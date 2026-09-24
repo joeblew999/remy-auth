@@ -1,4 +1,5 @@
-import { createRequestHandler } from 'react-router';
+import { createRequestHandler, RouterContextProvider } from 'react-router';
+import { cloudflareContext } from '../app/context';
 
 const handleRequest = createRequestHandler(
   () => import('virtual:react-router/server-build'),
@@ -6,15 +7,17 @@ const handleRequest = createRequestHandler(
 );
 
 export default {
-  async fetch(request, _env, _ctx) {
+  async fetch(request, env, ctx) {
     const started = performance.now();
     const requestId = crypto.randomUUID();
     try {
-      const response = await handleRequest(request);
+      const context = new RouterContextProvider();
+      context.set(cloudflareContext, { env, ctx, cf: request.cf });
+      const response = await handleRequest(request, context);
       response.headers.set('X-Request-ID', requestId);
       response.headers.set('X-Content-Type-Options', 'nosniff');
       response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-      // Deliberately omit URLs, cookies and headers from logs.
+      // Deliberately omit URLs, cookies, headers and geolocation from logs.
       console.log(JSON.stringify({ event: 'http_request', requestId,
         method: request.method, status: response.status,
         durationMs: Math.round(performance.now() - started) }));

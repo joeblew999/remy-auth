@@ -113,6 +113,13 @@ for (const locale of locales) {
       'week-start': weekdayName(locale as any, info.firstDay!),
       weekend: list(locale).format(info.weekend!.map(day => weekdayName(locale as any, day))),
     };
+    // Cloudflare's geolocation depends on where the request comes from; the page exposes what it used.
+    const zone = await page.locator('[data-sample="cf-timezone"]').getAttribute('data-timezone');
+    await expect(page.locator('[data-sample="cf-timezone"]')).toHaveText(zone || messages.location_unknown);
+    await expect(page.locator('[data-sample="cf-local"]')).toHaveText(zone
+      ? new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'long', timeZone: zone }).format(samples.instant) : messages.location_unknown);
+    const country = await page.locator('[data-sample="country"]').getAttribute('data-country');
+    await expect(page.locator('[data-sample="country"]')).toHaveText(country ? new Intl.DisplayNames([locale], { type: 'region' }).of(country)! : messages.location_unknown);
     if (info.otherCalendars.length === 0) await expect(page.locator('[data-sample="other-calendars"]')).toHaveText(messages.no_other_calendars);
     for (const calendar of info.otherCalendars) {
       await expect(page.locator(`[data-calendar="${calendar}"]`), calendar).toHaveText(

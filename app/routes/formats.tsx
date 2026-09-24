@@ -6,11 +6,15 @@ import { Shell } from '../shell';
 import { requireLocale } from '../locale';
 import { pageMeta } from '../seo';
 import { samples } from '../formats';
+import { cloudflareContext } from '../context';
 import type { Route } from './+types/formats';
 
-export function loader({ params }: Route.LoaderArgs) {
+export function loader({ params, context }: Route.LoaderArgs) {
   const locale = requireLocale(params.locale);
-  return { locale, info: localeInfo(locale) };
+  // Cloudflare's request geolocation: the network's country, region, city and time zone.
+  const cf = context.get(cloudflareContext).cf;
+  const country = /^[A-Z]{2}$/.test(cf?.country ?? '') ? cf!.country! : undefined;
+  return { locale, info: localeInfo(locale), place: { country, region: cf?.region, city: cf?.city, timeZone: cf?.timezone } };
 }
 export function meta({ params, matches }: Route.MetaArgs) {
   return pageMeta(params, matches, '/formats', locale => m.formats_title({}, { locale }), locale => m.formats_description({}, { locale }));
@@ -23,8 +27,15 @@ function LocalTime({ locale }: { locale: Locale }) {
   return <span data-sample="local">{text}</span>;
 }
 
-export default function Formats({ loaderData: { locale, info } }: Route.ComponentProps) {
+export default function Formats({ loaderData: { locale, info, place } }: Route.ComponentProps) {
   const o = { locale };
+  const unknown = m.location_unknown({}, o);
+  const regionName = new Intl.DisplayNames([locale], { type: 'region' });
+  const localTime = (() => {
+    try { return place.timeZone ? new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'long', timeZone: place.timeZone }).format(samples.instant) : unknown; }
+    catch { return unknown; }
+  })();
+  const placeText = [place.city, place.region].filter(Boolean).join(', ') || unknown;
   const dir = direction(locale);
   // Lists, collation, display names and ranges are native Intl; every other value is formatted inside its message.
   const list = new Intl.ListFormat(locale, { type: 'conjunction' });
@@ -77,6 +88,15 @@ export default function Formats({ loaderData: { locale, info } }: Route.Componen
         <Row sample="range" label={m.range_label({}, o)}>{range}</Row>
         <Row sample="relative" label={m.relative_label({}, o)}>{m.relative_value({ days: samples.days }, o)}</Row>
       </dl>
+
+      <h2>{m.location_heading({}, o)}</h2>
+      <dl>
+        <div><dt>{m.your_country_label({}, o)}</dt><dd data-sample="country" data-country={place.country}>{place.country ? regionName.of(place.country) : unknown}</dd></div>
+        <Row sample="place" label={m.place_label({}, o)}>{placeText}</Row>
+        <div><dt>{m.cf_timezone_label({}, o)}</dt><dd data-sample="cf-timezone" data-timezone={place.timeZone}>{place.timeZone ?? unknown}</dd></div>
+        <Row sample="cf-local" label={m.cf_local_time_label({}, o)}>{localTime}</Row>
+      </dl>
+      <p className="demo-note">{m.location_note({}, o)}</p>
 
       <h2>{m.timezone_heading({}, o)}</h2>
       <dl>

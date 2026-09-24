@@ -132,7 +132,7 @@
   "compact_label": "رقم مختصر",
   "currencies_label": "المبلغ نفسه بعملات أخرى",
   "currency_name_label": "اسم العملة",
-  "region_label": "البلد",
+  "region_label": "اسم بلد للتوضيح",
   "ordinal_heading": "الأعداد الترتيبية",
   "variants_heading": "صيغ حسب القيمة",
   "greeting_label": "تحية",
@@ -229,6 +229,13 @@
   "hour_cycle_24": "نظام 24 ساعة",
   "numbering_label": "نظام الترقيم",
   "timezone_heading": "المنطقة الزمنية",
-  "local_time_label": "بمنطقتك الزمنية",
-  "local_time_note": "يُعرض في متصفحك: يعرض الخادم الأوقات بالتوقيت العالمي لأنه لا يعرف منطقتك الزمنية."
+  "local_time_label": "بمنطقة جهازك الزمنية",
+  "local_time_note": "يُعرض هذا الصف في متصفحك: لا يرى الخادم ساعة جهازك أبدًا، لذا يستخدم موقع Cloudflare بدلًا منها.",
+  "location_heading": "أين أنت",
+  "your_country_label": "بلدك",
+  "place_label": "المدينة والمنطقة",
+  "cf_timezone_label": "المنطقة الزمنية لموقعك",
+  "cf_local_time_label": "الوقت المحلي هناك",
+  "location_unknown": "غير معروف على هذا الاتصال",
+  "location_note": "يبلّغ Cloudflare عن موقع الشبكة مع كل طلب؛ يستخدمه الخادم للوقت المحلي أعلاه ولا يخزّنه."
 }

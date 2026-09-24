@@ -128,7 +128,7 @@
   "compact_label": "Compact number",
   "currencies_label": "Same amount in other currencies",
   "currency_name_label": "Currency name",
-  "region_label": "Country",
+  "region_label": "Sample country name",
   "ordinal_heading": "Ordinals",
   "variants_heading": "Variants by value",
   "greeting_label": "Greeting",
@@ -224,6 +224,13 @@
   "hour_cycle_24": "24-hour clock",
   "numbering_label": "Numbering system",
   "timezone_heading": "Time zone",
-  "local_time_label": "In your time zone",
-  "local_time_note": "Rendered in your browser: the server formats times in UTC because it does not know your time zone."
+  "local_time_label": "In your device's time zone",
+  "local_time_note": "This row is rendered in your browser: the server never sees your device's clock, so it uses Cloudflare's location instead.",
+  "location_heading": "Where you are",
+  "your_country_label": "Your country",
+  "place_label": "City and region",
+  "cf_timezone_label": "Time zone at your location",
+  "cf_local_time_label": "Local time there",
+  "location_unknown": "Unknown on this connection",
+  "location_note": "Cloudflare reports the network's location with each request; the server uses it for the local time above and does not store it."
 }
