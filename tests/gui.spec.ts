@@ -41,14 +41,14 @@ test('concurrent SSR requests retain their requested language', async ({ request
   }));
 });
 
-test('client-only demo is noindex, interactive and switches language in the same tab', async ({ page, request, context }) => {
+test('client-only demo is indexable, interactive and switches language in the same tab', async ({ page, request, context }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
   const response = await request.get('/en/demo');
   expect(response.status()).toBe(200);
   const html = await response.text();
-  expect(html).toContain('noindex');
+  expect(html).not.toContain('noindex');
   expect(html).not.toContain('class="counter-card"');
   await page.goto('/en');
   await page.getByRole('link', { name: en.demo_link }).click();
@@ -71,7 +71,7 @@ test('missing routes, root redirect and sitemap are correct', async ({ request }
   const sitemap = await request.get('/sitemap.xml');
   expect(sitemap.status()).toBe(200);
   expect(await sitemap.text()).toContain('/es</loc>');
-  expect(await sitemap.text()).not.toContain('/demo');
+  expect(await sitemap.text()).toContain('/es/demo</loc>');
   expect(await (await request.get('/robots.txt')).text()).toContain('/sitemap.xml');
 });
 

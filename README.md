@@ -20,7 +20,7 @@ mise run project:dev
 Open [localhost:5173/en](http://127.0.0.1:5173/en); switch to Spanish or try the demo.
 Setup installs dependencies and skills, registers MCP, then runs build and browser checks.
 
-https://remy-auth.gedw99.workers.dev/ 
+Remote : https://remy-auth.gedw99.workers.dev/ 
 
 Setup installs the pinned **Codex CLI**; authenticate when prompted. **Claude Code**
 is optional and installed separately.

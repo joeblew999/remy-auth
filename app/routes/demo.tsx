@@ -16,8 +16,9 @@ export function HydrateFallback() {
   return <main className="error-page"><p role="status">{m.loading({}, { locale })}</p></main>;
 }
 export function meta({ loaderData }: Route.MetaArgs) {
-  return [{ title: loaderData ? `${m.demo_title({}, { locale: loaderData.locale })} | Remy` : 'Remy' },
-    { name: 'robots', content: 'noindex, nofollow' }];
+  const locale = loaderData?.locale ?? baseLocale;
+  return [{ title: loaderData ? `${m.demo_title({}, { locale })} | Remy` : 'Remy' },
+    { name: 'description', content: m.demo_description({}, { locale }) }];
 }
 export default function Demo({ loaderData: { locale } }: Route.ComponentProps) {
   const [count, setCount] = useState(0);

@@ -56,8 +56,8 @@ secrets are managed through Cloudflare. Local data is not uploaded by deployment
 | --- | --- |
 | `/` | Redirect to `/en` |
 | `/en`, `/es` | Server-rendered public page with localized content, metadata and alternate links |
-| `/en/demo`, `/es/demo` | Client-rendered counter with shared controls; `noindex`; public demo, not an account screen |
-| `/robots.txt`, `/sitemap.xml` | Public crawl metadata, excluding demo URLs from the sitemap |
+| `/en/demo`, `/es/demo` | Client-rendered counter with shared controls; indexable, listed in the sitemap; public demo, not an account screen |
+| `/robots.txt`, `/sitemap.xml` | Public crawl metadata; the sitemap lists overview and demo URLs |
 | Unknown route or locale | HTTP 404 |
 
 React Router runs through Cloudflare's Vite plugin. Demo routes render a localized

@@ -27,7 +27,7 @@ h1 { font-size: clamp(36px, 4.5vw, 58px); line-height: 1.08; letter-spacing: -.0
 .visual-tile { position: absolute; display: grid; place-items: center; width: 142px; height: 160px; border-radius: 24px; font-size: 85px; font-weight: 650; letter-spacing: -7px; }
 .tile-back { background: var(--background); border: 1px solid var(--border); color: var(--muted-foreground); transform: rotate(-14deg) translate(-30px,-12px); }
 .tile-front { background: var(--primary); color: var(--primary-foreground); transform: rotate(9deg) translate(29px,10px); box-shadow: 0 15px 35px color-mix(in oklch,var(--primary) 20%,transparent); }
-.visual-caption { position: absolute; bottom: 24px; font-size: 11px; letter-spacing: .18em; color: var(--muted-foreground); }
+.visual-caption { position: absolute; bottom: 24px; font-size: 11px; letter-spacing: .18em; color: var(--foreground); }
 footer { display: flex; justify-content: space-between; gap: 16px; padding-block: 24px; border-top: 1px solid var(--border); color: var(--muted-foreground); font-size: 12px; }
 .demo-content { grid-column: 1 / -1; width: min(100%,640px); margin-inline: auto; }
 .back-link { display: inline-block; font-size: 13px; color: var(--muted-foreground); margin-bottom: 36px; text-decoration: none; }
