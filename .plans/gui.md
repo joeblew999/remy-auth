@@ -154,9 +154,9 @@ numbering-system switch; no viewer time zone; no shadcn RTL utilities.
   deployment, validate indexing through Search Console and measure field performance.
 - The pinned Chrome DevTools CLI runs Lighthouse's accessibility, SEO, best-practices
   and agentic-browsing categories only; upstream excludes Performance by design and
-  offers `performance_start_trace` instead. Core Web Vitals therefore need a separate
-  check (Lighthouse's own package, the trace tool, or PageSpeed Insights with an API
-  key); choosing one is an open owner decision. Lighthouse also leaves ten
+  offers `performance_start_trace` instead. Decided 2026-09-24: Google's pinned `lighthouse`
+  package gates Core Web Vitals (`performanceChecks` in the shared checks) on Google's good
+  thresholds and a Performance score of at least 0.9, locally and against deployments. Lighthouse also leaves ten
   accessibility checks and structured data as manual items, and reports the missing
   CSP, HSTS, COOP and frame-control headers as informative findings.
 

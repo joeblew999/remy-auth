@@ -2,7 +2,7 @@
 // checks with the code. Plain JavaScript: Playwright loads helpers from node_modules without
 // transpiling. Node's own Intl is the oracle for formatted text; the compiled messages are the
 // ones the app renders. Call the factories from a test file and pass the app's public paths.
-import { test, expect } from '@playwright/test';
+import { test, expect, chromium } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import { readFileSync, rmSync } from 'node:fs';
 import { locales, baseLocale, localizeUrl } from './paraglide/runtime.js';
@@ -43,7 +43,7 @@ export function publicPageChecks({ paths, prerendered = false }) {
       for (const other of locales) await expect(page.locator(`link[hreflang="${other}"]`)).toHaveAttribute('href', `${baseURL}${localizedPath('', other)}`);
       await expect(page.locator('link[hreflang="x-default"]')).toHaveAttribute('href', `${baseURL}/`);
       for (const other of locales) await expect(page.getByRole('link', { name: endonym(other), exact: true })).toHaveAttribute('href', localizedPath('', other));
-      if (prerendered) await expect(page.locator('aside.language-hint')).toHaveCount(0);
+      if (prerendered) await expect(page.locator('.language-hint')).toHaveCount(0);
       await context.close();
     });
   }
@@ -126,7 +126,7 @@ export function entryChecks({ paths, mode }) {
     const context = await browser.newContext({ locale: 'es-ES' });
     const page = await context.newPage();
     await page.goto(`${baseURL}${localizedPath('', 'en')}`);
-    const hint = page.locator('aside.language-hint');
+    const hint = page.locator('.language-hint');
     await expect(hint).toContainText(m.language_hint({ language: endonym('es') }, { locale: 'es' }));
     await expect(hint.getByRole('link')).toHaveAttribute('href', localizedPath('', 'es'));
     await hint.getByRole('button').click();
@@ -234,6 +234,54 @@ export function lighthouseChecks({ pages }) {
           .map(audit => `${audit.id}: ${audit.title}`);
         await testInfo.attach('lighthouse.html', { path: `${dir}/report.html`, contentType: 'text/html' });
         expect([...new Set(failures)], 'See the lighthouse.html attachment in the HTML report').toEqual([]);
+      });
+    }
+  });
+}
+
+/**
+ * Core Web Vitals through Google's own `lighthouse` package (the Chrome DevTools CLI excludes
+ * the Performance category), driving Playwright's Chrome over a debugging port. The gate is
+ * Google's published "good" thresholds for the lab metrics and a Performance score of at least
+ * 0.9; every failing audit is in the attached report. Call it from tests/performance.spec.ts, which
+ * the shared Playwright config runs alone after all other checks. Tighten `thresholds` per project if needed.
+ */
+export function performanceChecks({ pages, thresholds = {} }) {
+  const limits = { score: 0.9, lcp: 2500, cls: 0.1, tbt: 200, ...thresholds };
+  test.describe('core web vitals', () => {
+    test.describe.configure({ mode: 'serial', timeout: 180_000 });
+    const port = 9222 + Math.floor(Math.random() * 1000);
+    let browser, puppeteerBrowser;
+    test.beforeAll(async () => {
+      browser = await chromium.launch({ channel: 'chrome', args: [`--remote-debugging-port=${port}`] });
+      // Lighthouse bundles puppeteer-core; connecting it to the same Chrome lets Lighthouse measure
+      // a page this check has already warmed, so a fresh renderer's cold font scan (seconds on
+      // macOS, never paid per page by real visitors) stays out of the numbers.
+      const puppeteer = await import('puppeteer-core');
+      puppeteerBrowser = await puppeteer.default.connect({ browserURL: `http://127.0.0.1:${port}` });
+    });
+    test.afterAll(async () => { await puppeteerBrowser?.disconnect(); await browser?.close(); });
+    for (const { path, device } of pages) {
+      test(`${device}: ${path} meets Google's good thresholds`, async ({ baseURL }, testInfo) => {
+        const { navigation, desktopConfig, generateReport } = await import('lighthouse');
+        const page = await puppeteerBrowser.newPage();
+        await page.goto(`${baseURL}${path}`, { waitUntil: 'load' });
+        const result = await navigation(page, `${baseURL}${path}`, {
+          flags: { output: 'json', logLevel: 'error', onlyCategories: ['performance'] },
+          config: device === 'desktop' ? desktopConfig : undefined,
+        });
+        await page.close();
+        const { lhr } = result;
+        await testInfo.attach('performance.html', { body: generateReport(lhr, 'html'), contentType: 'text/html' });
+        expect(lhr.finalDisplayedUrl).toBe(`${baseURL}${path}`);
+        const metrics = lhr.audits.metrics.details.items[0];
+        const score = lhr.categories.performance.score;
+        const failures = [];
+        if (score < limits.score) failures.push(`performance score ${score} < ${limits.score}`);
+        if (metrics.largestContentfulPaint > limits.lcp) failures.push(`LCP ${Math.round(metrics.largestContentfulPaint)} ms > ${limits.lcp} ms`);
+        if (metrics.cumulativeLayoutShift > limits.cls) failures.push(`CLS ${metrics.cumulativeLayoutShift} > ${limits.cls}`);
+        if (metrics.totalBlockingTime > limits.tbt) failures.push(`TBT ${Math.round(metrics.totalBlockingTime)} ms > ${limits.tbt} ms`);
+        expect(failures, 'See the performance.html attachment in the HTML report').toEqual([]);
       });
     }
   });

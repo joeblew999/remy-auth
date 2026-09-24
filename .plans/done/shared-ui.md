@@ -120,7 +120,7 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
    factories, and both repositories run them, so the shared controls and language behaviour
    are verified identically in server and client rendering. Each repository keeps only the
    checks it owns.
-6. **Guard the boundary.** Done 2026-09-24 (`scripts/verify-boundary.mjs`). A verification step fails if `app/` or the sample imports
+6. **Guard the boundary.** Done, then removed the same day as needless machinery; the rule stays a review rule. A verification step fails if `app/` or the sample imports
    anything from `packages/ui/src` or copies a helper that the package exports.
 
 ## Acceptance

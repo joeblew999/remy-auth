@@ -82,7 +82,7 @@ split. Keep the production browser check passing before enabling that optimizati
 
 - `app/`: route modules, page layout and app-specific styling; `app/paths.ts` is the single list of public paths that routes, the sitemap and the chooser derive from.
 - `workers/app.ts`: Worker entry, request IDs, structured status/timing logs, and the Cloudflare load context (`app/context.ts`) that hands bindings and request geolocation to loaders.
-- `packages/ui/`: shadcn/Base UI button, Remy's theme, compiled Paraglide messages, locale helpers, Accept-Language and cookie helpers, hreflang data, the language switcher, hint and chooser components, and the server, client and React Router halves that wire them, so consumers get the whole behaviour in either rendering mode. `scripts/verify-boundary.mjs` fails verification if `app/` or `workers/` bypass its public exports.
+- `packages/ui/`: shadcn/Base UI button, Remy's theme, compiled Paraglide messages, locale helpers, Accept-Language and cookie helpers, hreflang data, the language switcher, hint and chooser components, and the server, client and React Router halves that wire them, so consumers get the whole behaviour in either rendering mode.
 - `tests/gui.spec.ts` and `tests/lighthouse.spec.ts`: the package's shared checks (`@joeblew999/remy-ui/checks`) plus the checks only this repository owns (catalogs, concurrent server renders, hydration, its extra formats rows).
 
 The button and theme are sourced from Remy Sport's existing shadcn conventions.
@@ -114,7 +114,9 @@ and plural confirmation, same-tab language navigation, HTTP status and sitemap
 behavior with every listed URL self-canonical and cross-linked by `hreflang`,
 right-to-left mirroring, and narrow-screen overflow on every page. Lighthouse audits `/en`, `/es`, `/ar`, `/en/demo` and `/en/formats`
 in its accessibility, SEO, best-practices and agentic-browsing categories; the pinned
-CLI excludes Performance by design. The same suite runs locally and against a deployed URL.
+CLI excludes Performance by design, so Google's pinned `lighthouse` package gates that
+category on `/en` (mobile and desktop) and `/en/formats`: a Performance score of at least
+0.9 and lab Core Web Vitals within Google's good thresholds (LCP 2.5 s, CLS 0.1, TBT 200 ms). The same suite runs locally and against a deployed URL.
 `project:verify` also type-checks, builds and dry-runs deployment packaging for the Worker
 and verifies the isolated package consumer with a client build and a server render. Chrome DevTools CLI is available for
 manual snapshots, interactions and screenshots.

@@ -17,6 +17,12 @@ export function playwrightConfig({ webServer, testDir = './tests', timezoneId = 
     fullyParallel: true,
     reporter: [['list'], ['html', { open: 'never', outputFolder: `playwright-report/${remote ? 'remote' : 'local'}` }]],
     use: { baseURL: target.origin, ...devices['Desktop Chrome'], channel: 'chrome', timezoneId },
+    // Core Web Vitals are timing measurements: tests/performance.spec.ts runs alone, after every
+    // other file has finished, so parallel browsers and servers cannot inflate them.
+    projects: [
+      { name: 'checks', testIgnore: /performance\.spec\.[jt]s$/ },
+      { name: 'performance', testMatch: /performance\.spec\.[jt]s$/, dependencies: ['checks'], workers: 1 },
+    ],
     webServer: remote ? undefined : {
       command: webServer ?? `./node_modules/.bin/wrangler dev --ip 127.0.0.1 --port ${port}`,
       url: localizeUrl(new URL('/', target.origin), { locale: baseLocale }).href,

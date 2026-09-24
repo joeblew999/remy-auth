@@ -1,9 +1,13 @@
 # Remy UI proof
 
 One local workspace package, used through public exports by the public page and
-client-rendered demo. The shadcn `base-nova` / Base UI button and stone/orange CSS
-variables come from the existing Remy Sport source. Keep upstream attribution and
-use shadcn tooling for component upgrades rather than independently editing copies.
+client-rendered demo. Every file in `src/components` is what the pinned shadcn CLI
+generates from the official registry for the `base-nova` style on Base UI, including
+`cn` from shadcn's own `cn` package; nothing there is hand-edited. `mise run ui:components`
+regenerates them all (add a component by extending that task's list), and
+`ui:components:verify` in `project:verify` fails if they differ from the registry output.
+The stone/orange theme tokens in `src/styles.css` are shadcn's token format with Remy's
+values.
 
 Exports: `button`, `styles.css` (theme tokens and the language components' styles),
 `messages`, `runtime` (the generated Paraglide runtime as plain JavaScript), `locale`
@@ -14,8 +18,8 @@ clock and week conventions), `seo` (canonical and hreflang data from the URL pat
 `suggestedLocale`, `redirectToLocalized`, `pageMeta`; `react-router` is an optional peer),
 `client` (`useSuggestedLocale`, `DeviceTime` for prerendered apps), `cloudflare`
 (`placeFromCloudflare`), `samples` (the fixed values the formats and demo pages render) and
-`checks` (shared Playwright checks: public pages, entry URLs, demo, formats and Lighthouse;
-`@playwright/test` is an optional peer) and `playwright` (`playwrightConfig()`, the shared
+`checks` (shared Playwright checks: public pages, entry URLs, demo, formats, Lighthouse and
+Core Web Vitals; `@playwright/test` and `lighthouse` are optional peers) and `playwright` (`playwrightConfig()`, the shared
 Playwright configuration), all under `@joeblew999/remy-ui/`.
 
 Language behaviour is Paraglide's: strategies `url`, `cookie`, `preferredLanguage`,

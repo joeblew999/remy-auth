@@ -1,4 +1,3 @@
-// Reused from Remy Sport; upstream shadcn base-nova / Base UI.
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"

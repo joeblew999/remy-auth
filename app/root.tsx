@@ -23,10 +23,10 @@ export default function App() { return <Outlet />; }
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   const locale = getLocale();
   const missing = isRouteErrorResponse(error) && error.status === 404;
-  return <main className="error-page"><meta name="robots" content="noindex" />
+  return <main className="mx-auto max-w-3xl px-6 py-20"><meta name="robots" content="noindex" />
     <title>{missing ? m.not_found({}, { locale }) : m.error_title({}, { locale })}</title>
-    <h1>{missing ? m.not_found({}, { locale }) : m.error_title({}, { locale })}</h1>
-    <p>{missing ? m.not_found_detail({}, { locale }) : m.error_detail({}, { locale })}</p>
-    <a href={`/${locale}`}>{m.home_link({}, { locale })}</a>
+    <h1 className="text-3xl font-semibold tracking-tight">{missing ? m.not_found({}, { locale }) : m.error_title({}, { locale })}</h1>
+    <p className="my-6 text-muted-foreground">{missing ? m.not_found_detail({}, { locale }) : m.error_detail({}, { locale })}</p>
+    <a className="underline underline-offset-4" href={`/${locale}`}>{m.home_link({}, { locale })}</a>
   </main>;
 }

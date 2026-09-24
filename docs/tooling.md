@@ -66,6 +66,7 @@ CLI passthrough tasks accept upstream flags directly, such as
 | --- | --- |
 | `project:*` | Setup, pipeline and verification (shared defaults from `tasks/project.toml`; `[env]` supplies the inputs) and tool diagnostics |
 | `packages:*` | Check and upgrade npm packages |
+| `ui:*` | Compile the shared catalogs, regenerate and verify the shadcn components, pack and verify the package |
 | `skills:*` | Install, list and remove the pinned official skills |
 | `auth:*` | Better Auth CLI and diagnostics |
 | `cf:*` | Cloudflare CLI, live logs and deployment (CLI and logs are shared tasks) |

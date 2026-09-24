@@ -43,9 +43,9 @@ run = [
   { task = "mcp:verify" },
   { task = "project:doctor" },
   "node scripts/verify-tooling.mjs",
-  "node scripts/verify-boundary.mjs",
   { task = "project:typecheck" },
   { task = "project:test" },
+  { task = "ui:components:verify" },
   { task = "ui:verify" },
 ]
 
@@ -92,6 +92,16 @@ run = [
   { task = "ui:generate" },
   "node scripts/verify-ui-package.mjs",
 ]
+
+[tasks."ui:components"]
+description = "Regenerate every shadcn component in the shared package from the registry (the only way those files change)"
+dir = "{{config_root}}"
+run = "./node_modules/.bin/shadcn add button card input label badge alert field separator -c packages/ui --overwrite --yes"
+
+[tasks."ui:components:verify"]
+description = "Regenerate the shadcn components and fail if that changes anything: generated files are never hand-edited"
+dir = "{{config_root}}"
+run = [{ task = "ui:components" }, "git diff --exit-code --stat -- packages/ui/src/components"]
 
 [tasks."ui:generate"]
 description = "Compile the shared locale catalogs"
