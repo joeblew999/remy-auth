@@ -204,3 +204,11 @@ Production resources, domains, secrets and deployment are a later explicit actio
 Before production cutover: review migration/rollback, verify local acceptance, then
 verify fresh production auth logs and end-to-end behaviour after deployment. Repo
 creation and these documents do not authorize production provisioning.
+
+## Agent skills for this slice
+
+Carried over from the [agent-skills plan](done/agent-skills.md): before choosing the adapter
+(Kysely D1 dialect or Drizzle), `auth generate` and numbered D1 migrations via Wrangler, check
+whether the installed `create-auth`, `better-auth-best-practices`, `wrangler` and
+`workers-best-practices` skills cover them for the pinned versions; otherwise use
+https://www.better-auth.com/llms.txt. Record the outcome in that plan's table.

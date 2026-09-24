@@ -1,6 +1,6 @@
 # Agent skill coverage
 
-Status: research task, 2026-09-24. Pinned official sources are installed through
+Status: done 2026-09-24; the Better Auth on D1 row continues in the auth plan. Pinned official sources are installed through
 `mise run skills:install` and checked by `mise run project:verify`.
 This plan is for an agent that finds, vets and adds skills for the remaining gaps
 before the Better Auth + D1 slice starts. It does not authorise writing auth code.
@@ -81,12 +81,12 @@ Update this file with a completed table, then open one commit per accepted sourc
 
 | Gap | Decision (added / docs only / rejected) | Source + commit or docs URL | Reason |
 | --- | --- | --- | --- |
-| Better Auth on D1 | | | |
-| Paraglide JS 2.x | | | |
-| Playwright Test | | | |
-| Tailwind CSS 4 | | | |
-| Base UI | | | |
-| TypeScript 7 / Vite 8 / mise | | | |
+| Better Auth on D1 | moved to the [auth plan](../auth-service.md) | installed: `create-auth`, `better-auth-best-practices`, `wrangler`, `workers-best-practices`; docs https://www.better-auth.com/llms.txt | Only testable against the real adapter and D1 when the auth slice starts |
+| Paraglide JS 2.x | docs only | https://paraglidejs.com/llms.txt | opral repos ship no skills; the strategies, middleware and runtime were built from the docs and the generated runtime's README |
+| Playwright Test | `playwright-cli` sufficient | microsoft/playwright-cli (installed) plus `node_modules/@playwright/test` types | Projects, `webServer`, remote targets and the shared checks were written without gaps; microsoft/playwright has only contributor skills; no llms.txt |
+| Tailwind CSS 4 | docs only | https://tailwindcss.com/docs | No skills and no llms.txt; the shadcn skill covers the CSS-first setup the package uses |
+| Base UI | covered by `shadcn` | shadcn-ui/ui (installed); docs https://base-ui.com/llms.txt | The shadcn CLI generates the base-nova components on Base UI; mui/base-ui ships only `base-ui-review`, a contributor skill, rejected |
+| TypeScript 7 / Vite 8 / mise | docs only | https://vite.dev/llms.txt, https://mise.jdx.dev/llms.txt | No official skills; nothing today needed more than their docs |
 | Package publishing and releases | added | github/awesome-copilot @ 1f5644080a525d26a2e24f61a7609fb9b261c21a: `github-release` (`github-actions-hardening` added, then removed) | GitHub maintains GitHub Packages and Actions; npm and changesets ship no skills; registry alternatives are third-party |
 
 Escalate instead of guessing when a needed skill exists only from a third party,
