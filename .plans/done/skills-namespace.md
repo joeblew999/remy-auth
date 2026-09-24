@@ -1,6 +1,6 @@
 # Skills namespace plan
 
-Status: question from the owner, 2026-09-24; answered below. No change is authorised yet.
+Status: done 2026-09-24. Built as the owner chose after rejecting a generated index: skills grouped by source, flat symlinks for the agents.
 
 ## Question
 
@@ -41,3 +41,14 @@ Keep the flat, pure layout and make the grouping visible instead: a `skills:inde
 is current. Agents keep finding skills exactly as now; humans get the map.
 
 Owner decision: approve the generated index, or state a different grouping need.
+
+## Outcome
+
+The generated-index proposal above was rejected. What was built instead: `skills:group`
+(`tasks/skills/group`, the last step of `skills:install`) moves each installed skill to
+`.agents/skill-sources/<owner>/<repo>/<skill>`, using the source recorded in
+`skills-lock.json`, and leaves `.agents/skills/<skill>` as a symlink; `.claude/skills` links
+to that as before. Reinstalling alone cannot group, because the pinned installer has no
+target-folder option. Verified: all 32 skills visible to Claude Code and to the installer's
+own listing, no broken links, the tooling verifier unchanged, grouping in under a second.
+`skills:remove` also clears `.agents/skill-sources`.
