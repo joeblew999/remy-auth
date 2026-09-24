@@ -118,9 +118,12 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
    `ssr: false` and a `prerender` list, so one router convention covers both modes and
    the contrast is explicit. Alternative: plain Vite plus React without a router, which
    proves less and cannot prerender.
-2. **Publication.** Decided 2026-09-24: GitHub Packages, because both repositories
-   are private, the registry is npm-compatible, and a tag-triggered workflow publishes
-   with its own `GITHUB_TOKEN` (no npm account or long-lived token). GitHub requires the
+2. **Publication.** Decided 2026-09-24: GitHub Packages, because the registry is
+   npm-compatible, the package stays linked to this repository, and a tag-triggered
+   workflow publishes with its own `GITHUB_TOKEN` (no npm account or long-lived token).
+   Both repositories became public the same day, so GitHub may make the package public
+   too; its npm registry still expects a token for installs, to be confirmed at the
+   first publish. GitHub requires the
    scope to equal the owner, so the package was renamed `@joeblew999/remy-ui`. The
    workflow (`.github/workflows/publish.yml`) follows the installed
    `github-actions-hardening` skill: deny-all permissions, `packages: write` on the one

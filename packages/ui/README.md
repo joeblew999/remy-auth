@@ -20,7 +20,9 @@ integration remain in the GUI plan.
 ## Publishing
 
 The package is `@joeblew999/remy-ui` on GitHub Packages (the scope must equal the
-GitHub owner there), private like this repository. `.github/workflows/publish.yml`
+GitHub owner there). Both repositories have been public since 2026-09-24; GitHub sets
+the package's visibility from the linked repository, and its npm registry still expects
+a token for installs, which the first publish will confirm. `.github/workflows/publish.yml`
 publishes it when a `vX.Y.Z` tag is pushed whose version equals `packages/ui/package.json`,
 using the workflow's own `GITHUB_TOKEN`; no long-lived npm token exists. Cut releases
 with the installed `github-release` skill (SemVer from the public diff, changelog,

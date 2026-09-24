@@ -1,5 +1,7 @@
 # Remy Auth
 
+https://github.com/joeblew999/remy-auth
+
 Shared authentication for Remy apps, using **Better Auth on Cloudflare Workers**
 with **D1** as the planned identity and session store.
 
