@@ -1,13 +1,15 @@
-# Cloudflare observability
+# Cloudflare observability (generic)
 
-Status: required service capability, 2026-09-24. Wrangler collection configuration
-and tail CLI tasks exist. No Worker, instrumentation, audit store, dashboards or
-alerts have been deployed. This is not a completed observability implementation.
+Status: open, 2026-09-24. Generic: applies to every Worker built on the shared package and
+tasks (remy-auth now, remy-auth-app and later apps). The auth-specific signals, audit
+records and alerts moved to [the auth plan](auth-service.md#observability-for-the-auth-service).
+Done so far: the collection baseline in remy-auth's `wrangler.jsonc`, structured request logs
+with request IDs in its `workers/app.ts`, and the shared `cf:logs` and `cf:errors` tasks.
 
 ## Collection baseline
 
-Use Cloudflare-native tooling for auth and every consumer Worker. The root
-`wrangler.jsonc` explicitly enables persisted logs, invocation logs and traces,
+Use Cloudflare-native tooling for every Worker built on the shared package and tasks.
+remy-auth's `wrangler.jsonc` explicitly enables persisted logs, invocation logs and traces,
 with query-string redaction. Collection is set to 100% initially so local-to-staging
 verification has complete eligible-request coverage. Platform limits still apply.
 Record production volume/cost estimates and any sampling change before rollout.
@@ -26,19 +28,15 @@ defined lifecycle and access policy; select and verify the export mechanism then
 | Area | Signals and implementation |
 | --- | --- |
 | Worker health | Requests, HTTP status, exceptions, CPU/wall duration, resource-limit failures and release version |
-| Request tracing | Auth and sample request spans, supported D1/outbound spans, explicit business-operation spans where supported |
-| Auth behavior | Login success/failure counts, verification/recovery outcomes, token issuance/refresh/revocation and rate-limit denials |
-| Authorization | Bounded reason codes for scope, audience, membership and permission denial; HTTP/MCP parity |
-| D1 | Query errors/latency, read/write volume, database size, query efficiency and migration failures |
-| Dependencies | Email/provider failures and timeouts, JWKS/discovery failures, audit persistence failures |
+| Request tracing | Request spans and supported outbound spans, explicit business-operation spans where supported |
 | Release health | Correlate errors with deployment/version; verify monitoring after rollout and rollback |
-| Availability | Liveness, readiness including a minimal D1 check, and scheduled synthetic auth checks with disposable identities |
+| Availability | Liveness, readiness with each app's own dependency checks, and scheduled synthetic checks of its critical pages |
+| Availability | Three consecutive one-minute readiness failures | Check Worker deployment, D1 and Cloudflare status |
 
 Use [Worker metrics](https://developers.cloudflare.com/workers/observability/metrics-and-analytics/)
-and [D1 metrics](https://developers.cloudflare.com/d1/observability/metrics-analytics/)
-for platform signals. Custom outcomes need application instrumentation. Prefer
-structured logs and Query Builder first; introduce Analytics Engine only if metric
-aggregation requirements justify it. Sampled event counts are not exact totals.
+for platform signals. Custom outcomes need application instrumentation. Prefer structured
+logs and Query Builder first; introduce Analytics Engine only if aggregation requires it.
+Sampled event counts are not exact totals.
 
 ## Logging and correlation contract
 
@@ -48,8 +46,7 @@ and a bounded `reasonCode`. Use route templates, not raw URLs or dynamic paths.
 Generate request IDs server-side, return them in `X-Request-ID`, and include them
 in CLI failure messages. Preserve platform trace/Ray identifiers where available.
 Only propagate validated correlation metadata to trusted services; correlation IDs
-never authorize a request. Browser redirect legs need a non-secret flow identifier
-if they cannot share a trace. Do not promise a single trace across every OAuth hop.
+never authorize a request.
 Verify [trace limitations](https://developers.cloudflare.com/workers/observability/traces/known-limitations/)
 against the deployed runtime and the actual HTTP/service-binding topology.
 
@@ -58,59 +55,33 @@ OAuth codes/state, access/refresh tokens, API keys, request/response bodies or f
 callback URLs. Default to omitting email, IP and user-agent from operational logs.
 Keep necessary actor/tenant identifiers in restricted audit storage; avoid them as
 metric dimensions. Map errors to bounded codes and sanitized details rather than
-dumping arbitrary exception objects. Apply the same rules to Better Auth's logger.
+dumping arbitrary exception objects. Apply the same rules to every library logger.
 
 Platform URL redaction does not sanitize application console messages or custom
 span attributes. Test automatic spans, exceptions and live tail separately with
 secret canaries. If an automatic field leaks sensitive data, change collection or
 instrumentation before production. No debug capture of real credentials.
 
-## Durable security audit
-
-Record administrator actions, user lifecycle changes, membership/role changes,
-client registrations/grants, credential rotation, consent and revocation. Audit
-records contain event ID, timestamp, actor type/ID, target, organization, action,
-result, request ID and sanitized change metadata. Cover both API and CLI actions.
-
-Implement application-owned audit tables in D1 with restricted query access and
-an explicit retention policy. Do not rely on sampled console logs, `wrangler tail`
-or the optional Better Auth hosted dashboard for completeness. Cloudflare account
-audit logs cover platform administration, not all Remy end-user actions.
-
-Choose hooks against the installed Better Auth version. A background console log
-is not durable delivery. Define a D1-compatible atomic batch/outbox or reconciled
-delivery mechanism before claiming atomic mutation/audit coverage; do not assume
-Better Auth hooks provide interactive transactions on D1. Define failure behavior
-for critical privilege mutations and test crash/retry/deduplication. Never mark a
-failed or merely attempted action as successfully completed in the audit record.
-
 ## Dashboards and alerts
 
 Save views in Cloudflare [Query Builder](https://developers.cloudflare.com/workers/observability/query-builder/):
-service health by environment/release; login outcomes and 429s; HTTP/MCP denials;
-D1/dependency failures; and a request-ID investigation view. Review operator access
-and prevent cross-environment ambiguity. These views still need creation.
+service health by environment and release, and a request-ID investigation view.
 
 Initial proposed alert rules, to calibrate with real traffic:
 
 | Rule | Trigger | Response |
 | --- | --- | --- |
-| Availability | Three consecutive one-minute readiness failures | Check Worker deployment, D1 and Cloudflare status |
+| Availability | Liveness, readiness including a minimal D1 check, and scheduled synthetic auth checks with disposable identities |
+| Availability | Three consecutive one-minute readiness failures | Check the Worker deployment, its dependencies and Cloudflare status |
 | Server failures | >1% HTTP 5xx over 5 minutes, at least 100 requests | Inspect release, routes and dependency failures |
-| Latency | p95 >1 second over 10 minutes, at least 100 requests | Separate hashing/provider time from D1 and Worker time |
-| Audit durability | Any unrecovered critical audit-write failure | Investigate affected privileged mutations immediately |
-| Abuse | Sustained login failures/429s above baseline | Inspect aggregate patterns; do not treat ordinary 401s as outages |
-| Capacity/cost | 80% of an agreed usage/budget threshold | Review D1/telemetry volume and capacity before exhaustion |
+| Latency | p95 >1 second over 10 minutes, at least 100 requests | Separate dependency time from Worker time |
+| Capacity/cost | 80% of an agreed usage/budget threshold | Review storage and telemetry volume and capacity before exhaustion |
 
-Do not assume Cloudflare Notifications supports arbitrary log-query thresholds.
-Check the account's [available notification types](https://developers.cloudflare.com/notifications/notification-available/)
-and plan entitlements. Where native rules do not cover these conditions, implement
-a small scheduled monitoring Worker querying supported metrics APIs, with persisted
-deduplication/cooldown/recovery state and an explicitly selected delivery destination.
-Record monitor credentials/scopes and retry behavior. Delivery destinations and
-account-side policies are still unset; do not send messages during local setup.
-Cloudflare-hosted probes share a failure domain with the service: platform-wide
-outages require an independently hosted probe if that coverage becomes required.
+Do not assume Cloudflare Notifications supports arbitrary log-query thresholds. Check the
+account's [available notification types](https://developers.cloudflare.com/notifications/notification-available/)
+and plan entitlements; where native rules fall short, a small scheduled monitoring Worker
+with persisted deduplication and cooldown state. Delivery destinations are the owner's call
+and still unset. Cloudflare-hosted probes share a failure domain with the service.
 
 ## CLI workflow
 
@@ -129,17 +100,18 @@ invocation failures, not every handled HTTP 500 or expected
 a historical query or audit archive. Local logs will come from `wrangler dev`
 when the Worker exists; Cloudflare dashboards need deployed traffic.
 
-## Acceptance before production
+## Shared, not copied
 
-- Implement instrumentation and audit migrations with the first auth/sample flows.
-- Verify success, expected denial, unexpected failure, slow dependency and D1 failure
-  locally; distinguish HTTP errors from Worker execution failures.
-- Assert secret canaries are absent from logger output, exceptions and spans.
-- Verify request correlation across browser, CLI, HTTP and MCP operations.
-- Test audit completeness, persistence failure, retry deduplication and access control.
-- In staging, confirm persisted logs/traces, D1/platform metrics and saved views;
-  retain exact queries and release IDs in the runbook.
-- Exercise alerts and recovery delivery with the selected destination; verify the
-  monitor detects missing data as well as threshold breaches.
-- Record sampling, retention, projected costs, monitoring ownership and rollback
-  steps. Observability is complete only when these checks pass against the service.
+Everything here should reach apps the way the UI and tasks do: request logging and the log
+contract as a Worker wrapper in the package, the collection baseline and version metadata in
+each app's `wrangler.jsonc`, the checks (secret canaries absent from logs, request ID on every
+response, liveness answering) in `@joeblew999/remy-ui/checks`, and the CLI tasks in `tasks/`.
+
+## Acceptance
+
+- Every deployed Worker has the collection baseline, returns `X-Request-ID`, logs the contract
+  fields with its release version, and answers liveness.
+- Secret canaries are absent from logs, exceptions and spans.
+- Saved views and alerts exist in the account, with a destination the owner chose, and a
+  recovery notice is exercised once.
+- Sampling, retention, projected costs and monitoring ownership are recorded.

@@ -212,3 +212,48 @@ Carried over from the [agent-skills plan](done/agent-skills.md): before choosing
 whether the installed `create-auth`, `better-auth-best-practices`, `wrangler` and
 `workers-best-practices` skills cover them for the pinned versions; otherwise use
 https://www.better-auth.com/llms.txt. Record the outcome in that plan's table.
+
+## Observability for the auth service
+
+Moved from [the generic observability plan](observability.md), which covers Worker health,
+tracing, the log contract, releases, availability and the generic alerts.
+
+| Area | Signals and implementation |
+| --- | --- |
+| Auth behavior | Login success/failure counts, verification/recovery outcomes, token issuance/refresh/revocation and rate-limit denials |
+| Authorization | Bounded reason codes for scope, audience, membership and permission denial; HTTP/MCP parity |
+| D1 | Query errors/latency, read/write volume, database size, query efficiency and migration failures |
+| Dependencies | Email/provider failures and timeouts, JWKS/discovery failures, audit persistence failures |
+
+Use [D1 metrics](https://developers.cloudflare.com/d1/observability/metrics-analytics/) for D1.
+Browser redirect legs need a non-secret flow identifier if they cannot share a trace; do not
+promise a single trace across every OAuth hop. Apply the log field rules to Better Auth's logger.
+Saved views: login outcomes and 429s, HTTP/MCP denials, D1 and dependency failures.
+
+| Rule | Trigger | Response |
+| --- | --- | --- |
+| Audit durability | Any unrecovered critical audit-write failure | Investigate affected privileged mutations immediately |
+| Abuse | Sustained login failures/429s above baseline | Inspect aggregate patterns; do not treat ordinary 401s as outages |
+
+### Durable security audit
+
+Record administrator actions, user lifecycle changes, membership/role changes,
+client registrations/grants, credential rotation, consent and revocation. Audit
+records contain event ID, timestamp, actor type/ID, target, organization, action,
+result, request ID and sanitized change metadata. Cover both API and CLI actions.
+
+Implement application-owned audit tables in D1 with restricted query access and
+an explicit retention policy. Do not rely on sampled console logs, `wrangler tail`
+or the optional Better Auth hosted dashboard for completeness. Cloudflare account
+audit logs cover platform administration, not all Remy end-user actions.
+
+Choose hooks against the installed Better Auth version. A background console log
+is not durable delivery. Define a D1-compatible atomic batch/outbox or reconciled
+delivery mechanism before claiming atomic mutation/audit coverage; do not assume
+Better Auth hooks provide interactive transactions on D1. Define failure behavior
+for critical privilege mutations and test crash/retry/deduplication. Never mark a
+failed or merely attempted action as successfully completed in the audit record.
+
+Acceptance: verify success, expected denial, unexpected failure, slow dependency and D1 failure
+locally; correlation across browser, CLI, HTTP and MCP; audit completeness, persistence failure,
+retry deduplication and access control.
