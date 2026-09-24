@@ -49,13 +49,20 @@ raw = true
 run = "./node_modules/.bin/wrangler dev --ip 127.0.0.1 --port \"${PREVIEW_PORT:-4173}\""
 
 ["project:test"]
-description = "Build, then run the browser, HTTP and Lighthouse checks against the production artifact locally"
+description = "Level 1: build, then run our own browser and HTTP checks against the production artifact locally (fast)"
 dir = "{{config_root}}"
 depends = ["project:build"]
 env = { TEST_TARGET = "local" }
-run = "./node_modules/.bin/playwright test"
+run = "./node_modules/.bin/playwright test --project=ours"
+
+["project:test:google"]
+description = "Level 2: build, then run Google's Lighthouse audits and Core Web Vitals locally (slow; CI runs this)"
+dir = "{{config_root}}"
+depends = ["project:build"]
+env = { TEST_TARGET = "local" }
+run = "./node_modules/.bin/playwright test --project=google --project=google-cwv"
 
 ["project:verify"]
-description = "Verify tasks, dependencies, MCP registration, types and every check"
+description = "Level 1: verify tasks, dependencies, MCP registration, types and our own checks (fast)"
 dir = "{{config_root}}"
 run = ["mise tasks validate", "npm ls --depth=0", { task = "mcp:verify" }, { task = "project:typecheck" }, { task = "project:test" }]

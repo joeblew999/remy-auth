@@ -4,6 +4,14 @@ All notable changes to the shared UI package `@joeblew999/remy-ui` are documente
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 package follows [Semantic Versioning](https://semver.org/).
 
+## [0.6.0] - 2026-09-24
+
+### Changed
+- `playwrightConfig()` splits checks into two levels: `ours` (the app's own checks, fast)
+  and `google` plus `google-cwv` (Lighthouse audits and Core Web Vitals, slow). The shared
+  `project:test` runs level 1; `project:test:google` runs level 2; `project:test:remote`
+  runs both against a deployment.
+
 ## [0.5.0] - 2026-09-24
 
 ### Added
@@ -74,6 +82,7 @@ package follows [Semantic Versioning](https://semver.org/).
 - `@joeblew999/remy-ui/locale-info`: a locale's calendars, numbering system, hour cycle
   and week conventions, plus `weekdayName`.
 
+[0.6.0]: https://github.com/joeblew999/remy-auth/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/joeblew999/remy-auth/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/joeblew999/remy-auth/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/joeblew999/remy-auth/compare/v0.2.0...v0.3.0

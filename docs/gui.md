@@ -26,7 +26,8 @@ Development uses the same Worker source and Cloudflare runtime with hot reload.
 | `project:dev` | Local Workers, hot reload, port 5173 |
 | `project:build` | Build and Wrangler deployment dry run; no upload |
 | `project:preview` | Build, then serve the production artifact on Cloudflare's local host at `PREVIEW_PORT` (4173) |
-| `project:test` | Build, then test that artifact on the same local host |
+| `project:test` | Level 1: build, then run our own checks on the same local host (fast) |
+| `project:test:google` | Level 2: Lighthouse audits and Core Web Vitals locally (slow; CI runs it on every push) |
 | `cf:deploy` | Build, then upload to the authenticated Cloudflare account |
 | `project:test:remote` | Same tests against `TEST_BASE_URL`; no local server or deployment |
 | `project:report` / `project:report:remote` | Open the last local or remote run's HTML report, including Lighthouse reports |

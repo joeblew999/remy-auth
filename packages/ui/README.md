@@ -42,7 +42,10 @@ The package is `@joeblew999/remy-ui` on GitHub Packages (the scope must equal th
 GitHub owner there). `mise run ui:release` does the whole release from this machine: it
 runs `project:verify` (every check, locally), publishes with your `gh` token, tags
 `vX.Y.Z` from `packages/ui/package.json`, pushes, and creates the GitHub release from the
-matching CHANGELOG section. There is no CI in the loop. Bump the version and CHANGELOG
+matching CHANGELOG section, gated only on level 1 (our own checks, about 1½ minutes).
+CI (`.github/workflows/google.yml`) runs level 2, Google's Lighthouse audits and Core
+Web Vitals, on every push and tag, and releases a pushed tag itself unless the version is
+already published, so either route works. Bump the version and CHANGELOG
 first; the task refuses a dirty tree, a branch other than main, or an existing tag.
 
 Consumers add to their `.npmrc`:

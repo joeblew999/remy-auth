@@ -20,3 +20,7 @@ The including project supplies the npm packages the tasks run: `@react-router/de
 overrides the included task of the same name; remy-auth overrides `project:typecheck` and
 `project:verify` because it owns the shared package. mise caches remote includes;
 `MISE_TASK_REMOTE_NO_CACHE=true` refreshes them.
+
+Tests run in two levels: `project:test` is ours (the app's own browser and HTTP checks,
+fast, part of `project:verify`); `project:test:google` is Google's Lighthouse audits and
+Core Web Vitals (slow; CI runs it). `project:test:remote` runs both against a deployment.
