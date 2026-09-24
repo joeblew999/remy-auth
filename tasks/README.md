@@ -23,4 +23,5 @@ overrides the included task of the same name; remy-auth overrides `project:typec
 
 Tests run in two levels: `project:test` is ours (the app's own browser and HTTP checks,
 fast, part of `project:verify`); `project:test:google` is Google's Lighthouse audits and
-Core Web Vitals (slow; CI runs it). `project:test:remote` runs both against a deployment.
+Core Web Vitals (slow; CI runs it). `project:test:remote` runs both against a deployment. Set `[settings] task.timings = true` in the including
+`mise.toml` so each level prints per-task and total durations.
