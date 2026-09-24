@@ -1,14 +1,15 @@
+// Registers Chrome DevTools MCP for the including project; run through the `mcp:register` file task beside this file.
+// Runs from the including project's root (mise's default for file tasks), also when this
+// directory is included from another repository. Preserves unrelated settings and servers in
+// their native formats; absolute paths make editor launches independent of shell cwd.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { parse, stringify } from 'smol-toml';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
 
-// Project-only registration. Preserve unrelated settings and servers using their
-// native formats. Absolute paths make editor launches independent of shell cwd.
-const root = fileURLToPath(new URL('../', import.meta.url));
-process.chdir(root);
+const root = process.cwd();
+const { parse, stringify } = createRequire(join(root, 'package.json'))('smol-toml');
 const command = execFileSync('which', ['mise'], { encoding: 'utf8' }).trim();
 assert.ok(command.startsWith('/'), 'mise must resolve to an absolute executable path');
 const args = ['--cd', root, '--quiet', 'run', 'browser:mcp'];

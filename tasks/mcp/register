@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Register Chrome DevTools for this project in Codex and Claude (pass --check to verify)"
+# A shell wrapper so the module beside it loads as ESM wherever this directory is included from.
+set -euo pipefail
+exec node "$(dirname "$0")/register.mjs" "$@"

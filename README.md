@@ -70,8 +70,9 @@ Local preview and remote deployment use the same build and Wrangler configuratio
 See [local/remote commands](docs/gui.md#one-scaffold-for-local-and-cloudflare)
 for deployment and running the same tests against a deployed URL.
 
-Review dependency changes after upgrading. Node and skill-source commits are
-pinned separately in [mise.toml](mise.toml).
+Review dependency changes after upgrading. Node is pinned in [mise.toml](mise.toml); the
+skill-source commits and the shared agent bootstrap tasks live in
+[tasks/bootstrap.toml](tasks/bootstrap.toml), which other projects include by git reference.
 
 ## Project documentation
 

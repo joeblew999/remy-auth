@@ -7,7 +7,7 @@ before the Better Auth + D1 slice starts. It does not authorise writing auth cod
 
 ## Current coverage
 
-Installed sources are the `*_skills_source` pins in `mise.toml`; `mise run skills:list`
+Installed sources are the `*_skills_source` vars of `skills:install` in `tasks/bootstrap.toml`; `mise run skills:list`
 shows the installed skills and `package.json` the dependency versions to compare against.
 
 Probed on 2026-09-24 with `skills add <repo> --list --full-depth` and found **no

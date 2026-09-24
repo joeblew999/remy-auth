@@ -152,8 +152,19 @@ prompted. Claude Code is installed separately; launching Codex does not require 
 
 ## Agent skills
 
-The skill sources are the `*_skills_source` pins in [mise.toml](../mise.toml)'s `[vars]`;
-`skills:install` installs the selected skills from each. Install them locally:
+The skill sources are the `*_skills_source` vars of the `skills:install` task in
+[tasks/bootstrap.toml](../tasks/bootstrap.toml), which also holds the MCP, browser and web
+guidance tasks. `mise.toml` includes that directory (`[task_config] includes = ["tasks"]`),
+and any other project can include the same directory by git reference pinned to a commit:
+
+```toml
+[task_config]
+includes = ["git::https://github.com/joeblew999/remy-auth.git//tasks?ref=<commit>"]
+```
+
+The including project supplies the npm packages the tasks run (`chrome-devtools-mcp`,
+`modern-web-guidance`, `smol-toml`, and `@openai/codex` for `mcp:status`); mise caches the
+remote include and `MISE_TASK_REMOTE_NO_CACHE=true` refreshes it. Install the skills locally:
 
 ```sh
 mise install
@@ -173,12 +184,13 @@ if newly installed skills are not yet visible.
 
 To add a source, only from the library's own maintainers:
 
-1. Pin it in `[vars]` as `<name>_skills_source = "https://github.com/<owner>/<repo>/tree/<commit>"`,
-   using the commit from `git ls-remote https://github.com/<owner>/<repo> HEAD`.
-2. Add its line to `skills:install`, naming the skills with `--skill` rather than `'*'`
+1. Pin it in the `skills:install` task's `vars` in `tasks/bootstrap.toml` as
+   `<name>_skills_source = "https://github.com/<owner>/<repo>/tree/<commit>"`, using the
+   commit from `git ls-remote https://github.com/<owner>/<repo> HEAD`.
+2. Add its line to that task's `run` list, naming the skills with `--skill` rather than `'*'`
    when the repository also ships contributor-only skills.
 3. Run `mise run skills:remove`, `mise run skills:install` and `mise run project:verify`.
-   Verification reads the pins from mise.toml and rejects installed skills from unpinned sources.
+   Verification reads the pins from `tasks/bootstrap.toml` and rejects installed skills from unpinned sources.
 
 
 ## MCP registration
@@ -194,8 +206,8 @@ mise run mcp:verify     # Also runs during project:verify
 mise run mcp:status     # Requires both Codex and Claude CLIs
 ```
 
-Registration writes the `chrome-devtools` entry to project-local `.codex/config.toml`
-and `.mcp.json`. Each client launches `browser:mcp` through the current mise executable
+Registration (`tasks/mcp/register`, a file task) writes the `chrome-devtools` entry to
+project-local `.codex/config.toml` and `.mcp.json`. Each client launches `browser:mcp` through the current mise executable
 with an explicit repository path. Generated files contain machine-specific paths
 and are gitignored; rerun registration after moving the checkout or mise executable.
 Unrelated settings and servers are preserved. Changed existing files receive a
