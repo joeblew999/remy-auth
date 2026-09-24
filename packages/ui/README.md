@@ -39,13 +39,11 @@ integration remain in the GUI plan.
 ## Publishing
 
 The package is `@joeblew999/remy-ui` on GitHub Packages (the scope must equal the
-GitHub owner there). Both repositories have been public since 2026-09-24; GitHub sets
-the package's visibility from the linked repository (public since 0.1.0), and its npm
-registry returns 401 without a token even for public packages, confirmed 2026-09-24. `.github/workflows/publish.yml`
-publishes it when a `vX.Y.Z` tag is pushed whose version equals `packages/ui/package.json`,
-using the workflow's own `GITHUB_TOKEN`; no long-lived npm token exists. Cut releases
-with the installed `github-release` skill (SemVer from the public diff, changelog,
-release PR, then the tag). `mise run ui:pack` still produces the tarball locally.
+GitHub owner there). `mise run ui:release` does the whole release from this machine: it
+runs `project:verify` (every check, locally), publishes with your `gh` token, tags
+`vX.Y.Z` from `packages/ui/package.json`, pushes, and creates the GitHub release from the
+matching CHANGELOG section. There is no CI in the loop. Bump the version and CHANGELOG
+first; the task refuses a dirty tree, a branch other than main, or an existing tag.
 
 Consumers add to their `.npmrc`:
 

@@ -48,7 +48,7 @@ agent to check the connection; accept any project trust or server approval promp
 
 Skills supply guidance; MCP supplies callable tools. Setup includes Better Auth,
 Cloudflare, Chrome DevTools, Modern Web Guidance, React Router, shadcn, Playwright
-and GitHub release and Actions-hardening skills, plus the Chrome DevTools MCP server.
+and GitHub release skills, plus the Chrome DevTools MCP server.
 
 ## Everyday commands
 

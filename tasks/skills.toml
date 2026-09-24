@@ -21,7 +21,7 @@ run = [
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.react_router_skills_source}} --skill react-router --agent codex claude-code --full-depth --yes",
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.shadcn_skills_source}} --skill shadcn --agent codex claude-code --full-depth --yes",
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.playwright_skills_source}} --skill playwright-cli --agent codex claude-code --full-depth --yes",
-  "npx --yes skills@{{vars.skills_cli_version}} add {{vars.github_skills_source}} --skill github-release --skill github-actions-hardening --agent codex claude-code --full-depth --yes",
+  "npx --yes skills@{{vars.skills_cli_version}} add {{vars.github_skills_source}} --skill github-release --agent codex claude-code --full-depth --yes",
 ]
 
 ["skills:list"]
