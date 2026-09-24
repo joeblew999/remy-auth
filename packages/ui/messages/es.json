@@ -21,8 +21,8 @@
   "error_title": "Algo ha salido mal",
   "error_detail": "Inténtalo de nuevo.",
   "demo_label": "Demo interactiva",
-  "formats_title": "Fechas, números y moneda",
-  "formats_description": "Cómo Remy da formato a fechas, números, moneda y plurales en tu idioma.",
+  "formats_title": "Formatos en tu idioma",
+  "formats_description": "Cómo Remy adapta fechas, horas, calendarios, números, moneda, plurales y ordenación a tu idioma.",
   "formats_label": "Formatos internacionales",
   "formats_intro": "Cada valor de abajo procede del catálogo de mensajes compartido y de las reglas de tu idioma, y se muestra igual en el servidor y en el navegador.",
   "language_tag": "Etiqueta de idioma",
@@ -211,5 +211,18 @@
         "countPlural=other": "{name} ha reservado {count} asientos."
       }
     }
-  ]
+  ],
+  "systems_heading": "Calendario, semana y dígitos",
+  "calendar_label": "Calendario",
+  "other_calendars_label": "Otros calendarios en uso",
+  "no_other_calendars": "Ninguno",
+  "week_start_label": "Primer día de la semana",
+  "weekend_label": "Fin de semana",
+  "hour_cycle_label": "Ciclo horario",
+  "hour_cycle_12": "Reloj de 12 horas",
+  "hour_cycle_24": "Reloj de 24 horas",
+  "numbering_label": "Sistema de numeración",
+  "timezone_heading": "Zona horaria",
+  "local_time_label": "En tu zona horaria",
+  "local_time_note": "Se muestra en tu navegador: el servidor da formato a las horas en UTC porque no conoce tu zona horaria."
 }

@@ -54,6 +54,7 @@ html[dir="rtl"] .back-arrow::before { content: "→ "; }
 .formats dl > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 16px; padding: 14px 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); }
 .formats dt { color: var(--muted-foreground); font-size: 14px; }
 .formats dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.calendars { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
 .plurals { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; }
 .plurals li { border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; font-size: 14px; }
 .error-page { max-width: 800px; padding: 80px 24px; margin: auto; }

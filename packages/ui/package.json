@@ -11,7 +11,8 @@
     "./button": "./src/components/button.tsx",
     "./styles.css": "./src/styles.css",
     "./messages": "./src/paraglide/messages.js",
-    "./locale": "./src/locale.ts"
+    "./locale": "./src/locale.ts",
+    "./locale-info": "./src/locale-info.ts"
   },
   "peerDependencies": {
     "react": "^19.2.0",

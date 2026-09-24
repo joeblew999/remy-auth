@@ -21,8 +21,8 @@
   "error_title": "Something went wrong",
   "error_detail": "Please try again.",
   "demo_label": "Interactive demo",
-  "formats_title": "Dates, numbers and currency",
-  "formats_description": "How Remy formats dates, numbers, currency and plurals in your language.",
+  "formats_title": "Formats in your language",
+  "formats_description": "How Remy adapts dates, times, calendars, numbers, currency, plurals and sorting to your language.",
   "formats_label": "International formats",
   "formats_intro": "Every value below comes from the shared message catalog and your language's own rules, rendered the same way on the server and in the browser.",
   "language_tag": "Locale tag",
@@ -212,5 +212,18 @@
         "countPlural=other": "{name} reserved {count} seats."
       }
     }
-  ]
+  ],
+  "systems_heading": "Calendar, week and digits",
+  "calendar_label": "Calendar",
+  "other_calendars_label": "Other calendars in use",
+  "no_other_calendars": "None",
+  "week_start_label": "First day of the week",
+  "weekend_label": "Weekend",
+  "hour_cycle_label": "Hour cycle",
+  "hour_cycle_12": "12-hour clock",
+  "hour_cycle_24": "24-hour clock",
+  "numbering_label": "Numbering system",
+  "timezone_heading": "Time zone",
+  "local_time_label": "In your time zone",
+  "local_time_note": "Rendered in your browser: the server formats times in UTC because it does not know your time zone."
 }

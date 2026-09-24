@@ -1,4 +1,6 @@
-import { locales, localeName, direction } from '@remy/ui/locale';
+import { useEffect, useState } from 'react';
+import { locales, localeName, direction, type Locale } from '@remy/ui/locale';
+import { localeInfo, weekdayName } from '@remy/ui/locale-info';
 import { m } from '@remy/ui/messages';
 import { Shell } from '../shell';
 import { requireLocale } from '../locale';
@@ -6,11 +8,22 @@ import { pageMeta } from '../seo';
 import { samples } from '../formats';
 import type { Route } from './+types/formats';
 
-export function loader({ params }: Route.LoaderArgs) { return { locale: requireLocale(params.locale) }; }
+export function loader({ params }: Route.LoaderArgs) {
+  const locale = requireLocale(params.locale);
+  return { locale, info: localeInfo(locale) };
+}
 export function meta({ params, matches }: Route.MetaArgs) {
   return pageMeta(params, matches, '/formats', locale => m.formats_title({}, { locale }), locale => m.formats_description({}, { locale }));
 }
-export default function Formats({ loaderData: { locale } }: Route.ComponentProps) {
+
+/** The viewer's own time zone is only known in the browser, so this row renders after hydration. */
+function LocalTime({ locale }: { locale: Locale }) {
+  const [text, setText] = useState('');
+  useEffect(() => { setText(new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'long' }).format(samples.instant)); }, [locale]);
+  return <span data-sample="local">{text}</span>;
+}
+
+export default function Formats({ loaderData: { locale, info } }: Route.ComponentProps) {
   const o = { locale };
   const dir = direction(locale);
   // Lists, collation, display names and ranges are native Intl; every other value is formatted inside its message.
@@ -19,8 +32,10 @@ export default function Formats({ loaderData: { locale } }: Route.ComponentProps
   const sorted = list.format([...samples.names].sort(new Intl.Collator(locale).compare));
   const region = new Intl.DisplayNames([locale], { type: 'region' }).of(samples.region);
   const currencyName = new Intl.DisplayNames([locale], { type: 'currency' }).of('EUR');
+  const calendarName = new Intl.DisplayNames([locale], { type: 'calendar' });
   const range = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).formatRange(samples.rangeStart, samples.rangeEnd);
   const currencies = list.format(samples.currencies.map(currency => new Intl.NumberFormat(locale, { style: 'currency', currency }).format(samples.amount)));
+  const digits = new Intl.NumberFormat(locale, { numberingSystem: info.numberingSystem }).format(samples.decimal);
   const Row = ({ sample, label, children }: { sample: string; label: string; children: React.ReactNode }) =>
     <div><dt>{label}</dt><dd data-sample={sample}>{children}</dd></div>;
   return <Shell locale={locale} path="/formats">
@@ -39,6 +54,22 @@ export default function Formats({ loaderData: { locale } }: Route.ComponentProps
         <Row sample="region" label={m.region_label({}, o)}>{region}</Row>
       </dl>
 
+      <h2>{m.systems_heading({}, o)}</h2>
+      <dl>
+        <Row sample="calendar" label={m.calendar_label({}, o)}>{calendarName.of(info.calendar)}</Row>
+        <div><dt>{m.other_calendars_label({}, o)}</dt><dd data-sample="other-calendars">
+          {info.otherCalendars.length === 0 ? m.no_other_calendars({}, o) : <ul className="calendars">
+            {info.otherCalendars.map(calendar => <li key={calendar} data-calendar={calendar}>
+              {calendarName.of(calendar)}: {new Intl.DateTimeFormat(locale, { dateStyle: 'long', calendar, timeZone: 'UTC' }).format(samples.date)}
+            </li>)}
+          </ul>}
+        </dd></div>
+        <Row sample="numbering" label={m.numbering_label({}, o)}><code>{info.numberingSystem}</code> · {digits}</Row>
+        <Row sample="hour-cycle" label={m.hour_cycle_label({}, o)}>{['h11', 'h12'].includes(info.hourCycle) ? m.hour_cycle_12({}, o) : m.hour_cycle_24({}, o)}</Row>
+        {info.firstDay && <Row sample="week-start" label={m.week_start_label({}, o)}>{weekdayName(locale, info.firstDay)}</Row>}
+        {info.weekend && <Row sample="weekend" label={m.weekend_label({}, o)}>{list.format(info.weekend.map(day => weekdayName(locale, day)))}</Row>}
+      </dl>
+
       <h2>{m.dates_heading({}, o)}</h2>
       <dl>
         <Row sample="instant" label={m.instant_label({}, o)}><time dateTime={samples.instant.toISOString()}>{m.instant_value({ instant: samples.instant }, o)}</time></Row>
@@ -46,6 +77,12 @@ export default function Formats({ loaderData: { locale } }: Route.ComponentProps
         <Row sample="range" label={m.range_label({}, o)}>{range}</Row>
         <Row sample="relative" label={m.relative_label({}, o)}>{m.relative_value({ days: samples.days }, o)}</Row>
       </dl>
+
+      <h2>{m.timezone_heading({}, o)}</h2>
+      <dl>
+        <Row sample="local-row" label={m.local_time_label({}, o)}><LocalTime locale={locale} /></Row>
+      </dl>
+      <p className="demo-note">{m.local_time_note({}, o)}</p>
 
       <h2>{m.numbers_heading({}, o)}</h2>
       <dl>

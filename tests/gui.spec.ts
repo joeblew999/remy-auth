@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { samples } from '../app/formats';
+import { localeInfo, weekdayName } from '../packages/ui/src/locale-info';
 import { publicPaths } from '../app/routes/sitemap';
 
 // The inlang project is the only locale list; the catalogs and Node's own Intl are the oracles.
@@ -15,6 +16,7 @@ const list = (locale: string) => new Intl.ListFormat(locale, { type: 'conjunctio
 const euros = (locale: string) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(samples.amount);
 const pluralText = (locale: string, count: number) =>
   catalogs[locale].apps_count[0].match[`countPlural=${new Intl.PluralRules(locale).select(count)}`].replace('{count}', String(count));
+test.use({ timezoneId: 'Asia/Tokyo' });
 const collectErrors = (page: Page) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -76,6 +78,7 @@ for (const locale of locales) {
 
   test(`${locale}: formats page shows this language's own formats without JavaScript`, async ({ browser, baseURL }) => {
     const messages = catalogs[locale];
+    const info = localeInfo(locale as any);
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
     const response = await page.goto(`${baseURL}/${locale}/formats`);
@@ -104,7 +107,17 @@ for (const locale of locales) {
       sorted: list(locale).format([...samples.names].sort(new Intl.Collator(locale).compare)),
       greeting: messages.greeting.replace('{name}', samples.guest),
       ...Object.fromEntries(samples.statuses.map(status => [`status-${status}`, messages.invite_status[0].match[`status=${status}`] ?? messages.invite_status[0].match['status=*']])),
+      calendar: new Intl.DisplayNames([locale], { type: 'calendar' }).of(info.calendar)!,
+      numbering: `${info.numberingSystem} · ${new Intl.NumberFormat(locale, { numberingSystem: info.numberingSystem }).format(samples.decimal)}`,
+      'hour-cycle': messages[['h11', 'h12'].includes(info.hourCycle) ? 'hour_cycle_12' : 'hour_cycle_24'],
+      'week-start': weekdayName(locale as any, info.firstDay!),
+      weekend: list(locale).format(info.weekend!.map(day => weekdayName(locale as any, day))),
     };
+    if (info.otherCalendars.length === 0) await expect(page.locator('[data-sample="other-calendars"]')).toHaveText(messages.no_other_calendars);
+    for (const calendar of info.otherCalendars) {
+      await expect(page.locator(`[data-calendar="${calendar}"]`), calendar).toHaveText(
+        `${new Intl.DisplayNames([locale], { type: 'calendar' }).of(calendar)}: ${new Intl.DateTimeFormat(locale, { dateStyle: 'long', calendar, timeZone: 'UTC' }).format(samples.date)}`);
+    }
     for (const [sample, text] of Object.entries(expected)) await expect(page.locator(`[data-sample="${sample}"]`), sample).toHaveText(text);
     for (const count of samples.counts) await expect(page.locator(`[data-count="${count}"]`)).toHaveText(pluralText(locale, count));
     const ordinal = new Intl.PluralRules(locale, { type: 'ordinal' });
@@ -164,6 +177,7 @@ test('formats page hydrates in every language without errors', async ({ page }) 
     await expect(page.locator('html')).toHaveAttribute('dir', direction(locale));
     await expect(page.locator('[data-sample="currency"]')).toHaveText(euros(locale));
     await expect(page.locator('[data-count="100"]')).toHaveText(pluralText(locale, 100));
+    await expect(page.locator('[data-sample="local"]')).toHaveText(new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'long', timeZone: 'Asia/Tokyo' }).format(samples.instant));
   }
   expect(errors).toEqual([]);
 });

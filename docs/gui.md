@@ -58,7 +58,7 @@ secrets are managed through Cloudflare. Local data is not uploaded by deployment
 | `/` | Redirect to the best available locale from `Accept-Language`, else `/en` |
 | `/en`, `/es`, `/ar` | Server-rendered public page with localized content, direction, metadata and alternate links |
 | `/en/demo`, `/es/demo`, `/ar/demo` | Client-rendered counter and a localized reservation form with validation and plural confirmation; indexable, listed in the sitemap; public demo, not an account screen |
-| `/en/formats`, `/es/formats`, `/ar/formats` | Server-rendered examples of dates, ranges, relative time, numbers, compact numbers, units, currencies and their minor units, plurals, ordinals, value variants, interpolation, locale-aware sorting, region and currency names, endonyms and reading direction |
+| `/en/formats`, `/es/formats`, `/ar/formats` | Server-rendered examples of the locale's calendars, numbering system, hour cycle, week start and weekend, dates, ranges, relative time, the viewer's own time zone (browser-rendered), numbers, compact numbers, units, currencies and their minor units, plurals, ordinals, value variants, interpolation, locale-aware sorting, region and currency names, endonyms and reading direction |
 | `/robots.txt`, `/sitemap.xml` | Public crawl metadata; the sitemap lists every public path in every locale with `hreflang` alternates |
 | Unknown route or locale | HTTP 404 |
 
