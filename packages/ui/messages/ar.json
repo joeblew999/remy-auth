@@ -237,5 +237,11 @@
   "cf_timezone_label": "المنطقة الزمنية لموقعك",
   "cf_local_time_label": "الوقت المحلي هناك",
   "location_unknown": "غير معروف على هذا الاتصال",
-  "location_note": "يبلّغ Cloudflare عن موقع الشبكة مع كل طلب؛ يستخدمه الخادم للوقت المحلي أعلاه ولا يخزّنه."
+  "location_note": "يبلّغ Cloudflare عن موقع الشبكة مع كل طلب؛ يستخدمه الخادم للوقت المحلي أعلاه ولا يخزّنه.",
+  "choose_title": "اختر لغتك",
+  "choose_description": "يتذكر ريمي اختيارك على هذا الجهاز. يمكنك التبديل في أي وقت من قائمة اللغة.",
+  "continue_in": "تابع باللغة {language}",
+  "suggested_label": "مقترح لك",
+  "language_hint": "هذه الصفحة متاحة أيضًا باللغة {language}.",
+  "keep_language": "ابقَ على {language}"
 }

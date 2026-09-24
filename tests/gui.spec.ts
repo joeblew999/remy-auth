@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { samples } from '../app/formats';
 import { localeInfo, weekdayName } from '../packages/ui/src/locale-info';
-import { publicPaths } from '../app/routes/sitemap';
+import { publicPaths } from '../app/paths';
 
 // The inlang project is the only locale list; the catalogs and Node's own Intl are the oracles.
 const settings = JSON.parse(readFileSync('packages/ui/project.inlang/settings.json', 'utf8'));
@@ -67,9 +67,8 @@ for (const locale of locales) {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(messages.home_title);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `${baseURL}/${locale}`);
     await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', messages.home_description);
-    for (const alternate of [...locales, 'x-default']) {
-      await expect(page.locator(`link[hreflang="${alternate}"]`)).toHaveAttribute('href', `${baseURL}/${alternate === 'x-default' ? baseLocale : alternate}`);
-    }
+    for (const alternate of locales) await expect(page.locator(`link[hreflang="${alternate}"]`)).toHaveAttribute('href', `${baseURL}/${alternate}`);
+    await expect(page.locator('link[hreflang="x-default"]')).toHaveAttribute('href', `${baseURL}/`);
     for (const other of locales) {
       await expect(page.getByRole('link', { name: endonym(other), exact: true })).toHaveAttribute('href', `/${other}`);
     }
@@ -85,7 +84,7 @@ for (const locale of locales) {
     expect(response?.status()).toBe(200);
     await expect(page.locator('html')).toHaveAttribute('dir', direction(locale));
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `${baseURL}/${locale}/formats`);
-    await expect(page.locator('link[hreflang="x-default"]')).toHaveAttribute('href', `${baseURL}/${baseLocale}/formats`);
+    await expect(page.locator('link[hreflang="x-default"]')).toHaveAttribute('href', `${baseURL}/formats`);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(messages.formats_title);
     const expected: Record<string, string> = {
       tag: locale,
@@ -154,13 +153,45 @@ for (const locale of locales) {
   });
 }
 
-test('root redirect negotiates the language from Accept-Language', async ({ request }) => {
-  for (const [header, expected] of [['es-MX,es;q=0.9,en;q=0.8', 'es'], ['ar-EG', 'ar'], ['de-DE,de;q=0.9', baseLocale], ['*', baseLocale]]) {
-    const response = await request.get('/', { maxRedirects: 0, headers: { 'Accept-Language': header } });
-    expect(response.status(), header).toBe(302);
-    expect(response.headers()['location'], header).toMatch(new RegExp(`/${expected}$`));
-    expect(response.headers()['vary'] ?? '', header).toContain('Accept-Language');
-  }
+test('URLs without a language offer a chooser, honour a remembered choice, and never redirect by guess', async ({ request, baseURL }) => {
+  const chooser = await request.get('/', { headers: { 'Accept-Language': 'es-MX,es;q=0.9,en;q=0.8' } });
+  expect(chooser.status()).toBe(200);
+  const html = await chooser.text();
+  expect(html).toContain('<html lang="es"');
+  expect(html).toContain(catalogs.es.choose_title);
+  for (const locale of locales) expect(html).toContain(`href="/${locale}"`);
+  expect(html).toContain(`<link rel="canonical" href="${baseURL}/"`);
+  expect(html).toMatch(new RegExp(`hreflang="x-default" href="${baseURL}/"`, 'i'));
+  const unmatched = await request.get('/demo', { headers: { 'Accept-Language': 'de-DE,de;q=0.9' } });
+  expect(unmatched.status()).toBe(200);
+  expect(await unmatched.text()).toContain(`<html lang="${baseLocale}"`);
+  for (const locale of locales) expect(await unmatched.text()).toContain(`href="/${locale}/demo"`);
+  const remembered = await request.get('/formats', { maxRedirects: 0, headers: { Cookie: 'locale=ar' } });
+  expect(remembered.status()).toBe(302);
+  expect(remembered.headers()['location']).toMatch(/\/ar\/formats$/);
+  expect(remembered.headers()['vary'] ?? '').toContain('Cookie');
+  expect((await request.get('/nope')).status()).toBe(404);
+  expect((await request.get('/', { maxRedirects: 0, headers: { Cookie: 'locale=zz' } })).status()).toBe(200);
+});
+
+test('a page in another language offers the preferred one without redirecting', async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ locale: 'en-US' });
+  const page = await context.newPage();
+  const hint = page.locator('aside.language-hint');
+  await page.goto(`${baseURL}/es`);
+  await expect(hint).toContainText(catalogs.en.language_hint.replace('{language}', endonym('en')));
+  await expect(hint.getByRole('link')).toHaveAttribute('href', '/en');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'es');
+  await page.goto(`${baseURL}/en`);
+  await expect(hint).toHaveCount(0);
+  await page.goto(`${baseURL}/es/formats`);
+  await hint.getByRole('button').click();
+  await expect(hint).toHaveCount(0);
+  await page.reload();
+  await expect(hint).toHaveCount(0);
+  await page.goto(`${baseURL}/`);
+  await expect(page).toHaveURL(`${baseURL}/es`);
+  await context.close();
 });
 
 test('concurrent SSR requests retain their requested language and direction', async ({ request }) => {
@@ -214,7 +245,6 @@ test('client-only demo is indexable, interactive and switches language in the sa
 });
 
 test('missing routes, root redirect and sitemap are correct', async ({ request, baseURL }) => {
-  expect((await request.get('/', { maxRedirects: 0 })).status()).toBe(302);
   for (const path of ['/en/missing', '/zz', '/zz/demo', '/zz/formats']) expect((await request.get(path)).status()).toBe(404);
   const sitemap = await request.get('/sitemap.xml');
   expect(sitemap.status()).toBe(200);

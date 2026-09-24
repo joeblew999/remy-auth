@@ -1,10 +1,10 @@
-import { locales, baseLocale } from '@remy/ui/locale';
+import { locales } from '@remy/ui/locale';
+import { publicPaths } from '../paths';
 import type { Route } from './+types/sitemap';
-export const publicPaths = ['', '/demo', '/formats'];
 export function loader({ request }: Route.LoaderArgs) {
   const origin = new URL(request.url).origin;
   const entries = locales.flatMap(locale => publicPaths.map(path => {
-    const alternates = [...locales.map(value => [value, `${origin}/${value}${path}`]), ['x-default', `${origin}/${baseLocale}${path}`]]
+    const alternates = [...locales.map(value => [value, `${origin}/${value}${path}`]), ['x-default', `${origin}${path || '/'}`]]
       .map(([lang, href]) => `<xhtml:link rel="alternate" hreflang="${lang}" href="${href}"/>`).join('');
     return `<url><loc>${origin}/${locale}${path}</loc>${alternates}</url>`;
   }));

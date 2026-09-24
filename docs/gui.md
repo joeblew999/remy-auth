@@ -55,12 +55,14 @@ secrets are managed through Cloudflare. Local data is not uploaded by deployment
 
 | Route | Behavior |
 | --- | --- |
-| `/` | Redirect to the best available locale from `Accept-Language`, else `/en` |
+| `/`, `/demo`, `/formats` | Language chooser in the visitor's best-matching language, linking every version; a language chosen earlier on this device (cookie) redirects there instead. These are the `x-default` targets |
 | `/en`, `/es`, `/ar` | Server-rendered public page with localized content, direction, metadata and alternate links |
 | `/en/demo`, `/es/demo`, `/ar/demo` | Client-rendered counter and a localized reservation form with validation and plural confirmation; indexable, listed in the sitemap; public demo, not an account screen |
 | `/en/formats`, `/es/formats`, `/ar/formats` | Server-rendered examples of the locale's calendars, numbering system, hour cycle, week start and weekend, dates, ranges, relative time, the visitor's country, city, region and local time from Cloudflare's request geolocation (server-rendered, never stored), the device's own time zone (browser-rendered), numbers, compact numbers, units, currencies and their minor units, plurals, ordinals, value variants, interpolation, locale-aware sorting, region and currency names, endonyms and reading direction |
 | `/robots.txt`, `/sitemap.xml` | Public crawl metadata; the sitemap lists every public path in every locale with `hreflang` alternates |
 | Unknown route or locale | HTTP 404 |
+
+Localized pages never redirect by guess. When the visitor's preferred language differs from the page, a dismissible hint offers that version; choosing or dismissing is remembered in a `locale` cookie that only the chooser acts on.
 
 React Router runs through Cloudflare's Vite plugin. Demo routes render a localized
 loading fallback on the server and mount the interactive view after the client
@@ -73,7 +75,7 @@ split. Keep the production browser check passing before enabling that optimizati
 
 ## Structure and reuse
 
-- `app/`: route modules, page layout and app-specific styling.
+- `app/`: route modules, page layout and app-specific styling; `app/paths.ts` is the single list of public paths that routes, the sitemap and the chooser derive from.
 - `workers/app.ts`: Worker entry, request IDs, structured status/timing logs, and the Cloudflare load context (`app/context.ts`) that hands bindings and request geolocation to loaders.
 - `packages/ui/`: shadcn/Base UI button, Remy's theme, compiled Paraglide messages, and locale direction and endonym helpers.
 - `tests/gui.spec.ts`: browser and HTTP acceptance checks.
@@ -100,8 +102,8 @@ npm's cache/network for consumer dependencies. Nothing is published.
 
 The automated checks cover catalog parity and plural-category coverage, every
 locale's HTML with JavaScript disabled (language, direction, metadata, endonym
-links), the formats page's values against Node's own Intl per locale, root language
-negotiation, concurrent locale requests, hydration without console errors,
+links), the formats page's values against Node's own Intl per locale, the language
+chooser and remembered choice, the language hint, concurrent locale requests, hydration without console errors,
 client-only content and button interactions, the demo form's localized validation
 and plural confirmation, same-tab language navigation, HTTP status and sitemap
 behavior with every listed URL self-canonical and cross-linked by `hreflang`,

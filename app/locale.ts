@@ -1,12 +1,14 @@
-import { isLocale, baseLocale, type Locale } from '@remy/ui/locale';
+import { isLocale, type Locale } from '@remy/ui/locale';
+
+export const cookieName = 'locale';
 
 export function requireLocale(value: string | undefined): Locale {
   if (!isLocale(value)) throw new Response('Not found', { status: 404 });
   return value;
 }
 
-/** The best available locale for an Accept-Language header, or the base locale. */
-export function negotiateLocale(header: string | null): Locale {
+/** The best available locale for an Accept-Language header, if any matches. */
+export function matchLocale(header: string | null): Locale | undefined {
   const ranked = (header ?? '').split(',').map(part => {
     const [tag, ...params] = part.trim().split(';');
     const quality = params.map(param => param.trim()).find(param => param.startsWith('q='))?.slice(2);
@@ -17,5 +19,12 @@ export function negotiateLocale(header: string | null): Locale {
     const language = tag.split('-')[0];
     if (isLocale(language)) return language;
   }
-  return baseLocale;
+  return undefined;
+}
+
+/** The language the visitor explicitly chose earlier on this device, if the cookie names a known locale. */
+export function chosenLocale(cookieHeader: string | null): Locale | undefined {
+  const value = (cookieHeader ?? '').split(';').map(pair => pair.trim())
+    .find(pair => pair.startsWith(`${cookieName}=`))?.slice(cookieName.length + 1);
+  return isLocale(value) ? value : undefined;
 }

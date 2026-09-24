@@ -232,5 +232,11 @@
   "cf_timezone_label": "Time zone at your location",
   "cf_local_time_label": "Local time there",
   "location_unknown": "Unknown on this connection",
-  "location_note": "Cloudflare reports the network's location with each request; the server uses it for the local time above and does not store it."
+  "location_note": "Cloudflare reports the network's location with each request; the server uses it for the local time above and does not store it.",
+  "choose_title": "Choose your language",
+  "choose_description": "Remy remembers your choice on this device. You can switch at any time from the language menu.",
+  "continue_in": "Continue in {language}",
+  "suggested_label": "Suggested for you",
+  "language_hint": "This page is also available in {language}.",
+  "keep_language": "Keep {language}"
 }
