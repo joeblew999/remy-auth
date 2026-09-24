@@ -26,6 +26,10 @@ The sample is planned; its code and startup command do not exist yet.
   Name every task `namespace:action`; keep aliases namespaced too.
 - Development uses local storage. Startup must not provision production identities,
   import sample data or silently change app registrations.
+- Keep one Worker implementation and one source Wrangler configuration for local
+  and deployed execution. Test the production artifact locally and reuse the same
+  acceptance suite against deployed URLs. Environment differences belong in
+  bindings and secrets, not duplicate code. See [the runtime workflow](gui.md).
 - Apps integrate through a versioned protocol/contract, never direct access to this
   service's database. App data and auth provisioning are separate operations.
 - Failures remain visible. Never grant access because auth is unavailable.

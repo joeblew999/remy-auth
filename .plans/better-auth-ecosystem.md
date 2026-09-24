@@ -104,7 +104,7 @@ Do not manipulate auth tables directly to bypass hooks or audit behavior.
 | Tool | What it provides | Proposed use |
 | --- | --- | --- |
 | [Official Dashboard](https://better-auth.com/docs/infrastructure/plugins/dashboard) | Hosted management of users, sessions, organizations, analytics and audit events through `dash()` from `@better-auth/infra` | First operations-dashboard candidate; verify plugin/version coverage and remote connectivity |
-| [Better Auth UI](https://better-auth-ui.com/docs) | Community auth components with shadcn/ui, HeroUI and Solid options | Evaluate for login and account screens after choosing frontend framework |
+| [Better Auth UI](https://better-auth-ui.com/docs) | Community auth components with shadcn/ui, HeroUI and Solid options | Evaluate for hosted login/account screens; verify Base UI, Paraglide and rendering compatibility per the GUI plan |
 | [Better Auth Studio](https://www.better-auth.studio/) | Community admin GUI, launched by its own CLI | Local evaluation candidate; self-hosted production mode is explicitly beta |
 | [Better Auth Console](https://better-auth-console.com/docs) | Community self-hosted dashboard across multiple auth databases | Alternative if we need self-hosted operations; direct database access needs architectural review |
 | [better-auth-devtools](https://github.com/C-W-D-Harshit/better-auth-devtools) | Community React panel for test users, session inspection and role switching | Optional local/test aid, excluded from production builds and routes |

@@ -13,3 +13,13 @@ node_modules/
 /.codex/config.toml.bak
 /.mcp.json
 /.mcp.json.bak
+
+/build/
+/.react-router/
+/worker-configuration.d.ts
+/packages/ui/src/paraglide/
+/test-results/
+/playwright-report/
+*.tsbuildinfo
+
+/remy-ui-*.tgz

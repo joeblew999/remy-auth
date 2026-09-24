@@ -1,6 +1,6 @@
 # Shared auth service
 
-Status: proposed, 2026-09-24. Repository scaffold only; implementation has not started.
+Status: proposed, 2026-09-24. Minimal GUI proof implemented; auth service implementation has not started.
 Owner: remy-auth. First consumer: in-repo sample; first external consumer: remy-data.
 Reviewer defines acceptance;
 Executor implements and verifies a bounded milestone. Do not begin a fleet rollout.
@@ -28,6 +28,15 @@ HTTP and MCP adapters must call the same protected application operations. App
 permission definitions are not duplicated in a second MCP-only policy table.
 Only remy-auth writes its identity database. Apps use supported service interfaces.
 Do not route every business operation through the auth Worker or put app data in it.
+
+## GUI and reusable packages
+
+The [GUI plan](gui.md) covers shared shadcn/Base UI components, Paraglide,
+public-page rendering and SEO, plus same-tab hosted authentication. SSR is not
+required for every screen or consuming application. Both the service GUI
+and consuming apps must exercise these packages through their public exports.
+The initial smoke test is a small vertical slice, not completion of the full
+consumer/authorization milestone below.
 
 ## Required decisions before implementation
 
@@ -151,6 +160,9 @@ not a seed/provisioning command. No bootstrap credentials committed in manifests
 
 ## Definition of done
 
+The [GUI plan](gui.md) defines additional acceptance for package reuse, localized
+server-rendered content, accessibility and technical SEO.
+
 Cloudflare-native observability is required. Implement and verify the
 [observability plan](observability.md), including structured redacted logs,
 correlated traces, platform/D1 metrics, durable security audit records, dashboards
@@ -177,8 +189,8 @@ and tested alert/recovery delivery. Collection configuration alone is not comple
 
 Define service verification/development commands in mise.toml during implementation.
 Developer CLI setup, version diagnostics, Better Auth/Wrangler passthrough and
-agent-skill installation/listing tasks exist; no service startup or migration tasks
-exist yet. Do not add duplicate shell frameworks or a fleet task library. CI must be
+agent-skill installation/listing tasks exist. `project:dev` starts the GUI proof;
+auth service/sample orchestration and database migration tasks remain to be built. Do not add duplicate shell frameworks or a fleet task library. CI must be
 manual-only unless the owner explicitly changes that policy. Executor reports exact
 checks, changed files and limitations; Reviewer accepts the completed milestone.
 

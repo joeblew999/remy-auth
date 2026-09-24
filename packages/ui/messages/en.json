@@ -1,0 +1,23 @@
+{
+  "home_title": "One familiar place. Every Remy app.",
+  "home_description": "A shared foundation for Remy, in your language.",
+  "home_intro": "The same controls, colours and language follow you from one Remy app to the next.",
+  "public_label": "Shared foundation",
+  "demo_link": "Try the interactive demo",
+  "home_link": "Overview",
+  "demo_title": "Make yourself at home.",
+  "demo_description": "Try a small interaction using the same shared controls.",
+  "demo_note": "This is a public demo. Account and sign-in features are coming next.",
+  "count_label": "Button clicks",
+  "increment": "Add one",
+  "reset": "Reset",
+  "loading": "Loading the interactive demo…",
+  "language_label": "Language",
+  "skip_link": "Skip to content",
+  "footer": "Built to feel familiar.",
+  "not_found": "Page not found",
+  "not_found_detail": "This page is unavailable. Return to the overview.",
+  "error_title": "Something went wrong",
+  "error_detail": "Please try again.",
+  "demo_label": "Interactive demo"
+}

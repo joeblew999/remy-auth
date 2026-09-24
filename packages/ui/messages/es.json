@@ -1,0 +1,23 @@
+{
+  "home_title": "Un lugar familiar. Todas las apps de Remy.",
+  "home_description": "Una base compartida para Remy, en tu idioma.",
+  "home_intro": "Los mismos controles, colores e idioma te acompañan de una app de Remy a otra.",
+  "public_label": "Una base compartida",
+  "demo_link": "Prueba la demo interactiva",
+  "home_link": "Inicio",
+  "demo_title": "Siéntete como en casa.",
+  "demo_description": "Prueba una pequeña interacción con los mismos controles compartidos.",
+  "demo_note": "Esta es una demo pública. Las funciones de cuenta e inicio de sesión llegarán más adelante.",
+  "count_label": "Clics en el botón",
+  "increment": "Añadir uno",
+  "reset": "Restablecer",
+  "loading": "Cargando la demo interactiva…",
+  "language_label": "Idioma",
+  "skip_link": "Saltar al contenido",
+  "footer": "Diseñado para resultar familiar.",
+  "not_found": "Página no encontrada",
+  "not_found_detail": "Esta página no está disponible. Vuelve al inicio.",
+  "error_title": "Algo ha salido mal",
+  "error_detail": "Inténtalo de nuevo.",
+  "demo_label": "Demo interactiva"
+}

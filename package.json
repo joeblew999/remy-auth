@@ -6,11 +6,33 @@
     "node": ">=26.10.0 <27"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "1.58.0",
+    "@inlang/paraglide-js": "2.25.4",
+    "@openai/codex": "0.156.1",
+    "@playwright/test": "1.63.0",
+    "@react-router/dev": "8.4.0",
+    "@tailwindcss/vite": "4.3.3",
+    "@types/node": "26.6.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "auth": "1.7.5",
     "chrome-devtools-mcp": "1.10.1",
     "modern-web-guidance": "0.0.190",
     "npm-check-updates": "23.1.0",
+    "shadcn": "4.21.0",
     "smol-toml": "1.9.0",
+    "tailwindcss": "4.3.3",
+    "typescript": "7.0.2",
+    "vite": "8.3.0",
     "wrangler": "4.137.0"
-  }
+  },
+  "dependencies": {
+    "@remy/ui": "0.0.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-router": "8.4.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }

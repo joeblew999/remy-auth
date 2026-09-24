@@ -14,7 +14,12 @@ try {
     assert.deepEqual(lock.packages?.['']?.[section] ?? {}, manifest[section] ?? {},
       `${section}: package-lock.json differs from package.json; run npm install`);
   }
-  console.log('Manifest and lockfile dependency declarations match.');
+  const ui = await readJSON('packages/ui/package.json');
+  for (const section of ['dependencies', 'peerDependencies']) {
+    assert.deepEqual(lock.packages?.['packages/ui']?.[section] ?? {}, ui[section] ?? {},
+      `Shared UI ${section}: lockfile differs from manifest`);
+  }
+  console.log('Root and shared UI dependency declarations match the lockfile.');
 
   // This upstream API is unstable; recheck it when upgrading Wrangler.
   const config = unstable_readConfig({ config: 'wrangler.jsonc' });
@@ -51,7 +56,7 @@ try {
     }
     console.log(`${owner}/${repo}: verified ${entries.length} locked skills and Claude links.`);
   }
-  console.log('Tooling verified. Worker build/runtime tests will be added with the application.');
+  console.log('Tooling verified. GUI build and local runtime checks follow in project:verify.');
 } catch (error) {
   console.error(`Tooling verification failed: ${error.message}`);
   process.exitCode = 1;

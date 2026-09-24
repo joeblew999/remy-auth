@@ -82,9 +82,11 @@ Peer conflicts fail visibly; the task does not use npm's `--force` or
 migration requirements. If installation fails after manifest updates, resolve the
 reported conflict before using `project:setup`; no automatic rollback discards your edits.
 
-`project:setup` continues to reproduce the lockfile. Node and skill-source pins in
-`mise.toml` are managed separately. CLI checks do not establish auth-service runtime
-compatibility; add service tests to the upgrade workflow when the service exists.
+`project:setup` continues to reproduce the lockfile. Workspace dependencies are upgraded too; the local `@remy/ui` reference is excluded
+from registry upgrades. Node and skill-source pins in
+`mise.toml` are managed separately. The verification workflow includes GUI type checking, a Worker build, browser
+tests and an isolated shared-package consumer build. Auth runtime compatibility
+will need its own tests when Better Auth is integrated.
 
 ### Verification
 
@@ -95,11 +97,37 @@ sources, files and Claude symlinks. It uses the existing local installation and
 does not provision Cloudflare resources. Skill checks cover the lockfile inventory,
 not upstream discovery or content-integrity hashes.
 
-The Wrangler check uses its own configuration reader; it is not a deployment
-dry-run. Add typechecking, build and runtime tests when application code exists.
+The Wrangler configuration check uses its own reader. Verification then generates
+types, builds and dry-runs deployment packaging for the GUI/Worker, runs seven
+Playwright checks against the production artifact in local Workers using installed
+Chrome, and builds an isolated consumer of the packed UI package. No deployment
+is performed. See [the GUI proof](gui.md) for scope and commands.
 
 
 ## Start or reload your agent
+
+### VS Code Codex extension
+
+Open this repository in VS Code and use the Codex sidebar. The extension ships
+its own executable; the project's npm CLI installation serves terminal users.
+The [Codex CLI and IDE extension share MCP configuration](https://developers.openai.com/learn/docs-mcp).
+Our project registration writes `.codex/config.toml`; trust the project in Codex
+so that project configuration can load. VS Code's `.vscode/mcp.json` configures
+its own MCP client and is not the Codex extension's configuration file.
+
+After changing skills or MCP configuration:
+
+1. Run `mise run mcp:register` in the repository terminal.
+2. Save your work, open the Command Palette (`Cmd+Shift+P` on macOS), and run
+   **Developer: Reload Window**.
+3. Reopen the Codex sidebar and continue the conversation. Verify that the agent
+   can call the newly configured tools; registration alone does not prove a connection.
+
+`codex:resume` launches a terminal session; it does not reload the extension.
+The installed `code` CLI has no documented reload-window flag, so reloading uses
+VS Code's built-in command rather than a shell wrapper that pretends to restart it.
+
+### Terminal agents
 
 After `mise run project:setup`, use the installed Codex or Claude Code CLI:
 
@@ -115,8 +143,11 @@ run its `:resume` task from your terminal. These tasks refresh MCP registration,
 launch from the repository root and preserve interactive terminal input/output.
 They do not stop another running session. Use `/mcp` inside the agent to check the
 connection. Pass additional upstream options after `--`, for example
-`mise run codex:start -- --help`. Install and authenticate your chosen agent CLI
-separately; launching one does not require the other.
+`mise run codex:start -- --help`. Setup installs the pinned official
+[`@openai/codex` CLI](https://learn.chatgpt.com/docs/codex/cli) locally, and the
+Codex tasks use that executable directly rather than relying on your shell PATH.
+`packages:upgrade` updates it alongside the other dependencies. Authenticate when
+prompted. Claude Code is installed separately; launching Codex does not require it.
 
 
 ## Agent skills
@@ -230,8 +261,9 @@ a search returns no matches, use `list` to browse guide IDs. Browser support def
 
 The [observability plan](../.plans/observability.md) covers logs, traces, metrics,
 D1 health, durable auth audit records, correlation, dashboards and alerts.
-`wrangler.jsonc` enables logs/traces and URL query redaction for the future Worker.
-It still needs a Worker entry and D1 binding before it is deployable.
+`wrangler.jsonc` enables logs/traces and URL query redaction for the GUI Worker.
+A GUI Worker entry now emits request IDs, status and timing without logging URLs,
+headers or cookies. D1 and authentication are not implemented.
 
 ```sh
 mise run cf:logs -- --help

@@ -2,8 +2,11 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "remy-auth",
   "compatibility_date": "2026-09-24",
-  // Observability baseline. Add the Worker entry and D1 binding during scaffolding.
-  // This config does not yet describe a deployable service.
+  // Shared source for local development, production preview and deployment.
+  // Auth and D1 bindings are added in the next slice.
+  "main": "./workers/app.ts",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "./build/client" },
   "observability": {
     "enabled": true,
     "redact_query_string": true,

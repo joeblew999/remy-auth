@@ -29,26 +29,30 @@ run = "./node_modules/.bin/auth"
 [tasks."packages:check"]
 description = "Preview latest npm package versions without changing files"
 dir = "{{config_root}}"
-run = "./node_modules/.bin/ncu --target latest --dep prod,dev,optional --removeRange"
+run = "./node_modules/.bin/ncu --target latest --dep prod,dev,optional --workspaces --reject @remy/ui --removeRange"
 
 [tasks."packages:upgrade"]
 description = "Upgrade npm packages beyond existing pins, including majors, then verify tooling"
 dir = "{{config_root}}"
 run = [
-  "./node_modules/.bin/ncu --target latest --dep prod,dev,optional --removeRange --upgrade",
+  "./node_modules/.bin/ncu --target latest --dep prod,dev,optional --workspaces --reject @remy/ui --removeRange --upgrade",
   "npm install --prefer-online --strict-peer-deps",
   { task = "project:verify" },
 ]
 
 [tasks."project:verify"]
-description = "Verify CLI tools, dependencies, Wrangler configuration and installed skill links"
+description = "Verify tooling, GUI types, Worker build, browser tests and shared UI packaging"
 dir = "{{config_root}}"
 run = [
   "mise tasks validate",
   "npm ls --depth=0",
+  "./node_modules/.bin/codex --version",
   { task = "mcp:verify" },
   { task = "project:doctor" },
   "node scripts/verify-tooling.mjs {{vars.better_auth_skills_source}} {{vars.cloudflare_skills_source}} {{vars.chrome_skills_source}} {{vars.modern_web_skills_source}}",
+  { task = "project:typecheck" },
+  { task = "project:test" },
+  { task = "ui:verify" },
 ]
 
 [tasks."auth:info"]
@@ -145,7 +149,7 @@ run = "node scripts/register-mcp.mjs --check"
 [tasks."mcp:status"]
 description = "Show Chrome DevTools registration in both installed agent clients"
 dir = "{{config_root}}"
-run = ["codex mcp get chrome-devtools", "claude mcp get chrome-devtools"]
+run = ["./node_modules/.bin/codex mcp get chrome-devtools", "claude mcp get chrome-devtools"]
 
 [tasks."codex:start"]
 description = "Start Codex in this project with MCP registered"
@@ -153,7 +157,7 @@ dir = "{{config_root}}"
 depends = ["mcp:register"]
 raw = true
 raw_args = true
-run = "codex"
+run = "./node_modules/.bin/codex"
 
 [tasks."codex:resume"]
 description = "Resume the latest Codex conversation with freshly loaded configuration"
@@ -161,7 +165,7 @@ dir = "{{config_root}}"
 depends = ["mcp:register"]
 raw = true
 raw_args = true
-run = "codex resume --last"
+run = "./node_modules/.bin/codex resume --last"
 
 [tasks."claude:start"]
 description = "Start Claude Code in this project with MCP registered"
@@ -178,3 +182,71 @@ depends = ["mcp:register"]
 raw = true
 raw_args = true
 run = "claude --continue"
+
+[tasks."project:dev"]
+description = "Run the local Cloudflare GUI proof at http://127.0.0.1:5173"
+dir = "{{config_root}}"
+raw = true
+run = "./node_modules/.bin/react-router dev"
+
+[tasks."project:build"]
+description = "Build the shared local/remote artifact and dry-run Cloudflare packaging"
+dir = "{{config_root}}"
+run = ["./node_modules/.bin/react-router build", "./node_modules/.bin/wrangler deploy --dry-run"]
+
+[tasks."project:typecheck"]
+description = "Generate types and check the GUI, shared package and Worker"
+dir = "{{config_root}}"
+run = [
+  { task = "ui:generate" },
+  "./node_modules/.bin/wrangler types",
+  "./node_modules/.bin/react-router typegen",
+  "./node_modules/.bin/tsc",
+]
+
+[tasks."project:test"]
+description = "Test the production artifact in local Workers"
+dir = "{{config_root}}"
+depends = ["project:build"]
+env = { TEST_TARGET = "local" }
+run = "./node_modules/.bin/playwright test"
+
+[tasks."ui:pack"]
+description = "Compile and pack the shared UI for another Vite/Tailwind consumer"
+dir = "{{config_root}}"
+run = [
+  { task = "ui:generate" },
+  "npm pack --workspace @remy/ui",
+]
+
+[tasks."ui:verify"]
+description = "Build an isolated consumer from the shared UI npm tarball"
+dir = "{{config_root}}"
+run = [
+  { task = "ui:generate" },
+  "node scripts/verify-ui-package.mjs",
+]
+
+[tasks."ui:generate"]
+description = "Compile the shared locale catalogs"
+dir = "{{config_root}}"
+run = "./node_modules/.bin/paraglide-js compile --project ./packages/ui/project.inlang --outdir ./packages/ui/src/paraglide --strategy baseLocale --emit-ts-declarations --no-emit-git-ignore"
+
+[tasks."project:preview"]
+description = "Build and serve the deployment artifact locally at http://127.0.0.1:4173"
+dir = "{{config_root}}"
+depends = ["project:build"]
+raw = true
+run = "./node_modules/.bin/vite preview"
+
+[tasks."project:test:remote"]
+description = "Run the same GUI checks against TEST_BASE_URL, without starting a local server"
+dir = "{{config_root}}"
+env = { TEST_TARGET = "remote" }
+run = "./node_modules/.bin/playwright test"
+
+[tasks."cf:deploy"]
+description = "Build, dry-run and deploy the Worker to the authenticated Cloudflare account"
+dir = "{{config_root}}"
+depends = ["project:build"]
+run = "./node_modules/.bin/wrangler deploy"
