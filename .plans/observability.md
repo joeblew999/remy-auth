@@ -3,8 +3,15 @@
 Status: open, 2026-09-24. Generic: applies to every Worker built on the shared package and
 tasks (remy-auth now, remy-auth-app and later apps). The auth-specific signals, audit
 records and alerts moved to [the auth plan](auth-service.md#observability-for-the-auth-service).
-Done so far: the collection baseline in remy-auth's `wrangler.jsonc`, structured request logs
-with request IDs in its `workers/app.ts`, and the shared `cf:logs` and `cf:errors` tasks.
+Done 2026-09-24, in both apps: `@joeblew999/remy-ui/worker` (0.8.0) wraps each Worker with
+`X-Request-ID` on every response, one structured line per request following the log contract
+below (release from the version-metadata binding, route templates, never URLs or headers),
+and `/healthz`; the collection baseline is in both `wrangler.jsonc` files (remy-auth-app now
+runs a thin Worker in front of its assets); `observabilityChecks` covers request IDs and
+liveness in level 1; the shared `cf:logs` and `cf:errors` tasks read both. A secret canary in
+a query string was verified absent from the local log output. Still open: readiness with
+dependency checks, saved views, alerts (destination is the owner's call), automated canary
+checks against spans and live tail, and sampling, retention and cost records.
 
 ## Collection baseline
 
