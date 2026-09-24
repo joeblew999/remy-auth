@@ -9,7 +9,9 @@ below (release from the version-metadata binding, route templates, never URLs or
 and `/healthz`; the collection baseline is in both `wrangler.jsonc` files (remy-auth-app now
 runs a thin Worker in front of its assets); `observabilityChecks` covers request IDs and
 liveness in level 1; the shared `cf:logs` and `cf:errors` tasks read both. A secret canary in
-a query string was verified absent from the local log output. Still open: readiness with
+a query string was verified absent from our log lines and from the persisted Workers Logs; live
+`wrangler tail` still shows Cloudflare's own request metadata with the full URL, including the
+query string, to anyone with account access, so never put secrets in URLs. Still open: readiness with
 dependency checks, saved views, alerts (destination is the owner's call), automated canary
 checks against spans and live tail, and sampling, retention and cost records.
 
