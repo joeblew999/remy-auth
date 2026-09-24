@@ -78,7 +78,8 @@ skill-source commits and the shared agent bootstrap tasks live in
 
 - [GUI proof](docs/gui.md) — routes, shared package and what the checks prove.
 - [Tooling reference](docs/tooling.md) — skills, MCP, browser sessions, upgrades and troubleshooting.
-- [GUI plan](.plans/gui.md) — reusable React packages, internationalisation and SEO.
+- [GUI plan](.plans/done/gui.md) — done: reusable React packages, internationalisation and SEO.
+- [Portal plan](.plans/gui-portal.md) — open: hosted login screens, and the GUI decisions still yours.
 - [Shared UI plan](.plans/done/shared-ui.md) — done: the language code in the package, SSR proven from the tarball, and the `remy-auth-app` consumer.
 - [Implementation plan](.plans/auth-service.md) — auth service and the first local sample app.
 - [Better Auth ecosystem](.plans/better-auth-ecosystem.md) — plugins, CLI and GUI options.

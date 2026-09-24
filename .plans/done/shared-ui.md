@@ -5,7 +5,7 @@ below; the Executor implements the work items in order and stops at the open dec
 This plan answers one question: is the framework code designed to be shared by other
 projects for both CSR and SSR, and does a demo show that off? Today: designed yes,
 proven half, shown off no. It extends the "Shared package" section of the
-[GUI plan](../gui.md); the [development principles](../../docs/development.md) apply.
+[GUI plan](gui.md); the [development principles](../../docs/development.md) apply.
 
 ## Evidence today
 

@@ -31,7 +31,7 @@ Do not route every business operation through the auth Worker or put app data in
 
 ## GUI and reusable packages
 
-The [GUI plan](gui.md) covers shared shadcn/Base UI components, Paraglide,
+The [done GUI plan](done/gui.md) and the [portal plan](gui-portal.md) cover shared shadcn/Base UI components, Paraglide,
 public-page rendering and SEO, plus same-tab hosted authentication. SSR is not
 required for every screen or consuming application. Both the service GUI
 and consuming apps must exercise these packages through their public exports.
@@ -160,7 +160,7 @@ not a seed/provisioning command. No bootstrap credentials committed in manifests
 
 ## Definition of done
 
-The [GUI plan](gui.md) defines additional acceptance for package reuse, localized
+The [done GUI plan](done/gui.md) defines additional acceptance for package reuse, localized
 server-rendered content, accessibility and technical SEO.
 
 Cloudflare-native observability is required. Implement and verify the

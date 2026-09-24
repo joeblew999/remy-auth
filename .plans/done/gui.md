@@ -1,8 +1,10 @@
 # Shared GUI, internationalisation and search visibility
 
-Status: agreed direction; framework integration and package details require implementation
-verification. A minimal GUI proof now exists; authentication and full reuse rollout
-remain planned. See [the runnable proof](../docs/gui.md).
+Status: done 2026-09-24 for public pages: rendering strategy, the shared package
+`@joeblew999/remy-ui`, internationalisation, SEO checks, and vertical-slice steps 1, 4 and the
+public half of 5, proven in remy-auth (server-rendered) and remy-auth-app (prerendered).
+The open remainder, which needs the auth service or owner decisions, moved to
+[the portal plan](../gui-portal.md). See [the runnable proof](../../docs/gui.md).
 
 ## Evidence from existing Remy code
 
@@ -62,7 +64,7 @@ locale/message exports. Use shadcn's supported shared-package layout and CLI,
 not independently copied components in every consuming app. Keep React a peer
 dependency and export styles explicitly; verify Tailwind includes package classes.
 Split additional packages only when a real consumer or dependency boundary needs it.
-Decided 2026-09-24: the package is `@joeblew999/remy-ui`, published to GitHub Packages by a tag-triggered workflow; see the [shared UI plan](done/shared-ui.md).
+Decided 2026-09-24: the package is `@joeblew999/remy-ui`, published to GitHub Packages by a tag-triggered workflow; see the [shared UI plan](shared-ui.md).
 
 Keep authentication screens in the centrally hosted Remy Auth portal initially.
 Apps import shared controls and navigate to the portal in the same tab; OAuth/OIDC
@@ -86,7 +88,7 @@ metadata and common UI messages, with application-specific catalogs kept separat
 Use npm workspaces for the local proof, then test `npm pack` output in an isolated
 consumer. Cross-repository consumers install versioned artifacts, not sibling
 filesystem paths. No changes to remy-sport are included in this planning step.
-The [shared UI plan](done/shared-ui.md) (done) covers extracting the remaining app-local language
+The [shared UI plan](shared-ui.md) (done) covers extracting the remaining app-local language
 code into the package, proving server rendering from the tarball, and the
 `remy-auth-app` consumer that demonstrates reuse in client rendering.
 

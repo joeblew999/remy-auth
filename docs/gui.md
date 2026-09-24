@@ -92,7 +92,7 @@ explicitly into compiled message functions; concurrent requests share no mutable
 locale state. English, Spanish and Arabic are the catalogs; the Arabic catalog was
 written by an agent and is unreviewed. Direction, endonyms, dates, numbers,
 currency and plurals follow the decisions recorded in
-[the GUI plan](../.plans/gui.md#dates-numbers-currency-and-direction).
+[the GUI plan](../.plans/done/gui.md#dates-numbers-currency-and-direction).
 
 ```sh
 mise run ui:pack           # Produce the package tarball locally
