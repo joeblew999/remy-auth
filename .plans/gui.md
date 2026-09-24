@@ -86,6 +86,9 @@ metadata and common UI messages, with application-specific catalogs kept separat
 Use npm workspaces for the local proof, then test `npm pack` output in an isolated
 consumer. Cross-repository consumers install versioned artifacts, not sibling
 filesystem paths. No changes to remy-sport are included in this planning step.
+The [shared UI plan](shared-ui.md) covers extracting the remaining app-local language
+code into the package, proving server rendering from the tarball, and the
+`remy-auth-app` consumer that demonstrates reuse in client rendering.
 
 ## Internationalisation
 

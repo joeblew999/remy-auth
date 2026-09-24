@@ -76,6 +76,7 @@ pinned separately in [mise.toml](mise.toml).
 - [GUI proof](docs/gui.md) — routes, shared package and what the checks prove.
 - [Tooling reference](docs/tooling.md) — skills, MCP, browser sessions, upgrades and troubleshooting.
 - [GUI plan](.plans/gui.md) — reusable React packages, internationalisation and SEO.
+- [Shared UI plan](.plans/shared-ui.md) — extracting the language code into the package, proving SSR from the tarball, and the `remy-auth-app` consumer.
 - [Implementation plan](.plans/auth-service.md) — auth service and the first local sample app.
 - [Better Auth ecosystem](.plans/better-auth-ecosystem.md) — plugins, CLI and GUI options.
 - [Observability plan](.plans/observability.md) — Cloudflare logs, traces, metrics and audit records.
