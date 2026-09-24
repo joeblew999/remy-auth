@@ -3,7 +3,7 @@
 # same name in the project's own mise.toml.
 
 ["project:test:remote"]
-description = "Run the same checks against TEST_BASE_URL without starting a local server"
+description = "Both levels against TEST_BASE_URL (~90 s). Touches no local build or port: run it in the background and keep coding"
 dir = "{{config_root}}"
 env = { TEST_TARGET = "remote" }
 run = "./node_modules/.bin/playwright test"
@@ -49,14 +49,14 @@ raw = true
 run = "./node_modules/.bin/wrangler dev --ip 127.0.0.1 --port \"${PREVIEW_PORT:-4173}\""
 
 ["project:test"]
-description = "Level 1: build, then run our own browser and HTTP checks against the production artifact locally (fast)"
+description = "Level 1: build, then run our own browser and HTTP checks against the production artifact locally (fast, ~20 s). Uses build/ and PREVIEW_PORT: never two local levels at once"
 dir = "{{config_root}}"
 depends = ["project:build"]
 env = { TEST_TARGET = "local" }
 run = "./node_modules/.bin/playwright test --project=ours"
 
 ["project:test:google"]
-description = "Level 2: build, then run Google's Lighthouse audits and Core Web Vitals locally (slow; CI runs this)"
+description = "Level 2: build, then run Google's Lighthouse audits and Core Web Vitals locally (slow, ~90 s; CI runs this). Uses build/, PREVIEW_PORT and the Chrome DevTools daemon: never alongside another local level or a remote level 2"
 dir = "{{config_root}}"
 depends = ["project:build"]
 env = { TEST_TARGET = "local" }

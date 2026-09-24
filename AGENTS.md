@@ -11,3 +11,6 @@ changing anything, and follow them over your own defaults. Do not copy their con
 4. The plan in [`.plans/`](.plans/) covering your task, and its Executor/Reviewer roles.
 
 Before reporting work as done, run `mise run project:verify` and report its real result.
+Task descriptions (`mise tasks ls`) say how long each task takes and what may run at the same
+time: run post-deploy checks in the background and keep working; state the expected duration
+before starting anything that takes more than a few seconds.
