@@ -4,7 +4,7 @@ import { locales } from '@joeblew999/remy-ui/runtime';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { publicPageChecks, entryChecks, demoChecks, formatsChecks, collectErrors, endonym, direction, localizedPath } from '@joeblew999/remy-ui/checks';
 import { localeInfo, weekdayName } from '../packages/ui/src/locale-info';
-import { publicPaths } from '../app/paths';
+import { publicPaths } from '@joeblew999/remy-ui/paths';
 
 // The shared checks cover what every app built on the package must satisfy.
 publicPageChecks({ paths: publicPaths });

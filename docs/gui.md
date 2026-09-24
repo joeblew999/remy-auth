@@ -81,7 +81,7 @@ split. Keep the production browser check passing before enabling that optimizati
 
 ## Structure and reuse
 
-- `app/`: route modules, page layout and app-specific styling; `app/paths.ts` is the single list of public paths that routes, the sitemap and the un-localized entry URLs derive from.
+- `app/`: route modules (loaders, meta, runtime wiring) that render the package's pages, plus this app's extra formats rows; `publicPaths` from the package is the single list of public paths.
 - `workers/app.ts`: Worker entry, request IDs, structured status/timing logs, and the Cloudflare load context (`app/context.ts`) that hands bindings and request geolocation to loaders.
 - `packages/ui/`: shadcn/Base UI button, Remy's theme, compiled Paraglide messages, Paraglide's locale runtime (detection, cookie, URL localisation) re-exported, hreflang data, the language switcher and hint, React Router glue, the shared Playwright checks and config, so consumers get the whole behaviour in either rendering mode.
 - `tests/gui.spec.ts` and `tests/lighthouse.spec.ts`: the package's shared checks (`@joeblew999/remy-ui/checks`) plus the checks only this repository owns (catalogs, concurrent server renders, hydration, its extra formats rows).

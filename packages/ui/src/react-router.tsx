@@ -45,3 +45,9 @@ export function pageMeta(params: { locale?: string }, origin: string, path: stri
     ...links.alternates.map(link => ({ tagName: 'link' as const, rel: 'alternate', hrefLang: link.hrefLang, href: link.href })),
   ];
 }
+
+/** A route's `:locale` param as a Locale, or a 404 for anything else. */
+export function requireLocale(value: string | undefined): Locale {
+  if (!isLocale(value)) throw new Response('Not found', { status: 404 });
+  return value;
+}

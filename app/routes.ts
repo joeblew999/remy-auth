@@ -1,5 +1,5 @@
 import { index, route, type RouteConfig } from '@react-router/dev/routes';
-import { publicPaths } from './paths';
+import { publicPaths } from '@joeblew999/remy-ui/paths';
 export default [
   index('routes/redirect.ts'),
   // Public paths without a locale redirect too; ':locale' would otherwise capture them.

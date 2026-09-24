@@ -4,6 +4,15 @@ All notable changes to the shared UI package `@joeblew999/remy-ui` are documente
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 package follows [Semantic Versioning](https://semver.org/).
 
+## [0.7.0] - 2026-09-24
+
+### Added
+- `@joeblew999/remy-ui/pages`: `Shell`, `HomePage`, `DemoPage`, `FormatsPage` (with slots
+  for an app's extra rows and sections), `Group` and `Row`: the pages the shared checks
+  test, so both apps render the same markup instead of keeping copies.
+- `@joeblew999/remy-ui/paths`: `publicPaths` as plain JavaScript for route configs and specs.
+- `requireLocale` in `@joeblew999/remy-ui/react-router`.
+
 ## [0.6.0] - 2026-09-24
 
 ### Changed
@@ -82,6 +91,7 @@ package follows [Semantic Versioning](https://semver.org/).
 - `@joeblew999/remy-ui/locale-info`: a locale's calendars, numbering system, hour cycle
   and week conventions, plus `weekdayName`.
 
+[0.7.0]: https://github.com/joeblew999/remy-auth/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/joeblew999/remy-auth/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/joeblew999/remy-auth/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/joeblew999/remy-auth/compare/v0.3.0...v0.4.0

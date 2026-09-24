@@ -1,5 +1,5 @@
 import { locales } from '@joeblew999/remy-ui/locale';
-import { publicPaths } from '../paths';
+import { publicPaths } from '@joeblew999/remy-ui/paths';
 import type { Route } from './+types/sitemap';
 export function loader({ request }: Route.LoaderArgs) {
   const origin = new URL(request.url).origin;
