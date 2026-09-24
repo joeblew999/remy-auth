@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="Group installed skills by source under .agents/skill-sources, leaving flat symlinks the agents discover (~1 s)"
-set -euo pipefail
-exec node "$(dirname "$0")/group.mjs"

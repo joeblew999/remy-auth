@@ -22,7 +22,6 @@ run = [
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.shadcn_skills_source}} --skill shadcn --agent codex claude-code --full-depth --yes",
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.playwright_skills_source}} --skill playwright-cli --agent codex claude-code --full-depth --yes",
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.github_skills_source}} --skill github-release --agent codex claude-code --full-depth --yes",
-  { task = "skills:group" },
 ]
 
 ["skills:list"]
@@ -35,4 +34,4 @@ run = "npx --yes skills@{{vars.skills_cli_version}} list --agent codex claude-co
 description = "Remove all project-local skills for Codex and Claude (restore with mise run skills:install)"
 dir = "{{config_root}}"
 vars = { skills_cli_version = "1.7.0" }
-run = ["npx --yes skills@{{vars.skills_cli_version}} remove --all", "rm -rf .agents/skill-sources"]
+run = "npx --yes skills@{{vars.skills_cli_version}} remove --all"
