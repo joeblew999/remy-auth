@@ -9,6 +9,9 @@ cloudflare_skills_source = "https://github.com/cloudflare/skills/tree/6dc7604903
 chrome_skills_source = "https://github.com/ChromeDevTools/chrome-devtools-mcp/tree/6a7e51fecaaefbea46b89e68892d42c175ee9163"
 
 modern_web_skills_source = "https://github.com/GoogleChrome/modern-web-guidance/tree/22ab18dfb50a5d7e3bdcf471c14076a5534eae4e"
+react_router_skills_source = "https://github.com/remix-run/react-router/tree/2d9827bc09bc562647553f8abf026823e3bfd9dd"
+shadcn_skills_source = "https://github.com/shadcn-ui/ui/tree/98a1fe67b439324ddc857f47fbdce056600a4329"
+playwright_skills_source = "https://github.com/microsoft/playwright-cli/tree/74354ecc7a43da16d91a9bc54fa8db8283a3fcf5"
 
 [tasks."project:setup"]
 description = "Install dependencies and skills, register project MCP, then verify tooling"
@@ -49,7 +52,7 @@ run = [
   "./node_modules/.bin/codex --version",
   { task = "mcp:verify" },
   { task = "project:doctor" },
-  "node scripts/verify-tooling.mjs {{vars.better_auth_skills_source}} {{vars.cloudflare_skills_source}} {{vars.chrome_skills_source}} {{vars.modern_web_skills_source}}",
+  "node scripts/verify-tooling.mjs {{vars.better_auth_skills_source}} {{vars.cloudflare_skills_source}} {{vars.chrome_skills_source}} {{vars.modern_web_skills_source}} {{vars.react_router_skills_source}} {{vars.shadcn_skills_source}} {{vars.playwright_skills_source}}",
   { task = "project:typecheck" },
   { task = "project:test" },
   { task = "ui:verify" },
@@ -122,13 +125,16 @@ dir = "{{config_root}}"
 run = "./node_modules/.bin/wrangler tail --format json --status error"
 
 [tasks."skills:install"]
-description = "Install official auth, Cloudflare, Chrome DevTools and modern web skills for Codex and Claude"
+description = "Install official auth, Cloudflare, Chrome DevTools, modern web, React Router, shadcn and Playwright skills for Codex and Claude"
 dir = "{{config_root}}"
 run = [
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.better_auth_skills_source}} --skill '*' --agent codex claude-code --full-depth --yes",
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.cloudflare_skills_source}} --skill '*' --agent codex claude-code --full-depth --yes",
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.chrome_skills_source}} --skill '*' --agent codex claude-code --full-depth --yes",
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.modern_web_skills_source}} --skill modern-web-guidance --agent codex claude-code --full-depth --yes",
+  "npx --yes skills@{{vars.skills_cli_version}} add {{vars.react_router_skills_source}} --skill react-router --agent codex claude-code --full-depth --yes",
+  "npx --yes skills@{{vars.skills_cli_version}} add {{vars.shadcn_skills_source}} --skill shadcn --agent codex claude-code --full-depth --yes",
+  "npx --yes skills@{{vars.skills_cli_version}} add {{vars.playwright_skills_source}} --skill playwright-cli --agent codex claude-code --full-depth --yes",
 ]
 
 [tasks."skills:list"]

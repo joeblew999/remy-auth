@@ -79,6 +79,7 @@ pinned separately in [mise.toml](mise.toml).
 - [Implementation plan](.plans/auth-service.md) — auth service and the first local sample app.
 - [Better Auth ecosystem](.plans/better-auth-ecosystem.md) — plugins, CLI and GUI options.
 - [Observability plan](.plans/observability.md) — Cloudflare logs, traces, metrics and audit records.
+- [Agent skills plan](.plans/agent-skills.md) — finding and vetting skills for uncovered dependencies.
 - [Development principles](docs/development.md) — ownership, storage and contribution rules.
 
 The next slice adds Better Auth and local D1. The GUI proof emits request logs;

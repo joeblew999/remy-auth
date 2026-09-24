@@ -13,7 +13,7 @@ mise run auth:info
 ```
 
 Node is pinned in `mise.toml`; Better Auth CLI (`auth`), Wrangler, Chrome DevTools and Modern Web Guidance are pinned in
-`package.json` and `package-lock.json`. `project:setup` runs `npm ci`, installs skills from four official
+`package.json` and `package-lock.json`. `project:setup` runs `npm ci`, installs skills from seven official
 sources for Codex and Claude, registers project MCP tooling, then runs `mise run project:verify`. It stops on any
 failed step. Commands use the local binaries and accept upstream CLI
 arguments after `--`; they do not download a different CLI at execution time.
@@ -66,7 +66,7 @@ CLI passthrough tasks accept upstream flags directly, such as
 | --- | --- |
 | `project:*` | Setup, verification and tool diagnostics |
 | `packages:*` | Check and upgrade npm packages |
-| `skills:*` | Install and list four official skill sources |
+| `skills:*` | Install, list and remove seven official skill sources |
 | `auth:*` | Better Auth CLI and diagnostics |
 | `cf:*` | Cloudflare CLI and live logs |
 | `browser:*` | Chrome DevTools CLI, session lifecycle and MCP server |
@@ -92,7 +92,7 @@ will need its own tests when Better Auth is integrated.
 
 Run `mise run project:verify` at any time; `project:setup` and `packages:upgrade` also finish with it. It checks
 mise tasks, installed dependencies, CLI versions, manifest/lockfile consistency,
-Wrangler configuration and observability settings, and all four skill sources' pinned
+Wrangler configuration and observability settings, and all seven skill sources' pinned
 sources, files and Claude symlinks. It uses the existing local installation and
 does not provision Cloudflare resources. Skill checks cover the lockfile inventory,
 not upstream discovery or content-integrity hashes.
@@ -155,8 +155,10 @@ prompted. Claude Code is installed separately; launching Codex does not require 
 Install the complete official [Better Auth](https://github.com/better-auth/skills),
 [Cloudflare](https://github.com/cloudflare/skills) and
 [Chrome DevTools](https://github.com/ChromeDevTools/chrome-devtools-mcp/tree/main/skills) packs,
-plus the main [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance)
-skill locally for this project:
+plus the main [Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance),
+[React Router](https://github.com/remix-run/react-router/tree/main/.agents/skills/react-router),
+[shadcn](https://github.com/shadcn-ui/ui) and
+[Playwright CLI](https://github.com/microsoft/playwright-cli) skills locally for this project:
 
 ```sh
 mise install
@@ -166,15 +168,17 @@ mise run skills:list
 
 To reinstall from scratch, run `mise run skills:remove` then `mise run skills:install`.
 
-[mise.toml](../mise.toml) pins Node, the skills CLI and all four upstream skill commits.
+[mise.toml](../mise.toml) pins Node, the skills CLI and all seven upstream skill commits.
 Skills live in `.agents/skills/`; `.claude/skills/` links to the same files.
 The installer records provenance in `skills-lock.json`. Re-running installation
-restores the selected skills from all four pinned sources; update their source commits deliberately to adopt upstream
+restores the selected skills from all seven pinned sources; update their source commits deliberately to adopt upstream
 changes. Keep the generated skill files, links and lockfile in version control.
 The packs include auth setup/security and Cloudflare platform, Workers, Wrangler,
 storage and other official Cloudflare guidance. The seven Chrome skills cover the
 CLI, MCP, accessibility, cookies, LCP, memory leaks and troubleshooting. Modern Web Guidance adds implementation patterns
-and compatibility guidance (28 skills total across four sources). Reload an existing agent session
+and compatibility guidance. React Router covers framework-mode routes, loaders and actions; shadcn covers
+`packages/ui` components; Playwright CLI covers browser tests (31 skills total across seven sources).
+No official skills exist yet for Paraglide, Tailwind or D1 migrations; use their docs. Reload an existing agent session
 if newly installed skills are not yet visible.
 
 

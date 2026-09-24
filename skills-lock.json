@@ -134,6 +134,20 @@
       "skillPath": "better-auth/organization/SKILL.md",
       "computedHash": "8c85e683dabef4532f1e8b67bbed5c453d39e0e3d5aeedd69d16b568f6e6d44f"
     },
+    "playwright-cli": {
+      "source": "microsoft/playwright-cli",
+      "ref": "74354ecc7a43da16d91a9bc54fa8db8283a3fcf5",
+      "sourceType": "github",
+      "skillPath": "skills/playwright-cli/SKILL.md",
+      "computedHash": "1e6cef0264b72fbf47618ccb82644b9a72934b2eeb35186842332928492a3cd2"
+    },
+    "react-router": {
+      "source": "remix-run/react-router",
+      "ref": "2d9827bc09bc562647553f8abf026823e3bfd9dd",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/react-router/SKILL.md",
+      "computedHash": "ff4d9bc724f0e56a51c453eef5b93caef1c16d3623ac49345d74fc1a5efbc05a"
+    },
     "sandbox-migrate-to-next": {
       "source": "cloudflare/skills",
       "ref": "6dc7604903127485e7e4cb26314651ebd4a4df19",
@@ -154,6 +168,13 @@
       "sourceType": "github",
       "skillPath": "skills/sandbox-stable/SKILL.md",
       "computedHash": "1b77b09631eb6c01d4b2d5c97afd7e24fd588d6fa8c8dc421abeb7acdf26d2bb"
+    },
+    "shadcn": {
+      "source": "shadcn-ui/ui",
+      "ref": "98a1fe67b439324ddc857f47fbdce056600a4329",
+      "sourceType": "github",
+      "skillPath": "skills/shadcn/SKILL.md",
+      "computedHash": "f615de216e085a84e31593ad0fa9062232adc40cd87b7c7ab2b8e49abf6500be"
     },
     "troubleshooting": {
       "source": "ChromeDevTools/chrome-devtools-mcp",

@@ -36,7 +36,7 @@ try {
   console.log('Wrangler parsed the configuration; observability requirements pass.');
 
   const sources = process.argv.slice(2);
-  assert.equal(sources.length, 4, 'Run through mise run project:verify to supply all four pinned skill sources');
+  assert.equal(sources.length, 7, 'Run through mise run project:verify to supply all seven pinned skill sources');
   const skills = (await readJSON('skills-lock.json')).skills;
   for (const sourceURL of sources) {
     const source = new URL(sourceURL);
