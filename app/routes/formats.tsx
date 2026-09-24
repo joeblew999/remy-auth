@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { locales, localeName, direction, type Locale } from '@joeblew999/remy-ui/locale';
+import { locales, localeName, direction } from '@joeblew999/remy-ui/locale';
+import { DeviceTime } from '@joeblew999/remy-ui/client';
+import { placeFromCloudflare } from '@joeblew999/remy-ui/cloudflare';
 import { localeInfo, weekdayName } from '@joeblew999/remy-ui/locale-info';
 import { m } from '@joeblew999/remy-ui/messages';
 import { Shell } from '../shell';
@@ -12,19 +13,10 @@ import type { Route } from './+types/formats';
 export function loader({ params, context }: Route.LoaderArgs) {
   const locale = requireLocale(params.locale);
   // Cloudflare's request geolocation: the network's country, region, city and time zone.
-  const cf = context.get(cloudflareContext).cf;
-  const country = /^[A-Z]{2}$/.test(cf?.country ?? '') ? cf!.country! : undefined;
-  return { locale, info: localeInfo(locale), place: { country, region: cf?.region, city: cf?.city, timeZone: cf?.timezone } };
+  return { locale, info: localeInfo(locale), place: placeFromCloudflare(context.get(cloudflareContext).cf) };
 }
 export function meta({ params, matches }: Route.MetaArgs) {
   return pageMeta(params, matches, '/formats', locale => m.formats_title({}, { locale }), locale => m.formats_description({}, { locale }));
-}
-
-/** The viewer's own time zone is only known in the browser, so this row renders after hydration. */
-function LocalTime({ locale }: { locale: Locale }) {
-  const [text, setText] = useState('');
-  useEffect(() => { setText(new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'long' }).format(samples.instant)); }, [locale]);
-  return <span data-sample="local">{text}</span>;
 }
 
 export default function Formats({ loaderData: { locale, info, place } }: Route.ComponentProps) {
@@ -100,7 +92,7 @@ export default function Formats({ loaderData: { locale, info, place } }: Route.C
 
       <h2>{m.timezone_heading({}, o)}</h2>
       <dl>
-        <Row sample="local-row" label={m.local_time_label({}, o)}><LocalTime locale={locale} /></Row>
+        <Row sample="local-row" label={m.local_time_label({}, o)}><DeviceTime locale={locale} instant={samples.instant} data-sample="local" /></Row>
       </dl>
       <p className="demo-note">{m.local_time_note({}, o)}</p>
 

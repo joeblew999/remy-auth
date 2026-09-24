@@ -5,9 +5,21 @@ client-rendered demo. The shadcn `base-nova` / Base UI button and stone/orange C
 variables come from the existing Remy Sport source. Keep upstream attribution and
 use shadcn tooling for component upgrades rather than independently editing copies.
 
-Exports: `@joeblew999/remy-ui/button`, `@joeblew999/remy-ui/styles.css`, `@joeblew999/remy-ui/messages`,
-`@joeblew999/remy-ui/locale` (locale list, `direction` and `localeName` from Intl). React is a peer dependency. Consumers need a TSX-aware build and
-Tailwind 4 configured to scan the component source. Import the CSS after Tailwind.
+Exports: `button`, `styles.css` (theme tokens and the language components' styles),
+`messages`, `runtime` (the generated Paraglide runtime as plain JavaScript), `locale`
+(Paraglide's `getLocale`, `setLocale`, `localizeHref`, `localizeUrl`, `deLocalizeHref`,
+`cookieName` and text `direction`, plus `localeName`), `locale-info` (calendars, digits,
+clock and week conventions), `seo` (canonical and hreflang data from the URL patterns),
+`language` (switcher and hint), `react-router` (Paraglide's middleware as root middleware,
+`suggestedLocale`, `redirectToLocalized`, `pageMeta`; `react-router` is an optional peer),
+`client` (`useSuggestedLocale`, `DeviceTime` for prerendered apps) and `cloudflare`
+(`placeFromCloudflare`), all under `@joeblew999/remy-ui/`.
+
+Language behaviour is Paraglide's: strategies `url`, `cookie`, `preferredLanguage`,
+`baseLocale` with every locale prefixed in the URL, configured once in `paraglide.mjs`.
+A server-rendered app runs the middleware and passes the visitor's preference down; a
+prerendered app resolves it in the browser after hydration; both render the same
+components, so consumers get the whole behaviour in either mode.
 
 Paraglide compiles `messages/*.json` during type generation and the Vite build.
 Pass `{ locale }` explicitly to every message call. This proof has no process-wide

@@ -153,25 +153,27 @@ for (const locale of locales) {
   });
 }
 
-test('URLs without a language offer a chooser, honour a remembered choice, and never redirect by guess', async ({ request, baseURL }) => {
-  const chooser = await request.get('/', { headers: { 'Accept-Language': 'es-MX,es;q=0.9,en;q=0.8' } });
-  expect(chooser.status()).toBe(200);
-  const html = await chooser.text();
-  expect(html).toContain('<html lang="es"');
-  expect(html).toContain(catalogs.es.choose_title);
-  for (const locale of locales) expect(html).toContain(`href="/${locale}"`);
-  expect(html).toContain(`<link rel="canonical" href="${baseURL}/"`);
-  expect(html).toMatch(new RegExp(`hreflang="x-default" href="${baseURL}/"`, 'i'));
-  const unmatched = await request.get('/demo', { headers: { 'Accept-Language': 'de-DE,de;q=0.9' } });
-  expect(unmatched.status()).toBe(200);
-  expect(await unmatched.text()).toContain(`<html lang="${baseLocale}"`);
-  for (const locale of locales) expect(await unmatched.text()).toContain(`href="/${locale}/demo"`);
-  const remembered = await request.get('/formats', { maxRedirects: 0, headers: { Cookie: 'locale=ar' } });
-  expect(remembered.status()).toBe(302);
-  expect(remembered.headers()['location']).toMatch(/\/ar\/formats$/);
-  expect(remembered.headers()['vary'] ?? '').toContain('Cookie');
+test('URLs without a language go to the visitor\'s language: remembered choice, Accept-Language, else the base locale', async ({ request, browser, baseURL }) => {
+  const cases: [Record<string, string>, string][] = [
+    [{ 'Accept-Language': 'es-MX,es;q=0.9,en;q=0.8' }, 'es'], [{ 'Accept-Language': 'ar-EG' }, 'ar'],
+    [{ 'Accept-Language': 'de-DE,de;q=0.9' }, baseLocale], [{ 'Accept-Language': '*' }, baseLocale],
+    [{ 'Accept-Language': 'en', Cookie: 'PARAGLIDE_LOCALE=ar' }, 'ar'], [{ Cookie: 'PARAGLIDE_LOCALE=zz' }, baseLocale],
+  ];
+  for (const [headers, expected] of cases) {
+    for (const path of publicPaths) {
+      const response = await request.get(path || '/', { maxRedirects: 0, headers });
+      expect(response.status(), `${path} ${JSON.stringify(headers)}`).toBe(302);
+      expect(response.headers()['location']).toMatch(new RegExp(`/${expected}${path}$`));
+      expect(response.headers()['vary'] ?? '').toContain('Accept-Language');
+    }
+  }
+  // Document requests are redirected by Paraglide's middleware before any route runs.
+  const context = await browser.newContext({ locale: 'ar' });
+  const page = await context.newPage();
+  await page.goto(`${baseURL}/demo`);
+  await expect(page).toHaveURL(`${baseURL}/ar/demo`);
+  await context.close();
   expect((await request.get('/nope')).status()).toBe(404);
-  expect((await request.get('/', { maxRedirects: 0, headers: { Cookie: 'locale=zz' } })).status()).toBe(200);
 });
 
 test('a page in another language offers the preferred one without redirecting', async ({ browser, baseURL }) => {

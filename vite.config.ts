@@ -3,16 +3,11 @@ import { reactRouter } from '@react-router/dev/vite';
 import tailwindcss from '@tailwindcss/vite';
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import { defineConfig } from 'vite';
+import { options as paraglide } from './packages/ui/paraglide.mjs';
 
 export default defineConfig({
   plugins: [
-    paraglideVitePlugin({
-      project: './packages/ui/project.inlang',
-      outdir: './packages/ui/src/paraglide',
-      emitTsDeclarations: true,
-      emitGitIgnore: false,
-      strategy: ['baseLocale'],
-    }),
+    paraglideVitePlugin(paraglide),
     cloudflare({ viteEnvironment: { name: 'ssr' } }),
     tailwindcss(),
     reactRouter(),

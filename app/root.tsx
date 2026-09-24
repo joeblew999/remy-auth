@@ -1,24 +1,19 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLocation, useMatches, isRouteErrorResponse } from 'react-router';
-import { isLocale, baseLocale, direction, type Locale } from '@joeblew999/remy-ui/locale';
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, isRouteErrorResponse } from 'react-router';
+import { getLocale, direction } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
-import { chosenLocale, matchLocale } from './locale';
+import { languageMiddleware, suggestedLocale } from '@joeblew999/remy-ui/react-router';
 import type { Route } from './+types/root';
 import './styles.css';
 
-/** The public origin for canonical links, and the language the visitor prefers (chosen on this device, else by Accept-Language). */
-export function loader({ request }: Route.LoaderArgs) {
-  const chosen = chosenLocale(request.headers.get('cookie'));
-  return { origin: new URL(request.url).origin, preferred: chosen ?? matchLocale(request.headers.get('accept-language')) };
-}
+/** Paraglide scopes the locale to each request and redirects un-localized document requests. */
+export const middleware: Route.MiddlewareFunction[] = [languageMiddleware];
 
-/** The locale of the rendered route: from its loader data, else the URL's first segment, else the base locale. */
-function useDocumentLocale(): Locale {
-  const fromLoader = useMatches().map(match => (match.loaderData as { locale?: string } | undefined)?.locale).reverse().find(isLocale);
-  const segment = useLocation().pathname.split('/')[1];
-  return fromLoader ?? (isLocale(segment) ? segment : baseLocale);
+/** The public origin for canonical links, and a language worth offering on this page, if any. */
+export function loader({ request }: Route.LoaderArgs) {
+  return { origin: new URL(request.url).origin, preferred: suggestedLocale(request) };
 }
 export function Layout({ children }: { children: React.ReactNode }) {
-  const locale = useDocumentLocale();
+  const locale = getLocale();
   return <html lang={locale} dir={direction(locale)}><head>
     <meta charSet="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" /><Meta /><Links />
@@ -26,7 +21,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 export default function App() { return <Outlet />; }
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  const locale = useDocumentLocale();
+  const locale = getLocale();
   const missing = isRouteErrorResponse(error) && error.status === 404;
   return <main className="error-page"><meta name="robots" content="noindex" />
     <title>{missing ? m.not_found({}, { locale }) : m.error_title({}, { locale })}</title>

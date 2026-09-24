@@ -1,9 +1,9 @@
 import { index, route, type RouteConfig } from '@react-router/dev/routes';
 import { publicPaths } from './paths';
 export default [
-  index('routes/choose.tsx'),
-  // A public path without a locale shows the language chooser; ':locale' would otherwise capture it.
-  ...publicPaths.filter(Boolean).map(path => route(path.slice(1), 'routes/unprefixed.tsx', { id: `choose${path}` })),
+  index('routes/redirect.ts'),
+  // Public paths without a locale redirect too; ':locale' would otherwise capture them.
+  ...publicPaths.filter(Boolean).map(path => route(path.slice(1), 'routes/redirect.ts', { id: `redirect${path}` })),
   route(':locale', 'routes/home.tsx'),
   route(':locale/demo', 'routes/demo.tsx'),
   route(':locale/formats', 'routes/formats.tsx'),

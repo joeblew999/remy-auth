@@ -232,10 +232,7 @@
   "cf_local_time_label": "Hora local allí",
   "location_unknown": "Desconocida en esta conexión",
   "location_note": "Cloudflare indica la ubicación de la red en cada solicitud; el servidor la usa para la hora local de arriba y no la guarda.",
-  "choose_title": "Elige tu idioma",
-  "choose_description": "Remy recuerda tu elección en este dispositivo. Puedes cambiarla cuando quieras desde el menú de idioma.",
   "continue_in": "Continuar en {language}",
-  "suggested_label": "Sugerido para ti",
   "language_hint": "Esta página también está disponible en {language}.",
   "keep_language": "Seguir en {language}"
 }

@@ -54,6 +54,7 @@ run = [
   { task = "mcp:verify" },
   { task = "project:doctor" },
   "node scripts/verify-tooling.mjs",
+  "node scripts/verify-boundary.mjs",
   { task = "project:typecheck" },
   { task = "project:test" },
   { task = "ui:verify" },
@@ -243,7 +244,7 @@ run = [
 [tasks."ui:generate"]
 description = "Compile the shared locale catalogs"
 dir = "{{config_root}}"
-run = "./node_modules/.bin/paraglide-js compile --project ./packages/ui/project.inlang --outdir ./packages/ui/src/paraglide --strategy baseLocale --emit-ts-declarations --no-emit-git-ignore"
+run = "node packages/ui/paraglide.mjs"
 
 [tasks."project:preview"]
 description = "Build and serve the deployment artifact locally at http://127.0.0.1:4173"

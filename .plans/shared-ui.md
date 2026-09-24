@@ -41,10 +41,21 @@ copies app code.
 
 | Export | Contents | Rule |
 | --- | --- | --- |
-| `@joeblew999/remy-ui/i18n` | `matchLocale(acceptLanguage)`, `chosenLocale(cookieHeader)`, `cookieName`, `rememberLocale(locale)` (no-op without `document`) | Pure functions; no framework, no globals at import time |
-| `@joeblew999/remy-ui/seo` | `alternates(origin, path, locale)` returning canonical and hreflang entries as plain objects; `x-default` is the chooser path | Data only; React Router `meta` maps it, a SPA writes `<link>`s itself |
-| `@joeblew999/remy-ui/language` | `LanguageSwitcher`, `LanguageHint`, `LanguageChooser` taking `locale`, `path`, `preferred`, `available` and callbacks as props, rendering plain anchors | No router import; a language change is a full navigation by design |
-| `@joeblew999/remy-ui/locale`, `locale-info`, `messages`, `button`, `styles.css` | As today | Unchanged |
+| `@joeblew999/remy-ui/locale` | Paraglide runtime re-exports: `getLocale`, `setLocale`, `localizeHref`, `localizeUrl`, `deLocalizeHref`, `cookieName`, `direction` (`getTextDirection`), plus `localeName` | No hand-written detection, cookie or direction code: Paraglide owns it |
+| `@joeblew999/remy-ui/seo` | `alternates(origin, path, locale)` from Paraglide's URL patterns; `x-default` is the entry URL | Pure; usable in requests, at build time and in the browser |
+| `@joeblew999/remy-ui/language` | `LanguageSwitcher`, `LanguageHint` on `localizeHref` and `setLocale`, styles in `styles.css` | Plain anchors; no chooser page (Paraglide redirects entry URLs) |
+| `@joeblew999/remy-ui/react-router` | `languageMiddleware` (Paraglide's middleware as root middleware), `suggestedLocale`, `redirectToLocalized`, `pageMeta` | React Router glue, deliberately not neutral; `react-router` optional peer |
+| `@joeblew999/remy-ui/client` | `useSuggestedLocale(page)`, `DeviceTime` | The browser half for prerendered apps |
+| `@joeblew999/remy-ui/cloudflare` | `placeFromCloudflare(cf)` | Request geolocation as plain data |
+| `@joeblew999/remy-ui/runtime` | The generated Paraglide runtime as plain JavaScript | For Node build configs |
+| `@joeblew999/remy-ui/locale-info`, `messages`, `button`, `styles.css` | As before | Unchanged |
+
+Owner principles 2026-09-24: what is shared must be the client and server sides working in
+unison, not components alone; nothing framework neutral, the package targets React Router
+and Paraglide directly; no reinvented wheels, so detection, cookie, URL localisation and
+redirects are Paraglide's. The same principles apply to the mise tasks, shared across
+projects later. The compiler options in `packages/ui/paraglide.mjs` are the one source for
+the Vite plugin and `ui:generate`.
 
 Stays app-local: route modules, the Cloudflare load context and geolocation (runtime
 specific), the formats page samples (demo content, not a contract), the Worker entry.
@@ -84,13 +95,13 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
 
 ## Work items, in order
 
-1. **Extract pure helpers.** Move locale matching, the cookie helpers and the
+1. **Extract pure helpers.** Done 2026-09-24 (0.2.0). Move locale matching, the cookie helpers and the
    alternates builder into `@joeblew999/remy-ui/i18n` and `@joeblew999/remy-ui/seo`; `app/` imports them.
    The existing suite must stay green unchanged.
-2. **Extract components.** Move the switcher, hint and chooser into
+2. **Extract components.** Done 2026-09-24 (0.2.0). Move the switcher, hint and chooser into
    `@joeblew999/remy-ui/language` with props instead of router hooks; the app's shell and chooser
    routes become thin wrappers. Same suite, unchanged.
-3. **Prove SSR for strangers.** Extend `scripts/verify-ui-package.mjs` to import every
+3. **Prove SSR for strangers.** Done 2026-09-24: `ui:verify` builds and runs an SSR bundle from the tarball. Extend `scripts/verify-ui-package.mjs` to import every
    export in Node without a DOM and `renderToString` a page that uses the button,
    messages and language components, in addition to the client build. Fail on any
    browser global touched at import time.
@@ -100,7 +111,7 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
 5. **Compare the two consumers.** One Playwright check renders the shared controls in
    both apps and compares their accessibility tree and computed styles, which is the
    GUI plan's "compare both apps' shared controls visually" without brittle pixels.
-6. **Guard the boundary.** A verification step fails if `app/` or the sample imports
+6. **Guard the boundary.** Done 2026-09-24 (`scripts/verify-boundary.mjs`). A verification step fails if `app/` or the sample imports
    anything from `packages/ui/src` or copies a helper that the package exports.
 
 ## Acceptance
@@ -136,6 +147,6 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
    need a `read:packages` token even to install.
 3. **Sample deployment.** Local only, or its own Worker beside this one. Deploying is
    an explicit owner request either way.
-4. **Component styling contract.** Whether `@joeblew999/remy-ui/language` ships its own CSS in
-   `styles.css` or relies on consumer Tailwind classes; today the app styles them in
-   `app/styles.css`.
+4. **Component styling contract.** Decided 2026-09-24: the package ships its components'
+   CSS in `styles.css`, which every consumer already imports; apps keep only layout
+   overrides such as narrow-screen padding.
