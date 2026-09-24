@@ -1,6 +1,6 @@
 # Skills namespace plan
 
-Status: question from the owner, 2026-09-24; answered below. No change is authorised yet.
+Status: done 2026-09-24: skills stay flat, as the installer lays them out.
 
 ## Question
 
@@ -41,3 +41,12 @@ Keep the flat, pure layout and make the grouping visible instead: a `skills:inde
 is current. Agents keep finding skills exactly as now; humans get the map.
 
 Owner decision: approve the generated index, or state a different grouping need.
+
+## Outcome
+
+Tried and reverted the same day. Claude Code only discovers skills one folder deep: in a
+scratch project it listed `.claude/skills/flat-probe/` but not
+`.claude/skills/somesource/nested-probe/` (Codex was untestable at its usage limit). The
+installer has no target-folder option, so source-first folders need symlinks back into a
+flat `.agents/skills`, which editors show as a second copy of every skill. That was more
+confusing than flat, so skills stay flat and `skills-lock.json` records each one's source.
