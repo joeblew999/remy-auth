@@ -6,6 +6,9 @@
   // Auth and D1 bindings are added in the next slice.
   "main": "./workers/app.ts",
   "compatibility_flags": ["nodejs_compat"],
+  // Release and environment for the shared log contract (@joeblew999/remy-ui/worker).
+  "version_metadata": { "binding": "CF_VERSION_METADATA" },
+  "vars": { "ENVIRONMENT": "production" },
   "assets": { "directory": "./build/client" },
   "observability": {
     "enabled": true,

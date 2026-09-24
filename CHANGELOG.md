@@ -4,6 +4,16 @@ All notable changes to the shared UI package `@joeblew999/remy-ui` are documente
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 package follows [Semantic Versioning](https://semver.org/).
 
+## [0.8.0] - 2026-09-24
+
+### Added
+- `@joeblew999/remy-ui/worker`: `withObservability(service, handler)` wraps any Worker's
+  fetch: `X-Request-ID` on every response, one structured log line per request following the
+  shared contract (`schemaVersion`, `service`, `environment`, `release` from the version
+  metadata binding, `event`, `level`, `requestId`, route template, `method`, `status`,
+  `outcome`, `reasonCode` on failures, never URLs or headers), and `/healthz` for liveness.
+- `observabilityChecks({ service, paths })` in the shared checks.
+
 ## [0.7.0] - 2026-09-24
 
 ### Added
@@ -91,6 +101,7 @@ package follows [Semantic Versioning](https://semver.org/).
 - `@joeblew999/remy-ui/locale-info`: a locale's calendars, numbering system, hour cycle
   and week conventions, plus `weekdayName`.
 
+[0.8.0]: https://github.com/joeblew999/remy-auth/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/joeblew999/remy-auth/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/joeblew999/remy-auth/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/joeblew999/remy-auth/compare/v0.4.0...v0.5.0

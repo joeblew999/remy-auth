@@ -9,3 +9,4 @@ export declare function demoChecks(): void;
 export declare function formatsChecks(options?: { extra?: (page: Page, locale: string) => Promise<void> }): void;
 export declare function lighthouseChecks(options: { pages: { path: string; device: 'mobile' | 'desktop' }[] }): void;
 export declare function performanceChecks(options: { pages: { path: string; device: 'mobile' | 'desktop' }[]; thresholds?: { score?: number; lcp?: number; cls?: number; tbt?: number } }): void;
+export declare function observabilityChecks(options: { service: string; paths: string[] }): void;
