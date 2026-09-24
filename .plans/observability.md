@@ -11,9 +11,7 @@ runs a thin Worker in front of its assets); `observabilityChecks` covers request
 liveness in level 1; the shared `cf:logs` and `cf:errors` tasks read both. A secret canary in
 a query string was verified absent from our log lines and from the persisted Workers Logs; live
 `wrangler tail` still shows Cloudflare's own request metadata with the full URL, including the
-query string, to anyone with account access, so never put secrets in URLs. Still open: readiness with
-dependency checks, saved views, alerts (destination is the owner's call), automated canary
-checks against spans and live tail, and sampling, retention and cost records.
+query string, to anyone with account access, so never put secrets in URLs. Decisions for the rest are below.
 
 ## Collection baseline
 
@@ -31,6 +29,20 @@ Cloudflare currently documents telemetry retention of 3 days on Free and 7 days
 on Paid. Verify plan limits at deployment. Retention is not an audit-retention
 policy. Long-term exports, if required, should remain in Cloudflare R2 with a
 defined lifecycle and access policy; select and verify the export mechanism then.
+
+## Decisions (2026-09-24, delegated by the owner)
+
+| Item | Decision | Why |
+| --- | --- | --- |
+| Alert delivery | Email to the Cloudflare account address | Every existing account alert already goes there |
+| Real-time issues | Native policy "Remy Workers: real-time issues" created | Cloudflare detects Worker issues itself; no code |
+| Rule delivery, firing and recovery | Policy "Remy Workers: alert rules firing and recovered" still to create (API reset twice; one click in Notifications) | Needed before any rule below can email |
+| 5xx and latency rules | Defined in Workers Observability once there is real traffic | The plan's thresholds need traffic to calibrate |
+| Availability alerts | Deferred until a production domain exists | Cloudflare Health Checks need a zone; workers.dev has none |
+| Capacity and cost | Covered by the existing $10 budget alerts | Already in place |
+| Readiness | Same as liveness until an app has dependencies; the auth slice adds its D1 check | Nothing to check yet |
+| Saved views | Created with the 5xx and latency rules | Empty views are no use |
+| Sampling and retention | 100% sampling kept; retention per Cloudflare plan | Traffic is tiny; revisit at production volume |
 
 ## Required signals
 
