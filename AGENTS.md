@@ -10,6 +10,9 @@ changing anything, and follow them over your own defaults. Do not copy their con
 3. [GUI runtime workflow](docs/gui.md) — one Worker, local and remote test targets.
 4. The plan in [`.plans/`](.plans/) covering your task, and its Executor/Reviewer roles.
 
+Start by running `mise run project:setup`: it installs dependencies and the pinned skills (not
+committed; `skills-lock.json` records them) and registers MCP, then verifies.
+
 Before reporting work as done, run `mise run project:verify` and report its real result.
 Task descriptions (`mise tasks ls`) say how long each task takes and what may run at the same
 time: run post-deploy checks in the background and keep working; state the expected duration

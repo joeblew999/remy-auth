@@ -23,3 +23,6 @@ node_modules/
 *.tsbuildinfo
 
 /remy-ui-*.tgz
+# Installed by mise run skills:install from skills-lock.json; not committed.
+.agents/skills/
+.claude/skills/

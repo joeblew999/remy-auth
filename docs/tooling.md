@@ -177,7 +177,8 @@ To reinstall from scratch, run `mise run skills:remove` then `mise run skills:in
 Skills live in `.agents/skills/`; `.claude/skills/` links to the same files.
 The installer records provenance in `skills-lock.json`. Re-running installation
 restores the selected skills from the pinned sources; update their source commits deliberately to adopt upstream
-changes. Keep the generated skill files, links and lockfile in version control.
+changes. Only `skills-lock.json` is committed; the installed skills and their Claude links are
+ignored and recreated by `project:setup` or `skills:install`.
 `mise run skills:list` shows what is installed; [the skills plan](../.plans/agent-skills.md)
 tracks dependencies without an official skill. Reload an existing agent session
 if newly installed skills are not yet visible.
