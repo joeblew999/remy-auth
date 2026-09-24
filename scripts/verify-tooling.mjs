@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile, realpath, lstat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import { parse } from 'smol-toml';
 import { unstable_readConfig } from 'wrangler';
 
 // Only repo-specific invariants: npm, mise and Wrangler own their validation.
@@ -35,9 +36,15 @@ try {
   assert.equal(observability.logs.invocation_logs, true, 'Invocation logs must be enabled');
   console.log('Wrangler parsed the configuration; observability requirements pass.');
 
-  const sources = process.argv.slice(2);
-  assert.equal(sources.length, 7, 'Run through mise run project:verify to supply all seven pinned skill sources');
+  // mise.toml's *_skills_source vars are the single list of skill sources.
+  const vars = parse(await readFile('mise.toml', 'utf8')).vars ?? {};
+  const sources = Object.entries(vars).filter(([key]) => key.endsWith('_skills_source')).map(([, url]) => url);
+  assert.ok(sources.length > 0, 'mise.toml defines no *_skills_source pins');
   const skills = (await readJSON('skills-lock.json')).skills;
+  const pinned = new Set(sources.map(url => new URL(url).pathname.split('/').slice(1, 3).join('/')));
+  for (const [name, skill] of Object.entries(skills)) {
+    assert.ok(pinned.has(skill.source), `${name}: installed from ${skill.source}, which mise.toml does not pin`);
+  }
   for (const sourceURL of sources) {
     const source = new URL(sourceURL);
     const [owner, repo, tree, ref] = source.pathname.slice(1).split('/');

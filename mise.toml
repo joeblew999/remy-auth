@@ -52,7 +52,7 @@ run = [
   "./node_modules/.bin/codex --version",
   { task = "mcp:verify" },
   { task = "project:doctor" },
-  "node scripts/verify-tooling.mjs {{vars.better_auth_skills_source}} {{vars.cloudflare_skills_source}} {{vars.chrome_skills_source}} {{vars.modern_web_skills_source}} {{vars.react_router_skills_source}} {{vars.shadcn_skills_source}} {{vars.playwright_skills_source}}",
+  "node scripts/verify-tooling.mjs",
   { task = "project:typecheck" },
   { task = "project:test" },
   { task = "ui:verify" },

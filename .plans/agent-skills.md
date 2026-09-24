@@ -1,21 +1,14 @@
 # Agent skill coverage
 
-Status: research task, 2026-09-24. Seven pinned official sources (31 skills) are
-installed through `mise run skills:install` and checked by `mise run project:verify`.
+Status: research task, 2026-09-24. Pinned official sources are installed through
+`mise run skills:install` and checked by `mise run project:verify`.
 This plan is for an agent that finds, vets and adds skills for the remaining gaps
 before the Better Auth + D1 slice starts. It does not authorise writing auth code.
 
 ## Current coverage
 
-| Dependency | Pinned version | Skill source |
-| --- | --- | --- |
-| Better Auth (`auth` CLI; library not yet added) | 1.7.5 | better-auth/skills (6) |
-| Wrangler, Workers, D1, Durable Objects, Cloudflare Vite plugin | 4.137.0 / 1.58.0 | cloudflare/skills (14) |
-| Chrome DevTools MCP/CLI | 1.10.1 | ChromeDevTools/chrome-devtools-mcp (7) |
-| Frontend platform guidance | 0.0.190 | GoogleChrome/modern-web-guidance (1) |
-| React Router framework mode | 8.4.0 | remix-run/react-router `react-router` |
-| shadcn / `packages/ui` components | 4.21.0 | shadcn-ui/ui `shadcn` |
-| Browser automation | — | microsoft/playwright-cli `playwright-cli` |
+Installed sources are the `*_skills_source` pins in `mise.toml`; `mise run skills:list`
+shows the installed skills and `package.json` the dependency versions to compare against.
 
 Probed on 2026-09-24 with `skills add <repo> --list --full-depth` and found **no
 skills**: opral/paraglide-js, opral/monorepo, tailwindlabs/tailwindcss,
@@ -68,18 +61,8 @@ For each gap, in order:
 
 ## Adding an accepted skill
 
-Follow the existing pattern exactly:
-
-1. Get the upstream commit: `git ls-remote https://github.com/<owner>/<repo> HEAD`.
-2. Add `<name>_skills_source = "https://github.com/<owner>/<repo>/tree/<sha>"` to
-   `[vars]` in `mise.toml`.
-3. Add an install line to `skills:install` with `--skill <name>` (never `'*'` for
-   repos that also ship contributor-only skills).
-4. Pass the new var to `scripts/verify-tooling.mjs` in `project:verify` and update
-   its expected source count.
-5. Update counts and the source list in `docs/tooling.md`.
-6. Run `mise run skills:remove`, `mise run skills:install`, `mise run project:verify`.
-   All must pass, and `git status` must show only the intended additions.
+Follow [the steps in the tooling reference](../docs/tooling.md#agent-skills). Afterwards
+`git status` must show only the intended additions.
 
 ## Deliverable
 

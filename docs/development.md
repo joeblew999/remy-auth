@@ -34,6 +34,19 @@ The sample is planned; its code and startup command do not exist yet.
   service's database. App data and auth provisioning are separate operations.
 - Failures remain visible. Never grant access because auth is unavailable.
 - Keep credentials out of code, plans, logs and commits.
+- Give each fact one home. Link to the owning document, config or generated source
+  instead of restating it; change the owner, then update links.
+- Tests and audits are acceptance gates. Never skip, exempt, loosen or delete a check,
+  including individual Lighthouse audits, to make a run pass. Fix the cause, or stop
+  and ask the owner.
+- Change generated code at its source: shadcn components and theme tokens through
+  shadcn, translations in `packages/ui/messages/`, and Wrangler/React Router output
+  by regenerating. Do not hand-edit or override generated output elsewhere.
+- Decisions that plans leave open, or fixes that conflict with a plan, belong to the
+  owner. Ask; do not choose. Deploying, provisioning and filing upstream issues
+  also wait for the owner's explicit request.
+- Do not add test-only routes, flags or bypasses to the app, and do not mock Better
+  Auth, D1 or the Workers runtime. Any test hook must be listed for owner review.
 
 Cloudflare storage is the chosen direction, with D1 as the planned identity and
 session database. Verify the required Better Auth plugins against the pinned D1
