@@ -15,7 +15,8 @@ clock and week conventions), `seo` (canonical and hreflang data from the URL pat
 `client` (`useSuggestedLocale`, `DeviceTime` for prerendered apps), `cloudflare`
 (`placeFromCloudflare`), `samples` (the fixed values the formats and demo pages render) and
 `checks` (shared Playwright checks: public pages, entry URLs, demo, formats and Lighthouse;
-`@playwright/test` is an optional peer), all under `@joeblew999/remy-ui/`.
+`@playwright/test` is an optional peer) and `playwright` (`playwrightConfig()`, the shared
+Playwright configuration), all under `@joeblew999/remy-ui/`.
 
 Language behaviour is Paraglide's: strategies `url`, `cookie`, `preferredLanguage`,
 `baseLocale` with every locale prefixed in the URL, configured once in `paraglide.mjs`.

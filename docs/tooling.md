@@ -64,7 +64,7 @@ CLI passthrough tasks accept upstream flags directly, such as
 
 | Namespace | Purpose |
 | --- | --- |
-| `project:*` | Setup, verification and tool diagnostics |
+| `project:*` | Setup, pipeline and verification (shared defaults from `tasks/react-router.toml`; `[env]` supplies the inputs) and tool diagnostics |
 | `packages:*` | Check and upgrade npm packages |
 | `skills:*` | Install, list and remove the pinned official skills |
 | `auth:*` | Better Auth CLI and diagnostics |

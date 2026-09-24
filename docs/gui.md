@@ -25,8 +25,8 @@ Development uses the same Worker source and Cloudflare runtime with hot reload.
 | --- | --- |
 | `project:dev` | Local Workers, hot reload, port 5173 |
 | `project:build` | Build and Wrangler deployment dry run; no upload |
-| `project:preview` | Build, then serve the production artifact locally on 4173 |
-| `project:test` | Build, then test that artifact locally |
+| `project:preview` | Build, then serve the production artifact on Cloudflare's local host at `PREVIEW_PORT` (4173) |
+| `project:test` | Build, then test that artifact on the same local host |
 | `cf:deploy` | Build, then upload to the authenticated Cloudflare account |
 | `project:test:remote` | Same tests against `TEST_BASE_URL`; no local server or deployment |
 | `project:report` / `project:report:remote` | Open the last local or remote run's HTML report, including Lighthouse reports |
@@ -41,6 +41,11 @@ The URL must be an origin, without a path or query. Current tests read public
 routes and manipulate only the browser counter. Authentication and storage tests
 will need isolated fixtures when those features exist. The remote test task can
 also target an already-running local preview to check the external-server path.
+
+The pipeline tasks are shared defaults from `tasks/react-router.toml`, driven by this
+project's `[env]` inputs (`PREVIEW_PORT`, `DEPLOY_ORIGIN`); this repository overrides only
+`project:typecheck` and `project:verify` because it owns the package. The Playwright
+configuration is the package's `playwrightConfig()`.
 
 There is currently one Worker configuration and no named staging environment.
 If environments are added, select them using `CLOUDFLARE_ENV` at build time,

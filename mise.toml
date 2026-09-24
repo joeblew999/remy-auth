@@ -6,16 +6,12 @@ node = "26.10.0"
 [task_config]
 includes = ["tasks"]
 
+[env]
+# Inputs the shared pipeline tasks read; this project overrides only project:typecheck and
+# project:verify below, because it owns the shared package.
+PREVIEW_PORT = "4173"
+DEPLOY_ORIGIN = "https://remy-auth.gedw99.workers.dev"
 
-[tasks."project:setup"]
-description = "Install dependencies and skills, register project MCP, then verify tooling"
-dir = "{{config_root}}"
-run = [
-  "npm ci",
-  { task = "skills:install" },
-  { task = "mcp:register" },
-  { task = "project:verify" },
-]
 
 [tasks."auth:cli"]
 description = "Run the pinned Better Auth CLI (pass --help for commands)"
@@ -38,7 +34,7 @@ run = [
 ]
 
 [tasks."project:verify"]
-description = "Verify tooling, GUI types, Worker build, browser tests and shared UI packaging"
+description = "Verify tooling, GUI types, Worker build, browser tests and shared UI packaging (overrides the shared default)"
 dir = "{{config_root}}"
 run = [
   "mise tasks validate",
@@ -71,19 +67,8 @@ run = [
   "./node_modules/.bin/modern-web-guidance --version",
 ]
 
-[tasks."project:dev"]
-description = "Run the local Cloudflare GUI proof at http://127.0.0.1:5173"
-dir = "{{config_root}}"
-raw = true
-run = "./node_modules/.bin/react-router dev"
-
-[tasks."project:build"]
-description = "Build the shared local/remote artifact and dry-run Cloudflare packaging"
-dir = "{{config_root}}"
-run = ["./node_modules/.bin/react-router build", "./node_modules/.bin/wrangler deploy --dry-run"]
-
 [tasks."project:typecheck"]
-description = "Generate types and check the GUI, shared package and Worker"
+description = "Compile the shared catalogs, then generate types and check the GUI, shared package and Worker (overrides the shared default)"
 dir = "{{config_root}}"
 run = [
   { task = "ui:generate" },
@@ -91,13 +76,6 @@ run = [
   "./node_modules/.bin/react-router typegen",
   "./node_modules/.bin/tsc",
 ]
-
-[tasks."project:test"]
-description = "Test the production artifact in local Workers"
-dir = "{{config_root}}"
-depends = ["project:build"]
-env = { TEST_TARGET = "local" }
-run = "./node_modules/.bin/playwright test"
 
 [tasks."ui:pack"]
 description = "Compile and pack the shared UI for another Vite/Tailwind consumer"
@@ -120,15 +98,3 @@ description = "Compile the shared locale catalogs"
 dir = "{{config_root}}"
 run = "node packages/ui/paraglide.mjs"
 
-[tasks."project:preview"]
-description = "Build and serve the deployment artifact locally at http://127.0.0.1:4173"
-dir = "{{config_root}}"
-depends = ["project:build"]
-raw = true
-run = "./node_modules/.bin/vite preview"
-
-[tasks."cf:deploy"]
-description = "Build, dry-run and deploy the Worker to the authenticated Cloudflare account"
-dir = "{{config_root}}"
-depends = ["project:build"]
-run = "./node_modules/.bin/wrangler deploy"

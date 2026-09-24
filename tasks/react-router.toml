@@ -1,0 +1,49 @@
+# Default pipeline for a React Router app on Cloudflare built on @joeblew999/remy-ui. The
+# including project declares its inputs in [env]: PREVIEW_PORT (local host port for preview
+# and tests) and DEPLOY_ORIGIN (the public origin baked into prerendered links at deploy).
+# A project overrides a task here by defining the same name in its own mise.toml.
+
+["project:setup"]
+description = "Install dependencies (GITHUB_TOKEN with read:packages for the shared UI), the shared skills and MCP registration, then verify"
+dir = "{{config_root}}"
+run = ["npm ci", { task = "skills:install" }, { task = "mcp:register" }, { task = "project:verify" }]
+
+["project:typecheck"]
+description = "Generate Worker and route types and check the app"
+dir = "{{config_root}}"
+run = ["./node_modules/.bin/wrangler types", "./node_modules/.bin/react-router typegen", "./node_modules/.bin/tsc"]
+
+["project:dev"]
+description = "Run the app with hot reload (port from vite.config.ts)"
+dir = "{{config_root}}"
+raw = true
+run = "./node_modules/.bin/react-router dev"
+
+["project:build"]
+description = "Build the deployable artifact and dry-run the Cloudflare deployment"
+dir = "{{config_root}}"
+run = ["./node_modules/.bin/react-router build", "./node_modules/.bin/wrangler deploy --dry-run"]
+
+["project:preview"]
+description = "Build, then serve the production artifact on Cloudflare's local host at PREVIEW_PORT"
+dir = "{{config_root}}"
+depends = ["project:build"]
+raw = true
+run = "./node_modules/.bin/wrangler dev --ip 127.0.0.1 --port \"${PREVIEW_PORT:-4173}\""
+
+["project:test"]
+description = "Build, then run the browser, HTTP and Lighthouse checks against the production artifact locally"
+dir = "{{config_root}}"
+depends = ["project:build"]
+env = { TEST_TARGET = "local" }
+run = "./node_modules/.bin/playwright test"
+
+["project:verify"]
+description = "Verify tasks, dependencies, MCP registration, types and every check"
+dir = "{{config_root}}"
+run = ["mise tasks validate", "npm ls --depth=0", { task = "mcp:verify" }, { task = "project:typecheck" }, { task = "project:test" }]
+
+["cf:deploy"]
+description = "Build with DEPLOY_ORIGIN as the public origin and upload to the authenticated Cloudflare account"
+dir = "{{config_root}}"
+run = ["PUBLIC_ORIGIN=\"$DEPLOY_ORIGIN\" ./node_modules/.bin/react-router build", "./node_modules/.bin/wrangler deploy"]

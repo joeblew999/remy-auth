@@ -4,6 +4,13 @@ All notable changes to the shared UI package `@joeblew999/remy-ui` are documente
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 package follows [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] - 2026-09-24
+
+### Added
+- `@joeblew999/remy-ui/playwright`: `playwrightConfig()`, the shared Playwright configuration
+  (local target on Cloudflare's local host at `PREVIEW_PORT`, remote target from
+  `TEST_BASE_URL`, per-target HTML reports), so a project's config is one call.
+
 ## [0.3.0] - 2026-09-24
 
 ### Added
@@ -48,6 +55,7 @@ package follows [Semantic Versioning](https://semver.org/).
 - `@joeblew999/remy-ui/locale-info`: a locale's calendars, numbering system, hour cycle
   and week conventions, plus `weekdayName`.
 
+[0.4.0]: https://github.com/joeblew999/remy-auth/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/joeblew999/remy-auth/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/joeblew999/remy-auth/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/joeblew999/remy-auth/releases/tag/v0.1.0
