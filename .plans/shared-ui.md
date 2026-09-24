@@ -53,8 +53,10 @@ copies app code.
 Owner principles 2026-09-24: what is shared must be the client and server sides working in
 unison, not components alone; nothing framework neutral, the package targets React Router
 and Paraglide directly; no reinvented wheels, so detection, cookie, URL localisation and
-redirects are Paraglide's. The same principles apply to the mise tasks: since 2026-09-24 the agent
-bootstrap is `tasks/` here, included by remy-auth-app by git reference pinned to a commit. The compiler options in `packages/ui/paraglide.mjs` are the one source for
+redirects are Paraglide's. The same principles apply to the mise tasks: since 2026-09-24 `tasks/` here holds the
+agent bootstrap, the agent launchers, the Playwright runners and the Cloudflare wrappers,
+included by remy-auth-app by git reference pinned to a commit; each project keeps only its
+own pipeline tasks and Node pin. The compiler options in `packages/ui/paraglide.mjs` are the one source for
 the Vite plugin and `ui:generate`.
 
 Stays app-local: route modules, the Cloudflare load context and geolocation (runtime
@@ -109,9 +111,11 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
    checks in prerendered client rendering on `@joeblew999/remy-ui@0.2.0`, with Paraglide's
    middleware at prerender time; its own gate passes (18 checks). This repository's
    verification stays self-contained.
-5. **Compare the two consumers.** One Playwright check renders the shared controls in
-   both apps and compares their accessibility tree and computed styles, which is the
-   GUI plan's "compare both apps' shared controls visually" without brittle pixels.
+5. **Compare the two consumers.** Done 2026-09-24 the stronger way: `@joeblew999/remy-ui/checks`
+   (0.3.0) holds the public-page, entry, demo, formats and Lighthouse checks as Playwright
+   factories, and both repositories run them, so the shared controls and language behaviour
+   are verified identically in server and client rendering. Each repository keeps only the
+   checks it owns.
 6. **Guard the boundary.** Done 2026-09-24 (`scripts/verify-boundary.mjs`). A verification step fails if `app/` or the sample imports
    anything from `packages/ui/src` or copies a helper that the package exports.
 
