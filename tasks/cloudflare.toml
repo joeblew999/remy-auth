@@ -1,0 +1,20 @@
+# Cloudflare CLI wrappers over the including project's pinned Wrangler. Deployment tasks stay
+# per project because they carry that project's build and public origin.
+
+["cf:cli"]
+description = "Run the pinned Cloudflare CLI (pass --help for commands)"
+raw_args = true
+dir = "{{config_root}}"
+run = "./node_modules/.bin/wrangler"
+
+["cf:logs"]
+description = "Stream deployed Worker logs as JSON (requires Cloudflare login and deployment)"
+raw_args = true
+dir = "{{config_root}}"
+run = "./node_modules/.bin/wrangler tail --format json"
+
+["cf:errors"]
+description = "Stream deployed Worker invocation failures (not all HTTP 4xx/5xx responses)"
+raw_args = true
+dir = "{{config_root}}"
+run = "./node_modules/.bin/wrangler tail --format json --status error"

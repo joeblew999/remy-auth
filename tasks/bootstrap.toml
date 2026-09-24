@@ -3,8 +3,8 @@
 # it by git reference pinned to a commit, for example
 #   [task_config]
 #   includes = ["git::https://github.com/joeblew999/remy-auth.git//tasks?ref=<commit>"]
-# Consumers provide the npm packages the tasks run: chrome-devtools-mcp, modern-web-guidance,
-# smol-toml (and @openai/codex for mcp:status). The *_skills_source vars below are the only
+# Consumers provide the npm packages the tasks in this directory run: chrome-devtools-mcp,
+# modern-web-guidance, smol-toml, @playwright/test, wrangler (and @openai/codex for the Codex tasks). The *_skills_source vars below are the only
 # list of skill sources; verification rejects skills installed from anything else.
 
 ["skills:install"]

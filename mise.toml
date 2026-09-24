@@ -1,8 +1,8 @@
 [tools]
 node = "26.10.0"
 
-# Shared agent bootstrap tasks (skills, MCP, browser, web guidance) live in tasks/ so other
-# projects can include the same directory by git reference; see tasks/bootstrap.toml.
+# Shared tasks (agent bootstrap, agent launchers, Playwright runners, Cloudflare wrappers) live
+# in tasks/ so other projects can include the same directory by git reference; see tasks/*.toml.
 [task_config]
 includes = ["tasks"]
 
@@ -59,12 +59,6 @@ raw_args = true
 dir = "{{config_root}}"
 run = "./node_modules/.bin/auth info"
 
-[tasks."cf:cli"]
-description = "Run the pinned Cloudflare CLI (pass --help for commands)"
-raw_args = true
-dir = "{{config_root}}"
-run = "./node_modules/.bin/wrangler"
-
 [tasks."project:doctor"]
 description = "Check installed CLI versions without contacting a Cloudflare account"
 dir = "{{config_root}}"
@@ -76,50 +70,6 @@ run = [
   "./node_modules/.bin/chrome-devtools-mcp --version",
   "./node_modules/.bin/modern-web-guidance --version",
 ]
-
-[tasks."cf:logs"]
-description = "Stream deployed Worker logs as JSON (requires Cloudflare login and deployment)"
-raw_args = true
-dir = "{{config_root}}"
-run = "./node_modules/.bin/wrangler tail --format json"
-
-[tasks."cf:errors"]
-description = "Stream deployed Worker invocation failures (not all HTTP 4xx/5xx responses)"
-raw_args = true
-dir = "{{config_root}}"
-run = "./node_modules/.bin/wrangler tail --format json --status error"
-
-[tasks."codex:start"]
-description = "Start Codex in this project with MCP registered"
-dir = "{{config_root}}"
-depends = ["mcp:register"]
-raw = true
-raw_args = true
-run = "./node_modules/.bin/codex"
-
-[tasks."codex:resume"]
-description = "Resume the latest Codex conversation with freshly loaded configuration"
-dir = "{{config_root}}"
-depends = ["mcp:register"]
-raw = true
-raw_args = true
-run = "./node_modules/.bin/codex resume --last"
-
-[tasks."claude:start"]
-description = "Start Claude Code in this project with MCP registered"
-dir = "{{config_root}}"
-depends = ["mcp:register"]
-raw = true
-raw_args = true
-run = "claude"
-
-[tasks."claude:resume"]
-description = "Resume the latest Claude conversation with freshly loaded configuration"
-dir = "{{config_root}}"
-depends = ["mcp:register"]
-raw = true
-raw_args = true
-run = "claude --continue"
 
 [tasks."project:dev"]
 description = "Run the local Cloudflare GUI proof at http://127.0.0.1:5173"
@@ -176,24 +126,6 @@ dir = "{{config_root}}"
 depends = ["project:build"]
 raw = true
 run = "./node_modules/.bin/vite preview"
-
-[tasks."project:test:remote"]
-description = "Run the same GUI checks against TEST_BASE_URL, without starting a local server"
-dir = "{{config_root}}"
-env = { TEST_TARGET = "remote" }
-run = "./node_modules/.bin/playwright test"
-
-[tasks."project:report"]
-description = "Open the HTML report from the last local project:test run"
-dir = "{{config_root}}"
-raw = true
-run = "./node_modules/.bin/playwright show-report playwright-report/local"
-
-[tasks."project:report:remote"]
-description = "Open the HTML report from the last project:test:remote run"
-dir = "{{config_root}}"
-raw = true
-run = "./node_modules/.bin/playwright show-report playwright-report/remote"
 
 [tasks."cf:deploy"]
 description = "Build, dry-run and deploy the Worker to the authenticated Cloudflare account"

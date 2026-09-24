@@ -4,6 +4,16 @@ All notable changes to the shared UI package `@joeblew999/remy-ui` are documente
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 package follows [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-09-24
+
+### Added
+- `@joeblew999/remy-ui/checks`: shared Playwright checks (`publicPageChecks`, `entryChecks`,
+  `demoChecks`, `formatsChecks`, `lighthouseChecks`, plus `collectErrors`, `endonym`,
+  `direction`, `localizedPath`) so every app built on the package runs the same
+  Google-facing checks; `@playwright/test` is an optional peer.
+- `@joeblew999/remy-ui/samples`: the fixed sample values the formats and demo pages render
+  and the checks expect.
+
 ## [0.2.0] - 2026-09-24
 
 ### Added
@@ -38,5 +48,6 @@ package follows [Semantic Versioning](https://semver.org/).
 - `@joeblew999/remy-ui/locale-info`: a locale's calendars, numbering system, hour cycle
   and week conventions, plus `weekdayName`.
 
+[0.3.0]: https://github.com/joeblew999/remy-auth/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/joeblew999/remy-auth/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/joeblew999/remy-auth/releases/tag/v0.1.0

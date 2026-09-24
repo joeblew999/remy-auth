@@ -6,7 +6,7 @@ import { m } from '@joeblew999/remy-ui/messages';
 import { Shell } from '../shell';
 import { requireLocale } from '../locale';
 import { pageMeta } from '../seo';
-import { samples } from '../formats';
+import { samples } from '@joeblew999/remy-ui/samples';
 import { cloudflareContext } from '../context';
 import type { Route } from './+types/formats';
 

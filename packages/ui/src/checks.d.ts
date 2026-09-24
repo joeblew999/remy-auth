@@ -1,0 +1,10 @@
+import type { Page } from '@playwright/test';
+export declare const endonym: (locale: string) => string;
+export declare const direction: (locale: string) => 'ltr' | 'rtl';
+export declare const localizedPath: (path: string, locale: string) => string;
+export declare function collectErrors(page: Page): string[];
+export declare function publicPageChecks(options: { paths: string[]; prerendered?: boolean }): void;
+export declare function entryChecks(options: { paths: string[]; mode: 'redirect' | 'static' }): void;
+export declare function demoChecks(): void;
+export declare function formatsChecks(options?: { extra?: (page: Page, locale: string) => Promise<void> }): void;
+export declare function lighthouseChecks(options: { pages: { path: string; device: 'mobile' | 'desktop' }[] }): void;

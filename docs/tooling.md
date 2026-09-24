@@ -68,11 +68,11 @@ CLI passthrough tasks accept upstream flags directly, such as
 | `packages:*` | Check and upgrade npm packages |
 | `skills:*` | Install, list and remove the pinned official skills |
 | `auth:*` | Better Auth CLI and diagnostics |
-| `cf:*` | Cloudflare CLI and live logs |
+| `cf:*` | Cloudflare CLI, live logs and deployment (CLI and logs are shared tasks) |
 | `browser:*` | Chrome DevTools CLI, session lifecycle and MCP server |
 | `web:*` | Modern web guidance search and retrieval |
 | `mcp:*` | Register, verify and inspect project MCP connections |
-| `codex:*` / `claude:*` | Start or resume an interactive agent session |
+| `codex:*` / `claude:*` | Start or resume an interactive agent session (shared tasks) |
 
 After `project:setup`, `packages:upgrade` uses the locally pinned `npm-check-updates` to move npm
 dependencies past existing version pins, saves exact versions, installs them and
