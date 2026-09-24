@@ -105,9 +105,10 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
    export in Node without a DOM and `renderToString` a page that uses the button,
    messages and language components, in addition to the client build. Fail on any
    browser global touched at import time.
-4. **Build the consumer.** In `remy-auth-app`, following its plan: the same pages
-   and checks in client rendering, consuming the published package. Record the package
-   version it consumes; this repository's verification stays self-contained.
+4. **Build the consumer.** Done 2026-09-24: `remy-auth-app` runs the same pages and
+   checks in prerendered client rendering on `@joeblew999/remy-ui@0.2.0`, with Paraglide's
+   middleware at prerender time; its own gate passes (18 checks). This repository's
+   verification stays self-contained.
 5. **Compare the two consumers.** One Playwright check renders the shared controls in
    both apps and compares their accessibility tree and computed styles, which is the
    GUI plan's "compare both apps' shared controls visually" without brittle pixels.
