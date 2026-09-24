@@ -64,6 +64,13 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
 
 - React Router framework mode with `ssr: false` (client rendering) so the route module
   conventions match this app while the rendering mode differs. Owner decision 1 below.
+- Every public page is prerendered at build time, decided 2026-09-24 in the
+  [remy-auth-app plan](https://github.com/joeblew999/remy-auth-app/blob/main/.plans/app.md):
+  the GUI plan accepts public pages only with their content and metadata in the initial
+  HTML, and Lighthouse executes JavaScript, so only the no-JavaScript checks prove that.
+  Build-time loaders see no request, so the chooser prerenders neutrally and enhances
+  in the browser, the hint is client-side, the canonical origin is a build variable,
+  and the Cloudflare location section is omitted there as the honest SSR-only feature.
 - Consumes `@remy/ui` as a published, versioned artifact, matching the GUI plan's rule
   that cross-repository consumers never use sibling filesystem paths.
 - Shows the shared button and theme, the switcher, hint and chooser, the catalogs in
@@ -108,8 +115,9 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
 ## Open decisions for the owner
 
 1. **Sample rendering mode.** Recommended: React Router framework mode with
-   `ssr: false`, so one router convention covers both modes and the contrast is explicit.
-   Alternative: plain Vite plus React without a router, which proves less.
+   `ssr: false` and a `prerender` list, so one router convention covers both modes and
+   the contrast is explicit. Alternative: plain Vite plus React without a router, which
+   proves less and cannot prerender.
 2. **Publication.** The package stays a private workspace until remy-sport or remy-data
    consume it. Where it is published (npm scope or GitHub Packages) and its first
    version are undecided.
