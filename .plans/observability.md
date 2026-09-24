@@ -31,7 +31,6 @@ defined lifecycle and access policy; select and verify the export mechanism then
 | Request tracing | Request spans and supported outbound spans, explicit business-operation spans where supported |
 | Release health | Correlate errors with deployment/version; verify monitoring after rollout and rollback |
 | Availability | Liveness, readiness with each app's own dependency checks, and scheduled synthetic checks of its critical pages |
-| Availability | Three consecutive one-minute readiness failures | Check Worker deployment, D1 and Cloudflare status |
 
 Use [Worker metrics](https://developers.cloudflare.com/workers/observability/metrics-and-analytics/)
 for platform signals. Custom outcomes need application instrumentation. Prefer structured
@@ -71,7 +70,6 @@ Initial proposed alert rules, to calibrate with real traffic:
 
 | Rule | Trigger | Response |
 | --- | --- | --- |
-| Availability | Liveness, readiness including a minimal D1 check, and scheduled synthetic auth checks with disposable identities |
 | Availability | Three consecutive one-minute readiness failures | Check the Worker deployment, its dependencies and Cloudflare status |
 | Server failures | >1% HTTP 5xx over 5 minutes, at least 100 requests | Inspect release, routes and dependency failures |
 | Latency | p95 >1 second over 10 minutes, at least 100 requests | Separate dependency time from Worker time |
