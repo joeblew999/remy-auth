@@ -94,14 +94,14 @@ currency and plurals follow the decisions recorded in
 [the GUI plan](../.plans/gui.md#dates-numbers-currency-and-direction).
 
 ```sh
-mise run ui:pack           # Produce joeblew999-remy-ui-0.0.0.tgz locally
-mise run ui:verify         # Install the tarball into a temporary consumer and build it
+mise run ui:pack           # Produce the package tarball locally
+mise run ui:components     # Regenerate the shadcn components from the registry
 ```
 
-The package currently exports TSX and CSS for Vite/Tailwind consumers. The package
-check installs the actual tarball outside the workspace, so hidden sibling imports
-and missing generated files fail. It uses the pinned Vite/Tailwind build tools and
-npm's cache/network for consumer dependencies. Nothing is published.
+The package exports TSX and CSS for Vite/Tailwind consumers. Its real consumer is
+[remy-auth-app](https://github.com/joeblew999/remy-auth-app), which installs the published
+package and runs the package's own checks in client rendering, while this app runs them
+in server rendering.
 
 ## Evidence and limits
 
@@ -117,8 +117,7 @@ in its accessibility, SEO, best-practices and agentic-browsing categories; the p
 CLI excludes Performance by design, so Google's pinned `lighthouse` package gates that
 category on `/en` (mobile and desktop) and `/en/formats`: a Performance score of at least
 0.9 and lab Core Web Vitals within Google's good thresholds (LCP 2.5 s, CLS 0.1, TBT 200 ms). The same suite runs locally and against a deployed URL.
-`project:verify` also type-checks, builds and dry-runs deployment packaging for the Worker
-and verifies the isolated package consumer with a client build and a server render. Chrome DevTools CLI is available for
+`project:verify` also type-checks, builds and dry-runs deployment packaging for the Worker. Chrome DevTools CLI is available for
 manual snapshots, interactions and screenshots.
 
 The Worker retains logs/traces configuration and emits redacted structured request

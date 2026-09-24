@@ -66,7 +66,7 @@ CLI passthrough tasks accept upstream flags directly, such as
 | --- | --- |
 | `project:*` | Setup, pipeline and verification (shared defaults from `tasks/project.toml`; `[env]` supplies the inputs) and tool diagnostics |
 | `packages:*` | Check and upgrade npm packages |
-| `ui:*` | Compile the shared catalogs, regenerate and verify the shadcn components, pack and verify the package |
+| `ui:*` | Compile the shared catalogs, regenerate the shadcn components, pack the package |
 | `skills:*` | Install, list and remove the pinned official skills |
 | `auth:*` | Better Auth CLI and diagnostics |
 | `cf:*` | Cloudflare CLI, live logs and deployment (CLI and logs are shared tasks) |
@@ -85,8 +85,8 @@ reported conflict before using `project:setup`; no automatic rollback discards y
 
 `project:setup` continues to reproduce the lockfile. Workspace dependencies are upgraded too; the local `@joeblew999/remy-ui` reference is excluded
 from registry upgrades. Node and skill-source pins in
-`mise.toml` are managed separately. The verification workflow includes GUI type checking, a Worker build, browser
-tests and an isolated shared-package consumer build. Auth runtime compatibility
+`mise.toml` are managed separately. The verification workflow includes GUI type checking, a Worker build and browser
+tests. Auth runtime compatibility
 will need its own tests when Better Auth is integrated.
 
 ### Verification
@@ -101,8 +101,7 @@ not upstream discovery or content-integrity hashes.
 The Wrangler configuration check uses its own reader. Verification then generates
 types, builds and dry-runs deployment packaging for the GUI/Worker, runs the
 Playwright and Lighthouse checks against the production artifact in local Workers using installed
-Chrome, and builds an isolated consumer of the packed UI package. No deployment
-is performed. See [the GUI proof](gui.md) for scope and commands.
+Chrome. No deployment is performed. See [the GUI proof](gui.md) for scope and commands.
 
 
 ## Start or reload your agent

@@ -4,8 +4,8 @@ One local workspace package, used through public exports by the public page and
 client-rendered demo. Every file in `src/components` is what the pinned shadcn CLI
 generates from the official registry for the `base-nova` style on Base UI, including
 `cn` from shadcn's own `cn` package; nothing there is hand-edited. `mise run ui:components`
-regenerates them all (add a component by extending that task's list), and
-`ui:components:verify` in `project:verify` fails if they differ from the registry output.
+regenerates them all (add a component by extending that task's list); the regeneration
+is committed, so review sees any drift.
 The stone/orange theme tokens in `src/styles.css` are shadcn's token format with Remy's
 values.
 

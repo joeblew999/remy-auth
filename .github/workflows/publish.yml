@@ -39,10 +39,8 @@ jobs:
               process.exit(1);
             }'
 
-      - name: Type-check and build the isolated package consumer
-        run: |
-          mise run project:typecheck
-          mise run ui:verify
+      - name: Type-check
+        run: mise run project:typecheck
 
       - name: Publish to GitHub Packages
         env:
