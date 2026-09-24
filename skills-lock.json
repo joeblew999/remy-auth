@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "skills": {
+    "a11y-debugging": {
+      "source": "ChromeDevTools/chrome-devtools-mcp",
+      "ref": "6a7e51fecaaefbea46b89e68892d42c175ee9163",
+      "sourceType": "github",
+      "skillPath": "skills/a11y-debugging/SKILL.md",
+      "computedHash": "53a79829783f4fee58520d04a2f42f137a5ce478dd0c9a4423fe50ecb4384987"
+    },
+    "agents-sdk": {
+      "source": "cloudflare/skills",
+      "ref": "6dc7604903127485e7e4cb26314651ebd4a4df19",
+      "sourceType": "github",
+      "skillPath": "skills/agents-sdk/SKILL.md",
+      "computedHash": "a9f1d15143627d772d318e8675f8a26999d372592d21a2134d25c2ed15ebc8e5"
+    },
+    "better-auth-best-practices": {
+      "source": "better-auth/skills",
+      "ref": "20c9e88a5c007461a703f1c213572b073196113e",
+      "sourceType": "github",
+      "skillPath": "better-auth/best-practices/SKILL.md",
+      "computedHash": "0c30be0e118c2b7a0c4c57bd9e63bf110c7e420a79ec6ce7997153f3b1e066ee"
+    },
+    "better-auth-security-best-practices": {
+      "source": "better-auth/skills",
+      "ref": "20c9e88a5c007461a703f1c213572b073196113e",
+      "sourceType": "github",
+      "skillPath": "security/SKILL.md",
+      "computedHash": "7a230edf3a24ce18162cb4379f59b6a19b8d24ca04db530609d0f15cede556dc"
+    },
+    "chrome-devtools": {
+      "source": "ChromeDevTools/chrome-devtools-mcp",
+      "ref": "6a7e51fecaaefbea46b89e68892d42c175ee9163",
+      "sourceType": "github",
+      "skillPath": "skills/chrome-devtools/SKILL.md",
+      "computedHash": "0cfc9bbc549078e463950f9a661e7904568d45e75b7247187c4ae07559dfe8d8"
+    },
+    "chrome-devtools-cli": {
+      "source": "ChromeDevTools/chrome-devtools-mcp",
+      "ref": "6a7e51fecaaefbea46b89e68892d42c175ee9163",
+      "sourceType": "github",
+      "skillPath": "skills/chrome-devtools-cli/SKILL.md",
+      "computedHash": "ad9ae1c4c4d0d6e5b7025bdd227f335b4747fbfbc4e5e0967db8458a88b20588"
+    },
+    "cloudflare": {
+      "source": "cloudflare/skills",
+      "ref": "6dc7604903127485e7e4cb26314651ebd4a4df19",
+      "sourceType": "github",
+      "skillPath": "skills/cloudflare/SKILL.md",
+      "computedHash": "163d684e39202f0073a15b84181d6bc1c825092d66947193daefd153102e2839"
+    },
+    "cloudflare-email-service": {
+      "source": "cloudflare/skills",
+      "ref": "6dc7604903127485e7e4cb26314651ebd4a4df19",
+      "sourceType": "github",
+      "skillPath": "skills/cloudflare-email-service/SKILL.md",
+      "computedHash": "d2905141e0883fd3dfd4318e582de04f5a49d6e1b8971b2c7dcf708baf79cb0e"
+    },
+    "cloudflare-one": {
+      "source": "cloudflare/skills",
+      "ref": "6dc7604903127485e7e4cb26314651ebd4a4df19",
+      "sourceType": "github",
+      "skillPath": "skills/cloudflare-one/SKILL.md",
+      "computedHash": "b59b87e0f533dce3bf32d7e46f6f14f1d01bab5158b59679c8f4644522df3447"
+    },
+    "cloudflare-one-migrations": {
+      "source": "cloudflare/skills",
+      "ref": "6dc7604903127485e7e4cb26314651ebd4a4df19",
+      "sourceType": "github",
+      "skillPath": "skills/cloudflare-one-migrations/SKILL.md",
+      "computedHash": "24b397f739cc639f8bff90255a8c237c14ab84753a04ccc934e9a7030dce9549"
+    },
+    "cookie-debugging": {
+      "source": "ChromeDevTools/chrome-devtools-mcp",
+      "ref": "6a7e51fecaaefbea46b89e68892d42c175ee9163",
+      "sourceType": "github",
+      "skillPath": "skills/cookie-debugging/SKILL.md",
+      "computedHash": "d7c181437c5578cb886b3106e183e000cabf80b4f45c9c54f18bb7b7b83373ff"
+    },
+    "create-auth": {
+      "source": "better-auth/skills",
+      "ref": "20c9e88a5c007461a703f1c213572b073196113e",
+      "sourceType": "github",
+      "skillPath": "better-auth/create-auth/SKILL.md",
+      "computedHash": "9a9b498bc144367b8e237233f89def63fb2bd69e8cafe173eaa58fe3a863cdc4"
+    },
+    "debug-optimize-lcp": {
+      "source": "ChromeDevTools/chrome-devtools-mcp",
+      "ref": "6a7e51fecaaefbea46b89e68892d42c175ee9163",
+      "sourceType": "github",
+      "skillPath": "skills/debug-optimize-lcp/SKILL.md",
+      "computedHash": "6d8a0d83f5375437d5b8375d85a4869141799ab5cb0286d2542441e5b0fbd2cc"
+    },
+    "durable-objects": {
+      "source": "cloudflare/skills",
+      "ref": "6dc7604903127485e7e4cb26314651ebd4a4df19",
+      "sourceType": "github",
+      "skillPath": "skills/durable-objects/SKILL.md",
+      "computedHash": "f4ce39a555f70e78c394cad5451a7d26c81874afb2fc2d16e20c909c5c3794ec"
+    },
+    "email-and-password-best-practices": {
+      "source": "better-auth/skills",
+      "ref": "20c9e88a5c007461a703f1c213572b073196113e",
+      "sourceType": "github",
+      "skillPath": "better-auth/emailAndPassword/SKILL.md",
+      "computedHash": "863886759f729081e265941f4f72c503835d55a1f34f6d63cebe6571159fff4a"
+    },
+    "memory-leak-debugging": {
+      "source": "ChromeDevTools/chrome-devtools-mcp",
+      "ref": "6a7e51fecaaefbea46b89e68892d42c175ee9163",
+      "sourceType": "github",
+      "skillPath": "skills/memory-leak-debugging/SKILL.md",
+      "computedHash": "a43e2037aecc34dcd87c97e26ac306e66b9249676802197bff1316ba84c1a8c7"
+    },
+    "modern-web-guidance": {
+      "source": "GoogleChrome/modern-web-guidance",
+      "ref": "22ab18dfb50a5d7e3bdcf471c14076a5534eae4e",
+      "sourceType": "github",
+      "skillPath": "skills/modern-web-guidance/SKILL.md",
+      "computedHash": "6ac08f66a37cadf7a60310aa0d03c8d4be0908d8050265de5f36db872a0c5214"
+    },
+    "nextjs-on-cloudflare": {
+      "source": "cloudflare/skills",
+      "ref": "6dc7604903127485e7e4cb26314651ebd4a4df19",
+      "sourceType": "github",
+      "skillPath": "skills/nextjs-on-cloudflare/SKILL.md",
+      "computedHash": "bd6ffed7a3d8ed0fcddedb370f64808750b1f5a7d9f4c70fd1ba6cb4c7933b12"
+    },
+    "organization-best-practices": {
+      "source": "better-auth/skills",
+      "ref": "20c9e88a5c007461a703f1c213572b073196113e",
+      "sourceType": "github",
+      "skillPath": "better-auth/organization/SKILL.md",
+      "computedHash": "8c85e683dabef4532f1e8b67bbed5c453d39e0e3d5aeedd69d16b568f6e6d44f"
+    },
+    "sandbox-migrate-to-next": {
+      "source": "cloudflare/skills",
+      "ref": "6dc7604903127485e7e4cb26314651ebd4a4df19",
+      "sourceType": "github",
+      "skillPath": "skills/sandbox-migrate-to-next/SKILL.md",
+      "computedHash": "8efafcedb1d674900751d683c416452a2320dea8a57d4257c3c61d1a3a127e12"
+    },
+    "sandbox-next": {
+      "source": "cloudflare/skills",
+      "ref": "6dc7604903127485e7e4cb26314651ebd4a4df19",
+      "sourceType": "github",
+      "skillPath": "skills/sandbox-next/SKILL.md",
+      "computedHash": "e399a6cadee9ce2a48731c796f1d89e7b7a84cbe45f1ecf9da5c235b41133b95"
+    },
+    "sandbox-stable": {
+      "source": "cloudflare/skills",
+      "ref": "6dc7604903127485e7e4cb26314651ebd4a4df19",
+      "sourceType": "github",
+      "skillPath": "skills/sandbox-stable/SKILL.md",
+      "computedHash": "1b77b09631eb6c01d4b2d5c97afd7e24fd588d6fa8c8dc421abeb7acdf26d2bb"
+    },
+    "troubleshooting": {
+      "source": "ChromeDevTools/chrome-devtools-mcp",
+      "ref": "6a7e51fecaaefbea46b89e68892d42c175ee9163",
+      "sourceType": "github",
+      "skillPath": "skills/troubleshooting/SKILL.md",
+      "computedHash": "1cc4cc451bdc71e1748888d8bed68da2dfc886141bee4738598c926b1d95c137"
+    },
+    "turnstile-spin": {
+      "source": "cloudflare/skills",
+      "ref": "6dc7604903127485e7e4cb26314651ebd4a4df19",
+      "sourceType": "github",
+      "skillPath": "skills/turnstile-spin/SKILL.md",
+      "computedHash": "62a5165f9a3a8c92561351529c3c4fd0d0777ad2f2c873494aed6113e024dba1"
+    },
+    "two-factor-authentication-best-practices": {
+      "source": "better-auth/skills",
+      "ref": "20c9e88a5c007461a703f1c213572b073196113e",
+      "sourceType": "github",
+      "skillPath": "better-auth/twoFactor/SKILL.md",
+      "computedHash": "5bc3051aef5060db013f0b3cbe812c40dbae5c22d6ba3ddde4b941158362a197"
+    },
+    "web-perf": {
+      "source": "cloudflare/skills",
+      "ref": "6dc7604903127485e7e4cb26314651ebd4a4df19",
+      "sourceType": "github",
+      "skillPath": "skills/web-perf/SKILL.md",
+      "computedHash": "72d0dd9706147e19bf3c1a36fdc02570f77685541d89d901a3a2f570824ba3cb"
+    },
+    "workers-best-practices": {
+      "source": "cloudflare/skills",
+      "ref": "6dc7604903127485e7e4cb26314651ebd4a4df19",
+      "sourceType": "github",
+      "skillPath": "skills/workers-best-practices/SKILL.md",
+      "computedHash": "61834fa098e16280aae54e584f5a16e047391790b1e1e4995c0e9a111d6d75c3"
+    },
+    "wrangler": {
+      "source": "cloudflare/skills",
+      "ref": "6dc7604903127485e7e4cb26314651ebd4a4df19",
+      "sourceType": "github",
+      "skillPath": "skills/wrangler/SKILL.md",
+      "computedHash": "f0147a3ee20d56a89c735d6c9efd45d61a21e2fc5f2ebb53ca1250006b79c8ad"
+    }
+  }
+}

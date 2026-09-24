@@ -1,0 +1,180 @@
+[tools]
+node = "26.10.0"
+
+[vars]
+# Review upstream changes before updating these pins.
+skills_cli_version = "1.7.0"
+better_auth_skills_source = "https://github.com/better-auth/skills/tree/20c9e88a5c007461a703f1c213572b073196113e"
+cloudflare_skills_source = "https://github.com/cloudflare/skills/tree/6dc7604903127485e7e4cb26314651ebd4a4df19"
+chrome_skills_source = "https://github.com/ChromeDevTools/chrome-devtools-mcp/tree/6a7e51fecaaefbea46b89e68892d42c175ee9163"
+
+modern_web_skills_source = "https://github.com/GoogleChrome/modern-web-guidance/tree/22ab18dfb50a5d7e3bdcf471c14076a5534eae4e"
+
+[tasks."project:setup"]
+description = "Install dependencies and skills, register project MCP, then verify tooling"
+dir = "{{config_root}}"
+run = [
+  "npm ci",
+  { task = "skills:install" },
+  { task = "mcp:register" },
+  { task = "project:verify" },
+]
+
+[tasks."auth:cli"]
+description = "Run the pinned Better Auth CLI (pass --help for commands)"
+raw_args = true
+dir = "{{config_root}}"
+run = "./node_modules/.bin/auth"
+
+[tasks."packages:check"]
+description = "Preview latest npm package versions without changing files"
+dir = "{{config_root}}"
+run = "./node_modules/.bin/ncu --target latest --dep prod,dev,optional --removeRange"
+
+[tasks."packages:upgrade"]
+description = "Upgrade npm packages beyond existing pins, including majors, then verify tooling"
+dir = "{{config_root}}"
+run = [
+  "./node_modules/.bin/ncu --target latest --dep prod,dev,optional --removeRange --upgrade",
+  "npm install --prefer-online --strict-peer-deps",
+  { task = "project:verify" },
+]
+
+[tasks."project:verify"]
+description = "Verify CLI tools, dependencies, Wrangler configuration and installed skill links"
+dir = "{{config_root}}"
+run = [
+  "mise tasks validate",
+  "npm ls --depth=0",
+  { task = "mcp:verify" },
+  { task = "project:doctor" },
+  "node scripts/verify-tooling.mjs {{vars.better_auth_skills_source}} {{vars.cloudflare_skills_source}} {{vars.chrome_skills_source}} {{vars.modern_web_skills_source}}",
+]
+
+[tasks."auth:info"]
+description = "Show Better Auth setup diagnostics"
+raw_args = true
+dir = "{{config_root}}"
+run = "./node_modules/.bin/auth info"
+
+[tasks."cf:cli"]
+description = "Run the pinned Cloudflare CLI (pass --help for commands)"
+raw_args = true
+dir = "{{config_root}}"
+run = "./node_modules/.bin/wrangler"
+
+[tasks."project:doctor"]
+description = "Check installed CLI versions without contacting a Cloudflare account"
+dir = "{{config_root}}"
+run = [
+  "node --version",
+  "npm --version",
+  "./node_modules/.bin/auth --version",
+  "./node_modules/.bin/wrangler --version",
+  "./node_modules/.bin/chrome-devtools-mcp --version",
+  "./node_modules/.bin/modern-web-guidance --version",
+]
+
+[tasks."web:guidance"]
+description = "Search and retrieve Google modern web implementation guidance"
+raw_args = true
+dir = "{{config_root}}"
+env = { DISABLE_TELEMETRY = "1" }
+run = "./node_modules/.bin/modern-web-guidance"
+
+[tasks."browser:cli"]
+description = "Run Google's Chrome DevTools CLI"
+raw_args = true
+dir = "{{config_root}}"
+run = "./node_modules/.bin/chrome-devtools"
+
+[tasks."browser:mcp"]
+description = "Run Google's Chrome DevTools MCP server over stdio"
+raw_args = true
+dir = "{{config_root}}"
+run = "./node_modules/.bin/chrome-devtools-mcp --isolated --headless --no-usage-statistics --no-performance-crux"
+
+[tasks."browser:start"]
+description = "Start an isolated Chrome session (pass --headless=false for a visible window)"
+raw_args = true
+dir = "{{config_root}}"
+run = "./node_modules/.bin/chrome-devtools start --isolated --headless --no-usage-statistics --no-performance-crux"
+
+[tasks."browser:stop"]
+description = "Stop the Chrome DevTools CLI session"
+dir = "{{config_root}}"
+run = "./node_modules/.bin/chrome-devtools stop"
+
+[tasks."cf:logs"]
+description = "Stream deployed Worker logs as JSON (requires Cloudflare login and deployment)"
+raw_args = true
+dir = "{{config_root}}"
+run = "./node_modules/.bin/wrangler tail --format json"
+
+[tasks."cf:errors"]
+description = "Stream deployed Worker invocation failures (not all HTTP 4xx/5xx responses)"
+raw_args = true
+dir = "{{config_root}}"
+run = "./node_modules/.bin/wrangler tail --format json --status error"
+
+[tasks."skills:install"]
+description = "Install official auth, Cloudflare, Chrome DevTools and modern web skills for Codex and Claude"
+dir = "{{config_root}}"
+run = [
+  "npx --yes skills@{{vars.skills_cli_version}} add {{vars.better_auth_skills_source}} --skill '*' --agent codex claude-code --full-depth --yes",
+  "npx --yes skills@{{vars.skills_cli_version}} add {{vars.cloudflare_skills_source}} --skill '*' --agent codex claude-code --full-depth --yes",
+  "npx --yes skills@{{vars.skills_cli_version}} add {{vars.chrome_skills_source}} --skill '*' --agent codex claude-code --full-depth --yes",
+  "npx --yes skills@{{vars.skills_cli_version}} add {{vars.modern_web_skills_source}} --skill modern-web-guidance --agent codex claude-code --full-depth --yes",
+]
+
+[tasks."skills:list"]
+description = "List project-local skills for Codex and Claude"
+dir = "{{config_root}}"
+run = "npx --yes skills@{{vars.skills_cli_version}} list --agent codex claude-code"
+
+[tasks."mcp:register"]
+description = "Register Chrome DevTools for this project in Codex and Claude"
+dir = "{{config_root}}"
+run = "node scripts/register-mcp.mjs"
+
+[tasks."mcp:verify"]
+description = "Verify project MCP registration matches this checkout and mise installation"
+dir = "{{config_root}}"
+run = "node scripts/register-mcp.mjs --check"
+
+[tasks."mcp:status"]
+description = "Show Chrome DevTools registration in both installed agent clients"
+dir = "{{config_root}}"
+run = ["codex mcp get chrome-devtools", "claude mcp get chrome-devtools"]
+
+[tasks."codex:start"]
+description = "Start Codex in this project with MCP registered"
+dir = "{{config_root}}"
+depends = ["mcp:register"]
+raw = true
+raw_args = true
+run = "codex"
+
+[tasks."codex:resume"]
+description = "Resume the latest Codex conversation with freshly loaded configuration"
+dir = "{{config_root}}"
+depends = ["mcp:register"]
+raw = true
+raw_args = true
+run = "codex resume --last"
+
+[tasks."claude:start"]
+description = "Start Claude Code in this project with MCP registered"
+dir = "{{config_root}}"
+depends = ["mcp:register"]
+raw = true
+raw_args = true
+run = "claude"
+
+[tasks."claude:resume"]
+description = "Resume the latest Claude conversation with freshly loaded configuration"
+dir = "{{config_root}}"
+depends = ["mcp:register"]
+raw = true
+raw_args = true
+run = "claude --continue"

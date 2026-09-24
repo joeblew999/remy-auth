@@ -1,0 +1,16 @@
+{
+  "name": "remy-auth",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=26.10.0 <27"
+  },
+  "devDependencies": {
+    "auth": "1.7.5",
+    "chrome-devtools-mcp": "1.10.1",
+    "modern-web-guidance": "0.0.190",
+    "npm-check-updates": "23.1.0",
+    "smol-toml": "1.9.0",
+    "wrangler": "4.137.0"
+  }
+}

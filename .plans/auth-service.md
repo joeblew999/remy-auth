@@ -31,6 +31,16 @@ Do not route every business operation through the auth Worker or put app data in
 
 ## Required decisions before implementation
 
+Storage direction: Cloudflare-native storage, starting with D1 for identity and
+sessions, and separate local D1 storage for the sample's business records. SCIM is
+deferred until a concrete directory-provisioning requirement exists. PostgreSQL
+and Hyperdrive are outside the current scope. Add KV, R2 or Durable Objects only
+for an identified requirement; the initial auth design does not depend on them.
+
+The [ecosystem inventory](better-auth-ecosystem.md) records researched CLI, plugin,
+GUI and agent-tooling options, with a proposed feature adoption matrix. Its
+recommendations still require pinned-version runtime verification.
+
 1. Select the first login method and organization/membership model. Define how the
    first owner is explicitly provisioned; no default production admin or password.
 2. Record a feature matrix: organization RBAC, passkeys, MFA, SSO, SCIM, API/service
@@ -39,7 +49,8 @@ Do not route every business operation through the auth Worker or put app data in
    goal is shared access to Better Auth capabilities, not enabling every plugin blindly.
 3. Pin compatible Better Auth, OAuth/MCP and adapter versions. Prove Worker runtime
    support for the selected combination, including required transactions and
-   discovery/client-metadata transport. D1 remains a candidate until those checks pass.
+   discovery/client-metadata transport. D1 is the planned store; acceptance requires
+   those checks to pass. Report incompatibilities rather than silently switching stores.
 4. Define local ports, issuer/origins, exact callback allowlists, token audiences
    and allowed grant types for the sample app and its second isolated test instance.
 5. Define token lifetime, maximum revocation delay, permission-check caching,
@@ -56,8 +67,8 @@ Do not silently drop a required feature or substitute a new store.
 - [Organization access control](https://better-auth.com/docs/plugins/organization#access-control)
   supports custom roles and permissions; RBAC and ReBAC are different requirements.
 - [SCIM requirements](https://better-auth.com/docs/plugins/scim#enable-database-transactions)
-  explicitly exclude D1's transaction capabilities. A requirement for SCIM blocks
-  an unqualified all-features-on-D1 design; resolve storage/scope first.
+  explicitly exclude D1's transaction capabilities. SCIM is deferred and does not
+  drive the current storage choice. Revisit compatibility if it becomes required.
 - [MCP integration](https://better-auth.com/docs/plugins/mcp) requires resource-server
   validation and enforcement. Issuing a token does not protect a separate app.
 - The [community Zanzibar plugin](https://github.com/DagNo1/better-auth-zanzibar-plugin)
@@ -111,7 +122,7 @@ permission decision. Exercise browser login, CLI/user delegation and the selecte
 machine-access flow against this consumer. The sample is the working reference
 for future apps, not a mock or an alternate auth implementation.
 
-Provide one root `mise dev` command that starts the local auth service and sample,
+Provide one root `mise run project:dev` command that starts the local auth service and sample,
 reports both URLs and local data targets, and stops both on exit. A fresh checkout
 must work without another repo, production credentials, external source data or
 pre-existing accounts. Provide an explicit local setup/provisioning command for app
@@ -140,6 +151,11 @@ not a seed/provisioning command. No bootstrap credentials committed in manifests
 
 ## Definition of done
 
+Cloudflare-native observability is required. Implement and verify the
+[observability plan](observability.md), including structured redacted logs,
+correlated traces, platform/D1 metrics, durable security audit records, dashboards
+and tested alert/recovery delivery. Collection configuration alone is not completion.
+
 - The sample and its isolated second instance complete login against the same issuer; successful authorized
   HTTP and MCP operations exercise the same application permission decision.
 - Missing, expired, forged, wrong-issuer and wrong-audience tokens produce 401
@@ -159,7 +175,9 @@ not a seed/provisioning command. No bootstrap credentials committed in manifests
 - Verification covers the actual Worker runtime, database migrations, browser flow,
   two-consumer integration and HTTP/MCP parity. No permissive mocks or any-error assertions.
 
-Define verification/development commands in mise.toml during implementation; none
+Define service verification/development commands in mise.toml during implementation.
+Developer CLI setup, version diagnostics, Better Auth/Wrangler passthrough and
+agent-skill installation/listing tasks exist; no service startup or migration tasks
 exist yet. Do not add duplicate shell frameworks or a fleet task library. CI must be
 manual-only unless the owner explicitly changes that policy. Executor reports exact
 checks, changed files and limitations; Reviewer accepts the completed milestone.
