@@ -13,11 +13,11 @@
   "iconLibrary": "lucide",
   "rtl": false,
   "aliases": {
-    "components": "@remy/ui/components",
+    "components": "@joeblew999/remy-ui/components",
     "utils": "cn",
-    "ui": "@remy/ui/components",
-    "lib": "@remy/ui/lib",
-    "hooks": "@remy/ui/hooks"
+    "ui": "@joeblew999/remy-ui/components",
+    "lib": "@joeblew999/remy-ui/lib",
+    "hooks": "@joeblew999/remy-ui/hooks"
   },
   "menuColor": "default",
   "menuAccent": "subtle",

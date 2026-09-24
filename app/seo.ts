@@ -1,4 +1,4 @@
-import { locales, baseLocale, isLocale, type Locale } from '@remy/ui/locale';
+import { locales, baseLocale, isLocale, type Locale } from '@joeblew999/remy-ui/locale';
 
 type Match = { loaderData?: unknown } | undefined;
 

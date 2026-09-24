@@ -1,7 +1,7 @@
 import { redirect } from 'react-router';
-import { buttonVariants } from '@remy/ui/button';
-import { locales, localeName, direction, baseLocale, type Locale } from '@remy/ui/locale';
-import { m } from '@remy/ui/messages';
+import { buttonVariants } from '@joeblew999/remy-ui/button';
+import { locales, localeName, direction, baseLocale, type Locale } from '@joeblew999/remy-ui/locale';
+import { m } from '@joeblew999/remy-ui/messages';
 import { chosenLocale, matchLocale } from './locale';
 import { rememberLocale } from './preference';
 

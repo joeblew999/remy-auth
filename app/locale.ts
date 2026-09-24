@@ -1,4 +1,4 @@
-import { isLocale, type Locale } from '@remy/ui/locale';
+import { isLocale, type Locale } from '@joeblew999/remy-ui/locale';
 
 export const cookieName = 'locale';
 

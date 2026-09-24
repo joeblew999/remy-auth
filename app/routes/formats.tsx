@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { locales, localeName, direction, type Locale } from '@remy/ui/locale';
-import { localeInfo, weekdayName } from '@remy/ui/locale-info';
-import { m } from '@remy/ui/messages';
+import { locales, localeName, direction, type Locale } from '@joeblew999/remy-ui/locale';
+import { localeInfo, weekdayName } from '@joeblew999/remy-ui/locale-info';
+import { m } from '@joeblew999/remy-ui/messages';
 import { Shell } from '../shell';
 import { requireLocale } from '../locale';
 import { pageMeta } from '../seo';

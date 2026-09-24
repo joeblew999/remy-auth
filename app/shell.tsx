@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useRouteLoaderData } from 'react-router';
-import { locales, localeName, direction, type Locale } from '@remy/ui/locale';
-import { m } from '@remy/ui/messages';
+import { locales, localeName, direction, type Locale } from '@joeblew999/remy-ui/locale';
+import { m } from '@joeblew999/remy-ui/messages';
 import { rememberLocale } from './preference';
 
 /** Offers the visitor's preferred language without redirecting; dismissing remembers the current one. */

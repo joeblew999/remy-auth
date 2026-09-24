@@ -9,10 +9,10 @@ proven half, shown off no. It extends the "Shared package" section of the
 
 ## Evidence today
 
-- `packages/ui` (`@remy/ui`, private, `0.0.0`, npm workspace) exports `button`,
+- `packages/ui` (`@joeblew999/remy-ui`, private, `0.0.0`, npm workspace) exports `button`,
   `styles.css`, `messages`, `locale` (locale list, `direction`, `localeName`) and
   `locale-info`. React is a peer dependency. Nothing imports React Router.
-- This app consumes only those exports (`grep "from '@remy/ui/"` in `app/` and
+- This app consumes only those exports (`grep "from '@joeblew999/remy-ui/"` in `app/` and
   `workers/`) and exercises them in both modes on every run: server rendering in
   workerd, hydration and client-rendered routes in Chrome.
 - `mise run ui:verify` (`scripts/verify-ui-package.mjs`) packs the real tarball,
@@ -41,10 +41,10 @@ copies app code.
 
 | Export | Contents | Rule |
 | --- | --- | --- |
-| `@remy/ui/i18n` | `matchLocale(acceptLanguage)`, `chosenLocale(cookieHeader)`, `cookieName`, `rememberLocale(locale)` (no-op without `document`) | Pure functions; no framework, no globals at import time |
-| `@remy/ui/seo` | `alternates(origin, path, locale)` returning canonical and hreflang entries as plain objects; `x-default` is the chooser path | Data only; React Router `meta` maps it, a SPA writes `<link>`s itself |
-| `@remy/ui/language` | `LanguageSwitcher`, `LanguageHint`, `LanguageChooser` taking `locale`, `path`, `preferred`, `available` and callbacks as props, rendering plain anchors | No router import; a language change is a full navigation by design |
-| `@remy/ui/locale`, `locale-info`, `messages`, `button`, `styles.css` | As today | Unchanged |
+| `@joeblew999/remy-ui/i18n` | `matchLocale(acceptLanguage)`, `chosenLocale(cookieHeader)`, `cookieName`, `rememberLocale(locale)` (no-op without `document`) | Pure functions; no framework, no globals at import time |
+| `@joeblew999/remy-ui/seo` | `alternates(origin, path, locale)` returning canonical and hreflang entries as plain objects; `x-default` is the chooser path | Data only; React Router `meta` maps it, a SPA writes `<link>`s itself |
+| `@joeblew999/remy-ui/language` | `LanguageSwitcher`, `LanguageHint`, `LanguageChooser` taking `locale`, `path`, `preferred`, `available` and callbacks as props, rendering plain anchors | No router import; a language change is a full navigation by design |
+| `@joeblew999/remy-ui/locale`, `locale-info`, `messages`, `button`, `styles.css` | As today | Unchanged |
 
 Stays app-local: route modules, the Cloudflare load context and geolocation (runtime
 specific), the formats page samples (demo content, not a contract), the Worker entry.
@@ -71,7 +71,7 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
   Build-time loaders see no request, so the chooser prerenders neutrally and enhances
   in the browser, the hint is client-side, the canonical origin is a build variable,
   and the Cloudflare location section is omitted there as the honest SSR-only feature.
-- Consumes `@remy/ui` as a published, versioned artifact, matching the GUI plan's rule
+- Consumes `@joeblew999/remy-ui` as a published, versioned artifact, matching the GUI plan's rule
   that cross-repository consumers never use sibling filesystem paths.
 - Shows the shared button and theme, the switcher, hint and chooser, the catalogs in
   English, Spanish and Arabic, and a subset of the formats rows, so a reader sees the
@@ -85,10 +85,10 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
 ## Work items, in order
 
 1. **Extract pure helpers.** Move locale matching, the cookie helpers and the
-   alternates builder into `@remy/ui/i18n` and `@remy/ui/seo`; `app/` imports them.
+   alternates builder into `@joeblew999/remy-ui/i18n` and `@joeblew999/remy-ui/seo`; `app/` imports them.
    The existing suite must stay green unchanged.
 2. **Extract components.** Move the switcher, hint and chooser into
-   `@remy/ui/language` with props instead of router hooks; the app's shell and chooser
+   `@joeblew999/remy-ui/language` with props instead of router hooks; the app's shell and chooser
    routes become thin wrappers. Same suite, unchanged.
 3. **Prove SSR for strangers.** Extend `scripts/verify-ui-package.mjs` to import every
    export in Node without a DOM and `renderToString` a page that uses the button,
@@ -107,7 +107,7 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
 
 - `mise run project:verify` is green here; `remy-auth-app`'s own verification is green against the published package version.
 - `mise run ui:verify` proves both a client bundle and a server render from the tarball.
-- Both consumers import only `@remy/ui/*`; the boundary guard passes.
+- Both consumers import only `@joeblew999/remy-ui/*`; the boundary guard passes.
 - The sample passes every Lighthouse audit and the same language behaviour checks
   (chooser, remembered choice, hint) as this app, adapted to client rendering.
 - Package README documents each export, what runs where, and the consumer's duties.
@@ -118,11 +118,18 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
    `ssr: false` and a `prerender` list, so one router convention covers both modes and
    the contrast is explicit. Alternative: plain Vite plus React without a router, which
    proves less and cannot prerender.
-2. **Publication.** The package stays a private workspace until remy-sport or remy-data
-   consume it. Where it is published (npm scope or GitHub Packages) and its first
-   version are undecided.
+2. **Publication.** Decided 2026-09-24: GitHub Packages, because both repositories
+   are private, the registry is npm-compatible, and a tag-triggered workflow publishes
+   with its own `GITHUB_TOKEN` (no npm account or long-lived token). GitHub requires the
+   scope to equal the owner, so the package was renamed `@joeblew999/remy-ui`. The
+   workflow (`.github/workflows/publish.yml`) follows the installed
+   `github-actions-hardening` skill: deny-all permissions, `packages: write` on the one
+   job, SHA-pinned actions with Dependabot updates, no secrets in scripts. Releases use
+   the installed `github-release` skill (SemVer from the public diff, Keep a Changelog,
+   release PR, then the tag). Still open: the first version number, and that consumers
+   need a `read:packages` token even to install.
 3. **Sample deployment.** Local only, or its own Worker beside this one. Deploying is
    an explicit owner request either way.
-4. **Component styling contract.** Whether `@remy/ui/language` ships its own CSS in
+4. **Component styling contract.** Whether `@joeblew999/remy-ui/language` ships its own CSS in
    `styles.css` or relies on consumer Tailwind classes; today the app styles them in
    `app/styles.css`.

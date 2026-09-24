@@ -45,8 +45,8 @@ resume command. Each launch refreshes MCP registration. Use `/mcp` inside the
 agent to check the connection; accept any project trust or server approval prompt.
 
 Skills supply guidance; MCP supplies callable tools. Setup includes Better Auth,
-Cloudflare, Chrome DevTools and Modern Web Guidance skills, plus the Chrome
-DevTools MCP server.
+Cloudflare, Chrome DevTools, Modern Web Guidance, React Router, shadcn, Playwright
+and GitHub release and Actions-hardening skills, plus the Chrome DevTools MCP server.
 
 ## Everyday commands
 

@@ -89,7 +89,7 @@ currency and plurals follow the decisions recorded in
 [the GUI plan](../.plans/gui.md#dates-numbers-currency-and-direction).
 
 ```sh
-mise run ui:pack           # Produce remy-ui-0.0.0.tgz locally
+mise run ui:pack           # Produce joeblew999-remy-ui-0.0.0.tgz locally
 mise run ui:verify         # Install the tarball into a temporary consumer and build it
 ```
 

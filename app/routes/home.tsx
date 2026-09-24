@@ -1,6 +1,6 @@
-import { buttonVariants } from '@remy/ui/button';
-import { m } from '@remy/ui/messages';
-import { locales } from '@remy/ui/locale';
+import { buttonVariants } from '@joeblew999/remy-ui/button';
+import { m } from '@joeblew999/remy-ui/messages';
+import { locales } from '@joeblew999/remy-ui/locale';
 import { Shell } from '../shell';
 import { requireLocale } from '../locale';
 import { pageMeta } from '../seo';

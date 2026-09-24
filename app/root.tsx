@@ -1,6 +1,6 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLocation, useMatches, isRouteErrorResponse } from 'react-router';
-import { isLocale, baseLocale, direction, type Locale } from '@remy/ui/locale';
-import { m } from '@remy/ui/messages';
+import { isLocale, baseLocale, direction, type Locale } from '@joeblew999/remy-ui/locale';
+import { m } from '@joeblew999/remy-ui/messages';
 import { chosenLocale, matchLocale } from './locale';
 import type { Route } from './+types/root';
 import './styles.css';

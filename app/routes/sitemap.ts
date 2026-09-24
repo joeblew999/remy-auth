@@ -1,4 +1,4 @@
-import { locales } from '@remy/ui/locale';
+import { locales } from '@joeblew999/remy-ui/locale';
 import { publicPaths } from '../paths';
 import type { Route } from './+types/sitemap';
 export function loader({ request }: Route.LoaderArgs) {

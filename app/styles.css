@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "@remy/ui/styles.css";
+@import "@joeblew999/remy-ui/styles.css";
 @source "../packages/ui/src";
 
 @theme { --font-sans: Inter, ui-sans-serif, system-ui, sans-serif; }

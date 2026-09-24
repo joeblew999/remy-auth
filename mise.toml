@@ -12,6 +12,7 @@ modern_web_skills_source = "https://github.com/GoogleChrome/modern-web-guidance/
 react_router_skills_source = "https://github.com/remix-run/react-router/tree/2d9827bc09bc562647553f8abf026823e3bfd9dd"
 shadcn_skills_source = "https://github.com/shadcn-ui/ui/tree/98a1fe67b439324ddc857f47fbdce056600a4329"
 playwright_skills_source = "https://github.com/microsoft/playwright-cli/tree/74354ecc7a43da16d91a9bc54fa8db8283a3fcf5"
+github_skills_source = "https://github.com/github/awesome-copilot/tree/1f5644080a525d26a2e24f61a7609fb9b261c21a"
 
 [tasks."project:setup"]
 description = "Install dependencies and skills, register project MCP, then verify tooling"
@@ -32,13 +33,13 @@ run = "./node_modules/.bin/auth"
 [tasks."packages:check"]
 description = "Preview latest npm package versions without changing files"
 dir = "{{config_root}}"
-run = "./node_modules/.bin/ncu --target latest --dep prod,dev,optional --workspaces --reject @remy/ui --removeRange"
+run = "./node_modules/.bin/ncu --target latest --dep prod,dev,optional --workspaces --reject @joeblew999/remy-ui --removeRange"
 
 [tasks."packages:upgrade"]
 description = "Upgrade npm packages beyond existing pins, including majors, then verify tooling"
 dir = "{{config_root}}"
 run = [
-  "./node_modules/.bin/ncu --target latest --dep prod,dev,optional --workspaces --reject @remy/ui --removeRange --upgrade",
+  "./node_modules/.bin/ncu --target latest --dep prod,dev,optional --workspaces --reject @joeblew999/remy-ui --removeRange --upgrade",
   "npm install --prefer-online --strict-peer-deps",
   { task = "project:verify" },
 ]
@@ -125,7 +126,7 @@ dir = "{{config_root}}"
 run = "./node_modules/.bin/wrangler tail --format json --status error"
 
 [tasks."skills:install"]
-description = "Install official auth, Cloudflare, Chrome DevTools, modern web, React Router, shadcn and Playwright skills for Codex and Claude"
+description = "Install official auth, Cloudflare, Chrome DevTools, modern web, React Router, shadcn, Playwright and GitHub release skills for Codex and Claude"
 dir = "{{config_root}}"
 run = [
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.better_auth_skills_source}} --skill '*' --agent codex claude-code --full-depth --yes",
@@ -135,6 +136,7 @@ run = [
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.react_router_skills_source}} --skill react-router --agent codex claude-code --full-depth --yes",
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.shadcn_skills_source}} --skill shadcn --agent codex claude-code --full-depth --yes",
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.playwright_skills_source}} --skill playwright-cli --agent codex claude-code --full-depth --yes",
+  "npx --yes skills@{{vars.skills_cli_version}} add {{vars.github_skills_source}} --skill github-release --skill github-actions-hardening --agent codex claude-code --full-depth --yes",
 ]
 
 [tasks."skills:list"]
@@ -227,7 +229,7 @@ description = "Compile and pack the shared UI for another Vite/Tailwind consumer
 dir = "{{config_root}}"
 run = [
   { task = "ui:generate" },
-  "npm pack --workspace @remy/ui",
+  "npm pack --workspace @joeblew999/remy-ui",
 ]
 
 [tasks."ui:verify"]

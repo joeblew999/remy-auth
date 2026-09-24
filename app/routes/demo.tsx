@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router';
-import { isLocale, baseLocale } from '@remy/ui/locale';
-import { Button } from '@remy/ui/button';
-import { m } from '@remy/ui/messages';
+import { isLocale, baseLocale } from '@joeblew999/remy-ui/locale';
+import { Button } from '@joeblew999/remy-ui/button';
+import { m } from '@joeblew999/remy-ui/messages';
 import { Shell } from '../shell';
 import { requireLocale } from '../locale';
 import { pageMeta } from '../seo';

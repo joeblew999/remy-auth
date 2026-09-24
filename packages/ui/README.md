@@ -5,8 +5,8 @@ client-rendered demo. The shadcn `base-nova` / Base UI button and stone/orange C
 variables come from the existing Remy Sport source. Keep upstream attribution and
 use shadcn tooling for component upgrades rather than independently editing copies.
 
-Exports: `@remy/ui/button`, `@remy/ui/styles.css`, `@remy/ui/messages`,
-`@remy/ui/locale` (locale list, `direction` and `localeName` from Intl). React is a peer dependency. Consumers need a TSX-aware build and
+Exports: `@joeblew999/remy-ui/button`, `@joeblew999/remy-ui/styles.css`, `@joeblew999/remy-ui/messages`,
+`@joeblew999/remy-ui/locale` (locale list, `direction` and `localeName` from Intl). React is a peer dependency. Consumers need a TSX-aware build and
 Tailwind 4 configured to scan the component source. Import the CSS after Tailwind.
 
 Paraglide compiles `messages/*.json` during type generation and the Vite build.
@@ -17,6 +17,21 @@ unreviewed. Formatting lives in the catalogs' `number`, `datetime`, `relativetim
 and `plural` declarations. The 27-locale inventory and release/provenance
 integration remain in the GUI plan.
 
-The package is private while its public contract is being proven. Its current
-source exports can be tested using `mise run ui:pack`; publishing and migration
-of existing Remy apps are later work.
+## Publishing
+
+The package is `@joeblew999/remy-ui` on GitHub Packages (the scope must equal the
+GitHub owner there), private like this repository. `.github/workflows/publish.yml`
+publishes it when a `vX.Y.Z` tag is pushed whose version equals `packages/ui/package.json`,
+using the workflow's own `GITHUB_TOKEN`; no long-lived npm token exists. Cut releases
+with the installed `github-release` skill (SemVer from the public diff, changelog,
+release PR, then the tag). `mise run ui:pack` still produces the tarball locally.
+
+Consumers add to their `.npmrc`:
+
+```
+@joeblew999:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
+and install with a token that has `read:packages`, even for reads. Nothing is
+published yet; the first release is the owner's call.

@@ -1,4 +1,4 @@
-import type { Locale } from '@remy/ui/locale';
+import type { Locale } from '@joeblew999/remy-ui/locale';
 import { cookieName } from './locale';
 
 /** Remember an explicit language choice on this device. Browser only; the server reads the cookie. */

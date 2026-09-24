@@ -15,6 +15,16 @@ skills**: opral/paraglide-js, opral/monorepo, tailwindlabs/tailwindcss,
 drizzle-team/drizzle-orm. microsoft/playwright holds only contributor skills
 (`playwright-dev`, `-devops`, `-test-results`, `-triage`), not test authoring.
 
+Probed on 2026-09-24 for package publishing and releases: `npm/cli` and
+`changesets/changesets` ship **no skills**; the skills.sh registry's npm-publish and
+changesets skills are all third-party (b-open-io, oakoss, mblode, vercel-labs
+`autoship`) and were not installed. GitHub's own `github/awesome-copilot` (MIT, 441
+skills) has no GitHub Packages skill but ships `github-release` (SemVer, changelog,
+release PR with `gh` and `git`) and `github-actions-hardening` (workflow review:
+permissions, SHA pinning, injection, OIDC). Both were read in full, contain no remote
+fetches, telemetry or global configuration, and were **added**, pinned to
+`1f5644080a525d26a2e24f61a7609fb9b261c21a` as `github_skills_source`.
+
 ## Gaps to resolve
 
 Ordered by risk to the next slice:
@@ -76,6 +86,7 @@ Update this file with a completed table, then open one commit per accepted sourc
 | Tailwind CSS 4 | | | |
 | Base UI | | | |
 | TypeScript 7 / Vite 8 / mise | | | |
+| Package publishing and releases | added | github/awesome-copilot @ 1f5644080a525d26a2e24f61a7609fb9b261c21a: `github-release`, `github-actions-hardening` | GitHub maintains GitHub Packages and Actions; npm and changesets ship no skills; registry alternatives are third-party |
 
 Escalate instead of guessing when a needed skill exists only from a third party,
 contradicts the pinned version, or would require upgrading a dependency.

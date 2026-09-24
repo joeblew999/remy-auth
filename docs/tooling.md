@@ -82,7 +82,7 @@ Peer conflicts fail visibly; the task does not use npm's `--force` or
 migration requirements. If installation fails after manifest updates, resolve the
 reported conflict before using `project:setup`; no automatic rollback discards your edits.
 
-`project:setup` continues to reproduce the lockfile. Workspace dependencies are upgraded too; the local `@remy/ui` reference is excluded
+`project:setup` continues to reproduce the lockfile. Workspace dependencies are upgraded too; the local `@joeblew999/remy-ui` reference is excluded
 from registry upgrades. Node and skill-source pins in
 `mise.toml` are managed separately. The verification workflow includes GUI type checking, a Worker build, browser
 tests and an isolated shared-package consumer build. Auth runtime compatibility
