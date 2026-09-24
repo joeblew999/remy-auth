@@ -243,4 +243,3 @@ explicit Worker name. `cf:errors` filters Worker
 invocation failures, not all HTTP error responses. Instrumentation, durable audit
 storage, dashboards and alert delivery are required implementation work; they are
 not live yet.
-
