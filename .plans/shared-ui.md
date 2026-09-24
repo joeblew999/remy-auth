@@ -32,7 +32,7 @@ proven half, shown off no. It extends the "Shared package" section of the
 ## Outcome
 
 One versioned package that a server-rendered app and a client-only app both consume
-through public exports, a runnable second consumer in this repository that shows the
+through public exports, a runnable second consumer (`remy-auth-app`) that shows the
 same controls, theme, catalogs and language behaviour in client rendering, and checks
 that fail when either mode breaks. No consumer reaches into `packages/ui/src` or
 copies app code.
@@ -64,14 +64,14 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
 
 - React Router framework mode with `ssr: false` (client rendering) so the route module
   conventions match this app while the rendering mode differs. Owner decision 1 below.
-- Consumes `@remy/ui` through the workspace for development, and the packed tarball in
-  the isolated check, matching the GUI plan's rule that cross-repository consumers
-  install versioned artifacts.
+- Consumes `@remy/ui` as a published, versioned artifact, matching the GUI plan's rule
+  that cross-repository consumers never use sibling filesystem paths.
 - Shows the shared button and theme, the switcher, hint and chooser, the catalogs in
   English, Spanish and Arabic, and a subset of the formats rows, so a reader sees the
   same controls and behaviour rendered client-side next to this app's server-side pages.
-- Owns its own mise tasks (`sample:dev`, `sample:build`, `sample:test`) and Playwright
-  checks, including Lighthouse with every audit gated, run from `project:verify`.
+- Owns its own mise tasks and Playwright checks, including Lighthouse with every audit
+  gated, run from its own `project:verify`; this repository's verification stays
+  self-contained.
 - Contains no authentication yet; it becomes the protected sample when the auth slice
   lands, as the [auth plan](auth-service.md) describes.
 
