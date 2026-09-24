@@ -1,7 +1,8 @@
 # Shared auth service
 
 Status: proposed, 2026-09-24. Repository scaffold only; implementation has not started.
-Owner: remy-auth. First consumer: joeblew999/remy-data. Reviewer defines acceptance;
+Owner: remy-auth. First consumer: in-repo sample; first external consumer: remy-data.
+Reviewer defines acceptance;
 Executor implements and verifies a bounded milestone. Do not begin a fleet rollout.
 
 ## Problem and outcome
@@ -39,8 +40,8 @@ Do not route every business operation through the auth Worker or put app data in
 3. Pin compatible Better Auth, OAuth/MCP and adapter versions. Prove Worker runtime
    support for the selected combination, including required transactions and
    discovery/client-metadata transport. D1 remains a candidate until those checks pass.
-4. Select the second small consumer (or isolated reference consumer) and local ports,
-   issuer/origins, exact callback allowlists, token audiences and allowed grant types.
+4. Define local ports, issuer/origins, exact callback allowlists, token audiences
+   and allowed grant types for the sample app and its second isolated test instance.
 5. Define token lifetime, maximum revocation delay, permission-check caching,
    signing-key rotation and the failure behaviour when auth is unavailable.
 6. Write concrete resource-sharing examples before deciding whether ReBAC is needed.
@@ -68,21 +69,24 @@ Do not silently drop a required feature or substitute a new store.
 Recheck primary documentation against the pinned versions during implementation.
 Do not treat these observations as a deployed-system compatibility test.
 
-## Milestone 1: service plus two consumers
+## Milestone 1: service plus runnable in-repo sample
 
 Executor-owned areas in this repo: tool/dependency pins, Worker entry, auth config,
 login/consent UI, identity schema and numbered migrations, registration interface,
-versioned consumer contract, local startup and integration tests. Exact file layout
+versioned consumer contract, `examples/sample-app/`, local startup and integration
+tests. Exact service file layout
 is chosen during scaffolding; keep configuration beside the behaviour it controls.
-Changes in remy-data follow its own integration plan and repository instructions.
+This milestone must run and pass entirely inside remy-auth without a Remy Data
+checkout. Remy Data integration follows afterward under its own plan and instructions.
 
 1. Implement the chosen minimal identity/organization feature set and issuer.
 2. Expose the standard discovery and key endpoints; support the selected HTTP/MCP
    authorization flows. Browser/CLI user delegation and machine credentials must
    remain distinct identities with explicit privileges.
-3. Register two consumers with distinct audiences and exact callback URLs. Protect
-   one read and one mutation in each through their own contracts. For Remy Data,
-   any change to public-read behaviour needs its separate migration decision.
+3. Build the sample described below. Register it and a second isolated instance
+   with distinct audiences and exact callback URLs. Protect one read and one
+   mutation through the sample contract; test that neither instance accepts the
+   other instance's tokens or accesses its data.
 4. Verify signature, issuer, intended audience, expiry and required scope at each
    protected boundary. Derive the acting user/organization from trusted identity
    and membership checks, not a caller-supplied user ID or organization header.
@@ -91,6 +95,34 @@ Changes in remy-data follow its own integration plan and repository instructions
 6. Provide local execution for service and consumers with isolated local storage.
    Starting dev applies local schema and starts processes; accounts/registrations
    are provisioned explicitly. It never provisions or queries production implicitly.
+
+## Sample app: `examples/sample-app/`
+
+Build a small real consumer with a browser UI and its own Worker and local business
+storage. Use organization-owned notes as the minimal domain: sign in, show the
+current user/organization, list notes, create a note, and sign out. A reader can list;
+an editor can create. Display access failures clearly. Keep the sample's registration,
+permission declarations, API contract, HTTP/MCP adapters and tests in its directory.
+It must use the public auth integration contract, never service internals or direct
+identity-database access. Its notes remain separate from auth storage.
+
+Expose the same list/create operations through HTTP and MCP with one server-side
+permission decision. Exercise browser login, CLI/user delegation and the selected
+machine-access flow against this consumer. The sample is the working reference
+for future apps, not a mock or an alternate auth implementation.
+
+Provide one root `mise dev` command that starts the local auth service and sample,
+reports both URLs and local data targets, and stops both on exit. A fresh checkout
+must work without another repo, production credentials, external source data or
+pre-existing accounts. Provide an explicit local setup/provisioning command for app
+registration and initial access; startup must not silently seed users or notes.
+Users create notes through the UI; automated tests provision disposable local data.
+
+Run a second isolated sample instance in integration tests with its own registration,
+audience and storage. This proves cross-app rejection and shared login without
+maintaining a second example codebase. Local browser and HTTP/MCP tests must cover
+allowed and denied operations, organization isolation, logout and revocation before
+Remy Data adoption starts.
 
 ## Provisioning and seed data
 
@@ -108,7 +140,7 @@ not a seed/provisioning command. No bootstrap credentials committed in manifests
 
 ## Definition of done
 
-- Both consumers complete login against the same issuer; successful authorized
+- The sample and its isolated second instance complete login against the same issuer; successful authorized
   HTTP and MCP operations exercise the same application permission decision.
 - Missing, expired, forged, wrong-issuer and wrong-audience tokens produce 401
   at protected APIs (and the applicable OAuth/MCP challenge), with zero writes.

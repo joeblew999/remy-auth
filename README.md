@@ -13,10 +13,15 @@ registrations and token issuance. Each application owns its business records,
 resource permissions and enforcement beside its API contract. HTTP and MCP entry
 points must enforce the same application permissions.
 
-[Remy Data](https://github.com/joeblew999/remy-data) is the first consumer. Its
+The first consumer will be a runnable sample app in `examples/sample-app/`, with
+a browser UI, protected HTTP API and MCP access. The auth service and sample run
+locally from this repository so the full flow can be verified before app migration.
+
+[Remy Data](https://github.com/joeblew999/remy-data) is the first external consumer. Its
 [integration plan](https://github.com/joeblew999/remy-data/blob/main/.plans/auth.md)
 tracks adoption there; that link becomes available once the local plan is pushed.
-The first service milestone must also demonstrate a second independent consumer.
+Tests run a second isolated instance of the sample to verify application isolation.
+The sample is planned; its code and startup command do not exist yet.
 
 ## Development principles
 
