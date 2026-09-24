@@ -92,8 +92,9 @@ run = "./node_modules/.bin/shadcn add button card input label badge alert field 
 description = "Run every check locally, then publish the shared UI to GitHub Packages, tag, push and create the GitHub release"
 dir = "{{config_root}}"
 depends = ["project:verify"]
-shell = "bash -euo pipefail"
+shell = "bash -c"
 run = '''
+set -euo pipefail
 version=$(node -p "require('./packages/ui/package.json').version")
 [ "$(git branch --show-current)" = main ] || { echo "Release from main."; exit 1; }
 [ -z "$(git status --porcelain)" ] || { echo "Commit everything before releasing."; exit 1; }
