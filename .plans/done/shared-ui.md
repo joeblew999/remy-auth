@@ -1,11 +1,11 @@
 # Shared UI for server- and client-rendered consumers
 
-Status: implemented 2026-09-24, awaiting the owner's acceptance to move to `.plans/done/`. Owner: remy-auth. The Reviewer accepts against the checks
+Status: done; accepted by the owner 2026-09-24. Owner: remy-auth. The Reviewer accepts against the checks
 below; the Executor implements the work items in order and stops at the open decisions.
 This plan answers one question: is the framework code designed to be shared by other
 projects for both CSR and SSR, and does a demo show that off? Today: designed yes,
 proven half, shown off no. It extends the "Shared package" section of the
-[GUI plan](gui.md); the [development principles](../docs/development.md) apply.
+[GUI plan](../gui.md); the [development principles](../../docs/development.md) apply.
 
 ## Evidence today
 
@@ -97,7 +97,7 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
   gated, run from its own `project:verify`; this repository's verification stays
   self-contained.
 - Contains no authentication yet; it becomes the protected sample when the auth slice
-  lands, as the [auth plan](auth-service.md) describes.
+  lands, as the [auth plan](../auth-service.md) describes.
 
 ## Work items, in order
 
