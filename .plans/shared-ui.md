@@ -53,8 +53,8 @@ copies app code.
 Owner principles 2026-09-24: what is shared must be the client and server sides working in
 unison, not components alone; nothing framework neutral, the package targets React Router
 and Paraglide directly; no reinvented wheels, so detection, cookie, URL localisation and
-redirects are Paraglide's. The same principles apply to the mise tasks, shared across
-projects later. The compiler options in `packages/ui/paraglide.mjs` are the one source for
+redirects are Paraglide's. The same principles apply to the mise tasks: since 2026-09-24 the agent
+bootstrap is `tasks/` here, included by remy-auth-app by git reference pinned to a commit. The compiler options in `packages/ui/paraglide.mjs` are the one source for
 the Vite plugin and `ui:generate`.
 
 Stays app-local: route modules, the Cloudflare load context and geolocation (runtime
