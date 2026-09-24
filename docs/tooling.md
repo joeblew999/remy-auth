@@ -164,6 +164,8 @@ mise run skills:install
 mise run skills:list
 ```
 
+To reinstall from scratch, run `mise run skills:remove` then `mise run skills:install`.
+
 [mise.toml](../mise.toml) pins Node, the skills CLI and all four upstream skill commits.
 Skills live in `.agents/skills/`; `.claude/skills/` links to the same files.
 The installer records provenance in `skills-lock.json`. Re-running installation

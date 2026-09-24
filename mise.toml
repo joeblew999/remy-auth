@@ -136,6 +136,11 @@ description = "List project-local skills for Codex and Claude"
 dir = "{{config_root}}"
 run = "npx --yes skills@{{vars.skills_cli_version}} list --agent codex claude-code"
 
+[tasks."skills:remove"]
+description = "Remove all project-local skills for Codex and Claude (restore with mise run skills:install)"
+dir = "{{config_root}}"
+run = "npx --yes skills@{{vars.skills_cli_version}} remove --all"
+
 [tasks."mcp:register"]
 description = "Register Chrome DevTools for this project in Codex and Claude"
 dir = "{{config_root}}"
