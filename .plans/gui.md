@@ -90,8 +90,8 @@ filesystem paths. No changes to remy-sport are included in this planning step.
 ## Internationalisation
 
 Support Remy's full configured locale inventory without hardcoded EN/ES unions.
-English and Spanish are the initial end-to-end verification pair, not a permanent
-two-language product restriction. Carry locale tags, endonyms, direction, release
+English, Spanish and Arabic are the verification set, not a permanent product
+restriction. Carry locale tags, endonyms, direction, release
 status and translation provenance through a single agreed source of truth when
 extracting the shared package. Do not claim every configured language is reviewed.
 
@@ -107,66 +107,31 @@ Set document `lang` and `dir` in the initial HTML and preserve them on navigatio
 
 ### Dates, numbers, currency and direction
 
-Status: researched 2026-09-24; decisions below are open. Nothing in the app formats a
-date, number or currency yet. Read the sources, not this summary, before implementing.
+Status: decided and implemented 2026-09-24 on `/:locale/formats`, verified by
+`tests/gui.spec.ts` and Lighthouse. The owner delegated these decisions to the agent
+acting as Reviewer. Change a decision here first, then the code.
 
-What the tools and upstream guidance provide:
+Sources: [Paraglide formatting](https://paraglidejs.com/formatting) and
+[variants](https://paraglidejs.com/variants), whose `plural`, `number`, `datetime`
+and `relativetime` declaration formatters the pinned compiler supports; Google's
+guidance via `mise run web:guidance -- retrieve <id>` for Temporal
+(`capture-location-agnostic-data`, `coordinate-global-events`) and logical CSS;
+Lighthouse, whose `lang`, `hreflang` and charset audits cannot verify formatting.
 
-- **Paraglide** (no official agent skill exists) formats values inside messages with
-  declaration formatters backed by Intl: `plural`, `number` (including currency),
-  `datetime` and `relativetime`. See [formatting](https://paraglidejs.com/formatting)
-  and [variants](https://paraglidejs.com/variants). This keeps per-locale format
-  rules in `packages/ui/messages/` with the translations.
-- **Google Modern Web Guidance** (`mise run web:guidance -- retrieve <id>`) covers
-  dates and time with Temporal: `capture-location-agnostic-data`,
-  `coordinate-global-events`, `support-global-calendar-systems`,
-  `format-human-readable-durations`, `calculate-event-differentials`,
-  `manage-recurring-intervals`, `model-partial-time-concepts`. Its CSS guide covers
-  logical properties for RTL. It has no currency or number-formatting guide.
-  Its Temporal fallback imports a polyfill from `esm.sh`; that conflicts with this
-  repo's pinned-dependency rule and would need a pinned npm package instead.
-- **shadcn** only offers an `--rtl` init option; `packages/ui/components.json` has
-  `"rtl": false`. Nothing on dates, numbers or locales.
-- **Lighthouse** (run by `tests/lighthouse.spec.ts`) checks `lang`, `hreflang` and
-  charset validity only. It cannot verify formatting correctness.
+| Decision | Choice and reasoning |
+| --- | --- |
+| 1. Locale metadata | `packages/ui/project.inlang/settings.json` is the only locale list; Paraglide's runtime exports it. Endonyms come from `Intl.DisplayNames` and direction from the locale's likely script through `Intl.Locale`, both in `@remy/ui/locale`, so no language is listed twice. `app/root.tsx` sets `dir` from it and the switcher shows the endonyms. Release status and provenance stay documented per catalog until a second consumer needs machine-readable metadata. |
+| 2. Date and time model | Instants are `Date` values serialised as ISO 8601 UTC. Calendar dates are `YYYY-MM-DD` text, formatted with an explicit UTC zone so they never shift. Temporal is not adopted: it is not Baseline widely available and Google's fallback is an unpinned `esm.sh` polyfill. Revisit once a pinned package and Workers support are verified. |
+| 3. Storage in D1 | ISO 8601 UTC text for instants and `YYYY-MM-DD` text for calendar dates: sortable, readable in queries, and the shape the Better Auth adapter writes for SQLite; verify against the pinned adapter when the auth tables are created. |
+| 4. Display time zone | Server rendering formats in UTC and the format labels the zone (`timeStyle=long`). `request.cf.timezone` is not used: it is a network location, not the viewer's preference, and would make cached HTML vary. Viewer-zone rendering becomes a client-side, opt-in step once a stored user or organisation preference exists. |
+| 5. Currency | Money stays application-owned. The shared catalog provides the formatter (`number` with `style=currency`) and the page shows a sample amount. Apps store integer minor units with an ISO 4217 code and pass the major-unit value to the formatter; rounding follows Intl's per-currency fraction digits. |
+| 6. Calendars and digits | Gregorian only, with each locale's default numbering system as Intl provides it and no `-u-nu-` override. Non-Gregorian calendars wait for a configured locale that needs one. |
+| 7. RTL | Arabic (`ar`) joins the verification set; its catalog is agent-authored and unreviewed. `dir` follows the locale, `app/styles.css` uses logical properties, and directional glyphs are aria-hidden CSS content that flips under `[dir="rtl"]`. shadcn stays `"rtl": false` because no component carries directional utilities yet; switch it and regenerate through the shadcn CLI when one does. |
+| 9. Beyond dates, numbers and currency | The root URL negotiates the locale from `Accept-Language` with `Vary`, and every localized URL stays explicit. The formats page also shows compact numbers, units, currencies with different minor units, ordinals, value variants, interpolation, locale-aware sorting, region and currency names and date ranges; the demo has a localized form with validation and a plural confirmation; the sitemap carries `hreflang` alternates. Segmenter and DurationFormat wait for Baseline widely available. |
+| 8. Verification | Playwright, with Node's Intl as the oracle, checks per locale: `dir`, endonyms, formatted instant, calendar date, relative time, decimal, percent, currency, language list and every plural category the sample counts produce; each catalog must define those categories; concurrent SSR keeps language and direction; hydration logs no errors; RTL mirrors the header and every page fits 375px. Lighthouse audits `/ar` and `/en/formats` as well as the earlier pages. |
 
-Current gaps against this section:
-
-- `app/root.tsx` hardcodes `dir="ltr"`.
-- `app/shell.tsx` hardcodes endonyms separately from the locale list;
-  `Intl.DisplayNames` or the agreed locale source could own them.
-- No tests cover formatted values, RTL layout or long strings.
-
-Open decisions, delegated by the owner to the next agent acting as Reviewer. Record
-each decision, its reasoning and primary source here; escalate only where a decision
-conflicts with another plan or needs a product fact the repo does not contain:
-
-1. **Locale metadata source**: where tags, endonyms, direction and release status live
-   (inlang `settings.json`, derived from Intl, or a shared module), and how `dir` and
-   the language switcher read it.
-2. **Date and time model**: which values are instants, zoned date-times or plain
-   calendar dates; whether to adopt Temporal now, and its runtime support in browsers
-   and the Workers runtime (unverified) and fallback package if needed.
-3. **Stored representation in D1**, which has no date type: format for instants
-   (for example ISO 8601 UTC text or epoch integers) and for plain dates. Session and
-   membership expiry are the first users, so decide before auth tables exist.
-4. **Display time zone**: server rendering cannot know the viewer's zone. Choose
-   among a stored user or organisation preference, client-only rendering of times,
-   or UTC with labelling, and how `request.cf.timezone` may be used, if at all.
-5. **Currency**: whether money is in scope for remy-auth at all (billing is
-   application-owned per the [ecosystem plan](better-auth-ecosystem.md)); if it is,
-   who owns the currency choice, storage in minor units, and rounding rules.
-   Formatting then uses Paraglide `number` with `style: currency`.
-6. **Calendars and numbering systems**: whether non-Gregorian calendars or native
-   digits are required for any configured locale, or Gregorian/Latin only.
-7. **RTL enablement**: whether to switch shadcn to RTL mode, adopt logical CSS
-   properties in `app/styles.css`, and add an RTL locale to the verification pair.
-8. **Verification**: which of the above get Playwright checks (formatted output per
-   locale, `dir` per locale, RTL layout, long strings), since Lighthouse cannot.
-
-Constraints on any decision: formatting stays in Paraglide messages or native Intl,
-not a second i18n library; no unpinned remote imports; no hardcoded locale unions;
-follow [development principles](../docs/development.md).
+Known limits: agent-authored translations until reviewed; no calendar or
+numbering-system switch; no viewer time zone; no shadcn RTL utilities.
 
 ## SEO acceptance
 
@@ -184,6 +149,13 @@ follow [development principles](../docs/development.md).
   Personalized responses must not be placed in a shared public cache.
 - Check accessibility, mobile layout, Lighthouse and Core Web Vitals. After a public
   deployment, validate indexing through Search Console and measure field performance.
+- The pinned Chrome DevTools CLI runs Lighthouse's accessibility, SEO, best-practices
+  and agentic-browsing categories only; upstream excludes Performance by design and
+  offers `performance_start_trace` instead. Core Web Vitals therefore need a separate
+  check (Lighthouse's own package, the trace tool, or PageSpeed Insights with an API
+  key); choosing one is an open owner decision. Lighthouse also leaves ten
+  accessibility checks and structured data as manual items, and reports the missing
+  CSP, HSTS, COOP and frame-control headers as informative findings.
 
 No framework or Lighthouse score guarantees Google indexing, rankings or rich
 results. Acceptance is correct technical implementation and measurable behavior.

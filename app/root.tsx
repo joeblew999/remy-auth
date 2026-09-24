@@ -1,13 +1,17 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLocation, isRouteErrorResponse } from 'react-router';
-import { isLocale, baseLocale } from '@remy/ui/locale';
+import { isLocale, baseLocale, direction } from '@remy/ui/locale';
 import { m } from '@remy/ui/messages';
 import type { Route } from './+types/root';
 import './styles.css';
 
+/** The public origin every page's canonical and alternate links are built from. */
+export function loader({ request }: Route.LoaderArgs) {
+  return { origin: new URL(request.url).origin };
+}
 export function Layout({ children }: { children: React.ReactNode }) {
   const segment = useLocation().pathname.split('/')[1];
   const locale = isLocale(segment) ? segment : baseLocale;
-  return <html lang={locale} dir="ltr"><head>
+  return <html lang={locale} dir={direction(locale)}><head>
     <meta charSet="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" /><Meta /><Links />
   </head><body>{children}<ScrollRestoration /><Scripts /></body></html>;

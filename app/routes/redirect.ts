@@ -1,2 +1,7 @@
 import { redirect } from 'react-router';
-export function loader() { return redirect('/en', 302); }
+import { negotiateLocale } from '../locale';
+import type { Route } from './+types/redirect';
+export function loader({ request }: Route.LoaderArgs) {
+  return redirect(`/${negotiateLocale(request.headers.get('accept-language'))}`,
+    { status: 302, headers: { Vary: 'Accept-Language' } });
+}

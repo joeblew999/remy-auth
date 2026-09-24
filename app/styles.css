@@ -31,11 +31,31 @@ h1 { font-size: clamp(36px, 4.5vw, 58px); line-height: 1.08; letter-spacing: -.0
 footer { display: flex; justify-content: space-between; gap: 16px; padding-block: 24px; border-top: 1px solid var(--border); color: var(--muted-foreground); font-size: 12px; }
 .demo-content { grid-column: 1 / -1; width: min(100%,640px); margin-inline: auto; }
 .back-link { display: inline-block; font-size: 13px; color: var(--muted-foreground); margin-bottom: 36px; text-decoration: none; }
+.back-arrow::before { content: "← "; }
+html[dir="rtl"] .back-arrow::before { content: "→ "; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .counter-card { border: 1px solid var(--border); background: var(--card); padding: 32px; border-radius: 18px; }
 .counter-card > p { color: var(--muted-foreground); font-size: 14px; }
 .count { display: block; font-size: 64px; font-variant-numeric: tabular-nums; line-height: 1.5; }
 .actions { display: flex; gap: 12px; margin-top: 12px; }
+.reserve { margin-top: 20px; }
+.reserve h2 { font-size: 17px; font-weight: 650; margin-block: 0 16px; }
+.field { display: grid; gap: 6px; margin-bottom: 14px; }
+.field label { font-size: 14px; color: var(--muted-foreground); }
+.field input { font: inherit; padding: 10px 12px; border: 1px solid var(--input); border-radius: 8px; background: var(--background); color: var(--foreground); width: 100%; max-width: 360px; }
+.field input:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+.field input[aria-invalid="true"] { border-color: var(--destructive); }
+.field-error { margin: 0; font-size: 14px; color: var(--destructive); }
+.reserved { margin-block: 14px 0; min-height: 1.5em; }
 .demo-note { margin-top: 22px; font-size: 13px; line-height: 1.6; color: var(--muted-foreground); }
+.formats { grid-column: 1 / -1; width: min(100%, 720px); margin-inline: auto; }
+.formats h2 { font-size: 13px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-foreground); margin-block: 40px 12px; }
+.formats dl { display: grid; gap: 10px; margin: 0; }
+.formats dl > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 16px; padding: 14px 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); }
+.formats dt { color: var(--muted-foreground); font-size: 14px; }
+.formats dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.plurals { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; }
+.plurals li { border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; font-size: 14px; }
 .error-page { max-width: 800px; padding: 80px 24px; margin: auto; }
 .error-page p { margin-block: 24px; }
 .skip-link { position: fixed; inset-block-start: 8px; inset-inline-start: 8px; transform: translateY(-150%); background: var(--background); padding: 12px; z-index: 10; }

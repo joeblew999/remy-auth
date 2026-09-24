@@ -1,0 +1,221 @@
+{
+  "home_title": "مكان واحد مألوف. كل تطبيقات ريمي.",
+  "home_description": "أساس مشترك لريمي، بلغتك.",
+  "home_intro": "عناصر التحكم والألوان واللغة نفسها ترافقك من تطبيق ريمي إلى آخر.",
+  "public_label": "أساس مشترك",
+  "demo_link": "جرّب العرض التفاعلي",
+  "formats_link": "اطّلع على التواريخ والأرقام والعملة",
+  "home_link": "نظرة عامة",
+  "demo_title": "اشعر وكأنك في بيتك.",
+  "demo_description": "جرّب تفاعلًا بسيطًا باستخدام عناصر التحكم المشتركة نفسها.",
+  "demo_note": "هذا عرض توضيحي عام. ميزات الحساب وتسجيل الدخول قادمة لاحقًا.",
+  "count_label": "نقرات الزر",
+  "increment": "أضف واحدًا",
+  "reset": "إعادة تعيين",
+  "loading": "جارٍ تحميل العرض التفاعلي…",
+  "language_label": "اللغة",
+  "skip_link": "انتقل إلى المحتوى",
+  "footer": "صُمم ليبدو مألوفًا.",
+  "not_found": "الصفحة غير موجودة",
+  "not_found_detail": "هذه الصفحة غير متاحة. عد إلى النظرة العامة.",
+  "error_title": "حدث خطأ ما",
+  "error_detail": "يرجى المحاولة مرة أخرى.",
+  "demo_label": "عرض تفاعلي",
+  "formats_title": "التواريخ والأرقام والعملة",
+  "formats_description": "كيف ينسّق ريمي التواريخ والأرقام والعملة وصيغ الجمع بلغتك.",
+  "formats_label": "تنسيقات دولية",
+  "formats_intro": "كل قيمة أدناه تأتي من كتالوج الرسائل المشترك ومن قواعد لغتك، وتُعرض بالشكل نفسه على الخادم وفي المتصفح.",
+  "language_tag": "رمز اللغة",
+  "language_name": "الاسم بلغته",
+  "direction_label": "اتجاه القراءة",
+  "direction_ltr": "من اليسار إلى اليمين",
+  "direction_rtl": "من اليمين إلى اليسار",
+  "languages_available": "اللغات المتاحة",
+  "dates_heading": "التواريخ والأوقات",
+  "instant_label": "لحظة بالتوقيت العالمي",
+  "plain_date_label": "تاريخ تقويمي",
+  "relative_label": "وقت نسبي",
+  "numbers_heading": "الأرقام",
+  "decimal_label": "رقم عشري",
+  "percent_label": "نسبة مئوية",
+  "currency_heading": "العملة",
+  "currency_label": "مبلغ باليورو",
+  "currency_note": "كل تطبيق يملك أمواله: خزّن الوحدات الصغرى كأعداد صحيحة مع رمز ISO 4217 ونسّقها بهذا الكتالوج.",
+  "plural_heading": "صيغ الجمع",
+  "instant_value": [
+    {
+      "declarations": [
+        "input instant",
+        "local formatted = instant: datetime dateStyle=full timeStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "instant=*": "{formatted}"
+      }
+    }
+  ],
+  "plain_date_value": [
+    {
+      "declarations": [
+        "input date",
+        "local formatted = date: datetime dateStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "date=*": "{formatted}"
+      }
+    }
+  ],
+  "relative_value": [
+    {
+      "declarations": [
+        "input days",
+        "local formatted = days: relativetime unit=day numeric=auto"
+      ],
+      "match": {
+        "days=*": "{formatted}"
+      }
+    }
+  ],
+  "decimal_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "percent_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number style=percent"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "currency_value": [
+    {
+      "declarations": [
+        "input amount",
+        "local formatted = amount: number style=currency currency=EUR"
+      ],
+      "match": {
+        "amount=*": "{formatted}"
+      }
+    }
+  ],
+  "apps_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=zero": "لا توجد تطبيقات",
+        "countPlural=one": "تطبيق واحد",
+        "countPlural=two": "تطبيقان",
+        "countPlural=few": "{count} تطبيقات",
+        "countPlural=many": "{count} تطبيقًا",
+        "countPlural=other": "{count} تطبيق"
+      }
+    }
+  ],
+  "units_heading": "الوحدات",
+  "distance_label": "المسافة",
+  "compact_label": "رقم مختصر",
+  "currencies_label": "المبلغ نفسه بعملات أخرى",
+  "currency_name_label": "اسم العملة",
+  "region_label": "البلد",
+  "ordinal_heading": "الأعداد الترتيبية",
+  "variants_heading": "صيغ حسب القيمة",
+  "greeting_label": "تحية",
+  "status_label": "الدعوة",
+  "sorting_heading": "الترتيب",
+  "sorted_label": "الأسماء بترتيب هذه اللغة",
+  "range_label": "نطاق التواريخ",
+  "form_heading": "احجز مقاعد",
+  "name_label": "اسمك",
+  "guests_label": "المقاعد",
+  "submit": "احجز",
+  "name_required": "أدخل اسمك.",
+  "guests_invalid": "أدخل عددًا صحيحًا من المقاعد بين 1 و20.",
+  "greeting": "مرحبًا بك يا {name}.",
+  "distance_value": [
+    {
+      "declarations": [
+        "input km",
+        "local formatted = km: number style=unit unit=kilometer unitDisplay=long"
+      ],
+      "match": {
+        "km=*": "{formatted}"
+      }
+    }
+  ],
+  "compact_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number notation=compact"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "position_value": [
+    {
+      "declarations": [
+        "input n",
+        "local ordinal = n: plural type=ordinal"
+      ],
+      "selectors": [
+        "ordinal"
+      ],
+      "match": {
+        "ordinal=other": "المرتبة {n}"
+      }
+    }
+  ],
+  "invite_status": [
+    {
+      "declarations": [
+        "input status"
+      ],
+      "selectors": [
+        "status"
+      ],
+      "match": {
+        "status=accepted": "تم قبول الدعوة",
+        "status=declined": "تم رفض الدعوة",
+        "status=*": "الدعوة قيد الانتظار"
+      }
+    }
+  ],
+  "reserved": [
+    {
+      "declarations": [
+        "input name",
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=zero": "لم يحجز {name} أي مقعد.",
+        "countPlural=one": "حجز {name} مقعدًا واحدًا.",
+        "countPlural=two": "حجز {name} مقعدين.",
+        "countPlural=few": "حجز {name} {count} مقاعد.",
+        "countPlural=many": "حجز {name} {count} مقعدًا.",
+        "countPlural=other": "حجز {name} {count} مقعد."
+      }
+    }
+  ]
+}

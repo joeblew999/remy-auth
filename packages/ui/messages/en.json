@@ -4,6 +4,7 @@
   "home_intro": "The same controls, colours and language follow you from one Remy app to the next.",
   "public_label": "Shared foundation",
   "demo_link": "Try the interactive demo",
+  "formats_link": "See dates, numbers and currency",
   "home_link": "Overview",
   "demo_title": "Make yourself at home.",
   "demo_description": "Try a small interaction using the same shared controls.",
@@ -19,5 +20,197 @@
   "not_found_detail": "This page is unavailable. Return to the overview.",
   "error_title": "Something went wrong",
   "error_detail": "Please try again.",
-  "demo_label": "Interactive demo"
+  "demo_label": "Interactive demo",
+  "formats_title": "Dates, numbers and currency",
+  "formats_description": "How Remy formats dates, numbers, currency and plurals in your language.",
+  "formats_label": "International formats",
+  "formats_intro": "Every value below comes from the shared message catalog and your language's own rules, rendered the same way on the server and in the browser.",
+  "language_tag": "Locale tag",
+  "language_name": "Name in its own language",
+  "direction_label": "Reading direction",
+  "direction_ltr": "Left to right",
+  "direction_rtl": "Right to left",
+  "languages_available": "Available languages",
+  "dates_heading": "Dates and times",
+  "instant_label": "Moment in UTC",
+  "plain_date_label": "Calendar date",
+  "relative_label": "Relative time",
+  "numbers_heading": "Numbers",
+  "decimal_label": "Decimal number",
+  "percent_label": "Percentage",
+  "currency_heading": "Currency",
+  "currency_label": "Amount in euros",
+  "currency_note": "Each app owns its money: store integer minor units with an ISO 4217 code and format them with this catalog.",
+  "plural_heading": "Plurals",
+  "instant_value": [
+    {
+      "declarations": [
+        "input instant",
+        "local formatted = instant: datetime dateStyle=full timeStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "instant=*": "{formatted}"
+      }
+    }
+  ],
+  "plain_date_value": [
+    {
+      "declarations": [
+        "input date",
+        "local formatted = date: datetime dateStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "date=*": "{formatted}"
+      }
+    }
+  ],
+  "relative_value": [
+    {
+      "declarations": [
+        "input days",
+        "local formatted = days: relativetime unit=day numeric=auto"
+      ],
+      "match": {
+        "days=*": "{formatted}"
+      }
+    }
+  ],
+  "decimal_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "percent_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number style=percent"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "currency_value": [
+    {
+      "declarations": [
+        "input amount",
+        "local formatted = amount: number style=currency currency=EUR"
+      ],
+      "match": {
+        "amount=*": "{formatted}"
+      }
+    }
+  ],
+  "apps_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} app",
+        "countPlural=other": "{count} apps"
+      }
+    }
+  ],
+  "units_heading": "Units",
+  "distance_label": "Distance",
+  "compact_label": "Compact number",
+  "currencies_label": "Same amount in other currencies",
+  "currency_name_label": "Currency name",
+  "region_label": "Country",
+  "ordinal_heading": "Ordinals",
+  "variants_heading": "Variants by value",
+  "greeting_label": "Greeting",
+  "status_label": "Invitation",
+  "sorting_heading": "Sorting",
+  "sorted_label": "Names in this language's order",
+  "range_label": "Date range",
+  "form_heading": "Reserve seats",
+  "name_label": "Your name",
+  "guests_label": "Seats",
+  "submit": "Reserve",
+  "name_required": "Enter your name.",
+  "guests_invalid": "Enter a whole number of seats from 1 to 20.",
+  "greeting": "Welcome, {name}.",
+  "distance_value": [
+    {
+      "declarations": [
+        "input km",
+        "local formatted = km: number style=unit unit=kilometer unitDisplay=long"
+      ],
+      "match": {
+        "km=*": "{formatted}"
+      }
+    }
+  ],
+  "compact_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number notation=compact"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "position_value": [
+    {
+      "declarations": [
+        "input n",
+        "local ordinal = n: plural type=ordinal"
+      ],
+      "selectors": [
+        "ordinal"
+      ],
+      "match": {
+        "ordinal=one": "{n}st",
+        "ordinal=two": "{n}nd",
+        "ordinal=few": "{n}rd",
+        "ordinal=other": "{n}th"
+      }
+    }
+  ],
+  "invite_status": [
+    {
+      "declarations": [
+        "input status"
+      ],
+      "selectors": [
+        "status"
+      ],
+      "match": {
+        "status=accepted": "Invitation accepted",
+        "status=declined": "Invitation declined",
+        "status=*": "Invitation pending"
+      }
+    }
+  ],
+  "reserved": [
+    {
+      "declarations": [
+        "input name",
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{name} reserved {count} seat.",
+        "countPlural=other": "{name} reserved {count} seats."
+      }
+    }
+  ]
 }

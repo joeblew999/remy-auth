@@ -55,10 +55,11 @@ secrets are managed through Cloudflare. Local data is not uploaded by deployment
 
 | Route | Behavior |
 | --- | --- |
-| `/` | Redirect to `/en` |
-| `/en`, `/es` | Server-rendered public page with localized content, metadata and alternate links |
-| `/en/demo`, `/es/demo` | Client-rendered counter with shared controls; indexable, listed in the sitemap; public demo, not an account screen |
-| `/robots.txt`, `/sitemap.xml` | Public crawl metadata; the sitemap lists overview and demo URLs |
+| `/` | Redirect to the best available locale from `Accept-Language`, else `/en` |
+| `/en`, `/es`, `/ar` | Server-rendered public page with localized content, direction, metadata and alternate links |
+| `/en/demo`, `/es/demo`, `/ar/demo` | Client-rendered counter and a localized reservation form with validation and plural confirmation; indexable, listed in the sitemap; public demo, not an account screen |
+| `/en/formats`, `/es/formats`, `/ar/formats` | Server-rendered examples of dates, ranges, relative time, numbers, compact numbers, units, currencies and their minor units, plurals, ordinals, value variants, interpolation, locale-aware sorting, region and currency names, endonyms and reading direction |
+| `/robots.txt`, `/sitemap.xml` | Public crawl metadata; the sitemap lists every public path in every locale with `hreflang` alternates |
 | Unknown route or locale | HTTP 404 |
 
 React Router runs through Cloudflare's Vite plugin. Demo routes render a localized
@@ -74,14 +75,16 @@ split. Keep the production browser check passing before enabling that optimizati
 
 - `app/`: route modules, page layout and app-specific styling.
 - `workers/app.ts`: Worker entry, request IDs and structured status/timing logs.
-- `packages/ui/`: shadcn/Base UI button, Remy's theme and compiled Paraglide messages.
+- `packages/ui/`: shadcn/Base UI button, Remy's theme, compiled Paraglide messages, and locale direction and endonym helpers.
 - `tests/gui.spec.ts`: browser and HTTP acceptance checks.
 
 The button and theme are sourced from Remy Sport's existing shadcn conventions.
 Both rendering modes import the package's public exports. Locale is passed
 explicitly into compiled message functions; concurrent requests share no mutable
-locale state. English and Spanish are the proof catalogs. Other locales and RTL
-release coverage remain part of [the GUI plan](../.plans/gui.md).
+locale state. English, Spanish and Arabic are the catalogs; the Arabic catalog was
+written by an agent and is unreviewed. Direction, endonyms, dates, numbers,
+currency and plurals follow the decisions recorded in
+[the GUI plan](../.plans/gui.md#dates-numbers-currency-and-direction).
 
 ```sh
 mise run ui:pack           # Produce remy-ui-0.0.0.tgz locally
@@ -95,10 +98,16 @@ npm's cache/network for consumer dependencies. Nothing is published.
 
 ## Evidence and limits
 
-Seven automated checks cover translation key/parameter parity, English/Spanish
-HTML with JavaScript disabled, concurrent locale requests, client-only content and
-button interactions, same-tab language navigation, HTTP status/sitemap behavior,
-and narrow-screen overflow. The same suite runs locally and against a deployed URL.
+The automated checks cover catalog parity and plural-category coverage, every
+locale's HTML with JavaScript disabled (language, direction, metadata, endonym
+links), the formats page's values against Node's own Intl per locale, root language
+negotiation, concurrent locale requests, hydration without console errors,
+client-only content and button interactions, the demo form's localized validation
+and plural confirmation, same-tab language navigation, HTTP status and sitemap
+behavior with every listed URL self-canonical and cross-linked by `hreflang`,
+right-to-left mirroring, and narrow-screen overflow on every page. Lighthouse audits `/en`, `/es`, `/ar`, `/en/demo` and `/en/formats`
+in its accessibility, SEO, best-practices and agentic-browsing categories; the pinned
+CLI excludes Performance by design. The same suite runs locally and against a deployed URL.
 `project:verify` also type-checks, builds and dry-runs deployment packaging for the Worker
 and verifies the isolated package consumer. Chrome DevTools CLI is available for
 manual snapshots, interactions and screenshots.

@@ -3,8 +3,10 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, rmSync } from 'node:fs';
 
 // Google Lighthouse via the pinned Chrome DevTools CLI, against the same target as the GUI checks.
-// Every scored audit in every category must pass, not only the category score, because some
-// WCAG audits carry zero weight. No audit or category is exempt. The CLI shares one daemon, so these audits run serially.
+// The CLI runs the accessibility, SEO, best-practices and agentic-browsing categories; upstream
+// excludes Performance by design and offers performance_start_trace instead (see the GUI plan).
+// Every scored audit in every returned category must pass, not only the category score, because
+// some WCAG audits carry zero weight. No audit or category is exempt. The CLI shares one daemon, so these audits run serially.
 // Fix failures at their source: shadcn-generated tokens and components in packages/ui
 // change through shadcn, not by hand-editing them or overriding them in the app.
 const cli = (...args: string[]) => execFileSync('./node_modules/.bin/chrome-devtools', args,
@@ -14,7 +16,9 @@ const pages = [
   { path: '/en', device: 'mobile' },
   { path: '/en', device: 'desktop' },
   { path: '/es', device: 'mobile' },
+  { path: '/ar', device: 'mobile' },
   { path: '/en/demo', device: 'mobile' },
+  { path: '/en/formats', device: 'mobile' },
 ];
 
 test.describe.configure({ mode: 'serial', timeout: 120_000 });

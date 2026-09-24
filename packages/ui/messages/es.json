@@ -4,6 +4,7 @@
   "home_intro": "Los mismos controles, colores e idioma te acompañan de una app de Remy a otra.",
   "public_label": "Una base compartida",
   "demo_link": "Prueba la demo interactiva",
+  "formats_link": "Ver fechas, números y moneda",
   "home_link": "Inicio",
   "demo_title": "Siéntete como en casa.",
   "demo_description": "Prueba una pequeña interacción con los mismos controles compartidos.",
@@ -19,5 +20,196 @@
   "not_found_detail": "Esta página no está disponible. Vuelve al inicio.",
   "error_title": "Algo ha salido mal",
   "error_detail": "Inténtalo de nuevo.",
-  "demo_label": "Demo interactiva"
+  "demo_label": "Demo interactiva",
+  "formats_title": "Fechas, números y moneda",
+  "formats_description": "Cómo Remy da formato a fechas, números, moneda y plurales en tu idioma.",
+  "formats_label": "Formatos internacionales",
+  "formats_intro": "Cada valor de abajo procede del catálogo de mensajes compartido y de las reglas de tu idioma, y se muestra igual en el servidor y en el navegador.",
+  "language_tag": "Etiqueta de idioma",
+  "language_name": "Nombre en su propio idioma",
+  "direction_label": "Sentido de lectura",
+  "direction_ltr": "De izquierda a derecha",
+  "direction_rtl": "De derecha a izquierda",
+  "languages_available": "Idiomas disponibles",
+  "dates_heading": "Fechas y horas",
+  "instant_label": "Momento en UTC",
+  "plain_date_label": "Fecha del calendario",
+  "relative_label": "Tiempo relativo",
+  "numbers_heading": "Números",
+  "decimal_label": "Número decimal",
+  "percent_label": "Porcentaje",
+  "currency_heading": "Moneda",
+  "currency_label": "Importe en euros",
+  "currency_note": "Cada app es dueña de su dinero: guarda unidades menores enteras con un código ISO 4217 y dales formato con este catálogo.",
+  "plural_heading": "Plurales",
+  "instant_value": [
+    {
+      "declarations": [
+        "input instant",
+        "local formatted = instant: datetime dateStyle=full timeStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "instant=*": "{formatted}"
+      }
+    }
+  ],
+  "plain_date_value": [
+    {
+      "declarations": [
+        "input date",
+        "local formatted = date: datetime dateStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "date=*": "{formatted}"
+      }
+    }
+  ],
+  "relative_value": [
+    {
+      "declarations": [
+        "input days",
+        "local formatted = days: relativetime unit=day numeric=auto"
+      ],
+      "match": {
+        "days=*": "{formatted}"
+      }
+    }
+  ],
+  "decimal_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "percent_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number style=percent"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "currency_value": [
+    {
+      "declarations": [
+        "input amount",
+        "local formatted = amount: number style=currency currency=EUR"
+      ],
+      "match": {
+        "amount=*": "{formatted}"
+      }
+    }
+  ],
+  "apps_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} aplicación",
+        "countPlural=many": "{count} aplicaciones",
+        "countPlural=other": "{count} aplicaciones"
+      }
+    }
+  ],
+  "units_heading": "Unidades",
+  "distance_label": "Distancia",
+  "compact_label": "Número compacto",
+  "currencies_label": "El mismo importe en otras monedas",
+  "currency_name_label": "Nombre de la moneda",
+  "region_label": "País",
+  "ordinal_heading": "Ordinales",
+  "variants_heading": "Variantes según el valor",
+  "greeting_label": "Saludo",
+  "status_label": "Invitación",
+  "sorting_heading": "Ordenación",
+  "sorted_label": "Nombres en el orden de este idioma",
+  "range_label": "Intervalo de fechas",
+  "form_heading": "Reserva asientos",
+  "name_label": "Tu nombre",
+  "guests_label": "Asientos",
+  "submit": "Reservar",
+  "name_required": "Escribe tu nombre.",
+  "guests_invalid": "Escribe un número entero de asientos entre 1 y 20.",
+  "greeting": "Te damos la bienvenida, {name}.",
+  "distance_value": [
+    {
+      "declarations": [
+        "input km",
+        "local formatted = km: number style=unit unit=kilometer unitDisplay=long"
+      ],
+      "match": {
+        "km=*": "{formatted}"
+      }
+    }
+  ],
+  "compact_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number notation=compact"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "position_value": [
+    {
+      "declarations": [
+        "input n",
+        "local ordinal = n: plural type=ordinal"
+      ],
+      "selectors": [
+        "ordinal"
+      ],
+      "match": {
+        "ordinal=other": "{n}.º"
+      }
+    }
+  ],
+  "invite_status": [
+    {
+      "declarations": [
+        "input status"
+      ],
+      "selectors": [
+        "status"
+      ],
+      "match": {
+        "status=accepted": "Invitación aceptada",
+        "status=declined": "Invitación rechazada",
+        "status=*": "Invitación pendiente"
+      }
+    }
+  ],
+  "reserved": [
+    {
+      "declarations": [
+        "input name",
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{name} ha reservado {count} asiento.",
+        "countPlural=many": "{name} ha reservado {count} asientos.",
+        "countPlural=other": "{name} ha reservado {count} asientos."
+      }
+    }
+  ]
 }

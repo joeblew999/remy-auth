@@ -3,6 +3,7 @@ export default [
   index('routes/redirect.ts'),
   route(':locale', 'routes/home.tsx'),
   route(':locale/demo', 'routes/demo.tsx'),
+  route(':locale/formats', 'routes/formats.tsx'),
   route('robots.txt', 'routes/robots.ts'),
   route('sitemap.xml', 'routes/sitemap.ts'),
   route('*', 'routes/not-found.tsx'),

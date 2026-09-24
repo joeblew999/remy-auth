@@ -3,8 +3,8 @@
 Shared authentication for Remy apps, using **Better Auth on Cloudflare Workers**
 with **D1** as the planned identity and session store.
 
-**Status:** a minimal GUI proof runs locally on Cloudflare: English/Spanish public
-pages, a client-rendered demo and a shared shadcn/Paraglide package. Authentication,
+**Status:** a minimal GUI proof runs locally on Cloudflare: English, Spanish and Arabic
+public pages, a client-rendered demo and a shared shadcn/Paraglide package. Authentication,
 D1 storage and deployment are still planned.
 
 ## Get started
