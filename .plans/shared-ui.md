@@ -1,6 +1,6 @@
 # Shared UI for server- and client-rendered consumers
 
-Status: proposed 2026-09-24. Owner: remy-auth. The Reviewer accepts against the checks
+Status: implemented 2026-09-24, awaiting the owner's acceptance to move to `.plans/done/`. Owner: remy-auth. The Reviewer accepts against the checks
 below; the Executor implements the work items in order and stops at the open decisions.
 This plan answers one question: is the framework code designed to be shared by other
 projects for both CSR and SSR, and does a demo show that off? Today: designed yes,
@@ -134,10 +134,8 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
 
 ## Open decisions for the owner
 
-1. **Sample rendering mode.** Recommended: React Router framework mode with
-   `ssr: false` and a `prerender` list, so one router convention covers both modes and
-   the contrast is explicit. Alternative: plain Vite plus React without a router, which
-   proves less and cannot prerender.
+1. **Sample rendering mode.** Decided 2026-09-24: React Router framework mode with
+   `ssr: false` and a `prerender` list; remy-auth-app runs that way.
 2. **Publication.** Decided 2026-09-24: GitHub Packages, because the registry is
    npm-compatible, the package stays linked to this repository, and a tag-triggered
    workflow publishes with its own `GITHUB_TOKEN` (no npm account or long-lived token).
@@ -154,8 +152,8 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
    the installed `github-release` skill (SemVer from the public diff, Keep a Changelog,
    release PR, then the tag). Still open: the first version number, and that consumers
    need a `read:packages` token even to install.
-3. **Sample deployment.** Local only, or its own Worker beside this one. Deploying is
-   an explicit owner request either way.
+3. **Sample deployment.** Decided 2026-09-24: its own static-assets Worker,
+   https://remy-auth-app.gedw99.workers.dev, deployed on the owner's request.
 4. **Component styling contract.** Decided 2026-09-24: the package ships its components'
    CSS in `styles.css`, which every consumer already imports; apps keep only layout
    overrides such as narrow-screen padding.
