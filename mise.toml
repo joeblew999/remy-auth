@@ -256,6 +256,18 @@ dir = "{{config_root}}"
 env = { TEST_TARGET = "remote" }
 run = "./node_modules/.bin/playwright test"
 
+[tasks."project:report"]
+description = "Open the HTML report from the last local project:test run"
+dir = "{{config_root}}"
+raw = true
+run = "./node_modules/.bin/playwright show-report playwright-report/local"
+
+[tasks."project:report:remote"]
+description = "Open the HTML report from the last project:test:remote run"
+dir = "{{config_root}}"
+raw = true
+run = "./node_modules/.bin/playwright show-report playwright-report/remote"
+
 [tasks."cf:deploy"]
 description = "Build, dry-run and deploy the Worker to the authenticated Cloudflare account"
 dir = "{{config_root}}"

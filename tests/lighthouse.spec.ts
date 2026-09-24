@@ -34,6 +34,6 @@ for (const { path, device } of pages) {
       .filter((audit: any) => audit.score !== null && audit.score < 1)
       .map((audit: any) => `${audit.id}: ${audit.title}`);
     await testInfo.attach('lighthouse.html', { path: `${dir}/report.html`, contentType: 'text/html' });
-    expect([...new Set(failures)], `See the attached report in ${dir}`).toEqual([]);
+    expect([...new Set(failures)], 'See the lighthouse.html attachment in the HTML report').toEqual([]);
   });
 }

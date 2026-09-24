@@ -13,6 +13,7 @@ if (!['http:', 'https:'].includes(target.protocol) || target.username || target.
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
+  reporter: [['list'], ['html', { open: 'never', outputFolder: `playwright-report/${remote ? 'remote' : 'local'}` }]],
   use: { baseURL: target.origin, ...devices['Desktop Chrome'], channel: 'chrome' },
   webServer: remote ? undefined : {
     command: './node_modules/.bin/vite preview',

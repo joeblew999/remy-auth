@@ -29,6 +29,7 @@ Development uses the same Worker source and Cloudflare runtime with hot reload.
 | `project:test` | Build, then test that artifact locally |
 | `cf:deploy` | Build, then upload to the authenticated Cloudflare account |
 | `project:test:remote` | Same tests against `TEST_BASE_URL`; no local server or deployment |
+| `project:report` / `project:report:remote` | Open the last local or remote run's HTML report, including Lighthouse reports |
 
 After deliberately deploying to the intended account, run:
 
