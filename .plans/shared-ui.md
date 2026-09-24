@@ -121,9 +121,12 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
 2. **Publication.** Decided 2026-09-24: GitHub Packages, because the registry is
    npm-compatible, the package stays linked to this repository, and a tag-triggered
    workflow publishes with its own `GITHUB_TOKEN` (no npm account or long-lived token).
-   Both repositories became public the same day, so GitHub may make the package public
-   too; its npm registry still expects a token for installs, to be confirmed at the
-   first publish. GitHub requires the
+   Both repositories became public the same day and the package is public on GitHub
+   Packages; its npm registry still returns 401 without a token, so consumers need
+   `read:packages` (confirmed 2026-09-24). Version 0.1.0 is published and consumed by
+   remy-auth-app, whose `package:verify` builds a client bundle and a server render
+   from it, which also covers work item 3's "prove SSR for strangers" for the current
+   exports. GitHub requires the
    scope to equal the owner, so the package was renamed `@joeblew999/remy-ui`. The
    workflow (`.github/workflows/publish.yml`) follows the installed
    `github-actions-hardening` skill: deny-all permissions, `packages: write` on the one

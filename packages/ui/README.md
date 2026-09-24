@@ -21,8 +21,8 @@ integration remain in the GUI plan.
 
 The package is `@joeblew999/remy-ui` on GitHub Packages (the scope must equal the
 GitHub owner there). Both repositories have been public since 2026-09-24; GitHub sets
-the package's visibility from the linked repository, and its npm registry still expects
-a token for installs, which the first publish will confirm. `.github/workflows/publish.yml`
+the package's visibility from the linked repository (public since 0.1.0), and its npm
+registry returns 401 without a token even for public packages, confirmed 2026-09-24. `.github/workflows/publish.yml`
 publishes it when a `vX.Y.Z` tag is pushed whose version equals `packages/ui/package.json`,
 using the workflow's own `GITHUB_TOKEN`; no long-lived npm token exists. Cut releases
 with the installed `github-release` skill (SemVer from the public diff, changelog,
@@ -35,5 +35,6 @@ Consumers add to their `.npmrc`:
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
-and install with a token that has `read:packages`, even for reads. Nothing is
-published yet; the first release is the owner's call.
+and install with a token that has `read:packages`. Version 0.1.0 is published;
+[remy-auth-app](https://github.com/joeblew999/remy-auth-app) consumes it and proves a
+client build and a server render from the tarball with `mise run package:verify`.
