@@ -64,7 +64,7 @@ CLI passthrough tasks accept upstream flags directly, such as
 
 | Namespace | Purpose |
 | --- | --- |
-| `project:*` | Setup, pipeline and verification (shared defaults from `tasks/react-router.toml`; `[env]` supplies the inputs) and tool diagnostics |
+| `project:*` | Setup, pipeline and verification (shared defaults from `tasks/project.toml`; `[env]` supplies the inputs) and tool diagnostics |
 | `packages:*` | Check and upgrade npm packages |
 | `skills:*` | Install, list and remove the pinned official skills |
 | `auth:*` | Better Auth CLI and diagnostics |
@@ -153,8 +153,8 @@ prompted. Claude Code is installed separately; launching Codex does not require 
 ## Agent skills
 
 The skill sources are the `*_skills_source` vars of the `skills:install` task in
-[tasks/bootstrap.toml](../tasks/bootstrap.toml), which also holds the MCP, browser and web
-guidance tasks. `mise.toml` includes that directory (`[task_config] includes = ["tasks"]`),
+[tasks/skills.toml](../tasks/skills.toml); the directory holds one file per task
+namespace, described in [tasks/README.md](../tasks/README.md). `mise.toml` includes that directory (`[task_config] includes = ["tasks"]`),
 and any other project can include the same directory by git reference pinned to a commit:
 
 ```toml
@@ -184,13 +184,13 @@ if newly installed skills are not yet visible.
 
 To add a source, only from the library's own maintainers:
 
-1. Pin it in the `skills:install` task's `vars` in `tasks/bootstrap.toml` as
+1. Pin it in the `skills:install` task's `vars` in `tasks/skills.toml` as
    `<name>_skills_source = "https://github.com/<owner>/<repo>/tree/<commit>"`, using the
    commit from `git ls-remote https://github.com/<owner>/<repo> HEAD`.
 2. Add its line to that task's `run` list, naming the skills with `--skill` rather than `'*'`
    when the repository also ships contributor-only skills.
 3. Run `mise run skills:remove`, `mise run skills:install` and `mise run project:verify`.
-   Verification reads the pins from `tasks/bootstrap.toml` and rejects installed skills from unpinned sources.
+   Verification reads the pins from `tasks/skills.toml` and rejects installed skills from unpinned sources.
 
 
 ## MCP registration

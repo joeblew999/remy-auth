@@ -1,0 +1,17 @@
+# Codex sessions with MCP registered; the including project supplies @openai/codex.
+
+["codex:start"]
+description = "Start Codex in this project with MCP registered"
+dir = "{{config_root}}"
+depends = ["mcp:register"]
+raw = true
+raw_args = true
+run = "./node_modules/.bin/codex"
+
+["codex:resume"]
+description = "Resume the latest Codex conversation with freshly loaded configuration"
+dir = "{{config_root}}"
+depends = ["mcp:register"]
+raw = true
+raw_args = true
+run = "./node_modules/.bin/codex resume --last"

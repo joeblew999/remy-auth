@@ -72,7 +72,7 @@ for deployment and running the same tests against a deployed URL.
 
 Review dependency changes after upgrading. Node is pinned in [mise.toml](mise.toml); the
 skill-source commits and the shared agent bootstrap tasks live in
-[tasks/bootstrap.toml](tasks/bootstrap.toml), which other projects include by git reference.
+[tasks/](tasks/README.md), one file per task namespace, which other projects include by git reference.
 
 ## Project documentation
 

@@ -1,0 +1,24 @@
+# Google's Chrome DevTools CLI and MCP server over the including project's pinned chrome-devtools-mcp.
+
+["browser:cli"]
+description = "Run Google's Chrome DevTools CLI"
+raw_args = true
+dir = "{{config_root}}"
+run = "./node_modules/.bin/chrome-devtools"
+
+["browser:mcp"]
+description = "Run Google's Chrome DevTools MCP server over stdio"
+raw_args = true
+dir = "{{config_root}}"
+run = "./node_modules/.bin/chrome-devtools-mcp --isolated --headless --no-usage-statistics --no-performance-crux"
+
+["browser:start"]
+description = "Start an isolated Chrome session (pass --headless=false for a visible window)"
+raw_args = true
+dir = "{{config_root}}"
+run = "./node_modules/.bin/chrome-devtools start --isolated --headless --no-usage-statistics --no-performance-crux"
+
+["browser:stop"]
+description = "Stop the Chrome DevTools CLI session"
+dir = "{{config_root}}"
+run = "./node_modules/.bin/chrome-devtools stop"

@@ -1,0 +1,8 @@
+# Google's modern web implementation guidance over the including project's pinned modern-web-guidance.
+
+["web:guidance"]
+description = "Search and retrieve Google modern web implementation guidance"
+raw_args = true
+dir = "{{config_root}}"
+env = { DISABLE_TELEMETRY = "1" }
+run = "./node_modules/.bin/modern-web-guidance"

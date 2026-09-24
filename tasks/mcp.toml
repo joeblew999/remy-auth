@@ -1,0 +1,11 @@
+# Project MCP registration and status; mcp:register is the file task in mcp/register.
+
+["mcp:verify"]
+description = "Verify project MCP registration matches this checkout and mise installation"
+dir = "{{config_root}}"
+run = "mise run mcp:register -- --check"
+
+["mcp:status"]
+description = "Show Chrome DevTools registration in both installed agent clients"
+dir = "{{config_root}}"
+run = ["./node_modules/.bin/codex mcp get chrome-devtools", "claude mcp get chrome-devtools"]

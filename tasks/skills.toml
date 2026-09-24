@@ -1,11 +1,5 @@
-# Shared agent bootstrap: pinned official skills, Chrome DevTools, Google's web guidance and
-# project MCP registration. remy-auth includes this directory locally; other projects include
-# it by git reference pinned to a commit, for example
-#   [task_config]
-#   includes = ["git::https://github.com/joeblew999/remy-auth.git//tasks?ref=<commit>"]
-# Consumers provide the npm packages the tasks in this directory run: chrome-devtools-mcp,
-# modern-web-guidance, smol-toml, @playwright/test, wrangler (and @openai/codex for the Codex tasks). The *_skills_source vars below are the only
-# list of skill sources; verification rejects skills installed from anything else.
+# Pinned official agent skills for Codex and Claude. The *_skills_source vars of skills:install are the
+# only list of skill sources; verification rejects skills installed from anything else.
 
 ["skills:install"]
 description = "Install official auth, Cloudflare, Chrome DevTools, modern web, React Router, shadcn, Playwright and GitHub release skills for Codex and Claude"
@@ -41,43 +35,3 @@ description = "Remove all project-local skills for Codex and Claude (restore wit
 dir = "{{config_root}}"
 vars = { skills_cli_version = "1.7.0" }
 run = "npx --yes skills@{{vars.skills_cli_version}} remove --all"
-
-["mcp:verify"]
-description = "Verify project MCP registration matches this checkout and mise installation"
-dir = "{{config_root}}"
-run = "mise run mcp:register -- --check"
-
-["mcp:status"]
-description = "Show Chrome DevTools registration in both installed agent clients"
-dir = "{{config_root}}"
-run = ["./node_modules/.bin/codex mcp get chrome-devtools", "claude mcp get chrome-devtools"]
-
-["browser:cli"]
-description = "Run Google's Chrome DevTools CLI"
-raw_args = true
-dir = "{{config_root}}"
-run = "./node_modules/.bin/chrome-devtools"
-
-["browser:mcp"]
-description = "Run Google's Chrome DevTools MCP server over stdio"
-raw_args = true
-dir = "{{config_root}}"
-run = "./node_modules/.bin/chrome-devtools-mcp --isolated --headless --no-usage-statistics --no-performance-crux"
-
-["browser:start"]
-description = "Start an isolated Chrome session (pass --headless=false for a visible window)"
-raw_args = true
-dir = "{{config_root}}"
-run = "./node_modules/.bin/chrome-devtools start --isolated --headless --no-usage-statistics --no-performance-crux"
-
-["browser:stop"]
-description = "Stop the Chrome DevTools CLI session"
-dir = "{{config_root}}"
-run = "./node_modules/.bin/chrome-devtools stop"
-
-["web:guidance"]
-description = "Search and retrieve Google modern web implementation guidance"
-raw_args = true
-dir = "{{config_root}}"
-env = { DISABLE_TELEMETRY = "1" }
-run = "./node_modules/.bin/modern-web-guidance"

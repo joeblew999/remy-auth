@@ -1,7 +1,24 @@
-# Default pipeline for a React Router app on Cloudflare built on @joeblew999/remy-ui. The
-# including project declares its inputs in [env]: PREVIEW_PORT (local host port for preview
-# and tests) and DEPLOY_ORIGIN (the public origin baked into prerendered links at deploy).
-# A project overrides a task here by defining the same name in its own mise.toml.
+# Default pipeline for a React Router app on Cloudflare built on @joeblew999/remy-ui, driven by the
+# including project's [env] inputs PREVIEW_PORT and DEPLOY_ORIGIN. Override a task by defining the
+# same name in the project's own mise.toml.
+
+["project:test:remote"]
+description = "Run the same checks against TEST_BASE_URL without starting a local server"
+dir = "{{config_root}}"
+env = { TEST_TARGET = "remote" }
+run = "./node_modules/.bin/playwright test"
+
+["project:report"]
+description = "Open the HTML report from the last local project:test run"
+dir = "{{config_root}}"
+raw = true
+run = "./node_modules/.bin/playwright show-report playwright-report/local"
+
+["project:report:remote"]
+description = "Open the HTML report from the last project:test:remote run"
+dir = "{{config_root}}"
+raw = true
+run = "./node_modules/.bin/playwright show-report playwright-report/remote"
 
 ["project:setup"]
 description = "Install dependencies (GITHUB_TOKEN with read:packages for the shared UI), the shared skills and MCP registration, then verify"
@@ -42,8 +59,3 @@ run = "./node_modules/.bin/playwright test"
 description = "Verify tasks, dependencies, MCP registration, types and every check"
 dir = "{{config_root}}"
 run = ["mise tasks validate", "npm ls --depth=0", { task = "mcp:verify" }, { task = "project:typecheck" }, { task = "project:test" }]
-
-["cf:deploy"]
-description = "Build with DEPLOY_ORIGIN as the public origin and upload to the authenticated Cloudflare account"
-dir = "{{config_root}}"
-run = ["PUBLIC_ORIGIN=\"$DEPLOY_ORIGIN\" ./node_modules/.bin/react-router build", "./node_modules/.bin/wrangler deploy"]

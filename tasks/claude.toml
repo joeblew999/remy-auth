@@ -1,0 +1,17 @@
+# Claude Code sessions with MCP registered; Claude Code is installed separately.
+
+["claude:start"]
+description = "Start Claude Code in this project with MCP registered"
+dir = "{{config_root}}"
+depends = ["mcp:register"]
+raw = true
+raw_args = true
+run = "claude"
+
+["claude:resume"]
+description = "Resume the latest Claude conversation with freshly loaded configuration"
+dir = "{{config_root}}"
+depends = ["mcp:register"]
+raw = true
+raw_args = true
+run = "claude --continue"

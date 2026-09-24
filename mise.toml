@@ -1,8 +1,8 @@
 [tools]
 node = "26.10.0"
 
-# Shared tasks (agent bootstrap, agent launchers, Playwright runners, Cloudflare wrappers) live
-# in tasks/ so other projects can include the same directory by git reference; see tasks/*.toml.
+# Shared tasks live in tasks/, one file per namespace, so other projects can include the same
+# directory by git reference; see tasks/README.md.
 [task_config]
 includes = ["tasks"]
 

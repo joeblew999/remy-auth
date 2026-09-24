@@ -56,7 +56,7 @@ and Paraglide directly; no reinvented wheels, so detection, cookie, URL localisa
 redirects are Paraglide's. The same principles apply to the mise tasks: since 2026-09-24 `tasks/` here holds the
 agent bootstrap, the agent launchers, the Playwright runners and the Cloudflare wrappers,
 included by remy-auth-app by git reference pinned to a commit. Since 0.4.0 the pipeline
-(`tasks/react-router.toml`: setup, typecheck, dev, build, preview, test, verify, deploy) is
+(`tasks/project.toml` and `cf.toml`: setup, typecheck, dev, build, preview, test, verify, deploy) is
 shared too, driven by each project's `[env]` inputs (`PREVIEW_PORT`, `PUBLIC_ORIGIN`,
 `DEPLOY_ORIGIN`), and the Playwright configuration is the package's `playwrightConfig()`;
 a project keeps its Node pin, its inputs, and overrides only what it truly owns (remy-auth:

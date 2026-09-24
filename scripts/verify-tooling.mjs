@@ -36,10 +36,10 @@ try {
   assert.equal(observability.logs.invocation_logs, true, 'Invocation logs must be enabled');
   console.log('Wrangler parsed the configuration; observability requirements pass.');
 
-  // The skills:install task's *_skills_source vars in tasks/bootstrap.toml are the single list of skill sources.
-  const vars = parse(await readFile('tasks/bootstrap.toml', 'utf8'))['skills:install']?.vars ?? {};
+  // The skills:install task's *_skills_source vars in tasks/skills.toml are the single list of skill sources.
+  const vars = parse(await readFile('tasks/skills.toml', 'utf8'))['skills:install']?.vars ?? {};
   const sources = Object.entries(vars).filter(([key]) => key.endsWith('_skills_source')).map(([, url]) => url);
-  assert.ok(sources.length > 0, 'tasks/bootstrap.toml defines no *_skills_source pins');
+  assert.ok(sources.length > 0, 'tasks/skills.toml defines no *_skills_source pins');
   const skills = (await readJSON('skills-lock.json')).skills;
   const pinned = new Set(sources.map(url => new URL(url).pathname.split('/').slice(1, 3).join('/')));
   for (const [name, skill] of Object.entries(skills)) {

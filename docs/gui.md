@@ -42,7 +42,7 @@ routes and manipulate only the browser counter. Authentication and storage tests
 will need isolated fixtures when those features exist. The remote test task can
 also target an already-running local preview to check the external-server path.
 
-The pipeline tasks are shared defaults from `tasks/react-router.toml`, driven by this
+The pipeline tasks are shared defaults from `tasks/project.toml`, driven by this
 project's `[env]` inputs (`PREVIEW_PORT`, `DEPLOY_ORIGIN`); this repository overrides only
 `project:typecheck` and `project:verify` because it owns the package. The Playwright
 configuration is the package's `playwrightConfig()`.
