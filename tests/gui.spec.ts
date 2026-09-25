@@ -8,11 +8,13 @@ import { publicPaths } from '@joeblew999/remy-ui/paths';
 import { searchParamsChecks } from '@joeblew999/remy-ui/showcase/search-params.checks';
 import { preloadChecks } from '@joeblew999/remy-ui/showcase/preload.checks';
 import { navigationBlockingChecks } from '@joeblew999/remy-ui/showcase/navigation-blocking.checks';
+import { serverFunctionChecks } from '@joeblew999/remy-ui/showcase/server-functions.checks';
 
 // The shared checks cover what every app built on the package must satisfy.
 publicPageChecks({ paths: publicPaths });
 entryChecks({ paths: publicPaths, mode: 'redirect' });
 demoChecks();
+serverFunctionChecks();
 observabilityChecks({ service: 'remy-auth', paths: publicPaths });
 searchParamsChecks();
 preloadChecks();
