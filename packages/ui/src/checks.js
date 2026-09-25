@@ -59,7 +59,7 @@ export function collectErrors(page) {
  * `translations` names, per path, the languages such a page also has its own text in (English first):
  * the sitemap lists it in each of them, self-canonical, with those as alternates and x-default.
  */
-export function publicPageChecks({ paths, prerendered = false, oneLanguage = { locale: baseLocale, paths: [] } }) {
+export function publicPageChecks({ paths, prerendered = false, oneLanguage = { locale: baseLocale, paths: [] }, sitemap = true }) {
   for (const locale of checkedLocales) {
     const o = { locale };
     test(`${locale}: home page is complete without JavaScript`, async ({ browser, baseURL }) => {
@@ -93,8 +93,45 @@ export function publicPageChecks({ paths, prerendered = false, oneLanguage = { l
     });
   }
 
-  test('unknown paths are 404s; the sitemap lists only localized, self-canonical URLs with hreflang alternates', async ({ request, baseURL }) => {
+  test('unknown paths are 404s', async ({ request }) => {
     for (const path of ['/zz', `${localizedPath('', baseLocale)}/missing`, '/zz/demo']) expect((await request.get(path)).status(), path).toBe(404);
+  });
+
+  // An app whose sitemap comes from the seo-routes part runs these with the part's checks instead (sitemap: false).
+  if (sitemap) sitemapChecks({ paths, oneLanguage });
+
+  // One test per language, as the other per-language checks; one-language pages once, in their language.
+  const narrowCases = [...checkedLocales.map(locale => [locale, paths]), ...(oneLanguage.paths.length ? [[oneLanguage.locale, oneLanguage.paths, 'one-language pages']] : [])];
+  for (const [locale, casePaths, what = 'every page'] of narrowCases) test(`${locale}: ${what} mirror the header in right-to-left languages, fit a narrow screen and name only fonts they load`, async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    for (const path of casePaths) {
+      await page.goto(localizedPath(path, locale));
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${locale}${path} overflows`).toBe(true);
+      // The fonts rule (fonts.css): every named family is one the page loads (@font-face), the rest generic.
+      const fonts = await page.evaluate(() => {
+        const loaded = new Set([...document.fonts].map(face => face.family.replace(/^["']|["']$/g, '')));
+        const generic = new Set(['system-ui', 'sans-serif', 'serif', 'monospace', 'emoji', 'math']);
+        const families = [...new Set([document.documentElement, ...document.querySelectorAll('body, body *')]
+          .flatMap(element => getComputedStyle(element).fontFamily.split(',')).map(name => name.trim().replace(/^["']|["']$/g, '')))];
+        return families.filter(name => !generic.has(name) && !loaded.has(name));
+      });
+      expect(fonts, `${locale}${path} names fonts it never loads`).toEqual([]);
+      const brand = await page.locator('.brand').boundingBox();
+      const languages = await page.locator('nav.languages').boundingBox();
+      if (direction(locale) === 'rtl') expect(brand.x, `${locale}${path}`).toBeGreaterThan(languages.x);
+      else expect(brand.x, `${locale}${path}`).toBeLessThan(languages.x);
+    }
+  });
+}
+
+/**
+ * The sitemap lists only localized, self-canonical URLs with hreflang alternates: every site path in
+ * every locale, and `oneLanguage`'s pages as publicPageChecks describes; robots.txt names it.
+ * publicPageChecks runs these unless told `sitemap: false`; the seo-routes part's checks run them too.
+ */
+export function sitemapChecks({ paths, oneLanguage = { locale: baseLocale, paths: [] } }) {
+  test('the sitemap lists only localized, self-canonical URLs with hreflang alternates', async ({ request, baseURL }) => {
     const sitemap = await request.get('/sitemap.xml');
     expect(sitemap.status()).toBe(200);
     const xml = await sitemap.text();
@@ -120,30 +157,6 @@ export function publicPageChecks({ paths, prerendered = false, oneLanguage = { l
       for (const locale of langsOf(path)) expect(xml, `${locale}${path}`).toContain(`<url><loc>${baseURL}${localizedPath(path, locale)}</loc>${alternates}</url>`);
     }
     expect(await (await request.get('/robots.txt')).text()).toContain('/sitemap.xml');
-  });
-
-  // One test per language, as the other per-language checks; one-language pages once, in their language.
-  const narrowCases = [...checkedLocales.map(locale => [locale, paths]), ...(oneLanguage.paths.length ? [[oneLanguage.locale, oneLanguage.paths, 'one-language pages']] : [])];
-  for (const [locale, casePaths, what = 'every page'] of narrowCases) test(`${locale}: ${what} mirror the header in right-to-left languages, fit a narrow screen and name only fonts they load`, async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 812 });
-    for (const path of casePaths) {
-      await page.goto(localizedPath(path, locale));
-      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${locale}${path} overflows`).toBe(true);
-      // The fonts rule (fonts.css): every named family is one the page loads (@font-face), the rest generic.
-      const fonts = await page.evaluate(() => {
-        const loaded = new Set([...document.fonts].map(face => face.family.replace(/^["']|["']$/g, '')));
-        const generic = new Set(['system-ui', 'sans-serif', 'serif', 'monospace', 'emoji', 'math']);
-        const families = [...new Set([document.documentElement, ...document.querySelectorAll('body, body *')]
-          .flatMap(element => getComputedStyle(element).fontFamily.split(',')).map(name => name.trim().replace(/^["']|["']$/g, '')))];
-        return families.filter(name => !generic.has(name) && !loaded.has(name));
-      });
-      expect(fonts, `${locale}${path} names fonts it never loads`).toEqual([]);
-      const brand = await page.locator('.brand').boundingBox();
-      const languages = await page.locator('nav.languages').boundingBox();
-      if (direction(locale) === 'rtl') expect(brand.x, `${locale}${path}`).toBeGreaterThan(languages.x);
-      else expect(brand.x, `${locale}${path}`).toBeLessThan(languages.x);
-    }
   });
 }
 

@@ -1,4 +1,4 @@
-// Shared answers for this app's read-only server routes (robots.txt, sitemap.xml).
+// Shared answers for the seo-routes part's read-only server routes (robots.txt, sitemap.xml).
 
 /**
  * Crawl metadata changes only with a deployment and depends only on the request's origin, so

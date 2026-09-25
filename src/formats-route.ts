@@ -1,7 +1,8 @@
 import { getLocale } from '@joeblew999/remy-ui/locale';
 import { localeInfo } from '@joeblew999/remy-ui/locale-info';
 import { formatsSearchSchema } from '@joeblew999/remy-ui/showcase/search-params';
-import { getPlace } from './place';
+// The deferred-place part's server function, or undefined when the app does not list it (src/parts.json).
+import { getPlace } from 'virtual:remy-parts/deferred-place/place';
 
 // The formats routes' critical options, in a module of their own: TanStack's code splitting keeps a
 // route's loader and validateSearch in every page's first load, so this file imports nothing that
@@ -14,7 +15,7 @@ export const formatsRouteOptions = {
   // Cloudflare's request geolocation (the network's country, region, city and time zone) comes
   // from a server function, so it is read in the Worker during SSR and client navigation alike.
   // Deferred: returned unawaited, so the page streams and the location group follows (DeferredPlace).
-  loader: () => ({ info: localeInfo(getLocale()), place: getPlace() }),
+  loader: () => ({ info: localeInfo(getLocale()), place: getPlace?.() }),
   // The loader reads no search param (so no loaderDeps), and its data stays fresh for five
   // minutes: Back, Forward and the controls reuse it instead of calling the server function again.
   staleTime: 5 * 60_000,

@@ -74,7 +74,7 @@ Both finalists get a small scratch build in W1 before anything is chosen (how-we
 | Site pages (`/:locale/...`) | `public, max-age=0, s-maxage=3600, stale-while-revalidate=86400` (**assumed** values), no `Vary` | Root route `headers()` in the shared package; `localizedWorker` keeps `no-store` as the default for everything else |
 | App pages (`/app/...`) | `private, no-store`, forever (auth follows; [auth plan](auth-service.md) "never share a public cache") | Stays the `localizedWorker` default |
 | Entry redirects (un-localized paths) | `private, no-store` (they depend on Accept-Language and the cookie) | `entryRedirect` |
-| `robots.txt`, `sitemap.xml` | `public, max-age=3600` as now, plus `s-maxage` | `src/server-routes.ts` `crawlCache` |
+| `robots.txt`, `sitemap.xml` | `public, max-age=3600` as now, plus `s-maxage` | `packages/ui/src/parts/seo-routes/server-routes.ts` `crawlCache` |
 | `/healthz` | `no-store`; it must always reach the Worker | `withObservability` |
 | Future `/api` | `no-store` by default; `public` only for data that is the same for everyone, byte for byte | Per route, in the contracts plan |
 | `/assets/*` | `public, max-age=31536000, immutable` (done) | `public/_headers` |
@@ -83,7 +83,7 @@ Both finalists get a small scratch build in W1 before anything is chosen (how-we
 
 1. **Site pages must be the same for every visitor.** Today the language hint comes from the
    cookie and Accept-Language (`src/preferred.ts`, root loader) and the /formats place card from
-   `request.cf` (`src/place.server.ts`). Move both to the
+   `request.cf` (`packages/ui/src/parts/deferred-place/place.server.ts`). Move both to the
    browser on site pages only (`createClientOnlyFn` or `ssr: 'data-only'`; the browser location
    exists since 0.9.3). App pages keep them.
 2. **CSP:** a per-request nonce inside cached HTML would be served again to later visitors, which
