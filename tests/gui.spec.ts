@@ -6,13 +6,14 @@ import { publicPageChecks, entryChecks, demoChecks, formatsChecks, observability
 import { localeInfo, weekdayName } from '../packages/ui/src/locale-info';
 import { publicPaths } from '@joeblew999/remy-ui/paths';
 import { deferredPlaceChecks } from '@joeblew999/remy-ui/showcase/deferred-place.checks';
+import { statusCardChecks } from '@joeblew999/remy-ui/showcase/status-card.checks';
 
 // The shared checks cover what every app built on the package must satisfy.
 publicPageChecks({ paths: publicPaths });
 entryChecks({ paths: publicPaths, mode: 'redirect' });
 demoChecks();
 observabilityChecks({ service: 'remy-auth', paths: publicPaths });
-deferredPlaceChecks();
+deferredPlaceChecks(); statusCardChecks({ service: 'remy-auth' });
 formatsChecks({ extra: async (page, locale) => {
   // Rows only this server-rendered app has: more Intl examples and Cloudflare's geolocation.
   const messages = catalogs[locale];
