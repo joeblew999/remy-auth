@@ -1,0 +1,7 @@
+/* Fonts for every Remy app, the one home of this rule: only generic CSS families, no web fonts.
+   system-ui and monospace map to each platform's own fonts, which cover every script we ship
+   (Arabic, Hebrew, Thai, Ge'ez, Devanagari, CJK) and resolve at once. A named family that is not
+   loaded (Inter, ui-sans-serif, SFMono-Regular, Roboto, ...) makes a fresh Chrome renderer on
+   macOS stall its first layout for seconds. publicPageChecks fails if any element uses a
+   non-generic family or the page declares a web font. */
+@theme { --font-sans: system-ui, sans-serif; --font-mono: monospace; }

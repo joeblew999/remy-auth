@@ -1,9 +1,7 @@
 @import "tailwindcss" source(none);
 @import "@joeblew999/remy-ui/styles.css";
+@import "@joeblew999/remy-ui/fonts.css";
 @source "../src";
 @source "../packages/ui/src";
 
-/* Only family names that resolve at once: an unloaded name (Inter, ui-sans-serif, SFMono-Regular, ...)
-   makes a fresh Chrome renderer on macOS stall its first layout for seconds. */
-@theme { --font-sans: system-ui, sans-serif; --font-mono: Menlo, monospace; }
 body { font-family: var(--font-sans); color: var(--foreground); background: var(--background); }

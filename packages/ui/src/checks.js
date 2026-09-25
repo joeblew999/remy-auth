@@ -64,12 +64,20 @@ export function publicPageChecks({ paths, prerendered = false }) {
     expect(await (await request.get('/robots.txt')).text()).toContain('/sitemap.xml');
   });
 
-  test('right-to-left languages mirror the header and every page fits a narrow screen', async ({ page }) => {
+  test('right-to-left languages mirror the header, every page fits a narrow screen and uses only generic font families', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     for (const locale of locales) for (const path of paths) {
       await page.goto(localizedPath(path, locale));
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${locale}${path} overflows`).toBe(true);
+      // The fonts rule (fonts.css): platform fonts through generic families only, no web fonts.
+      const fonts = await page.evaluate(() => ({
+        families: [...new Set([document.documentElement, ...document.querySelectorAll('body, body *')]
+          .flatMap(element => getComputedStyle(element).fontFamily.split(',')).map(name => name.trim().replace(/^["']|["']$/g, '')))],
+        webFonts: document.fonts.size,
+      }));
+      expect(fonts.families.filter(name => !['system-ui', 'sans-serif', 'serif', 'monospace', 'emoji', 'math'].includes(name)), `${locale}${path} named fonts`).toEqual([]);
+      expect(fonts.webFonts, `${locale}${path} web fonts`).toBe(0);
       const brand = await page.locator('.brand').boundingBox();
       const languages = await page.locator('nav.languages').boundingBox();
       if (direction(locale) === 'rtl') expect(brand.x, `${locale}${path}`).toBeGreaterThan(languages.x);

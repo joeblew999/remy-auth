@@ -53,7 +53,10 @@ Pre-release for the move to TanStack Start and Router ([plan](.plans/tanstack.md
 - `performanceChecks` no longer warms a page before Lighthouse measures it. The warm-up hid a
   first-layout stall of seconds that every visitor paid in a fresh Chrome renderer on macOS; the
   cause was font-family names that never load (`Inter`, `ui-monospace`, `SFMono-Regular`, ...),
-  fixed in each app's `@theme` with `system-ui, sans-serif` and `Menlo, monospace`.
+  fixed by the new `fonts.css` export (generic families only: `system-ui, sans-serif` and
+  `monospace`), which each app imports after `styles.css`.
+- `publicPageChecks` fails when any element on any page uses a non-generic font family or the
+  page declares a web font.
 
 ## [0.8.0] - 2026-09-24
 

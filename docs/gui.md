@@ -85,7 +85,11 @@ preload their route's code and data on intent; language changes are full navigat
 - `packages/ui/`: shadcn/Base UI button, Remy's theme, compiled Paraglide messages, Paraglide's locale runtime (detection, cookie, URL localisation) re-exported, hreflang data, the language switcher and hint, TanStack Router and Start glue, the shared Playwright checks and config, so consumers get the whole behaviour in either rendering mode.
 - `tests/gui.spec.ts` and `tests/lighthouse.spec.ts`: the package's shared checks (`@joeblew999/remy-ui/checks`) plus the checks only this repository owns (catalogs, concurrent server renders, hydration, its extra formats rows).
 
-The button and theme are sourced from Remy Sport's existing shadcn conventions.
+The button and theme are sourced from Remy Sport's existing shadcn conventions. Fonts have one
+rule, in the package's `fonts.css`: generic CSS families only (`system-ui`, `sans-serif`,
+`monospace`) and no web fonts, because platform fonts cover every script and a named family that
+is not loaded stalls a fresh Chrome renderer for seconds. `publicPageChecks` enforces it on every
+page in every language.
 Both rendering modes import the package's public exports. Locale is passed
 explicitly into compiled message functions; concurrent requests share no mutable
 locale state. English, Spanish and Arabic are the catalogs; the Arabic catalog was
