@@ -50,7 +50,8 @@ export function preloadChecks({ serverFn = true, locale = 'en' } = {}) {
     const log = record(page);
     await page.goto(localizedPath('/formats', locale));
     await page.waitForLoadState('networkidle');
-    await page.locator('#main').getByRole('link', { name: m.home_link({}, o), exact: true }).click();
+    // Site pages navigate through the header (no back links): its brand link leads home.
+    await page.locator('.site-header .brand').click();
     await expect(page).toHaveURL(`${baseURL}${localizedPath('', locale)}`);
     await page.locator('#main').getByRole('link', { name: m.formats_link({}, o), exact: true }).click();
     await expect(page).toHaveURL(`${baseURL}${localizedPath('/formats', locale)}`);
