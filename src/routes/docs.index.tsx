@@ -2,8 +2,8 @@ import { createFileRoute } from '@tanstack/react-router';
 import { getLocale } from '@joeblew999/remy-ui/locale';
 import { docsHead, loadDocsPage } from '../docs/page';
 import { DocsView } from '../docs/view';
-import { usePreferred } from '../preferred';
-import { problemPages } from '../problem';
+import { usePreferred } from '@joeblew999/remy-ui/preferred';
+import { problemPages } from '@joeblew999/remy-ui/problem';
 
 // The docs home, /docs: the repository's README, a site page (.plans/docs-site.md).
 export const Route = createFileRoute('/docs/')({

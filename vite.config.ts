@@ -8,6 +8,11 @@ import { defineConfig } from 'vite';
 import { FontaineTransform } from 'fontaine';
 import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import { options as paraglide } from './packages/ui/paraglide.mjs';
+import { remyParts } from '@joeblew999/remy-ui/parts/vite';
+
+// The shared package's parts this app lists in src/parts.json, one line each (.plans/parts.md):
+// their routes mount beside src/routes and `virtual:remy-parts` says which are present.
+const parts = remyParts();
 
 // TanStack Start on Cloudflare's Vite plugin, per Cloudflare's and Paraglide's guides: the Worker
 // entry is wrangler.jsonc's main (src/server.ts), and the Start plugin comes before React's.
@@ -20,6 +25,7 @@ export default defineConfig({
     // TanStack Devtools: first, as its docs require; strips the devtools from production builds.
     devtools(),
     paraglideVitePlugin(paraglide),
+    parts.plugin,
     // Fumadocs MDX: compiles the docs table's Markdown in place (source.config.ts) into .source/; before Start's plugin.
     fumadocsMdx(),
     cloudflare({ viteEnvironment: { name: 'ssr' } }),
@@ -29,7 +35,7 @@ export default defineConfig({
     tailwindcss(),
     // TanStack Start's own option: the stylesheet inlined in the HTML, so the first paint needs no CSS
     // fetch (Lighthouse's simulated mobile LCP counted the preloaded scripts as blocking that fetch).
-    tanstackStart({ server: { build: { inlineCss: true } } }),
+    tanstackStart({ server: { build: { inlineCss: true } }, router: { virtualRouteConfig: parts.routes } }),
     viteReact(),
   ],
   server: { host: '127.0.0.1', port: 5173, strictPort: true },

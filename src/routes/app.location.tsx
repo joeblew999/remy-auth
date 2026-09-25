@@ -4,9 +4,9 @@ import { m } from '@joeblew999/remy-ui/messages';
 import { LocationPage } from '@joeblew999/remy-ui/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { getPlace } from '../place';
-import { usePreferred } from '../preferred';
+import { usePreferred } from '@joeblew999/remy-ui/preferred';
 import { DeferredPlace } from '../showcase/deferred-place';
-import { problemPages } from '../problem';
+import { problemPages } from '@joeblew999/remy-ui/problem';
 
 // Cloudflare's location of the request (streamed) beside the device's own (asked in the browser).
 export const Route = createFileRoute('/app/location')({

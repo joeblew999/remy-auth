@@ -45,6 +45,15 @@ evidence. Each item's detail lives in the plan it links to. Git history holds th
 | 7 | Security headers: static headers (be82e16) and report-only CSP (36184b8) done; step 3, enforce ([plan](gui-portal.md)) | a clean report period and **owner decision** | `Content-Security-Policy` enforced |
 | 8 | Contract-first APIs: items 2, 3 and 5 done on oRPC 1.15.4 (05d2511, 61c2ed7); items 4 and 6 open ([plan](openapi-contracts.md#progress-and-decisions-2026-09-25-branch-contract-api)) | ready | the contract published, consumers on it |
 | 9 | Parts: convert the existing parts with candidate 2 (virtual module, chosen from the spike) | ready | one line per part in each app |
+| 1 | Batch 3 merged (TanStack Form, Zod schema, TanStack Devtools); release 0.10.3, deploy | release gate | remy-auth-app moves to 0.10.3 |
+| 2 | ~~Merge batch 1~~ done 2026-09-25: remy-auth-app live on 0.10.2 (32 of 32 live), TanStack plan in done/, alert policy created | | |
+| 3 | Docs refactor: first pass merged 2026-09-25 (one home per fact, two rulebooks split); second pass: `docs/gui.md` evidence section, now.md history lines | | |
+| 4 | Tooling fixes first pass merged (sequential release gate, rollout wait, per-agent ports, cf:urls, project:upgrade-ui); second pass: docs for the new tasks, remy-auth-app CI | | shared tasks released with 0.10.3 |
+| 5 | Formats speed: TanStack Start's `inlineCss`; Core Web Vitals judged on a Cloudflare preview (`project:test:cwv`), thresholds unchanged (decided 2026-09-25) | release 0.10.3 | Google's level green on production |
+| 6 | Structured data on the site pages | batch 2, structured data | check in the server HTML |
+| 7 | Security headers rollout, report-only first | batch 2 report and **owner decision** | enforce after a clean report period |
+| 8 | Contract-first APIs: build items 2 to 6 on oRPC 1.15.4 (chosen from the spike) | ready | status and reservation endpoints |
+| 9 | Parts: convert the existing parts with candidate 2 (virtual module, chosen from the spike). First pass 2026-09-25: the mechanism and `time-zones`; the rest need the designs in [the plan](parts.md#conversion-first-pass-2026-09-25) | ready | one line per part in each app |
 | 10 | ~~Ten more languages~~ done 2026-09-25: 0.10.5, both apps live | | native-speaker review (owner) |
 | 11 | ~~Auth service decisions 1 to 6~~ done 2026-09-25: runtime proven (Better Auth 1.7.6 on D1), all confirmed by the owner | | |
 | 12 | Auth service milestone 1: Better Auth on D1, issuer, sample app | ready | login screens |

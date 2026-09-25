@@ -9,7 +9,7 @@ import { DirectionProvider } from '@joeblew999/remy-ui/components/direction';
 import { SiteNavLinks } from '@joeblew999/remy-ui/shell';
 import { docsHeaderLink } from '../docs/header-link';
 import { preferredLocale } from '../preferred';
-import { NotFound, ErrorPage } from '../problem';
+import { NotFound, ErrorPage } from '@joeblew999/remy-ui/problem';
 import '../styles.css';
 
 // Router context: the per-request QueryClient from getRouter (src/router.tsx).

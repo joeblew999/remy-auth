@@ -6,9 +6,9 @@ import { m } from '@joeblew999/remy-ui/messages';
 import { DemoPage } from '@joeblew999/remy-ui/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { useLeaveGuard } from '@joeblew999/remy-ui/showcase/navigation-blocking';
-import { usePreferred } from '../preferred';
+import { usePreferred } from '@joeblew999/remy-ui/preferred';
 import { orpc } from '../api/client';
-import { problemPages } from '../problem';
+import { problemPages } from '@joeblew999/remy-ui/problem';
 
 // An app page rendered in the browser only: the server sends the document and its metadata.
 export const Route = createFileRoute('/app/demo')({

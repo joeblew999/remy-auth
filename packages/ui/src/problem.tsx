@@ -1,10 +1,9 @@
 import { useRouter, type ErrorComponentProps } from '@tanstack/react-router';
-import { getLocale } from '@joeblew999/remy-ui/locale';
-import { m } from '@joeblew999/remy-ui/messages';
-import { Button } from '@joeblew999/remy-ui/button';
-import { Shell } from '@joeblew999/remy-ui/shell';
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@joeblew999/remy-ui/components/empty';
-import { buttonVariants } from '@joeblew999/remy-ui/components/button';
+import { getLocale } from './locale';
+import { m } from './paraglide/messages.js';
+import { Shell } from './shell';
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from './components/empty';
+import { Button, buttonVariants } from './components/button';
 
 // The localized problem pages, kept out of search results. The root route uses them for unknown
 // paths and failures outside any page; every page route sets them too (`...problemPages`), so a

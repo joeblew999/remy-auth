@@ -7,6 +7,8 @@ import { formatLocale } from '@joeblew999/remy-ui/locale-info';
 import { Group, Row } from '@joeblew999/remy-ui/pages';
 import { Skeleton as Placeholder } from '@joeblew999/remy-ui/components/skeleton';
 import { DevicePlace } from '@joeblew999/remy-ui/showcase/device-place';
+// The zone links to the time-zones part's page only when the app lists that part (src/parts.json).
+import { hasPart } from 'virtual:remy-parts';
 
 /**
  * Cloudflare's view of the visitor, streamed: the loader returns the place unawaited, the page's
@@ -33,9 +35,9 @@ function PlaceGroup({ locale, place }: { locale: Locale; place: Place }) {
   return <Group title={m.location_heading({}, o)}>
     <Row sample="country" label={m.your_country_label({}, o)} data-country={place.country}>{place.country ? regionName.of(place.country) : unknown}</Row>
     <Row sample="place" label={m.place_label({}, o)}>{[place.city, place.region].filter(Boolean).join(', ') || unknown}</Row>
-    <Row sample="cf-timezone" label={m.cf_timezone_label({}, o)} data-timezone={place.timeZone}>{place.timeZone
+    <Row sample="cf-timezone" label={m.cf_timezone_label({}, o)} data-timezone={place.timeZone}>{place.timeZone && hasPart('time-zones')
       ? <Link className="underline underline-offset-4" to="/time-zones/$" params={{ _splat: place.timeZone }} preload="intent">{place.timeZone}</Link>
-      : unknown}</Row>
+      : place.timeZone || unknown}</Row>
     <Row sample="cf-local" label={m.cf_local_time_label({}, o)}>{localTime}</Row>
   </Group>;
 }

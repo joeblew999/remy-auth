@@ -61,6 +61,9 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `client` | `useSuggestedLocale`, `DeviceTime` for prerendered apps |
 | `worker` | `withObservability` and the request-ID helpers |
 | `cloudflare` | `placeFromCloudflare` |
+| `problem` | The localized problem pages: `Problem`, `NotFound`, `ErrorPage`, `problemPages` (one spread line per page route) |
+| `preferred` | `usePreferred`, the root loader's `preferred` language, for page routes (the app's root loader returns it) |
+| `parts`, `parts/vite`, `parts/checks` | Parts ([plan](../../.plans/parts.md)): an app lists them in `src/parts.json`, one name per line. `remyParts()` in `vite.config.ts` (its `plugin` among the plugins, its `routes` as `tanstackStart({ router: { virtualRouteConfig } })`) mounts each listed part's routes beside `src/routes` and generates `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` in the test file runs each listed part's checks. Parts today: `time-zones` |
 | `showcase/*` | TanStack showcase pieces: search params and `choiceCards`, device place, leave guard, time zones |
 | `samples` | The fixed values the pages render |
 | `checks`, `showcase/*.checks` | Shared Playwright checks: public pages, entry URLs (with the Chinese strategy), demo (native digits), formats (own calendar and digits, week rules, word segmentation), text (`textChecks`: 320 px, hyphenation, casing by language), zones, observability, Lighthouse and Core Web Vitals, and one per showcase piece; zones, observability, the Content Security Policy, Lighthouse and Core Web Vitals, and one per showcase |

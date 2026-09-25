@@ -10,8 +10,8 @@ import { docsSearchSchema, searchDocs, searchQuery } from '../docs/search';
 import { SearchForm } from '../docs/search-form';
 import { SearchResults as Results } from '../docs/search-results';
 import { docsSearchPath } from '../paths';
-import { usePreferred } from '../preferred';
-import { problemPages } from '../problem';
+import { usePreferred } from '@joeblew999/remy-ui/preferred';
+import { problemPages } from '@joeblew999/remy-ui/problem';
 
 // Docs search (.plans/docs-site.md, "Docs search"): a site page, rendered on the server from the
 // query in its address with Fumadocs' search (src/docs/source.server.ts), so it works without

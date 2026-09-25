@@ -16,6 +16,7 @@ import { docsI18nDir, docsLangs, docsPath, docsTable } from '../src/docs/table.j
 import { deferredPlaceChecks } from '@joeblew999/remy-ui/showcase/deferred-place.checks';
 import { statusCardChecks } from '@joeblew999/remy-ui/showcase/status-card.checks';
 import { problemChecks } from '@joeblew999/remy-ui/showcase/problem.checks';
+import { partChecks } from '@joeblew999/remy-ui/parts/checks';
 import { codeSplittingChecks } from '@joeblew999/remy-ui/showcase/code-splitting.checks';
 import { buildBoundaryChecks } from '@joeblew999/remy-ui/showcase/build-boundaries.checks';
 import { devicePlaceChecks } from '@joeblew999/remy-ui/showcase/device-place.checks';
@@ -49,7 +50,9 @@ navigationBlockingChecks();
 deferredPlaceChecks();
 devicePlaceChecks({ path: '/app/location', network: true });
 statusCardChecks({ service: 'remy-auth', path: '/app', endpoint: '/api/status' });
-problemChecks({ timeZones: { known: 'Asia/Tokyo', alias: 'asia/tokyo', unknown: 'Mars/Olympus_Mons' }, failingNavigation: { from: '', link: 'formats_link', fail: '**/_serverFn/**', heading: 'formats_title' }, serverRoutes: [{ path: '/robots.txt', type: 'text/plain; charset=utf-8', cache: 'public, max-age=3600, s-maxage=3600', origin: true }, { path: '/sitemap.xml', type: 'application/xml; charset=utf-8', cache: 'public, max-age=3600, s-maxage=3600', origin: true }] });
+// Every part listed in src/parts.json brings its own checks.
+partChecks();
+problemChecks({ failingNavigation: { from: '', link: 'formats_link', fail: '**/_serverFn/**', heading: 'formats_title' }, serverRoutes: [{ path: '/robots.txt', type: 'text/plain; charset=utf-8', cache: 'public, max-age=3600, s-maxage=3600', origin: true }, { path: '/sitemap.xml', type: 'application/xml; charset=utf-8', cache: 'public, max-age=3600, s-maxage=3600', origin: true }] });
 formatsChecks({ extra: async (page, locale) => {
   // Rows only this server-rendered app has: more Intl examples and Cloudflare's geolocation.
   const messages = catalogs[locale];

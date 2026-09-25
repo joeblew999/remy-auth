@@ -7,6 +7,13 @@ package follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- Parts (`.plans/parts.md`): `./parts` (`readParts`, `catalog`), `./parts/vite` (`remyParts()`: a Vite
+  plugin generating `virtual:remy-parts` from the app's `src/parts.json`, and the route config that
+  mounts each listed part's routes through TanStack's `virtualRouteConfig` and `physical()`),
+  `./parts/checks` (`partChecks()`). First part: `time-zones` (the `/time-zones/$` route and its checks),
+  so an app adds or removes it with one line. New dependency `@tanstack/virtual-file-routes`.
+- `./problem` (`Problem`, `NotFound`, `ErrorPage`, `problemPages`) and `./preferred` (`usePreferred`),
+  moved from remy-auth so parts' routes can use them. Nothing changes for existing imports.
 - `./smoke`: `smokeChecks({ sitePaths, appPaths, hydrate, locales })`, tier 1 of the test tiers (every page
   answers, site pages with a heading, chosen pages hydrate cleanly) for any app on the package.
 
