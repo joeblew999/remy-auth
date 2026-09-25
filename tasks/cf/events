@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Workers Logs of the deployed Worker: counts by event and level, then the latest events (all, or one event such as ask_failed). Read only; needs Cloudflare login"
+#MISE dir="{{config_root}}"
+# A shell wrapper so the module beside it loads as ESM wherever this directory is included from.
+set -euo pipefail
+exec node "$(dirname "$0")/observe.mjs" events "$@"

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Check the AI setup (AI Search and its AI Gateway) against Cloudflare's advice and our decisions; fails on a FAIL. Read only; needs Cloudflare login"
+#MISE dir="{{config_root}}"
+# A shell wrapper so the module beside it loads as ESM wherever this directory is included from.
+set -euo pipefail
+exec node "$(dirname "$0")/observe.mjs" ai-check "$@"

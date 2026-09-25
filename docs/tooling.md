@@ -289,3 +289,23 @@ mise run cf:errors -- --help
 Both tasks use the configured Worker; `cf:logs` also accepts an explicit Worker name.
 `cf:errors` filters Worker invocation failures, not all HTTP error responses. Durable audit
 storage, dashboards and alert delivery are open work in the observability plan.
+
+Stored history and the AI answers, read only, from Cloudflare's own APIs. The Worker, its AI Search
+instance and that instance's AI Gateway come from `wrangler.jsonc`, so an including app gets its own:
+
+```sh
+mise run cf:events                      # Workers Logs, last 24 h: counts by event and level, latest 10
+mise run cf:events -- ask_failed --since 7d --limit 20
+mise run cf:ai-usage                    # AI Gateway, last 7 days: calls, cache, failures, tokens, cost, time
+mise run cf:ai-check                    # AI Search and gateway settings against Cloudflare's advice; fails on FAIL
+```
+
+Wrangler's login reads AI Search but cannot be granted AI Gateway or Workers Logs access. Those need
+`CLOUDFLARE_OBSERVE_TOKEN`, an API token with **AI Gateway Read** and **Workers Observability Write**
+(the only permission Cloudflare's query API accepts, even for reading), created at
+<https://dash.cloudflare.com/profile/api-tokens> and kept in the gitignored `mise.local.toml`:
+
+```toml
+[env]
+CLOUDFLARE_OBSERVE_TOKEN = "<token>"
+```

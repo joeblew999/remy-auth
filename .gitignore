@@ -29,3 +29,6 @@ node_modules/
 .claude/skills/
 # Temporary git worktrees that agents create; machine-local.
 .claude/worktrees/
+
+# Local mise settings and secrets (CLOUDFLARE_OBSERVE_TOKEN, a local tasks path).
+mise.local.toml
