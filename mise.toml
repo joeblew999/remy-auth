@@ -100,6 +100,15 @@ description = "Regenerate every shadcn component from the registry into the shar
 dir = "{{config_root}}"
 run = "./node_modules/.bin/shadcn add button card input label badge alert field separator direction skeleton empty sidebar breadcrumb collapsible dropdown-menu avatar sheet tooltip navigation-menu use-mobile table spinner dialog command --overwrite --yes"
 
+[tasks."ui:blocks"]
+description = "Show what upstream shadcn changed in each owned block, in place (shadcn add --diff from the package, whose components alias puts blocks in packages/ui/src/blocks/<name>/components); merge by hand, never --overwrite (it drops Remy's data)"
+dir = "{{config_root}}"
+run = [
+  "./node_modules/.bin/shadcn add @shadcn/sidebar-16 -c packages/ui --diff src/blocks/sidebar-16/components/app-sidebar.tsx",
+  "./node_modules/.bin/shadcn add @shadcn/sidebar-16 -c packages/ui --diff src/blocks/sidebar-16/components/nav-main.tsx",
+  "./node_modules/.bin/shadcn add @shadcn/sidebar-16 -c packages/ui --diff src/blocks/sidebar-16/components/site-header.tsx",
+]
+
 [tasks."ui:theme"]
 description = "Rewrite the shared stylesheet with shadcn's default theme (Nova style, neutral) through shadcn apply; never edit packages/ui/src/styles/globals.css by hand"
 dir = "{{config_root}}"

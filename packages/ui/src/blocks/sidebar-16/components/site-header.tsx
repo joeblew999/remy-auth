@@ -1,13 +1,13 @@
 import { Link } from '@tanstack/react-router';
 import { PanelLeftIcon } from 'lucide-react';
-import type { Locale } from '../../paraglide/runtime.js';
-import { m } from '../../paraglide/messages.js';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from '../../components/breadcrumb';
-import { Button } from '../../components/button';
-import { Separator } from '../../components/separator';
-import { useSidebar } from '../../components/sidebar';
-import { LanguageMenu } from '../../language';
-import { ModeToggle } from '../../theme';
+import type { Locale } from '../../../paraglide/runtime.js';
+import { m } from '../../../paraglide/messages.js';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from '../../../components/breadcrumb';
+import { Button } from '../../../components/button';
+import { Separator } from '../../../components/separator';
+import { useSidebar } from '../../../components/sidebar';
+import { LanguageMenu } from '../../../language';
+import { ModeToggle } from '../../../theme';
 
 /** sidebar-16's SiteHeader: the sidebar toggle, the breadcrumb with the app's name, and the language menu where the block has its search form. */
 export function SiteHeader({ locale, path }: { locale: Locale; path: string }) {

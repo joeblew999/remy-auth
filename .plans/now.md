@@ -83,5 +83,3 @@ Each is small; fix or decide, then delete the line.
 - The time zone pages have no page of their own in the navigation: they are reached from a zone.
 - The demo's loading placeholder was removed (it duplicated the app frame); app pages rendered only
   in the browser show nothing until their script runs.
-- `@shadcn/sidebar-16` lands in the app when added; for a shared shell it was moved into the package
-  (`packages/ui/src/blocks/sidebar-16`) by hand, so `shadcn add` cannot update it later.

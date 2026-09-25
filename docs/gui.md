@@ -119,11 +119,15 @@ tasks in [`mise.toml`](../mise.toml) are the only way they change:
 ```sh
 mise run ui:components     # Re-add every shadcn component (extend the list there to add one)
 mise run ui:theme          # Rewrite globals.css with shadcn's default theme
+mise run ui:blocks         # Diff each owned block against upstream, in place
 mise run ui:verify         # Re-run both and fail on any difference (runs before every release)
 mise run ui:pack           # Produce the package tarball locally
 ```
 
-Blocks are owned copies, as shadcn intends; sidebar-16's README says what was changed.
+Blocks are owned copies, as shadcn intends; sidebar-16's README says what was changed. The
+package's `components` alias (`@joeblew999/remy-ui/blocks`) is where shadcn writes a block's own
+files when run from the package (`shadcn add <block> -c packages/ui`): `blocks/<name>/components`.
+So `ui:blocks` diffs them in place and upstream changes are merged by hand.
 
 Fonts live in [`packages/ui/src/fonts.css`](../packages/ui/src/fonts.css), imported after
 `globals.css` (see [`src/styles.css`](../src/styles.css)); the file explains its rules. fontaine in
