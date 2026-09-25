@@ -1,5 +1,6 @@
-# Cloudflare CLI, logs and deployment over the including project's pinned Wrangler; cf:deploy builds
-# with DEPLOY_ORIGIN as the public origin; cf:preview (the file task cf/preview) uploads a branch preview.
+# Cloudflare CLI and logs over the including project's pinned Wrangler. Deployment is in file tasks
+# beside this file: cf/deploy builds with DEPLOY_ORIGIN as the public origin, cf/preview uploads a
+# branch preview, and both wait through cf/wait until the new version is live.
 
 ["cf:cli"]
 description = "Run the pinned Cloudflare CLI (pass --help for commands)"
@@ -18,8 +19,3 @@ description = "Stream deployed Worker invocation failures (not all HTTP 4xx/5xx 
 raw_args = true
 dir = "{{config_root}}"
 run = "./node_modules/.bin/wrangler tail --format json --status error"
-
-["cf:deploy"]
-description = "Build with DEPLOY_ORIGIN as the public origin and upload to the authenticated Cloudflare account (~10 s). Then run project:test:remote in the background and keep working"
-dir = "{{config_root}}"
-run = ["PUBLIC_ORIGIN=\"$DEPLOY_ORIGIN\" ./node_modules/.bin/vite build", "./node_modules/.bin/wrangler deploy"]
