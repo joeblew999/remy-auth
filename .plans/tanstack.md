@@ -59,9 +59,10 @@ logout and role changes; the showcase's caching rows use public data only.
 ## Work items, in order
 
 1. **Spike and skills (about 1 hour).** Pin the versions above. Done 2026-09-25: 22 of the 23
-   TanStack skills installed from `TanStack/router` at `ddad69a`, scanned first. At migration,
-   swap the `remix-run/react-router` source for TanStack's `react-router` skill: both use that
-   name, and skills install flat by name, so they cannot coexist. In a scratch app, prove the four
+   TanStack skills installed from `TanStack/router` at `ddad69a`, scanned first. Swapped on
+   branch `tanstack`: the `remix-run/react-router` source is gone and TanStack's `react-router`
+   skill (React bindings) is the 23rd; both use that name, and skills install flat by name, so
+   they cannot coexist. In a scratch app, prove the four
    unverified points above on Cloudflare's local host. Stop and report if any is a blocker.
 2. **Package (`@joeblew999/remy-ui`).** Replace `react-router.tsx` with `tanstack.tsx`: the
    server-entry wrapper combining `paraglideMiddleware` and `withObservability`, the router
@@ -80,6 +81,14 @@ logout and role changes; the showcase's caching rows use public data only.
 5. **Showcase.** Build the rows of the table above, in that order, each with its shared check,
    in both apps where the rendering mode allows (streaming and the data-only panel are
    server-side, so remy-auth only; remy-auth-app shows the prerendered and client-side ones).
+   remy-auth done on branch `tanstack` (2026-09-25): typed search params, loader caching and
+   intent preloading, navigation blocking, the validated server function with request-ID
+   middleware, Query with the live status card, deferred place, problem pages and the time zone
+   sub-resource, server route caching and 405, execution boundaries, dev-only devtools, and
+   code-splitting and build-boundary checks, each with its shared check in
+   `packages/ui/src/showcase/`. The deferred place resolves before the shell flushes on the
+   server (Cloudflare's `cf` is synchronous), so streaming is proven on client navigation and by
+   the chunked response rather than by a server-visible skeleton; no artificial delay was added.
 6. **Shared tasks.** `project.toml` swaps `react-router typegen`, `dev` and `build` for the
    TanStack/Vite equivalents; consumers pick it up by bumping the include.
 7. **Ship.** Both level-1 gates, local release, both deploys, live checks in the background,

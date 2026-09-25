@@ -226,11 +226,11 @@
       "computedHash": "1e6cef0264b72fbf47618ccb82644b9a72934b2eeb35186842332928492a3cd2"
     },
     "react-router": {
-      "source": "remix-run/react-router",
-      "ref": "2d9827bc09bc562647553f8abf026823e3bfd9dd",
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
       "sourceType": "github",
-      "skillPath": ".agents/skills/react-router/SKILL.md",
-      "computedHash": "ff4d9bc724f0e56a51c453eef5b93caef1c16d3623ac49345d74fc1a5efbc05a"
+      "skillPath": "packages/react-router/skills/react-router/SKILL.md",
+      "computedHash": "f762a6278b2b1ae911195cc7748d213ed08f37cb70ce33aef1578a5759ef01d2"
     },
     "react-start": {
       "source": "TanStack/router",

@@ -153,7 +153,10 @@ prompted. Claude Code is installed separately; launching Codex does not require 
 ## Agent skills
 
 The skill sources are the `*_skills_source` vars of the `skills:install` task in
-[tasks/skills.toml](../tasks/skills.toml); the directory holds one file per task
+[tasks/skills.toml](../tasks/skills.toml): Better Auth, Cloudflare, Chrome DevTools, Modern Web
+Guidance, shadcn, Playwright CLI, GitHub release and TanStack Router/Start. TanStack's skills are
+named one by one, including its `react-router` skill (the React bindings), which replaced Remix's
+skill of the same name: skills install flat by name, so the two cannot coexist. The directory holds one file per task
 namespace, described in [tasks/README.md](../tasks/README.md). `mise.toml` includes that directory (`[task_config] includes = ["tasks"]`),
 and any other project can include the same directory by git reference pinned to a commit:
 

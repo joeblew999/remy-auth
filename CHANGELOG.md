@@ -22,6 +22,18 @@ Pre-release for the move to TanStack Start and Router ([plan](.plans/tanstack.md
   exports the `Reservation` and `ReservationResult` types. Without them it behaves as before.
 - Export patterns `./showcase/*` (`src/showcase/*.tsx`) and `./showcase/*.checks`
   (`src/showcase/*.checks.js`) for the TanStack showcase's components and checks.
+- `worker`: the inner handler receives the generated request ID as `X-Request-ID` (a client's
+  own value is replaced); new exports `logContext`, `writeLog`, `outcome`, `level` and
+  `requestIdHeader`, so the log contract has one definition.
+- Showcase modules: `showcase/search-params` (`validateSearch`, `searchDefaults`,
+  `calendarsFor`, `FormatsControls`), `showcase/navigation-blocking` (`useLeaveGuard`) and
+  `showcase/time-zone` (`TimeZonePage`, `canonicalTimeZone`, `timeZoneName`, `timeZonePath`).
+- Showcase checks: `search-params`, `preload`, `navigation-blocking`, `server-functions`,
+  `deferred-place`, `status-card`, `problem` (localized 404 for an unknown sub-resource, error
+  page without leaks and retry, read-only server routes with caching and 405),
+  `code-splitting` and `build-boundaries` (`serverOnlyMarkers`, `devtoolsMarkers`).
+- Catalog keys for the search-param controls, the leave-page warning, the live status card, the
+  retry button and the time zone page.
 
 ### Changed
 - `pages`: in-app links are TanStack `Link`s to de-localized paths with `preload="intent"`;
