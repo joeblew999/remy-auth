@@ -4,7 +4,7 @@
 //USAGE arg "<output>" help="The file Wrangler wrote through WRANGLER_OUTPUT_FILE_PATH during deploy or versions upload"
 // Cloudflare rolls a new version out over a few seconds, so checks start only once /healthz
 // answers with it; a timeout would otherwise test the previous version.
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 
 const [origin, output] = process.argv.slice(2);
 const fail = message => { console.error(`cf:wait: ${message}`); process.exit(1); };
@@ -29,6 +29,7 @@ for (let attempt = 1; attempt <= attempts; attempt++) {
     const release = response.ok ? (await response.json()).release : undefined;
     if (release === version) {
       console.log(`${origin} serves version ${version}.`);
+      await waitForAsset();
       process.exit(0);
     }
     last = response.ok ? `release ${release}` : `HTTP ${response.status}`;
@@ -38,3 +39,19 @@ for (let attempt = 1; attempt <= attempts; attempt++) {
   await new Promise(resolve => setTimeout(resolve, 2000));
 }
 fail(`${origin}/healthz did not report version ${version} within ${attempts * 2} s (last: ${last})`);
+
+// The Worker answers /healthz as soon as its version is live, but static assets (every page of a
+// prerendered app) spread across Cloudflare's edge separately: also wait until this build's entry
+// script is served, three times in a row.
+async function waitForAsset() {
+  const entry = readdirSync('dist/client/assets').filter(name => /^index-[\w-]+\.js$/.test(name)).at(0);
+  if (!entry) return;
+  let streak = 0;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    const response = await fetch(new URL(`/assets/${entry}`, origin), { cache: 'no-store' }).catch(() => undefined);
+    streak = response?.ok ? streak + 1 : 0;
+    if (streak === 3) { console.log(`${origin} serves this build's assets (${entry}).`); return; }
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+  fail(`${origin} did not serve this build's /assets/${entry} within ${attempts} s`);
+}

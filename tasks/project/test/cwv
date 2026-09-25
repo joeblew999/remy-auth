@@ -7,5 +7,8 @@ log="$(mktemp)"; trap 'rm -f "$log"' EXIT
 mise run cf:preview ${usage_alias:+"$usage_alias"} | tee "$log"
 origin="$(sed -n 's/^Preview passed level 1: \(https:[^ ]*\)$/\1/p' "$log" | tail -1)"
 [ -n "$origin" ] || { echo "project:test:cwv: cf:preview did not report its origin" >&2; exit 1; }
-TEST_BASE_URL="$origin" TEST_TARGET=remote ./node_modules/.bin/playwright test --project=google-cwv --no-deps
+# One speed measurement at a time on this machine: a second run waits for the lock (see project:test:google).
+lock="${TMPDIR:-/tmp}/remy-level2.lock"
+if command -v flock >/dev/null; then locker=(flock "$lock"); else locker=(lockf -k "$lock"); fi
+TEST_BASE_URL="$origin" TEST_TARGET=remote "${locker[@]}" ./node_modules/.bin/playwright test --project=google-cwv --no-deps
 echo "Core Web Vitals passed on $origin"

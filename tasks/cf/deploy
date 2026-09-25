@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-#MISE description="Build with DEPLOY_ORIGIN as the public origin, upload to the authenticated Cloudflare account and wait until production serves the new version (~20 s). Builds into dist/: not alongside a local level. Then run project:test:remote in the background and keep working"
+#MISE description="Run the local gate (project:verify), then build with DEPLOY_ORIGIN as the public origin, upload to the authenticated Cloudflare account and wait until production serves the new version (~1 min). Builds into dist/: not alongside a local level. Then run project:test:remote in the background and keep working"
 #MISE dir="{{config_root}}"
 set -euo pipefail
 : "${DEPLOY_ORIGIN:?cf:deploy needs DEPLOY_ORIGIN in [env]}"
+
+# Nothing red reaches production: the gate runs here, not by memory.
+mise run project:verify
 
 export PUBLIC_ORIGIN="$DEPLOY_ORIGIN"
 ./node_modules/.bin/vite build

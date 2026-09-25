@@ -81,6 +81,21 @@ When the owner hands over decisions, for example to finish work unattended:
   This once released a version whose checks had failed.
 - Before reporting work as done, run `mise run project:verify` and report its real result.
 
+## Sharing one machine between agents
+
+The machine crashed on 2026-09-25 with about ten agents building and testing at once (load 188),
+and timing-sensitive checks failed well before that. So:
+
+- An agent builds and tests only in its own git worktree, never in the main checkout: builds write
+  `dist/`, and two builds in one checkout delete each other's files.
+- Each agent sets its own `PREVIEW_PORT` from the shell (the repo's `mise.toml` reads it; never 4190,
+  which browsers block).
+- At most three agents run tests at the same time; research, writing and scratch spikes do not
+  count. When more are needed, set `PLAYWRIGHT_WORKERS=2` for each.
+- Google's level (`project:test:google`, `project:test:cwv`) takes a machine-wide lock, so a second
+  run waits rather than skewing the first.
+- `cf:deploy` runs the local gate itself; never chain a deploy after a gate with `;`.
+
 ## Reporting to the owner
 
 - Every report about something the owner can look at gives its URLs: the live sites, the preview

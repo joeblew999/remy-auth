@@ -15,6 +15,8 @@ export function playwrightConfig({ webServer, testDir = './tests', timezoneId = 
   return defineConfig({
     testDir,
     fullyParallel: true,
+    // PLAYWRIGHT_WORKERS caps the browsers this run starts, for machines running several agents at once.
+    ...(process.env.PLAYWRIGHT_WORKERS ? { workers: Number(process.env.PLAYWRIGHT_WORKERS) } : {}),
     reporter: [['list'], ['html', { open: 'never', outputFolder: `playwright-report/${remote ? 'remote' : 'local'}` }]],
     use: { baseURL: target.origin, ...devices['Desktop Chrome'], channel: 'chrome', timezoneId, colorScheme: process.env.COLOR_SCHEME ?? 'light' },
     // Two levels. "ours": the app's own checks, fast, gate every local release.

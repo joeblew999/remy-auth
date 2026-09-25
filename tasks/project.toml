@@ -74,7 +74,9 @@ description = "Level 2, audits: build, then run Google's Lighthouse audits (acce
 dir = "{{config_root}}"
 depends = ["project:build"]
 env = { TEST_TARGET = "local" }
-run = "./node_modules/.bin/playwright test --project=google"
+# One level 2 at a time on this machine (flock on Linux, lockf on macOS): Lighthouse shares one
+# Chrome DevTools daemon and needs a quiet CPU; a second run waits instead of skewing the first.
+run = "$(command -v flock >/dev/null && echo flock || echo 'lockf -k') \"${TMPDIR:-/tmp}/remy-level2.lock\" ./node_modules/.bin/playwright test --project=google"
 
 ["project:verify"]
 description = "Level 1: verify tasks, dependencies, MCP registration, types and our own checks (fast)"
