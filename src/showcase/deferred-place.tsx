@@ -4,6 +4,7 @@ import type { Place } from '@joeblew999/remy-ui/cloudflare';
 import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { Group, Row } from '@joeblew999/remy-ui/pages';
+import { Skeleton as Placeholder } from '@joeblew999/remy-ui/components/skeleton';
 import { DevicePlace } from '@joeblew999/remy-ui/showcase/device-place';
 
 /**
@@ -49,5 +50,5 @@ function PlaceSkeleton({ locale }: { locale: Locale }) {
 
 function Skeleton({ label }: { label: string }) {
   return <><dt className="text-muted-foreground">{label}</dt>
-    <dd><span aria-hidden="true" className="inline-block h-4 w-3/4 animate-pulse rounded bg-muted align-middle" /></dd></>;
+    <dd><Placeholder aria-hidden="true" className="h-4 w-3/4" /></dd></>;
 }

@@ -33,7 +33,7 @@ export function timeZoneName(locale: Locale, zone: string, style: 'longGeneric' 
 export function TimeZonePage({ locale, zone, preferred }: { locale: Locale; zone: string; preferred?: Locale }) {
   const o = { locale };
   return <Shell locale={locale} path={timeZonePath(zone)} preferred={preferred}>
-    <section className="mx-auto flex max-w-2xl flex-col gap-6">
+    <section className="flex flex-col gap-6">
       <Link className="inline-flex items-center gap-1 text-sm text-muted-foreground" to="/formats" preload="intent"><ArrowLeftIcon aria-hidden="true" className="size-4 rtl:rotate-180" />{m.formats_back({}, o)}</Link>
       <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{m.formats_label({}, o)}</p>
       <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">{timeZoneName(locale, zone, 'longGeneric')}</h1>

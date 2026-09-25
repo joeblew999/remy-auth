@@ -3,6 +3,8 @@ import { getLocale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
 import { Button } from '@joeblew999/remy-ui/button';
 import { Shell } from '@joeblew999/remy-ui/pages';
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@joeblew999/remy-ui/components/empty';
+import { buttonVariants } from '@joeblew999/remy-ui/components/button';
 
 // The localized problem pages, kept out of search results. The root route uses them for unknown
 // paths and failures outside any page; every page route sets them too (`...problemPages`), so a
@@ -34,13 +36,15 @@ export const problemPages = { notFoundComponent: NotFound, errorComponent: Error
 export function Problem({ missing, detail, children }: { missing: boolean; detail?: string; children?: React.ReactNode }) {
   const locale = getLocale();
   const title = missing ? m.not_found({}, { locale }) : m.error_title({}, { locale });
-  return <Shell locale={locale}><section className="problem mx-auto flex max-w-2xl flex-col gap-6" data-problem={missing ? 'not-found' : 'error'}><meta name="robots" content="noindex" />
+  return <Shell locale={locale}><Empty data-problem={missing ? 'not-found' : 'error'}><meta name="robots" content="noindex" />
     <title>{title}</title>
-    <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">{title}</h1>
-    <p className="text-lg leading-relaxed text-muted-foreground">{detail ?? (missing ? m.not_found_detail({}, { locale }) : m.error_detail({}, { locale }))}</p>
-    <div className="flex flex-wrap items-center gap-4">
+    <EmptyHeader>
+      <EmptyTitle><h1 className="text-2xl font-semibold tracking-tight">{title}</h1></EmptyTitle>
+      <EmptyDescription><p>{detail ?? (missing ? m.not_found_detail({}, { locale }) : m.error_detail({}, { locale }))}</p></EmptyDescription>
+    </EmptyHeader>
+    <EmptyContent className="flex-row flex-wrap justify-center">
       {children}
-      <a className="underline underline-offset-4" href={`/${locale}`}>{m.home_link({}, { locale })}</a>
-    </div>
-  </section></Shell>;
+      <a className={buttonVariants({ variant: 'link' })} href={`/${locale}`}>{m.home_link({}, { locale })}</a>
+    </EmptyContent>
+  </Empty></Shell>;
 }
