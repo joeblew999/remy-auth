@@ -121,7 +121,8 @@
     {
       "declarations": [
         "input count",
-        "local countPlural = count: plural"
+        "local countPlural = count: plural",
+        "local countText = count: number"
       ],
       "selectors": [
         "countPlural"
@@ -130,9 +131,9 @@
         "countPlural=zero": "لا توجد تطبيقات",
         "countPlural=one": "تطبيق واحد",
         "countPlural=two": "تطبيقان",
-        "countPlural=few": "{count} تطبيقات",
-        "countPlural=many": "{count} تطبيقًا",
-        "countPlural=other": "{count} تطبيق"
+        "countPlural=few": "{countText} تطبيقات",
+        "countPlural=many": "{countText} تطبيقًا",
+        "countPlural=other": "{countText} تطبيق"
       }
     }
   ],
@@ -183,13 +184,14 @@
     {
       "declarations": [
         "input n",
-        "local ordinal = n: plural type=ordinal"
+        "local ordinal = n: plural type=ordinal",
+        "local nText = n: number"
       ],
       "selectors": [
         "ordinal"
       ],
       "match": {
-        "ordinal=other": "المرتبة {n}"
+        "ordinal=other": "المرتبة {nText}"
       }
     }
   ],
@@ -213,7 +215,8 @@
       "declarations": [
         "input name",
         "input count",
-        "local countPlural = count: plural"
+        "local countPlural = count: plural",
+        "local countText = count: number"
       ],
       "selectors": [
         "countPlural"
@@ -222,9 +225,9 @@
         "countPlural=zero": "لم يحجز {name} أي مقعد.",
         "countPlural=one": "حجز {name} مقعدًا واحدًا.",
         "countPlural=two": "حجز {name} مقعدين.",
-        "countPlural=few": "حجز {name} {count} مقاعد.",
-        "countPlural=many": "حجز {name} {count} مقعدًا.",
-        "countPlural=other": "حجز {name} {count} مقعد."
+        "countPlural=few": "حجز {name} {countText} مقاعد.",
+        "countPlural=many": "حجز {name} {countText} مقعدًا.",
+        "countPlural=other": "حجز {name} {countText} مقعد."
       }
     }
   ],

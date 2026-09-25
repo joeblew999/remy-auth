@@ -1,0 +1,308 @@
+{
+  "home_title": "एक जानी-पहचानी जगह। हर Remy ऐप।",
+  "home_description": "Remy की साझा नींव, आपकी भाषा में।",
+  "home_intro": "वही कंट्रोल, वही रंग और वही भाषा एक Remy ऐप से दूसरे तक आपके साथ चलते हैं।",
+  "public_label": "साझा नींव",
+  "demo_link": "इंटरैक्टिव डेमो आज़माएं",
+  "formats_link": "तारीखें, संख्याएं और मुद्रा देखें",
+  "home_link": "अवलोकन",
+  "demo_title": "इसे अपना ही समझें।",
+  "demo_description": "उन्हीं साझा कंट्रोल के साथ एक छोटा-सा इंटरैक्शन आज़माएं।",
+  "demo_note": "यह एक सार्वजनिक डेमो है। खाता और साइन-इन की सुविधाएं जल्द आ रही हैं।",
+  "count_label": "बटन क्लिक",
+  "increment": "एक जोड़ें",
+  "reset": "रीसेट करें",
+  "loading": "इंटरैक्टिव डेमो लोड हो रहा है…",
+  "language_label": "भाषा",
+  "skip_link": "सामग्री पर जाएं",
+  "footer": "जाना-पहचाना लगे, इसलिए बनाया गया।",
+  "not_found": "पेज नहीं मिला",
+  "not_found_detail": "यह पेज उपलब्ध नहीं है। अवलोकन पर लौटें।",
+  "error_title": "कुछ गलत हो गया",
+  "error_detail": "कृपया फिर से कोशिश करें।",
+  "retry": "फिर से कोशिश करें",
+  "zone_description": "किसी समय क्षेत्र का नाम, UTC से अंतर और स्थानीय समय, आपकी भाषा में।",
+  "zone_intro": "हर समय क्षेत्र का एक नाम, UTC से एक अंतर और एक स्थानीय समय होता है, और हर एक आपकी भाषा के अपने नियमों से लिखा जाता है।",
+  "zone_id_label": "IANA पहचानकर्ता",
+  "utc_offset_label": "UTC से अंतर",
+  "zone_not_found": "{zone} नाम का कोई समय क्षेत्र नहीं है।",
+  "formats_back": "फ़ॉर्मैट पर वापस जाएं",
+  "demo_label": "इंटरैक्टिव डेमो",
+  "formats_title": "आपकी भाषा में फ़ॉर्मैट",
+  "formats_description": "Remy आपकी भाषा के अनुसार तारीखें, समय, कैलेंडर, संख्याएं, मुद्रा, बहुवचन और क्रम कैसे ढालता है।",
+  "formats_label": "अंतरराष्ट्रीय फ़ॉर्मैट",
+  "formats_intro": "नीचे दिया हर मान साझा संदेश कैटलॉग और आपकी भाषा के अपने नियमों से आता है, और सर्वर व ब्राउज़र दोनों में एक जैसा दिखता है।",
+  "language_tag": "लोकेल टैग",
+  "language_name": "अपनी भाषा में नाम",
+  "direction_label": "पढ़ने की दिशा",
+  "direction_ltr": "बाएं से दाएं",
+  "direction_rtl": "दाएं से बाएं",
+  "languages_available": "उपलब्ध भाषाएं",
+  "dates_heading": "तारीखें और समय",
+  "instant_label": "UTC में क्षण",
+  "plain_date_label": "कैलेंडर तारीख",
+  "relative_label": "सापेक्ष समय",
+  "numbers_heading": "संख्याएं",
+  "decimal_label": "दशमलव संख्या",
+  "percent_label": "प्रतिशत",
+  "currency_heading": "मुद्रा",
+  "currency_label": "यूरो में राशि",
+  "currency_note": "हर ऐप अपने पैसों का हिसाब खुद रखता है: राशि को सबसे छोटी इकाई में पूर्णांक के रूप में ISO 4217 कोड के साथ सहेजें और इस कैटलॉग से फ़ॉर्मैट करें।",
+  "choices_heading": "दूसरे मान आज़माएं",
+  "choices_note": "आपकी पसंद पते (URL) में रहती है, इसलिए इस पेज का लिंक वही मान दिखाता है।",
+  "plural_heading": "बहुवचन",
+  "instant_value": [
+    {
+      "declarations": [
+        "input instant",
+        "local formatted = instant: datetime dateStyle=full timeStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "instant=*": "{formatted}"
+      }
+    }
+  ],
+  "plain_date_value": [
+    {
+      "declarations": [
+        "input date",
+        "local formatted = date: datetime dateStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "date=*": "{formatted}"
+      }
+    }
+  ],
+  "relative_value": [
+    {
+      "declarations": [
+        "input days",
+        "local formatted = days: relativetime unit=day numeric=auto"
+      ],
+      "match": {
+        "days=*": "{formatted}"
+      }
+    }
+  ],
+  "decimal_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "percent_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number style=percent"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "currency_value": [
+    {
+      "declarations": [
+        "input amount",
+        "local formatted = amount: number style=currency currency=EUR"
+      ],
+      "match": {
+        "amount=*": "{formatted}"
+      }
+    }
+  ],
+  "apps_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{countText} ऐप",
+        "countPlural=other": "{countText} ऐप"
+      }
+    }
+  ],
+  "units_heading": "इकाइयां",
+  "distance_label": "दूरी",
+  "compact_label": "संक्षिप्त संख्या",
+  "currencies_label": "यही राशि दूसरी मुद्राओं में",
+  "currency_name_label": "मुद्रा का नाम",
+  "region_label": "देश के नाम का उदाहरण",
+  "ordinal_heading": "क्रमसूचक संख्याएं",
+  "variants_heading": "मान के अनुसार रूप",
+  "greeting_label": "अभिवादन",
+  "status_label": "आमंत्रण",
+  "sorting_heading": "क्रम",
+  "sorted_label": "इस भाषा के क्रम में नाम",
+  "range_label": "तारीख की अवधि",
+  "form_heading": "सीटें आरक्षित करें",
+  "name_label": "आपका नाम",
+  "guests_label": "सीटें",
+  "submit": "आरक्षित करें",
+  "name_required": "अपना नाम डालें।",
+  "guests_invalid": "1 से 20 तक सीटों की पूर्ण संख्या डालें।",
+  "leave_unsaved": "क्या यह पेज छोड़ना है? आपका आरक्षण अभी तक नहीं हुआ है।",
+  "greeting": "स्वागत है, {name}।",
+  "distance_value": [
+    {
+      "declarations": [
+        "input km",
+        "local formatted = km: number style=unit unit=kilometer unitDisplay=long"
+      ],
+      "match": {
+        "km=*": "{formatted}"
+      }
+    }
+  ],
+  "compact_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number notation=compact"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "position_value": [
+    {
+      "declarations": [
+        "input n",
+        "local ordinal = n: plural type=ordinal",
+        "local nText = n: number"
+      ],
+      "selectors": [
+        "ordinal"
+      ],
+      "match": {
+        "ordinal=one": "{nText}ला",
+        "ordinal=two": "{nText}रा",
+        "ordinal=few": "{nText}था",
+        "ordinal=many": "{nText}ठा",
+        "ordinal=other": "{nText}वां"
+      }
+    }
+  ],
+  "invite_status": [
+    {
+      "declarations": [
+        "input status"
+      ],
+      "selectors": [
+        "status"
+      ],
+      "match": {
+        "status=accepted": "आमंत्रण स्वीकार किया गया",
+        "status=declined": "आमंत्रण अस्वीकार किया गया",
+        "status=*": "आमंत्रण लंबित है"
+      }
+    }
+  ],
+  "reserved": [
+    {
+      "declarations": [
+        "input name",
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{name} ने {countText} सीट आरक्षित की।",
+        "countPlural=other": "{name} ने {countText} सीटें आरक्षित कीं।"
+      }
+    }
+  ],
+  "systems_heading": "कैलेंडर, सप्ताह और अंक",
+  "calendar_label": "कैलेंडर",
+  "other_calendars_label": "प्रचलित अन्य कैलेंडर",
+  "no_other_calendars": "कोई नहीं",
+  "week_start_label": "सप्ताह का पहला दिन",
+  "weekend_label": "सप्ताहांत",
+  "hour_cycle_label": "घंटे का प्रारूप",
+  "hour_cycle_12": "12 घंटे की घड़ी",
+  "hour_cycle_24": "24 घंटे की घड़ी",
+  "numbering_label": "अंक प्रणाली",
+  "timezone_heading": "समय क्षेत्र",
+  "local_time_label": "आपके डिवाइस के समय क्षेत्र में",
+  "local_time_note": "यह पंक्ति आपके ब्राउज़र में बनती है: सर्वर आपके डिवाइस की घड़ी नहीं देख सकता, इसलिए वह इसकी जगह Cloudflare की जगह-जानकारी का इस्तेमाल करता है।",
+  "location_heading": "आप कहां हैं",
+  "your_country_label": "आपका देश",
+  "place_label": "शहर और क्षेत्र",
+  "cf_timezone_label": "आपकी जगह का समय क्षेत्र",
+  "cf_local_time_label": "वहां का स्थानीय समय",
+  "location_unknown": "इस कनेक्शन पर अज्ञात",
+  "location_note": "Cloudflare हर अनुरोध के साथ नेटवर्क की जगह बताता है; सर्वर इसका इस्तेमाल ऊपर दिए स्थानीय समय के लिए करता है और इसे सहेजता नहीं है।",
+  "live_status_heading": "लाइव स्थिति",
+  "live_status_label": "स्थिति",
+  "live_status_ok": "चालू है",
+  "live_service_label": "सेवा",
+  "live_release_label": "रिलीज़",
+  "live_status_note": "सर्वर पर बनाया गया, फिर जब तक यह पेज खुला है, आपका ब्राउज़र इसे रीफ़्रेश करता रहता है।",
+  "live_refresh": "अभी रीफ़्रेश करें",
+  "continue_in": "{language} में जारी रखें",
+  "language_hint": "यह पेज {language} में भी उपलब्ध है।",
+  "keep_language": "{language} ही रखें",
+  "device_place_heading": "आपके डिवाइस की जगह",
+  "device_place_note": "आपका ब्राउज़र बता सकता है कि यह डिवाइस कहां है। यह जानकारी इसी पेज पर रहती है: हमारे सर्वर पर कुछ नहीं भेजा जाता।",
+  "device_place_button": "मेरे डिवाइस की जगह इस्तेमाल करें",
+  "device_place_asking": "आपके ब्राउज़र का इंतज़ार है…",
+  "device_place_denied": "आपके ब्राउज़र ने जगह शेयर नहीं की।",
+  "device_place_unavailable": "आपका डिवाइस अपनी जगह नहीं ढूंढ पाया।",
+  "device_place_unsupported": "यह ब्राउज़र जगह शेयर नहीं कर सकता।",
+  "latitude_label": "अक्षांश",
+  "longitude_label": "देशांतर",
+  "accuracy_label": "सटीकता",
+  "network_distance_label": "नेटवर्क की जगह से दूरी",
+  "nav_heading": "पेज",
+  "nav_home": "अवलोकन",
+  "nav_demo": "डेमो",
+  "nav_formats": "फ़ॉर्मैट",
+  "toggle_sidebar": "साइडबार दिखाएं या छिपाएं",
+  "zone_site": "साइट पेज · JavaScript के बिना चलता है",
+  "zone_app": "ऐप · JavaScript चाहिए",
+  "open_app": "ऐप खोलें",
+  "back_to_site": "साइट पर वापस जाएं",
+  "nav_location": "जगह",
+  "app_home_title": "आपका ऐप",
+  "app_home_description": "Remy का इंटरैक्टिव हिस्सा: लाइव डेटा, फ़ॉर्म और आपका डिवाइस।",
+  "app_home_intro": "यहां सब कुछ आपके ब्राउज़र में चलता है। साइट पेज JavaScript के बिना भी पढ़े जा सकते हैं।",
+  "location_title": "आप कहां हैं",
+  "location_description": "Cloudflare से मिली आपके नेटवर्क की जगह और, अगर आप अनुमति दें, तो आपके डिवाइस की अपनी जगह।",
+  "location_intro": "नेटवर्क जो बताता है, उसकी तुलना आपके डिवाइस की बताई जगह से करें।",
+  "sections_nav": "इस पेज पर",
+  "section_language": "यह भाषा",
+  "section_language_note": "यह कौन-सी भाषा है, इसे कैसे लिखा और पढ़ा जाता है।",
+  "section_time": "तारीखें और समय",
+  "section_time_note": "आज कौन-सा दिन है, क्या समय है, और यह भाषा इन्हें कैसे लिखती है।",
+  "section_numbers": "संख्याएं",
+  "section_numbers_note": "संख्याएं कैसे लिखी जाती हैं: अंक, समूहन, प्रतिशत और इकाइयां।",
+  "section_money": "पैसा",
+  "section_money_note": "राशियां इस भाषा में और दूसरी मुद्राओं में कैसी दिखती हैं।",
+  "section_words": "शब्द",
+  "section_words_note": "किसी मान के साथ टेक्स्ट कैसे बदलता है: बहुवचन, क्रम, रूप और छंटाई।",
+  "theme_toggle": "थीम",
+  "theme_light": "लाइट",
+  "theme_dark": "डार्क",
+  "theme_system": "सिस्टम",
+  "casing_label": "बड़े अक्षर",
+  "week_label": "सप्ताह, सप्ताहांत चिह्नित",
+  "word_breaks_heading": "शब्द-विभाजन",
+  "words_label": "होम पेज के शीर्षक के शब्द",
+  "word_count_label": "शब्दों की संख्या",
+  "long_word_label": "जर्मन भाषा का एक लंबा शब्द"
+}

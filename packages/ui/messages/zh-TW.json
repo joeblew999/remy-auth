@@ -1,0 +1,302 @@
+{
+  "home_title": "一個熟悉的地方，串起每個 Remy 應用程式。",
+  "home_description": "Remy 的共用基礎，以你的語言呈現。",
+  "home_intro": "從一個 Remy 應用程式到下一個，控制項、配色和語言都始終如一。",
+  "public_label": "共用基礎",
+  "demo_link": "試用互動示範",
+  "formats_link": "查看日期、數字和貨幣",
+  "home_link": "總覽",
+  "demo_title": "就像在自己家一樣。",
+  "demo_description": "使用同一套共用控制項，試試一個簡單的互動。",
+  "demo_note": "這是公開示範。帳戶和登入功能即將推出。",
+  "count_label": "按鈕點擊次數",
+  "increment": "加一",
+  "reset": "重設",
+  "loading": "正在載入互動示範…",
+  "language_label": "語言",
+  "skip_link": "跳至主要內容",
+  "footer": "打造熟悉的使用體驗。",
+  "not_found": "找不到網頁",
+  "not_found_detail": "無法使用這個網頁。請返回總覽。",
+  "error_title": "發生錯誤",
+  "error_detail": "請再試一次。",
+  "retry": "再試一次",
+  "zone_description": "時區的名稱、與 UTC 的時差及當地時間，以你的語言呈現。",
+  "zone_intro": "每個時區都有名稱、與 UTC 的時差和當地時間，並依照你的語言規則書寫。",
+  "zone_id_label": "IANA 識別碼",
+  "utc_offset_label": "與 UTC 的時差",
+  "zone_not_found": "沒有名為 {zone} 的時區。",
+  "formats_back": "返回格式",
+  "demo_label": "互動示範",
+  "formats_title": "以你的語言呈現的格式",
+  "formats_description": "Remy 如何依照你的語言調整日期、時間、曆法、數字、貨幣、複數和排序。",
+  "formats_label": "國際格式",
+  "formats_intro": "下方每個值都來自共用的訊息目錄與你的語言規則，在伺服器和瀏覽器中的呈現方式完全相同。",
+  "language_tag": "語言代碼",
+  "language_name": "該語言的自稱",
+  "direction_label": "閱讀方向",
+  "direction_ltr": "由左至右",
+  "direction_rtl": "由右至左",
+  "languages_available": "可用語言",
+  "dates_heading": "日期和時間",
+  "instant_label": "UTC 時刻",
+  "plain_date_label": "日曆日期",
+  "relative_label": "相對時間",
+  "numbers_heading": "數字",
+  "decimal_label": "小數",
+  "percent_label": "百分比",
+  "currency_heading": "貨幣",
+  "currency_label": "歐元金額",
+  "currency_note": "每個應用程式自行管理金額：以整數儲存最小貨幣單位並附上 ISO 4217 代碼，再用這個目錄格式化。",
+  "choices_heading": "試試其他值",
+  "choices_note": "你的選擇會保存在網址中，因此這個網頁的連結會顯示相同的值。",
+  "plural_heading": "複數",
+  "instant_value": [
+    {
+      "declarations": [
+        "input instant",
+        "local formatted = instant: datetime dateStyle=full timeStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "instant=*": "{formatted}"
+      }
+    }
+  ],
+  "plain_date_value": [
+    {
+      "declarations": [
+        "input date",
+        "local formatted = date: datetime dateStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "date=*": "{formatted}"
+      }
+    }
+  ],
+  "relative_value": [
+    {
+      "declarations": [
+        "input days",
+        "local formatted = days: relativetime unit=day numeric=auto"
+      ],
+      "match": {
+        "days=*": "{formatted}"
+      }
+    }
+  ],
+  "decimal_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "percent_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number style=percent"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "currency_value": [
+    {
+      "declarations": [
+        "input amount",
+        "local formatted = amount: number style=currency currency=EUR"
+      ],
+      "match": {
+        "amount=*": "{formatted}"
+      }
+    }
+  ],
+  "apps_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=other": "{countText} 個應用程式"
+      }
+    }
+  ],
+  "units_heading": "單位",
+  "distance_label": "距離",
+  "compact_label": "簡潔數字",
+  "currencies_label": "同一金額的其他貨幣",
+  "currency_name_label": "貨幣名稱",
+  "region_label": "國家名稱範例",
+  "ordinal_heading": "序數",
+  "variants_heading": "依值變化",
+  "greeting_label": "問候語",
+  "status_label": "邀請",
+  "sorting_heading": "排序",
+  "sorted_label": "依這個語言排序的名稱",
+  "range_label": "日期範圍",
+  "form_heading": "預訂座位",
+  "name_label": "你的姓名",
+  "guests_label": "座位數",
+  "submit": "預訂",
+  "name_required": "請輸入你的姓名。",
+  "guests_invalid": "請輸入 1 到 20 之間的整數座位數。",
+  "leave_unsaved": "要離開這個網頁嗎？你的預訂尚未完成。",
+  "greeting": "歡迎，{name}。",
+  "distance_value": [
+    {
+      "declarations": [
+        "input km",
+        "local formatted = km: number style=unit unit=kilometer unitDisplay=long"
+      ],
+      "match": {
+        "km=*": "{formatted}"
+      }
+    }
+  ],
+  "compact_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number notation=compact"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "position_value": [
+    {
+      "declarations": [
+        "input n",
+        "local ordinal = n: plural type=ordinal",
+        "local nText = n: number"
+      ],
+      "selectors": [
+        "ordinal"
+      ],
+      "match": {
+        "ordinal=other": "第 {nText} 名"
+      }
+    }
+  ],
+  "invite_status": [
+    {
+      "declarations": [
+        "input status"
+      ],
+      "selectors": [
+        "status"
+      ],
+      "match": {
+        "status=accepted": "已接受邀請",
+        "status=declined": "已拒絕邀請",
+        "status=*": "邀請待回覆"
+      }
+    }
+  ],
+  "reserved": [
+    {
+      "declarations": [
+        "input name",
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=other": "{name} 已預訂 {countText} 個座位。"
+      }
+    }
+  ],
+  "systems_heading": "曆法、週和數字",
+  "calendar_label": "曆法",
+  "other_calendars_label": "其他常用曆法",
+  "no_other_calendars": "無",
+  "week_start_label": "每週第一天",
+  "weekend_label": "週末",
+  "hour_cycle_label": "時制",
+  "hour_cycle_12": "12 小時制",
+  "hour_cycle_24": "24 小時制",
+  "numbering_label": "數字系統",
+  "timezone_heading": "時區",
+  "local_time_label": "依你裝置的時區",
+  "local_time_note": "這一列在你的瀏覽器中呈現：伺服器無法得知你裝置的時鐘，因此改用 Cloudflare 判斷的位置。",
+  "location_heading": "你所在的位置",
+  "your_country_label": "你的國家/地區",
+  "place_label": "城市和地區",
+  "cf_timezone_label": "你所在位置的時區",
+  "cf_local_time_label": "當地時間",
+  "location_unknown": "此連線無法得知",
+  "location_note": "Cloudflare 會在每個要求中回報網路的位置；伺服器用它來顯示上方的當地時間，不會儲存。",
+  "live_status_heading": "即時狀態",
+  "live_status_label": "狀態",
+  "live_status_ok": "運作正常",
+  "live_service_label": "服務",
+  "live_release_label": "版本",
+  "live_status_note": "先在伺服器上呈現，之後在這個網頁開啟期間由你的瀏覽器更新。",
+  "live_refresh": "立即重新整理",
+  "continue_in": "以{language}繼續",
+  "language_hint": "這個網頁也提供{language}版本。",
+  "keep_language": "繼續使用{language}",
+  "device_place_heading": "你的裝置位置",
+  "device_place_note": "你的瀏覽器可以分享這部裝置的位置。資訊只會留在這個網頁上，不會傳送到我們的伺服器。",
+  "device_place_button": "使用我裝置的位置",
+  "device_place_asking": "正在等候你的瀏覽器…",
+  "device_place_denied": "你的瀏覽器未分享位置。",
+  "device_place_unavailable": "你的裝置找不到自己的位置。",
+  "device_place_unsupported": "這個瀏覽器無法分享位置。",
+  "latitude_label": "緯度",
+  "longitude_label": "經度",
+  "accuracy_label": "精確度",
+  "network_distance_label": "與網路位置的距離",
+  "nav_heading": "網頁",
+  "nav_home": "總覽",
+  "nav_demo": "示範",
+  "nav_formats": "格式",
+  "toggle_sidebar": "切換側邊欄",
+  "zone_site": "網站頁面 · 不需要 JavaScript",
+  "zone_app": "應用程式 · 需要 JavaScript",
+  "open_app": "開啟應用程式",
+  "back_to_site": "返回網站",
+  "nav_location": "位置",
+  "app_home_title": "你的應用程式",
+  "app_home_description": "Remy 的互動部分：即時資料、表單和你的裝置。",
+  "app_home_intro": "這裡的一切都在你的瀏覽器中執行。網站頁面即使不使用 JavaScript 也能閱讀。",
+  "location_title": "你所在的位置",
+  "location_description": "Cloudflare 判斷的網路位置，以及在你允許時由裝置本身提供的位置。",
+  "location_intro": "比較網路和你的裝置各自回報的位置。",
+  "sections_nav": "本頁內容",
+  "section_language": "這個語言",
+  "section_language_note": "這是哪個語言，以及它如何書寫和閱讀。",
+  "section_time": "日期和時間",
+  "section_time_note": "現在的日期和時間，以及這個語言的寫法。",
+  "section_numbers": "數字",
+  "section_numbers_note": "數字的寫法：數字符號、分位、百分比和單位。",
+  "section_money": "金錢",
+  "section_money_note": "金額在這個語言和其他貨幣中的樣子。",
+  "section_words": "文字",
+  "section_words_note": "文字如何隨值改變：複數、順序、變化和排序。",
+  "theme_toggle": "主題",
+  "theme_light": "淺色",
+  "theme_dark": "深色",
+  "theme_system": "系統",
+  "casing_label": "大寫字母",
+  "week_label": "一週，並標示週末",
+  "word_breaks_heading": "斷詞",
+  "words_label": "首頁標題中的詞",
+  "word_count_label": "詞數",
+  "long_word_label": "一個很長的德文單字"
+}

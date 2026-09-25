@@ -1,0 +1,304 @@
+{
+  "home_title": "Ein vertrauter Ort. Jede Remy-App.",
+  "home_description": "Eine gemeinsame Grundlage für Remy, in Ihrer Sprache.",
+  "home_intro": "Dieselben Bedienelemente, Farben und dieselbe Sprache begleiten Sie von einer Remy-App zur nächsten.",
+  "public_label": "Gemeinsame Grundlage",
+  "demo_link": "Interaktive Demo ausprobieren",
+  "formats_link": "Datum, Zahlen und Währung ansehen",
+  "home_link": "Übersicht",
+  "demo_title": "Fühlen Sie sich wie zu Hause.",
+  "demo_description": "Probieren Sie eine kleine Interaktion mit denselben gemeinsamen Bedienelementen aus.",
+  "demo_note": "Dies ist eine öffentliche Demo. Konto- und Anmeldefunktionen folgen als Nächstes.",
+  "count_label": "Klicks auf die Schaltfläche",
+  "increment": "Eins hinzufügen",
+  "reset": "Zurücksetzen",
+  "loading": "Die interaktive Demo wird geladen …",
+  "language_label": "Sprache",
+  "skip_link": "Zum Inhalt springen",
+  "footer": "Gebaut, um vertraut zu wirken.",
+  "not_found": "Seite nicht gefunden",
+  "not_found_detail": "Diese Seite ist nicht verfügbar. Kehren Sie zur Übersicht zurück.",
+  "error_title": "Etwas ist schiefgelaufen",
+  "error_detail": "Bitte versuchen Sie es erneut.",
+  "retry": "Erneut versuchen",
+  "zone_description": "Name, UTC-Abweichung und Ortszeit einer Zeitzone, in Ihrer Sprache.",
+  "zone_intro": "Jede Zeitzone hat einen Namen, eine Abweichung von UTC und eine Ortszeit, jeweils nach den Regeln Ihrer Sprache geschrieben.",
+  "zone_id_label": "IANA-Kennung",
+  "utc_offset_label": "Abweichung von UTC",
+  "zone_not_found": "Es gibt keine Zeitzone namens {zone}.",
+  "formats_back": "Zurück zu den Formaten",
+  "demo_label": "Interaktive Demo",
+  "formats_title": "Formate in Ihrer Sprache",
+  "formats_description": "Wie Remy Datum, Uhrzeit, Kalender, Zahlen, Währung, Pluralformen und Sortierung an Ihre Sprache anpasst.",
+  "formats_label": "Internationale Formate",
+  "formats_intro": "Jeder Wert unten stammt aus dem gemeinsamen Nachrichtenkatalog und den Regeln Ihrer Sprache und wird auf dem Server und im Browser gleich dargestellt.",
+  "language_tag": "Sprachkennung",
+  "language_name": "Name in der eigenen Sprache",
+  "direction_label": "Leserichtung",
+  "direction_ltr": "Von links nach rechts",
+  "direction_rtl": "Von rechts nach links",
+  "languages_available": "Verfügbare Sprachen",
+  "dates_heading": "Datum und Uhrzeit",
+  "instant_label": "Zeitpunkt in UTC",
+  "plain_date_label": "Kalenderdatum",
+  "relative_label": "Relative Zeit",
+  "numbers_heading": "Zahlen",
+  "decimal_label": "Dezimalzahl",
+  "percent_label": "Prozentsatz",
+  "currency_heading": "Währung",
+  "currency_label": "Betrag in Euro",
+  "currency_note": "Jede App verwaltet ihr eigenes Geld: Speichern Sie ganzzahlige kleinste Einheiten mit einem ISO-4217-Code und formatieren Sie sie mit diesem Katalog.",
+  "choices_heading": "Andere Werte ausprobieren",
+  "choices_note": "Ihre Auswahl steht in der Adresse, sodass ein Link auf diese Seite dieselben Werte zeigt.",
+  "plural_heading": "Pluralformen",
+  "instant_value": [
+    {
+      "declarations": [
+        "input instant",
+        "local formatted = instant: datetime dateStyle=full timeStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "instant=*": "{formatted}"
+      }
+    }
+  ],
+  "plain_date_value": [
+    {
+      "declarations": [
+        "input date",
+        "local formatted = date: datetime dateStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "date=*": "{formatted}"
+      }
+    }
+  ],
+  "relative_value": [
+    {
+      "declarations": [
+        "input days",
+        "local formatted = days: relativetime unit=day numeric=auto"
+      ],
+      "match": {
+        "days=*": "{formatted}"
+      }
+    }
+  ],
+  "decimal_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "percent_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number style=percent"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "currency_value": [
+    {
+      "declarations": [
+        "input amount",
+        "local formatted = amount: number style=currency currency=EUR"
+      ],
+      "match": {
+        "amount=*": "{formatted}"
+      }
+    }
+  ],
+  "apps_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{countText} App",
+        "countPlural=other": "{countText} Apps"
+      }
+    }
+  ],
+  "units_heading": "Einheiten",
+  "distance_label": "Entfernung",
+  "compact_label": "Kompakte Zahl",
+  "currencies_label": "Derselbe Betrag in anderen Währungen",
+  "currency_name_label": "Name der Währung",
+  "region_label": "Beispiel für einen Ländernamen",
+  "ordinal_heading": "Ordnungszahlen",
+  "variants_heading": "Varianten nach Wert",
+  "greeting_label": "Begrüßung",
+  "status_label": "Einladung",
+  "sorting_heading": "Sortierung",
+  "sorted_label": "Namen in der Reihenfolge dieser Sprache",
+  "range_label": "Zeitraum",
+  "form_heading": "Plätze reservieren",
+  "name_label": "Ihr Name",
+  "guests_label": "Plätze",
+  "submit": "Reservieren",
+  "name_required": "Geben Sie Ihren Namen ein.",
+  "guests_invalid": "Geben Sie eine ganze Zahl von 1 bis 20 Plätzen ein.",
+  "leave_unsaved": "Diese Seite verlassen? Ihre Reservierung wurde noch nicht abgeschlossen.",
+  "greeting": "Willkommen, {name}.",
+  "distance_value": [
+    {
+      "declarations": [
+        "input km",
+        "local formatted = km: number style=unit unit=kilometer unitDisplay=long"
+      ],
+      "match": {
+        "km=*": "{formatted}"
+      }
+    }
+  ],
+  "compact_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number notation=compact"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "position_value": [
+    {
+      "declarations": [
+        "input n",
+        "local ordinal = n: plural type=ordinal",
+        "local nText = n: number"
+      ],
+      "selectors": [
+        "ordinal"
+      ],
+      "match": {
+        "ordinal=other": "{nText}."
+      }
+    }
+  ],
+  "invite_status": [
+    {
+      "declarations": [
+        "input status"
+      ],
+      "selectors": [
+        "status"
+      ],
+      "match": {
+        "status=accepted": "Einladung angenommen",
+        "status=declined": "Einladung abgelehnt",
+        "status=*": "Einladung ausstehend"
+      }
+    }
+  ],
+  "reserved": [
+    {
+      "declarations": [
+        "input name",
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{name} hat {countText} Platz reserviert.",
+        "countPlural=other": "{name} hat {countText} Plätze reserviert."
+      }
+    }
+  ],
+  "systems_heading": "Kalender, Woche und Ziffern",
+  "calendar_label": "Kalender",
+  "other_calendars_label": "Weitere gebräuchliche Kalender",
+  "no_other_calendars": "Keine",
+  "week_start_label": "Erster Tag der Woche",
+  "weekend_label": "Wochenende",
+  "hour_cycle_label": "Stundenzählung",
+  "hour_cycle_12": "12-Stunden-Format",
+  "hour_cycle_24": "24-Stunden-Format",
+  "numbering_label": "Zahlensystem",
+  "timezone_heading": "Zeitzone",
+  "local_time_label": "In der Zeitzone Ihres Geräts",
+  "local_time_note": "Diese Zeile wird in Ihrem Browser dargestellt: Der Server sieht die Uhr Ihres Geräts nie und verwendet stattdessen den Standort von Cloudflare.",
+  "location_heading": "Ihr Standort",
+  "your_country_label": "Ihr Land",
+  "place_label": "Stadt und Region",
+  "cf_timezone_label": "Zeitzone an Ihrem Standort",
+  "cf_local_time_label": "Ortszeit dort",
+  "location_unknown": "Bei dieser Verbindung unbekannt",
+  "location_note": "Cloudflare meldet mit jeder Anfrage den Standort des Netzwerks; der Server verwendet ihn für die Ortszeit oben und speichert ihn nicht.",
+  "live_status_heading": "Live-Status",
+  "live_status_label": "Status",
+  "live_status_ok": "Betriebsbereit",
+  "live_service_label": "Dienst",
+  "live_release_label": "Version",
+  "live_status_note": "Auf dem Server dargestellt und dann von Ihrem Browser aktualisiert, solange diese Seite geöffnet ist.",
+  "live_refresh": "Jetzt aktualisieren",
+  "continue_in": "Auf {language} fortfahren",
+  "language_hint": "Diese Seite gibt es auch auf {language}.",
+  "keep_language": "Bei {language} bleiben",
+  "device_place_heading": "Standort Ihres Geräts",
+  "device_place_note": "Ihr Browser kann mitteilen, wo sich dieses Gerät befindet. Die Angabe bleibt auf dieser Seite: Nichts wird an unsere Server gesendet.",
+  "device_place_button": "Standort meines Geräts verwenden",
+  "device_place_asking": "Warten auf Ihren Browser …",
+  "device_place_denied": "Ihr Browser hat keinen Standort freigegeben.",
+  "device_place_unavailable": "Ihr Gerät konnte seinen Standort nicht ermitteln.",
+  "device_place_unsupported": "Dieser Browser kann keinen Standort freigeben.",
+  "latitude_label": "Breitengrad",
+  "longitude_label": "Längengrad",
+  "accuracy_label": "Genauigkeit",
+  "network_distance_label": "Entfernung zum Standort des Netzwerks",
+  "nav_heading": "Seiten",
+  "nav_home": "Übersicht",
+  "nav_demo": "Demo",
+  "nav_formats": "Formate",
+  "toggle_sidebar": "Seitenleiste ein- oder ausblenden",
+  "zone_site": "Website-Seite · funktioniert ohne JavaScript",
+  "zone_app": "App · benötigt JavaScript",
+  "open_app": "App öffnen",
+  "back_to_site": "Zurück zur Website",
+  "nav_location": "Standort",
+  "app_home_title": "Ihre App",
+  "app_home_description": "Die interaktive Seite von Remy: Live-Daten, Formulare und Ihr Gerät.",
+  "app_home_intro": "Alles hier läuft in Ihrem Browser. Die Website-Seiten bleiben auch ohne JavaScript lesbar.",
+  "location_title": "Ihr Standort",
+  "location_description": "Ihr Netzwerkstandort laut Cloudflare und, wenn Sie es erlauben, der Ihres Geräts.",
+  "location_intro": "Vergleichen Sie, was das Netzwerk sagt, mit dem, was Ihr Gerät sagt.",
+  "sections_nav": "Auf dieser Seite",
+  "section_language": "Diese Sprache",
+  "section_language_note": "Welche Sprache das ist und wie sie geschrieben und gelesen wird.",
+  "section_time": "Datum und Uhrzeit",
+  "section_time_note": "Welcher Tag und welche Uhrzeit es ist und wie diese Sprache sie schreibt.",
+  "section_numbers": "Zahlen",
+  "section_numbers_note": "Wie Zahlen geschrieben werden: Ziffern, Gruppierung, Prozentangaben und Einheiten.",
+  "section_money": "Geld",
+  "section_money_note": "Wie Beträge aussehen, in dieser Sprache und in anderen Währungen.",
+  "section_words": "Wörter",
+  "section_words_note": "Wie sich Text mit einem Wert ändert: Pluralformen, Reihenfolge, Varianten und Sortierung.",
+  "theme_toggle": "Design",
+  "theme_light": "Hell",
+  "theme_dark": "Dunkel",
+  "theme_system": "System",
+  "casing_label": "Großbuchstaben",
+  "week_label": "Die Woche, Wochenende markiert",
+  "word_breaks_heading": "Worttrennung",
+  "words_label": "Wörter im Titel der Startseite",
+  "word_count_label": "Anzahl der Wörter",
+  "long_word_label": "Ein langes deutsches Wort"
+}

@@ -91,9 +91,12 @@ Rules for the regrouping:
 
 ## Translations
 
-The new catalogs are machine-made by the agent. They are marked unreviewed in each catalog's
-metadata and in the README until a native speaker reviews them. The checks prove structure,
-plural coverage and formatting, not wording.
+The new catalogs are machine-made by the agent. They are marked unreviewed in the package
+[README](../packages/ui/README.md#language) and in [docs/gui.md](../docs/gui.md) until a native
+speaker reviews them: not in the catalogs, because the message-format plugin reads every top-level
+key as a message and the catalog check requires every key set to equal the base (decided
+2026-09-25 under the owner's delegation). The checks prove structure, plural coverage and
+formatting, not wording.
 
 ## Verified 2026-09-25 (work item 1)
 
@@ -151,6 +154,36 @@ New message keys every catalog must carry: `casing_label`, `week_label`, `word_b
 `words_label`, `word_count_label`, `long_word_label` (the plural check now also covers 22 and 25).
 A consumer (remy-auth-app) must import `text.css` and call `textChecks({ paths: allPaths })`.
 
+## Work item 4 done (2026-09-25, branch l10n-features)
+
+The ten catalogs (written by five parallel agents, two languages each) are in
+[messages/](../packages/ui/messages/) and in Paraglide's `locales`, in the order of the table above,
+with their Noto fonts in [fonts.css](../packages/ui/src/fonts.css) (fontsource 5.3.0, pinned). Every
+check runs in all 13 languages, the zh-TW matching check end to end included; nothing is skipped.
+Found and fixed on the way, decided under the owner's delegation:
+
+- **Counts inside sentences used Latin digits** on the Persian page (`3 برنامه`, `رتبهٔ 11`), because
+  the catalogs placed `{count}` and `{n}` raw. Every catalog now formats them through Paraglide's own
+  `number` function (`local countText = count: number`) in `apps_count`, `position_value` and
+  `reserved`. A new assertion in the formats and demo checks fails on any digit that is not the
+  language's own.
+- **Two checks outgrew their timeout** looping over every language in one test (app pages kept out
+  of search, the 320 px text check). They are one test per language now, as the other per-language
+  checks are; the assertions are unchanged.
+- The entry check's "unsupported language falls back" case used German, which is now served; it
+  takes the first of a list of unserved languages instead, and fails if every one becomes served.
+
+Level 1 (`project:test`) now takes about 75 seconds with 13 languages (181 checks), level 1 plus
+types and build (`project:verify`) about 82 seconds, both measured on two consecutive green runs;
+level 2's audits about 33 seconds. Phone-width (375 px) screenshots of `/xx` and `/xx/formats` for the
+ten new languages showed no missing glyphs and no horizontal overflow. Arabic, Persian and Hebrew
+draw with the system's Arial through Geist's metric fallback, so their Noto fonts load only where
+Arial lacks the script; Chinese headings break inside words (`word-break: auto-phrase` is
+Japanese-only in Chrome).
+
+Still open from item 6: level 2 audits only `/en`, `/es`, `/ar` and `/en/formats`, not one page per
+script family.
+
 ## Work items, in order
 
 1. **Verify (about 1 hour):** Paraglide's language matching for scripts and regions; `getWeekInfo`
@@ -160,7 +193,7 @@ A consumer (remy-auth-app) must import `text.css` and call `textChecks({ paths: 
 3. **System features 1 to 8** in the package, each with its shared check, on the existing three
    languages first.
 4. **Catalogs** for the 10 new languages, added to Paraglide's settings. Parallel agents, one per
-   two languages.
+   two languages. Done (above).
 5. **Both apps** pick them up: new prefixes, prerendered pages in remy-auth-app, sitemap and
    hreflang.
 6. **Gates and timing.** Level 1 grows with the language count, from about 35 seconds to an

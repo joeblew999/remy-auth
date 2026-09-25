@@ -35,6 +35,11 @@ export const formatTag = locale => {
 };
 /** `value` written in a numbering system's digits, e.g. digits(3, 'arabext') is ۳. */
 const digits = (value, numberingSystem) => new Intl.NumberFormat('en', { numberingSystem, useGrouping: false }).format(value);
+/** The decimal digits in `text` that are not the language's own (Persian text with a Latin 3 gives ['3']). */
+export const foreignDigits = (text, locale) => {
+  const own = digits(1234567890, new Intl.Locale(locale).getNumberingSystems()[0]);
+  return [...text.matchAll(/\p{Nd}/gu)].map(([digit]) => digit).filter(digit => !own.includes(digit));
+};
 
 /** Collects page errors and console errors so a test can assert none happened. */
 export function collectErrors(page) {
@@ -117,9 +122,13 @@ export function publicPageChecks({ paths, prerendered = false }) {
 export function entryChecks({ paths, mode }) {
   if (mode === 'redirect') {
     test("URLs without a language redirect to the visitor's language: remembered choice, Accept-Language, else the base locale", async ({ request, browser, baseURL }) => {
+      // A language this project does not serve falls back to the base locale: the first of these
+      // that is not configured, so adding languages never turns the case into a supported one.
+      const unserved = ['sw-KE', 'nl-NL', 'fi-FI', 'ko-KR', 'vi-VN'].find(tag => !locales.includes(new Intl.Locale(tag).language));
+      expect(unserved, 'every candidate language is configured: extend the list').toBeTruthy();
       const cases = [
         [{ 'Accept-Language': 'es-MX,es;q=0.9,en;q=0.8' }, 'es'], [{ 'Accept-Language': 'ar-EG' }, 'ar'],
-        [{ 'Accept-Language': 'de-DE,de;q=0.9' }, baseLocale], [{ 'Accept-Language': '*' }, baseLocale],
+        [{ 'Accept-Language': `${unserved},${new Intl.Locale(unserved).language};q=0.9` }, baseLocale], [{ 'Accept-Language': '*' }, baseLocale],
         [{ 'Accept-Language': 'en', Cookie: 'PARAGLIDE_LOCALE=ar' }, 'ar'], [{ Cookie: 'PARAGLIDE_LOCALE=zz' }, baseLocale],
       ];
       for (const [headers, expected] of cases) for (const path of paths) {
@@ -236,6 +245,7 @@ export function demoChecks() {
       await guests.fill('3');
       await page.getByRole('button', { name: m.submit({}, o), exact: true }).click();
       await expect(page.locator('.reserved')).toHaveText(m.reserved({ name: samples.guest, count: 3 }, o));
+      expect(foreignDigits(await page.locator('.reserved').innerText(), locale), 'the confirmation writes the seats in the language\'s digits').toEqual([]);
       for (const [value, numberingSystem] of [[4, 'arabext'], [5, 'arab'], [12, 'arabext'], [7, new Intl.Locale(locale).getNumberingSystems()[0]]]) {
         await guests.fill(digits(value, numberingSystem));
         await page.getByRole('button', { name: m.submit({}, o), exact: true }).click();
@@ -305,6 +315,8 @@ export function formatsChecks({ extra } = {}) {
       for (const [sample, text] of Object.entries(expected)) await expect(page.locator(`[data-sample="${sample}"]`), sample).toHaveText(text);
       for (const count of samples.counts) await expect(page.locator(`[data-count="${count}"]`)).toHaveText(m.apps_count({ count }, o));
       for (const n of samples.positions) await expect(page.locator(`[data-position="${n}"]`)).toHaveText(m.position_value({ n }, o));
+      // Counts and positions inside sentences use the language's own digits too, as the number rows do.
+      for (const node of await page.locator('[data-count], [data-position]').all()) expect(foreignDigits(await node.innerText(), locale), await node.innerText()).toEqual([]);
       // The week in this locale's order from its first day, its weekend marked (Intl Locale Info's getWeekInfo).
       const days = Array.from({ length: 7 }, (_, index) => ((firstDay - 1 + index) % 7) + 1);
       await expect(page.locator('[data-weekday]')).toHaveText(days.map(day => weekday(locale, day, 'short')));
@@ -425,18 +437,21 @@ export function zoneChecks({ sitePaths, appPaths }) {
     await context.close();
   });
 
-  test('app pages are kept out of search and say they are the app', async ({ page, request }) => {
-    const sitemap = await (await request.get('/sitemap.xml')).text();
-    for (const locale of checkedLocales) for (const path of appPaths) {
-      const url = localizedPath(path, locale);
-      const response = await request.get(url);
-      expect(response.status(), url).toBe(200);
-      expect(await response.text(), url).toContain('<meta name="robots" content="noindex"/>');
-      expect(sitemap, url).not.toContain(`${url}<`);
-      await page.goto(url);
-      await expect(page.locator('[data-zone="app"]'), url).toHaveText(m.zone_app({}, { locale }));
-    }
-  });
+  // One test per language, as the other per-language checks: the work grows with the language count.
+  for (const locale of checkedLocales) {
+    test(`${locale}: app pages are kept out of search and say they are the app`, async ({ page, request }) => {
+      const sitemap = await (await request.get('/sitemap.xml')).text();
+      for (const path of appPaths) {
+        const url = localizedPath(path, locale);
+        const response = await request.get(url);
+        expect(response.status(), url).toBe(200);
+        expect(await response.text(), url).toContain('<meta name="robots" content="noindex"/>');
+        expect(sitemap, url).not.toContain(`${url}<`);
+        await page.goto(url);
+        await expect(page.locator('[data-zone="app"]'), url).toHaveText(m.zone_app({}, { locale }));
+      }
+    });
+  }
 
   test('on a phone in landscape the way back to the site stays in view', async ({ page }) => {
     await page.setViewportSize({ width: 844, height: 340 });
@@ -478,9 +493,10 @@ export function observabilityChecks({ service, paths }) {
  * the page's lang in place.
  */
 export function textChecks({ paths }) {
-  test('every page fits 320 px in every language; text hyphenates and capitalises by the page language', async ({ page }) => {
+  // One test per language, as the other per-language checks: the work grows with the language count.
+  for (const locale of checkedLocales) test(`${locale}: every page fits 320 px; text hyphenates and capitalises by the page language`, async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });
-    for (const locale of checkedLocales) for (const path of paths) {
+    for (const path of paths) {
       const url = localizedPath(path, locale);
       await page.goto(url);
       await expect(page.getByRole('heading', { level: 1 }), url).toBeVisible();

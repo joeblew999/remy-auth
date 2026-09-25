@@ -1,0 +1,308 @@
+{
+  "home_title": "Jedno znajome miejsce. Każda aplikacja Remy.",
+  "home_description": "Wspólna podstawa dla Remy, w Twoim języku.",
+  "home_intro": "Te same elementy sterujące, kolory i język towarzyszą Ci w każdej aplikacji Remy.",
+  "public_label": "Wspólna podstawa",
+  "demo_link": "Wypróbuj interaktywne demo",
+  "formats_link": "Zobacz daty, liczby i waluty",
+  "home_link": "Przegląd",
+  "demo_title": "Rozgość się.",
+  "demo_description": "Wypróbuj prostą interakcję z użyciem tych samych wspólnych elementów sterujących.",
+  "demo_note": "To publiczne demo. Konta i logowanie pojawią się wkrótce.",
+  "count_label": "Kliknięcia przycisku",
+  "increment": "Dodaj jeden",
+  "reset": "Wyzeruj",
+  "loading": "Wczytywanie interaktywnego demo…",
+  "language_label": "Język",
+  "skip_link": "Przejdź do treści",
+  "footer": "Stworzone, by było znajome.",
+  "not_found": "Nie znaleziono strony",
+  "not_found_detail": "Ta strona jest niedostępna. Wróć do przeglądu.",
+  "error_title": "Coś poszło nie tak",
+  "error_detail": "Spróbuj ponownie.",
+  "retry": "Spróbuj ponownie",
+  "zone_description": "Nazwa, przesunięcie względem UTC i czas lokalny strefy czasowej, w Twoim języku.",
+  "zone_intro": "Każda strefa czasowa ma nazwę, przesunięcie względem UTC i czas lokalny, a każde z nich jest zapisane według zasad Twojego języka.",
+  "zone_id_label": "Identyfikator IANA",
+  "utc_offset_label": "Przesunięcie względem UTC",
+  "zone_not_found": "Nie ma strefy czasowej o nazwie {zone}.",
+  "formats_back": "Wróć do formatów",
+  "demo_label": "Interaktywne demo",
+  "formats_title": "Formaty w Twoim języku",
+  "formats_description": "Jak Remy dostosowuje daty, godziny, kalendarze, liczby, waluty, liczbę mnogą i sortowanie do Twojego języka.",
+  "formats_label": "Formaty międzynarodowe",
+  "formats_intro": "Każda wartość poniżej pochodzi ze wspólnego katalogu komunikatów i zasad Twojego języka i jest wyświetlana tak samo na serwerze i w przeglądarce.",
+  "language_tag": "Znacznik języka",
+  "language_name": "Nazwa we własnym języku",
+  "direction_label": "Kierunek czytania",
+  "direction_ltr": "Od lewej do prawej",
+  "direction_rtl": "Od prawej do lewej",
+  "languages_available": "Dostępne języki",
+  "dates_heading": "Daty i godziny",
+  "instant_label": "Moment w czasie UTC",
+  "plain_date_label": "Data kalendarzowa",
+  "relative_label": "Czas względny",
+  "numbers_heading": "Liczby",
+  "decimal_label": "Liczba dziesiętna",
+  "percent_label": "Procent",
+  "currency_heading": "Waluta",
+  "currency_label": "Kwota w euro",
+  "currency_note": "Każda aplikacja zarządza własnymi pieniędzmi: przechowuj kwoty jako liczby całkowite w jednostkach podrzędnych razem z kodem ISO 4217 i formatuj je za pomocą tego katalogu.",
+  "choices_heading": "Wypróbuj inne wartości",
+  "choices_note": "Twoje wybory są zapisane w adresie, więc link do tej strony pokazuje te same wartości.",
+  "plural_heading": "Liczba mnoga",
+  "instant_value": [
+    {
+      "declarations": [
+        "input instant",
+        "local formatted = instant: datetime dateStyle=full timeStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "instant=*": "{formatted}"
+      }
+    }
+  ],
+  "plain_date_value": [
+    {
+      "declarations": [
+        "input date",
+        "local formatted = date: datetime dateStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "date=*": "{formatted}"
+      }
+    }
+  ],
+  "relative_value": [
+    {
+      "declarations": [
+        "input days",
+        "local formatted = days: relativetime unit=day numeric=auto"
+      ],
+      "match": {
+        "days=*": "{formatted}"
+      }
+    }
+  ],
+  "decimal_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "percent_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number style=percent"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "currency_value": [
+    {
+      "declarations": [
+        "input amount",
+        "local formatted = amount: number style=currency currency=EUR"
+      ],
+      "match": {
+        "amount=*": "{formatted}"
+      }
+    }
+  ],
+  "apps_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{countText} aplikacja",
+        "countPlural=few": "{countText} aplikacje",
+        "countPlural=many": "{countText} aplikacji",
+        "countPlural=other": "{countText} aplikacji"
+      }
+    }
+  ],
+  "units_heading": "Jednostki",
+  "distance_label": "Odległość",
+  "compact_label": "Liczba w formie skróconej",
+  "currencies_label": "Ta sama kwota w innych walutach",
+  "currency_name_label": "Nazwa waluty",
+  "region_label": "Przykładowa nazwa kraju",
+  "ordinal_heading": "Liczebniki porządkowe",
+  "variants_heading": "Warianty zależne od wartości",
+  "greeting_label": "Powitanie",
+  "status_label": "Zaproszenie",
+  "sorting_heading": "Sortowanie",
+  "sorted_label": "Imiona w kolejności tego języka",
+  "range_label": "Zakres dat",
+  "form_heading": "Zarezerwuj miejsca",
+  "name_label": "Twoje imię",
+  "guests_label": "Miejsca",
+  "submit": "Zarezerwuj",
+  "name_required": "Wpisz swoje imię.",
+  "guests_invalid": "Wpisz liczbę całkowitą miejsc od 1 do 20.",
+  "leave_unsaved": "Opuścić tę stronę? Rezerwacja nie została jeszcze dokonana.",
+  "greeting": "Witaj, {name}.",
+  "distance_value": [
+    {
+      "declarations": [
+        "input km",
+        "local formatted = km: number style=unit unit=kilometer unitDisplay=long"
+      ],
+      "match": {
+        "km=*": "{formatted}"
+      }
+    }
+  ],
+  "compact_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number notation=compact"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "position_value": [
+    {
+      "declarations": [
+        "input n",
+        "local ordinal = n: plural type=ordinal",
+        "local nText = n: number"
+      ],
+      "selectors": [
+        "ordinal"
+      ],
+      "match": {
+        "ordinal=other": "{nText}."
+      }
+    }
+  ],
+  "invite_status": [
+    {
+      "declarations": [
+        "input status"
+      ],
+      "selectors": [
+        "status"
+      ],
+      "match": {
+        "status=accepted": "Zaproszenie przyjęte",
+        "status=declined": "Zaproszenie odrzucone",
+        "status=*": "Zaproszenie oczekuje na odpowiedź"
+      }
+    }
+  ],
+  "reserved": [
+    {
+      "declarations": [
+        "input name",
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Rezerwacja dla {name}: {countText} miejsce.",
+        "countPlural=few": "Rezerwacja dla {name}: {countText} miejsca.",
+        "countPlural=many": "Rezerwacja dla {name}: {countText} miejsc.",
+        "countPlural=other": "Rezerwacja dla {name}: {countText} miejsca."
+      }
+    }
+  ],
+  "systems_heading": "Kalendarz, tydzień i cyfry",
+  "calendar_label": "Kalendarz",
+  "other_calendars_label": "Inne używane kalendarze",
+  "no_other_calendars": "Brak",
+  "week_start_label": "Pierwszy dzień tygodnia",
+  "weekend_label": "Weekend",
+  "hour_cycle_label": "Format godziny",
+  "hour_cycle_12": "Zegar 12-godzinny",
+  "hour_cycle_24": "Zegar 24-godzinny",
+  "numbering_label": "System liczbowy",
+  "timezone_heading": "Strefa czasowa",
+  "local_time_label": "W strefie czasowej Twojego urządzenia",
+  "local_time_note": "Ten wiersz jest generowany w Twojej przeglądarce: serwer nie widzi zegara Twojego urządzenia, więc zamiast niego używa lokalizacji z Cloudflare.",
+  "location_heading": "Gdzie jesteś",
+  "your_country_label": "Twój kraj",
+  "place_label": "Miasto i region",
+  "cf_timezone_label": "Strefa czasowa w Twojej lokalizacji",
+  "cf_local_time_label": "Czas lokalny w tym miejscu",
+  "location_unknown": "Nieznana dla tego połączenia",
+  "location_note": "Cloudflare podaje lokalizację sieci przy każdym żądaniu; serwer używa jej do wyświetlenia czasu lokalnego powyżej i jej nie przechowuje.",
+  "live_status_heading": "Stan na żywo",
+  "live_status_label": "Stan",
+  "live_status_ok": "Działa",
+  "live_service_label": "Usługa",
+  "live_release_label": "Wydanie",
+  "live_status_note": "Generowane na serwerze, a następnie odświeżane przez przeglądarkę, dopóki ta strona jest otwarta.",
+  "live_refresh": "Odśwież teraz",
+  "continue_in": "Kontynuuj w języku: {language}",
+  "language_hint": "Ta strona jest też dostępna w języku: {language}.",
+  "keep_language": "Pozostaw język: {language}",
+  "device_place_heading": "Lokalizacja Twojego urządzenia",
+  "device_place_note": "Przeglądarka może udostępnić lokalizację tego urządzenia. Pozostaje ona na tej stronie: nic nie jest wysyłane na nasze serwery.",
+  "device_place_button": "Użyj lokalizacji mojego urządzenia",
+  "device_place_asking": "Czekam na przeglądarkę…",
+  "device_place_denied": "Przeglądarka nie udostępniła lokalizacji.",
+  "device_place_unavailable": "Urządzenie nie mogło ustalić swojej lokalizacji.",
+  "device_place_unsupported": "Ta przeglądarka nie może udostępnić lokalizacji.",
+  "latitude_label": "Szerokość geograficzna",
+  "longitude_label": "Długość geograficzna",
+  "accuracy_label": "Dokładność",
+  "network_distance_label": "Odległość od lokalizacji sieci",
+  "nav_heading": "Strony",
+  "nav_home": "Przegląd",
+  "nav_demo": "Demo",
+  "nav_formats": "Formaty",
+  "toggle_sidebar": "Pokaż lub ukryj panel boczny",
+  "zone_site": "Strona witryny · działa bez JavaScriptu",
+  "zone_app": "Aplikacja · wymaga JavaScriptu",
+  "open_app": "Otwórz aplikację",
+  "back_to_site": "Wróć do witryny",
+  "nav_location": "Lokalizacja",
+  "app_home_title": "Twoja aplikacja",
+  "app_home_description": "Interaktywna część Remy: dane na żywo, formularze i Twoje urządzenie.",
+  "app_home_intro": "Wszystko tutaj działa w Twojej przeglądarce. Strony witryny pozostają czytelne bez JavaScriptu.",
+  "location_title": "Gdzie jesteś",
+  "location_description": "Lokalizacja Twojej sieci według Cloudflare oraz, jeśli na to pozwolisz, lokalizacja samego urządzenia.",
+  "location_intro": "Porównaj to, co podaje sieć, z tym, co podaje Twoje urządzenie.",
+  "sections_nav": "Na tej stronie",
+  "section_language": "Ten język",
+  "section_language_note": "Jaki to język oraz jak się w nim pisze i czyta.",
+  "section_time": "Daty i godziny",
+  "section_time_note": "Jaki jest dzień i godzina oraz jak ten język je zapisuje.",
+  "section_numbers": "Liczby",
+  "section_numbers_note": "Jak zapisuje się liczby: cyfry, grupowanie, procenty i jednostki.",
+  "section_money": "Pieniądze",
+  "section_money_note": "Jak wyglądają kwoty w tym języku i w innych walutach.",
+  "section_words": "Słowa",
+  "section_words_note": "Jak tekst zmienia się zależnie od wartości: liczba mnoga, kolejność, warianty i sortowanie.",
+  "theme_toggle": "Motyw",
+  "theme_light": "Jasny",
+  "theme_dark": "Ciemny",
+  "theme_system": "Systemowy",
+  "casing_label": "Wielkie litery",
+  "week_label": "Tydzień z zaznaczonym weekendem",
+  "word_breaks_heading": "Podział na słowa",
+  "words_label": "Słowa w tytule strony głównej",
+  "word_count_label": "Liczba słów",
+  "long_word_label": "Długie słowo niemieckie"
+}

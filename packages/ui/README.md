@@ -75,8 +75,9 @@ every locale prefixed in the URL, configured once in `paraglide.mjs`, which comp
 `messages/*.json` during type generation and the Vite build. Pass `{ locale }` explicitly to every
 message call; there is no process-wide locale. A server-rendered app runs the middleware and passes
 the visitor's preference down; a prerendered app resolves it in the browser after hydration; both
-render the same components. English, Spanish and Arabic are implemented; Arabic is agent-authored
-and unreviewed.
+render the same components. The languages are the `locales` in `project.inlang/settings.json`;
+every catalog except English and Spanish (Arabic, Persian, Hebrew, Thai, Japanese, Traditional
+Chinese, Hindi, Amharic, Polish, Turkish and German) is agent-authored and unreviewed.
 
 ## Publishing
 

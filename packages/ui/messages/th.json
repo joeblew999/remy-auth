@@ -1,0 +1,302 @@
+{
+  "home_title": "ที่เดียวที่คุ้นเคย ทุกแอปของ Remy",
+  "home_description": "รากฐานร่วมของ Remy ในภาษาของคุณ",
+  "home_intro": "ปุ่มควบคุม สี และภาษาเดียวกันจะติดตามคุณจากแอป Remy หนึ่งไปยังอีกแอปหนึ่ง",
+  "public_label": "รากฐานร่วม",
+  "demo_link": "ลองใช้เดโมแบบโต้ตอบ",
+  "formats_link": "ดูรูปแบบวันที่ ตัวเลข และสกุลเงิน",
+  "home_link": "ภาพรวม",
+  "demo_title": "ทำตัวตามสบาย",
+  "demo_description": "ลองโต้ตอบง่าย ๆ ด้วยปุ่มควบคุมชุดเดียวกัน",
+  "demo_note": "นี่คือเดโมสาธารณะ ฟีเจอร์บัญชีและการลงชื่อเข้าใช้จะมาในเร็ว ๆ นี้",
+  "count_label": "จำนวนครั้งที่คลิกปุ่ม",
+  "increment": "เพิ่มหนึ่ง",
+  "reset": "รีเซ็ต",
+  "loading": "กำลังโหลดเดโมแบบโต้ตอบ…",
+  "language_label": "ภาษา",
+  "skip_link": "ข้ามไปยังเนื้อหา",
+  "footer": "สร้างมาให้รู้สึกคุ้นเคย",
+  "not_found": "ไม่พบหน้านี้",
+  "not_found_detail": "หน้านี้ไม่พร้อมใช้งาน กลับไปที่ภาพรวม",
+  "error_title": "เกิดข้อผิดพลาด",
+  "error_detail": "โปรดลองอีกครั้ง",
+  "retry": "ลองอีกครั้ง",
+  "zone_description": "ชื่อ ค่าชดเชยจาก UTC และเวลาท้องถิ่นของเขตเวลา ในภาษาของคุณ",
+  "zone_intro": "เขตเวลาแต่ละแห่งมีชื่อ ค่าชดเชยจาก UTC และเวลาท้องถิ่น ซึ่งเขียนตามกฎของภาษาคุณเอง",
+  "zone_id_label": "ตัวระบุ IANA",
+  "utc_offset_label": "ค่าชดเชยจาก UTC",
+  "zone_not_found": "ไม่มีเขตเวลาชื่อ {zone}",
+  "formats_back": "กลับไปที่รูปแบบ",
+  "demo_label": "เดโมแบบโต้ตอบ",
+  "formats_title": "รูปแบบในภาษาของคุณ",
+  "formats_description": "วิธีที่ Remy ปรับวันที่ เวลา ปฏิทิน ตัวเลข สกุลเงิน รูปพหูพจน์ และการเรียงลำดับให้เข้ากับภาษาของคุณ",
+  "formats_label": "รูปแบบสากล",
+  "formats_intro": "ค่าทุกค่าด้านล่างมาจากแคตตาล็อกข้อความร่วมและกฎของภาษาคุณเอง และแสดงผลเหมือนกันทั้งบนเซิร์ฟเวอร์และในเบราว์เซอร์",
+  "language_tag": "แท็กภาษา",
+  "language_name": "ชื่อในภาษาของตัวเอง",
+  "direction_label": "ทิศทางการอ่าน",
+  "direction_ltr": "ซ้ายไปขวา",
+  "direction_rtl": "ขวาไปซ้าย",
+  "languages_available": "ภาษาที่มีให้ใช้",
+  "dates_heading": "วันที่และเวลา",
+  "instant_label": "ช่วงเวลาใน UTC",
+  "plain_date_label": "วันที่ตามปฏิทิน",
+  "relative_label": "เวลาแบบสัมพัทธ์",
+  "numbers_heading": "ตัวเลข",
+  "decimal_label": "เลขทศนิยม",
+  "percent_label": "เปอร์เซ็นต์",
+  "currency_heading": "สกุลเงิน",
+  "currency_label": "จำนวนเงินเป็นยูโร",
+  "currency_note": "แต่ละแอปดูแลเงินของตัวเอง: จัดเก็บเป็นหน่วยย่อยจำนวนเต็มพร้อมรหัส ISO 4217 แล้วจัดรูปแบบด้วยแคตตาล็อกนี้",
+  "choices_heading": "ลองค่าอื่น",
+  "choices_note": "ค่าที่คุณเลือกอยู่ในที่อยู่เว็บ ลิงก์มายังหน้านี้จึงแสดงค่าเดียวกัน",
+  "plural_heading": "รูปพหูพจน์",
+  "instant_value": [
+    {
+      "declarations": [
+        "input instant",
+        "local formatted = instant: datetime dateStyle=full timeStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "instant=*": "{formatted}"
+      }
+    }
+  ],
+  "plain_date_value": [
+    {
+      "declarations": [
+        "input date",
+        "local formatted = date: datetime dateStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "date=*": "{formatted}"
+      }
+    }
+  ],
+  "relative_value": [
+    {
+      "declarations": [
+        "input days",
+        "local formatted = days: relativetime unit=day numeric=auto"
+      ],
+      "match": {
+        "days=*": "{formatted}"
+      }
+    }
+  ],
+  "decimal_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "percent_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number style=percent"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "currency_value": [
+    {
+      "declarations": [
+        "input amount",
+        "local formatted = amount: number style=currency currency=EUR"
+      ],
+      "match": {
+        "amount=*": "{formatted}"
+      }
+    }
+  ],
+  "apps_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=other": "{countText} แอป"
+      }
+    }
+  ],
+  "units_heading": "หน่วย",
+  "distance_label": "ระยะทาง",
+  "compact_label": "ตัวเลขแบบย่อ",
+  "currencies_label": "จำนวนเงินเดียวกันในสกุลเงินอื่น",
+  "currency_name_label": "ชื่อสกุลเงิน",
+  "region_label": "ตัวอย่างชื่อประเทศ",
+  "ordinal_heading": "ลำดับที่",
+  "variants_heading": "ข้อความที่เปลี่ยนตามค่า",
+  "greeting_label": "คำทักทาย",
+  "status_label": "คำเชิญ",
+  "sorting_heading": "การเรียงลำดับ",
+  "sorted_label": "ชื่อที่เรียงตามลำดับของภาษานี้",
+  "range_label": "ช่วงวันที่",
+  "form_heading": "จองที่นั่ง",
+  "name_label": "ชื่อของคุณ",
+  "guests_label": "จำนวนที่นั่ง",
+  "submit": "จอง",
+  "name_required": "กรอกชื่อของคุณ",
+  "guests_invalid": "กรอกจำนวนที่นั่งเป็นจำนวนเต็มตั้งแต่ 1 ถึง 20",
+  "leave_unsaved": "ออกจากหน้านี้หรือไม่ การจองของคุณยังไม่เสร็จสมบูรณ์",
+  "greeting": "ยินดีต้อนรับ คุณ{name}",
+  "distance_value": [
+    {
+      "declarations": [
+        "input km",
+        "local formatted = km: number style=unit unit=kilometer unitDisplay=long"
+      ],
+      "match": {
+        "km=*": "{formatted}"
+      }
+    }
+  ],
+  "compact_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number notation=compact"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "position_value": [
+    {
+      "declarations": [
+        "input n",
+        "local ordinal = n: plural type=ordinal",
+        "local nText = n: number"
+      ],
+      "selectors": [
+        "ordinal"
+      ],
+      "match": {
+        "ordinal=other": "ลำดับที่ {nText}"
+      }
+    }
+  ],
+  "invite_status": [
+    {
+      "declarations": [
+        "input status"
+      ],
+      "selectors": [
+        "status"
+      ],
+      "match": {
+        "status=accepted": "ตอบรับคำเชิญแล้ว",
+        "status=declined": "ปฏิเสธคำเชิญแล้ว",
+        "status=*": "คำเชิญรอการตอบกลับ"
+      }
+    }
+  ],
+  "reserved": [
+    {
+      "declarations": [
+        "input name",
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=other": "{name} จอง {countText} ที่นั่งแล้ว"
+      }
+    }
+  ],
+  "systems_heading": "ปฏิทิน สัปดาห์ และตัวเลข",
+  "calendar_label": "ปฏิทิน",
+  "other_calendars_label": "ปฏิทินอื่นที่ใช้กัน",
+  "no_other_calendars": "ไม่มี",
+  "week_start_label": "วันแรกของสัปดาห์",
+  "weekend_label": "วันหยุดสุดสัปดาห์",
+  "hour_cycle_label": "ระบบนาฬิกา",
+  "hour_cycle_12": "นาฬิกา 12 ชั่วโมง",
+  "hour_cycle_24": "นาฬิกา 24 ชั่วโมง",
+  "numbering_label": "ระบบตัวเลข",
+  "timezone_heading": "เขตเวลา",
+  "local_time_label": "ตามเขตเวลาของอุปกรณ์คุณ",
+  "local_time_note": "แถวนี้แสดงผลในเบราว์เซอร์ของคุณ เซิร์ฟเวอร์ไม่เห็นนาฬิกาของอุปกรณ์ จึงใช้ตำแหน่งจาก Cloudflare แทน",
+  "location_heading": "ตำแหน่งของคุณ",
+  "your_country_label": "ประเทศของคุณ",
+  "place_label": "เมืองและภูมิภาค",
+  "cf_timezone_label": "เขตเวลาที่ตำแหน่งของคุณ",
+  "cf_local_time_label": "เวลาท้องถิ่นที่นั่น",
+  "location_unknown": "ไม่ทราบสำหรับการเชื่อมต่อนี้",
+  "location_note": "Cloudflare รายงานตำแหน่งของเครือข่ายมาพร้อมกับทุกคำขอ เซิร์ฟเวอร์ใช้ข้อมูลนี้เพื่อแสดงเวลาท้องถิ่นด้านบนเท่านั้นและไม่จัดเก็บไว้",
+  "live_status_heading": "สถานะปัจจุบัน",
+  "live_status_label": "สถานะ",
+  "live_status_ok": "ทำงานปกติ",
+  "live_service_label": "บริการ",
+  "live_release_label": "รุ่น",
+  "live_status_note": "แสดงผลบนเซิร์ฟเวอร์ จากนั้นเบราว์เซอร์จะรีเฟรชขณะที่หน้านี้เปิดอยู่",
+  "live_refresh": "รีเฟรชตอนนี้",
+  "continue_in": "ใช้ต่อเป็นภาษา{language}",
+  "language_hint": "หน้านี้มีให้อ่านเป็นภาษา{language}ด้วย",
+  "keep_language": "ใช้ภาษา{language}ต่อไป",
+  "device_place_heading": "ตำแหน่งของอุปกรณ์คุณ",
+  "device_place_note": "เบราว์เซอร์ของคุณสามารถแชร์ตำแหน่งของอุปกรณ์นี้ได้ ข้อมูลจะอยู่ในหน้านี้เท่านั้น ไม่มีการส่งไปยังเซิร์ฟเวอร์ของเรา",
+  "device_place_button": "ใช้ตำแหน่งของอุปกรณ์",
+  "device_place_asking": "กำลังรอเบราว์เซอร์ของคุณ…",
+  "device_place_denied": "เบราว์เซอร์ของคุณไม่ได้แชร์ตำแหน่ง",
+  "device_place_unavailable": "อุปกรณ์ของคุณหาตำแหน่งไม่พบ",
+  "device_place_unsupported": "เบราว์เซอร์นี้แชร์ตำแหน่งไม่ได้",
+  "latitude_label": "ละติจูด",
+  "longitude_label": "ลองจิจูด",
+  "accuracy_label": "ความแม่นยำ",
+  "network_distance_label": "ระยะห่างจากตำแหน่งของเครือข่าย",
+  "nav_heading": "หน้า",
+  "nav_home": "ภาพรวม",
+  "nav_demo": "เดโม",
+  "nav_formats": "รูปแบบ",
+  "toggle_sidebar": "เปิดหรือปิดแถบด้านข้าง",
+  "zone_site": "หน้าเว็บไซต์ · ทำงานได้โดยไม่ต้องใช้ JavaScript",
+  "zone_app": "แอป · ต้องใช้ JavaScript",
+  "open_app": "เปิดแอป",
+  "back_to_site": "กลับไปที่เว็บไซต์",
+  "nav_location": "ตำแหน่ง",
+  "app_home_title": "แอปของคุณ",
+  "app_home_description": "ด้านที่โต้ตอบได้ของ Remy: ข้อมูลสด แบบฟอร์ม และอุปกรณ์ของคุณ",
+  "app_home_intro": "ทุกอย่างในนี้ทำงานในเบราว์เซอร์ของคุณ ส่วนหน้าเว็บไซต์ยังอ่านได้โดยไม่ต้องใช้ JavaScript",
+  "location_title": "ตำแหน่งของคุณ",
+  "location_description": "ตำแหน่งเครือข่ายของคุณจาก Cloudflare และตำแหน่งของอุปกรณ์เองหากคุณอนุญาต",
+  "location_intro": "เปรียบเทียบตำแหน่งที่เครือข่ายบอกกับตำแหน่งที่อุปกรณ์ของคุณบอก",
+  "sections_nav": "ในหน้านี้",
+  "section_language": "ภาษานี้",
+  "section_language_note": "นี่คือภาษาอะไร เขียนและอ่านอย่างไร",
+  "section_time": "วันที่และเวลา",
+  "section_time_note": "วันนี้วันที่เท่าไร ตอนนี้กี่โมง และภาษานี้เขียนอย่างไร",
+  "section_numbers": "ตัวเลข",
+  "section_numbers_note": "วิธีเขียนตัวเลข: ตัวเลข การจัดกลุ่มหลัก เปอร์เซ็นต์ และหน่วย",
+  "section_money": "เงิน",
+  "section_money_note": "จำนวนเงินมีหน้าตาอย่างไร ในภาษานี้และในสกุลเงินอื่น",
+  "section_words": "คำ",
+  "section_words_note": "ข้อความเปลี่ยนไปตามค่าอย่างไร: รูปพหูพจน์ ลำดับ รูปแบบต่าง ๆ และการเรียงลำดับ",
+  "theme_toggle": "ธีม",
+  "theme_light": "สว่าง",
+  "theme_dark": "มืด",
+  "theme_system": "ตามระบบ",
+  "casing_label": "ตัวพิมพ์ใหญ่",
+  "week_label": "สัปดาห์ โดยทำเครื่องหมายวันหยุดสุดสัปดาห์",
+  "word_breaks_heading": "การตัดคำ",
+  "words_label": "คำในชื่อหน้าแรก",
+  "word_count_label": "จำนวนคำ",
+  "long_word_label": "คำภาษาเยอรมันที่ยาว"
+}

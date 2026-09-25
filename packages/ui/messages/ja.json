@@ -1,0 +1,302 @@
+{
+  "home_title": "なじみのある場所がひとつ。すべての Remy アプリで。",
+  "home_description": "Remy の共通基盤を、あなたの言語で。",
+  "home_intro": "同じ操作、同じ色、同じ言語が、Remy のどのアプリでもあなたについてきます。",
+  "public_label": "共通基盤",
+  "demo_link": "インタラクティブデモを試す",
+  "formats_link": "日付・数値・通貨の表示を見る",
+  "home_link": "概要",
+  "demo_title": "くつろいでご利用ください。",
+  "demo_description": "同じ共通コントロールを使った、簡単な操作を試してみましょう。",
+  "demo_note": "これは公開デモです。アカウントとサインインの機能は近日公開予定です。",
+  "count_label": "ボタンのクリック数",
+  "increment": "1 つ増やす",
+  "reset": "リセット",
+  "loading": "インタラクティブデモを読み込んでいます…",
+  "language_label": "言語",
+  "skip_link": "コンテンツへスキップ",
+  "footer": "なじみやすさを大切に。",
+  "not_found": "ページが見つかりません",
+  "not_found_detail": "このページは表示できません。概要に戻ってください。",
+  "error_title": "問題が発生しました",
+  "error_detail": "もう一度お試しください。",
+  "retry": "再試行",
+  "zone_description": "タイムゾーンの名前、UTC との時差、現地時刻を、あなたの言語で。",
+  "zone_intro": "タイムゾーンにはそれぞれ名前、UTC との時差、現地時刻があり、いずれもあなたの言語の規則で表記されます。",
+  "zone_id_label": "IANA 識別子",
+  "utc_offset_label": "UTC との時差",
+  "zone_not_found": "{zone} というタイムゾーンはありません。",
+  "formats_back": "表示形式に戻る",
+  "demo_label": "インタラクティブデモ",
+  "formats_title": "あなたの言語での表示形式",
+  "formats_description": "Remy が日付、時刻、暦、数値、通貨、複数形、並べ替えをあなたの言語に合わせる仕組み。",
+  "formats_label": "国際的な表示形式",
+  "formats_intro": "以下の値はすべて共通のメッセージカタログとあなたの言語の規則から生成され、サーバーでもブラウザでも同じように表示されます。",
+  "language_tag": "ロケールタグ",
+  "language_name": "その言語での名前",
+  "direction_label": "文字の方向",
+  "direction_ltr": "左から右",
+  "direction_rtl": "右から左",
+  "languages_available": "利用できる言語",
+  "dates_heading": "日付と時刻",
+  "instant_label": "UTC での時点",
+  "plain_date_label": "暦の日付",
+  "relative_label": "相対時間",
+  "numbers_heading": "数値",
+  "decimal_label": "小数",
+  "percent_label": "パーセント",
+  "currency_heading": "通貨",
+  "currency_label": "ユーロでの金額",
+  "currency_note": "金額は各アプリが管理します。整数の最小単位を ISO 4217 コードとともに保存し、このカタログで書式設定してください。",
+  "choices_heading": "ほかの値を試す",
+  "choices_note": "選んだ値はアドレスに保存されるため、このページへのリンクを開くと同じ値が表示されます。",
+  "plural_heading": "複数形",
+  "instant_value": [
+    {
+      "declarations": [
+        "input instant",
+        "local formatted = instant: datetime dateStyle=full timeStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "instant=*": "{formatted}"
+      }
+    }
+  ],
+  "plain_date_value": [
+    {
+      "declarations": [
+        "input date",
+        "local formatted = date: datetime dateStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "date=*": "{formatted}"
+      }
+    }
+  ],
+  "relative_value": [
+    {
+      "declarations": [
+        "input days",
+        "local formatted = days: relativetime unit=day numeric=auto"
+      ],
+      "match": {
+        "days=*": "{formatted}"
+      }
+    }
+  ],
+  "decimal_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "percent_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number style=percent"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "currency_value": [
+    {
+      "declarations": [
+        "input amount",
+        "local formatted = amount: number style=currency currency=EUR"
+      ],
+      "match": {
+        "amount=*": "{formatted}"
+      }
+    }
+  ],
+  "apps_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=other": "{countText} 個のアプリ"
+      }
+    }
+  ],
+  "units_heading": "単位",
+  "distance_label": "距離",
+  "compact_label": "短縮表記の数値",
+  "currencies_label": "同じ金額をほかの通貨で",
+  "currency_name_label": "通貨名",
+  "region_label": "国名の例",
+  "ordinal_heading": "序数",
+  "variants_heading": "値による表現の違い",
+  "greeting_label": "あいさつ",
+  "status_label": "招待",
+  "sorting_heading": "並べ替え",
+  "sorted_label": "この言語の順序で並べた名前",
+  "range_label": "期間",
+  "form_heading": "席を予約する",
+  "name_label": "お名前",
+  "guests_label": "席数",
+  "submit": "予約する",
+  "name_required": "お名前を入力してください。",
+  "guests_invalid": "席数は 1 から 20 までの整数で入力してください。",
+  "leave_unsaved": "このページを離れますか？予約はまだ完了していません。",
+  "greeting": "ようこそ、{name} さん。",
+  "distance_value": [
+    {
+      "declarations": [
+        "input km",
+        "local formatted = km: number style=unit unit=kilometer unitDisplay=long"
+      ],
+      "match": {
+        "km=*": "{formatted}"
+      }
+    }
+  ],
+  "compact_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number notation=compact"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "position_value": [
+    {
+      "declarations": [
+        "input n",
+        "local ordinal = n: plural type=ordinal",
+        "local nText = n: number"
+      ],
+      "selectors": [
+        "ordinal"
+      ],
+      "match": {
+        "ordinal=other": "{nText} 番目"
+      }
+    }
+  ],
+  "invite_status": [
+    {
+      "declarations": [
+        "input status"
+      ],
+      "selectors": [
+        "status"
+      ],
+      "match": {
+        "status=accepted": "招待を承諾しました",
+        "status=declined": "招待を辞退しました",
+        "status=*": "招待の返答待ち"
+      }
+    }
+  ],
+  "reserved": [
+    {
+      "declarations": [
+        "input name",
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=other": "{name} さんが {countText} 席を予約しました。"
+      }
+    }
+  ],
+  "systems_heading": "暦、週、数字",
+  "calendar_label": "暦",
+  "other_calendars_label": "ほかに使われている暦",
+  "no_other_calendars": "なし",
+  "week_start_label": "週の始まり",
+  "weekend_label": "週末",
+  "hour_cycle_label": "時刻の表記",
+  "hour_cycle_12": "12 時間制",
+  "hour_cycle_24": "24 時間制",
+  "numbering_label": "数字の体系",
+  "timezone_heading": "タイムゾーン",
+  "local_time_label": "お使いのデバイスのタイムゾーン",
+  "local_time_note": "この行はブラウザで表示されます。サーバーはデバイスの時計を参照できないため、代わりに Cloudflare が判定した場所を使います。",
+  "location_heading": "現在地",
+  "your_country_label": "お住まいの国",
+  "place_label": "都市と地域",
+  "cf_timezone_label": "現在地のタイムゾーン",
+  "cf_local_time_label": "現地時刻",
+  "location_unknown": "この接続では不明です",
+  "location_note": "Cloudflare はリクエストごとにネットワークの場所を通知します。サーバーはこれを上記の現地時刻に使うだけで、保存はしません。",
+  "live_status_heading": "稼働状況",
+  "live_status_label": "状態",
+  "live_status_ok": "正常に稼働中",
+  "live_service_label": "サービス",
+  "live_release_label": "リリース",
+  "live_status_note": "サーバーで表示したあと、このページを開いている間はブラウザが更新します。",
+  "live_refresh": "今すぐ更新",
+  "continue_in": "{language}で続ける",
+  "language_hint": "このページは{language}でもご覧いただけます。",
+  "keep_language": "{language}のままにする",
+  "device_place_heading": "デバイスの位置",
+  "device_place_note": "ブラウザはこのデバイスの位置を共有できます。位置情報はこのページ内にとどまり、サーバーには送信されません。",
+  "device_place_button": "デバイスの位置を使う",
+  "device_place_asking": "ブラウザの応答を待っています…",
+  "device_place_denied": "ブラウザは位置情報を共有しませんでした。",
+  "device_place_unavailable": "デバイスの位置を特定できませんでした。",
+  "device_place_unsupported": "このブラウザは位置情報を共有できません。",
+  "latitude_label": "緯度",
+  "longitude_label": "経度",
+  "accuracy_label": "精度",
+  "network_distance_label": "ネットワークの位置からの距離",
+  "nav_heading": "ページ",
+  "nav_home": "概要",
+  "nav_demo": "デモ",
+  "nav_formats": "表示形式",
+  "toggle_sidebar": "サイドバーの表示を切り替える",
+  "zone_site": "サイトページ・JavaScript なしで動作",
+  "zone_app": "アプリ・JavaScript が必要",
+  "open_app": "アプリを開く",
+  "back_to_site": "サイトに戻る",
+  "nav_location": "位置",
+  "app_home_title": "あなたのアプリ",
+  "app_home_description": "Remy のインタラクティブな側面。ライブデータ、フォーム、そしてあなたのデバイス。",
+  "app_home_intro": "ここにあるものはすべてブラウザで動作します。サイトのページは JavaScript なしでも読めます。",
+  "location_title": "現在地",
+  "location_description": "Cloudflare によるネットワークの位置と、許可した場合はデバイス自身の位置。",
+  "location_intro": "ネットワークが示す位置と、デバイスが示す位置を比べてみましょう。",
+  "sections_nav": "このページの内容",
+  "section_language": "この言語",
+  "section_language_note": "どの言語か、どのように書き、読むのか。",
+  "section_time": "日付と時刻",
+  "section_time_note": "今日が何日で今が何時か、そしてこの言語での書き方。",
+  "section_numbers": "数値",
+  "section_numbers_note": "数字、桁区切り、パーセント、単位など、数値の書き方。",
+  "section_money": "金額",
+  "section_money_note": "この言語とほかの通貨での金額の見え方。",
+  "section_words": "ことば",
+  "section_words_note": "複数形、語順、表現の違い、並べ替えなど、値によって変わる文章。",
+  "theme_toggle": "テーマ",
+  "theme_light": "ライト",
+  "theme_dark": "ダーク",
+  "theme_system": "システム",
+  "casing_label": "大文字と小文字",
+  "week_label": "1 週間（週末に印付き）",
+  "word_breaks_heading": "単語の区切り",
+  "words_label": "ホームページのタイトルに含まれる単語",
+  "word_count_label": "単語数",
+  "long_word_label": "長いドイツ語の単語"
+}

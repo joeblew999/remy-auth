@@ -132,8 +132,9 @@ Fonts live in [`packages/ui/src/fonts.css`](../packages/ui/src/fonts.css), impor
 - `tests/`: the package's shared checks (`@joeblew999/remy-ui/checks`, `showcase/*.checks`) plus the checks only this repository owns (catalogs, concurrent server renders, hydration, its extra formats rows); `lighthouse.spec.ts` and `performance.spec.ts` are level 2.
 
 Locale is passed explicitly into compiled message functions; concurrent requests share no
-mutable locale state. English, Spanish and Arabic are the catalogs; the Arabic catalog was
-written by an agent and is unreviewed. Direction, endonyms, dates, numbers, currency and plurals
+mutable locale state. The catalogs are the `locales` in
+[settings.json](../packages/ui/project.inlang/settings.json); every one except English and Spanish
+was written by an agent and is unreviewed. Direction, endonyms, dates, numbers, currency and plurals
 follow the decisions recorded in
 [the GUI plan](../.plans/done/gui.md#dates-numbers-currency-and-direction).
 

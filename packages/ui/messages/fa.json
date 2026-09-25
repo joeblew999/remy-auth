@@ -1,0 +1,304 @@
+{
+  "home_title": "یک جای آشنا. همهٔ برنامه‌های Remy.",
+  "home_description": "پایه‌ای مشترک برای Remy، به زبان شما.",
+  "home_intro": "همان کنترل‌ها، رنگ‌ها و زبان از یک برنامهٔ Remy به برنامهٔ دیگر همراه شما هستند.",
+  "public_label": "پایهٔ مشترک",
+  "demo_link": "نسخهٔ نمایشی تعاملی را امتحان کنید",
+  "formats_link": "تاریخ‌ها، اعداد و واحد پول را ببینید",
+  "home_link": "نمای کلی",
+  "demo_title": "راحت باشید، اینجا خانهٔ شماست.",
+  "demo_description": "یک تعامل کوچک را با همان کنترل‌های مشترک امتحان کنید.",
+  "demo_note": "این یک نسخهٔ نمایشی عمومی است. قابلیت‌های حساب کاربری و ورود به‌زودی اضافه می‌شوند.",
+  "count_label": "تعداد کلیک‌های دکمه",
+  "increment": "افزودن یک",
+  "reset": "بازنشانی",
+  "loading": "در حال بارگیری نسخهٔ نمایشی تعاملی…",
+  "language_label": "زبان",
+  "skip_link": "رفتن به محتوا",
+  "footer": "ساخته‌شده تا آشنا به نظر برسد.",
+  "not_found": "صفحه پیدا نشد",
+  "not_found_detail": "این صفحه در دسترس نیست. به نمای کلی برگردید.",
+  "error_title": "مشکلی پیش آمد",
+  "error_detail": "لطفاً دوباره تلاش کنید.",
+  "retry": "تلاش دوباره",
+  "zone_description": "نام، اختلاف با UTC و زمان محلی یک منطقهٔ زمانی، به زبان شما.",
+  "zone_intro": "هر منطقهٔ زمانی یک نام، یک اختلاف با UTC و یک زمان محلی دارد که هر کدام طبق قواعد زبان شما نوشته می‌شود.",
+  "zone_id_label": "شناسهٔ IANA",
+  "utc_offset_label": "اختلاف با UTC",
+  "zone_not_found": "منطقهٔ زمانی‌ای با نام {zone} وجود ندارد.",
+  "formats_back": "بازگشت به قالب‌ها",
+  "demo_label": "نسخهٔ نمایشی تعاملی",
+  "formats_title": "قالب‌ها به زبان شما",
+  "formats_description": "Remy چگونه تاریخ‌ها، زمان‌ها، تقویم‌ها، اعداد، واحد پول، صورت‌های جمع و مرتب‌سازی را با زبان شما هماهنگ می‌کند.",
+  "formats_label": "قالب‌های بین‌المللی",
+  "formats_intro": "هر مقدار زیر از فهرست پیام‌های مشترک و قواعد خود زبان شما می‌آید و روی سرور و در مرورگر به یک شکل نمایش داده می‌شود.",
+  "language_tag": "برچسب زبان",
+  "language_name": "نام به زبان خودش",
+  "direction_label": "جهت خواندن",
+  "direction_ltr": "چپ به راست",
+  "direction_rtl": "راست به چپ",
+  "languages_available": "زبان‌های موجود",
+  "dates_heading": "تاریخ‌ها و زمان‌ها",
+  "instant_label": "لحظه به وقت UTC",
+  "plain_date_label": "تاریخ تقویمی",
+  "relative_label": "زمان نسبی",
+  "numbers_heading": "اعداد",
+  "decimal_label": "عدد اعشاری",
+  "percent_label": "درصد",
+  "currency_heading": "واحد پول",
+  "currency_label": "مبلغ به یورو",
+  "currency_note": "هر برنامه مسئول پول خودش است: واحدهای خُرد را به‌صورت عدد صحیح همراه با کد ISO 4217 ذخیره کنید و با این فهرست قالب‌بندی کنید.",
+  "choices_heading": "مقدارهای دیگر را امتحان کنید",
+  "choices_note": "انتخاب‌های شما در نشانی صفحه ذخیره می‌شوند، پس پیوند این صفحه همین مقدارها را نشان می‌دهد.",
+  "plural_heading": "صورت‌های جمع",
+  "instant_value": [
+    {
+      "declarations": [
+        "input instant",
+        "local formatted = instant: datetime dateStyle=full timeStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "instant=*": "{formatted}"
+      }
+    }
+  ],
+  "plain_date_value": [
+    {
+      "declarations": [
+        "input date",
+        "local formatted = date: datetime dateStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "date=*": "{formatted}"
+      }
+    }
+  ],
+  "relative_value": [
+    {
+      "declarations": [
+        "input days",
+        "local formatted = days: relativetime unit=day numeric=auto"
+      ],
+      "match": {
+        "days=*": "{formatted}"
+      }
+    }
+  ],
+  "decimal_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "percent_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number style=percent"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "currency_value": [
+    {
+      "declarations": [
+        "input amount",
+        "local formatted = amount: number style=currency currency=EUR"
+      ],
+      "match": {
+        "amount=*": "{formatted}"
+      }
+    }
+  ],
+  "apps_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{countText} برنامه",
+        "countPlural=other": "{countText} برنامه"
+      }
+    }
+  ],
+  "units_heading": "واحدها",
+  "distance_label": "مسافت",
+  "compact_label": "عدد فشرده",
+  "currencies_label": "همین مبلغ به واحدهای پول دیگر",
+  "currency_name_label": "نام واحد پول",
+  "region_label": "نام یک کشور نمونه",
+  "ordinal_heading": "اعداد ترتیبی",
+  "variants_heading": "صورت‌ها بر اساس مقدار",
+  "greeting_label": "خوشامدگویی",
+  "status_label": "دعوت‌نامه",
+  "sorting_heading": "مرتب‌سازی",
+  "sorted_label": "نام‌ها به ترتیب این زبان",
+  "range_label": "بازهٔ تاریخ",
+  "form_heading": "رزرو صندلی",
+  "name_label": "نام شما",
+  "guests_label": "صندلی‌ها",
+  "submit": "رزرو",
+  "name_required": "نام خود را وارد کنید.",
+  "guests_invalid": "تعداد صندلی را به‌صورت عددی صحیح از ۱ تا ۲۰ وارد کنید.",
+  "leave_unsaved": "از این صفحه خارج می‌شوید؟ رزرو شما هنوز انجام نشده است.",
+  "greeting": "{name}، خوش آمدید.",
+  "distance_value": [
+    {
+      "declarations": [
+        "input km",
+        "local formatted = km: number style=unit unit=kilometer unitDisplay=long"
+      ],
+      "match": {
+        "km=*": "{formatted}"
+      }
+    }
+  ],
+  "compact_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number notation=compact"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "position_value": [
+    {
+      "declarations": [
+        "input n",
+        "local ordinal = n: plural type=ordinal",
+        "local nText = n: number"
+      ],
+      "selectors": [
+        "ordinal"
+      ],
+      "match": {
+        "ordinal=other": "رتبهٔ {nText}"
+      }
+    }
+  ],
+  "invite_status": [
+    {
+      "declarations": [
+        "input status"
+      ],
+      "selectors": [
+        "status"
+      ],
+      "match": {
+        "status=accepted": "دعوت پذیرفته شد",
+        "status=declined": "دعوت رد شد",
+        "status=*": "دعوت در انتظار پاسخ"
+      }
+    }
+  ],
+  "reserved": [
+    {
+      "declarations": [
+        "input name",
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{name} {countText} صندلی رزرو کرد.",
+        "countPlural=other": "{name} {countText} صندلی رزرو کرد."
+      }
+    }
+  ],
+  "systems_heading": "تقویم، هفته و ارقام",
+  "calendar_label": "تقویم",
+  "other_calendars_label": "تقویم‌های دیگر در استفاده",
+  "no_other_calendars": "هیچ",
+  "week_start_label": "نخستین روز هفته",
+  "weekend_label": "تعطیلی آخر هفته",
+  "hour_cycle_label": "قالب ساعت",
+  "hour_cycle_12": "ساعت ۱۲ساعته",
+  "hour_cycle_24": "ساعت ۲۴ساعته",
+  "numbering_label": "دستگاه اعداد",
+  "timezone_heading": "منطقهٔ زمانی",
+  "local_time_label": "در منطقهٔ زمانی دستگاه شما",
+  "local_time_note": "این ردیف در مرورگر شما نمایش داده می‌شود: سرور هرگز ساعت دستگاه شما را نمی‌بیند، پس به‌جای آن از موقعیت Cloudflare استفاده می‌کند.",
+  "location_heading": "کجا هستید",
+  "your_country_label": "کشور شما",
+  "place_label": "شهر و منطقه",
+  "cf_timezone_label": "منطقهٔ زمانی موقعیت شما",
+  "cf_local_time_label": "زمان محلی آنجا",
+  "location_unknown": "در این اتصال نامشخص است",
+  "location_note": "Cloudflare موقعیت شبکه را همراه هر درخواست گزارش می‌دهد؛ سرور از آن برای زمان محلی بالا استفاده می‌کند و آن را ذخیره نمی‌کند.",
+  "live_status_heading": "وضعیت زنده",
+  "live_status_label": "وضعیت",
+  "live_status_ok": "فعال",
+  "live_service_label": "سرویس",
+  "live_release_label": "نسخه",
+  "live_status_note": "روی سرور نمایش داده می‌شود و تا زمانی که این صفحه باز است، مرورگر شما آن را به‌روز می‌کند.",
+  "live_refresh": "به‌روزرسانی اکنون",
+  "continue_in": "ادامه به زبان {language}",
+  "language_hint": "این صفحه به زبان {language} هم موجود است.",
+  "keep_language": "ماندن در زبان {language}",
+  "device_place_heading": "موقعیت دستگاه شما",
+  "device_place_note": "مرورگر شما می‌تواند موقعیت این دستگاه را به اشتراک بگذارد. این اطلاعات در همین صفحه می‌ماند: چیزی به سرورهای ما فرستاده نمی‌شود.",
+  "device_place_button": "استفاده از موقعیت دستگاهم",
+  "device_place_asking": "در انتظار مرورگر شما…",
+  "device_place_denied": "مرورگر شما موقعیتی به اشتراک نگذاشت.",
+  "device_place_unavailable": "دستگاه شما نتوانست موقعیتش را پیدا کند.",
+  "device_place_unsupported": "این مرورگر نمی‌تواند موقعیت را به اشتراک بگذارد.",
+  "latitude_label": "عرض جغرافیایی",
+  "longitude_label": "طول جغرافیایی",
+  "accuracy_label": "دقت",
+  "network_distance_label": "فاصله از موقعیت شبکه",
+  "nav_heading": "صفحه‌ها",
+  "nav_home": "نمای کلی",
+  "nav_demo": "نسخهٔ نمایشی",
+  "nav_formats": "قالب‌ها",
+  "toggle_sidebar": "نمایش یا پنهان کردن نوار کناری",
+  "zone_site": "صفحهٔ سایت · بدون JavaScript کار می‌کند",
+  "zone_app": "برنامه · به JavaScript نیاز دارد",
+  "open_app": "باز کردن برنامه",
+  "back_to_site": "بازگشت به سایت",
+  "nav_location": "موقعیت",
+  "app_home_title": "برنامهٔ شما",
+  "app_home_description": "بخش تعاملی Remy: داده‌های زنده، فرم‌ها و دستگاه شما.",
+  "app_home_intro": "همه‌چیز در اینجا در مرورگر شما اجرا می‌شود. صفحه‌های سایت بدون JavaScript هم خواندنی می‌مانند.",
+  "location_title": "کجا هستید",
+  "location_description": "موقعیت شبکهٔ شما از Cloudflare و، اگر اجازه دهید، موقعیت خود دستگاهتان.",
+  "location_intro": "آنچه شبکه می‌گوید را با آنچه دستگاهتان می‌گوید مقایسه کنید.",
+  "sections_nav": "در این صفحه",
+  "section_language": "این زبان",
+  "section_language_note": "این زبان چیست و چگونه نوشته و خوانده می‌شود.",
+  "section_time": "تاریخ‌ها و زمان‌ها",
+  "section_time_note": "امروز چه روزی است و ساعت چند است، و این زبان آن‌ها را چگونه می‌نویسد.",
+  "section_numbers": "اعداد",
+  "section_numbers_note": "اعداد چگونه نوشته می‌شوند: ارقام، گروه‌بندی، درصدها و واحدها.",
+  "section_money": "پول",
+  "section_money_note": "مبلغ‌ها در این زبان و به واحدهای پول دیگر چگونه نمایش داده می‌شوند.",
+  "section_words": "واژه‌ها",
+  "section_words_note": "متن چگونه با یک مقدار تغییر می‌کند: صورت جمع، ترتیب، صورت‌های گوناگون و مرتب‌سازی.",
+  "theme_toggle": "پوسته",
+  "theme_light": "روشن",
+  "theme_dark": "تیره",
+  "theme_system": "سیستم",
+  "casing_label": "حروف بزرگ",
+  "week_label": "هفته، با روزهای تعطیل مشخص‌شده",
+  "word_breaks_heading": "مرز واژه‌ها",
+  "words_label": "واژه‌های عنوان صفحهٔ اصلی",
+  "word_count_label": "تعداد واژه‌ها",
+  "long_word_label": "یک واژهٔ آلمانی بلند"
+}

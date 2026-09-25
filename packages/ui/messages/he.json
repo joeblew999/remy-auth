@@ -1,0 +1,306 @@
+{
+  "home_title": "מקום מוכר אחד. כל אפליקציות Remy.",
+  "home_description": "בסיס משותף ל־Remy, בשפה שלך.",
+  "home_intro": "אותם פקדים, אותם צבעים ואותה שפה מלווים אותך מאפליקציית Remy אחת לאחרת.",
+  "public_label": "בסיס משותף",
+  "demo_link": "לנסות את ההדגמה האינטראקטיבית",
+  "formats_link": "תאריכים, מספרים ומטבע",
+  "home_link": "סקירה כללית",
+  "demo_title": "מרגישים כמו בבית.",
+  "demo_description": "אפשר לנסות פעולה קטנה עם אותם פקדים משותפים.",
+  "demo_note": "זוהי הדגמה ציבורית. תכונות החשבון וההתחברות יגיעו בהמשך.",
+  "count_label": "לחיצות על הכפתור",
+  "increment": "הוספת אחד",
+  "reset": "איפוס",
+  "loading": "ההדגמה האינטראקטיבית נטענת…",
+  "language_label": "שפה",
+  "skip_link": "דילוג לתוכן",
+  "footer": "נבנה כדי להרגיש מוכר.",
+  "not_found": "הדף לא נמצא",
+  "not_found_detail": "הדף הזה אינו זמין. אפשר לחזור לסקירה הכללית.",
+  "error_title": "משהו השתבש",
+  "error_detail": "כדאי לנסות שוב.",
+  "retry": "ניסיון חוזר",
+  "zone_description": "השם, ההפרש מ־UTC והשעה המקומית של אזור זמן, בשפה שלך.",
+  "zone_intro": "לכל אזור זמן יש שם, הפרש מ־UTC ושעה מקומית, וכל אחד מהם נכתב לפי הכללים של השפה שלך.",
+  "zone_id_label": "מזהה IANA",
+  "utc_offset_label": "הפרש מ־UTC",
+  "zone_not_found": "אין אזור זמן בשם {zone}.",
+  "formats_back": "חזרה לתבניות",
+  "demo_label": "הדגמה אינטראקטיבית",
+  "formats_title": "תבניות בשפה שלך",
+  "formats_description": "איך Remy מתאים לשפה שלך תאריכים, שעות, לוחות שנה, מספרים, מטבע, צורות רבים ומיון.",
+  "formats_label": "תבניות בינלאומיות",
+  "formats_intro": "כל ערך שלמטה מגיע מקטלוג ההודעות המשותף ומהכללים של השפה שלך, ומוצג באותו אופן בשרת ובדפדפן.",
+  "language_tag": "תג שפה",
+  "language_name": "השם בשפה עצמה",
+  "direction_label": "כיוון קריאה",
+  "direction_ltr": "משמאל לימין",
+  "direction_rtl": "מימין לשמאל",
+  "languages_available": "שפות זמינות",
+  "dates_heading": "תאריכים ושעות",
+  "instant_label": "רגע בזמן UTC",
+  "plain_date_label": "תאריך בלוח השנה",
+  "relative_label": "זמן יחסי",
+  "numbers_heading": "מספרים",
+  "decimal_label": "מספר עשרוני",
+  "percent_label": "אחוז",
+  "currency_heading": "מטבע",
+  "currency_label": "סכום באירו",
+  "currency_note": "כל אפליקציה אחראית לכסף שלה: יש לשמור יחידות משנה כמספרים שלמים עם קוד ISO 4217 ולעצב אותן בעזרת הקטלוג הזה.",
+  "choices_heading": "לנסות ערכים אחרים",
+  "choices_note": "הבחירות שלך נשמרות בכתובת, כך שקישור לדף הזה מציג את אותם ערכים.",
+  "plural_heading": "צורות רבים",
+  "instant_value": [
+    {
+      "declarations": [
+        "input instant",
+        "local formatted = instant: datetime dateStyle=full timeStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "instant=*": "{formatted}"
+      }
+    }
+  ],
+  "plain_date_value": [
+    {
+      "declarations": [
+        "input date",
+        "local formatted = date: datetime dateStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "date=*": "{formatted}"
+      }
+    }
+  ],
+  "relative_value": [
+    {
+      "declarations": [
+        "input days",
+        "local formatted = days: relativetime unit=day numeric=auto"
+      ],
+      "match": {
+        "days=*": "{formatted}"
+      }
+    }
+  ],
+  "decimal_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "percent_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number style=percent"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "currency_value": [
+    {
+      "declarations": [
+        "input amount",
+        "local formatted = amount: number style=currency currency=EUR"
+      ],
+      "match": {
+        "amount=*": "{formatted}"
+      }
+    }
+  ],
+  "apps_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "אפליקציה אחת",
+        "countPlural=two": "שתי אפליקציות",
+        "countPlural=other": "{countText} אפליקציות"
+      }
+    }
+  ],
+  "units_heading": "יחידות",
+  "distance_label": "מרחק",
+  "compact_label": "מספר מקוצר",
+  "currencies_label": "אותו סכום במטבעות אחרים",
+  "currency_name_label": "שם המטבע",
+  "region_label": "שם מדינה לדוגמה",
+  "ordinal_heading": "מספרים סודרים",
+  "variants_heading": "צורות לפי ערך",
+  "greeting_label": "ברכה",
+  "status_label": "הזמנה",
+  "sorting_heading": "מיון",
+  "sorted_label": "שמות לפי סדר השפה הזאת",
+  "range_label": "טווח תאריכים",
+  "form_heading": "הזמנת מקומות",
+  "name_label": "השם שלך",
+  "guests_label": "מקומות",
+  "submit": "הזמנה",
+  "name_required": "יש להזין את השם שלך.",
+  "guests_invalid": "יש להזין מספר שלם של מקומות, מ־1 עד 20.",
+  "leave_unsaved": "לצאת מהדף? ההזמנה שלך עדיין לא בוצעה.",
+  "greeting": "{name}, ברוכים הבאים.",
+  "distance_value": [
+    {
+      "declarations": [
+        "input km",
+        "local formatted = km: number style=unit unit=kilometer unitDisplay=long"
+      ],
+      "match": {
+        "km=*": "{formatted}"
+      }
+    }
+  ],
+  "compact_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number notation=compact"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "position_value": [
+    {
+      "declarations": [
+        "input n",
+        "local ordinal = n: plural type=ordinal",
+        "local nText = n: number"
+      ],
+      "selectors": [
+        "ordinal"
+      ],
+      "match": {
+        "ordinal=other": "מקום {nText}"
+      }
+    }
+  ],
+  "invite_status": [
+    {
+      "declarations": [
+        "input status"
+      ],
+      "selectors": [
+        "status"
+      ],
+      "match": {
+        "status=accepted": "ההזמנה התקבלה",
+        "status=declined": "ההזמנה נדחתה",
+        "status=*": "ההזמנה ממתינה לתשובה"
+      }
+    }
+  ],
+  "reserved": [
+    {
+      "declarations": [
+        "input name",
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "נשמר מקום אחד עבור {name}.",
+        "countPlural=two": "נשמרו שני מקומות עבור {name}.",
+        "countPlural=other": "נשמרו {countText} מקומות עבור {name}."
+      }
+    }
+  ],
+  "systems_heading": "לוח שנה, שבוע וספרות",
+  "calendar_label": "לוח שנה",
+  "other_calendars_label": "לוחות שנה נוספים בשימוש",
+  "no_other_calendars": "אין",
+  "week_start_label": "היום הראשון בשבוע",
+  "weekend_label": "סוף שבוע",
+  "hour_cycle_label": "תצוגת שעון",
+  "hour_cycle_12": "שעון של 12 שעות",
+  "hour_cycle_24": "שעון של 24 שעות",
+  "numbering_label": "שיטת ספרות",
+  "timezone_heading": "אזור זמן",
+  "local_time_label": "באזור הזמן של המכשיר שלך",
+  "local_time_note": "השורה הזאת מוצגת בדפדפן שלך: השרת אף פעם לא רואה את השעון של המכשיר שלך, ולכן הוא משתמש במיקום של Cloudflare במקומו.",
+  "location_heading": "איפה נמצאים",
+  "your_country_label": "המדינה שלך",
+  "place_label": "עיר ואזור",
+  "cf_timezone_label": "אזור הזמן במיקום שלך",
+  "cf_local_time_label": "השעה המקומית שם",
+  "location_unknown": "לא ידוע בחיבור הזה",
+  "location_note": "Cloudflare מדווח על מיקום הרשת עם כל בקשה; השרת משתמש בו לשעה המקומית שלמעלה ואינו שומר אותו.",
+  "live_status_heading": "סטטוס חי",
+  "live_status_label": "סטטוס",
+  "live_status_ok": "פועל",
+  "live_service_label": "שירות",
+  "live_release_label": "גרסה",
+  "live_status_note": "מוצג בשרת, ואז הדפדפן שלך מרענן אותו כל עוד הדף פתוח.",
+  "live_refresh": "רענון עכשיו",
+  "continue_in": "להמשיך ב{language}",
+  "language_hint": "הדף הזה זמין גם ב{language}.",
+  "keep_language": "להישאר ב{language}",
+  "device_place_heading": "המיקום של המכשיר שלך",
+  "device_place_note": "הדפדפן שלך יכול לשתף את מיקום המכשיר. המיקום נשאר בדף הזה: שום דבר לא נשלח לשרתים שלנו.",
+  "device_place_button": "שימוש במיקום המכשיר שלי",
+  "device_place_asking": "ממתינים לדפדפן שלך…",
+  "device_place_denied": "הדפדפן שלך לא שיתף מיקום.",
+  "device_place_unavailable": "המכשיר שלך לא הצליח לאתר את מיקומו.",
+  "device_place_unsupported": "הדפדפן הזה לא יכול לשתף מיקום.",
+  "latitude_label": "קו רוחב",
+  "longitude_label": "קו אורך",
+  "accuracy_label": "דיוק",
+  "network_distance_label": "המרחק ממיקום הרשת",
+  "nav_heading": "דפים",
+  "nav_home": "סקירה כללית",
+  "nav_demo": "הדגמה",
+  "nav_formats": "תבניות",
+  "toggle_sidebar": "הצגה או הסתרה של סרגל הצד",
+  "zone_site": "דף באתר · עובד בלי JavaScript",
+  "zone_app": "אפליקציה · דורשת JavaScript",
+  "open_app": "פתיחת האפליקציה",
+  "back_to_site": "חזרה לאתר",
+  "nav_location": "מיקום",
+  "app_home_title": "האפליקציה שלך",
+  "app_home_description": "הצד האינטראקטיבי של Remy: נתונים חיים, טפסים והמכשיר שלך.",
+  "app_home_intro": "כל מה שכאן רץ בדפדפן שלך. דפי האתר נשארים קריאים גם בלי JavaScript.",
+  "location_title": "איפה נמצאים",
+  "location_description": "מיקום הרשת שלך לפי Cloudflare, ואם מאשרים, גם המיקום של המכשיר עצמו.",
+  "location_intro": "אפשר להשוות בין מה שהרשת אומרת לבין מה שהמכשיר שלך אומר.",
+  "sections_nav": "בדף הזה",
+  "section_language": "השפה הזאת",
+  "section_language_note": "איזו שפה זו, ואיך כותבים וקוראים אותה.",
+  "section_time": "תאריכים ושעות",
+  "section_time_note": "איזה יום היום ומה השעה, ואיך השפה הזאת כותבת אותם.",
+  "section_numbers": "מספרים",
+  "section_numbers_note": "איך כותבים מספרים: ספרות, קיבוץ, אחוזים ויחידות.",
+  "section_money": "כסף",
+  "section_money_note": "איך נראים סכומים בשפה הזאת ובמטבעות אחרים.",
+  "section_words": "מילים",
+  "section_words_note": "איך טקסט משתנה לפי ערך: צורות רבים, סדר, וריאציות ומיון.",
+  "theme_toggle": "ערכת נושא",
+  "theme_light": "בהירה",
+  "theme_dark": "כהה",
+  "theme_system": "לפי המערכת",
+  "casing_label": "אותיות רישיות",
+  "week_label": "השבוע, עם סימון סוף השבוע",
+  "word_breaks_heading": "גבולות מילים",
+  "words_label": "המילים בכותרת דף הבית",
+  "word_count_label": "מספר המילים",
+  "long_word_label": "מילה ארוכה בגרמנית"
+}

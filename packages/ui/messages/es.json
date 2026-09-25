@@ -121,15 +121,16 @@
     {
       "declarations": [
         "input count",
-        "local countPlural = count: plural"
+        "local countPlural = count: plural",
+        "local countText = count: number"
       ],
       "selectors": [
         "countPlural"
       ],
       "match": {
-        "countPlural=one": "{count} aplicación",
-        "countPlural=many": "{count} aplicaciones",
-        "countPlural=other": "{count} aplicaciones"
+        "countPlural=one": "{countText} aplicación",
+        "countPlural=many": "{countText} aplicaciones",
+        "countPlural=other": "{countText} aplicaciones"
       }
     }
   ],
@@ -180,13 +181,14 @@
     {
       "declarations": [
         "input n",
-        "local ordinal = n: plural type=ordinal"
+        "local ordinal = n: plural type=ordinal",
+        "local nText = n: number"
       ],
       "selectors": [
         "ordinal"
       ],
       "match": {
-        "ordinal=other": "{n}.º"
+        "ordinal=other": "{nText}.º"
       }
     }
   ],
@@ -210,15 +212,16 @@
       "declarations": [
         "input name",
         "input count",
-        "local countPlural = count: plural"
+        "local countPlural = count: plural",
+        "local countText = count: number"
       ],
       "selectors": [
         "countPlural"
       ],
       "match": {
-        "countPlural=one": "{name} ha reservado {count} asiento.",
-        "countPlural=many": "{name} ha reservado {count} asientos.",
-        "countPlural=other": "{name} ha reservado {count} asientos."
+        "countPlural=one": "{name} ha reservado {countText} asiento.",
+        "countPlural=many": "{name} ha reservado {countText} asientos.",
+        "countPlural=other": "{name} ha reservado {countText} asientos."
       }
     }
   ],
