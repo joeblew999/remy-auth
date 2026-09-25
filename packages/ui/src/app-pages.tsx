@@ -78,7 +78,7 @@ export type { Reservation, ReservationResult } from './reservation';
 
 export function DemoPage({ locale, preferred, onReserve, onDirtyChange }: {
   locale: Locale; preferred?: Locale;
-  /** Called once the form's own validation passes, for example a server function that validates again. Without it the form confirms locally. */
+  /** Called once the form's own validation passes, for example an API call whose server validates again. Without it the form confirms locally. */
   onReserve?: (reservation: Reservation) => ReservationResult | Promise<ReservationResult>;
   /** Told whenever the form holds input that has not been reserved yet, for example to warn before leaving. */
   onDirtyChange?: (dirty: boolean) => void;
