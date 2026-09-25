@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { locales } from '@joeblew999/remy-ui/runtime';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { checkedLocales, zoneChecks, publicPageChecks, entryChecks, demoChecks, formatsChecks, textChecks, observabilityChecks, cspChecks, collectErrors, endonym, direction, localizedPath, formatTag } from '@joeblew999/remy-ui/checks';
@@ -12,6 +12,7 @@ import { navigationBlockingChecks } from '@joeblew999/remy-ui/showcase/navigatio
 import { apiChecks, reservationApiChecks } from '@joeblew999/remy-ui/api/checks';
 import { info } from '@joeblew999/remy-auth-contract';
 import { router } from '../src/api/router';
+import { docsI18nDir, docsLangs, docsPath, docsTable } from '../src/docs/table.js';
 import { deferredPlaceChecks } from '@joeblew999/remy-ui/showcase/deferred-place.checks';
 import { statusCardChecks } from '@joeblew999/remy-ui/showcase/status-card.checks';
 import { problemChecks } from '@joeblew999/remy-ui/showcase/problem.checks';
@@ -21,9 +22,11 @@ import { devicePlaceChecks } from '@joeblew999/remy-ui/showcase/device-place.che
 
 // The shared checks cover what every app built on the package must satisfy.
 // Site pages (for Google) and app pages (for people using the app) never mix; see paths.js.
-// This app adds the docs (site pages, English only) and the answer page (an app page): src/paths.ts.
+// This app adds the docs (site pages in English and their translations, docs/i18n/) and the answer page
+// (an app page): src/paths.ts.
 zoneChecks({ sitePaths: siteAndDocsPaths, appPaths: appPagePaths });
-publicPageChecks({ paths: sitePaths, oneLanguage: { locale: 'en', paths: docsPaths } });
+const translations = Object.fromEntries(docsTable.map(row => [docsPath(row.slug), docsLangs(row, readdirSync(docsI18nDir), existsSync)]));
+publicPageChecks({ paths: sitePaths, oneLanguage: { locale: 'en', paths: docsPaths, translations } });
 // Text in every language: the shared pages (the docs are English only).
 textChecks({ paths: allPaths });
 entryChecks({ paths: everyPath, mode: 'redirect' });

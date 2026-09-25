@@ -5,7 +5,7 @@ import { logContext, requestIdHeader, writeLog } from '@joeblew999/remy-ui/worke
 import type { Locale } from '@joeblew999/remy-ui/locale';
 import { askMaxLength, type AskResult } from './ask-limits';
 import { docsPage } from './docs/source.server';
-import { docsPath, docsRowForObjectKey } from './docs/table.js';
+import { docsLocale, docsObjectForKey, docsPath } from './docs/table.js';
 import { service } from './service';
 
 // The answer itself, in the Worker only (`.server.ts`: never in a browser bundle). Limits come
@@ -58,21 +58,27 @@ export const answerQuestion = createServerOnlyFn(async (q: string, locale: Local
   }
 });
 
-/** A heading line's text as the page shows it: no link targets, code or emphasis marks, no Markdown escapes. */
+/** A heading line's text as the page shows it: no explicit [#id], link targets, code or emphasis marks, no Markdown escapes. */
 const headingText = (line: string) => line.match(/^#{1,6}\s+(.+?)\s*#*\s*$/)?.[1]
-  .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[`*_]/g, '').replace(/\\([!-/:-@[-`{-~])/g, '$1').replace(/\s+/g, ' ').trim();
+  .replace(/\s*\[#[^\]]+\]$/, '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[`*_]/g, '').replace(/\\([!-/:-@[-`{-~])/g, '$1').replace(/\s+/g, ' ').trim();
 
 /**
- * A chunk as a citation. The instance remy-docs-pages reads one Markdown object per docs page from R2
- * (key <slug>.md, index.md for /docs: src/docs/table.js), and its chunks carry no metadata, so the key
- * names the page. The citation is that page, or, when the chunk's text holds a heading the page lists
- * in "On this page", that section. Chunks of anything else are not cited.
+ * A chunk as a citation. The instance remy-docs-pages reads one Markdown object per docs page and
+ * language from R2 (key <slug>.md, index.md for /docs, a translation <locale>/<slug>.md:
+ * src/docs/table.js), and its chunks carry no metadata, so the key names the page and its language.
+ * An English page opens in the visitor's frame language, a translation in its own
+ * (/<locale>/docs/<slug>). The citation is that page, or, when the chunk's text holds a heading the
+ * page lists in "On this page", that section (translations keep the English heading ids). The title
+ * is the one the opened page shows. Chunks of anything else are not cited.
  */
 async function citation(chunk: AiSearchSearchResponse['chunks'][number], locale: Locale) {
-  const row = docsRowForObjectKey(chunk.item.key);
-  const page = row && await docsPage(row.slug);
-  if (!page) return undefined;
-  const url = `/${locale}${docsPath(page.slug)}`;
-  const heading = chunk.text.split('\n').map(headingText).flatMap(text => page.headings.filter(item => item.text === text)).at(0);
+  const object = docsObjectForKey(chunk.item.key);
+  if (!object) return undefined;
+  const target = object.locale === docsLocale ? locale : object.locale;
+  const [source, page] = await Promise.all([docsPage(object.row.slug, object.locale), docsPage(object.row.slug, target)]);
+  if (!source || !page) return undefined;
+  const url = `/${target}${docsPath(page.slug)}`;
+  const id = chunk.text.split('\n').map(headingText).flatMap(text => source.headings.filter(item => item.text === text)).at(0)?.id;
+  const heading = page.headings.find(item => item.id === id);
   return heading ? { url: `${url}#${heading.id}`, title: `${page.title}: ${heading.text}` } : { url, title: page.title };
 }

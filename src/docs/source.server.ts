@@ -1,8 +1,10 @@
 import { createServerOnlyFn } from '@tanstack/react-start';
 import type { Root } from 'hast';
-import { createSearchAPI, type SearchAPI } from 'fumadocs-core/search/server';
+import { createI18nSearchAPI, type SearchAPI } from 'fumadocs-core/search/server';
+import { defineI18n } from 'fumadocs-core/i18n';
+import { locales } from '@joeblew999/remy-ui/locale';
 import { docs } from '../../.source/server';
-import { docsPath, docsTable, docsRowForSlug } from './table.js';
+import { docsFile, docsLangs as langsOf, docsLocale, docsPath, docsTable, docsRowForSlug, docsTranslationOf } from './table.js';
 
 // The docs pages, read on the server from Fumadocs MDX's server entry (source.config.ts): the
 // article's finished HTML tree, titles for the docs navigation, the page's description and its "On
@@ -15,8 +17,12 @@ export type DocsHeading = { id: string; text: string };
 /** Everything a docs page needs, all serializable. */
 export type DocsPageData = {
   slug: string;
-  /** The repository file the page is read from. */
+  /** The repository file the page is read from: the translation, or the English file. */
   file: string;
+  /** The language of the text: the locale when it has a translation, else English. */
+  lang: string;
+  /** Every locale the page has its own text in, English first: its hreflang alternates. */
+  langs: string[];
   /** The article: the Markdown's finished HTML tree (hast), which view.tsx renders. */
   tree: Root;
   title: string;
@@ -32,6 +38,21 @@ const entry = (file: string) => {
   return doc;
 };
 
+/** The file a page is read from in a locale (table.js's one rule), from the pages Fumadocs compiled. */
+const fileIn = (row: { file: string }, locale: string) => docsFile(row, locale, file => entries.has(file));
+/** The language of that file's text. */
+const langOf = (file: string) => docsTranslationOf(file)?.locale ?? docsLocale;
+
+/** Fumadocs' i18n config: the site's languages, English the default and the fallback. */
+const i18n = defineI18n({ languages: [...locales], defaultLanguage: docsLocale, parser: 'dir' });
+/** The languages the docs have a translation in, English first: each gets its own search index. */
+const docsLocales = [docsLocale, ...new Set(docs.flatMap(doc => docsTranslationOf(doc.info.path)?.locale ?? []))];
+/** The locales a page has its own text in, English first. */
+export const docsLangs = createServerOnlyFn((slug: string) => {
+  const row = docsRowForSlug(slug);
+  return row ? langsOf(row, docsLocales, file => entries.has(file)) : [];
+});
+
 /** A description for search results: the page's first sentence-sized paragraph, cut at a word near 160 characters. */
 function describe(contents: { heading?: string; content: string }[], title: string) {
   const text = contents.map(content => content.content.trim()).find(content => content.length >= 40 && /[a-z]/i.test(content)) ?? title;
@@ -40,26 +61,29 @@ function describe(contents: { heading?: string; content: string }[], title: stri
   return `${cut.slice(0, cut.lastIndexOf(' ')).replace(/[,;:]$/, '')}…`;
 }
 
-/** The page for a slug, or undefined for a slug the docs table does not have. */
-export const docsPage = createServerOnlyFn(async (slug: string): Promise<DocsPageData | undefined> => {
+/** The page for a slug in a locale (its translation, else English), or undefined for a slug the docs table does not have. */
+export const docsPage = createServerOnlyFn(async (slug: string, locale: string = docsLocale): Promise<DocsPageData | undefined> => {
   const row = docsRowForSlug(slug);
   if (!row) return undefined;
-  const doc = entry(row.file);
+  const file = fileIn(row, locale);
+  const doc = entry(file);
   const { toc, structuredData, _exports } = await doc.load();
   const text = new Map(structuredData.headings.map(heading => [heading.id, heading.content]));
   return {
     slug,
-    file: row.file,
+    file,
+    lang: langOf(file),
+    langs: docsLangs(slug),
     tree: (_exports as { tree: Root }).tree,
     title: doc.title,
     description: describe(structuredData.contents, doc.title),
     headings: toc.filter(item => item.depth === 2).map(item => ({ id: item.url.slice(1), text: text.get(item.url.slice(1)) ?? item.url.slice(1) })),
-    nav: docsNav(),
+    nav: docsNav(locale),
   };
 });
 
-/** Every docs page's slug, path and title, in table order: the docs navigation. */
-export const docsNav = createServerOnlyFn(() => docsTable.map(row => ({ slug: row.slug, path: docsPath(row.slug), title: entry(row.file).title })));
+/** Every docs page's slug, path and title in a locale (translated titles where there are), in table order: the docs navigation. */
+export const docsNav = createServerOnlyFn((locale: string = docsLocale) => docsTable.map(row => ({ slug: row.slug, path: docsPath(row.slug), title: entry(fileIn(row, locale)).title })));
 
 /** A piece of a search hit's text; `mark` where it matches the query. */
 export type DocsSearchText = { text: string; mark?: true }[];
@@ -67,19 +91,22 @@ export type DocsSearchText = { text: string; mark?: true }[];
 export type DocsSearchHit = { type: 'page' | 'heading' | 'text'; url: string; content: DocsSearchText };
 
 /**
- * Fumadocs' own search server (fumadocs-core `createSearchAPI('advanced')`, which `createFromSource`
- * builds from a Fumadocs loader; this app has a collection, not a loader, so it passes the same
- * indexes itself): one index per docs page from its structured text, sections with their anchors.
- * Built on the first search in each Worker isolate, then kept; none of it reaches the browser
- * (.plans/docs-site.md, "Docs search").
+ * Fumadocs' own search server (fumadocs-core `createI18nSearchAPI('advanced')`, which `createFromSource`
+ * builds from an i18n Fumadocs loader; this app has a collection, not a loader, so it passes the same
+ * indexes itself): one index per docs page and docs language from its structured text, sections with
+ * their anchors, each tagged with its locale so a search reads one language's pages (Fumadocs'
+ * default multilingual tokenizer). A locale without translations searches English. Built on the
+ * first search in each Worker isolate, then kept; none of it reaches the browser
+ * (.plans/docs-site.md, "Docs search" and "Docs translations").
  */
 let search: SearchAPI | undefined;
-const searchServer = () => search ??= createSearchAPI('advanced', {
-  indexes: () => Promise.all(docsTable.map(async row => {
-    const doc = entry(row.file);
+const searchServer = () => search ??= createI18nSearchAPI('advanced', {
+  i18n,
+  indexes: () => Promise.all(docsLocales.flatMap(locale => docsTable.map(async row => {
+    const doc = entry(fileIn(row, locale));
     const { structuredData } = await doc.load();
-    return { id: docsPath(row.slug), url: docsPath(row.slug), title: doc.title, structuredData };
-  })),
+    return { id: `${locale}${docsPath(row.slug)}`, locale, url: docsPath(row.slug), title: doc.title, structuredData };
+  }))),
 });
 
 /**
@@ -91,6 +118,7 @@ const pieces = (content: string): DocsSearchText => content.split(/<mark>(.*?)<\
   .map((text, index) => (index % 2 ? { text: plain(text), mark: true as const } : { text: plain(text) }))
   .filter(piece => piece.text);
 
-/** The docs' hits for a query, as Fumadocs orders them: each page, then its matching sections. */
-export const docsSearch = createServerOnlyFn(async (query: string): Promise<DocsSearchHit[]> =>
-  (await searchServer().search(query)).map(hit => ({ type: hit.type, url: hit.url, content: pieces(hit.content) })));
+/** The docs' hits for a query in a locale's docs, as Fumadocs orders them: each page, then its matching sections. */
+export const docsSearch = createServerOnlyFn(async (query: string, locale: string = docsLocale): Promise<DocsSearchHit[]> =>
+  (await searchServer().search(query, { locale: docsLocales.includes(locale) ? locale : docsLocale }))
+    .map(hit => ({ type: hit.type, url: hit.url, content: pieces(hit.content) })));

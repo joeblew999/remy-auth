@@ -15,6 +15,9 @@ package follows [Semantic Versioning](https://semver.org/).
   in a module of its own, so a page that needs only the frame (remy-auth's docs and problem pages)
   no longer downloads the home and formats pages. `pages` re-exports all of it: nothing changes for
   existing imports.
+- `publicPageChecks({ oneLanguage: { translations } })`: one-language pages that also have their own
+  text in other languages (remy-auth's translated docs) are expected in the sitemap once per language,
+  self-canonical, with those languages as alternates and x-default.
 
 ### Changed
 - The formats rows (`Group`, `Row`) live in their own module and the showcase modules whose route

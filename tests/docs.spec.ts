@@ -5,7 +5,7 @@ import GithubSlugger from 'github-slugger';
 import { locales } from '@joeblew999/remy-ui/runtime';
 import { m } from '@joeblew999/remy-ui/messages';
 import { checkedLocales, collectErrors, hydrated, localizedPath } from '@joeblew999/remy-ui/checks';
-import { branch, docsLocale, docsObjectKey, docsPath, docsRowForObjectKey, docsTable, repository } from '../src/docs/table.js';
+import { branch, docsFile, docsI18nDir, docsLangs, docsLocale, docsObjectForKey, docsObjectKey, docsPath, docsRowForObjectKey, docsTable, docsTranslationFile, docsTranslationOf, repository } from '../src/docs/table.js';
 import { askMaxLength } from '../src/ask-limits';
 import { askPath, docsPaths, docsSearchPath } from '../src/paths';
 
@@ -16,6 +16,13 @@ import { askPath, docsPaths, docsSearchPath } from '../src/paths';
 // runs locally is deterministic and never reaches AI Search (limits are checked before any call).
 
 const remote = process.env.TEST_TARGET === 'remote';
+
+/** The languages with translations on disk (docs/i18n/<locale>/), and a page's file and languages by table.js's rules. */
+const translatedLocales = readdirSync(docsI18nDir);
+const fileIn = (row: { file: string }, locale: string) => docsFile(row, locale, existsSync);
+const langsOf = (row: { file: string }) => docsLangs(row, translatedLocales, existsSync);
+/** Every language the docs have text in, English first. */
+const docsLocales = [docsLocale, ...translatedLocales];
 
 /** What a Markdown file holds, outside code fences: headings (level, GitHub id, text), tables, code blocks. */
 function outline(file: string) {
@@ -32,8 +39,10 @@ function outline(file: string) {
     const heading = line.match(/^(#{1,6})\s+(.+?)\s*#*\s*$/);
     if (heading) {
       // GitHub slugs the rendered text: link text without the target, no backticks or emphasis marks.
-      const text = heading[2].replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[`*_]/g, '');
-      headings.push({ level: heading[1].length, id: slugger.slug(text), text });
+      // A translation's explicit id (Fumadocs' `[#id]`, the English heading's) is the id, and is not text.
+      const id = heading[2].match(/\s*\[#([^\]]+)\]$/);
+      const text = heading[2].replace(/\s*\[#[^\]]+\]$/, '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[`*_]/g, '');
+      headings.push({ level: heading[1].length, id: id ? id[1] : slugger.slug(text), text });
     }
     if (/^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$/.test(line) && line.includes('|')) tables++;
   }
@@ -43,21 +52,28 @@ function outline(file: string) {
 const docsUrl = (slug: string, locale: string) => localizedPath(docsPath(slug), locale);
 
 test.describe('docs pages', () => {
-  for (const { file, slug } of docsTable) {
-    const source = outline(file);
-    test(`${docsPath(slug)} (${file}) is complete without JavaScript in every language, canonical to /${docsLocale}`, async ({ browser, request, baseURL }) => {
-      const canonical = `${baseURL}${docsUrl(slug, docsLocale)}`;
-      // The server's HTML itself: every heading's id is there before any script runs.
-      const html = await (await request.get(docsUrl(slug, docsLocale))).text();
-      for (const heading of source.headings) expect(html, `${file}: ${heading.text}`).toContain(` id="${heading.id}"`);
+  for (const row of docsTable) {
+    const { file, slug } = row;
+    const langs = langsOf(row);
+    test(`${docsPath(slug)} (${file}) is complete without JavaScript in every language: its translation self-canonical with alternates, else English canonical to /${docsLocale}`, async ({ browser, request, baseURL }) => {
+      // The server's HTML itself: every heading's id is there before any script runs, in every language
+      // the page has text in; translations keep the English ids.
+      for (const lang of langs) {
+        const html = await (await request.get(docsUrl(slug, lang))).text();
+        for (const heading of outline(fileIn(row, lang)).headings) expect(html, `${fileIn(row, lang)}: ${heading.text}`).toContain(` id="${heading.id}"`);
+        expect(outline(fileIn(row, lang)).headings.map(heading => heading.id), fileIn(row, lang)).toEqual(outline(file).headings.map(heading => heading.id));
+      }
       const context = await browser.newContext({ javaScriptEnabled: false });
       const page = await context.newPage();
       for (const locale of checkedLocales) {
         const url = docsUrl(slug, locale);
+        const lang = langs.includes(locale) ? locale : docsLocale;
+        const source = outline(fileIn(row, lang));
+        const canonical = `${baseURL}${docsUrl(slug, lang)}`;
         expect((await page.goto(url))?.status(), url).toBe(200);
         await expect(page.locator('html'), url).toHaveAttribute('lang', locale);
         const article = page.locator(`article[data-docs-article="${slug}"]`);
-        await expect(article, url).toHaveAttribute('lang', docsLocale);
+        await expect(article, url).toHaveAttribute('lang', lang);
         await expect(page.getByRole('heading', { level: 1 }), url).toHaveText(source.headings[0].text);
         for (const heading of source.headings) await expect(article.locator(`h${heading.level}[id="${heading.id}"]`), `${url}: ${heading.text}`).toHaveCount(1);
         await expect(article.locator('table'), url).toHaveCount(source.tables);
@@ -72,9 +88,12 @@ test.describe('docs pages', () => {
           await expect(toc.getByRole('link'), url).toHaveCount(h2.length);
           for (const heading of h2) await expect(toc.locator(`a[href="#${heading.id}"]`), url).toHaveCount(1);
         }
-        // English only: one canonical URL for every language, and no alternates to other languages.
+        // A language with its own text: canonical to itself, with every language the page has as
+        // alternates and English as x-default. Any other language: English's canonical, no alternates.
         await expect(page.locator('link[rel="canonical"]'), url).toHaveAttribute('href', canonical);
-        await expect(page.locator('link[hreflang]'), url).toHaveCount(0);
+        const alternates = lang === locale && langs.length > 1 ? [...langs.map(value => [value, value]), ['x-default', docsLocale]] : [];
+        await expect(page.locator('link[hreflang]'), url).toHaveCount(alternates.length);
+        for (const [hreflang, value] of alternates) await expect(page.locator(`link[rel="alternate"][hreflang="${hreflang}"]`), url).toHaveAttribute('href', `${baseURL}${docsUrl(slug, value)}`);
         await expect(page.locator('meta[name="description"]'), url).toHaveAttribute('content', /\S{3}/);
         await expect(page.locator('meta[name="robots"]'), url).toHaveCount(0);
         // The site header links to the docs.
@@ -109,7 +128,7 @@ test.describe('docs pages', () => {
     page.on('request', request => { if (request.resourceType() === 'document') documents++; });
     await page.locator('article a[href="/es/docs/development"]').first().click();
     await expect(page).toHaveURL(/\/es\/docs\/development$/);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(outline('docs/development.md').headings[0].text);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(outline(fileIn({ file: 'docs/development.md' }, 'es')).headings[0].text);
     expect(documents).toBe(0);
     expect(errors).toEqual([]);
   });
@@ -127,14 +146,15 @@ test.describe('docs pages', () => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
     const prefix = `${repository}/`;
-    for (const { slug } of docsTable) {
-      const url = docsUrl(slug, docsLocale);
+    // In every language the docs have text in: a translation's links resolve as its English file's do.
+    for (const locale of docsLocales) for (const { slug } of docsTable) {
+      const url = docsUrl(slug, locale);
       await page.goto(url);
       const hrefs = await page.locator(`article[data-docs-article="${slug}"] a[href]`).evaluateAll(links => links.map(link => link.getAttribute('href')!));
       for (const href of hrefs) {
         if (href.startsWith('#')) expect(await idsOf(url), `${url} → ${href}`).toContain(decodeURIComponent(href.slice(1)));
         else if (href.startsWith('/')) {
-          expect(href, `${url} → ${href}`).toMatch(new RegExp(`^/${docsLocale}/docs(/|#|$)`));
+          expect(href, `${url} → ${href}`).toMatch(new RegExp(`^/${locale}/docs(/|#|$)`));
           const [path, hash] = href.split('#');
           const targets = await idsOf(path);
           if (hash) expect(targets, `${url} → ${href}`).toContain(decodeURIComponent(hash));
@@ -147,11 +167,14 @@ test.describe('docs pages', () => {
     await context.close();
   });
 
-  test('the sitemap lists every docs page once, in English, and no other language\'s docs URL', async ({ request, baseURL }) => {
+  test('the sitemap lists every docs page once in each language it has text in (English, its translations), and no other language\'s docs URL', async ({ request, baseURL }) => {
     const xml = await (await request.get('/sitemap.xml')).text();
-    for (const path of docsPaths) {
-      expect(xml.split(`<loc>${baseURL}/${docsLocale}${path}</loc>`).length - 1, path).toBe(1);
-      for (const locale of locales.filter(value => value !== docsLocale)) expect(xml, `${locale}${path}`).not.toContain(`${baseURL}/${locale}${path}<`);
+    expect(docsPaths).toEqual(docsTable.map(row => docsPath(row.slug)));
+    for (const row of docsTable) {
+      const path = docsPath(row.slug);
+      const langs = langsOf(row);
+      for (const lang of langs) expect(xml.split(`<loc>${baseURL}/${lang}${path}</loc>`).length - 1, `${lang}${path}`).toBe(1);
+      for (const locale of locales.filter(value => !langs.includes(value))) expect(xml, `${locale}${path}`).not.toContain(`${baseURL}/${locale}${path}<`);
     }
   });
 
@@ -197,6 +220,33 @@ test.describe('docs pages', () => {
       expect((await request.get(path)).status(), `${key} → ${path}`).toBe(200);
     }
   });
+
+  test('translations: English at the bucket\'s root, each translation under its locale, every key round-trips to its page in that language', async ({ request }) => {
+    expect(docsObjectKey('tooling', 'es')).toBe('es/tooling.md');
+    expect(docsObjectKey('', 'es')).toBe('es/index.md');
+    expect(docsObjectKey('tooling', docsLocale)).toBe('tooling.md');
+    expect(docsObjectForKey('es/missing.md')).toBeUndefined();
+    expect(translatedLocales, 'Spanish is translated').toContain('es');
+    // Spanish: every page is translated (docs/i18n/es/).
+    for (const row of docsTable) expect(existsSync(docsTranslationFile(row.file, 'es')), row.file).toBe(true);
+    const keys: string[] = [];
+    for (const locale of docsLocales) for (const row of docsTable) {
+      const file = fileIn(row, locale);
+      // A locale without its translation of a page publishes nothing for it: English answers.
+      if (locale !== docsLocale && file === row.file) continue;
+      if (locale !== docsLocale) expect(docsTranslationOf(file), file).toEqual({ locale, row });
+      const key = docsObjectKey(row.slug, locale);
+      keys.push(key);
+      expect(docsObjectForKey(key), key).toEqual({ row, locale });
+      expect(statSync(file).size, file).toBeLessThan(4 * 1024 * 1024);
+      // The citation's page: /<locale>/docs/<slug>, its text in that language.
+      const path = docsUrl(row.slug, locale);
+      const response = await request.get(path);
+      expect(response.status(), `${key} → ${path}`).toBe(200);
+      expect(await response.text(), `${key} → ${path}`).toMatch(new RegExp(`<article lang="${locale}"`));
+    }
+    expect(new Set(keys).size, 'keys are unique').toBe(keys.length);
+  });
 });
 
 /** The GitHub id of the heading a phrase first appears under, outside code blocks, in a Markdown file. */
@@ -208,7 +258,7 @@ function sectionOf(file: string, phrase: string) {
     if (opens) { if (!fence) fence = opens[1]; else if (line.trim().startsWith(fence)) fence = undefined; continue; }
     if (fence) continue;
     const heading = line.match(/^#{1,6}\s+(.+?)\s*#*\s*$/);
-    if (heading) id = slugger.slug(heading[1].replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[`*_]/g, ''));
+    if (heading) id = heading[1].match(/\s*\[#([^\]]+)\]$/)?.[1] ?? slugger.slug(heading[1].replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[`*_]/g, ''));
     else if (line.includes(phrase)) return id;
   }
   throw new Error(`${phrase} is not in ${file} outside code blocks`);
@@ -246,6 +296,30 @@ test.describe('docs search', () => {
     await context.close();
     // The server's own HTML says so too, before any script.
     expect(await (await request.get(`${localizedPath(docsSearchPath, 'en')}?q=${encodeURIComponent(query)}`)).text()).toMatch(/<meta name="robots" content="noindex"/);
+  });
+
+  test('a translated language searches its own text: a Spanish phrase leads to its Spanish section; English and an untranslated language search English', async ({ browser }) => {
+    const spanish = 'memoria privada';
+    const file = fileIn({ file: 'docs/how-we-work.md' }, 'es');
+    expect(file).toBe(docsTranslationFile('docs/how-we-work.md', 'es'));
+    const target = `${docsUrl('how-we-work', 'es')}#${sectionOf(file, spanish)}`;
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.goto(`${localizedPath(docsSearchPath, 'es')}?q=${encodeURIComponent(spanish)}`);
+    const hit = page.locator(`[data-docs-results] a[href="${target}"]`).filter({ has: page.locator('mark') }).first();
+    await expect(hit, target).toBeVisible();
+    await hit.click();
+    await expect(page).toHaveURL(new RegExp(`${target}$`));
+    await expect(page.locator('article[lang="es"]')).toContainText(spanish);
+    // English and Arabic (no translation) search the English docs, which do not have the phrase.
+    for (const locale of ['en', 'ar']) {
+      await page.goto(`${localizedPath(docsSearchPath, locale)}?q=${encodeURIComponent(spanish)}`);
+      await expect(page.locator('[data-docs-results] a[href*="#where-rules-live"]'), locale).toHaveCount(0);
+    }
+    // And the English phrase of an untranslated locale leads to the English section there.
+    await page.goto(`${localizedPath(docsSearchPath, 'ar')}?q=${encodeURIComponent('private memory')}`);
+    await expect(page.locator(`[data-docs-results] a[href="${docsUrl('how-we-work', 'ar')}#${sectionOf('docs/how-we-work.md', 'private memory')}"]`).first()).toBeVisible();
+    await context.close();
   });
 
   test('the empty search page shows the box and is indexable; a query that finds nothing says so', async ({ browser, baseURL }) => {
