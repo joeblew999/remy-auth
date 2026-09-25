@@ -32,6 +32,7 @@
     "./cloudflare": "./src/cloudflare.ts",
     "./samples": "./src/samples.js",
     "./checks": "./src/checks.js",
+    "./smoke": "./src/smoke.js",
     "./playwright": "./src/playwright.js",
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts",
