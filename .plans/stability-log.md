@@ -1,0 +1,20 @@
+# Architecture stability log: what the pump found
+
+Owner, 2026-09-25: "We are finding the limits to the architecture stability. By pumping hard we find out
+and we find out how well the code boundaries hold up!" Many agents code in parallel, deploys run no tests,
+a full run (tier 4) catches what broke. Each break is logged with the boundary it crossed.
+
+| Date | What broke | Boundary crossed | Held or leaked | Fix |
+| --- | --- | --- | --- | --- |
+| 09-25 | `cf:preview` waited for `/en/docs`, which only remy-auth has | shared tasks assumed one app's pages | leaked (publisher → consumer) | wait on `/healthz`, which the package gives every app |
+| 09-25 | Translated docs broke the shared sitemap check | shared checks assumed English-only docs | leaked, caught by the translation agent | `publicPageChecks({ oneLanguage: { translations } })` |
+| 09-25 | Replacing the search dialog left its checks behind (2 failures) | UI change without its checks | leaked, caught by the full run | checks follow the inline box |
+| 09-25 | Docs page layout change broke translation/search checks (4 failures) | two agents changing the docs area in parallel | leaked, caught by the full run | fix agent |
+| 09-25 | Header importing the search box would have put it in every page's bundle | route-level code splitting | held (caught by review before deploy) | the id in its own module |
+| 09-25 | Answers mixed English and Spanish citations | AI Search index shared across languages | leaked, seen live by the owner | folder filter per language |
+| 09-25 | Five merges into `CHANGELOG.md` and `now.md` conflicted | shared plan and changelog files | held (text conflicts only, no code) | resolved at merge |
+| 09-25 | Fonts, formats, parts, caching, sidebar, contracts merged in parallel | package vs app, parts, route files | held: typecheck clean, every page 200 live | — |
+
+What holds so far: code boundaries (package vs app, parts, routes) survive parallel work; merges
+conflict only in shared text files. What leaks: assumptions baked into *shared* tasks and checks about one
+app's shape, and checks that don't move with the code they check.
