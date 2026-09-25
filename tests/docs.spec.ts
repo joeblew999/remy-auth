@@ -206,9 +206,16 @@ test.describe('docs pages', () => {
   });
 });
 
+/**
+ * The rate limit is keyed by the visitor's address (CF-Connecting-IP). Locally each check is its own
+ * visitor, an address from the documentation range, so no check (or earlier run: Wrangler keeps the
+ * counts) spends another's budget. A deployed target ignores the header: Cloudflare sets it.
+ */
+const visitor = () => (remote ? {} : { 'CF-Connecting-IP': `2001:db8::${crypto.randomUUID().slice(0, 4)}:${crypto.randomUUID().slice(0, 4)}` });
+
 test.describe('answers', () => {
-  // One after another: the rate limit counts every question from this machine, so the answer (on a
-  // deployed target) comes before the check that runs the limit out.
+  // One after another: on a deployed target every question comes from this machine's one address,
+  // so the answer comes before the check that runs the limit out.
   test.describe.configure({ mode: 'serial' });
 
   test('the answer page is an app page: noindex, never stored, a plain form that works without JavaScript', async ({ browser, request }) => {
@@ -239,7 +246,7 @@ test.describe('answers', () => {
   });
 
   test(`a question over ${askMaxLength} characters is explained, not sent`, async ({ browser }) => {
-    const context = await browser.newContext({ javaScriptEnabled: false });
+    const context = await browser.newContext({ javaScriptEnabled: false, extraHTTPHeaders: visitor() });
     const page = await context.newPage();
     const question = 'x'.repeat(askMaxLength + 1);
     await page.goto(`${localizedPath(askPath, 'en')}?q=${question}`);
@@ -251,7 +258,7 @@ test.describe('answers', () => {
 
   test('with AI Search out of reach, a question gets "no answer" and the way to the docs, never a blank page', async ({ browser }) => {
     test.skip(remote, 'Locally the binding is switched off (wrangler dev --local, playwright.config.ts); a deployed target answers.');
-    const context = await browser.newContext({ javaScriptEnabled: false });
+    const context = await browser.newContext({ javaScriptEnabled: false, extraHTTPHeaders: visitor() });
     const page = await context.newPage();
     await page.goto(`${localizedPath(askPath, 'ar')}?q=${encodeURIComponent('Where do the docs live?')}`);
     await expect(page.locator('[data-ask="no-answer"]')).toHaveText(m.ask_no_answer({}, { locale: 'ar' }));
@@ -288,9 +295,10 @@ test.describe('answers', () => {
     // more through (developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit).
     const most = remote ? 25 : 21;
     const accepted = new Map<number, number>();
+    const headers = visitor();
     for (let attempt = 0; attempt < most && outcomes.at(-1) !== 'rate-limited'; attempt++) {
       const minute = Math.floor(Date.now() / 60_000);
-      const html = await (await request.get(`${localizedPath(askPath, 'en')}?q=${question}`)).text();
+      const html = await (await request.get(`${localizedPath(askPath, 'en')}?q=${question}`, { headers })).text();
       const outcome = html.match(/data-ask="([^"]+)"/)?.[1] ?? 'none';
       outcomes.push(outcome);
       if (outcome !== 'rate-limited' && minute === Math.floor(Date.now() / 60_000)) accepted.set(minute, (accepted.get(minute) ?? 0) + 1);
