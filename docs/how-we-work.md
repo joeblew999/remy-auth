@@ -75,11 +75,17 @@ When the owner hands over decisions, for example to finish work unattended:
 
 ## Gates before anything leaves the machine
 
-- Run the local gate (`mise run project:verify`) and see it pass before any push, tag, release
-  or deploy. CI is slow; a red CI run costs far more than a local run.
+- The full gate (`mise run project:verify`, every language) is for real releases: `ui:release`
+  runs it, and a tag or package release never goes out without it. Owner, 2026-09-25: "It's just
+  only needed for real releases, we can't take forever in development. You have to start to use
+  your judgement better on when a deploy needs a gateway test."
+- Development deploys (`mise run cf:deploy`) run no tests. Judge each one: a change to app or
+  shared-package code that visitors run gets the quick gate first (`GATE=1 mise run cf:deploy`,
+  one language per writing system); docs text, plans, tasks and config that do not change what
+  visitors get deploy straight away. Say which you chose when reporting.
 - Never pipe a gating command through `grep` or `tail` in a chain: the pipe hides its exit code.
   This once released a version whose checks had failed.
-- Before reporting work as done, run `mise run project:verify` and report its real result.
+- Report what was tested and what was not; never call untested work verified.
 
 ## Sharing one machine between agents
 
@@ -94,7 +100,7 @@ and timing-sensitive checks failed well before that. So:
   count. When more are needed, set `PLAYWRIGHT_WORKERS=2` for each.
 - Google's level (`project:test:google`, `project:test:cwv`) takes a machine-wide lock, so a second
   run waits rather than skewing the first.
-- `cf:deploy` runs the local gate itself; never chain a deploy after a gate with `;`.
+- `GATE=1 mise run cf:deploy` runs the quick gate itself; never chain a deploy after a gate with `;`.
 
 ## Reporting to the owner
 

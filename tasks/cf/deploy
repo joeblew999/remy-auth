@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
-#MISE description="Run the local gate (project:verify) in one language per writing system (QUICK_LOCALES; every language runs in project:verify and ui:release), then build with DEPLOY_ORIGIN as the public origin, upload to the authenticated Cloudflare account and wait until production serves the new version (~1 min), then docs:publish when the project has it. Builds into dist/: not alongside a local level. Then run project:test:remote in the background and keep working"
+#MISE description="Build (no tests; GATE=1 runs the quick gate first, for code visitors run; releases run the full gate) with DEPLOY_ORIGIN as the public origin, upload to the authenticated Cloudflare account and wait until production serves the new version (~1 min), then docs:publish when the project has it. Builds into dist/: not alongside a local level. Then run project:test:remote in the background and keep working"
 #MISE dir="{{config_root}}"
 set -euo pipefail
 : "${DEPLOY_ORIGIN:?cf:deploy needs DEPLOY_ORIGIN in [env]}"
 
-# Nothing red reaches production: the gate runs here, not by memory. Everyday deploys check one
-# language per writing system (QUICK_LOCALES, default en, ar, ja, th; owner, 2026-09-25: "We really
-# don't need lang tests all the time"); every language runs at release (ui:release) and on demand
-# (project:verify). CHECK_LOCALES set by the caller wins.
-export CHECK_LOCALES="${CHECK_LOCALES:-${QUICK_LOCALES:-en,ar,ja,th}}"
-mise run project:verify
+# Development deploys run no tests (owner, 2026-09-25: the gate is for real releases; ui:release runs
+# the full one). GATE=1 runs the quick gate first, one language per writing system (QUICK_LOCALES),
+# for changes to code that visitors run: the deployer judges (docs/how-we-work.md).
+if [ "${GATE:-}" = 1 ]; then
+  export CHECK_LOCALES="${CHECK_LOCALES:-${QUICK_LOCALES:-en,ar,ja,th}}"
+  mise run project:verify
+fi
 
 export PUBLIC_ORIGIN="$DEPLOY_ORIGIN"
 ./node_modules/.bin/vite build
