@@ -40,7 +40,10 @@ translation: "The docs translation. Is this also paraglide based or what?"
 11. Observability is thin: only failures are logged (`ask_failed`), with the error's name alone
     ("Error"), so a failure cannot be diagnosed. Nothing records answered, no-answer, rate-limited
     or too-long, the AI call's time, cache hits or citations; no alert on failures; AI Gateway's own
-    logs and spend are not surfaced anywhere we look. The question is never logged (on purpose).
+    logs and spend are not surfaced anywhere we look. Checked 2026-09-25: see
+    [observability.md](observability.md#ai-answers-docs-site-what-cloudflare-gives-what-we-have-checked-2026-09-25)
+    (spend limit likely not enforced on postpaid, gateway rate limit against Cloudflare's advice,
+    questions stored in gateway logs).
 12. Level 1 is now 2.1 minutes locally and 2.6 on a preview (280 checks).
 
 ## To review later

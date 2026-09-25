@@ -137,3 +137,53 @@ response, liveness answering) in `@joeblew999/remy-ui/checks`, and the CLI tasks
 - Saved views and alerts exist in the account, with a destination the owner chose, and a
   recovery notice is exercised once.
 - Sampling, retention, projected costs and monitoring ownership are recorded.
+
+## AI answers (docs site): what Cloudflare gives, what we have (checked 2026-09-25)
+
+Sources: the pinned `cloudflare` skill (`references/ai-gateway`, `ai-search`, `observability`),
+which routes to Cloudflare's docs ([AI Search and its gateway](https://developers.cloudflare.com/ai-search/configuration/models/ai-gateway/),
+[spend limits](https://developers.cloudflare.com/ai-gateway/features/spend-limits/),
+[logging](https://developers.cloudflare.com/ai-gateway/observability/logging/),
+[analytics](https://developers.cloudflare.com/ai-gateway/observability/analytics/),
+[custom metadata](https://developers.cloudflare.com/ai-gateway/observability/custom-metadata/)),
+and the live account read through the Cloudflare API MCP (gateway, instance, logs, alert types).
+
+**Every model call AI Search makes runs through its AI Gateway (`remy-docs`).** That gateway is the
+place to observe the AI part:
+- **Logs, per call** (on, live): model, tokens in and out, cost, duration, cached or not, status,
+  user agent, and AI Search's own metadata (`ai-search`, `task`, `origin`). 11 calls so far; an
+  answer costs about $0.0002 to $0.0006 and takes 2.4 to 4.2 s, a cached one 0.2 s and $0.
+- **Analytics** (dashboard and GraphQL): requests, tokens, cost, errors, cache rate over time.
+- **User Insights** (dashboard): spend and unusual-usage flags, per user when metadata names one.
+- **Logpush** of gateway logs (off). **Custom metadata**: up to 5 entries per call; whether the AI
+  Search binding passes ours through is **not verified**.
+- **AI Search Metrics tab**: indexing health, searches, most retrieved sections.
+- **Alerts**: no AI Gateway alert type exists. Available: Workers Observability alert policies
+  (we have two), billing budget and billing usage alerts (the $10 budget alert exists; whether a
+  usage alert can target Workers AI alone is **not verified**).
+
+**Problems found in the live setup:**
+1. **The $10 spend limit very likely does not stop anything.** Spend limits apply to Unified
+   Billing (prepaid credits) and bring-your-own-key calls; the gateway's Workers AI billing is
+   `postpaid`. A real cap means Unified Billing with prepaid credits (**owner: money**).
+2. **The gateway has a rate limit (60 a minute), which Cloudflare says not to set** on a gateway
+   connected to AI Search: it also throttles AI Search's own calls, including indexing. A likely
+   cause of the first `docs:index` run failing part way. Remove it; our own limit (10 a minute per
+   visitor, in the Worker) stays. Gateway caching is off, as Cloudflare advises; AI Search's own
+   cache (48 h) is on.
+3. **Visitors' questions are stored.** Gateway logs keep request and response bodies by default,
+   so questions and answers are kept, while our code says "the question is never logged". Decide:
+   turn off payload storage (metadata only), or keep them for quality review and say so.
+4. **The gateway is unauthenticated**; Cloudflare recommends authentication to stop others adding
+   calls and log volume.
+5. **Our own logs say almost nothing**: only `ask_failed`, with the error name "Error".
+
+**Proper observability for the answers, proposed:**
+- One `ask` event per question in Workers Logs: outcome (answered, no-answer, rate-limited,
+  too-long, failed), AI call duration, citation count, cache hit, gateway log ID, locale, release,
+  request ID; the error's message on failure. Never the question.
+- A Workers Observability alert on `ask` failures and on answer time, beside the existing two.
+- Gateway spend and errors read through GraphQL by a mise task (`cf:ai-usage`), so agents and the
+  owner see cost and errors per day without the dashboard; later a check against a daily budget.
+- A remote check that the gateway settings stay as decided (no gateway rate limit, no gateway
+  cache, payload storage as decided, spend rule present).
