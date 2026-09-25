@@ -17,6 +17,7 @@ a full run (tier 4) catches what broke. Each break is logged with the boundary i
 | 09-25 | `project:test:only` ignored `CHECK_LOCALES` | tier task defaults | leaked (tooling) | caller's `CHECK_LOCALES` wins |
 | 09-25 | `field.tsx` lost shadcn's `"use client"` after an agent removed other components | shadcn CLI regenerating shared files | leaked, caught by `ui:verify` | regenerated with `ui:components` |
 | 09-25 | A background agent could not run the test tier (its permission check refused it) | agent permissions vs test tasks | leaked (process) | full runs run as the lead's own background command |
+| 09-25 | Parts (pass 2) and package moves both reworked the sitemap route and the app's check calls, in opposite directions (route into a part vs a shared builder; checks split into parts vs one serverAppChecks) | two agents given overlapping scopes on the same files | leaked: a design clash, not a text conflict | one agent reconciles; lesson: give parallel agents disjoint files |
 | 09-25 | Five merges into `CHANGELOG.md` and `now.md` conflicted | shared plan and changelog files | held (text conflicts only, no code) | resolved at merge |
 | 09-25 | Fonts, formats, parts, caching, sidebar, contracts merged in parallel | package vs app, parts, route files | held: typecheck clean, every page 200 live | — |
 
