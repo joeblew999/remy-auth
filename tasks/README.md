@@ -2,17 +2,53 @@
 
 One file per task namespace (`skills`, `mcp`, `browser`, `web`, `codex`, `claude`, `project`,
 `cf`, `api`); file tasks live in their namespace's directory (`mcp/`, `cf/`, `api/`, `project/`). remy-auth includes this
-directory locally; any other project includes it by git reference pinned to a commit:
+directory locally; any other project includes it by git reference pinned to the release tag that
+matches its `@joeblew999/remy-ui` version:
 
 ```toml
+min_version = "2026.9.12"   # the tasks rely on it; an include cannot set it
+
 [task_config]
-includes = ["git::https://github.com/joeblew999/remy-auth.git//tasks?ref=<commit>"]
+includes = ["git::https://github.com/joeblew999/remy-auth.git//tasks?ref=vX.Y.Z"]
 
 [env]
-PREVIEW_PORT = "4174"                                   # local host port for preview and tests
-PUBLIC_ORIGIN = "http://127.0.0.1:4174"                 # origin in prerendered links for local tests
-DEPLOY_ORIGIN = "https://your-app.your-subdomain.workers.dev"   # origin used by cf:deploy
+# Local host port for preview and tests, from the shell so each worktree or agent picks its own.
+PREVIEW_PORT = "{{ get_env(name='PREVIEW_PORT', default='4174') }}"
+# Origin in prerendered links for local tests; follows the port.
+PUBLIC_ORIGIN = "http://127.0.0.1:{{ env.PREVIEW_PORT }}"
+# Origin cf:deploy builds with.
+DEPLOY_ORIGIN = "https://your-app.your-subdomain.workers.dev"
 ```
+
+### A new consumer
+
+The one recipe. [remy-auth-app](https://github.com/joeblew999/remy-auth-app) is the reference
+consumer and the starting point: made a GitHub template repository, a new app copies no files by
+hand.
+
+1. Prerequisites: mise >= 2026.9.12, `gh auth login` with a token that has `read:packages`, Google
+   Chrome (the checks use it), and `wrangler login` before the first deploy.
+2. `gh repo create <name> --private --template joeblew999/remy-auth-app --clone`, then `cd <name>`.
+3. Name the app: `name` in `wrangler.jsonc` and `package.json`, the prerender Worker's name in
+   `vite.config.ts`, the service name in `workers/app.ts`, `src/server.ts` and `tests/gui.spec.ts`
+   (`grep -rn remy-auth-app --exclude-dir=node_modules .` lists them), and `DEPLOY_ORIGIN` in
+   `mise.toml` (`https://<name>.<your-subdomain>.workers.dev`).
+4. `mise install`, then `GITHUB_TOKEN=$(gh auth token) npm install` once to write the new app's
+   `package-lock.json` (`project:setup` runs `npm ci`, which needs it), then
+   `GITHUB_TOKEN=$(gh auth token) mise run project:setup` (npm ci, pinned skills, MCP registration,
+   `project:verify`).
+5. Commit `package-lock.json`, `skills-lock.json` and `src/routeTree.gen.ts`.
+6. `mise run cf:deploy`.
+7. CI: the template's `.github/workflows/google.yml` runs the types and Google's audits on every push
+   to `main`. Grant the new repository read access in the `@joeblew999/remy-ui` package's settings
+   ("Manage Actions access"), or `npm ci` fails there.
+
+The template already carries `min_version`, the three inputs above, `preview_urls: false` and
+`observability.redact_query_string` in `wrangler.jsonc`, the `.npmrc` for GitHub Packages, the
+`.gitignore`, the checks under `tests/`, and a Dependabot file that keeps the SHA-pinned actions
+current. Move to a new release with `mise run project:upgrade-ui -- <version>` (package and tasks
+`ref` together). `ref=main` (`mise.dev.toml`) is cached and never refreshed on its own: run with
+`MISE_TASK_REMOTE_NO_CACHE=true` after `main` moves.
 
 ### Choosing the version: released, development or local
 
@@ -31,9 +67,10 @@ mise uses the most specific file's `includes` instead of the default (verified w
 `main` moves, refresh with `MISE_TASK_REMOTE_NO_CACHE=true`. Pin a commit SHA only while a branch
 is under test before release; move back to a tag at release.
 
-The including project supplies the npm packages the tasks run: `vite` with `@tanstack/react-start`,
-`wrangler`, `@playwright/test`, `chrome-devtools-mcp`, `modern-web-guidance`, `smol-toml`
-(and `@openai/codex` for the Codex tasks). A task defined in the project's own `mise.toml`
+The including project supplies the npm packages the tasks run; the full list is remy-auth-app's
+`package.json` (`vite` with `@tanstack/react-start` and its plugins, `wrangler`, `@playwright/test`,
+`lighthouse`, `chrome-devtools-mcp`, `modern-web-guidance`, `smol-toml`, and `@openai/codex` for
+the Codex tasks). A task defined in the project's own `mise.toml`
 overrides the included task of the same name; remy-auth overrides `project:typecheck` and
 `project:verify` because it owns the shared package.
 

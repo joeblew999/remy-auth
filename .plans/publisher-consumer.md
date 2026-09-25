@@ -48,3 +48,19 @@ remy-auth publishes; remy-auth-app is the reference consumer and the proof.
 
 A second, throwaway consumer made from the recipe alone passes the shared checks and deploys to a
 preview; remy-auth-app passes its gate and Core Web Vitals after any move; no check is loosened.
+
+## Decisions
+
+- 2026-09-25, recipe and consumer drift (analysis action list items 2 and 4, D2, D3, D6, D15,
+  D16): the new-consumer recipe has **one home**, [tasks/README.md](../tasks/README.md#a-new-consumer)
+  (docs/tooling.md already links there); it starts from remy-auth-app as a GitHub template repository
+  (`gh repo create --template`), no scaffolding script of ours. remy-auth-app (branch
+  `consumer-drift-recipe`) now has `min_version`, `PREVIEW_PORT` from the shell with `PUBLIC_ORIGIN`
+  following it, `preview_urls: false`, `redact_query_string`, a `google.yml` workflow (types and
+  Lighthouse audits on push to main, actions pinned by SHA, no release job) with Dependabot, and a
+  refreshed README; its package stays on 0.10.5 until the release. Checked with typecheck and build
+  only (owner: no test tiers). Still open: the shared wrangler-config check (D6, item 5), the name
+  written once (D1, item 3), the reusable workflow (item 8; the consumer's copy becomes a caller),
+  and the gate's throwaway second consumer.
+- Owner to do: mark remy-auth-app a template repository (GitHub setting) and grant it read access
+  in the `@joeblew999/remy-ui` package's "Manage Actions access", or its CI's `npm ci` fails.
