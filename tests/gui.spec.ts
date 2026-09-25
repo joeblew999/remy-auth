@@ -12,25 +12,30 @@ import { info } from '@joeblew999/remy-auth-contract';
 import { router } from '../src/api/router';
 import { registeredOrigins } from '../src/api/origins';
 import { docsI18nDir, docsLangs, docsPath, docsTable } from '../src/docs/table.js';
-import { deferredPlaceChecks } from '@joeblew999/remy-ui/showcase/deferred-place.checks';
-import { statusCardChecks } from '@joeblew999/remy-ui/showcase/status-card.checks';
-import { problemChecks } from '@joeblew999/remy-ui/showcase/problem.checks';
 import { partChecks } from '@joeblew999/remy-ui/parts/checks';
 import { codeSplittingChecks } from '@joeblew999/remy-ui/showcase/code-splitting.checks';
 import { buildBoundaryChecks } from '@joeblew999/remy-ui/showcase/build-boundaries.checks';
 
 // The shared checks cover what every app built on the package must satisfy: one call for a
-// server-rendered app (@joeblew999/remy-ui/app-checks), with this app's own pages beside the shared ones.
+// server-rendered app (@joeblew999/remy-ui/app-checks), with this app's own pages beside the shared ones,
+// and one for the parts it lists in src/parts.json (partChecks), which serverAppChecks leaves to them.
 // Site pages (for Google) and app pages (for people using the app) never mix; see paths.js.
 // This app adds the docs (site pages in English and their translations, docs/i18n/), the docs search
 // and the answer page (site pages): src/paths.ts.
 const translations = Object.fromEntries(docsTable.map(row => [docsPath(row.slug), docsLangs(row, readdirSync(docsI18nDir), existsSync)]));
+const oneLanguage = { locale: 'en', paths: docsPaths, translations };
 serverAppChecks({
   service: 'remy-auth',
   ownSitePaths: [...docsPaths, docsSearchPath, askPath],
-  oneLanguage: { locale: 'en', paths: docsPaths, translations },
+  oneLanguage,
   formats: { extra: formatsExtra },
 });
+// Every part listed in src/parts.json brings its own checks: the sitemap (seo-routes), the streamed
+// place and its failing navigation (deferred-place), the status card, the time-zone pages.
+partChecks({ options: {
+  'seo-routes': { paths: sitePaths, oneLanguage },
+  'status-card': { service: 'remy-auth', path: '/app', endpoint: '/api/status' },
+} });
 // The demo reservation and the status card are contract endpoints (@joeblew999/remy-auth-contract).
 apiChecks({ router, title: info.title, origins: registeredOrigins });
 reservationApiChecks();
@@ -38,15 +43,10 @@ codeSplittingChecks({ paths: [...sitePaths, '/docs'] });
 codeSplittingChecks({ paths: appPaths, home: '/app' });
 // The app mounts TanStack Devtools (src/routes/__root.tsx), whose shell must never ship either.
 buildBoundaryChecks({ paths: everyPath, markers: [
-  { name: 'request.cf', pattern: /\.cf\b/, source: 'src/place.server.ts' },
+  { name: 'request.cf', pattern: /\.cf\b/, source: 'packages/ui/src/parts/deferred-place/place.server.ts' },
   { name: 'TanStack Devtools (the shell hosting the panels)', pattern: /tsd-(?:control|surface)\b/, source: { package: '@tanstack/devtools', from: '@tanstack/react-devtools' } },
 ] });
-deferredPlaceChecks();
-statusCardChecks({ service: 'remy-auth', path: '/app', endpoint: '/api/status' });
-// Every part listed in src/parts.json brings its own checks.
-partChecks();
-problemChecks({ failingNavigation: { from: '', link: 'formats_link', fail: '**/_serverFn/**', heading: 'formats_title' }, serverRoutes: [{ path: '/robots.txt', type: 'text/plain; charset=utf-8', cache: 'public, max-age=3600, s-maxage=3600', origin: true }, { path: '/sitemap.xml', type: 'application/xml; charset=utf-8', cache: 'public, max-age=3600, s-maxage=3600', origin: true }] });
-// Rows only this server-rendered app has on the formats page: more Intl examples and Cloudflare's geolocation.
+// Rows only this server-rendered app has on the formats page: more Intl examples (Cloudflare's geolocation: the deferred-place part's checks).
 async function formatsExtra(page: Page, locale: string) {
   const messages = catalogs[locale];
   const info = localeInfo(locale as any);
@@ -68,13 +68,6 @@ async function formatsExtra(page: Page, locale: string) {
     await expect(page.locator(`[data-calendar="${calendar}"]`), calendar).toHaveText(
       `${new Intl.DisplayNames([locale], { type: 'calendar' }).of(calendar)}: ${new Intl.DateTimeFormat(format, { ...samples.calendarDate, calendar }).format(samples.date)}`);
   }
-  // Cloudflare's geolocation depends on where the request comes from; the page exposes what it used.
-  const zone = await page.locator('[data-sample="cf-timezone"]').getAttribute('data-timezone');
-  await expect(page.locator('[data-sample="cf-timezone"]')).toHaveText(zone || messages.location_unknown);
-  await expect(page.locator('[data-sample="cf-local"]')).toHaveText(zone
-    ? new Intl.DateTimeFormat(format, { dateStyle: 'full', timeStyle: 'long', timeZone: zone }).format(samples.instant) : messages.location_unknown);
-  const country = await page.locator('[data-sample="country"]').getAttribute('data-country');
-  await expect(page.locator('[data-sample="country"]')).toHaveText(country ? new Intl.DisplayNames([locale], { type: 'region' }).of(country)! : messages.location_unknown);
 }
 
 // Checks that belong to this repository: the catalogs it owns, and server rendering itself.

@@ -35,6 +35,26 @@ package follows [Semantic Versioning](https://semver.org/).
   mounts each listed part's routes through TanStack's `virtualRouteConfig` and `physical()`),
   `./parts/checks` (`partChecks()`). First part: `time-zones` (the `/time-zones/$` route and its checks),
   so an app adds or removes it with one line. New dependency `@tanstack/virtual-file-routes`.
+- Parts, second pass: three more parts, each one line in `src/parts.json`.
+  `deferred-place` (Cloudflare's place streamed into the formats and location pages, its `getPlace`
+  server function and checks; links a zone to `time-zones` only when that part is listed),
+  `seo-routes` (`/robots.txt` and `/sitemap.xml`, listing the package's site pages, every listed part's
+  and the app's own entries from its `src/parts/seo-routes.ts`) and `status-card` (the live status card
+  on the app home, with the app's status query from its `src/parts/status-card.ts`).
+  The mechanism gains entry modules (`virtual:remy-parts/<part>/<entry>`, `undefined` for an unlisted
+  part), app options (`virtual:remy-parts/<part>/app`), site paths a part adds (`sitePaths`) and
+  `partSitePaths()`. New exports `./parts/seo-routes/sitemap` and `./parts/status-card/query` (types
+  for the app's options). One implementation each: the seo-routes part builds its routes with `seo`'s
+  `sitemapXml` and `robotsTxt` (as a prerendered app writes its files), and the status-card part is
+  `showcase/status-card`'s card with the app's query.
+- `serverAppChecks({ parts })` is part-aware: what a listed part owns runs with `partChecks()` instead,
+  never twice (with `seo-routes` no sitemap test in `publicPageChecks`; the device-place row expects
+  Cloudflare's place only with `deferred-place`). `parts` defaults to the app's `src/parts.json`, or
+  none without one; `prerenderedAppChecks` is unchanged. remy-auth's test file is one `serverAppChecks`
+  call, one `partChecks` call and its own checks.
+- `sitemapChecks({ paths, oneLanguage })` (`checks`): the sitemap test, split out of `publicPageChecks`,
+  which runs it unless told `sitemap: false` (the seo-routes part's checks run it then). The 404 check it
+  shared a test with is a test of its own, still in `publicPageChecks`.
 - `./problem` (`Problem`, `NotFound`, `ErrorPage`, `problemPages`) and `./preferred` (`usePreferred`),
   moved from remy-auth so parts' routes can use them. Nothing changes for existing imports.
 - `./smoke`: `smokeChecks({ sitePaths, appPaths, hydrate, locales })`, tier 1 of the test tiers (every page

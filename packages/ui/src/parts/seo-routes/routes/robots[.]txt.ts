@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { robotsTxt, robotsType } from '@joeblew999/remy-ui/seo';
+import { robotsTxt, robotsType } from '../../../seo';
 import { crawlCache, readOnly } from '../server-routes';
 
 export const Route = createFileRoute('/robots.txt')({

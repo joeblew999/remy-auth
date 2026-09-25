@@ -58,6 +58,13 @@ preview; remy-auth-app passes its gate and Core Web Vitals after any move; no ch
   live beside `checks.js`, not in it, because the showcase checks import `checks.js`. remy-auth uses
   them with the same CSS bytes, sitemap and robots output and the same 276 registered checks.
   remy-auth-app moves after the next release (it installs the package from GitHub Packages).
+- 2026-09-25, package moves meet parts (parts second pass, [parts.md](parts.md)): one design. The
+  seo-routes part's `/sitemap.xml` and `/robots.txt` are built with `seo`'s `sitemapXml`/`robotsTxt`
+  (no second builder; a prerendered consumer writes its files with the same functions);
+  the status-card part wraps `showcase/status-card`; `serverAppChecks` takes `parts` (default: the
+  app's `src/parts.json`) and leaves what a listed part owns to `partChecks()`. remy-auth's test file is
+  `serverAppChecks` + `partChecks` + its own checks; every registered test title survives (the sitemap
+  and 404 test split in two, the Cloudflare rows became a no-JavaScript test per language).
 - `cf:preview-delete` keeps `${1:-…}`: `cf:preview` calls the file directly, not through mise, so
   there is no `usage_name` there (the analysis's "drop it" would break the cleanup).
 

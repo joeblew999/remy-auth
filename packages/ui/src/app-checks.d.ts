@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import type { PartName } from './parts/list.js';
 
 type AppCheckOptions = {
   /** The Worker's service name in its logs and response headers. */
@@ -14,6 +15,13 @@ type AppCheckOptions = {
 };
 
 /** The shared checks of a server-rendered app: zones, public pages, text, fonts, redirecting entry URLs, demo, observability, CSP, formats and the showcase rows. */
-export declare function serverAppChecks(options: AppCheckOptions & { oneLanguage?: { locale: string; paths: string[]; translations?: Record<string, string[]> } }): void;
+export declare function serverAppChecks(options: AppCheckOptions & {
+  oneLanguage?: { locale: string; paths: string[]; translations?: Record<string, string[]> };
+  /**
+   * The app's listed parts (default: its src/parts.json, or none without one). What a listed part owns
+   * runs with partChecks() instead: seo-routes the sitemap, deferred-place the network place.
+   */
+  parts?: readonly PartName[];
+}): void;
 /** The shared checks of a fully prerendered app: zones, public pages, static entry pages, demo, formats, text, observability and the showcase rows without server functions. */
 export declare function prerenderedAppChecks(options: AppCheckOptions): void;

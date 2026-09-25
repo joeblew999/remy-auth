@@ -57,6 +57,8 @@
     "./parts": "./src/parts/list.js",
     "./parts/vite": "./src/parts/vite.js",
     "./parts/checks": "./src/parts/checks.js",
+    "./parts/seo-routes/sitemap": "./src/parts/seo-routes/sitemap.ts",
+    "./parts/status-card/query": "./src/parts/status-card/query.ts",
     "./showcase/*.checks": "./src/showcase/*.checks.js",
     "./showcase/*": "./src/showcase/*.tsx"
   },
