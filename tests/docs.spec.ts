@@ -1,14 +1,13 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import GithubSlugger from 'github-slugger';
 import { locales } from '@joeblew999/remy-ui/runtime';
 import { m } from '@joeblew999/remy-ui/messages';
 import { checkedLocales, collectErrors, hydrated, localizedPath } from '@joeblew999/remy-ui/checks';
-import { branch, docsLocale, docsPath, docsTable, repository } from '../src/docs/table.js';
+import { branch, docsLocale, docsObjectKey, docsPath, docsRowForObjectKey, docsTable, repository } from '../src/docs/table.js';
 import { askMaxLength } from '../src/ask-limits';
 import { askPath, docsPaths, docsSearchPath } from '../src/paths';
-import { docsManifest } from '../scripts/docs-manifest.mjs';
 
 // The docs site and its answers (.plans/docs-site.md, "Checks"). The source of truth for what a page
 // must contain is the repository file itself, read here independently of Fumadocs: its headings with
@@ -187,21 +186,15 @@ test.describe('docs pages', () => {
     await context.close();
   });
 
-  test('every section the index task uploads cites a heading that exists on its page', async ({ request }) => {
-    const items = await docsManifest();
-    expect(items.length).toBeGreaterThan(docsTable.length);
-    expect(new Set(items.map(item => item.key)).size, 'keys are unique').toBe(items.length);
-    const pages = new Map<string, string>();
-    for (const item of items) {
-      const [path, id] = item.url.split('#');
-      expect(path, item.key).toMatch(new RegExp(`^/${docsLocale}/docs(/|$)`));
-      if (!pages.has(path)) {
-        const response = await request.get(path);
-        expect(response.status(), path).toBe(200);
-        pages.set(path, await response.text());
-      }
-      expect(pages.get(path), `${item.key} → ${item.url}`).toMatch(new RegExp(`<h[1-6][^>]* id="${id}"`));
-      expect(item.text.length, item.key).toBeLessThan(4 * 1024 * 1024);
+  test('every file docs:publish puts in the bucket maps back to its docs page, which exists', async ({ request }) => {
+    const keys = docsTable.map(row => docsObjectKey(row.slug));
+    expect(new Set(keys).size, 'keys are unique').toBe(keys.length);
+    for (const row of docsTable) {
+      const key = docsObjectKey(row.slug);
+      expect(docsRowForObjectKey(key), key).toBe(row);
+      expect(statSync(row.file).size, row.file).toBeLessThan(4 * 1024 * 1024);
+      const path = `/${docsLocale}${docsPath(row.slug)}`;
+      expect((await request.get(path)).status(), `${key} → ${path}`).toBe(200);
     }
   });
 });

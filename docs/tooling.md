@@ -73,7 +73,7 @@ CLI passthrough tasks accept upstream flags directly, such as
 | `api:*` | The generated OpenAPI document a running Worker serves (`api:spec`, `--urls` for its operations; shared task) |
 | `browser:*` | Chrome DevTools CLI, session lifecycle and MCP server |
 | `web:*` | Modern web guidance search and retrieval |
-| `docs:*` | The AI Search index behind `/docs/ask`: list the sections (`docs:manifest`), replace the production index after a deploy (`docs:index`, owner's request) |
+| `docs:*` | The docs for AI answers at `/docs/ask`: publish them to R2 (`docs:publish`, also run by `cf:deploy`), check retrieval (`docs:questions`), stop or resume answers (`docs:answers:*`), run locally against the live index (`docs:dev`) |
 | `mcp:*` | Register, verify and inspect project MCP connections |
 | `codex:*` / `claude:*` | Start or resume an interactive agent session (shared tasks) |
 
@@ -294,9 +294,11 @@ storage, dashboards and alert delivery are open work in the observability plan.
 
 Two Cloudflare products sit behind `/docs/ask`, and they are easy to mix up:
 
-- **AI Search** is the index. It holds the docs, one item per `##` section, finds the sections that
-  match a question, and asks a Workers AI model to write the answer. This is what `docs:*` tasks
-  upload to and delete from. Production is `remy-docs`; `remy-docs-dev` is for trying changes.
+- **AI Search** is the index (`remy-docs-pages`). It reads the docs itself from the R2 bucket
+  `remy-docs` (one Markdown file per docs page, synced hourly and whenever `docs:publish` asks),
+  finds the passages that match a question, and asks a Workers AI model to write the answer.
+- **R2** holds the files AI Search reads. `docs:publish` makes the bucket hold exactly the docs
+  pages: it puts each one and deletes anything else, so a removed page leaves the answers too.
 - **AI Gateway** is the meter in front of the model. Every model call AI Search makes passes through
   it (`remy-docs`), and it logs each one with its cost, tokens and time (and the question). It holds
   no docs. Spend limits and rate limits live here; `cf:ai-usage` and `cf:ai-check` read it.
@@ -306,13 +308,9 @@ exist only on Cloudflare (AI Search has no local version). Every `docs:*` and `c
 LOCAL or REMOTE (and PRODUCTION) in `mise tasks`.
 
 ```sh
-mise run docs:manifest -- tooling          # LOCAL: the sections a page becomes
-mise run docs:dev:create                   # REMOTE (dev), once: the dev index
-mise run docs:dev:index -- docs/tooling.md # REMOTE (dev): only that page; unchanged sections skipped
-mise run docs:dev                          # LOCAL app, answers from the dev index: /en/docs/ask
-mise run docs:questions -- remy-docs-dev   # REMOTE, search only: fixed questions find their sections
-mise run docs:dev:delete                   # REMOTE (dev): delete the dev index
-mise run docs:index                        # REMOTE, PRODUCTION: from a clean commit, after cf:deploy
+mise run docs:publish                      # REMOTE, PRODUCTION: bucket = docs pages, then sync (cf:deploy runs it)
+mise run docs:questions                    # REMOTE, search only: fixed questions find their pages
+mise run docs:dev                          # LOCAL app, answers from the live index: /en/docs/ask
 mise run docs:answers:off                  # REMOTE, PRODUCTION: emergency stop, seconds, no build
 mise run docs:answers:on                   # REMOTE, PRODUCTION: resume (confirms)
 mise run docs:answers:status               # REMOTE, read only

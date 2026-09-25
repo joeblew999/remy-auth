@@ -1,6 +1,6 @@
 // The docs table: the one list of which repository files are the site's docs, and their slugs
 // (.plans/docs-site.md, decision 2). Plain JavaScript, so Fumadocs' config (source.config.ts), the
-// routes, the checks and the index task (scripts/docs-index.mjs) all read the same rows. The files are
+// routes, the checks and the publish task (scripts/docs-publish.mjs) all read the same rows. The files are
 // read where they are: nothing is copied. Titles come from each file's first heading.
 
 /** Where the source lives, for links to files that are not docs pages. */

@@ -5,7 +5,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 
-const instance = process.argv[2] ?? 'remy-docs';
+const instance = process.argv[2] ?? 'remy-docs-pages';
 const questions = JSON.parse(readFileSync(new URL('../src/docs/questions.json', import.meta.url), 'utf8'));
 const search = query => JSON.parse(execFileSync('./node_modules/.bin/wrangler', ['ai-search', 'search', instance, '--query', query, '--json'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }));
 console.log(`Target: Cloudflare (remote), AI Search ${instance}: ${questions.length} questions, search only (no answers written)`);
