@@ -304,5 +304,22 @@
   "word_breaks_heading": "Podział na słowa",
   "words_label": "Słowa w tytule strony głównej",
   "word_count_label": "Liczba słów",
-  "long_word_label": "Długie słowo niemieckie"
+  "long_word_label": "Długie słowo niemieckie",
+  "nav_docs": "Dokumentacja",
+  "docs_label": "Dokumentacja",
+  "docs_nav": "Strony dokumentacji",
+  "docs_toc": "Na tej stronie",
+  "docs_source": "Źródło na GitHubie",
+  "ask_label": "Zapytaj dokumentację",
+  "ask_hint": "Krótka odpowiedź z linkami do stron, z których pochodzi. Do {max} znaków.",
+  "ask_submit": "Zapytaj",
+  "ask_title": "Zapytaj dokumentację",
+  "ask_description": "Krótkie odpowiedzi z dokumentacji Remy, z linkami do dokładnych sekcji.",
+  "ask_intro": "Zadaj pytanie o Remy. Odpowiedź wskazuje sekcje dokumentacji, z których pochodzi; otwórz linki, aby przeczytać je w całości.",
+  "ask_answer": "Odpowiedź",
+  "ask_sources": "Źródła",
+  "ask_too_long": "Twoje pytanie ma {length} znaków. Ogranicz je do {max} znaków.",
+  "ask_rate_limited": "Zbyt wiele pytań z Twojego połączenia. Odczekaj minutę i zapytaj ponownie.",
+  "ask_no_answer": "Tym razem brak odpowiedzi. Przeszukaj dokumentację.",
+  "ask_browse": "Przeglądaj dokumentację"
 }

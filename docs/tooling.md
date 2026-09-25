@@ -73,6 +73,7 @@ CLI passthrough tasks accept upstream flags directly, such as
 | `api:*` | The generated OpenAPI document a running Worker serves (`api:spec`, `--urls` for its operations; shared task) |
 | `browser:*` | Chrome DevTools CLI, session lifecycle and MCP server |
 | `web:*` | Modern web guidance search and retrieval |
+| `docs:*` | The AI Search index behind `/app/ask`: list the sections (`docs:manifest`), replace the production index after a deploy (`docs:index`, owner's request) |
 | `mcp:*` | Register, verify and inspect project MCP connections |
 | `codex:*` / `claude:*` | Start or resume an interactive agent session (shared tasks) |
 

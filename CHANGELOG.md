@@ -6,6 +6,14 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `SiteNavLinks` (`pages`): a context through which an app adds its own links to the site header;
+  remy-auth adds "Docs". Without it the header is unchanged.
+- `publicPageChecks({ oneLanguage })`: site pages written in one language only, listed once in the
+  sitemap without alternates and checked on a narrow screen like the others.
+- shadcn's `table` component (through `ui:components`), and messages for the docs and the answer
+  page in every language.
+
 ## [0.10.5] - 2026-09-25
 
 ### Added
@@ -176,7 +184,7 @@ remy-auth-app).
 ### Added
 - `@joeblew999/remy-ui/tanstack`: `localizedWorker(service, start)`, the Worker entry for a
   server-rendered Start app (`withObservability` around Paraglide's middleware around Start's
-  handler, which gets the original request so `request.cf` reaches server functions;
+  handler, which gets the original request so its Cloudflare `cf` properties reach server functions;
   un-localized entry URLs answer 302 with `Vary`; HTML is `no-store`); `entryRedirect`;
   `localeRewrite`, the router `rewrite` (Paraglide's `deLocalizeUrl`/`localizeUrl`);
   `pageHead({ path, title, description })` for a route's `head()`: title, description,

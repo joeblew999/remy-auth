@@ -1,6 +1,8 @@
 # Docs on the site, with AI answers that cite the page
 
-Status: proposed 2026-09-25 under the owner's delegation; spike done, nothing built in the repo.
+Status: approved by the owner 2026-09-25 ("I approve all your recommendations", Workers AI ceiling
+$10 a month); D1 to D7 built on branch `docs-site` (see [Implementation](#implementation-2026-09-25));
+waiting for the Reviewer, then deploy, `docs:index` and the remote answer check.
 Owner: remy-auth. Executor/Reviewer roles as in [plans and roles](../docs/development.md#plans-and-roles).
 Owner, 2026-09-25: "The site needs docs? What shadcn way is easy? Markdown based or something or
 tanstack. The docs are going to need AI answers in Cloudflare, so a person hitting the site can
@@ -176,9 +178,68 @@ cannot be tuned enough; it costs us chunking, embedding and retrieval code.
 | D6 | Citation checks, level 2 on one docs page, hands-on pass on a preview (throttled phone, with and without JavaScript) | S |
 | D7 | Docs, release, now.md; remy-auth-app gets the header link only if the owner wants its own docs | S |
 
+Status on branch `docs-site`: D1 to D5 built and checked locally; D6 checked locally except the
+live answer and Core Web Vitals, which need a preview; D7 docs written, release not done.
+
 ## Decisions for the owner
 
-1. Provisioning: create the production AI Search instance `remy-docs` and an AI Gateway with a
-   spend alert, on this account. What monthly Workers AI spend is the ceiling?
+1. Provisioning: **approved 2026-09-25**, ceiling $10 a month; created (below).
 2. `.plans/` stays out of the public docs (decided); say so if you want it in.
 3. Docs in English only for now (decided); translation waits for the hard localisation work.
+
+## Implementation (2026-09-25)
+
+### Cloudflare resources (account `7384af54e33b8a54ff240371ea368440`)
+
+| Resource | Name / id | Settings |
+| --- | --- | --- |
+| AI Gateway | `remy-docs` | spend limit rule `monthly-10-usd`: $10 per 30-day fixed window, blocks with 429 once spent; rate limit 60 a minute; logs on; Workers AI billing `postpaid` |
+| AI Search instance | `remy-docs` (namespace `default`) | built-in storage; gateway `remy-docs`; custom metadata `url`, `title`, `release` (text); cache on, `close_enough`, 48 h; `max_num_results` 5; keyword match `or`; embedding `@cf/qwen/qwen3-embedding-0.6b` (default); no public endpoint |
+| Spend alert | notification policy `36460ec7f144488a83e37ad1e58a175a` ("Billing Budget Alert", $10, email) | already on the account, with the auto-created `7ab20ba503c44072a796a0a1766c7f7d`; account-wide, so it covers Workers AI |
+| Worker bindings (`wrangler.jsonc`) | `DOCS_SEARCH` (`ai_search`, instance `remy-docs`); `ASK_LIMIT` (`ratelimits`, namespace 4281, 10 per 60 s) | |
+
+**Assumed, not verified:** the gateway's spend limit is documented for Unified Billing and BYOK
+requests; whether it also stops Workers AI calls billed `postpaid` through the gateway is not
+stated. The hard backstop is therefore the Worker's own limits (10 questions a minute per IP, 300
+characters, five sections, `max_tokens` 300, the AI Search cache); the budget alert reports
+account spend daily. Switching the gateway to Unified Billing would make the limit certain but
+needs prepaid credits (owner's call).
+
+### Decisions made while building (delegated)
+
+- **The docs table lives in the app** (`src/docs/table.js`), not in the package's `paths.js`: the
+  package is shared with remy-auth-app, which has no docs. `src/paths.ts` composes the package's
+  paths with the docs and `/app/ask` for the entry redirects, the sitemap and the shared checks.
+- **"Docs" in the header through `SiteNavLinks`**, a context the shared `SiteShell` reads; an app
+  that provides nothing (remy-auth-app) keeps the shared links only. D7's question stays open.
+- **Content loads before hydration**: the router's `hydrate` option (awaited by TanStack Router)
+  preloads the page's chunk; without it the article suspended during hydration and React replaced
+  the server's text with nothing until the chunk arrived. A check now fails on any such drop.
+- **Local runs use `wrangler dev --local`** (`playwright.config.ts`, `project:preview`): an
+  `ai_search` binding always runs remotely, and without a login Wrangler refuses to start at all,
+  which would break CI and the "no Cloudflare account needed" rule. Locally the binding is off.
+- **Index upload**: `mise run docs:index` (scripts/docs-index.mjs) uploads one item per `##`
+  section (60 today; `mise run docs:manifest` lists them) and deletes stale keys, with Wrangler's
+  login. It was **not run**: uploading to the production index was held back for the orchestrator,
+  so the instance is empty until the first `docs:index` after deploy.
+- **Two docs lines reworded**: the compiled docs ship to the browser as JavaScript, so the app's
+  build-boundary marker for server code (`/\.cf\b/`, `request.cf`) matched prose in `docs/gui.md`
+  and `CHANGELOG.md`. The lines now say "the request's `cf` properties"; the marker is unchanged.
+  Any future docs text naming `request.cf` will trip it again (owner's call whether to narrow it).
+
+### How the answer check is deterministic
+
+Everything that runs locally never reaches AI Search: limits are applied before any call, and the
+binding is switched off (`--local`), so a question locally always takes the "no answer" path,
+which a check asserts. The answer itself is checked only against a deployed target
+(`project:test:remote`): one fixed question, asserting only structure (an answer, at least one
+citation, every citation a `/<locale>/docs/<slug>#<id>` that exists), never wording; the AI Search
+cache (48 h) returns the same answer to the same question. The upload manifest is checked locally:
+every item's URL is an existing heading on the built page.
+
+### Checks run (branch `docs-site`)
+
+`mise run project:verify` (85 passed, 1 skipped: the remote-only answer), `mise run ui:verify`,
+`mise run project:test:google` (6 of 6 pages pass every audit, `/en/docs/gui` included). Not run:
+`project:test:cwv` and the answer check, which need a Cloudflare preview; the hands-on pass on a
+throttled phone was done locally (screenshots, with and without JavaScript), not on a preview.

@@ -298,5 +298,22 @@
   "word_breaks_heading": "斷詞",
   "words_label": "首頁標題中的詞",
   "word_count_label": "詞數",
-  "long_word_label": "一個很長的德文單字"
+  "long_word_label": "一個很長的德文單字",
+  "nav_docs": "文件",
+  "docs_label": "說明文件",
+  "docs_nav": "說明文件頁面",
+  "docs_toc": "本頁內容",
+  "docs_source": "GitHub 上的原始碼",
+  "ask_label": "詢問文件",
+  "ask_hint": "附上出處頁面連結的簡短回答。最多 {max} 個字元。",
+  "ask_submit": "提問",
+  "ask_title": "詢問文件",
+  "ask_description": "來自 Remy 說明文件的簡短回答，並連結到確切章節。",
+  "ask_intro": "提出關於 Remy 的問題。回答會註明出自哪些文件章節；點選連結即可閱讀全文。",
+  "ask_answer": "回答",
+  "ask_sources": "出處",
+  "ask_too_long": "您的問題長 {length} 個字元，請保持在 {max} 個字元以內。",
+  "ask_rate_limited": "您的連線提問次數過多。請等一分鐘後再問。",
+  "ask_no_answer": "這次沒有回答。請改為搜尋說明文件。",
+  "ask_browse": "瀏覽說明文件"
 }

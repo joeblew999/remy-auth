@@ -300,5 +300,22 @@
   "word_breaks_heading": "Sözcük sınırları",
   "words_label": "Ana sayfa başlığındaki sözcükler",
   "word_count_label": "Sözcük sayısı",
-  "long_word_label": "Uzun bir Almanca sözcük"
+  "long_word_label": "Uzun bir Almanca sözcük",
+  "nav_docs": "Belgeler",
+  "docs_label": "Belgeler",
+  "docs_nav": "Belge sayfaları",
+  "docs_toc": "Bu sayfada",
+  "docs_source": "GitHub'daki kaynak",
+  "ask_label": "Belgelere sor",
+  "ask_hint": "Geldiği sayfalara bağlantılar içeren kısa bir yanıt. En fazla {max} karakter.",
+  "ask_submit": "Sor",
+  "ask_title": "Belgelere sor",
+  "ask_description": "Remy belgelerinden, ilgili bölümlere bağlantılı kısa yanıtlar.",
+  "ask_intro": "Remy hakkında bir soru sorun. Yanıt, dayandığı belge bölümlerini gösterir; tamamını okumak için bağlantıları izleyin.",
+  "ask_answer": "Yanıt",
+  "ask_sources": "Kaynaklar",
+  "ask_too_long": "Sorunuz {length} karakter uzunluğunda. En fazla {max} karakter olsun.",
+  "ask_rate_limited": "Bağlantınızdan çok fazla soru geldi. Bir dakika bekleyip yeniden sorun.",
+  "ask_no_answer": "Bu sefer yanıt yok. Bunun yerine belgelerde arayın.",
+  "ask_browse": "Belgelere göz at"
 }

@@ -300,5 +300,22 @@
   "word_breaks_heading": "Worttrennung",
   "words_label": "Wörter im Titel der Startseite",
   "word_count_label": "Anzahl der Wörter",
-  "long_word_label": "Ein langes deutsches Wort"
+  "long_word_label": "Ein langes deutsches Wort",
+  "nav_docs": "Doku",
+  "docs_label": "Dokumentation",
+  "docs_nav": "Seiten der Dokumentation",
+  "docs_toc": "Auf dieser Seite",
+  "docs_source": "Quelle auf GitHub",
+  "ask_label": "Die Doku fragen",
+  "ask_hint": "Eine kurze Antwort mit Links zu den Seiten, aus denen sie stammt. Bis zu {max} Zeichen.",
+  "ask_submit": "Fragen",
+  "ask_title": "Die Doku fragen",
+  "ask_description": "Kurze Antworten aus der Remy-Dokumentation, mit Links zu den genauen Abschnitten.",
+  "ask_intro": "Stellen Sie eine Frage zu Remy. Die Antwort nennt die Abschnitte der Dokumentation, aus denen sie stammt; folgen Sie den Links, um sie ganz zu lesen.",
+  "ask_answer": "Antwort",
+  "ask_sources": "Quellen",
+  "ask_too_long": "Ihre Frage ist {length} Zeichen lang. Bitte höchstens {max} Zeichen.",
+  "ask_rate_limited": "Zu viele Fragen von Ihrer Verbindung. Warten Sie eine Minute und fragen Sie dann erneut.",
+  "ask_no_answer": "Diesmal keine Antwort. Durchsuchen Sie stattdessen die Dokumentation.",
+  "ask_browse": "Dokumentation durchsehen"
 }

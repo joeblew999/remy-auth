@@ -303,5 +303,22 @@
   "word_breaks_heading": "Word breaks",
   "words_label": "Words in the home page title",
   "word_count_label": "Number of words",
-  "long_word_label": "A long German word"
+  "long_word_label": "A long German word",
+  "nav_docs": "Docs",
+  "docs_label": "Documentation",
+  "docs_nav": "Documentation pages",
+  "docs_toc": "On this page",
+  "docs_source": "Source on GitHub",
+  "ask_label": "Ask the docs",
+  "ask_hint": "A short answer with links to the pages it comes from. Up to {max} characters.",
+  "ask_submit": "Ask",
+  "ask_title": "Ask the docs",
+  "ask_description": "Short answers from the Remy documentation, with links to the exact sections.",
+  "ask_intro": "Ask a question about Remy. The answer cites the documentation sections it comes from; follow the links to read them in full.",
+  "ask_answer": "Answer",
+  "ask_sources": "Sources",
+  "ask_too_long": "Your question is {length} characters long. Keep it to {max} characters.",
+  "ask_rate_limited": "Too many questions from your connection. Wait a minute, then ask again.",
+  "ask_no_answer": "No answer this time. Search the documentation instead.",
+  "ask_browse": "Browse the documentation"
 }

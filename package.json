@@ -15,6 +15,8 @@
     "@tanstack/react-devtools": "0.10.13",
     "@tanstack/react-query-devtools": "5.103.2",
     "@tanstack/react-router-devtools": "1.167.2",
+    "@types/mdast": "4.0.4",
+    "@types/mdx": "2.0.14",
     "@types/node": "26.6.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
@@ -22,6 +24,7 @@
     "auth": "1.7.5",
     "chrome-devtools-mcp": "1.10.1",
     "fontaine": "^1.0.0",
+    "github-slugger": "2.0.0",
     "lighthouse": "13.5.0",
     "modern-web-guidance": "0.0.190",
     "npm-check-updates": "23.1.0",
@@ -29,6 +32,8 @@
     "smol-toml": "1.9.0",
     "tailwindcss": "4.3.3",
     "typescript": "7.0.2",
+    "unist-util-visit": "5.1.0",
+    "vfile": "6.0.3",
     "vite": "8.3.0",
     "wrangler": "4.137.0"
   },
@@ -42,9 +47,12 @@
     "@tanstack/react-router": "1.170.39",
     "@tanstack/react-router-ssr-query": "1.167.3",
     "@tanstack/react-start": "1.168.58",
+    "fumadocs-core": "16.15.14",
+    "fumadocs-mdx": "15.4.5",
     "lucide-react": "1.48.0",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "zod": "4.6.5"
   },
   "workspaces": [
     "packages/*"

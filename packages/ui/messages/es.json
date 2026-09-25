@@ -302,5 +302,22 @@
   "word_breaks_heading": "Separación de palabras",
   "words_label": "Palabras del título de la portada",
   "word_count_label": "Número de palabras",
-  "long_word_label": "Una palabra alemana larga"
+  "long_word_label": "Una palabra alemana larga",
+  "nav_docs": "Documentación",
+  "docs_label": "Documentación",
+  "docs_nav": "Páginas de la documentación",
+  "docs_toc": "En esta página",
+  "docs_source": "Código fuente en GitHub",
+  "ask_label": "Pregunta a la documentación",
+  "ask_hint": "Una respuesta breve con enlaces a las páginas de las que procede. Hasta {max} caracteres.",
+  "ask_submit": "Preguntar",
+  "ask_title": "Pregunta a la documentación",
+  "ask_description": "Respuestas breves a partir de la documentación de Remy, con enlaces a las secciones exactas.",
+  "ask_intro": "Haz una pregunta sobre Remy. La respuesta cita las secciones de la documentación de las que procede; sigue los enlaces para leerlas completas.",
+  "ask_answer": "Respuesta",
+  "ask_sources": "Fuentes",
+  "ask_too_long": "Tu pregunta tiene {length} caracteres. Limítala a {max} caracteres.",
+  "ask_rate_limited": "Demasiadas preguntas desde tu conexión. Espera un minuto y vuelve a preguntar.",
+  "ask_no_answer": "Esta vez no hay respuesta. Busca en la documentación.",
+  "ask_browse": "Explorar la documentación"
 }

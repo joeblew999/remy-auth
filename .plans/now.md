@@ -53,7 +53,7 @@ formats speed), batch 3 (TanStack Form, Zod adapter, Devtools), a docs audit and
 | 13 | Auth portal screens from shadcn's login and signup blocks; admin lists on TanStack Table | 12 | shared login checks |
 | 14 | remy-auth-app runs the consumer contract set, not the whole package suite | 4 | faster consumer gates |
 | 15 | Caching: spike Workers Caching against prerendered site pages on a preview, then build ([plan](caching.md)) | load to settle; decisions 1 to 4 in the plan (delegated: recommendation first) | cached site pages, private app pages |
-| 16 | Docs section: fumadocs (headless, in SiteShell) over the repo's Markdown at /docs; AI answers with Cloudflare AI Search at /app/ask ([plan](docs-site.md)) | building (owner approved, $10 a month Workers AI ceiling) | docs live, then answers |
+| 16 | Docs section: fumadocs (headless, in SiteShell) over the repo's Markdown at /docs; AI answers with Cloudflare AI Search at /app/ask ([plan](docs-site.md)) | approved 2026-09-25 ($10 a month); resources created; D1 to D7 built on branch `docs-site`, local gates green; **Reviewer, then deploy, `docs:index`, `project:test:remote` and `project:test:cwv` on a preview** ([status](docs-site.md#implementation-2026-09-25)) | docs live, then answers |
 | 17 | Language tests: every language at release and on demand, one per writing system every day ([plan](language-test-tiers.md)) | ready (owner decided) | faster everyday gate |
 | 18 | Fonts by writing system, font order fix, font check, fonts in the formats page ([plan](fonts.md)) | agent analysis; three owner decisions in the plan | |
 | 19 | Formats: every area for the page's language, every choice from the system's languages ([plan](formats-consistency.md)) | agent analysis | |
@@ -74,6 +74,8 @@ Each is small; fix or decide, then delete the line.
   right; likely the previous build's scripts (3 languages) still served.
 - `shadcn apply` reinstalls components and writes `"use client"` differently from `shadcn add` for
   `label` and `separator`, so `ui:theme` applies the theme only. Report upstream (owner's call).
+  Adding `table` to `ui:components` flips it again for `field`, `sheet` and `sidebar` (stable once
+  regenerated; docs-site branch).
 - fontaine 1.0.0 cannot add its fallback names inside Tailwind's `@theme inline`, so `fonts.css`
   lists them by hand; it also emits two differing `size-adjust` faces for Geist. Report upstream.
 - Lighthouse's simulated mobile LCP (2.5 s budget) runs about twice a real throttled trace (1.3 s

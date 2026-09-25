@@ -298,5 +298,22 @@
   "word_breaks_heading": "単語の区切り",
   "words_label": "ホームページのタイトルに含まれる単語",
   "word_count_label": "単語数",
-  "long_word_label": "長いドイツ語の単語"
+  "long_word_label": "長いドイツ語の単語",
+  "nav_docs": "ドキュメント",
+  "docs_label": "ドキュメント",
+  "docs_nav": "ドキュメントのページ",
+  "docs_toc": "このページの内容",
+  "docs_source": "GitHub のソース",
+  "ask_label": "ドキュメントに質問",
+  "ask_hint": "出典のページへのリンク付きの短い回答。{max} 文字まで。",
+  "ask_submit": "質問する",
+  "ask_title": "ドキュメントに質問",
+  "ask_description": "Remy のドキュメントからの短い回答と、該当セクションへのリンク。",
+  "ask_intro": "Remy について質問してください。回答には出典となるドキュメントのセクションが示されます。リンクから全文を読めます。",
+  "ask_answer": "回答",
+  "ask_sources": "出典",
+  "ask_too_long": "質問は {length} 文字です。{max} 文字以内にしてください。",
+  "ask_rate_limited": "お使いの接続からの質問が多すぎます。1 分待ってからもう一度質問してください。",
+  "ask_no_answer": "今回は回答がありません。代わりにドキュメントを検索してください。",
+  "ask_browse": "ドキュメントを見る"
 }

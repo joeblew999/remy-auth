@@ -4,6 +4,7 @@ import { getGlobalStartContext } from '@tanstack/react-start';
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query';
 import { localeRewrite } from '@joeblew999/remy-ui/tanstack';
 import { routeTree } from './routeTree.gen';
+import { preloadDocsContent } from './docs/loader';
 
 /**
  * One router per request on the server and one in the browser; routes carry no locale, the rewrite adds it.
@@ -25,6 +26,9 @@ export function getRouter() {
     // The request's CSP nonce (src/middleware.ts) on every script and head tag the server renders;
     // undefined in the browser, which needs none.
     ssr: { nonce: getGlobalStartContext()?.nonce },
+    // Browser only: hydration waits for this, so a docs page's content is loaded before React
+    // hydrates it and the server's text stays on screen (src/docs/loader.tsx).
+    hydrate: () => preloadDocsContent(window.location.pathname),
   });
   setupRouterSsrQueryIntegration({ router, queryClient });
   return router;

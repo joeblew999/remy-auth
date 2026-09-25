@@ -16,9 +16,12 @@ import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ApiSplatRouteImport } from './routes/api.$'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppAskRouteImport } from './routes/app.ask'
 import { Route as AppDemoRouteImport } from './routes/app.demo'
 import { Route as AppFormatsRouteImport } from './routes/app.formats'
 import { Route as AppLocationRouteImport } from './routes/app.location'
+import { Route as DocsIndexRouteImport } from './routes/docs.index'
+import { Route as DocsSlugRouteImport } from './routes/docs.$slug'
 import { Route as TimeZonesSplatRouteImport } from './routes/time-zones.$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -56,6 +59,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/app/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppAskRoute = AppAskRouteImport.update({
+  id: '/app/ask',
+  path: '/app/ask',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppDemoRoute = AppDemoRouteImport.update({
   id: '/app/demo',
   path: '/app/demo',
@@ -71,6 +79,16 @@ const AppLocationRoute = AppLocationRouteImport.update({
   path: '/app/location',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsIndexRoute = DocsIndexRouteImport.update({
+  id: '/docs/',
+  path: '/docs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsSlugRoute = DocsSlugRouteImport.update({
+  id: '/docs/$slug',
+  path: '/docs/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TimeZonesSplatRoute = TimeZonesSplatRouteImport.update({
   id: '/time-zones/$',
   path: '/time-zones/$',
@@ -84,11 +102,14 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/$': typeof ApiSplatRoute
+  '/app/ask': typeof AppAskRoute
   '/app/demo': typeof AppDemoRoute
   '/app/formats': typeof AppFormatsRoute
   '/app/location': typeof AppLocationRoute
+  '/docs/$slug': typeof DocsSlugRoute
   '/time-zones/$': typeof TimeZonesSplatRoute
   '/app/': typeof AppIndexRoute
+  '/docs/': typeof DocsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -97,11 +118,14 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/$': typeof ApiSplatRoute
+  '/app/ask': typeof AppAskRoute
   '/app/demo': typeof AppDemoRoute
   '/app/formats': typeof AppFormatsRoute
   '/app/location': typeof AppLocationRoute
+  '/docs/$slug': typeof DocsSlugRoute
   '/time-zones/$': typeof TimeZonesSplatRoute
   '/app': typeof AppIndexRoute
+  '/docs': typeof DocsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -111,11 +135,14 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/$': typeof ApiSplatRoute
+  '/app/ask': typeof AppAskRoute
   '/app/demo': typeof AppDemoRoute
   '/app/formats': typeof AppFormatsRoute
   '/app/location': typeof AppLocationRoute
+  '/docs/$slug': typeof DocsSlugRoute
   '/time-zones/$': typeof TimeZonesSplatRoute
   '/app/': typeof AppIndexRoute
+  '/docs/': typeof DocsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -126,11 +153,14 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/api/$'
+    | '/app/ask'
     | '/app/demo'
     | '/app/formats'
     | '/app/location'
+    | '/docs/$slug'
     | '/time-zones/$'
     | '/app/'
+    | '/docs/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -139,11 +169,14 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/api/$'
+    | '/app/ask'
     | '/app/demo'
     | '/app/formats'
     | '/app/location'
+    | '/docs/$slug'
     | '/time-zones/$'
     | '/app'
+    | '/docs'
   id:
     | '__root__'
     | '/'
@@ -152,11 +185,14 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/api/$'
+    | '/app/ask'
     | '/app/demo'
     | '/app/formats'
     | '/app/location'
+    | '/docs/$slug'
     | '/time-zones/$'
     | '/app/'
+    | '/docs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -166,11 +202,14 @@ export interface RootRouteChildren {
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiSplatRoute: typeof ApiSplatRoute
+  AppAskRoute: typeof AppAskRoute
   AppDemoRoute: typeof AppDemoRoute
   AppFormatsRoute: typeof AppFormatsRoute
   AppLocationRoute: typeof AppLocationRoute
+  DocsSlugRoute: typeof DocsSlugRoute
   TimeZonesSplatRoute: typeof TimeZonesSplatRoute
   AppIndexRoute: typeof AppIndexRoute
+  DocsIndexRoute: typeof DocsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -224,6 +263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/ask': {
+      id: '/app/ask'
+      path: '/app/ask'
+      fullPath: '/app/ask'
+      preLoaderRoute: typeof AppAskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/demo': {
       id: '/app/demo'
       path: '/app/demo'
@@ -245,6 +291,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppLocationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs/': {
+      id: '/docs/'
+      path: '/docs'
+      fullPath: '/docs/'
+      preLoaderRoute: typeof DocsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs/$slug': {
+      id: '/docs/$slug'
+      path: '/docs/$slug'
+      fullPath: '/docs/$slug'
+      preLoaderRoute: typeof DocsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/time-zones/$': {
       id: '/time-zones/$'
       path: '/time-zones/$'
@@ -262,11 +322,14 @@ const rootRouteChildren: RootRouteChildren = {
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiSplatRoute: ApiSplatRoute,
+  AppAskRoute: AppAskRoute,
   AppDemoRoute: AppDemoRoute,
   AppFormatsRoute: AppFormatsRoute,
   AppLocationRoute: AppLocationRoute,
+  DocsSlugRoute: DocsSlugRoute,
   TimeZonesSplatRoute: TimeZonesSplatRoute,
   AppIndexRoute: AppIndexRoute,
+  DocsIndexRoute: DocsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

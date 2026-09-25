@@ -300,5 +300,22 @@
   "word_breaks_heading": "የቃላት መለያየት",
   "words_label": "በመነሻ ገጹ ርዕስ ውስጥ ያሉ ቃላት",
   "word_count_label": "የቃላት ብዛት",
-  "long_word_label": "ረጅም የጀርመንኛ ቃል"
+  "long_word_label": "ረጅም የጀርመንኛ ቃል",
+  "nav_docs": "ሰነዶች",
+  "docs_label": "ሰነዶች",
+  "docs_nav": "የሰነድ ገጾች",
+  "docs_toc": "በዚህ ገጽ ላይ",
+  "docs_source": "ምንጭ በGitHub ላይ",
+  "ask_label": "ሰነዶቹን ይጠይቁ",
+  "ask_hint": "ከመጣባቸው ገጾች ጋር አገናኞች ያሉት አጭር መልስ። እስከ {max} ቁምፊዎች።",
+  "ask_submit": "ጠይቅ",
+  "ask_title": "ሰነዶቹን ይጠይቁ",
+  "ask_description": "ከRemy ሰነዶች የተወሰዱ አጫጭር መልሶች፣ ወደ ትክክለኛ ክፍሎቹ ከሚወስዱ አገናኞች ጋር።",
+  "ask_intro": "ስለ Remy ጥያቄ ይጠይቁ። መልሱ የመጣባቸውን የሰነድ ክፍሎች ይጠቅሳል፤ ሙሉውን ለማንበብ አገናኞቹን ይከተሉ።",
+  "ask_answer": "መልስ",
+  "ask_sources": "ምንጮች",
+  "ask_too_long": "ጥያቄዎ {length} ቁምፊዎች ነው። ከ{max} ቁምፊዎች አያሳልፉት።",
+  "ask_rate_limited": "ከግንኙነትዎ በጣም ብዙ ጥያቄዎች መጥተዋል። አንድ ደቂቃ ቆይተው እንደገና ይጠይቁ።",
+  "ask_no_answer": "በዚህ ጊዜ መልስ የለም። በምትኩ ሰነዶቹን ይፈልጉ።",
+  "ask_browse": "ሰነዶቹን ያስሱ"
 }
