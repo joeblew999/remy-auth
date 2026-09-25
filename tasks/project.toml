@@ -63,10 +63,10 @@ env = { TEST_TARGET = "local" }
 run = "./node_modules/.bin/playwright test --project=ours"
 
 ["project:test:quick"]
-description = "Quick tier for the edit loop: build, then every check of ours in QUICK_LOCALES only (default en and ar: the base language and right to left). Not a gate: project:verify, releases and CI run every language"
+description = "Quick tier for the edit loop: build, then every check of ours in QUICK_LOCALES only (default en, ar, ja and th: one language per writing system — Latin, right to left, CJK, Thai; languages not configured yet are skipped). Not a gate: project:verify, releases and CI run every language"
 dir = "{{config_root}}"
 depends = ["project:build"]
-env = { TEST_TARGET = "local", CHECK_LOCALES = "{{ env.QUICK_LOCALES | default(value='en,ar') }}" }
+env = { TEST_TARGET = "local", CHECK_LOCALES = "{{ env.QUICK_LOCALES | default(value='en,ar,ja,th') }}" }
 run = "./node_modules/.bin/playwright test --project=ours"
 
 ["project:test:google"]
