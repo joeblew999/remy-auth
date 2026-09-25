@@ -5,7 +5,7 @@
 // (Seroval nodes: `{ p: { k: keys, v: values } }`, scalars `{ s }`); if TanStack changes it, these
 // checks fail rather than pass without testing anything.
 import { test, expect } from '@playwright/test';
-import { locales } from '../paraglide/runtime.js';
+import { locales, cookieName } from '../paraglide/runtime.js';
 import { m } from '../paraglide/messages.js';
 import { samples } from '../samples.js';
 import { collectErrors, localizedPath } from '../checks.js';
@@ -28,8 +28,8 @@ function valueNode(tree, key) {
 
 /**
  * For every locale: the server rejects what the browser allowed (21 guests, a blank name) with
- * field errors in the page's language, confirms a valid reservation with its own message, and
- * refuses a malformed call with 400. Every call's response carries the Worker's X-Request-ID,
+ * field errors in the page's language (even when Paraglide's cookie names another), confirms a
+ * valid reservation with its own message, and refuses a malformed call with 400. Every call's response carries the Worker's X-Request-ID,
  * and the function middleware returns the same ID with the result, so it saw it too.
  */
 export function serverFunctionChecks({ path = '/demo' } = {}) {
@@ -48,6 +48,9 @@ export function serverFunctionChecks({ path = '/demo' } = {}) {
         page.getByRole('button', { name: m.submit({}, o), exact: true }).click(),
       ]))[0];
       await page.goto(localizedPath(path, locale));
+      // Another tab has since chosen another language: the answer must still follow this page, not Paraglide's cookie.
+      const other = locales.find(value => value !== locale);
+      await page.context().addCookies([{ name: cookieName, value: other, url: new URL('/', page.url()).href }]);
       await page.getByLabel(m.name_label({}, o), { exact: true }).fill(samples.guest);
       await page.getByLabel(m.guests_label({}, o), { exact: true }).fill('3');
 
