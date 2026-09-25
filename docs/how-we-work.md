@@ -38,6 +38,12 @@ Mark anything not checked as assumed.
 - Never pipe a gating command through `grep` or `tail` in a chain: the pipe hides its exit code.
   This once released a version whose checks had failed.
 
+## Reporting to the owner
+
+- Every report about something the owner can look at gives its URLs: the live sites, the preview
+  (`mise run cf:preview` prints it) and a direct link to each page or feature discussed.
+- Say what was checked and what was not.
+
 ## Multi-agent work
 
 When work splits into independent parts and the owner has asked for multi-agent orchestration,
@@ -49,7 +55,7 @@ use this shape:
 3. **Each part proves itself.** Every part ships with its own shared check.
 4. **One integrator.** It merges the parts into the working branch and runs level 1 and level 2.
    Nothing reaches `main` unless both pass.
-5. **Hands-on pass.** Passing checks is not the end. Use each piece in a real Chrome on the
-   production build, throttled to a mid-range phone, with a performance trace and screenshots.
+5. **Hands-on pass.** Passing checks is not the end. Deploy a preview with `mise run cf:preview`
+   and use each piece in a real Chrome, throttled to a mid-range phone, with a performance trace and screenshots.
    Write down how it feels: the wait before content, layout shifts, flashes, and anything
    annoying. Fix what feels bad before merging, even when its checks pass.
