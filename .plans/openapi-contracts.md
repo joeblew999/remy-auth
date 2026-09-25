@@ -21,7 +21,7 @@ OpenAPI, in two halves:
 | Decision | Choice | Why |
 | --- | --- | --- |
 | Producing | oRPC 1.15.4, contract-first: `oc.errors().route().input().output()` in a contract, `implement(contract)` on the server | Only candidate proved to validate both directions by default; generates OpenAPI 3.1 from the contract alone with typed errors and per-operation security; official TanStack Start adapter and TanStack Query utilities. Scored 34 of 36; runner-up Hono with @hono/zod-openapi at 26 |
-| oRPC version | 1.15.4 now; move to 2.0 when it leaves beta, server and clients together | 2.0 is beta (2.0.0-beta.40) and changes both the contract API and the wire format; nothing is proved on it yet |
+| oRPC version | Chosen in the spike: 2.0 if it is released by then, or if its latest beta proves better with TanStack; otherwise 1.15.4, with a later move of server and clients together | 2.0 changes both the contract API and the wire format, so starting on 1.15 means writing contracts twice. Betas ship every few days alongside the 1.15 patches (beta.40 on 2026-09-23), with no published release date. The owner reports that 2.0 integrates much more with TanStack and is close to release; the spike checks what it adds |
 | Mounting | A Start server route `src/routes/api/$.ts` with `OpenAPIHandler`; `RPCHandler` only if the app's own pages need it | Start owns routing and the Worker entry; the adapter documents this route |
 | Server functions | Only for page glue that no other client calls (locale, device, place) | They produce no OpenAPI, validate input only and live under `/_serverFn/*`, not stable paths |
 | Server-side calls | `createRouterClient` inside loaders, through `createIsomorphicFn`; the browser uses the link | No HTTP hop on the server; oRPC's documented pattern |
@@ -77,7 +77,7 @@ Query, Zod 4, fetch on Workers, maturity, size)
 
 ## Work items, in order
 
-1. **Spike (about 1 hour):** oRPC 1.15.4 inside TanStack Start on the Workers runtime: the server
+1. **Spike (about 2 hours):** first review oRPC 2.0: its release notes and migration guide, what it adds for TanStack Start, Router and Query, and whether 2.0.0 is out. Build the spike on 2.0 and on 1.15.4 and record the choice above. Then, on the chosen version, oRPC inside TanStack Start on the Workers runtime: the server
    route, the router client in a loader, Query utilities with SSR hydration, `ResponseValidationPlugin`
    on an `OpenAPILink`. Measure the Worker bundle size and CPU cost of parsing.
 2. **Package `api` module** and the shared `api:*` tasks in `tasks/api.toml`.
@@ -98,7 +98,7 @@ Query, Zod 4, fetch on Workers, maturity, size)
 
 ## Risks
 
-1. oRPC 2.0 breaks the contract API and the wire format: migrate server and clients together.
+1. oRPC 2.0 breaks the contract API and the wire format. If we start on a 2.0 beta, pin it exactly and move to 2.0.0 when released; if we start on 1.15, migrate server and clients together.
 2. oRPC rests mostly on one maintainer. Switch trigger: 2.0 stalls in beta through 2027, or
    maintenance stops; the runner-up is Hono with a small response-validation middleware.
 3. oRPC's types need `skipLibCheck` (already on) or `@opentelemetry/api` installed.
