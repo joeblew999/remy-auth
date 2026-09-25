@@ -25,7 +25,11 @@ demoChecks();
 serverFunctionChecks();
 codeSplittingChecks({ paths: sitePaths });
 codeSplittingChecks({ paths: appPaths, home: '/app' });
-buildBoundaryChecks({ paths: allPaths, markers: [{ name: 'request.cf', pattern: /\.cf\b/, source: 'src/place.server.ts' }] });
+// The app mounts TanStack Devtools (src/routes/__root.tsx), whose shell must never ship either.
+buildBoundaryChecks({ paths: allPaths, markers: [
+  { name: 'request.cf', pattern: /\.cf\b/, source: 'src/place.server.ts' },
+  { name: 'TanStack Devtools (the shell hosting the panels)', pattern: /tsd-(?:control|surface)\b/, source: { package: '@tanstack/devtools', from: '@tanstack/react-devtools' } },
+] });
 observabilityChecks({ service: 'remy-auth', paths: allPaths });
 searchParamsChecks();
 preloadChecks();

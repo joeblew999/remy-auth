@@ -17,7 +17,7 @@ adding or removing a part is one line there. No other file in the app changes.
 | --- | --- | --- |
 | observability | ops | Worker wrapper (request ID, log line, `/healthz`), function middleware logging `server_fn` |
 | status-card | ops | home-page card, query, server function, checks |
-| devtools | dev | Router and Query devtools in development only |
+| devtools | dev | TanStack Devtools with Router and Query panels (`__root.tsx`), stripped from production builds by the `devtools()` Vite plugin |
 | seo-routes | ops | `robots.txt`, `sitemap.xml` server routes |
 | problem-pages | feature | localized not-found and error pages, checks |
 | leave-guard | feature | demo form's leave warning, checks |

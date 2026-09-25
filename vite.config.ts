@@ -1,4 +1,5 @@
 import { cloudflare } from '@cloudflare/vite-plugin';
+import { devtools } from '@tanstack/devtools-vite';
 import tailwindcss from '@tailwindcss/vite';
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
@@ -15,6 +16,8 @@ import { options as paraglide } from './packages/ui/paraglide.mjs';
 // @tanstack/react-start/server (build-boundaries.checks.js scans what ships).
 export default defineConfig({
   plugins: [
+    // TanStack Devtools: first, as its docs require; strips the devtools from production builds.
+    devtools(),
     paraglideVitePlugin(paraglide),
     cloudflare({ viteEnvironment: { name: 'ssr' } }),
     // Fallback faces sized to the web fonts (size-adjust and ascent/descent overrides, as Next.js

@@ -1,8 +1,10 @@
 import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
+import { TanStackDevtools } from '@tanstack/react-devtools';
+import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools';
+import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { getLocale, direction } from '@joeblew999/remy-ui/locale';
 import { DirectionProvider } from '@joeblew999/remy-ui/components/direction';
-import { Devtools } from '../devtools';
 import { preferredLocale } from '../preferred';
 import { NotFound, ErrorPage } from '../problem';
 import styles from '../styles.css?url';
@@ -21,11 +23,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorPage,
 });
 
-/** The document: Paraglide's locale for this request (server) or URL (browser) sets language and direction. */
+/**
+ * The document: Paraglide's locale for this request (server) or URL (browser) sets language and direction.
+ * TanStack Devtools (Router and Query panels) mount here in development; the devtools() Vite plugin
+ * strips them from production builds, which build-boundaries.checks.js proves on every served script.
+ */
 function Document({ children }: { children: React.ReactNode }) {
   const locale = getLocale();
   return <html lang={locale} dir={direction(locale)}>
     <head><HeadContent /></head>
-    <body><DirectionProvider direction={direction(locale)}>{children}</DirectionProvider><Devtools /><Scripts /></body>
+    <body><DirectionProvider direction={direction(locale)}>{children}</DirectionProvider>
+      <TanStackDevtools plugins={[
+        { name: 'TanStack Router', render: <TanStackRouterDevtoolsPanel /> },
+        { name: 'TanStack Query', render: <ReactQueryDevtoolsPanel /> },
+      ]} />
+      <Scripts /></body>
   </html>;
 }
