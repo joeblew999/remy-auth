@@ -4,6 +4,17 @@ All notable changes to the shared UI package `@joeblew999/remy-ui` are documente
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 package follows [Semantic Versioning](https://semver.org/).
 
+## [0.10.2] - 2026-09-25
+
+### Changed
+- Formats in five sections (this language, dates and times, numbers, money, words) with a list of
+  links to them; each search-param control sits in the section it changes. `FormatsExtras` slots are
+  now rows in groups (`language`, `systems`, `dates`, `currency`) and cards per section (`time`,
+  `numbers`, `money`, `words`); `FormatsControls` and `PrerenderedFormatsControls` become
+  `choiceCards` and `prerenderedChoiceCards` (one `ChoiceCard` per param, with `to`).
+- Full width in both frames, as shadcn's sidebar-16 block has it; formats cards two per row on
+  medium screens and three on wide ones.
+
 ## [0.10.1] - 2026-09-25
 
 ### Added
