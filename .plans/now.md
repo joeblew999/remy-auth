@@ -67,7 +67,7 @@ evidence. Each item's detail lives in the plan it links to. Git history holds th
 | 21 | Publisher and consumers checked: new-consumer recipe, drift, more in the include, docs and AI answers for every consumer, remy-auth-app CI (it has no workflow yet), fewer scripts ([plan](publisher-consumer.md)) | agent analysis | |
 | 22 | Docs site review: what went wrong, design, operations, efficiency ([plan](docs-site-review.md)) | owner, later | |
 | 23 | ~~Docs search on the site (route A) and AI answers from R2 (route B)~~ done 2026-09-25, see 16 | | |
-| 24 | Release the shared UI 0.10.6 (already the version in `packages/ui/package.json`, not tagged: the lighter site frame module `shell`, SiteNavLinks, one-language pages, `./smoke`) and move remy-auth-app to it; remy-auth-app is live on 0.10.5 | ready | |
+| 24 | ~~Release the shared UI and move remy-auth-app~~ done 2026-09-25: remy-ui 0.11.0 and contract 0.2.0 released; both apps live on 0.11.0 | | |
 
 Decisions only the owner can make: enforcing the security headers (7), a native-speaker review of
 the Arabic and new catalogs, the production origin and Search Console, filing upstream issues
