@@ -1,6 +1,7 @@
 /* shadcn's stylesheet from the shared package (written by the shadcn CLI, never by hand), then
-   the fonts for every language, then where this app's classes live. */
+   the fonts for every language, then how text breaks in every language, then where this app's classes live. */
 @import "@joeblew999/remy-ui/globals.css";
 @import "@joeblew999/remy-ui/fonts.css";
+@import "@joeblew999/remy-ui/text.css";
 @source "../src";
 @source "../packages/ui/src";

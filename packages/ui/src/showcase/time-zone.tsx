@@ -4,6 +4,7 @@ import type { Locale } from '../paraglide/runtime.js';
 import { m } from '../paraglide/messages.js';
 import { Shell, Group, Row } from '../pages';
 import { samples } from '../samples.js';
+import { formatLocale } from '../locale-info';
 
 // A time zone as a sub-resource of the formats page: /<locale>/time-zones/<IANA name>, a splat
 // because the names contain slashes. The route's loader resolves the name with
@@ -49,7 +50,7 @@ export function TimeZonePage({ locale, zone, preferred }: { locale: Locale; zone
       <Group title={m.timezone_heading({}, o)}>
         <Row sample="zone" label={m.zone_id_label({}, o)}><bdi>{zone}</bdi></Row>
         <Row sample="zone-offset" label={m.utc_offset_label({}, o)}>{timeZoneName(locale, zone, 'longOffset')}</Row>
-        <Row sample="zone-local" label={m.cf_local_time_label({}, o)}>{new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'long', timeZone: zone }).format(samples.instant)}</Row>
+        <Row sample="zone-local" label={m.cf_local_time_label({}, o)}>{new Intl.DateTimeFormat(formatLocale(locale), { dateStyle: 'full', timeStyle: 'long', timeZone: zone }).format(samples.instant)}</Row>
       </Group>
     </section>
   </Shell>;

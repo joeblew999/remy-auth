@@ -5,7 +5,8 @@
 import { test, expect, chromium } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import { readFileSync, rmSync } from 'node:fs';
-import { locales, baseLocale, localizeUrl } from './paraglide/runtime.js';
+import { locales, baseLocale, localizeUrl, extractLocaleFromHeader } from './paraglide/runtime.js';
+import { matchChinese } from './matching.js';
 
 /**
  * The languages whose checks run: every locale, or the comma-separated subset in CHECK_LOCALES
@@ -21,7 +22,19 @@ import { samples } from './samples.js';
 export const endonym = locale => new Intl.DisplayNames([locale], { type: 'language' }).of(locale);
 export const direction = locale => new Intl.Locale(locale).getTextInfo().direction;
 export const localizedPath = (path, locale) => localizeUrl(new URL(path || '/', 'http://localhost'), { locale }).pathname;
-const weekday = (locale, day) => new Intl.DateTimeFormat(locale, { weekday: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(2024, 0, day)));
+const weekday = (locale, day, style = 'long') => new Intl.DateTimeFormat(locale, { weekday: style, timeZone: 'UTC' }).format(new Date(Date.UTC(2024, 0, day)));
+
+/**
+ * The contract for every formatter on the pages: the locale with its own calendar and digits named
+ * explicitly, the first of Intl Locale Info's getCalendars() and getNumberingSystems()
+ * (fa → fa-u-ca-persian-nu-arabext). Mirrors locale-info.ts's formatLocale on purpose.
+ */
+export const formatTag = locale => {
+  const tag = new Intl.Locale(locale);
+  return new Intl.Locale(locale, { calendar: tag.getCalendars()[0], numberingSystem: tag.getNumberingSystems()[0] }).toString();
+};
+/** `value` written in a numbering system's digits, e.g. digits(3, 'arabext') is ۳. */
+const digits = (value, numberingSystem) => new Intl.NumberFormat('en', { numberingSystem, useGrouping: false }).format(value);
 
 /** Collects page errors and console errors so a test can assert none happened. */
 export function collectErrors(page) {
@@ -121,6 +134,49 @@ export function entryChecks({ paths, mode }) {
       await expect(page).toHaveURL(`${baseURL}${localizedPath(paths[1] ?? '', 'ar')}`);
       await context.close();
     });
+
+    // Paraglide's preferredLanguage matches a whole tag or its language only; the custom-chinese
+    // strategy (matching.js) adds the script. This runs whatever the locales are: the proof that
+    // Traditional Chinese reaches zh-TW is the matcher itself over a list that has zh-TW, and every
+    // other language, the URL and the cookie must still get exactly Paraglide's own answer.
+    test('the Chinese strategy maps Traditional script to zh-TW and leaves everything else to Paraglide', async ({ request }) => {
+      const withTaiwan = [...locales.filter(locale => locale !== 'zh-TW'), 'zh-TW'];
+      const matcher = [
+        [['zh-Hant-HK'], 'zh-TW'], [['zh-HK'], 'zh-TW'], [['zh-MO', 'en'], 'zh-TW'], [['zh-Hant'], 'zh-TW'],
+        [['fr', 'zh-Hant-HK'], 'zh-TW'], [['zh-CN'], undefined], [['zh-Hans-HK'], undefined], [['zh'], undefined],
+        [['zh-SG', 'zh-HK'], undefined], [[baseLocale, 'zh-HK'], undefined], [['zh-TW'], undefined], [['not a tag', 'zh-HK'], 'zh-TW'],
+      ];
+      for (const [tags, expected] of matcher) expect(matchChinese(tags, withTaiwan), tags.join(',')).toBe(expected);
+      // Without zh-TW configured the strategy never answers.
+      expect(matchChinese(['zh-Hant-HK'], locales.filter(locale => locale !== 'zh-TW'))).toBe(undefined);
+      const paraglide = headers => extractLocaleFromHeader(new Request('http://localhost/', { headers })) ?? baseLocale;
+      const other = locales.find(locale => locale !== baseLocale && !locale.startsWith('zh')) ?? baseLocale;
+      const cases = [
+        [{ 'Accept-Language': 'zh-CN,zh;q=0.9' }, paraglide({ 'Accept-Language': 'zh-CN,zh;q=0.9' })],
+        [{ 'Accept-Language': `${other},zh-Hant-HK;q=0.9` }, other],
+        [{ 'Accept-Language': 'zh-Hant-HK', Cookie: `PARAGLIDE_LOCALE=${other}` }, other],
+      ];
+      for (const [headers, expected] of cases) for (const path of paths) {
+        const response = await request.get(path || '/', { maxRedirects: 0, headers });
+        expect(response.status(), `${path} ${JSON.stringify(headers)}`).toBe(302);
+        expect(response.headers()['location'], `${path} ${JSON.stringify(headers)}`).toMatch(new RegExp(`${localizedPath(path, expected)}$`));
+      }
+      // A localized URL always wins over the header.
+      const page = await request.get(localizedPath(paths[0], other), { headers: { 'Accept-Language': 'zh-Hant-HK' } });
+      expect(await page.text()).toContain(`<html lang="${other}"`);
+    });
+
+    // Skipped only while zh-TW is not a configured locale: the end-to-end proof once it is.
+    test('Accept-Language zh-Hant-HK reaches zh-TW', async ({ request }) => {
+      test.skip(!locales.includes('zh-TW'), 'zh-TW is not a configured locale yet (.plans/hard-localisation.md)');
+      for (const language of ['zh-Hant-HK', 'zh-HK', 'zh-TW']) for (const path of paths) {
+        const response = await request.get(path || '/', { maxRedirects: 0, headers: { 'Accept-Language': language } });
+        expect(response.status(), `${path} ${language}`).toBe(302);
+        expect(response.headers()['location'], `${path} ${language}`).toMatch(new RegExp(`${localizedPath(path, 'zh-TW')}$`));
+      }
+      const simplified = await request.get(paths[0] || '/', { maxRedirects: 0, headers: { 'Accept-Language': 'zh-CN' } });
+      expect(simplified.headers()['location']).not.toMatch(new RegExp(`${localizedPath(paths[0], 'zh-TW')}$`));
+    });
   } else {
     test("entry URLs are static lists of every language, and the browser moves to the visitor's language", async ({ request, browser, baseURL }) => {
       for (const path of paths) {
@@ -174,9 +230,20 @@ export function demoChecks() {
       await page.getByRole('button', { name: m.submit({}, o), exact: true }).click();
       await expect(page.locator('#name-error')).toHaveText(m.name_required({}, o));
       await page.getByLabel(m.name_label({}, o), { exact: true }).fill(samples.guest);
-      await page.getByLabel(m.guests_label({}, o), { exact: true }).fill('3');
+      const guests = page.getByLabel(m.guests_label({}, o), { exact: true });
+      // The seats start in the language's own digits, and digits of any script are read.
+      await expect(guests).toHaveValue(new Intl.NumberFormat(formatTag(locale)).format(2));
+      await guests.fill('3');
       await page.getByRole('button', { name: m.submit({}, o), exact: true }).click();
       await expect(page.locator('.reserved')).toHaveText(m.reserved({ name: samples.guest, count: 3 }, o));
+      for (const [value, numberingSystem] of [[4, 'arabext'], [5, 'arab'], [12, 'arabext'], [7, new Intl.Locale(locale).getNumberingSystems()[0]]]) {
+        await guests.fill(digits(value, numberingSystem));
+        await page.getByRole('button', { name: m.submit({}, o), exact: true }).click();
+        await expect(page.locator('.reserved'), `${value} in ${numberingSystem} digits`).toHaveText(m.reserved({ name: samples.guest, count: value }, o));
+      }
+      await guests.fill(digits(21, 'arabext'));
+      await page.getByRole('button', { name: m.submit({}, o), exact: true }).click();
+      await expect(page.locator('#guests-error')).toHaveText(m.guests_invalid({}, o));
       const other = locales.find(value => value !== locale);
       // App pages switch language through the header's menu (shadcn's DropdownMenu with a radio group).
       await page.getByRole('button', { name: m.language_label({}, o), exact: true }).click();
@@ -204,29 +271,47 @@ export function formatsChecks({ extra } = {}) {
       await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `${baseURL}${localizedPath('/formats', locale)}`);
       await expect(page.locator('link[hreflang="x-default"]')).toHaveAttribute('href', `${baseURL}/formats`);
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(m.formats_title({}, o));
-      const resolved = new Intl.DateTimeFormat(locale, { hour: 'numeric' }).resolvedOptions();
+      // Formatted with the explicit tag (the language's own calendar and digits): the rows written
+      // by Paraglide's messages use the plain locale, so they match only if the runtime's defaults
+      // are the language's own, which is the claim (a Persian page shows the Persian calendar).
+      const format = formatTag(locale);
+      const resolved = new Intl.DateTimeFormat(format, { hour: 'numeric' }).resolvedOptions();
       const tag = new Intl.Locale(locale);
-      const numbering = tag.getNumberingSystems?.()[0] ?? resolved.numberingSystem;
+      const numbering = tag.getNumberingSystems()[0];
+      const { firstDay, weekend } = tag.getWeekInfo();
+      const list = new Intl.ListFormat(locale, { type: 'conjunction' });
+      const titleWords = [...new Intl.Segmenter(locale, { granularity: 'word' }).segment(m.home_title({}, o))].filter(part => part.isWordLike).map(part => part.segment);
       const expected = {
         tag: locale,
         name: endonym(locale),
         direction: direction(locale) === 'rtl' ? m.direction_rtl({}, o) : m.direction_ltr({}, o),
         languages: new Intl.ListFormat(locale, { type: 'conjunction' }).format(locales.map(endonym)),
-        calendar: new Intl.DisplayNames([locale], { type: 'calendar' }).of(resolved.calendar),
-        numbering: `${numbering} · ${new Intl.NumberFormat(locale, { numberingSystem: numbering }).format(samples.decimal)}`,
+        calendar: new Intl.DisplayNames([locale], { type: 'calendar' }).of(tag.getCalendars()[0]),
+        numbering: `${numbering} · ${new Intl.NumberFormat(format).format(samples.decimal)}`,
         'hour-cycle': ['h11', 'h12'].includes(resolved.hourCycle ?? '') ? m.hour_cycle_12({}, o) : m.hour_cycle_24({}, o),
-        'week-start': weekday(locale, tag.getWeekInfo().firstDay),
-        instant: new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'long', timeZone: 'UTC' }).format(samples.instant),
-        date: new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'UTC' }).format(samples.date),
-        relative: new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }).format(samples.days, 'day'),
-        decimal: new Intl.NumberFormat(locale).format(samples.decimal),
-        percent: new Intl.NumberFormat(locale, { style: 'percent' }).format(samples.share),
-        compact: new Intl.NumberFormat(locale, { notation: 'compact' }).format(samples.big),
-        currency: new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(samples.amount),
+        'week-start': weekday(locale, firstDay),
+        weekend: list.format(weekend.map(day => weekday(locale, day))),
+        instant: new Intl.DateTimeFormat(format, { dateStyle: 'full', timeStyle: 'long', timeZone: 'UTC' }).format(samples.instant),
+        date: new Intl.DateTimeFormat(format, { dateStyle: 'long', timeZone: 'UTC' }).format(samples.date),
+        relative: new Intl.RelativeTimeFormat(format, { numeric: 'auto' }).format(samples.days, 'day'),
+        decimal: new Intl.NumberFormat(format).format(samples.decimal),
+        percent: new Intl.NumberFormat(format, { style: 'percent' }).format(samples.share),
+        compact: new Intl.NumberFormat(format, { notation: 'compact' }).format(samples.big),
+        currency: new Intl.NumberFormat(format, { style: 'currency', currency: 'EUR' }).format(samples.amount),
+        casing: samples.casing,
+        'word-count': new Intl.NumberFormat(format).format(titleWords.length),
+        'long-word': samples.longWord,
       };
       for (const [sample, text] of Object.entries(expected)) await expect(page.locator(`[data-sample="${sample}"]`), sample).toHaveText(text);
       for (const count of samples.counts) await expect(page.locator(`[data-count="${count}"]`)).toHaveText(m.apps_count({ count }, o));
       for (const n of samples.positions) await expect(page.locator(`[data-position="${n}"]`)).toHaveText(m.position_value({ n }, o));
+      // The week in this locale's order from its first day, its weekend marked (Intl Locale Info's getWeekInfo).
+      const days = Array.from({ length: 7 }, (_, index) => ((firstDay - 1 + index) % 7) + 1);
+      await expect(page.locator('[data-weekday]')).toHaveText(days.map(day => weekday(locale, day, 'short')));
+      expect(await page.locator('[data-weekday]').evaluateAll(nodes => nodes.map(node => Number(node.dataset.weekday)))).toEqual(days);
+      expect(await page.locator('[data-weekend]').evaluateAll(nodes => nodes.map(node => Number(node.dataset.weekday)))).toEqual(days.filter(day => weekend.includes(day)));
+      // Words as Intl.Segmenter divides them, also for languages written without spaces.
+      await expect(page.locator('[data-word]')).toHaveText(titleWords);
       await extra?.(page, locale);
       await context.close();
     });
@@ -382,5 +467,42 @@ export function observabilityChecks({ service, paths }) {
     expect(body.status).toBe('ok');
     expect(body.service).toBe(service);
     expect(typeof body.release).toBe('string');
+  });
+}
+
+/**
+ * Text in every language on every page (text.css): no page is wider than a 320 px screen, long
+ * words hyphenate by the page's language (and break where there is no dictionary), capitals are
+ * set in the page's language (so Turkish gets İ from i), and Japanese headings break between
+ * phrases. The Turkish and Japanese rules are also proven on the existing languages by switching
+ * the page's lang in place.
+ */
+export function textChecks({ paths }) {
+  test('every page fits 320 px in every language; text hyphenates and capitalises by the page language', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    for (const locale of checkedLocales) for (const path of paths) {
+      const url = localizedPath(path, locale);
+      await page.goto(url);
+      await expect(page.getByRole('heading', { level: 1 }), url).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${url} overflows 320 px`).toBe(true);
+      expect(await page.evaluate(() => {
+        const style = getComputedStyle(document.querySelector('h1'));
+        return { lang: document.documentElement.lang, hyphens: style.hyphens, wrap: style.overflowWrap };
+      }), url).toEqual({ lang: locale, hyphens: 'auto', wrap: 'break-word' });
+      // Every element capitalised by CSS takes its casing rules from the page's language.
+      expect(await page.evaluate(lang => [...document.querySelectorAll('body *')]
+        .filter(node => getComputedStyle(node).textTransform === 'uppercase' && node.closest('[lang]')?.getAttribute('lang') !== lang)
+        .map(node => node.outerHTML.slice(0, 120)), locale), `${url} capitalises outside its language`).toEqual([]);
+      const casing = page.locator('[data-sample="casing"]');
+      if (await casing.count()) {
+        expect(await casing.innerText(), url).toBe(samples.casing.toLocaleUpperCase(locale));
+        const inTurkish = await page.evaluate(() => { document.documentElement.lang = 'tr'; return document.querySelector('[data-sample="casing"]').innerText; });
+        expect(inTurkish, `${url} with lang=tr`).toBe(samples.casing.toLocaleUpperCase('tr'));
+        const japanese = await page.evaluate(() => { document.documentElement.lang = 'ja'; return getComputedStyle(document.querySelector('h1')).wordBreak; });
+        expect(japanese, `${url} with lang=ja`).toBe('auto-phrase');
+        const own = await page.evaluate(lang => { document.documentElement.lang = lang; return getComputedStyle(document.querySelector('h1')).wordBreak; }, locale);
+        expect(own, url).toBe(locale.startsWith('ja') ? 'auto-phrase' : 'normal');
+      }
+    }
   });
 }

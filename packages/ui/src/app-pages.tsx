@@ -12,7 +12,7 @@ import { SidebarInset, SidebarProvider } from './components/sidebar';
 import { AppSidebar } from './blocks/sidebar-16/app-sidebar';
 import { SiteHeader } from './blocks/sidebar-16/site-header';
 import { FormatsContent, Intro, SkipLink, ZoneBadge, type FormatsControlCards, type FormatsExtras } from './pages';
-import type { LocaleInfo } from './locale-info';
+import { formatLocale, type LocaleInfo } from './locale-info';
 import { reservationSchema, type Reservation, type ReservationDraft, type ReservationResult } from './reservation';
 
 // App pages (paths.js): they need JavaScript and use the app shell. Kept apart from ./pages, the
@@ -71,8 +71,8 @@ export function AppFormatsPage({ locale, info, preferred, extras = {}, controls 
   return <AppShell locale={locale} path="/app/formats" preferred={preferred}><FormatsContent locale={locale} info={info} extras={extras} controls={controls} backTo="/app" /></AppShell>;
 }
 
-/** The demo form's starting values: no name, two seats. */
-const draft: ReservationDraft = { name: '', guests: '2' };
+/** The demo form's starting values: no name, two seats, written in the language's own digits. */
+const draft = (locale: Locale): ReservationDraft => ({ name: '', guests: new Intl.NumberFormat(formatLocale(locale)).format(2) });
 
 export type { Reservation, ReservationResult } from './reservation';
 
@@ -91,7 +91,7 @@ export function DemoPage({ locale, preferred, onReserve, onDirtyChange }: {
   // TanStack Form with shadcn's Field components (https://ui.shadcn.com/docs/forms/tanstack-form):
   // the shared Zod schema checks on submit, and the server's field errors join the form's own.
   const form = useForm({
-    defaultValues: draft,
+    defaultValues: draft(locale),
     validators: { onSubmit: schema },
     onSubmitInvalid: () => { setFailed(false); setReservation(null); },
     onSubmit: async ({ value, formApi }) => {
@@ -137,7 +137,7 @@ export function DemoPage({ locale, preferred, onReserve, onDirtyChange }: {
       <Card>
         <CardHeader><CardTitle>{m.count_label({}, o)}</CardTitle></CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <output aria-live="polite" className="block text-6xl tabular-nums">{new Intl.NumberFormat(locale).format(count)}</output>
+          <output aria-live="polite" className="block text-6xl tabular-nums">{new Intl.NumberFormat(formatLocale(locale)).format(count)}</output>
           <div className="flex flex-wrap gap-3">
             <Button onClick={() => setCount(value => value + 1)}>{m.increment({}, o)}</Button>
             <Button variant="outline" onClick={() => setCount(0)} disabled={count === 0}>{m.reset({}, o)}</Button>
@@ -163,11 +163,13 @@ export function DemoPage({ locale, preferred, onReserve, onDirtyChange }: {
                   {isInvalid && <FieldError id="name-error" errors={field.state.meta.errors} />}
                 </Field>;
               }} />
+              {/* A text field, not type="number", which rejects digits other than 0-9: the shared
+                  schema reads seats typed in any script's digits (Persian ۳, Arabic-Indic ٣). */}
               <form.Field name="guests" children={field => {
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                 return <Field data-invalid={isInvalid || undefined}>
                   <FieldLabel htmlFor={field.name}>{m.guests_label({}, o)}</FieldLabel>
-                  <Input id={field.name} name={field.name} type="number" inputMode="numeric" min={1} max={20} step={1} value={field.state.value} onBlur={field.handleBlur}
+                  <Input id={field.name} name={field.name} inputMode="numeric" autoComplete="off" value={field.state.value} onBlur={field.handleBlur}
                     onChange={event => field.handleChange(event.target.value)} aria-invalid={isInvalid || undefined} aria-describedby={isInvalid ? 'guests-error' : undefined} />
                   {isInvalid && <FieldError id="guests-error" errors={field.state.meta.errors} />}
                 </Field>;

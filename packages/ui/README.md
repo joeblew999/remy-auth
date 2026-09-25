@@ -21,6 +21,7 @@ where classes live:
 ```css
 @import "@joeblew999/remy-ui/globals.css";
 @import "@joeblew999/remy-ui/fonts.css";
+@import "@joeblew999/remy-ui/text.css";
 @source "../src";
 @source "../node_modules/@joeblew999/remy-ui/src";
 ```
@@ -43,7 +44,7 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 
 | Export | What it holds |
 | --- | --- |
-| `globals.css`, `fonts.css` | shadcn's stylesheet as the CLI writes it; the fonts for every language |
+| `globals.css`, `fonts.css`, `text.css` | shadcn's stylesheet as the CLI writes it; the fonts for every language; how text breaks in every language (hyphenation by `lang`, Japanese phrase breaks) |
 | `components/*`, `hooks/*`, `button` | shadcn components and hooks (`button` is also a short path) |
 | `paths` | `sitePaths`, `appPaths`, `allPaths`, `isAppPath` |
 | `pages` | `SiteShell` (alias `Shell`), `HomePage`, `FormatsContent`, `FormatsPage`, `Intro`, `ZoneBadge`, `SkipLink`, `Group`, `Row` |
@@ -51,7 +52,9 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `language` | `LanguageSwitcher` (plain links, site pages), `LanguageMenu` (shadcn DropdownMenu, app pages), `LanguageHint` |
 | `messages`, `runtime` | Compiled Paraglide messages and runtime |
 | `locale` | Paraglide's `getLocale`, `setLocale`, `localizeHref`, `localizeUrl`, `deLocalizeHref`, `cookieName` and more, plus `direction` and `localeName` |
-| `locale-info` | Calendars, digits, clock and week conventions |
+| `locale-info` | Calendars, digits, clock and week conventions from Intl Locale Info; `formatLocale` (the tag every formatter uses, naming the language's own calendar and digits), `weekOrder`, `words` (Intl.Segmenter) |
+| `matching` | The `custom-chinese` Paraglide strategy (Traditional Chinese tags reach `zh-TW`), `matchChinese`, `preferredFromHeader`, `preferredFromNavigator` |
+| `reservation` | The demo reservation's Zod schema (seats typed in any script's digits), `asciiDigits` |
 | `seo` | Canonical and `hreflang` alternates |
 | `tanstack` | `localizedWorker` (Worker entry: observability, Paraglide's middleware and entry redirects around TanStack Start), `localeRewrite`, `pageHead`, `suggestedLocale`, `suggestedLocaleInBrowser` |
 | `client` | `useSuggestedLocale`, `DeviceTime` for prerendered apps |
@@ -59,7 +62,7 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `cloudflare` | `placeFromCloudflare` |
 | `showcase/*` | TanStack showcase pieces: search params and `choiceCards`, device place, leave guard, time zones |
 | `samples` | The fixed values the pages render |
-| `checks`, `showcase/*.checks` | Shared Playwright checks: public pages, entry URLs, demo, formats, zones, observability, Lighthouse and Core Web Vitals, and one per showcase piece |
+| `checks`, `showcase/*.checks` | Shared Playwright checks: public pages, entry URLs (with the Chinese strategy), demo (native digits), formats (own calendar and digits, week rules, word segmentation), text (`textChecks`: 320 px, hyphenation, casing by language), zones, observability, Lighthouse and Core Web Vitals, and one per showcase piece |
 | `playwright` | `playwrightConfig()`, the shared Playwright configuration |
 
 `@tanstack/react-router`, `@playwright/test` and `lighthouse` are optional peers: the pages need
@@ -67,7 +70,7 @@ the router, the checks need the other two.
 
 ## Language
 
-Language behaviour is Paraglide's: strategies `url`, `cookie`, `preferredLanguage`, `baseLocale`,
+Language behaviour is Paraglide's: strategies `url`, `cookie`, `custom-chinese` (Paraglide's own custom-strategy hook, in `matching.js`), `preferredLanguage`, `baseLocale`,
 every locale prefixed in the URL, configured once in `paraglide.mjs`, which compiles
 `messages/*.json` during type generation and the Vite build. Pass `{ locale }` explicitly to every
 message call; there is no process-wide locale. A server-rendered app runs the middleware and passes

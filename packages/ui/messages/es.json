@@ -293,5 +293,11 @@
   "theme_toggle": "Tema",
   "theme_light": "Claro",
   "theme_dark": "Oscuro",
-  "theme_system": "Sistema"
+  "theme_system": "Sistema",
+  "casing_label": "Mayúsculas",
+  "week_label": "La semana, con el fin de semana marcado",
+  "word_breaks_heading": "Separación de palabras",
+  "words_label": "Palabras del título de la portada",
+  "word_count_label": "Número de palabras",
+  "long_word_label": "Una palabra alemana larga"
 }

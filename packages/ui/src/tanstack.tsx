@@ -1,8 +1,8 @@
 import type { LocationRewrite } from '@tanstack/react-router';
 import { paraglideMiddleware } from './paraglide/server.js';
 import { deLocalizeUrl, localizeUrl, getLocale, getUrlOrigin, extractLocaleFromUrl, extractLocaleFromRequest,
-  extractLocaleFromRequestWithStrategies, extractLocaleFromHeader, extractLocaleFromCookie, extractLocaleFromNavigator,
-  shouldRedirect, type Locale } from './paraglide/runtime.js';
+  extractLocaleFromRequestWithStrategies, extractLocaleFromCookie, shouldRedirect, type Locale } from './paraglide/runtime.js';
+import { preferredFromHeader, preferredFromNavigator } from './matching.js';
 import { alternates } from './seo';
 import { withObservability } from './worker';
 import { allPaths, isAppPath } from './paths.js';
@@ -63,7 +63,7 @@ export async function entryRedirect(request: Request, entryPaths: readonly strin
  */
 export function suggestedLocale(request: Request): Locale | undefined {
   const page = extractLocaleFromRequest(request);
-  const header = extractLocaleFromHeader(request);
+  const header = preferredFromHeader(request);
   let remembered: Locale | undefined;
   try { remembered = extractLocaleFromRequestWithStrategies(request, ['cookie']); } catch { remembered = undefined; }
   return header && header !== page && remembered !== page ? header : undefined;
@@ -71,7 +71,7 @@ export function suggestedLocale(request: Request): Locale | undefined {
 
 /** The same decision in the browser, for client-side navigations: the browser's languages instead of the header. */
 export function suggestedLocaleInBrowser(page: Locale): Locale | undefined {
-  const browser = extractLocaleFromNavigator();
+  const browser = preferredFromNavigator();
   const remembered = extractLocaleFromCookie();
   return browser && browser !== page && remembered !== page ? browser : undefined;
 }

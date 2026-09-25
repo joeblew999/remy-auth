@@ -117,6 +117,40 @@ plural coverage and formatting, not wording.
   dropped. During hydration the server's text is the source of truth: client code does not format
   it again.
 
+## Work item 3 done on the existing three languages (2026-09-25, branch l10n-features)
+
+Decided under the owner's delegation, with reasons:
+
+- **One formatting tag.** `formatLocale` in [locale-info.ts](../packages/ui/src/locale-info.ts)
+  names the calendar and digits from `getCalendars()[0]` and `getNumberingSystems()[0]`; every
+  formatter on the pages uses it. Paraglide's compiled messages format with the plain locale (its
+  registry takes no options), so the formats check compares those rows with the explicit tag: they
+  agree only if the runtime's defaults are the language's own. The page's `lang` stays plain.
+- **Other calendars use year, month and day fields** (`samples.calendarDate`), in the calendar
+  control and the other-calendars list, so the broken Hebrew `dateStyle` never shows. The control
+  adds Republic of China, Ethiopian and Chinese; its default stays `gregory` so the search-param
+  contract and shareable addresses do not change; the language's own calendar is the first choice
+  and the calendar row above it.
+- **Native digits** are read by mapping every decimal digit Intl knows (`Intl.supportedValuesOf
+  ('numberingSystem')`) to ASCII in the shared schema; the seats field is a text field with
+  `inputMode="numeric"`, and its default is written in the language's digits.
+- **Week rules** (first day, weekend, the week in order with the weekend marked) are shared rows
+  now, not an app extra, from `getWeekInfo()` with no fallback.
+- **Casing, words, long words** are rows in the shared content (`istanbul`, the home title's
+  words, a German compound in `lang="de"`); [text.css](../packages/ui/src/text.css) holds
+  `hyphens: auto`, `overflow-wrap: break-word` and `word-break: auto-phrase` for Japanese headings.
+  `textChecks` loads every site and app page in every language at 320 px, and proves the Turkish
+  and Japanese rules now by switching the page's `lang` in place.
+- **Chinese matching** is the `custom-chinese` strategy in [matching.js](../packages/ui/src/matching.js),
+  before `preferredLanguage`. Paraglide's server runs custom strategies before every other one, so
+  the strategy steps aside when a strategy listed before it (URL, cookie) answers. The language
+  hint uses the same matcher. The end-to-end zh-TW check is skipped only while zh-TW is not
+  configured; the matcher itself is checked now against a locale list that has zh-TW.
+
+New message keys every catalog must carry: `casing_label`, `week_label`, `word_breaks_heading`,
+`words_label`, `word_count_label`, `long_word_label` (the plural check now also covers 22 and 25).
+A consumer (remy-auth-app) must import `text.css` and call `textChecks({ paths: allPaths })`.
+
 ## Work items, in order
 
 1. **Verify (about 1 hour):** Paraglide's language matching for scripts and regions; `getWeekInfo`

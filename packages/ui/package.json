@@ -19,6 +19,7 @@
     "./button": "./src/components/button.tsx",
     "./globals.css": "./src/styles/globals.css",
     "./fonts.css": "./src/fonts.css",
+    "./text.css": "./src/text.css",
     "./messages": "./src/paraglide/messages.js",
     "./runtime": "./src/paraglide/runtime.js",
     "./locale": "./src/locale.ts",
@@ -38,6 +39,7 @@
     "./app-pages": "./src/app-pages.tsx",
     "./reservation": "./src/reservation.ts",
     "./paths": "./src/paths.js",
+    "./matching": "./src/matching.js",
     "./worker": "./src/worker.ts",
     "./showcase/*.checks": "./src/showcase/*.checks.js",
     "./showcase/*": "./src/showcase/*.tsx"

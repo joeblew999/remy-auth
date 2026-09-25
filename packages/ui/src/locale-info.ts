@@ -3,31 +3,54 @@ import type { Locale } from './paraglide/runtime.js';
 /** A locale's own calendar, digit, clock and week conventions, from the runtime's CLDR data. */
 export type LocaleInfo = {
   calendar: string; otherCalendars: string[]; numberingSystem: string; hourCycle: string;
-  firstDay?: number; weekend?: number[];
+  firstDay: number; weekend: number[];
 };
 
-// The Intl Locale Info methods are not Baseline yet, so this runs on the server only
-// (route loaders) and falls back to the resolved formatting options where missing.
+// Intl Locale Info (getCalendars, getNumberingSystems, getWeekInfo) is Baseline since 2026-07-21
+// and present in workerd; decided in .plans/hard-localisation.md: rely on it, no fallback. The
+// deprecated getters (weekInfo, calendars, ...) are never used.
 type LocaleWithInfo = Intl.Locale & {
-  getCalendars?: () => string[]; getNumberingSystems?: () => string[];
-  getWeekInfo?: () => { firstDay: number; weekend: number[] };
+  getCalendars(): string[]; getNumberingSystems(): string[];
+  getWeekInfo(): { firstDay: number; weekend: number[] };
 };
+const withInfo = (locale: string) => new Intl.Locale(locale) as LocaleWithInfo;
+
+/**
+ * The tag every formatter on the pages uses: the locale with its own calendar and digits named
+ * explicitly (fa → fa-u-ca-persian-nu-arabext, th → th-u-ca-buddhist-nu-latn), so a runtime whose
+ * resolved defaults differ from the locale's CLDR preferences still writes dates and numbers the
+ * language's way. The page's `lang` stays the plain locale; Paraglide's messages format with the
+ * plain locale too, and the shared formats check proves both agree.
+ */
+export function formatLocale(locale: Locale): string {
+  const tag = withInfo(locale);
+  return new Intl.Locale(locale, { calendar: tag.getCalendars()[0], numberingSystem: tag.getNumberingSystems()[0] }).toString();
+}
+
 export function localeInfo(locale: Locale): LocaleInfo {
-  const resolved = new Intl.DateTimeFormat(locale, { hour: 'numeric' }).resolvedOptions();
-  const tag = new Intl.Locale(locale) as LocaleWithInfo;
-  const calendars = tag.getCalendars?.() ?? [resolved.calendar];
-  const week = tag.getWeekInfo?.();
+  const tag = withInfo(locale);
+  const [calendar, ...otherCalendars] = tag.getCalendars();
+  const { firstDay, weekend } = tag.getWeekInfo();
   return {
-    calendar: resolved.calendar,
-    otherCalendars: calendars.filter(calendar => calendar !== resolved.calendar),
-    numberingSystem: tag.getNumberingSystems?.()[0] ?? resolved.numberingSystem,
-    hourCycle: resolved.hourCycle ?? 'h23',
-    firstDay: week?.firstDay, weekend: week?.weekend,
+    calendar, otherCalendars,
+    numberingSystem: tag.getNumberingSystems()[0],
+    hourCycle: new Intl.DateTimeFormat(formatLocale(locale), { hour: 'numeric' }).resolvedOptions().hourCycle ?? 'h23',
+    firstDay, weekend,
   };
 }
 
 /** The localized name of an ISO weekday number (1 = Monday … 7 = Sunday). */
-export function weekdayName(locale: Locale, day: number): string {
+export function weekdayName(locale: Locale, day: number, weekday: 'long' | 'short' = 'long'): string {
   // 2024-01-01 is a Monday.
-  return new Intl.DateTimeFormat(locale, { weekday: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(2024, 0, day)));
+  return new Intl.DateTimeFormat(locale, { weekday, timeZone: 'UTC' }).format(new Date(Date.UTC(2024, 0, day)));
+}
+
+/** The seven ISO weekday numbers in this locale's week order, starting on its first day. */
+export function weekOrder(firstDay: number): number[] {
+  return Array.from({ length: 7 }, (_, index) => ((firstDay - 1 + index) % 7) + 1);
+}
+
+/** The words of `text` as this language divides them (Intl.Segmenter), for languages written without spaces too. */
+export function words(locale: Locale, text: string): string[] {
+  return [...new Intl.Segmenter(locale, { granularity: 'word' }).segment(text)].filter(part => part.isWordLike).map(part => part.segment);
 }

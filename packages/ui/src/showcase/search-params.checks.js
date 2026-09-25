@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 import { locales } from '../paraglide/runtime.js';
 import { m } from '../paraglide/messages.js';
 import { samples } from '../samples.js';
-import { localizedPath, collectErrors, checkedLocales } from '../checks.js';
+import { localizedPath, collectErrors, checkedLocales, formatTag } from '../checks.js';
 
 // Mirrors search-params.tsx on purpose: the check states the contract, not the implementation.
 const defaults = { currency: 'EUR', count: 3, calendar: 'gregory' };
@@ -12,9 +12,9 @@ const defaults = { currency: 'EUR', count: 3, calendar: 'gregory' };
 /** What the chosen rows must show for these values in this locale. */
 function expected(locale, { currency, count, calendar }) {
   return {
-    'chosen-currency': new Intl.NumberFormat(locale, { style: 'currency', currency }).format(samples.amount),
+    'chosen-currency': new Intl.NumberFormat(formatTag(locale), { style: 'currency', currency }).format(samples.amount),
     'chosen-count': m.apps_count({ count }, { locale }),
-    'chosen-calendar': new Intl.DateTimeFormat(locale, { dateStyle: 'long', calendar, timeZone: 'UTC' }).format(samples.date),
+    'chosen-calendar': new Intl.DateTimeFormat(formatTag(locale), { ...samples.calendarDate, calendar }).format(samples.date),
   };
 }
 

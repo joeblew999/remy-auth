@@ -4,6 +4,7 @@ import { m } from '../paraglide/messages.js';
 import { Button } from '../components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/card';
 import { Row } from '../pages';
+import { formatLocale } from '../locale-info';
 
 // The device's own location, from the browser's Geolocation API. Following privacy-by-design
 // guidance: the card says why and where the data goes before asking, the browser asks only when
@@ -26,11 +27,11 @@ export function distanceKm(a: Coordinates, b: Coordinates) {
 
 /** Formatters the card and its checks share, so both agree on every locale's output. */
 export const devicePlaceFormat = {
-  degrees: (locale: string, value: number) => new Intl.NumberFormat(locale, { style: 'unit', unit: 'degree', maximumFractionDigits: 4 }).format(value),
+  degrees: (locale: string, value: number) => new Intl.NumberFormat(formatLocale(locale as Locale), { style: 'unit', unit: 'degree', maximumFractionDigits: 4 }).format(value),
   accuracy: (locale: string, metres: number) => metres < 1000
-    ? new Intl.NumberFormat(locale, { style: 'unit', unit: 'meter', maximumFractionDigits: 0 }).format(metres)
-    : new Intl.NumberFormat(locale, { style: 'unit', unit: 'kilometer', maximumFractionDigits: 1 }).format(metres / 1000),
-  distance: (locale: string, km: number) => new Intl.NumberFormat(locale, { style: 'unit', unit: 'kilometer', maximumFractionDigits: km < 10 ? 1 : 0 }).format(km),
+    ? new Intl.NumberFormat(formatLocale(locale as Locale), { style: 'unit', unit: 'meter', maximumFractionDigits: 0 }).format(metres)
+    : new Intl.NumberFormat(formatLocale(locale as Locale), { style: 'unit', unit: 'kilometer', maximumFractionDigits: 1 }).format(metres / 1000),
+  distance: (locale: string, km: number) => new Intl.NumberFormat(formatLocale(locale as Locale), { style: 'unit', unit: 'kilometer', maximumFractionDigits: km < 10 ? 1 : 0 }).format(km),
 };
 
 /** `network` is Cloudflare's location of the request, when the page has one, to show how far apart the two are. */
