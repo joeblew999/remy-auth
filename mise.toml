@@ -148,7 +148,7 @@ dir = "{{config_root}}"
 run = "node scripts/docs-publish.mjs"
 
 [tasks."docs:questions"]
-description = "REMOTE, search only (no answers, next to no cost): each fixed question (src/docs/questions.json) must find its docs section in the top three. Instance: remy-docs-pages (default)"
+description = "REMOTE, search only (no answers, next to no cost): each fixed question (src/docs/questions.json) must find its docs page in the top three. Instance: remy-docs-pages (default)"
 dir = "{{config_root}}"
 run = "node scripts/docs-questions.mjs"
 
