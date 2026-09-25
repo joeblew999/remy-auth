@@ -4,6 +4,28 @@ All notable changes to the shared UI package `@joeblew999/remy-ui` are documente
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 package follows [Semantic Versioning](https://semver.org/).
 
+## [0.10.0] - 2026-09-25
+
+All in on shadcn, and site pages kept apart from app pages. Breaking for consumers.
+
+### Changed
+- shadcn's monorepo layout: the app's `components.json` routes `shadcn add` into this package; the
+  stylesheet is `globals.css` (was `styles.css`), exactly what the shadcn CLI writes (default Nova
+  style, neutral theme, Geist), checked by `mise run ui:verify` before every release.
+- Components regenerated with shadcn's RTL mode; `direction` (DirectionProvider), `skeleton`,
+  `empty`, `sidebar`, `sheet`, `tooltip`, `breadcrumb`, `collapsible`, `dropdown-menu`, `avatar` and
+  the `use-mobile` hook added through the CLI.
+- `fonts.css`: Geist from shadcn, Noto Sans Arabic on Arabic pages per shadcn's RTL guide, generic
+  code font; apps add fontaine's size-matched fallbacks in their Vite config.
+- `paths`: `sitePaths` (for Google: no JavaScript needed, indexed, in the sitemap), `appPaths`
+  (under `/app`: JavaScript, noindex) and `allPaths`, replacing `publicPaths`; `pageHead` adds
+  noindex to app pages.
+- `pages`: `SiteShell` (static shadcn parts), `ZoneBadge`, `SkipLink`, `Intro`; the demo moves to
+  `app-pages` with `AppShell` (shadcn's sidebar-16 block, owned in `blocks/sidebar-16`),
+  `AppHomePage` and `LocationPage`.
+- `publicPageChecks` enforces that every named font is loaded; new `zoneChecks`; checks find page
+  links inside `#main`; `codeSplittingChecks` takes a start page per zone.
+
 ## [0.9.3] - 2026-09-25
 
 ### Added

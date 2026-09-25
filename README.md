@@ -11,23 +11,27 @@ storage are still planned; open work is listed in [.plans/now.md](.plans/now.md)
 
 ## Where to look
 
-Two live sites. Everything else (previews, tags) is for development.
+Two live sites, each with two kinds of page ([paths](packages/ui/src/paths.js)): **site pages**
+for Google (complete without JavaScript, indexed, labelled "Site page") and **app pages** under
+`/app` (need JavaScript, hidden from search, shadcn's sidebar app shell, labelled "App"). Swap `/en`
+for `/es` or `/ar` anywhere.
 
 | Site | Rendering | Open |
 | --- | --- | --- |
 | remy-auth | server-rendered on every request | https://remy-auth.gedw99.workers.dev/en |
 | remy-auth-app | prerendered static pages | https://remy-auth-app.gedw99.workers.dev/en |
 
-What to try, on either site (swap `/en` for `/es` or `/ar`):
-
-| Try | Link |
-| --- | --- |
-| Where you are: Cloudflare's location (remy-auth only) and your device's location (press the button) | https://remy-auth.gedw99.workers.dev/en/formats |
-| Settings in the address: change currency, count or calendar, then share the link | https://remy-auth.gedw99.workers.dev/en/formats?currency=JPY&count=11&calendar=islamic |
-| Arabic, right to left | https://remy-auth.gedw99.workers.dev/ar/formats?currency=KWD&count=11&calendar=islamic |
-| Demo form: the server answers in your language; type a name, then leave, and it warns you | https://remy-auth.gedw99.workers.dev/es/demo |
-| Live status card, refreshing by itself | https://remy-auth.gedw99.workers.dev/en |
-| A page that does not exist, localized | https://remy-auth.gedw99.workers.dev/ar/time-zones/Mars/Olympus |
+| Kind | Page | remy-auth link |
+| --- | --- | --- |
+| Site | Home | https://remy-auth.gedw99.workers.dev/en |
+| Site | Formats, with settings in the address | https://remy-auth.gedw99.workers.dev/en/formats?currency=JPY&count=11&calendar=islamic |
+| Site | A time zone | https://remy-auth.gedw99.workers.dev/en/time-zones/Asia/Tokyo |
+| Site | Not found, localized | https://remy-auth.gedw99.workers.dev/ar/time-zones/Mars/Olympus |
+| Site | Sitemap (site pages only) | https://remy-auth.gedw99.workers.dev/sitemap.xml |
+| App | Home, with the live status card | https://remy-auth.gedw99.workers.dev/en/app |
+| App | Demo form: server reply and leave warning | https://remy-auth.gedw99.workers.dev/en/app/demo |
+| App | Location: Cloudflare's and your device's | https://remy-auth.gedw99.workers.dev/en/app/location |
+| Ops | Liveness | https://remy-auth.gedw99.workers.dev/healthz |
 
 ## Get started
 
