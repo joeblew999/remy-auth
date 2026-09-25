@@ -40,8 +40,8 @@ The sample is planned; its code and startup command do not exist yet.
   including individual Lighthouse audits, to make a run pass. Fix the cause, or stop
   and ask the owner.
 - Change generated code at its source: shadcn components and theme tokens through
-  shadcn, translations in `packages/ui/messages/`, and Wrangler/React Router output
-  by regenerating. Do not hand-edit or override generated output elsewhere.
+  shadcn, translations in `packages/ui/messages/`, and Wrangler/TanStack Router output
+  (including `src/routeTree.gen.ts`) by regenerating. Do not hand-edit or override generated output elsewhere.
 - Decisions that plans leave open, or fixes that conflict with a plan, belong to the
   owner. Ask; do not choose. Deploying, provisioning and filing upstream issues
   also wait for the owner's explicit request.
