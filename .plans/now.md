@@ -15,9 +15,13 @@ evidence. Each item's detail lives in the plan it links to.
 - [x] remy-auth-app: formats settings in the address on a prerendered page (0.9.2; live, 33 checks).
 - [x] Location from the browser as well as Cloudflare's, in both apps (0.9.3; live; becomes a
       part with the parts work).
-- [ ] All in on shadcn (branch `shadcn-stock`, preview https://shadcn-remy-auth.gedw99.workers.dev):
-      shadcn's monorepo layout, CLI-written theme and components, sidebar-16 app shell, site and app
-      pages kept apart. Left: remy-auth-app on the new package, merge, release 0.10.0, deploy.
+- [x] All in on shadcn and TanStack, site pages apart from app pages: 0.10.0 released, both apps
+      live (remy-auth-app 38 of 38 checks live; remy-auth 60 of 61, see the next item).
+- [ ] remy-auth's /en/formats misses Google's simulated mobile LCP live (2.62-2.75 s against
+      2.5 s; a real throttled trace shows 1.3 s). Owner: nothing is removed from the page. Next:
+      trace what the site page loads that it does not need first, then regroup the page.
+- [ ] Formats also as an app page (/app/formats), same component in the app frame, if the owner
+      wants it.
 - [ ] Parts: spike, then convert the existing parts ([plan](parts.md)).
 - [ ] Formats page regrouped, then ten more languages and the hard localisation features
       ([plan](hard-localisation.md)).
