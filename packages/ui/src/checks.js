@@ -537,12 +537,13 @@ export function cspChecks({ paths, reportPath = '/csp-report' }) {
     }
   });
 
-  test('every page loads and hydrates without a single violation of that policy', async ({ page }) => {
+  // One test per language, as the other per-language checks: the work grows with the language count.
+  for (const locale of checkedLocales) test(`${locale}: every page loads and hydrates without a single violation of that policy`, async ({ page }) => {
     await page.addInitScript(() => {
       window.__cspViolations = [];
       document.addEventListener('securitypolicyviolation', event => window.__cspViolations.push(`${event.effectiveDirective} ${event.blockedURI} ${event.sourceFile}:${event.lineNumber}`));
     });
-    for (const locale of checkedLocales) for (const path of paths) {
+    for (const path of paths) {
       const url = localizedPath(path, locale);
       await page.goto(url);
       await hydrated(page.locator('body'));
