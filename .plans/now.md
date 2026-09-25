@@ -51,6 +51,7 @@ formats speed), batch 3 (TanStack Form, Zod adapter, Devtools), a docs audit and
 | 12 | Auth service milestone 1: Better Auth on D1, issuer, sample app | 11 confirmed | login screens |
 | 13 | Auth portal screens from shadcn's login and signup blocks; admin lists on TanStack Table | 12 | shared login checks |
 | 14 | remy-auth-app runs the consumer contract set, not the whole package suite | 4 | faster consumer gates |
+| 15 | Caching: spike Workers Caching against prerendered site pages on a preview, then build ([plan](caching.md)) | load to settle; decisions 1 to 4 in the plan (delegated: recommendation first) | cached site pages, private app pages |
 
 Decisions only the owner can make: the security headers rollout (7), launching the auth
 decisions (11) and confirming them, a native-speaker review of the Arabic and new catalogs, the
