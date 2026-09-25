@@ -1,0 +1,46 @@
+# Docs site and AI answers: swing back and review
+
+Status: problems only, no analysis, 2026-09-25. The docs (`/docs`) and AI answers (`/app/ask`)
+went live on remy-auth to have something up; this lists what needs revisiting.
+
+Owner, verbatim: "Later we will need to review the docs design I suspect. This is a new way of
+doing things and I suspect it might need revisiting in terms of the design, operations,
+efficiency." "You fucked up a ton of things to get this as far as you did." "Right now I just want
+it up so at least we have something!" Also: "Agree about reciting docs later" (reindexing), "We
+will need to clean up previews too after they run. So make sure mise has the ability to delete
+previews?", "commit based preview will allow agents to deploy and test if they need", and on
+translation: "The docs translation. Is this also paraglide based or what?"
+
+## What went wrong on the way
+
+1. The docs agent built on a base from before the 13 languages; the merge conflicted, and the ten
+   new languages had none of the 17 docs and answer messages. They were machine-translated at
+   merge time and need a native-speaker review.
+2. Checks that loop every language times every page in one test timed out as languages and docs
+   pages grew (CSP, narrow screen, site pages). Each was split per language during the release;
+   `build-boundaries` ("the browser never downloads server-only code or devtools") still times
+   out on the preview. So 0.10.6 is **not released**: remy-auth is deployed from main, and
+   remy-auth-app is still on 0.10.5.
+3. The preview alias (`release`) kept serving the previous build to some requests after the wait
+   check passed, causing false failures in two releases. Fixed with one alias per commit
+   (`release-<sha>`). Previews now pile up: there is no task to delete them. Cloudflare's newer
+   Previews (`wrangler preview`, `wrangler preview delete`) replace aliased version URLs.
+4. The index upload (`docs:index`) was blocked for the agent; the first run by hand failed part way,
+   the second uploaded 62 sections. Cause unknown. Reindexing is manual, not part of deploy.
+5. Previews and production share one AI Search index; locally the answers are switched off, so the
+   real answer is only checked against a deployed site.
+6. The $10 AI Gateway limit may not apply to Workers AI billed postpaid (unverified; money).
+7. The build-boundary check flagged `request.cf` written in the docs text, because docs ship to
+   the browser as JavaScript; the docs were reworded instead of deciding the check's marker.
+8. Adding shadcn's `table` rewrote `"use client"` in `field`, `sheet` and `sidebar`.
+9. The docs engine lives in remy-auth's app code, so consumers get no docs or answers
+   ([publisher-consumer.md](publisher-consumer.md)).
+10. Translation: only the page chrome (navigation, answer page) is Paraglide. The docs themselves
+    are the repo's English Markdown, served under every language's URL with canonical to `/en`.
+11. Level 1 is now 2.1 minutes locally and 2.6 on a preview (280 checks).
+
+## To review later
+
+Docs design (look, navigation, English-only content under 13 languages), operations (indexing,
+previews, cleanup, cost limit), efficiency (gate time, docs shipped as JavaScript), and how
+consumers get all of it.
