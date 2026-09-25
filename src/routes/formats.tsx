@@ -1,14 +1,18 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, stripSearchParams } from '@tanstack/react-router';
 import { getLocale } from '@joeblew999/remy-ui/locale';
 import { weekdayName, localeInfo } from '@joeblew999/remy-ui/locale-info';
 import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { FormatsPage, Group, Row } from '@joeblew999/remy-ui/pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
+import { FormatsControls, validateSearch, searchDefaults } from '@joeblew999/remy-ui/showcase/search-params';
 import { getPlace } from '../place';
 import { usePreferred } from '../preferred';
 
 export const Route = createFileRoute('/formats')({
+  // ?currency, ?count and ?calendar, validated with defaults; defaults are left out of URLs.
+  validateSearch,
+  search: { middlewares: [stripSearchParams(searchDefaults)] },
   // Cloudflare's request geolocation (the network's country, region, city and time zone) comes
   // from a server function, so it is read in the Worker during SSR and client navigation alike.
   loader: async () => ({ info: localeInfo(getLocale()), place: await getPlace() }),
@@ -57,6 +61,7 @@ function Formats() {
       <Row sample="currency-name" label={m.currency_name_label({}, o)}>{new Intl.DisplayNames([locale], { type: 'currency' }).of('EUR')}</Row>
     </>,
     after: <>
+      <FormatsControls locale={locale} search={Route.useSearch()} />
       <p className="text-sm leading-relaxed text-muted-foreground">{m.currency_note({}, o)}</p>
       <Group title={m.units_heading({}, o)}>
         <Row sample="distance" label={m.distance_label({}, o)}>{m.distance_value({ km: samples.km }, o)}</Row>
