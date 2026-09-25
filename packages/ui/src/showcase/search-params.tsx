@@ -1,4 +1,5 @@
-import { ClientOnly, Link, type SearchSchemaInput } from '@tanstack/react-router';
+import { ClientOnly, Link } from '@tanstack/react-router';
+import * as z from 'zod/mini';
 import { getLocale, type Locale } from '../paraglide/runtime.js';
 import { m } from '../paraglide/messages.js';
 import { localeInfo } from '../locale-info';
@@ -8,10 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/card';
 import { Row } from '../pages';
 
 // Typed, validated search params on the formats page: /formats?currency=JPY&count=11&calendar=islamic.
-// The route wires `validateSearch` and strips `searchDefaults` from its URLs
+// The route wires `validateSearch` to a Zod 4 schema, which TanStack Router takes directly as a
+// Standard Schema (no adapter), and strips `searchDefaults` from its URLs
 // (`search: { middlewares: [stripSearchParams(searchDefaults)] }`), so the plain page stays
-// /formats, an invalid value falls back to its default, and TanStack Router redirects (server)
-// or replaces (browser) the URL with the normalised one. A plain function, no schema library.
+// /formats, an invalid value falls back to its default (Zod's catch), and TanStack Router
+// redirects (server) or replaces (browser) the URL with the normalised one. The schema uses Zod
+// Mini, Zod's own tree-shakable build of the same schemas: the route's validateSearch is in every
+// page's entry chunk, and Mini adds about a quarter of what classic Zod does to it.
 
 /** The currencies the controls offer: zero, two and three minor-unit digits. */
 export const currencies = ['EUR', 'USD', 'GBP', 'JPY', 'KWD'] as const;
@@ -22,8 +26,7 @@ export const maxCount = 1000;
 /** Calendars offered in every language besides the language's own, so each has a choice. */
 const showcaseCalendars = ['gregory', 'islamic', 'hebrew', 'japanese', 'buddhist', 'persian'];
 
-export type FormatsSearch = { currency: Currency; count: number; calendar: string };
-export const searchDefaults = { currency: 'EUR', count: 3, calendar: 'gregory' } as const satisfies FormatsSearch;
+export const searchDefaults = { currency: 'EUR', count: 3, calendar: 'gregory' } as const;
 
 /** The language's own calendars (CLDR, where the runtime has them) first, then the showcase ones. */
 export function calendarsFor(locale: Locale): string[] {
@@ -31,25 +34,23 @@ export function calendarsFor(locale: Locale): string[] {
   return [...new Set([info.calendar, ...info.otherCalendars, ...showcaseCalendars])];
 }
 
-const isCurrency = (value: unknown): value is Currency => currencies.some(currency => currency === value);
-function toCount(value: unknown): number | undefined {
-  const count = typeof value === 'number' ? value : typeof value === 'string' && /^\d+$/.test(value) ? Number(value) : NaN;
-  return Number.isInteger(count) && count >= 0 && count <= maxCount ? count : undefined;
-}
+const { currency, count, calendar } = searchDefaults;
 
 /**
- * The formats route's `validateSearch`: every value is checked, and a missing or invalid one
- * becomes its default. The input type marks the params optional, so `<Link to="/formats">` needs
- * none, while a Link that sets one is type-checked against the allowed values.
+ * The formats route's `validateSearch` schema: every value is checked, and a missing or invalid one
+ * becomes its default. The schema's input marks the params optional, so `<Link to="/formats">`
+ * needs none, while a Link that sets one is type-checked against the allowed values. The count
+ * also accepts the digits as text, as the router parses `?count=0011`.
  */
-export function validateSearch(search: Partial<FormatsSearch> & SearchSchemaInput): FormatsSearch {
-  const raw: Record<string, unknown> = search;
-  return {
-    currency: isCurrency(raw.currency) ? raw.currency : searchDefaults.currency,
-    count: toCount(raw.count) ?? searchDefaults.count,
-    calendar: typeof raw.calendar === 'string' && calendarsFor(getLocale()).includes(raw.calendar) ? raw.calendar : searchDefaults.calendar,
-  };
-}
+export const formatsSearchSchema = z.object({
+  currency: z.catch(z._default(z.enum(currencies), currency), currency),
+  count: z.catch(z._default(z.pipe(
+    z.union([z.number(), z.pipe(z.string().check(z.regex(/^\d+$/)), z.transform(Number))]),
+    z.number().check(z.int(), z.minimum(0), z.maximum(maxCount)),
+  ), count), count),
+  calendar: z.catch(z._default(z.string().check(z.refine(value => calendarsFor(getLocale()).includes(value))), calendar), calendar),
+});
+export type FormatsSearch = z.output<typeof formatsSearchSchema>;
 
 const choice = buttonVariants({ size: 'sm', variant: 'outline' });
 const chosen = buttonVariants({ size: 'sm' });
