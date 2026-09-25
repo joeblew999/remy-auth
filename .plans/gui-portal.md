@@ -20,8 +20,9 @@ follow. Owner: remy-auth. Executor/Reviewer roles as in [plans and roles](../doc
 
 5. **Arabic catalog review**: the translations are agent-written and marked unreviewed.
 6. **Structured data**: a schema.org type for the public pages, or "none applies".
-7. **Security headers**: CSP with a nonce (React Router supports `nonce`), HSTS, COOP and
-   frame control, which Lighthouse reports as informative; a strict CSP can break the app,
+7. **Security headers**: CSP with a nonce (the pinned TanStack Router takes one through its
+   `ssr: { nonce }` router option and puts it on the scripts and head tags it renders; to be
+   proven with a strict CSP), HSTS, COOP and frame control, which Lighthouse reports as informative; a strict CSP can break the app,
    so the rollout needs the owner's call.
 8. **Search Console**: URL Inspection and field performance after a public deployment on
    the production origin, which also needs choosing (done plan, slice step 6).
