@@ -2,8 +2,8 @@
 
 Status: open, 2026-09-25; a plan only, nothing built. Owner's request: "a proper solution for
 caching. TanStack must have one?" Applies to both apps through the shared package and tasks.
-Checked on 2026-09-25 against the installed TanStack skills, TanStack Start 1.168.58, Wrangler
-4.137.0, TanStack's ISR guide and Cloudflare's docs. Anything else is marked **assumed**.
+Checked 2026-09-25 against the TanStack skills, Start 1.168.58, Wrangler 4.137.0, TanStack's ISR
+guide and Cloudflare's docs. Anything else is marked **assumed**.
 
 ## Correction to what we believed
 
@@ -14,17 +14,10 @@ on workers.dev, custom domains and previews. It follows our `Cache-Control`, `s-
 `stale-while-revalidate`, `Vary` and `Cache-Tag` headers (RFC 9111), and `ctx.cache.purge()` clears
 entries. The cache key is the path, the query string and the **Worker version**, so every deploy
 starts with a fresh cache and no purge step is needed. Zone Cache Rules, Page Rules and the
-Cache API (`caches.default`) do not apply to it
-([Workers Cache](https://developers.cloudflare.com/workers/cache/),
-[cache keys](https://developers.cloudflare.com/workers/cache/cache-keys/),
-[limitations](https://developers.cloudflare.com/workers/cache/limitations/)). A custom domain is
-now a choice about branding and alerts, not about caching.
-
-Trade-offs from the same docs:
-- With caching on, **every** request is billed, including static asset requests and calls
-  between entrypoints, which are free today. Cache hits use no CPU time.
-- Responses with `Set-Cookie`, and requests with `Authorization`, skip the cache automatically.
-- The Cache API remains, but it is local to one data centre and never skips running the Worker.
+Cache API do not apply to it ([docs](https://developers.cloudflare.com/workers/cache/)). A custom
+domain is now about branding and alerts, not caching. Trade-offs: with caching on, **every**
+request is billed, including static assets and calls between entrypoints, which are free today
+(hits use no CPU); `Set-Cookie` responses and `Authorization` requests skip the cache.
 
 ## TanStack's model and how it maps
 
@@ -37,8 +30,7 @@ server-functions skills say to set standard headers and let the CDN do the cachi
 - **Server functions and server routes:** GET handlers set `Cache-Control` the same way. The
   server-functions skill says never to mark as `public` anything that reads a session or cookie.
 - **In the browser:** Router's loader cache (`staleTime`, `gcTime`) and TanStack Query already
-  cache, per request and per QueryClient (`src/router.tsx`). The edge cache sits in front of them;
-  neither replaces the other.
+  cache (`src/router.tsx`). The edge cache sits in front; neither replaces the other.
 - **On Cloudflare:** the headers above drive Workers Caching directly. A deploy clears the cache
   because the version is in the key. Put the locale in the path (Paraglide `url` strategy, which
   we already use) rather than `Vary: Accept-Language`. `Vary` is honoured
@@ -70,13 +62,11 @@ Both finalists get a small scratch build in W1 before anything is chosen (how-we
 
 ## What has to change first
 
-1. **Site pages must be the same for every visitor.** Today they are not:
-   - the language hint comes from the cookie and Accept-Language in `src/preferred.ts` (the root
-     loader runs on the server);
-   - the /formats place card reads `request.cf` in `src/place.server.ts`.
-   Move both to the browser on site pages only (`createClientOnlyFn`, or Router's
-   `ssr: 'data-only'` / client loader; the browser location already exists since 0.9.3). App pages
-   keep them.
+1. **Site pages must be the same for every visitor.** Today the language hint comes from the
+   cookie and Accept-Language (`src/preferred.ts`, root loader) and the /formats place card from
+   `request.cf` (`src/place.server.ts`). Move both to the
+   browser on site pages only (`createClientOnlyFn` or `ssr: 'data-only'`; the browser location
+   exists since 0.9.3). App pages keep them.
 2. **CSP:** a per-request nonce inside cached HTML would be served again to later visitors, which
    defeats it. Site pages that are cached switch to a hash-based CSP; app pages keep the nonce.
    **Assumed:** TanStack Start has no built-in hash CSP. W1 checks this; if it is missing, record
@@ -85,17 +75,14 @@ Both finalists get a small scratch build in W1 before anything is chosen (how-we
    `X-Request-ID` would be served again and no log line would be written. The upstream pattern
    ([examples](https://developers.cloudflare.com/workers/cache/examples/)) fixes this: an
    uncached gateway entrypoint (`withObservability`, Paraglide redirects) calls a cached Start
-   entrypoint through `ctx.exports`. Each request is then billed twice (**assumed** acceptable at
-   our traffic).
-4. **No `Set-Cookie`** on site page responses, or they skip the cache. **Assumed**: none today;
-   W1 checks.
+   entrypoint through `ctx.exports`, billed twice (**assumed** fine at our traffic).
+4. **No `Set-Cookie`** on site pages, or they skip the cache (**assumed** none today; W1 checks).
 
 ## Log contract: cache outcome
 
 Add `cache` to the line `withObservability` writes, taken from the inner response's
-`Cf-Cache-Status` (`HIT`, `MISS`, `EXPIRED`, `UPDATING`, `BYPASS`, or `none` when absent). The
-schema stays `schemaVersion: 1` because the field is additive. Hits and misses can then be filtered
-in Workers Observability through our own field. Cloudflare's own "Cache Analytics in Workers
+`Cf-Cache-Status` (`HIT`, `MISS`, `EXPIRED`, `UPDATING`, `BYPASS`, or `none`); additive, so
+`schemaVersion` stays 1, and hits and misses filter in Workers Observability. Cloudflare's own "Cache Analytics in Workers
 Observability" is listed as coming soon, and the cache-keys page says hits show there already;
 **assumed** unclear until W1 looks. Owner: [observability plan](observability.md).
 
@@ -103,8 +90,8 @@ Observability" is listed as coming soon, and the cache-keys page says hits show 
 
 - Each kind of page in the table above: the exact `Cache-Control`, no `Vary: Cookie` on site
   pages, and no `Set-Cookie` on site pages.
-- On the preview, request a site page twice: the second answer has `Cf-Cache-Status: HIT`, the
-  same body and a *different* `X-Request-ID`. Request an app page twice: never `HIT`.
+- Preview: a site page twice gives `Cf-Cache-Status: HIT`, the same body and a *different*
+  `X-Request-ID`; an app page is never `HIT`.
 - Site page HTML contains no nonce, no location and no language hint from the server; its CSP
   hashes match its inline scripts. App pages carry the nonce.
 - The log line has `cache` for every request.
