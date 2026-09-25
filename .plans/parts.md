@@ -1,7 +1,7 @@
 # Parts: add or remove a piece of any Remy app in one line
 
 Status: proposed 2026-09-25 under the owner's delegation. Owner: remy-auth. Executor/Reviewer roles
-as in the [auth plan](auth-service.md). Owner, 2026-09-25: parts of the GUI (some for operations,
+as in [plans and roles](../docs/development.md#plans-and-roles). Owner, 2026-09-25: parts of the GUI (some for operations,
 some for testing) will be wanted again and again; adding and removing them from any Remy app must
 be child's play.
 

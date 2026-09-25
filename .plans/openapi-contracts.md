@@ -2,7 +2,7 @@
 
 Status: decided 2026-09-25 under the owner's delegation, from a scored survey with scratch proofs
 (below). It builds on the [TanStack move](tanstack.md), on main since release 0.9.0. Owner:
-remy-auth. Executor/Reviewer roles as in the [auth plan](auth-service.md). Tools were chosen by
+remy-auth. Executor/Reviewer roles as in [plans and roles](../docs/development.md#plans-and-roles). Tools were chosen by
 survey, as [how we work](../docs/how-we-work.md) requires.
 
 ## Goal

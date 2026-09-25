@@ -1,19 +1,8 @@
 # Architecture and development principles
 
-This service owns login, users, sessions, organizations, memberships, application
-registrations and token issuance. Each application owns its business records,
-resource permissions and enforcement beside its API contract. HTTP and MCP entry
-points must enforce the same application permissions.
-
-The first consumer will be a runnable sample app in `examples/sample-app/`, with
-a browser UI, protected HTTP API and MCP access. The auth service and sample run
-locally from this repository so the full flow can be verified before app migration.
-
-[Remy Data](https://github.com/joeblew999/remy-data) is the first external consumer. Its
-[integration plan](https://github.com/joeblew999/remy-data/blob/main/.plans/auth.md)
-tracks adoption there.
-Tests run a second isolated instance of the sample to verify application isolation.
-The sample is planned; its code and startup command do not exist yet.
+This document owns what the code must be. How people and agents work day to day lives in
+[how we work](how-we-work.md). What the auth service owns, and its storage direction, live in
+[the auth service plan](../.plans/auth-service.md).
 
 ## Development principles
 
@@ -43,7 +32,8 @@ The sample is planned; its code and startup command do not exist yet.
   shadcn, translations in `packages/ui/messages/`, and Wrangler/TanStack Router output
   (including `src/routeTree.gen.ts`) by regenerating. Do not hand-edit or override generated output elsewhere.
 - Decisions that plans leave open, or fixes that conflict with a plan, belong to the
-  owner. Ask; do not choose. Deploying, provisioning and filing upstream issues
+  owner. Ask; do not choose, unless the owner has delegated them
+  ([how we work](how-we-work.md#when-the-owner-delegates-decisions)). Deploying, provisioning and filing upstream issues
   also wait for the owner's explicit request.
 - Do not mock Better Auth, D1 or the Workers runtime. Development conveniences (a seed route,
   a sign-in picker for seeded people, a fixed sign-in code) are allowed only behind one
@@ -52,13 +42,10 @@ The sample is planned; its code and startup command do not exist yet.
   in production, require authentication outside local development, and are listed in the
   owning plan. No other test-only routes, flags or bypasses.
 
-Cloudflare storage is the chosen direction, with D1 as the planned identity and
-session database. Verify the required Better Auth plugins against the pinned D1
-adapter before implementation acceptance. SCIM is deferred until directory
-provisioning is needed; PostgreSQL/Hyperdrive is not part of the current plan.
-No community ReBAC plugin has been selected.
+## Plans and roles
 
-For developers and agents: read [the implementation plan](../.plans/auth-service.md) before implementation. Use the roles
-Executor and Reviewer; keep plans in `.plans/` and move them to `.plans/done/`
-only after implementation, required checks and reviewer acceptance. This repository
-creation authorizes the planning scaffold, not production provisioning or rollout.
+Plans live in `.plans/`; [.plans/now.md](../.plans/now.md) is the one list of what is open and
+where it stands. Read the plan covering your task before changing anything. Every plan works with two roles: the Reviewer
+defines acceptance, and the Executor implements and verifies a bounded milestone, then reports the
+exact checks run, the files changed and the limitations. A plan moves to `.plans/done/` only after
+implementation, its required checks and the Reviewer's acceptance.

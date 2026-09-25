@@ -1,8 +1,8 @@
 # Localisation that proves the hard parts
 
 Status: proposed 2026-09-25 under the owner's delegation; it builds on the
-[TanStack move](tanstack.md), on main since release 0.9.0. Owner: remy-auth. Executor/Reviewer roles as in the
-[auth plan](auth-service.md).
+[TanStack move](tanstack.md), on main since release 0.9.0. Owner: remy-auth. Executor/Reviewer roles as in
+[plans and roles](../docs/development.md#plans-and-roles).
 
 ## Why
 

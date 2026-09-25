@@ -2,8 +2,8 @@
 
 Status: proposed, 2026-09-24; refreshed 2026-09-25 for TanStack Start. Minimal GUI proof implemented; auth service implementation has not started. Builds on the [TanStack move](tanstack.md), on main since release 0.9.0.
 Owner: remy-auth. First consumer: in-repo sample; first external consumer: remy-data.
-Reviewer defines acceptance;
-Executor implements and verifies a bounded milestone. Do not begin a fleet rollout.
+Executor/Reviewer roles as in [plans and roles](../docs/development.md#plans-and-roles). Do not
+begin a fleet rollout.
 
 ## Problem and outcome
 
@@ -196,7 +196,8 @@ versioned consumer contract, `examples/sample-app/`, local startup and integrati
 tests. Exact service file layout
 is chosen during scaffolding; keep configuration beside the behaviour it controls.
 This milestone must run and pass entirely inside remy-auth without a Remy Data
-checkout. Remy Data integration follows afterward under its own plan and instructions.
+checkout. Remy Data integration follows afterward under
+[its own plan](https://github.com/joeblew999/remy-data/blob/main/.plans/auth.md) and instructions.
 
 1. Implement the chosen minimal identity/organization feature set and issuer.
 2. Expose the standard discovery and key endpoints; support the selected HTTP/MCP
