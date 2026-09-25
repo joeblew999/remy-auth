@@ -1,9 +1,10 @@
-# Move both apps and the shared package to TanStack Start and Router
+# All in on TanStack: Start, Router and Query across both apps and the shared package
 
 Status: agreed by the owner 2026-09-25; not started. Owner: remy-auth. Executor/Reviewer roles as in
 the [auth plan](auth-service.md). Replaces React Router in remy-auth, remy-auth-app and
-`@joeblew999/remy-ui`. Done in a branch in each repository; main keeps working until every
-gate passes.
+`@joeblew999/remy-ui`, and goes all in (owner, 2026-09-25: "I want to see what it can really
+do"): every TanStack strength is used somewhere visible and proven by a check. Done in a branch
+in each repository; main keeps working until every gate passes.
 
 ## Why
 
@@ -28,6 +29,30 @@ Not yet verified, first thing in work item 1: reading `request.cf` (geolocation)
 server function; the shape of `head()` metadata for canonical and hreflang links; TanStack's
 prefetch-on-intent default; how prerendering writes the locale-prefixed paths and the 404 page.
 
+## What TanStack will show off, and where
+
+Each row is built with the installed TanStack skill named in the last column and gets a shared
+check, so it keeps working in both apps.
+
+| Capability | Where it shows | Proven by | Skill |
+| --- | --- | --- | --- |
+| Typed, validated search params | Formats page controls in the URL: `?currency=JPY&count=11&calendar=islamic`, schema-validated with defaults, invalid values corrected, every `Link` typed | Check: bad params fall back; the page shows the chosen values; shareable URLs round-trip | `search-params`, `type-safety` |
+| Intent preloading and loader caching | Every in-app link preloads on hover; going back reuses cached loader data (`staleTime`) | Check: hovering a link fetches its route before the click; back navigation makes no new request | `navigation`, `data-loading` |
+| Server functions | Demo reservation submits through a validated `createServerFn`; the server re-validates and answers in the visitor's language | Check: server-side validation errors show without client validation; success message comes from the server | `server-functions` |
+| Per-route rendering | Home and formats server-rendered; demo `ssr: false`; a live status panel `ssr: 'data-only'`; remy-auth-app fully prerendered | Existing no-JavaScript checks plus one per mode | `deployment`, `ssr` |
+| Streaming and deferred data | Formats page streams its slow section (Cloudflare location, other calendars) behind `Await` with a pending skeleton | Check: first bytes arrive before the deferred part; the skeleton is replaced | `data-loading`, `ssr` |
+| TanStack Query with the router | A live status card polling `/healthz` (release, service) with SSR dehydration, per-request QueryClient | Check: server HTML already holds the status; it refreshes in the browser | `router-query` |
+| Server routes | `/healthz`, `/robots.txt`, `/sitemap.xml` as server routes instead of loaders returning Responses | Existing sitemap, robots and liveness checks | `server-routes` |
+| Middleware | Global request middleware for Paraglide and the observability wrapper; server-function middleware adding the request ID to every server call's log line | Existing request-ID check extended to server-function calls | `middleware` |
+| Not-found and errors | Typed `notFound()` with localized not-found and error components per route | Existing 404 checks plus a thrown error rendering the localized error page | `not-found-and-errors` |
+| Navigation blocking | Demo form warns before leaving with unsaved input | Check: typing then clicking away asks first | `navigation` |
+| Code splitting | `autoCodeSplitting`: each route's component loads on demand | Check: the demo route's chunk is not in the home page's first load | `code-splitting`, `router-plugin` |
+| Execution boundaries | Geolocation and locale info through `createServerOnlyFn`; device time through `ClientOnly` | Type-check and build fail if server code leaks into the client bundle | `execution-model` |
+| Devtools | Router and Query devtools in development only | Not in production bundles (build check) | `start-core` |
+
+The auth slice will then use `auth-and-guards` and `auth-server-primitives` (sessions, CSRF,
+OAuth with PKCE) on the same foundation.
+
 ## Work items, in order
 
 1. **Spike and skills (about 1 hour).** Pin the versions above. Done 2026-09-25: 22 of the 23
@@ -49,13 +74,16 @@ prefetch-on-intent default; how prerendering writes the locale-prefixed paths an
 4. **remy-auth-app.** Prerendered with `prerender` and the `localizeHref` path list; its thin
    observability Worker in front of the assets stays; entry pages as now. The shared checks must
    pass unchanged.
-5. **Shared tasks.** `project.toml` swaps `react-router typegen`, `dev` and `build` for the
+5. **Showcase.** Build the rows of the table above, in that order, each with its shared check,
+   in both apps where the rendering mode allows (streaming and the data-only panel are
+   server-side, so remy-auth only; remy-auth-app shows the prerendered and client-side ones).
+6. **Shared tasks.** `project.toml` swaps `react-router typegen`, `dev` and `build` for the
    TanStack/Vite equivalents; consumers pick it up by bumping the include.
-6. **Ship.** Both level-1 gates, local release, both deploys, live checks in the background,
+7. **Ship.** Both level-1 gates, local release, both deploys, live checks in the background,
    CI level 2; update the done GUI plan, `docs/gui.md`, `docs/tooling.md`, the package README
    and memory; merge both branches.
 
-Estimate: about a day, dominated by items 2 and 3.
+Estimate: about a day for items 1 to 4, and another day for the showcase.
 
 ## Acceptance
 
@@ -66,8 +94,9 @@ Estimate: about a day, dominated by items 2 and 3.
 - The TanStack skills are installed through the shared tasks and listed in the lockfile.
 - In-app links prefetch on intent; language switches remain full navigations.
 
-## Open decisions
+## Decisions
 
-1. **React Query now or later.** Recommended later: neither app fetches data yet; the auth
-   slice is the first real user.
-2. **Server functions for the demo form.** Recommended no: the form is client-only validation.
+1. **TanStack Query: now.** It is part of the showcase (the live status card), and the auth
+   slice needs it next.
+2. **Server functions for the demo form: yes.** They show typed server calls with server-side
+   validation; the form keeps its client-side validation as well.
