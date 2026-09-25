@@ -5,9 +5,29 @@ https://github.com/joeblew999/remy-auth
 Shared authentication for Remy apps, using **Better Auth on Cloudflare Workers**
 with **D1** as the planned identity and session store.
 
-**Status:** a minimal GUI proof runs locally on Cloudflare: English, Spanish and Arabic
-public pages, a client-rendered demo and a shared shadcn/Paraglide package. Authentication,
-D1 storage and deployment are still planned.
+**Status:** the GUI foundation is live on Cloudflare in two apps built on TanStack Start, in
+English, Spanish and Arabic, from the shared `@joeblew999/remy-ui` package. Authentication and D1
+storage are still planned; open work is listed in [.plans/now.md](.plans/now.md).
+
+## Where to look
+
+Two live sites. Everything else (previews, tags) is for development.
+
+| Site | Rendering | Open |
+| --- | --- | --- |
+| remy-auth | server-rendered on every request | https://remy-auth.gedw99.workers.dev/en |
+| remy-auth-app | prerendered static pages | https://remy-auth-app.gedw99.workers.dev/en |
+
+What to try, on either site (swap `/en` for `/es` or `/ar`):
+
+| Try | Link |
+| --- | --- |
+| Where you are: Cloudflare's location (remy-auth only) and your device's location (press the button) | https://remy-auth.gedw99.workers.dev/en/formats |
+| Settings in the address: change currency, count or calendar, then share the link | https://remy-auth.gedw99.workers.dev/en/formats?currency=JPY&count=11&calendar=islamic |
+| Arabic, right to left | https://remy-auth.gedw99.workers.dev/ar/formats?currency=KWD&count=11&calendar=islamic |
+| Demo form: the server answers in your language; type a name, then leave, and it warns you | https://remy-auth.gedw99.workers.dev/es/demo |
+| Live status card, refreshing by itself | https://remy-auth.gedw99.workers.dev/en |
+| A page that does not exist, localized | https://remy-auth.gedw99.workers.dev/ar/time-zones/Mars/Olympus |
 
 ## Get started
 

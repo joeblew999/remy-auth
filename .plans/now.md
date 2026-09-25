@@ -13,7 +13,8 @@ evidence. Each item's detail lives in the plan it links to.
       ([tasks README](../tasks/README.md)).
 - [x] Test tiers: `project:test:quick` for the edit loop; level 1 faster (19 s to 13.5 s).
 - [x] remy-auth-app: formats settings in the address on a prerendered page (0.9.2; live, 33 checks).
-- [ ] Location from the browser as well as Cloudflare's, in both apps, as a part.
+- [x] Location from the browser as well as Cloudflare's, in both apps (0.9.3; live; becomes a
+      part with the parts work).
 - [ ] Parts: spike, then convert the existing parts ([plan](parts.md)).
 - [ ] Formats page regrouped, then ten more languages and the hard localisation features
       ([plan](hard-localisation.md)).
