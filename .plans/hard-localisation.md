@@ -1,8 +1,8 @@
 # Localisation that proves the hard parts
 
-Status: proposed 2026-09-25 under the owner's delegation; can start: the
-[TanStack plan](done/tanstack.md) landed on main 2026-09-25. Owner: remy-auth. Executor/Reviewer roles as in the
-[auth plan](auth-service.md).
+Status: proposed 2026-09-25 under the owner's delegation; it builds on the
+[TanStack move](done/tanstack.md), on main since release 0.9.0. Owner: remy-auth. Executor/Reviewer roles as in
+[plans and roles](../docs/development.md#plans-and-roles).
 
 ## Why
 
@@ -57,9 +57,9 @@ Each item is shown on the formats or demo page and proven by a shared check.
 9. **Server and browser agree.** The existing no-JavaScript formats check already compares server
    output with the browser's `Intl`, which catches ICU differences between workerd and Chrome for
    the new calendars.
-10. **Fonts.** System fonts cover these scripts on current phones and desktops. CI's Linux Chrome
-    may not, so the level-2 workflow installs Noto fonts. The hands-on pass takes one screenshot
-    per language to catch missing glyphs.
+10. **Fonts.** Each new script gets its Noto font the way Arabic has one, loaded only on pages in
+    that language; [fonts.css](../packages/ui/src/fonts.css) says how. The hands-on pass takes one
+    screenshot per language to catch missing glyphs.
 
 Name order (family name first in Japanese and Chinese) needs separate name fields in the shared
 demo form. It is listed, but waits until a real app needs it.

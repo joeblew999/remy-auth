@@ -11,10 +11,8 @@ storage are still planned; open work is listed in [.plans/now.md](.plans/now.md)
 
 ## Where to look
 
-Two live sites, each with two kinds of page ([paths](packages/ui/src/paths.js)): **site pages**
-for Google (complete without JavaScript, indexed, labelled "Site page") and **app pages** under
-`/app` (need JavaScript, hidden from search, shadcn's sidebar app shell, labelled "App"). Swap `/en`
-for `/es` or `/ar` anywhere.
+Two live sites, each with site pages for Google and app pages under `/app`;
+[paths.js](packages/ui/src/paths.js) defines both kinds. Swap `/en` for `/es` or `/ar` anywhere.
 
 | Site | Rendering | Open |
 | --- | --- | --- |
@@ -46,33 +44,14 @@ mise run project:dev
 Open [localhost:5173/en](http://127.0.0.1:5173/en); switch to Spanish or try the demo.
 Setup installs dependencies and skills, registers MCP, then runs build and browser checks.
 
-Remote : https://remy-auth.gedw99.workers.dev/ 
-
 Setup installs the pinned **Codex CLI**; authenticate when prompted. **Claude Code**
 is optional and installed separately.
 Install **Google Chrome** before setup; browser checks use the installed Chrome.
 
 ## Work with an agent
 
-**VS Code:** use the installed Codex extension. After changing skills or MCP,
-run `mise run mcp:register`, then open the Command Palette (`Cmd+Shift+P` on Mac)
-and select **Developer: Reload Window**. Reopen Codex and continue your conversation.
-The extension uses Codex configuration; it does not need the terminal CLI to run.
-
-**Terminal:** use these tasks for standalone agent sessions:
-
-| | Codex | Claude Code |
-| --- | --- | --- |
-| Start a conversation | `mise run codex:start` | `mise run claude:start` |
-| Resume the latest conversation | `mise run codex:resume` | `mise run claude:resume` |
-
-To reload a terminal agent, type `/exit` in the agent, then run its
-resume command. Each launch refreshes MCP registration. Use `/mcp` inside the
-agent to check the connection; accept any project trust or server approval prompt.
-
-Skills supply guidance; MCP supplies callable tools. Setup includes Better Auth,
-Cloudflare, Chrome DevTools, Modern Web Guidance, shadcn, Playwright, GitHub release
-and TanStack Router/Start skills, plus the Chrome DevTools MCP server.
+Starting, resuming and reloading Codex or Claude Code, in VS Code or a terminal, is in
+[developer tooling](docs/tooling.md#start-or-reload-your-agent).
 
 ## Everyday commands
 
@@ -100,18 +79,11 @@ skill-source commits and the shared agent bootstrap tasks live in
 
 ## Project documentation
 
-- [GUI proof](docs/gui.md) — routes, shared package and what the checks prove.
-- [Tooling reference](docs/tooling.md) — skills, MCP, browser sessions, upgrades and troubleshooting.
-- [GUI plan](.plans/done/gui.md) — done: reusable React packages, internationalisation and SEO.
-- [TanStack plan](.plans/done/tanstack.md) — done: both apps and the package moved from React Router to TanStack Start, Router and Query.
-- [OpenAPI contracts plan](.plans/openapi-contracts.md) — proposed: contract-first APIs with oRPC, producing and consuming OpenAPI with runtime validation.
-- [Portal plan](.plans/gui-portal.md) — open: hosted login screens, and the GUI decisions still yours.
-- [Shared UI plan](.plans/done/shared-ui.md) — done: the language code in the package, SSR proven from the tarball, and the `remy-auth-app` consumer.
-- [Implementation plan](.plans/auth-service.md) — auth service and the first local sample app.
-- [Better Auth ecosystem](.plans/better-auth-ecosystem.md) — plugins, CLI and GUI options.
-- [Observability plan](.plans/observability.md) — Cloudflare logs, traces, metrics and audit records.
-- [Agent skills plan](.plans/done/agent-skills.md) — finding and vetting skills for uncovered dependencies.
-- [Development principles](docs/development.md) — ownership, storage and contribution rules.
-
-The next slice adds Better Auth and local D1. The GUI proof emits request logs;
-production observability and the independent authenticated sample remain planned.
+- [Agent index](AGENTS.md): where agents start.
+- [Development principles](docs/development.md): what the code must be, and how plans work.
+- [How we work](docs/how-we-work.md): how people and agents work.
+- [Developer tooling](docs/tooling.md): mise tasks, skills, MCP and browser tools.
+- [GUI runtime workflow](docs/gui.md): one Worker, local and remote test targets.
+- [Shared tasks](tasks/README.md): the mise tasks other projects include.
+- [Shared UI package](packages/ui/README.md) and its [changelog](CHANGELOG.md).
+- [Plans](.plans/): [.plans/now.md](.plans/now.md) is the only list of what is open and where it stands.
