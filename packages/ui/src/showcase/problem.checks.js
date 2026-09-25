@@ -88,7 +88,7 @@ export function problemChecks({ timeZones, failingNavigation, serverRoutes = [] 
         await page.waitForLoadState('networkidle');
         const secret = 'Error: loader exploded\n    at secretFunction (/src/secret.ts:12:34)';
         await page.route(fail, route => route.fulfill({ status: 500, contentType: 'text/plain', body: secret }));
-        await page.getByRole('link', { name: m[link]({}, o), exact: true }).click();
+        await page.locator('#main').getByRole('link', { name: m[link]({}, o), exact: true }).click();
         const problem = page.locator('[data-problem="error"]');
         await expect(problem.getByRole('heading', { level: 1 })).toHaveText(m.error_title({}, o));
         await expect(problem.locator('p')).toHaveText(m.error_detail({}, o));

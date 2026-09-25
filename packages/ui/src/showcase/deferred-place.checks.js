@@ -30,7 +30,7 @@ export function deferredPlaceChecks({ path = '/formats', from = '' } = {}) {
     let release;
     const held = new Promise(resolve => { release = resolve; });
     await page.route('**/_serverFn/**', async route => { await held; await route.continue(); });
-    await page.getByRole('link', { name: m.formats_link({}, { locale: 'en' }), exact: true }).click();
+    await page.locator('#main').getByRole('link', { name: m.formats_link({}, { locale: 'en' }), exact: true }).click();
     // The navigation did not wait for the deferred data: the page and the skeleton are there, the rows are not.
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(m.formats_title({}, { locale: 'en' }));
     await expect(page.locator('.place-skeleton')).toBeVisible();

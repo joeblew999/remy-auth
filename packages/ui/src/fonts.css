@@ -1,7 +1,7 @@
 /* Fonts for every language, following shadcn's RTL guide (https://ui.shadcn.com/docs/rtl/start):
    @fontsource-variable packages beside shadcn's Geist. styles/globals.css stays exactly what the
-   shadcn CLI writes; this file comes after it. One stack for every page: the browser takes each
-   character from the first family that has it, and each package's unicode-range means a page only
+   shadcn CLI writes; this file comes after it. Geist for every page; each other script's
+   font only on pages in that language (below), and each package's unicode-range means a page only
    downloads the files for characters it shows. Add a language's Noto package here when its script
    is new. Every named family must be loaded: an unloaded name (Inter, ui-monospace,
    SFMono-Regular, ...) stalls a fresh Chrome renderer's first layout on macOS for seconds, and
@@ -12,10 +12,12 @@
 @import "@fontsource-variable/noto-sans-arabic";
 
 @theme inline {
-  --font-sans: 'Geist Variable', 'Geist Variable fallback', 'Noto Sans Arabic Variable', sans-serif;
+  --font-sans: 'Geist Variable', 'Geist Variable fallback', sans-serif;
   --font-mono: 'Geist Mono Variable', 'Geist Mono Variable fallback', monospace;
 }
 
-/* Google web guidance (visually stable font fallbacks and mixed fonts): scale the fallback and
-   the other scripts to the web font's x-height, so the swap to Geist keeps the layout. Baseline 2024. */
-html { font-size-adjust: from-font; }
+
+/* Each script's font only on pages in that language, as shadcn's RTL guide sets it per app language:
+   a page downloads no script font for a few words in another language (the language switcher's
+   endonyms), which the system's fonts draw. */
+html:lang(ar) { font-family: 'Geist Variable', 'Geist Variable fallback', 'Noto Sans Arabic Variable', sans-serif; }

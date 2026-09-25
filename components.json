@@ -14,7 +14,7 @@
   "rtl": true,
   "aliases": {
     "components": "@/components",
-    "hooks": "@/hooks",
+    "hooks": "@joeblew999/remy-ui/hooks",
     "lib": "@/lib",
     "utils": "cn",
     "ui": "@joeblew999/remy-ui/components"

@@ -268,5 +268,10 @@
   "latitude_label": "خط العرض",
   "longitude_label": "خط الطول",
   "accuracy_label": "الدقة",
-  "network_distance_label": "المسافة من موقع الشبكة"
+  "network_distance_label": "المسافة من موقع الشبكة",
+  "nav_heading": "الصفحات",
+  "nav_home": "نظرة عامة",
+  "nav_demo": "تجربة",
+  "nav_formats": "التنسيقات",
+  "toggle_sidebar": "إظهار الشريط الجانبي أو إخفاؤه"
 }

@@ -6,14 +6,16 @@ import { m } from './paraglide/messages.js';
 import { localeName } from './locale';
 import { weekdayName, type LocaleInfo } from './locale-info';
 import { DeviceTime } from './client';
-import { LanguageHint, LanguageSwitcher } from './language';
+import { LanguageHint } from './language';
 import { samples } from './samples.js';
 import { Badge } from './components/badge';
 import { Button, buttonVariants } from './components/button';
 import { Card, CardContent, CardHeader, CardTitle } from './components/card';
 import { Field, FieldError, FieldGroup, FieldLabel } from './components/field';
 import { Input } from './components/input';
-import { Separator } from './components/separator';
+import { SidebarInset, SidebarProvider } from './components/sidebar';
+import { AppSidebar } from './blocks/sidebar-16/app-sidebar';
+import { SiteHeader } from './blocks/sidebar-16/site-header';
 
 // The pages every Remy app built on this package shows, and that the shared checks test.
 // Apps keep their route modules (loaders, head, runtime wiring) and render these.
@@ -23,23 +25,26 @@ import { Separator } from './components/separator';
 
 export { publicPaths } from './paths.js';
 
-/** Page frame: skip link, language hint, header with brand and switcher, footer. `preferred` is the language to offer, however the app learns it. */
+/**
+ * Page frame: shadcn's sidebar-16 block (blocks/sidebar-16): a sticky site header with the sidebar
+ * toggle, brand and language switcher; the sidebar with the pages; then the page. `preferred` is the
+ * language to offer, however the app learns it.
+ */
 export function Shell({ locale, path = '', preferred, children }: { locale: Locale; path?: string; preferred?: Locale; children: React.ReactNode }) {
-  return <div className="site mx-auto flex min-h-svh w-full max-w-3xl flex-col px-5 sm:px-8">
-    <a className="skip-link sr-only focus:not-sr-only focus:fixed focus:start-2 focus:top-2 focus:z-10 focus:bg-background focus:p-3" href="#main">{m.skip_link({}, { locale })}</a>
-    <LanguageHint locale={locale} path={path} preferred={preferred} />
-    <header className="site-header flex items-center justify-between gap-5 py-6">
-      <Link className="brand inline-flex items-center text-2xl font-bold tracking-tight text-foreground" to="/" preload="intent">
-        <span aria-hidden="true" className="me-2 grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground">r</span>remy<span aria-hidden="true" className="text-primary">.</span>
-      </Link>
-      <LanguageSwitcher locale={locale} path={path} />
-    </header>
-    <Separator />
-    <main id="main" className="flex-1 py-12">{children}</main>
-    <Separator />
-    <footer className="flex flex-wrap justify-between gap-4 py-6 text-xs text-muted-foreground">
-      <span>© {new Date().getUTCFullYear()} Remy</span><span>{m.footer({}, { locale })}</span>
-    </footer>
+  return <div className="[--header-height:calc(--spacing(14))]">
+    <a className="skip-link sr-only focus:not-sr-only focus:fixed focus:start-2 focus:top-2 focus:z-60 focus:bg-background focus:p-3" href="#main">{m.skip_link({}, { locale })}</a>
+    <SidebarProvider className="flex flex-col">
+      <SiteHeader locale={locale} path={path} />
+      <div className="flex flex-1">
+        <AppSidebar locale={locale} />
+        <SidebarInset>
+          <div className="flex flex-1 flex-col gap-4 p-4 md:p-8">
+            <LanguageHint locale={locale} path={path} preferred={preferred} />
+            <main id="main" className="mx-auto w-full max-w-3xl flex-1">{children}</main>
+          </div>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   </div>;
 }
 

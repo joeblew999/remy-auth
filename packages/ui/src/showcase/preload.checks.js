@@ -28,7 +28,7 @@ export function preloadChecks({ serverFn = true, locale = 'en' } = {}) {
     const log = record(page);
     await page.goto(localizedPath('', locale));
     await page.waitForLoadState('networkidle');
-    const link = page.getByRole('link', { name: m.formats_link({}, o), exact: true });
+    const link = page.locator('#main').getByRole('link', { name: m.formats_link({}, o), exact: true });
 
     const beforeHover = log.mark;
     await link.hover();
@@ -50,9 +50,9 @@ export function preloadChecks({ serverFn = true, locale = 'en' } = {}) {
     const log = record(page);
     await page.goto(localizedPath('/formats', locale));
     await page.waitForLoadState('networkidle');
-    await page.getByRole('link', { name: m.home_link({}, o), exact: true }).click();
+    await page.locator('#main').getByRole('link', { name: m.home_link({}, o), exact: true }).click();
     await expect(page).toHaveURL(`${baseURL}${localizedPath('', locale)}`);
-    await page.getByRole('link', { name: m.formats_link({}, o), exact: true }).click();
+    await page.locator('#main').getByRole('link', { name: m.formats_link({}, o), exact: true }).click();
     await expect(page).toHaveURL(`${baseURL}${localizedPath('/formats', locale)}`);
     await page.mouse.move(0, 0);
     await page.waitForLoadState('networkidle');

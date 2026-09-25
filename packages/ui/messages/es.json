@@ -262,5 +262,10 @@
   "latitude_label": "Latitud",
   "longitude_label": "Longitud",
   "accuracy_label": "Precisión",
-  "network_distance_label": "Distancia a la ubicación de la red"
+  "network_distance_label": "Distancia a la ubicación de la red",
+  "nav_heading": "Páginas",
+  "nav_home": "Inicio",
+  "nav_demo": "Demo",
+  "nav_formats": "Formatos",
+  "toggle_sidebar": "Mostrar u ocultar la barra lateral"
 }

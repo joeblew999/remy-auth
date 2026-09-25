@@ -28,7 +28,7 @@ export function navigationBlockingChecks() {
       const answers = [false, true];
       const seen = dialogs(page, answers);
       const name = page.getByLabel(m.name_label({}, o), { exact: true });
-      const overview = page.getByRole('link', { name: m.home_link({}, o), exact: true });
+      const overview = page.locator('#main').getByRole('link', { name: m.home_link({}, o), exact: true });
 
       // Untouched: leaving does not ask. Act once React has hydrated the form, as a visitor's click
       // before hydration is a plain page load that no script can guard.

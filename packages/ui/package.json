@@ -33,6 +33,7 @@
     "./checks": "./src/checks.js",
     "./playwright": "./src/playwright.js",
     "./components/*": "./src/components/*.tsx",
+    "./hooks/*": "./src/hooks/*.ts",
     "./pages": "./src/pages.tsx",
     "./paths": "./src/paths.js",
     "./worker": "./src/worker.ts",
