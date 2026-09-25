@@ -6,6 +6,20 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.10.4] - 2026-09-25
+
+### Added
+- Site header on shadcn's NavigationMenu (plain links, complete without JavaScript), a footer list of
+  every language as real links, and a header language dropdown over the same links whose trigger
+  falls back to that list without JavaScript.
+- `theme`: shadcn's TanStack Start ThemeProvider and ModeToggle (light, dark, system), on site and
+  app pages. Without JavaScript site pages show the default theme.
+- Breadcrumb on the time zone pages (shadcn Breadcrumb, server-rendered links).
+
+### Changed
+- One zone badge style (secondary) on site and app pages; the app pages no longer repeat it as a
+  label; site pages have no back links (they navigate through the header).
+
 ## [0.10.3] - 2026-09-25
 
 ### Added
@@ -259,7 +273,8 @@ remy-auth-app).
 - `@joeblew999/remy-ui/locale-info`: a locale's calendars, numbering system, hour cycle
   and week conventions, plus `weekdayName`.
 
-[Unreleased]: https://github.com/joeblew999/remy-auth/compare/v0.10.3...HEAD
+[Unreleased]: https://github.com/joeblew999/remy-auth/compare/v0.10.4...HEAD
+[0.10.4]: https://github.com/joeblew999/remy-auth/compare/v0.10.3...v0.10.4
 [0.10.3]: https://github.com/joeblew999/remy-auth/compare/v0.10.2...v0.10.3
 [0.10.2]: https://github.com/joeblew999/remy-auth/compare/v0.10.1...v0.10.2
 [0.10.1]: https://github.com/joeblew999/remy-auth/compare/v0.10.0...v0.10.1
