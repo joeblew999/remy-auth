@@ -1,3 +1,6 @@
+# The tasks rely on mise 2026.9.12: task run lists, env templating and include overrides.
+min_version = "2026.9.12"
+
 [tools]
 node = "26.10.0"
 
