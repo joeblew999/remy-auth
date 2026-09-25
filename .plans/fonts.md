@@ -1,6 +1,7 @@
 # Fonts per writing system (quick plan)
 
-Status: open, 2026-09-25; a plan only, nothing built. Owner's question: "as we add more languages
+Status: open, 2026-09-25. Built 2026-09-25: the stack fix (step 2) and `fontChecks` (step 3);
+steps 1, 4 and 5 remain (see "Done so far" below). Owner's question: "as we add more languages
 then fonts need to be downloaded? ... it's tempting to align the adding of a language with a font
 download but I doubt it's that simple ... Tempting to also show the fonts aspect in the formats gui
 control". Builds on [hard localisation](hard-localisation.md) item 10 and the fonts rule in
@@ -143,3 +144,26 @@ font has glyphs" instead of `isCustomFont`. Prove B and A with scratch builds of
    script named, passes on all 13.
 4. **Fonts rows on the formats page.** Gate: formats check asserts the server rows; no-JS check.
 5. **Owner decisions:** Persian face; CJK byte budget; A vs B if step 1 shows CJK too heavy.
+
+## Done so far
+
+Review fixes, 2026-09-25: the check counts only web fonts (`isCustomFont`), fails when none of its
+selectors is on the page, and Han no longer lists Korean. The script fonts' fontaine fallback faces were
+dropped (their sizes came from fontaine's Latin defaults, unmeasured for these scripts); each stack is
+Geist, the script's Noto, Geist's fallback. Not yet run in the nine other languages, nor cwv per script:
+the next full run (tier 4) covers the first.
+ (2026-09-25)
+
+- **Stacks fixed** (`fonts.css`): `'Geist Variable', '<script font> Variable', '<script font>
+  Variable fallback', 'Geist Variable fallback', sans-serif`. Chosen over limiting Geist's fallback
+  to Geist's ranges because fontaine 1.0 copies only weight, style and stretch onto fallback faces
+  (read in `fontaine/dist`), so it cannot give them a `unicode-range`. Script fonts still load only
+  on their language's pages; no preloads.
+- **Known cost, open:** every fontsource Noto package also carries Latin slices. While Geist is
+  still loading, Chrome may reach the script font's Latin slice for Latin characters (Geist wins once
+  loaded). **Assumed** a few KB per non-Latin page; measure in step 1.
+- **`fontChecks`** (`checks.js`, called from `tests/gui.spec.ts` on the site pages): per language,
+  `CSS.getPlatformFontsForNode` on the heading and intro; every drawing font must be one the
+  language's stack names (not a fallback face, not a system font), each named script font must draw
+  something, and Japanese and Traditional Chinese must name different fonts. The failure names the
+  script (`maximize().script`). The byte budget and the Greek scratch-locale proof are not built.

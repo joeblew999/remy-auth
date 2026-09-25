@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { locales } from '@joeblew999/remy-ui/runtime';
 import { samples } from '@joeblew999/remy-ui/samples';
-import { checkedLocales, zoneChecks, publicPageChecks, entryChecks, demoChecks, formatsChecks, textChecks, observabilityChecks, cspChecks, collectErrors, endonym, direction, localizedPath, formatTag } from '@joeblew999/remy-ui/checks';
+import { checkedLocales, zoneChecks, publicPageChecks, entryChecks, demoChecks, formatsChecks, textChecks, fontChecks, observabilityChecks, cspChecks, collectErrors, endonym, direction, localizedPath, formatTag } from '@joeblew999/remy-ui/checks';
 import { localeInfo } from '../packages/ui/src/locale-info';
 import { sitePaths, appPaths, allPaths } from '@joeblew999/remy-ui/paths';
 import { appPagePaths, docsPaths, everyPath, siteAndDocsPaths } from '../src/paths';
@@ -30,6 +30,8 @@ const translations = Object.fromEntries(docsTable.map(row => [docsPath(row.slug)
 publicPageChecks({ paths: sitePaths, oneLanguage: { locale: 'en', paths: docsPaths, translations } });
 // Text in every language: the shared pages (the docs are English only).
 textChecks({ paths: allPaths });
+// The font drawing each language is the one fonts.css names for its script: the site pages, in every language.
+fontChecks({ paths: sitePaths });
 entryChecks({ paths: everyPath, mode: 'redirect' });
 demoChecks();
 // The demo reservation and the status card are contract endpoints (@joeblew999/remy-auth-contract).

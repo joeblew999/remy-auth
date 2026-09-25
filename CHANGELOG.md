@@ -32,6 +32,17 @@ package follows [Semantic Versioning](https://semver.org/).
   comes from `country-to-currency` (new dependency; the runtime has no currency-for-region API).
 - A numbering-system control on the formats page (`?numbering=`), in the Numbers section.
 - `LocaleInfo` has `region`, `currency` and `counts`; `Group` passes other props (data attributes) to its card.
+- `fontChecks({ paths })` (`checks`): per language, the fonts that actually draw the heading and
+  intro (Chrome DevTools Protocol `CSS.getPlatformFontsForNode`) are the ones `fonts.css` names
+  for it; a system or fallback font drawing the text fails naming the page's script and the font
+  to add, a named script font that draws nothing fails, and Japanese and Traditional Chinese must
+  name different fonts.
+
+### Fixed
+- `fonts.css`: Arabic, Persian and Hebrew pages are drawn with Noto Sans Arabic and Hebrew on
+  macOS and Windows. Each language's script font now comes before fontaine's Geist fallback (local
+  Arial, which carries Arabic and Hebrew and so drew them itself), followed by the script font's
+  own metric-matched fallback face; Geist's fallback stays last. No new preloads.
 
 ### Changed
 - Formats page: every section opens with what it is for the page's language (`data-own-area`):
