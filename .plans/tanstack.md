@@ -1,6 +1,6 @@
 # All in on TanStack: Start, Router and Query across both apps and the shared package
 
-Status: agreed by the owner 2026-09-25; not started. Owner: remy-auth. Executor/Reviewer roles as in
+Status: agreed by the owner 2026-09-25; items 1 to 3 done on branch `tanstack` in remy-auth (level 1 green, package 0.9.0-rc.0 not published); showcase next. Owner: remy-auth. Executor/Reviewer roles as in
 the [auth plan](auth-service.md). Replaces React Router in remy-auth, remy-auth-app and
 `@joeblew999/remy-ui`, and goes all in (owner, 2026-09-25: "I want to see what it can really
 do"): every TanStack strength is used somewhere visible and proven by a check. Done in a branch
