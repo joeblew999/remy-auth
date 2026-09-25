@@ -156,7 +156,9 @@ The skill sources are the `*_skills_source` vars of the `skills:install` task in
 [tasks/skills.toml](../tasks/skills.toml): Better Auth, Cloudflare, Chrome DevTools, Modern Web
 Guidance, shadcn, Playwright CLI, GitHub release and TanStack Router/Start. TanStack's skills are
 named one by one, including its `react-router` skill (the React bindings), which replaced Remix's
-skill of the same name: skills install flat by name, so the two cannot coexist. The directory holds one file per task
+skill of the same name: skills install flat by name, so the two cannot coexist. TanStack Form's
+skills are not installed: they live only on its v2 alpha branches and describe the 2.0 alpha API, not
+the 1.x we pin; add them when we move to Form 2. The directory holds one file per task
 namespace; `mise.toml` includes it, and [tasks/README.md](../tasks/README.md) says how another
 project includes it and which npm packages that project supplies. Install the skills locally:
 

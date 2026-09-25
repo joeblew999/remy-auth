@@ -6,12 +6,21 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `./reservation`: the demo reservation's rules as one Zod 4 schema (`reservationSchema(locale)`,
+  localized messages) for the browser and the server, the server function's input shape
+  (`reservationInput`) and `reservationErrors` for a server's field errors.
+
 ### Changed
 - `showcase/search-params`: the formats search params are validated by a Zod 4 schema,
   `formatsSearchSchema`, which TanStack Router takes directly as `validateSearch` (Standard
   Schema, no adapter). It replaces the hand-written `validateSearch` function and its parsing
   helpers; `FormatsSearch` is the schema's output type. Written with Zod Mini to keep the entry
   chunk small. New dependency: `zod` 4.6.5.
+- `DemoPage`'s form runs on TanStack Form (`@tanstack/react-form` 1.33.5) with shadcn's Field
+  pattern: the shared schema validates on submit, a server's field errors show as the form's own,
+  and `onDirtyChange` follows the form's `isDirty`. Its own validation code and input tracking are
+  gone; `Reservation` and `ReservationResult` now come from `./reservation` (still re-exported).
 
 ## [0.10.2] - 2026-09-25
 
