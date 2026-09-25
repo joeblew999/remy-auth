@@ -41,6 +41,8 @@
   "currency_heading": "Moneda",
   "currency_label": "Importe en euros",
   "currency_note": "Cada app es dueña de su dinero: guarda unidades menores enteras con un código ISO 4217 y dales formato con este catálogo.",
+  "choices_heading": "Prueba otros valores",
+  "choices_note": "Tus elecciones quedan en la dirección, así que un enlace a esta página muestra los mismos valores.",
   "plural_heading": "Plurales",
   "instant_value": [
     {
@@ -143,6 +145,7 @@
   "submit": "Reservar",
   "name_required": "Escribe tu nombre.",
   "guests_invalid": "Escribe un número entero de asientos entre 1 y 20.",
+  "leave_unsaved": "¿Salir de esta página? Tu reserva aún no se ha hecho.",
   "greeting": "Te damos la bienvenida, {name}.",
   "distance_value": [
     {

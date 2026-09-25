@@ -41,6 +41,8 @@
   "currency_heading": "Currency",
   "currency_label": "Amount in euros",
   "currency_note": "Each app owns its money: store integer minor units with an ISO 4217 code and format them with this catalog.",
+  "choices_heading": "Try other values",
+  "choices_note": "Your choices live in the address, so a link to this page shows the same values.",
   "plural_heading": "Plurals",
   "instant_value": [
     {
@@ -142,6 +144,7 @@
   "submit": "Reserve",
   "name_required": "Enter your name.",
   "guests_invalid": "Enter a whole number of seats from 1 to 20.",
+  "leave_unsaved": "Leave this page? Your reservation has not been made yet.",
   "greeting": "Welcome, {name}.",
   "distance_value": [
     {
