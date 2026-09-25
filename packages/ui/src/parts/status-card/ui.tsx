@@ -1,24 +1,28 @@
 import { useQuery, type QueryClient } from '@tanstack/react-query';
 import { useRouter } from '@tanstack/react-router';
-import { getLocale } from '@joeblew999/remy-ui/locale';
-import { m } from '@joeblew999/remy-ui/messages';
-import { Button } from '@joeblew999/remy-ui/components/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@joeblew999/remy-ui/components/card';
-import { invalidateEverything } from '../invalidate';
-import { orpc } from '../api/client';
+import { getLocale } from '../../locale';
+import { m } from '../../paraglide/messages.js';
+import { Button } from '../../components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/card';
+import { invalidateEverything } from '../../invalidate';
+// The app's own status query (its src/parts/status-card.ts): the package does not know the app's API.
+import { statusQuery as appStatusQuery } from 'virtual:remy-parts/status-card/app';
+
+// The status-card part (.plans/parts.md): apps import it as `virtual:remy-parts/status-card/ui`,
+// which is `undefined` when the app does not list the part.
 
 /** How often an open page asks again, and how long an answer counts as fresh (so hydration does not refetch at once). */
 export const statusRefreshMs = 10_000;
 
-/**
- * The live status as a query on the contract's GET /api/status: the router itself on the server
- * during SSR, HTTP with the response checked against the contract in the browser.
- */
-export const statusQuery = orpc.status.queryOptions({ staleTime: statusRefreshMs });
+/** The app's query, fresh for the card's interval; the app must provide it when it lists the part. */
+const statusQuery = () => {
+  if (!appStatusQuery) throw new Error('the status-card part needs the app\'s statusQuery (src/parts/status-card.ts)');
+  return { ...appStatusQuery, staleTime: statusRefreshMs };
+};
 
 /** The loader of a route that shows the card: fills the request's QueryClient, so the server HTML holds the status. */
 export const statusCardLoader = async ({ context }: { context: { queryClient: QueryClient } }) => {
-  await context.queryClient.ensureQueryData(statusQuery);
+  await context.queryClient.ensureQueryData(statusQuery());
 };
 
 /** The Worker's status, release and service; polls while the page is open and visible. */
@@ -26,7 +30,7 @@ export function StatusCard() {
   const locale = getLocale();
   const o = { locale };
   const router = useRouter();
-  const { data, dataUpdatedAt, isFetching } = useQuery({ ...statusQuery, refetchInterval: statusRefreshMs });
+  const { data, dataUpdatedAt, isFetching } = useQuery({ ...statusQuery(), refetchInterval: statusRefreshMs });
   return <aside aria-labelledby="live-status" className="status-card mt-6">
     <Card data-status={data?.status} data-updated={dataUpdatedAt || undefined} aria-busy={isFetching}>
       <CardHeader><CardTitle><h2 id="live-status">{m.live_status_heading({}, o)}</h2></CardTitle></CardHeader>

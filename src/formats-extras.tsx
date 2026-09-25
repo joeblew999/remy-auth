@@ -4,13 +4,14 @@ import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { Group, Row, type FormatsExtras } from '@joeblew999/remy-ui/pages';
 import type { Place } from '@joeblew999/remy-ui/cloudflare';
-import { DeferredPlace } from './showcase/deferred-place';
+// The deferred-place part's group, or undefined when the app does not list it (src/parts.json).
+import { DeferredPlace } from 'virtual:remy-parts/deferred-place/ui';
 
 /**
  * The rows this server-rendered app adds to the shared formats content, on the site page and the
- * app page alike: Cloudflare's view of the visitor (streamed) and further Intl examples.
+ * app page alike: Cloudflare's view of the visitor (streamed; the deferred-place part) and further Intl examples.
  */
-export function formatsExtras({ locale, info, place }: { locale: Locale; info: LocaleInfo; place: Promise<Place> }): FormatsExtras {
+export function formatsExtras({ locale, info, place }: { locale: Locale; info: LocaleInfo; place?: Promise<Place> }): FormatsExtras {
   const o = { locale };
   const format = formatLocale(locale);
   const list = new Intl.ListFormat(locale, { type: 'conjunction' });
@@ -18,7 +19,7 @@ export function formatsExtras({ locale, info, place }: { locale: Locale; info: L
   const regionName = new Intl.DisplayNames([locale], { type: 'region' });
   return {
     language: <Row sample="region" label={m.region_label({}, o)}>{regionName.of(info.region)}</Row>,
-    time: <DeferredPlace locale={locale} place={place} />,
+    time: DeferredPlace && place && <DeferredPlace locale={locale} place={place} />,
     systems: <>
       <Row sample="other-calendars" label={m.other_calendars_label({}, o)}>
         {info.otherCalendars.length === 0 ? m.no_other_calendars({}, o) : <ul className="flex flex-col gap-1">

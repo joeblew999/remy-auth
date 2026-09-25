@@ -107,6 +107,54 @@ Not converted yet, each needing a design choice:
 - **remy-auth-app**: adopts the parts list when it moves to the next package release (not edited here);
   a physical route mount from `node_modules` is untried there.
 
+## Conversion, second pass (2026-09-25)
+
+Same delegation, same gate (`project:check` only). `src/parts.json` now lists `time-zones`,
+`deferred-place`, `seo-routes` and `status-card`; `project:check` passes with the full list, with each
+of them removed alone, and with the list empty. A removed `deferred-place` ships no place UI, a removed
+`status-card` no card.
+
+**Mechanism, added:** a part's `entries` become `virtual:remy-parts/<part>/<entry>` (the part's real
+exports when listed, `undefined` when not, so the app writes `{DeferredPlace && ...}` and `getPlace?.()`
+and nothing is left behind); a part's `app` options come from the app's own `src/parts/<part>.ts` as
+`virtual:remy-parts/<part>/app` (this is the "typed parts.ts" the spike left open, one file per part,
+typed by the package's `virtual.d.ts`); a part's `sitePaths` feed the sitemap and its checks. One module
+per entry keeps TanStack's code splitting: a loader imports only the server function's entry, the
+component the UI's.
+
+Decided:
+
+- **deferred-place: a part that does not `require` time-zones.** It links a zone to `/time-zones/...`
+  only when `hasPart('time-zones')`, by the path from time-zones' own `timeZonePath`, not a typed route.
+  A `requires` would make removing time-zones two lines (and a typed `Link` in always type-checked
+  package code fails whenever the route is absent); now removing time-zones is one line. Without the
+  part, `/app/location` shows the device's own place alone, as remy-auth-app does. Its checks (the
+  streamed place, the Cloudflare rows of the formats page, the failing-navigation error page, which
+  fails its server function) moved from remy-auth's test file into the part.
+- **seo-routes: a part, each part contributing its paths.** Both routes and their cache/405 answers moved
+  into the package; the sitemap lists the package's site pages, every listed part's `sitePaths` (none
+  yet) and the app's own entries (`sitemapEntries` in `src/parts/seo-routes.ts`: remy-auth's docs,
+  moved from its sitemap route unchanged). Site entries now use the package's `alternates()` (the same
+  URLs `localizedPath` gives). The sitemap test moved out of `publicPageChecks` into `sitemapChecks`,
+  which the part's checks run (remy-auth passes `sitemap: false`); the 404 check stays.
+- **status-card: a part.** The app gives its status query (`orpc.status.queryOptions()`) in
+  `src/parts/status-card.ts`; the part owns the card, its timing, its loader and its checks.
+  `invalidateEverything` moved to the package (`./invalidate`). New optional peer `@tanstack/react-query`.
+- **leave-guard: not a part.** It is one hook passed as the demo form's `onDirtyChange`; as a part the
+  app would call a hook that may be `undefined` (against React's rules of hooks) or the package would
+  ship a no-op stand-in, to save well under a kilobyte. Stays `showcase/navigation-blocking`.
+- **search-params: not a part.** The address-bar controls are the formats page's own: its
+  `validateSearch`, its controls slot, and the shared `formatsChecks`, which both apps run. Removing
+  them would change the shared page, not drop a piece.
+- **observability: not a part.** Request IDs, the log line and `/healthz` are required of every app
+  (`observabilityChecks` on every page) and already live in the package's `localizedWorker`; the
+  function middleware needs the app's service name and `env`. Always-on, like the problem pages.
+- **devtools:** unchanged (first pass).
+
+Still open: remy-auth-app adopts parts at the next package release (its sitemap and robots could then
+be the seo-routes part, given an origin option for prerendering; untried); how to write a part in the
+package README (work item 5).
+
 ## Work items
 
 1. **Spike (about 2 hours):** both candidates with two parts, `status-card` (UI, query, server

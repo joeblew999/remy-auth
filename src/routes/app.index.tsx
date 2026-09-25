@@ -4,10 +4,11 @@ import { m } from '@joeblew999/remy-ui/messages';
 import { AppHomePage } from '@joeblew999/remy-ui/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { usePreferred } from '@joeblew999/remy-ui/preferred';
-import { StatusCard, statusCardLoader } from '../showcase/status-card';
+// The status-card part, or undefined when the app does not list it (src/parts.json).
+import { StatusCard, statusCardLoader } from 'virtual:remy-parts/status-card/ui';
 import { problemPages } from '@joeblew999/remy-ui/problem';
 
-// The app's home: the live status card (TanStack Query) inside the app shell.
+// The app's home: the live status card (TanStack Query; the status-card part) inside the app shell.
 export const Route = createFileRoute('/app/')({
   // The loader goes with the component into this route's own chunk (TanStack's codeSplitGroupings):
   // it pulls in the API client and its contract (oRPC and Zod), which no other page's first load needs.
@@ -19,5 +20,5 @@ export const Route = createFileRoute('/app/')({
 });
 
 function AppHome() {
-  return <AppHomePage locale={getLocale()} preferred={usePreferred()}><StatusCard /></AppHomePage>;
+  return <AppHomePage locale={getLocale()} preferred={usePreferred()}>{StatusCard && <StatusCard />}</AppHomePage>;
 }

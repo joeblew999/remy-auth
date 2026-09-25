@@ -11,7 +11,11 @@ export declare function hydrated(locator: Locator): Promise<void>;
  * `oneLanguage`: site pages in one language only, listed once in the sitemap without alternates; its
  * `translations` (path to languages, that language first) lists a translated page in each, with alternates.
  */
-export declare function publicPageChecks(options: { paths: string[]; prerendered?: boolean; oneLanguage?: { locale: string; paths: string[]; translations?: Record<string, string[]> } }): void;
+export type OneLanguage = { locale: string; paths: string[]; translations?: Record<string, string[]> };
+/** `sitemap: false` leaves the sitemap to the seo-routes part's checks (sitemapChecks). */
+export declare function publicPageChecks(options: { paths: string[]; prerendered?: boolean; oneLanguage?: OneLanguage; sitemap?: boolean }): void;
+/** The sitemap lists `paths` in every locale and `oneLanguage`'s pages, self-canonical with hreflang alternates; robots.txt names it. */
+export declare function sitemapChecks(options: { paths: string[]; oneLanguage?: OneLanguage }): void;
 export declare function entryChecks(options: { paths: string[]; mode: 'redirect' | 'static' }): void;
 export declare function demoChecks(): void;
 /** Site pages work without JavaScript and are indexable; app pages are noindex and out of the sitemap. */
