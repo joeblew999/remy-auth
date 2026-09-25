@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
+import { useForm, useStore } from '@tanstack/react-form';
 import type { Locale } from './paraglide/runtime.js';
 import { m } from './paraglide/messages.js';
 import { LanguageHint } from './language';
@@ -12,6 +13,7 @@ import { AppSidebar } from './blocks/sidebar-16/app-sidebar';
 import { SiteHeader } from './blocks/sidebar-16/site-header';
 import { FormatsContent, Intro, SkipLink, ZoneBadge, type FormatsControlCards, type FormatsExtras } from './pages';
 import type { LocaleInfo } from './locale-info';
+import { reservationSchema, type Reservation, type ReservationDraft, type ReservationResult } from './reservation';
 
 // App pages (paths.js): they need JavaScript and use the app shell. Kept apart from ./pages, the
 // site pages, so a site page never downloads the app shell's code.
@@ -69,13 +71,10 @@ export function AppFormatsPage({ locale, info, preferred, extras = {}, controls 
   return <AppShell locale={locale} path="/app/formats" preferred={preferred}><FormatsContent locale={locale} info={info} extras={extras} controls={controls} backTo="/app" /></AppShell>;
 }
 
-/** The demo form's starting number of seats. */
-const defaultGuests = 2;
+/** The demo form's starting values: no name, two seats. */
+const draft: ReservationDraft = { name: '', guests: '2' };
 
-/** A reservation the demo form accepted on its own checks. */
-export type Reservation = { name: string; guests: number };
-/** The answer to a reservation: field errors to show like the form's own, or the confirmation to show instead of the default one. */
-export type ReservationResult = { errors?: { name?: string; guests?: string }; message?: string };
+export type { Reservation, ReservationResult } from './reservation';
 
 export function DemoPage({ locale, preferred, onReserve, onDirtyChange }: {
   locale: Locale; preferred?: Locale;
@@ -86,35 +85,52 @@ export function DemoPage({ locale, preferred, onReserve, onDirtyChange }: {
 }) {
   const o = { locale };
   const [count, setCount] = useState(0);
-  const [errors, setErrors] = useState<{ name?: string; guests?: string }>({});
   const [reservation, setReservation] = useState<{ name: string; count: number; message?: string } | null>(null);
   const [failed, setFailed] = useState(false);
-  const form = useRef<HTMLFormElement>(null);
-  // Input typed before hydration (a prerendered page) fired no onInput, so check once hydrated.
+  const schema = reservationSchema(locale);
+  // TanStack Form with shadcn's Field components (https://ui.shadcn.com/docs/forms/tanstack-form):
+  // the shared Zod schema checks on submit, and the server's field errors join the form's own.
+  const form = useForm({
+    defaultValues: draft,
+    validators: { onSubmit: schema },
+    onSubmitInvalid: () => { setFailed(false); setReservation(null); },
+    onSubmit: async ({ value, formApi }) => {
+      const accepted = schema.parse(value);
+      let result: ReservationResult;
+      try {
+        result = onReserve ? await onReserve(accepted) : {};
+      } catch {
+        setReservation(null);
+        setFailed(true);
+        return;
+      }
+      setFailed(false);
+      const { name, guests } = result.errors ?? {};
+      if (name || guests) {
+        setReservation(null);
+        formApi.setErrorMap({ onSubmit: { form: undefined, fields: {
+          ...(name ? { name: [{ message: name }] } : {}),
+          ...(guests ? { guests: [{ message: guests }] } : {}),
+        } } });
+        return;
+      }
+      setReservation({ name: accepted.name, count: accepted.guests, message: result.message });
+      // Reserved: the input is no longer unsaved. Keep it on screen, and keep the original defaults.
+      formApi.reset(value, { keepDefaultValues: true });
+    },
+  });
+  const dirty = useStore(form.store, state => state.isDirty);
+  useEffect(() => onDirtyChange?.(dirty), [dirty]);
+  // React keeps input typed before hydration (a prerendered page) in the DOM but not in state, and
+  // fires no change for it: hand it to the form once hydrated.
+  const element = useRef<HTMLFormElement>(null);
   useEffect(() => {
-    const data = form.current && new FormData(form.current);
-    if (data && (String(data.get('name') ?? '').trim() || Number(data.get('guests')) !== defaultGuests)) onDirtyChange?.(true);
+    const data = element.current && new FormData(element.current);
+    for (const name of ['name', 'guests'] as const) {
+      const typed = data?.get(name);
+      if (typeof typed === 'string' && typed !== form.getFieldValue(name)) form.setFieldValue(name, typed);
+    }
   }, []);
-  function settle(next: typeof errors, accepted: { name: string; count: number; message?: string }) {
-    const ok = Object.keys(next).length === 0;
-    setFailed(false);
-    setErrors(next);
-    setReservation(ok ? accepted : null);
-    if (ok) onDirtyChange?.(false);
-  }
-  function reserve(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const name = String(data.get('name') ?? '').trim();
-    const guests = Number(data.get('guests'));
-    const next: typeof errors = {};
-    if (!name) next.name = m.name_required({}, o);
-    if (!Number.isInteger(guests) || guests < 1 || guests > 20) next.guests = m.guests_invalid({}, o);
-    if (Object.keys(next).length || !onReserve) return settle(next, { name, count: guests });
-    void Promise.resolve().then(() => onReserve({ name, guests })).then(
-      result => settle(result.errors ?? {}, { name, count: guests, message: result.message }),
-      () => { setReservation(null); setFailed(true); });
-  }
   return <AppShell locale={locale} path="/app/demo" preferred={preferred}>
     <section className="flex flex-col gap-6">
       <Intro locale={locale} label={m.demo_label({}, o)} title={m.demo_title({}, o)} intro={m.demo_description({}, o)} backTo="/app" />
@@ -131,18 +147,31 @@ export function DemoPage({ locale, preferred, onReserve, onDirtyChange }: {
       <Card>
         <CardHeader><CardTitle>{m.form_heading({}, o)}</CardTitle></CardHeader>
         <CardContent>
-          <form ref={form} noValidate onSubmit={reserve} onInput={() => onDirtyChange?.(true)} className="flex flex-col gap-6">
+          <form ref={element} noValidate className="flex flex-col gap-6" onSubmit={event => {
+            event.preventDefault();
+            // Submit errors answer the last attempt only: every submit checks, and asks the server, afresh.
+            form.setErrorMap({ onSubmit: { form: undefined, fields: {} } });
+            void form.handleSubmit();
+          }}>
             <FieldGroup>
-              <Field data-invalid={errors.name ? true : undefined}>
-                <FieldLabel htmlFor="name">{m.name_label({}, o)}</FieldLabel>
-                <Input id="name" name="name" dir="auto" autoComplete="name" aria-invalid={errors.name ? true : undefined} aria-describedby={errors.name ? 'name-error' : undefined} />
-                {errors.name && <FieldError id="name-error">{errors.name}</FieldError>}
-              </Field>
-              <Field data-invalid={errors.guests ? true : undefined}>
-                <FieldLabel htmlFor="guests">{m.guests_label({}, o)}</FieldLabel>
-                <Input id="guests" name="guests" type="number" inputMode="numeric" min={1} max={20} step={1} defaultValue={defaultGuests} aria-invalid={errors.guests ? true : undefined} aria-describedby={errors.guests ? 'guests-error' : undefined} />
-                {errors.guests && <FieldError id="guests-error">{errors.guests}</FieldError>}
-              </Field>
+              <form.Field name="name" children={field => {
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                return <Field data-invalid={isInvalid || undefined}>
+                  <FieldLabel htmlFor={field.name}>{m.name_label({}, o)}</FieldLabel>
+                  <Input id={field.name} name={field.name} dir="auto" autoComplete="name" value={field.state.value} onBlur={field.handleBlur}
+                    onChange={event => field.handleChange(event.target.value)} aria-invalid={isInvalid || undefined} aria-describedby={isInvalid ? 'name-error' : undefined} />
+                  {isInvalid && <FieldError id="name-error" errors={field.state.meta.errors} />}
+                </Field>;
+              }} />
+              <form.Field name="guests" children={field => {
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                return <Field data-invalid={isInvalid || undefined}>
+                  <FieldLabel htmlFor={field.name}>{m.guests_label({}, o)}</FieldLabel>
+                  <Input id={field.name} name={field.name} type="number" inputMode="numeric" min={1} max={20} step={1} value={field.state.value} onBlur={field.handleBlur}
+                    onChange={event => field.handleChange(event.target.value)} aria-invalid={isInvalid || undefined} aria-describedby={isInvalid ? 'guests-error' : undefined} />
+                  {isInvalid && <FieldError id="guests-error" errors={field.state.meta.errors} />}
+                </Field>;
+              }} />
             </FieldGroup>
             <div><Button type="submit">{m.submit({}, o)}</Button></div>
             <p role="status" className="reserved min-h-6">{failed ? m.error_detail({}, o) : reservation && (reservation.message ?? m.reserved({ name: reservation.name, count: reservation.count }, o))}</p>
@@ -153,4 +182,3 @@ export function DemoPage({ locale, preferred, onReserve, onDirtyChange }: {
     </section>
   </AppShell>;
 }
-
