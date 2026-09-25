@@ -11,6 +11,8 @@
     "@openai/codex": "0.156.1",
     "@playwright/test": "1.63.0",
     "@tailwindcss/vite": "4.3.3",
+    "@tanstack/devtools-vite": "0.8.5",
+    "@tanstack/react-devtools": "0.10.13",
     "@tanstack/react-query-devtools": "5.103.2",
     "@tanstack/react-router-devtools": "1.167.2",
     "@types/node": "26.6.2",
