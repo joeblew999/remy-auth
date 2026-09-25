@@ -31,6 +31,28 @@ Before a plan names a library or tool:
 
 Mark anything not checked as assumed.
 
+## UI: shadcn and TanStack all the way
+
+UI is hard and never done, so we take what shadcn and TanStack have spent years getting right,
+and write only what they do not provide.
+
+- **shadcn's CLI writes every component and the theme.** Components come from `mise run ui:components`,
+  the theme from `mise run ui:theme` (shadcn's default Nova style, neutral, Geist: no preset, no
+  branding of our own). `mise run ui:verify` fails the release on any hand edit. The repository uses
+  shadcn's monorepo layout, so `shadcn add` run in the app writes into the shared package.
+- **Look for a shadcn block before building a layout or a screen:**
+  `./node_modules/.bin/shadcn search @shadcn -t registry:block`. Add it with `shadcn add`, keep its
+  structure, and replace only its sample data. Do not add constraints the block does not have (it is
+  full width, so we are).
+- **Compose, do not restyle.** Use variants and semantic tokens; follow the installed shadcn skill's
+  rules (Separator, Skeleton, Badge, Empty, Alert, Field instead of hand-made equivalents).
+- **Two kinds of page** ([paths](../packages/ui/src/paths.js)): site pages are for Google and work
+  without JavaScript, so they use only static shadcn parts; app pages live under `/app`, need
+  JavaScript and use the sidebar app shell. Checks keep them apart.
+- **Adopt the TanStack library instead of our own code** (Form, Router's Zod adapter, Table, Devtools
+  and so on), install its agent skills, then delete the code it replaces.
+- Before writing any UI code, ask: does shadcn, TanStack or Paraglide already do this? If yes, use it.
+
 ## Gates before anything leaves the machine
 
 - Run the local gate (`mise run project:verify`) and see it pass before any push, tag, release
