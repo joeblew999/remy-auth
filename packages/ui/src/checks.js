@@ -53,7 +53,20 @@ export function publicPageChecks({ paths, prerendered = false }) {
       await expect(page.locator('link[hreflang="x-default"]')).toHaveAttribute('href', `${baseURL}/`);
       for (const other of locales) await expect(page.getByRole('link', { name: endonym(other), exact: true })).toHaveAttribute('href', localizedPath('', other));
       if (prerendered) await expect(page.locator('.language-hint')).toHaveCount(0);
+      // Structured data: the site home names the site (schema.org WebSite), once, in the server's HTML.
+      const data = page.locator('script[type="application/ld+json"]');
+      await expect(data).toHaveCount(1);
+      expect(JSON.parse(await data.textContent())).toEqual(website(baseURL));
       await context.close();
+    });
+
+    test(`${locale}: the home page's structured data stays single once hydrated`, async ({ page, baseURL }) => {
+      // Guards TanStack Router issue #6627: the browser must not add a second copy of the head script.
+      await page.goto(localizedPath('', locale));
+      await hydrated(page.locator('body'));
+      const data = page.locator('script[type="application/ld+json"]');
+      await expect(data).toHaveCount(1);
+      expect(JSON.parse(await data.textContent())).toEqual(website(baseURL));
     });
   }
 
@@ -95,6 +108,9 @@ export function publicPageChecks({ paths, prerendered = false }) {
     }
   });
 }
+
+/** The schema.org WebSite the site home page carries: the brand and the site root. */
+const website = origin => ({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Remy', url: `${origin}/` });
 
 /**
  * URLs without a locale lead to the visitor's language, and a localized page offers the
@@ -335,6 +351,8 @@ export function zoneChecks({ sitePaths, appPaths }) {
       await expect(page.getByRole('heading', { level: 1 }), url).toBeVisible();
       await expect(page.locator('[data-zone="site"]'), url).toHaveText(m.zone_site({}, { locale }));
       await expect(page.locator('meta[name="robots"]'), url).toHaveCount(0);
+      // Structured data belongs to the site home page only (publicPageChecks).
+      if (path !== '') await expect(page.locator('script[type="application/ld+json"]'), url).toHaveCount(0);
     }
     await context.close();
   });
@@ -345,7 +363,10 @@ export function zoneChecks({ sitePaths, appPaths }) {
       const url = localizedPath(path, locale);
       const response = await request.get(url);
       expect(response.status(), url).toBe(200);
-      expect(await response.text(), url).toContain('<meta name="robots" content="noindex"/>');
+      const html = await response.text();
+      // TanStack Router puts the request's CSP nonce, when there is one, on every head tag it renders.
+      expect(html, url).toMatch(/<meta name="robots" content="noindex"(?: nonce="[^"]+")?\/>/);
+      expect(html, url).not.toContain('application/ld+json');
       expect(sitemap, url).not.toContain(`${url}<`);
       await page.goto(url);
       await expect(page.locator('[data-zone="app"]'), url).toHaveText(m.zone_app({}, { locale }));
@@ -363,7 +384,7 @@ export function zoneChecks({ sitePaths, appPaths }) {
 
 /** Observability every Worker built on this package must show: a request ID on every response and a liveness route. */
 export function observabilityChecks({ service, paths }) {
-  test(`every response carries a request ID and the permissions policy, and /healthz answers for ${service}`, async ({ request }) => {
+  test(`every response carries a request ID, the permissions policy and the static security headers, and /healthz answers for ${service}`, async ({ request }) => {
     const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
     const seen = new Set();
     for (const path of [...locales.flatMap(locale => paths.map(p => localizedPath(p, locale))), '/zz', '/robots.txt', '/sitemap.xml']) {
@@ -371,6 +392,9 @@ export function observabilityChecks({ service, paths }) {
       const id = response.headers()['x-request-id'];
       expect(id, path).toMatch(uuid);
       expect(response.headers()['permissions-policy'], path).toBe('geolocation=(self), camera=(), microphone=()');
+      expect(response.headers()['content-security-policy'], path).toContain("frame-ancestors 'none'");
+      expect(response.headers()['cross-origin-opener-policy'], path).toBe('same-origin-allow-popups');
+      expect(response.headers()['strict-transport-security'], path).toMatch(/^max-age=\d+$/);
       expect(seen.has(id), `${path} reused a request ID`).toBe(false);
       seen.add(id);
     }
@@ -381,5 +405,59 @@ export function observabilityChecks({ service, paths }) {
     expect(body.status).toBe('ok');
     expect(body.service).toBe(service);
     expect(typeof body.release).toBe('string');
+  });
+}
+
+/**
+ * A strict nonce-based Content Security Policy, report-only for now: every page's response names a
+ * fresh nonce in its report-only policy, every script the server renders carries that nonce, and
+ * the page loads and hydrates without one violation. Data blocks (application/ld+json) are not
+ * scripts to CSP, and TanStack renders them without one. The report endpoint takes both report
+ * formats and answers 204.
+ */
+export function cspChecks({ paths, reportPath = '/csp-report' }) {
+  test("every script in a server-rendered page carries the response's CSP nonce, and the report-only policy names it", async ({ request }) => {
+    const seen = new Set();
+    for (const locale of checkedLocales) for (const path of paths) {
+      const url = localizedPath(path, locale);
+      const response = await request.get(url);
+      expect(response.status(), url).toBe(200);
+      const policy = response.headers()['content-security-policy-report-only'] ?? '';
+      const nonce = policy.match(/'nonce-([A-Za-z0-9+/=]+)'/)?.[1];
+      expect(nonce, `${url}: ${policy}`).toBeTruthy();
+      expect(policy, url).toBe(`script-src 'nonce-${nonce}' 'strict-dynamic' 'report-sample'; object-src 'none'; base-uri 'none'; report-uri ${reportPath}; report-to csp`);
+      expect(response.headers()['reporting-endpoints'], url).toBe(`csp="${reportPath}"`);
+      expect(seen.has(nonce), `${url} reused a nonce`).toBe(false);
+      seen.add(nonce);
+      const scripts = [...(await response.text()).matchAll(/<script\b[^>]*>/g)].map(match => match[0])
+        .filter(tag => !/\btype="(?!module"|text\/javascript")[^"]*"/.test(tag));
+      expect(scripts.length, url).toBeGreaterThan(0);
+      for (const tag of scripts) expect(tag, url).toContain(` nonce="${nonce}"`);
+    }
+  });
+
+  test('every page loads and hydrates without a single violation of that policy', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__cspViolations = [];
+      document.addEventListener('securitypolicyviolation', event => window.__cspViolations.push(`${event.effectiveDirective} ${event.blockedURI} ${event.sourceFile}:${event.lineNumber}`));
+    });
+    for (const locale of checkedLocales) for (const path of paths) {
+      const url = localizedPath(path, locale);
+      await page.goto(url);
+      await hydrated(page.locator('body'));
+      await page.waitForLoadState('networkidle');
+      expect(await page.evaluate(() => window.__cspViolations), url).toEqual([]);
+    }
+  });
+
+  test('the CSP report endpoint takes both report formats and only POST', async ({ request }) => {
+    const reports = [{ type: 'csp-violation', url: 'http://localhost/en', body: { documentURL: 'http://localhost/en', blockedURL: 'inline', effectiveDirective: 'script-src-elem', disposition: 'report' } }];
+    expect((await request.post(reportPath, { data: JSON.stringify(reports), headers: { 'Content-Type': 'application/reports+json' } })).status()).toBe(204);
+    const legacy = { 'csp-report': { 'document-uri': 'http://localhost/en', 'blocked-uri': 'inline', 'effective-directive': 'script-src-elem', disposition: 'report' } };
+    expect((await request.post(reportPath, { data: JSON.stringify(legacy), headers: { 'Content-Type': 'application/csp-report' } })).status()).toBe(204);
+    expect((await request.post(reportPath, { data: 'not json', headers: { 'Content-Type': 'application/csp-report' } })).status()).toBe(400);
+    const get = await request.get(reportPath);
+    expect(get.status()).toBe(405);
+    expect(get.headers()['allow']).toBe('POST');
   });
 }
