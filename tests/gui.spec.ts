@@ -4,7 +4,8 @@ import { locales } from '@joeblew999/remy-ui/runtime';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { checkedLocales, zoneChecks, publicPageChecks, entryChecks, demoChecks, formatsChecks, observabilityChecks, cspChecks, collectErrors, endonym, direction, localizedPath } from '@joeblew999/remy-ui/checks';
 import { localeInfo, weekdayName } from '../packages/ui/src/locale-info';
-import { sitePaths, appPaths, allPaths } from '@joeblew999/remy-ui/paths';
+import { sitePaths, appPaths } from '@joeblew999/remy-ui/paths';
+import { appPagePaths, docsPaths, everyPath, siteAndDocsPaths } from '../src/paths';
 import { searchParamsChecks } from '@joeblew999/remy-ui/showcase/search-params.checks';
 import { preloadChecks } from '@joeblew999/remy-ui/showcase/preload.checks';
 import { navigationBlockingChecks } from '@joeblew999/remy-ui/showcase/navigation-blocking.checks';
@@ -20,22 +21,23 @@ import { devicePlaceChecks } from '@joeblew999/remy-ui/showcase/device-place.che
 
 // The shared checks cover what every app built on the package must satisfy.
 // Site pages (for Google) and app pages (for people using the app) never mix; see paths.js.
-zoneChecks({ sitePaths, appPaths });
-publicPageChecks({ paths: sitePaths });
-entryChecks({ paths: allPaths, mode: 'redirect' });
+// This app adds the docs (site pages, English only) and the answer page (an app page): src/paths.ts.
+zoneChecks({ sitePaths: siteAndDocsPaths, appPaths: appPagePaths });
+publicPageChecks({ paths: sitePaths, oneLanguage: { locale: 'en', paths: docsPaths } });
+entryChecks({ paths: everyPath, mode: 'redirect' });
 demoChecks();
 // The demo reservation and the status card are contract endpoints (@joeblew999/remy-auth-contract).
 apiChecks({ router, title: info.title });
 reservationApiChecks();
-codeSplittingChecks({ paths: sitePaths });
+codeSplittingChecks({ paths: [...sitePaths, '/docs'] });
 codeSplittingChecks({ paths: appPaths, home: '/app' });
 // The app mounts TanStack Devtools (src/routes/__root.tsx), whose shell must never ship either.
-buildBoundaryChecks({ paths: allPaths, markers: [
+buildBoundaryChecks({ paths: everyPath, markers: [
   { name: 'request.cf', pattern: /\.cf\b/, source: 'src/place.server.ts' },
   { name: 'TanStack Devtools (the shell hosting the panels)', pattern: /tsd-(?:control|surface)\b/, source: { package: '@tanstack/devtools', from: '@tanstack/react-devtools' } },
 ] });
-observabilityChecks({ service: 'remy-auth', paths: allPaths });
-cspChecks({ paths: allPaths });
+observabilityChecks({ service: 'remy-auth', paths: everyPath });
+cspChecks({ paths: everyPath });
 searchParamsChecks();
 preloadChecks();
 navigationBlockingChecks();

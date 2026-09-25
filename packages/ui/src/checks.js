@@ -35,8 +35,10 @@ export function collectErrors(page) {
  * Every localized public page carries its content and metadata in the initial HTML, unknown
  * paths are 404s, the sitemap lists only localized self-canonical URLs with hreflang
  * alternates, right-to-left languages mirror the header, and every page fits a phone.
+ * `oneLanguage` names site pages written in one language only (remy-auth's docs): the sitemap lists
+ * each once, in that language, without alternates; every other expectation stays as it is.
  */
-export function publicPageChecks({ paths, prerendered = false }) {
+export function publicPageChecks({ paths, prerendered = false, oneLanguage = { locale: baseLocale, paths: [] } }) {
   for (const locale of checkedLocales) {
     const o = { locale };
     test(`${locale}: home page is complete without JavaScript`, async ({ browser, baseURL }) => {
@@ -76,19 +78,22 @@ export function publicPageChecks({ paths, prerendered = false }) {
     expect(sitemap.status()).toBe(200);
     const xml = await sitemap.text();
     const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
-    expect(urls.sort()).toEqual(locales.flatMap(locale => paths.map(path => `${baseURL}${localizedPath(path, locale)}`)).sort());
+    const localized = locales.flatMap(locale => paths.map(path => `${baseURL}${localizedPath(path, locale)}`));
+    const single = oneLanguage.paths.map(path => `${baseURL}${localizedPath(path, oneLanguage.locale)}`);
+    expect([...urls].sort()).toEqual([...localized, ...single].sort());
     for (const url of urls) {
       const response = await request.get(url);
       expect(response.status(), url).toBe(200);
       expect(await response.text(), url).toContain(`<link rel="canonical" href="${url}"`);
     }
-    for (const lang of [...locales, 'x-default']) expect(xml.match(new RegExp(`hreflang="${lang}"`, 'g'))?.length, lang).toBe(urls.length);
+    for (const lang of [...locales, 'x-default']) expect(xml.match(new RegExp(`hreflang="${lang}"`, 'g'))?.length, lang).toBe(localized.length);
+    for (const url of single) expect(xml, url).toContain(`<url><loc>${url}</loc></url>`);
     expect(await (await request.get('/robots.txt')).text()).toContain('/sitemap.xml');
   });
 
   test('right-to-left languages mirror the header, every page fits a narrow screen and names only fonts it loads', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    for (const locale of checkedLocales) for (const path of paths) {
+    for (const locale of checkedLocales) for (const path of [...paths, ...oneLanguage.paths]) {
       await page.goto(localizedPath(path, locale));
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${locale}${path} overflows`).toBe(true);
