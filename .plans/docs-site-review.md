@@ -44,7 +44,18 @@ translation: "The docs translation. Is this also paraglide based or what?"
     [observability.md](observability.md#ai-answers-docs-site-what-cloudflare-gives-what-we-have-checked-2026-09-25)
     (spend limit likely not enforced on postpaid, gateway rate limit against Cloudflare's advice,
     questions stored in gateway logs).
-12. Level 1 is now 2.1 minutes locally and 2.6 on a preview (280 checks).
+12. Going back to an answer page runs the question again: the page is a GET form (`?q=`), its loader
+    runs on every visit and the page is `no-store`. AI Search's own cache makes a repeat cost $0
+    (gateway logs show `cached: true`, cost 0), but it is still a call. Owner, 2026-09-25: "when you
+    click and link to an answer and then go back it seems to run the same search? So blows money?"
+13. The docs pages ship as JavaScript and hydrate. Owner, 2026-09-25: "a bit pissed off that this
+    thing loads all the docs gui as JavaScript ... so that site has no js or very little ... at the
+    moment it's slow in the browser." Server-render the docs content only (no client copy), keep
+    the shell's small scripts.
+14. Indexing production took 7 minutes (2026-09-25): every section is deleted and re-uploaded one by
+    one, and Cloudflare answers "overloaded" while it indexes. Research (docs-ai-tooling-research.md):
+    hash each section into its key and skip unchanged ones; upload before delete.
+15. Level 1 is now 2.1 minutes locally and 2.6 on a preview (280 checks).
 
 ## To review later
 

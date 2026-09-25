@@ -22,6 +22,7 @@ async function api(method, path = '', body) {
 }
 
 const command = process.argv[2];
+console.log(`Target: Cloudflare (remote), AI Search ${namespace}/${dev} (dev), account ${account}`);
 if (command === 'create') {
   if ((await api('GET', `/${dev}`)).success) {
     console.log(`${dev} exists`);

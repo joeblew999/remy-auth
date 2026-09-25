@@ -51,11 +51,15 @@ async function listItems() {
 }
 
 const manifest = await docsManifest({ release, rows: docsRows(names) });
+// Say where this goes before touching anything: it is always remote (Cloudflare), and which instance.
+console.log(`Target: Cloudflare (remote), AI Search ${namespace}/${instance}${instance === production ? ' = PRODUCTION' : ' (dev)'}, account ${account}`);
+console.log(`Upload: ${manifest.length} sections from ${names.length ? names.join(', ') : 'every docs page'} at ${release}. Each is deleted and re-uploaded; Cloudflare answers "overloaded" while it indexes, and this waits and retries.`);
 const existing = await listItems();
 const keys = new Set(manifest.map(item => item.key));
 
 // Upload replaces: a key that exists is deleted first (the API refuses a second upload of a key).
-for (const item of manifest) {
+for (const [index, item] of manifest.entries()) {
+  console.log(`  [${index + 1}/${manifest.length}] ${item.key}`);
   for (const old of existing.filter(entry => entry.key === item.key)) await api(`/${old.id}`, { method: 'DELETE' });
   const form = new FormData();
   form.set('file', new File([item.text], item.key, { type: 'text/markdown' }));
