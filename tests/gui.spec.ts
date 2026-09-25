@@ -5,12 +5,14 @@ import { samples } from '@joeblew999/remy-ui/samples';
 import { publicPageChecks, entryChecks, demoChecks, formatsChecks, observabilityChecks, collectErrors, endonym, direction, localizedPath } from '@joeblew999/remy-ui/checks';
 import { localeInfo, weekdayName } from '../packages/ui/src/locale-info';
 import { publicPaths } from '@joeblew999/remy-ui/paths';
+import { deferredPlaceChecks } from '@joeblew999/remy-ui/showcase/deferred-place.checks';
 
 // The shared checks cover what every app built on the package must satisfy.
 publicPageChecks({ paths: publicPaths });
 entryChecks({ paths: publicPaths, mode: 'redirect' });
 demoChecks();
 observabilityChecks({ service: 'remy-auth', paths: publicPaths });
+deferredPlaceChecks();
 formatsChecks({ extra: async (page, locale) => {
   // Rows only this server-rendered app has: more Intl examples and Cloudflare's geolocation.
   const messages = catalogs[locale];
