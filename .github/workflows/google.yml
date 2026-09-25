@@ -11,6 +11,12 @@ on:
 
 permissions: {}
 
+# ui:release pushes main and then the tag for the same commit: the tag's run (which releases)
+# cancels main's run instead of running level 2 twice. Runs of different commits never collide.
+concurrency:
+  group: google-${{ github.sha }}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/tags/v') }}
+
 jobs:
   google:
     runs-on: ubuntu-latest
