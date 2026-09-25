@@ -44,6 +44,17 @@ Pre-release for the move to TanStack Start and Router ([plan](.plans/tanstack.md
 - `@joeblew999/remy-ui/react-router` (`languageMiddleware`, `redirectToLocalized`, `pageMeta`,
   `requireLocale`, `suggestedLocale`); routes no longer carry a `:locale` segment.
 
+### Changed
+- `HomePage` takes `children`, shown inside the page under its links (the live status card).
+- `LanguageHint` puts its two actions under the text instead of shadcn's absolutely placed
+  `AlertAction`, which overlapped the text at phone width.
+- `DemoPage` shows the localized "Please try again." when `onReserve` rejects, instead of an
+  unhandled rejection.
+- `performanceChecks` no longer warms a page before Lighthouse measures it. The warm-up hid a
+  first-layout stall of seconds that every visitor paid in a fresh Chrome renderer on macOS; the
+  cause was font-family names that never load (`Inter`, `ui-monospace`, `SFMono-Regular`, ...),
+  fixed in each app's `@theme` with `system-ui, sans-serif` and `Menlo, monospace`.
+
 ## [0.8.0] - 2026-09-24
 
 ### Added

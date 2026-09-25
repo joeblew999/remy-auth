@@ -254,9 +254,9 @@ export function performanceChecks({ pages, thresholds = {} }) {
     let browser, puppeteerBrowser;
     test.beforeAll(async () => {
       browser = await chromium.launch({ channel: 'chrome', args: [`--remote-debugging-port=${port}`] });
-      // Lighthouse bundles puppeteer-core; connecting it to the same Chrome lets Lighthouse measure
-      // a page this check has already warmed, so a fresh renderer's cold font scan (seconds on
-      // macOS, never paid per page by real visitors) stays out of the numbers.
+      // Lighthouse bundles puppeteer-core; connecting it to the same Chrome lets Lighthouse drive a
+      // fresh page. Never warm the page first: a visitor's first load in a new tab is cold, and a
+      // warm-up once hid a multi-second font stall that real visitors paid.
       const puppeteer = await import('puppeteer-core');
       puppeteerBrowser = await puppeteer.default.connect({ browserURL: `http://127.0.0.1:${port}` });
     });
@@ -265,7 +265,6 @@ export function performanceChecks({ pages, thresholds = {} }) {
       test(`${device}: ${path} meets Google's good thresholds`, async ({ baseURL }, testInfo) => {
         const { navigation, desktopConfig, generateReport } = await import('lighthouse');
         const page = await puppeteerBrowser.newPage();
-        await page.goto(`${baseURL}${path}`, { waitUntil: 'load' });
         const result = await navigation(page, `${baseURL}${path}`, {
           flags: { output: 'json', logLevel: 'error', onlyCategories: ['performance'] },
           config: device === 'desktop' ? desktopConfig : undefined,
