@@ -157,7 +157,7 @@ remy-auth-app).
 ### Added
 - `@joeblew999/remy-ui/tanstack`: `localizedWorker(service, start)`, the Worker entry for a
   server-rendered Start app (`withObservability` around Paraglide's middleware around Start's
-  handler, which gets the original request so `request.cf` reaches server functions;
+  handler, which gets the original request so its Cloudflare `cf` properties reach server functions;
   un-localized entry URLs answer 302 with `Vary`; HTML is `no-store`); `entryRedirect`;
   `localeRewrite`, the router `rewrite` (Paraglide's `deLocalizeUrl`/`localizeUrl`);
   `pageHead({ path, title, description })` for a route's `head()`: title, description,

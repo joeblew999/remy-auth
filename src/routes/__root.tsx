@@ -6,6 +6,8 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { getLocale, direction } from '@joeblew999/remy-ui/locale';
 import { ThemeProvider } from '@joeblew999/remy-ui/theme';
 import { DirectionProvider } from '@joeblew999/remy-ui/components/direction';
+import { SiteNavLinks } from '@joeblew999/remy-ui/pages';
+import { docsHeaderLink } from '../docs/header-link';
 import { preferredLocale } from '../preferred';
 import { NotFound, ErrorPage } from '../problem';
 import '../styles.css';
@@ -33,7 +35,9 @@ function Document({ children }: { children: React.ReactNode }) {
   const locale = getLocale();
   return <html lang={locale} dir={direction(locale)} suppressHydrationWarning>
     <head><HeadContent /></head>
-    <body><DirectionProvider direction={direction(locale)}><ThemeProvider defaultTheme="system" storageKey="theme">{children}</ThemeProvider></DirectionProvider>
+    <body><DirectionProvider direction={direction(locale)}><ThemeProvider defaultTheme="system" storageKey="theme">
+      {/* The site header's "Docs" link: the docs are this app's own (src/docs). */}
+      <SiteNavLinks value={docsHeaderLink(locale)}>{children}</SiteNavLinks></ThemeProvider></DirectionProvider>
       <TanStackDevtools plugins={[
         { name: 'TanStack Router', render: <TanStackRouterDevtoolsPanel /> },
         { name: 'TanStack Query', render: <ReactQueryDevtoolsPanel /> },

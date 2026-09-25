@@ -1,3 +1,4 @@
+import { createContext, useContext } from 'react';
 import { Link } from '@tanstack/react-router';
 import { ArrowLeftIcon } from 'lucide-react';
 import { locales, getTextDirection as direction, type Locale } from './paraglide/runtime.js';
@@ -33,11 +34,19 @@ export function ZoneBadge({ locale, app }: { locale: Locale; app: boolean }) {
 }
 
 /**
+ * Links an app adds to the site header's navigation, after the shared ones: a function of the page's
+ * de-localized path (so a link can mark itself active) returning NavigationMenuItems. remy-auth adds
+ * "Docs" this way (its docs pages live in the app); an app that provides nothing gets the shared links only.
+ */
+export const SiteNavLinks = createContext<((path: string) => React.ReactNode) | undefined>(undefined);
+
+/**
  * The frame of a site page: static shadcn components only (links styled as buttons, Badge,
  * Separator), so the page is complete without JavaScript. `preferred` is the language to offer.
  */
 export function SiteShell({ locale, path = '', preferred, children }: { locale: Locale; path?: string; preferred?: Locale; children: React.ReactNode }) {
   const o = { locale };
+  const appLinks = useContext(SiteNavLinks);
   return <div className="flex min-h-svh w-full flex-col px-4 md:px-8">
     <SkipLink locale={locale} />
     <LanguageHint locale={locale} path={path} preferred={preferred} />
@@ -48,6 +57,7 @@ export function SiteShell({ locale, path = '', preferred, children }: { locale: 
           <NavigationMenuItem>
             <NavigationMenuLink active={path === '/formats'} render={<Link to="/formats" preload="intent" />}>{m.nav_formats({}, o)}</NavigationMenuLink>
           </NavigationMenuItem>
+          {appLinks?.(path)}
           <NavigationMenuItem>
             <NavigationMenuLink href={repository}>GitHub</NavigationMenuLink>
           </NavigationMenuItem>

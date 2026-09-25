@@ -4,3 +4,9 @@
 @import "@joeblew999/remy-ui/fonts.css";
 @source "../src";
 @source "../packages/ui/src";
+
+/* Code blocks in the docs: Shiki writes both themes as CSS variables (source.config.ts), and this is
+   Shiki's documented rule for showing one of them (shiki.style/guide/dual-themes), following the
+   theme class the shared ThemeProvider puts on <html>. */
+.shiki, .shiki span { color: var(--shiki-light); background-color: var(--shiki-light-bg); }
+.dark .shiki, .dark .shiki span { color: var(--shiki-dark); background-color: var(--shiki-dark-bg); }
