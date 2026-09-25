@@ -30,7 +30,7 @@ export function AppShell({ locale, path = '/app', preferred, children }: { local
         <SidebarInset>
           <div className="flex flex-1 flex-col gap-4 p-4 md:p-8">
             <LanguageHint locale={locale} path={path} preferred={preferred} />
-            <main id="main" className="mx-auto w-full max-w-5xl flex-1"><div className="mb-6"><ZoneBadge locale={locale} app /></div>{children}</main>
+            <main id="main" className="w-full flex-1"><div className="mb-6"><ZoneBadge locale={locale} app /></div>{children}</main>
           </div>
         </SidebarInset>
       </div>

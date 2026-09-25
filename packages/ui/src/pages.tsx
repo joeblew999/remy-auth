@@ -36,7 +36,7 @@ export function ZoneBadge({ locale, app }: { locale: Locale; app: boolean }) {
  */
 export function SiteShell({ locale, path = '', preferred, children }: { locale: Locale; path?: string; preferred?: Locale; children: React.ReactNode }) {
   const o = { locale };
-  return <div className="mx-auto flex min-h-svh w-full max-w-5xl flex-col px-5 sm:px-8">
+  return <div className="flex min-h-svh w-full flex-col px-4 md:px-8">
     <SkipLink locale={locale} />
     <LanguageHint locale={locale} path={path} preferred={preferred} />
     <header className="site-header flex items-center justify-between gap-3 pt-4">
@@ -107,7 +107,7 @@ function FormatsSection({ id, title, note, children }: { id: string; title: stri
       <h2 id={`${id}-heading`} className="text-2xl font-semibold tracking-tight">{title}</h2>
       <p className="text-sm text-muted-foreground">{note}</p>
     </div>
-    <div className="grid items-start gap-4 md:grid-cols-2">{children}</div>
+    <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">{children}</div>
   </section>;
 }
 
