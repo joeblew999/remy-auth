@@ -11,6 +11,17 @@ package follows [Semantic Versioning](https://semver.org/).
   in a module of its own, so a page that needs only the frame (remy-auth's docs and problem pages)
   no longer downloads the home and formats pages. `pages` re-exports all of it: nothing changes for
   existing imports.
+- `fontChecks({ paths })` (`checks`): per language, the fonts that actually draw the heading and
+  intro (Chrome DevTools Protocol `CSS.getPlatformFontsForNode`) are the ones `fonts.css` names
+  for it; a system or fallback font drawing the text fails naming the page's script and the font
+  to add, a named script font that draws nothing fails, and Japanese and Traditional Chinese must
+  name different fonts.
+
+### Fixed
+- `fonts.css`: Arabic, Persian and Hebrew pages are drawn with Noto Sans Arabic and Hebrew on
+  macOS and Windows. Each language's script font now comes before fontaine's Geist fallback (local
+  Arial, which carries Arabic and Hebrew and so drew them itself), followed by the script font's
+  own metric-matched fallback face; Geist's fallback stays last. No new preloads.
 
 ### Changed
 - The formats rows (`Group`, `Row`) live in their own module and the showcase modules whose route

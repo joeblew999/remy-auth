@@ -26,11 +26,15 @@
 
 /* Each script's font only on pages in that language, as shadcn's RTL guide sets it per app language:
    a page downloads no script font for a few words in another language (the language switcher's
-   endonyms), which the system's fonts draw. */
-html:lang(ar), html:lang(fa) { font-family: 'Geist Variable', 'Geist Variable fallback', 'Noto Sans Arabic Variable', sans-serif; }
-html:lang(he) { font-family: 'Geist Variable', 'Geist Variable fallback', 'Noto Sans Hebrew Variable', sans-serif; }
-html:lang(th) { font-family: 'Geist Variable', 'Geist Variable fallback', 'Noto Sans Thai Variable', sans-serif; }
-html:lang(ja) { font-family: 'Geist Variable', 'Geist Variable fallback', 'Noto Sans JP Variable', sans-serif; }
-html:lang(zh-TW) { font-family: 'Geist Variable', 'Geist Variable fallback', 'Noto Sans TC Variable', sans-serif; }
-html:lang(hi) { font-family: 'Geist Variable', 'Geist Variable fallback', 'Noto Sans Devanagari Variable', sans-serif; }
-html:lang(am) { font-family: 'Geist Variable', 'Geist Variable fallback', 'Noto Sans Ethiopic Variable', sans-serif; }
+   endonyms), which the system's fonts draw. Order: Geist draws Latin, then the script font, then
+   the script font's fontaine fallback (a local font sized to it, so the swap moves nothing), and
+   Geist's fallback last. Geist's fallback is local Arial with no unicode-range: before the script
+   font it would draw Arabic and Hebrew itself on macOS and Windows, and the Noto font never would.
+   fontChecks proves which font renders each language. */
+html:lang(ar), html:lang(fa) { font-family: 'Geist Variable', 'Noto Sans Arabic Variable', 'Noto Sans Arabic Variable fallback', 'Geist Variable fallback', sans-serif; }
+html:lang(he) { font-family: 'Geist Variable', 'Noto Sans Hebrew Variable', 'Noto Sans Hebrew Variable fallback', 'Geist Variable fallback', sans-serif; }
+html:lang(th) { font-family: 'Geist Variable', 'Noto Sans Thai Variable', 'Noto Sans Thai Variable fallback', 'Geist Variable fallback', sans-serif; }
+html:lang(ja) { font-family: 'Geist Variable', 'Noto Sans JP Variable', 'Noto Sans JP Variable fallback', 'Geist Variable fallback', sans-serif; }
+html:lang(zh-TW) { font-family: 'Geist Variable', 'Noto Sans TC Variable', 'Noto Sans TC Variable fallback', 'Geist Variable fallback', sans-serif; }
+html:lang(hi) { font-family: 'Geist Variable', 'Noto Sans Devanagari Variable', 'Noto Sans Devanagari Variable fallback', 'Geist Variable fallback', sans-serif; }
+html:lang(am) { font-family: 'Geist Variable', 'Noto Sans Ethiopic Variable', 'Noto Sans Ethiopic Variable fallback', 'Geist Variable fallback', sans-serif; }

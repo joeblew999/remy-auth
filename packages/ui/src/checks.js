@@ -609,3 +609,63 @@ export function textChecks({ paths }) {
     }
   });
 }
+
+/** A family name as the rendered font reports it: 'Noto Sans JP Variable' and 'NotoSansJP-Regular' both start notosansjp. */
+const fontKey = name => name.toLowerCase().replace(/ variable$/, '').replace(/[^a-z0-9]/g, '');
+/** The web fonts an element's stack names (fonts.css): not fontaine's '… fallback' faces, not generic families. */
+const namedFonts = family => family.split(',').map(name => name.trim().replace(/^["']|["']$/g, ''))
+  .filter(name => name && !name.endsWith(' fallback') && !['serif', 'sans-serif', 'monospace', 'system-ui', 'cursive', 'fantasy'].includes(name));
+const drawnBy = (font, name) => font.glyphCount > 0 && [font.familyName, font.postScriptName].some(real => real && fontKey(real).startsWith(fontKey(name)));
+
+/**
+ * The fonts that actually draw each page's text (fonts.css), read from Chrome with the DevTools
+ * Protocol's CSS.getPlatformFontsForNode: the heading and intro in every language are drawn only
+ * by the fonts fonts.css names for that language (Geist, then the script's font), and the script
+ * font draws some of it. A system or fallback font drawing the text fails with the page's script
+ * named (Intl.Locale's maximize().script), so a new language whose script has no font says which
+ * font to add. Japanese and Traditional Chinese share Han code points with different glyph shapes,
+ * so each Han language must name a font of its own.
+ */
+export function fontChecks({ paths, selectors = ['h1', 'h1 + p'] }) {
+  for (const locale of checkedLocales) test(`${locale}: the page's text is drawn by the fonts fonts.css names for its script`, async ({ page }) => {
+    const script = new Intl.Locale(locale).maximize().script;
+    const cdp = await page.context().newCDPSession(page);
+    for (const path of paths) {
+      const url = localizedPath(path, locale);
+      await page.goto(url);
+      await page.evaluate(() => document.fonts.ready);
+      await cdp.send('DOM.enable');
+      await cdp.send('CSS.enable');
+      const { root } = await cdp.send('DOM.getDocument');
+      const problems = async () => {
+        const found = [];
+        for (const selector of selectors) {
+          const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector });
+          if (!nodeId) continue;
+          const named = namedFonts(await page.locator(selector).first().evaluate(node => getComputedStyle(node).fontFamily));
+          const { fonts } = await cdp.send('CSS.getPlatformFontsForNode', { nodeId });
+          for (const font of fonts) if (font.glyphCount > 0 && !named.some(name => drawnBy(font, name)))
+            found.push(`${selector} drawn by ${font.familyName} (${font.glyphCount} glyphs${font.isCustomFont ? '' : ', system font'}), not by ${named.join(' or ')}: fonts.css needs the font for script ${script} in ${locale}'s stack, before any fallback`);
+          for (const name of named.slice(1)) if (!fonts.some(font => drawnBy(font, name)))
+            found.push(`${selector}: ${name} is named for ${locale} (${script}) but draws nothing`);
+        }
+        return found;
+      };
+      await expect.poll(problems, { message: `${url}: the fonts drawing ${locale} (${script})`, timeout: 15_000 }).toEqual([]);
+    }
+  });
+
+  // Han: Japanese and Traditional Chinese draw the same code points with different glyphs, so each needs its own font.
+  const han = locales.filter(locale => ['Jpan', 'Hant', 'Hans', 'Kore'].includes(new Intl.Locale(locale).maximize().script));
+  if (han.length > 1 && checkedLocales.some(locale => han.includes(locale))) test(`${han.join(', ')}: each Han language names a font of its own`, async ({ page }) => {
+    const fonts = {};
+    for (const locale of han) {
+      await page.goto(localizedPath(paths[0], locale));
+      fonts[locale] = namedFonts(await page.locator('h1').evaluate(node => getComputedStyle(node).fontFamily)).slice(1).join(', ');
+    }
+    for (const locale of han) {
+      expect(fonts[locale], `${locale} names no Han font in fonts.css`).not.toBe('');
+      expect(han.filter(other => other !== locale && fonts[other] === fonts[locale]), `${locale} shares ${fonts[locale]} with another Han language`).toEqual([]);
+    }
+  });
+}
