@@ -21,7 +21,8 @@ export const Route = createFileRoute('/docs/search')({
   validateSearch: docsSearchSchema,
   loaderDeps: ({ search }) => ({ q: searchQuery(search.q) }),
   loader: async ({ deps }) => {
-    const [hits, nav] = await Promise.all([deps.q ? searchDocs({ data: deps.q }) : [], getDocsNav()]);
+    const locale = getLocale();
+    const [hits, nav] = await Promise.all([deps.q ? searchDocs({ data: { q: deps.q, locale } }) : [], getDocsNav({ data: locale })]);
     return { query: deps.q, hits, nav };
   },
   head: ({ loaderData }) => {

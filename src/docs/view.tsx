@@ -14,17 +14,20 @@ import { branch, docsPath, repository } from './table.js';
 
 // A docs page (.plans/docs-site.md, decision 4): text first, then the search and question boxes, "On this page"
 // and the docs navigation; no hero, no cards. It is a site page in SiteShell, complete in the server's
-// HTML. The article is English (lang="en") inside a frame in the visitor's language. Its text comes
+// HTML. The article is in the visitor's language when it has a translation, else English (lang="en",
+// left to right) inside a frame in the visitor's language (.plans/docs-site.md, "Docs translations"). Its text comes
 // as data, the Markdown's finished tree from the server (source.server.ts), rendered with
 // hast-util-to-jsx-runtime as Fumadocs renders server-compiled Markdown: no page ships as code.
 
 export function DocsView({ locale, page, preferred }: { locale: Locale; page: DocsPageData; preferred?: Locale }) {
   const o = { locale };
   const path = docsPath(page.slug);
+  // The text's language; English inside another language's frame reads left to right.
+  const text = { lang: page.lang, dir: page.lang === locale ? undefined : 'ltr' } as const;
   const content = useMemo(() => toJsxRuntime(page.tree, { Fragment, jsx, jsxs, components: docsComponents }), [page.tree]);
   return <SiteShell locale={locale} path={path} preferred={preferred}>
     <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[12rem_minmax(0,1fr)_14rem]">
-      <article lang="en" dir="ltr" className="min-w-0 max-w-3xl break-words lg:col-start-2 lg:row-start-1" data-docs-article={page.slug}>
+      <article {...text} className="min-w-0 max-w-3xl break-words lg:col-start-2 lg:row-start-1" data-docs-article={page.slug}>
         {/* The tree is in the loader data on the server, at hydration and on navigations, so the
             article renders at once and hydration keeps the server's text. */}
         {content}
@@ -37,7 +40,7 @@ export function DocsView({ locale, page, preferred }: { locale: Locale; page: Do
         <AskForm locale={locale} />
         {page.headings.length > 0 && <nav aria-labelledby="docs-toc" className="flex flex-col gap-2 text-sm">
           <p id="docs-toc" className="font-medium">{m.docs_toc({}, o)}</p>
-          <ul lang="en" dir="ltr" className="flex flex-col gap-2">
+          <ul {...text} className="flex flex-col gap-2">
             {page.headings.map(heading => <li key={heading.id}><a className="text-muted-foreground hover:text-foreground" href={`#${heading.id}`}>{heading.text}</a></li>)}
           </ul>
         </nav>}

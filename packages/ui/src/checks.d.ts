@@ -7,8 +7,11 @@ export declare const checkedLocales: readonly string[];
 export declare function collectErrors(page: Page): string[];
 /** Resolves once React has hydrated the element. */
 export declare function hydrated(locator: Locator): Promise<void>;
-/** `oneLanguage`: site pages in one language only, listed once in the sitemap without alternates. */
-export declare function publicPageChecks(options: { paths: string[]; prerendered?: boolean; oneLanguage?: { locale: string; paths: string[] } }): void;
+/**
+ * `oneLanguage`: site pages in one language only, listed once in the sitemap without alternates; its
+ * `translations` (path to languages, that language first) lists a translated page in each, with alternates.
+ */
+export declare function publicPageChecks(options: { paths: string[]; prerendered?: boolean; oneLanguage?: { locale: string; paths: string[]; translations?: Record<string, string[]> } }): void;
 export declare function entryChecks(options: { paths: string[]; mode: 'redirect' | 'static' }): void;
 export declare function demoChecks(): void;
 /** Site pages work without JavaScript and are indexable; app pages are noindex and out of the sitemap. */

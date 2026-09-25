@@ -2,10 +2,10 @@ import { allPaths, appPaths, sitePaths } from '@joeblew999/remy-ui/paths';
 import { docsPaths } from './docs/table.js';
 
 // This app's pages beside the shared package's (paths.js owns the two kinds): the docs, site pages in
-// English only (src/docs/table.js), and beside them the docs search and the answer page, site pages
+// English and their translations (src/docs/table.js), and beside them the docs search and the answer page, site pages
 // in every language. remy-auth-app has none of them.
 
-/** Site pages in every language, with hreflang alternates. The docs are site pages too, but English only: docsPaths. */
+/** Site pages in every language, with hreflang alternates. The docs are site pages too, in English and their translations: docsPaths. */
 export { sitePaths, docsPaths };
 /** Docs search (.plans/docs-site.md, "Docs search"): a site page; with a query in its address, noindex. Not in the sitemap. */
 export const docsSearchPath = '/docs/search';

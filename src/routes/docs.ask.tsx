@@ -31,7 +31,7 @@ export const Route = createFileRoute('/docs/ask')({
   loader: async ({ deps }) => {
     const answer = askDocs({ data: { q: deps.q, locale: getLocale() } });
     const query = searchQuery(deps.q);
-    const [hits, nav] = await Promise.all([query ? searchDocs({ data: query }) : [], getDocsNav()]);
+    const [hits, nav] = await Promise.all([query ? searchDocs({ data: { q: query, locale: getLocale() } }) : [], getDocsNav({ data: getLocale() })]);
     return { question: deps.q, hits, nav, result: import.meta.env.SSR ? await answer : answer };
   },
   // The router keeps each question's answer for the visit (keyed by q, loaderDeps), so going back from a

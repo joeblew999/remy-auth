@@ -378,3 +378,37 @@ Checks (`tests/docs.spec.ts`, "docs search"): a known phrase leads from a docs p
 section's heading, without JavaScript, in every checked language, and result pages are `noindex`;
 the empty page shows the box, is indexable and self-canonical; a query with no hits says so and
 lists the docs; with JavaScript, results are in-app links with no errors.
+
+## Docs translations (2026-09-25)
+
+Owner: docs translation; plumbing proved with one language, Spanish. Survey: installed `fumadocs-core`
+16.15.14 (`dist/i18n`, `dist/search/server.js`). Its `loader()` i18n (`parser: 'dir'`) assumes one
+content folder per language; this app reads repository files in place through a collection, so the
+docs table keeps that job with one rule, and search uses Fumadocs' own i18n server.
+
+- **Files:** a translation lives at `docs/i18n/<locale>/<the English file's path>` (for example
+  `docs/i18n/es/docs/tooling.md`). `docsFile(row, locale, exists)` in `src/docs/table.js` is the one
+  rule: the translation when it exists, else the English file (`exists` is the disk in Node, the
+  pages Fumadocs compiled in the Worker). `source.config.ts` compiles every file under `docs/i18n/`
+  whose path names a docs table file; a translation's relative links resolve from its English file's
+  folder, so links are copied unchanged. Headings keep the English ids with Fumadocs' `## Título [#id]`
+  wherever the translated text would slug differently, so anchors and links between pages work.
+- **Pages:** a locale with a translation renders it (`<article lang>` of that locale), canonical to
+  itself, with hreflang alternates for every language the page has (English as x-default); the English
+  page lists the same alternates. A locale without one keeps English text, canonical to /en, no
+  alternates. The docs navigation shows translated titles. The sitemap follows `docsLangs`, the same rule.
+- **Search:** `createI18nSearchAPI('advanced')` with `defineI18n`, each index tagged with its locale
+  (Fumadocs' default multilingual tokenizer; `localeMap` is deprecated in this version). A locale
+  without translations searches English.
+- **Answers:** `docsObjectKey(slug, locale)`: English at the bucket's root, a translation at
+  `<locale>/<slug>.md`; `docs:publish` puts both and deletes stale keys as before. A citation of
+  `<locale>/<slug>.md` opens `/<locale>/docs/<slug>`; an English one opens in the visitor's language.
+- **Add a language:** drop translated files into `docs/i18n/<locale>/` at the English paths (any subset;
+  missing pages fall back to English), keep the headings' order and add `[#english-id]` where a
+  heading slugs differently (`tests/docs.spec.ts` checks the ids match), then `mise run
+  project:test` and, after deploy, `docs:publish`.
+- **Checks** (`tests/docs.spec.ts`): each checked language shows its translation or English with the
+  right `lang`, canonical and alternates and the English ids; links in every translation resolve; the
+  sitemap lists each page once per language it has; a Spanish phrase finds its Spanish section while
+  English and Arabic search English; every bucket key round-trips to its page in that language. The
+  shared sitemap check takes the translations (`publicPageChecks({ oneLanguage: { translations } })`).

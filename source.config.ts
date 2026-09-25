@@ -1,5 +1,5 @@
 import { dirname, join, relative, resolve } from 'node:path';
-import { statSync } from 'node:fs';
+import { readdirSync, statSync } from 'node:fs';
 import { defineCollections, defineConfig } from 'fumadocs-mdx/config';
 import { pageSchema } from 'fumadocs-core/source/schema';
 import type { Root, Link } from 'mdast';
@@ -7,7 +7,7 @@ import type { Root as HastRoot, Element } from 'hast';
 import { valueToEstree } from 'estree-util-value-to-estree';
 import type { VFile } from 'vfile';
 import { visit } from 'unist-util-visit';
-import { branch, docsPath, docsRowForFile, docsTable, firstHeading, repository } from './src/docs/table.js';
+import { branch, docsI18nDir, docsPath, docsRowForFile, docsTable, docsTranslationOf, firstHeading, repository } from './src/docs/table.js';
 
 // Fumadocs MDX over the repository's own Markdown, read in place (.plans/docs-site.md, D1): the docs
 // table names the files, nothing is copied, and the generated entry files live in .source/ (ignored).
@@ -15,6 +15,12 @@ import { branch, docsPath, docsRowForFile, docsTable, firstHeading, repository }
 // browser bundle.
 
 const root = import.meta.dirname;
+
+/** The translations on disk (.plans/docs-site.md, "Docs translations"): docs/i18n/<locale>/<a docs table file>. */
+const translations = readdirSync(join(root, docsI18nDir), { recursive: true, encoding: 'utf8' })
+  .map(path => `${docsI18nDir}/${path.split('\\').join('/')}`)
+  .filter(path => docsTranslationOf(path))
+  .sort();
 
 
 /**
@@ -24,7 +30,9 @@ const root = import.meta.dirname;
  */
 function remarkRepositoryLinks() {
   return (tree: Root, file: VFile) => {
-    const from = relative(root, dirname(file.path));
+    // A translation links as its English file does: its links resolve from the English file's folder.
+    const path = relative(root, file.path).split('\\').join('/');
+    const from = dirname(docsTranslationOf(path)?.row.file ?? path);
     visit(tree, 'link', (node: Link) => {
       if (/^[a-z][a-z0-9+.-]*:/i.test(node.url) || node.url.startsWith('#') || node.url.startsWith('/')) return;
       const [path, hash] = node.url.split('#');
@@ -62,7 +70,7 @@ function rehypeExportTree() {
 export const docs = defineCollections({
   type: 'doc',
   dir: '.',
-  files: docsTable.map(row => row.file),
+  files: [...docsTable.map(row => row.file), ...translations],
   // Lazy: the Worker loads a page's compiled content only when that page is requested; the page's
   // `tree` export travels as data (src/docs/source.server.ts), and the browser entry is not used.
   async: true,

@@ -14,7 +14,7 @@ export const docsSearchSchema = z.object({ q: z.catch(z.optional(z.string()), un
 /** The query as searched: trimmed, at most searchMaxLength characters. */
 export const searchQuery = (q = '') => q.trim().slice(0, searchMaxLength);
 
-/** Searches on the server. */
+/** Searches on the server: a query alone searches English; with a locale, that locale's docs (English where it has no translations). */
 export const searchDocs = createServerFn({ method: 'GET' })
-  .validator((q: string) => searchQuery(q))
-  .handler(({ data }) => docsSearch(data));
+  .validator((data: string | { q: string; locale?: string }) => (typeof data === 'string' ? { q: searchQuery(data) } : { q: searchQuery(data.q), locale: data.locale }))
+  .handler(({ data }) => docsSearch(data.q, data.locale));

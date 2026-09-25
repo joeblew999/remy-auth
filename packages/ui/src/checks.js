@@ -54,7 +54,9 @@ export function collectErrors(page) {
  * paths are 404s, the sitemap lists only localized self-canonical URLs with hreflang
  * alternates, right-to-left languages mirror the header, and every page fits a phone.
  * `oneLanguage` names site pages written in one language only (remy-auth's docs): the sitemap lists
- * each once, in that language, without alternates; every other expectation stays as it is.
+ * each once, in that language, without alternates; every other expectation stays as it is. Its
+ * `translations` names, per path, the languages such a page also has its own text in (English first):
+ * the sitemap lists it in each of them, self-canonical, with those as alternates and x-default.
  */
 export function publicPageChecks({ paths, prerendered = false, oneLanguage = { locale: baseLocale, paths: [] } }) {
   for (const locale of checkedLocales) {
@@ -97,15 +99,25 @@ export function publicPageChecks({ paths, prerendered = false, oneLanguage = { l
     const xml = await sitemap.text();
     const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
     const localized = locales.flatMap(locale => paths.map(path => `${baseURL}${localizedPath(path, locale)}`));
-    const single = oneLanguage.paths.map(path => `${baseURL}${localizedPath(path, oneLanguage.locale)}`);
-    expect([...urls].sort()).toEqual([...localized, ...single].sort());
+    const langsOf = path => ((oneLanguage.translations?.[path]?.length ?? 0) > 1 ? oneLanguage.translations[path] : [oneLanguage.locale]);
+    const single = oneLanguage.paths.filter(path => langsOf(path).length === 1).map(path => `${baseURL}${localizedPath(path, oneLanguage.locale)}`);
+    const translated = oneLanguage.paths.filter(path => langsOf(path).length > 1);
+    const translatedUrls = translated.flatMap(path => langsOf(path).map(locale => `${baseURL}${localizedPath(path, locale)}`));
+    expect([...urls].sort()).toEqual([...localized, ...single, ...translatedUrls].sort());
     for (const url of urls) {
       const response = await request.get(url);
       expect(response.status(), url).toBe(200);
       expect(await response.text(), url).toContain(`<link rel="canonical" href="${url}"`);
     }
-    for (const lang of [...locales, 'x-default']) expect(xml.match(new RegExp(`hreflang="${lang}"`, 'g'))?.length, lang).toBe(localized.length);
+    // Every translated page's URL lists each of its languages and x-default once.
+    const extra = lang => translated.reduce((sum, path) => sum + (lang === 'x-default' || langsOf(path).includes(lang) ? langsOf(path).length : 0), 0);
+    for (const lang of [...locales, 'x-default']) expect(xml.match(new RegExp(`hreflang="${lang}"`, 'g'))?.length ?? 0, lang).toBe(localized.length + extra(lang));
     for (const url of single) expect(xml, url).toContain(`<url><loc>${url}</loc></url>`);
+    for (const path of translated) {
+      const alternates = [...langsOf(path).map(lang => [lang, lang]), ['x-default', oneLanguage.locale]]
+        .map(([lang, locale]) => `<xhtml:link rel="alternate" hreflang="${lang}" href="${baseURL}${localizedPath(path, locale)}"/>`).join('');
+      for (const locale of langsOf(path)) expect(xml, `${locale}${path}`).toContain(`<url><loc>${baseURL}${localizedPath(path, locale)}</loc>${alternates}</url>`);
+    }
     expect(await (await request.get('/robots.txt')).text()).toContain('/sitemap.xml');
   });
 
