@@ -5,13 +5,13 @@
 ```sh
 mise run project:dev       # http://127.0.0.1:5173/en
 mise run project:preview   # Production build on local Workers, port 4173
-mise run project:verify    # Tooling, types, build, browser tests and package check
+mise run project:check     # Tier 0: typecheck and build
 ```
 
 Google Chrome must be installed. Everything runs locally in the Workers runtime;
 no Cloudflare account, database or production credentials are needed. Browser
-tests own port 4173 and refuse to reuse an unrelated process. Stop a manual preview
-before verification; the development server on 5173 can remain running.
+tests own `PREVIEW_PORT` (default 4173; each agent sets its own) and refuse to reuse an unrelated
+process. Stop a manual preview before a test tier; the development server on 5173 can remain running.
 
 ## One scaffold for local and Cloudflare
 
@@ -26,11 +26,10 @@ Development uses the same Worker source and Cloudflare runtime with hot reload.
 | `project:dev` | Local Workers, hot reload, port 5173 |
 | `project:build` | Build and Wrangler deployment dry run; no upload |
 | `project:preview` | Build, then serve the production artifact on Cloudflare's local host at `PREVIEW_PORT` (4173) |
-| `project:test` | Level 1: build, then run our own checks on the same local host (fast) |
-| `project:test:quick` | Level 1 in a few languages only, for the edit loop; not a gate |
-| `project:test:google` | Level 2: Lighthouse audits and Core Web Vitals locally (slow; CI runs it on every push) |
-| `cf:deploy` | Build, then upload to the authenticated Cloudflare account |
-| `cf:preview` | Upload this branch as a preview beside production, then run level 1 against it |
+| `project:check` … `project:verify` | The test tiers, on the same local host ([rule](how-we-work.md#gates-before-anything-leaves-the-machine), [tasks](../tasks/README.md)) |
+| `project:test:google` / `project:test:cwv` | Google's level: Lighthouse audits locally; Core Web Vitals on a throwaway Cloudflare Worker |
+| `cf:deploy` | Build, then upload to the authenticated Cloudflare account (no tests unless `GATE` picks a tier) |
+| `cf:preview` | Deploy this commit as a throwaway Worker, run level 1 against it, delete it |
 | `project:test:remote` | Same tests against `TEST_BASE_URL`; no local server or deployment |
 | `project:report` / `project:report:remote` | Open the last local or remote run's HTML report, including Lighthouse reports |
 
@@ -85,7 +84,7 @@ JavaScript; app pages use `LanguageMenu`, shadcn's DropdownMenu calling Paraglid
 
 ## What is implemented
 
-Every page exists in every locale (`/en`, `/es`, `/ar` prefixes); the table names them without it.
+Every page exists in every locale (13 prefixes such as `/en`, `/ar`, `/ja`; the docs pages in English only); the table names them without it.
 
 | Route | Kind | Behavior |
 | --- | --- | --- |
@@ -153,26 +152,25 @@ runs them on server-rendered ones.
 
 ## Evidence and limits
 
-The automated checks cover catalog parity and plural-category coverage, every
-locale's HTML with JavaScript disabled (language, direction, metadata, endonym
-links), the formats page's values against Node's own Intl per locale, the entry
-redirects and remembered choice, the language hint, concurrent locale requests, hydration without console errors,
-client-only content and button interactions, the demo form's localized validation
-and plural confirmation, same-tab language navigation, HTTP status and sitemap
-behavior with every listed URL self-canonical and cross-linked by `hreflang`,
-right-to-left mirroring, and narrow-screen overflow on every page. Lighthouse audits the site pages `/en`, `/es`, `/ar` and `/en/formats` (app pages are noindex by design)
-in its accessibility, SEO, best-practices and agentic-browsing categories; the pinned
-CLI excludes Performance by design, so Google's pinned `lighthouse` package gates that
-category on `/en` (mobile and desktop) and `/en/formats`: a Performance score of at least
-0.9 and lab Core Web Vitals within Google's good thresholds (LCP 2.5 s, CLS 0.1, TBT 200 ms). The same suite runs locally and against a deployed URL.
-`project:verify` also type-checks, builds and dry-runs deployment packaging for the Worker. Chrome DevTools CLI is available for
-manual snapshots, interactions and screenshots.
+What the checks cover is the checks themselves: `tests/` and the package's
+`@joeblew999/remy-ui/checks` (each check's title says what it proves); the tiers that run them are in
+[how we work](how-we-work.md#gates-before-anything-leaves-the-machine). In short: every page in every
+language without JavaScript (language, direction, metadata, links), catalogs and plurals, the formats
+values against Intl, entry redirects and the language hint, hydration, the demo form and the API,
+HTTP statuses, the sitemap and `hreflang`, security headers and the CSP nonce, narrow screens, and
+the docs, search and ask pages.
 
-The Worker retains logs/traces configuration and emits redacted structured request
-logs locally. Hosted logs, traces and Google indexing need a subsequent deployment
-and external validation. Canonical URLs currently use the request origin; choose
-the production public origin before deployment. This proof contains no Better Auth
-server, credentials, sessions, D1 database, authorization or cross-app SSO.
+Google's level covers site pages only (app pages are noindex by design): Lighthouse audits `/en`
+(mobile and desktop), `/es`, `/ar`, `/en/formats` and `/en/docs/gui`
+([`tests/lighthouse.spec.ts`](../tests/lighthouse.spec.ts)); Core Web Vitals, from Google's pinned
+`lighthouse` package, judge `/en` (mobile and desktop), `/en/formats` and `/en/docs/gui`
+([`tests/performance.spec.ts`](../tests/performance.spec.ts)) against Google's good thresholds (LCP
+2.5 s, CLS 0.1, TBT 200 ms, Performance at least 0.9), on a throwaway Cloudflare Worker
+(`project:test:cwv`), not localhost.
+
+Limits: no Better Auth server, credentials, sessions, D1 database, authorization or cross-app SSO
+yet. The site is served from its workers.dev address (`DEPLOY_ORIGIN`); the production public origin and
+Search Console are owner decisions ([now](../.plans/now.md)).
 
 Known tooling notices: Node may print the Chrome DevTools localStorage experimental
 warning; npm reports unapproved upstream install scripts; Vite's isolated package

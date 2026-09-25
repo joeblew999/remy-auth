@@ -69,7 +69,7 @@ CLI passthrough tasks accept upstream flags directly, such as
 | `ui:*` | Compile the shared catalogs (`ui:generate`), regenerate the shadcn components and theme (`ui:components`, `ui:theme`), prove them untouched (`ui:verify`), pack and release the package (`ui:pack`, `ui:release`) |
 | `skills:*` | Install, list and remove the pinned official skills |
 | `auth:*` | Better Auth CLI and diagnostics |
-| `cf:*` | Cloudflare CLI, live logs and deployment (CLI and logs are shared tasks) |
+| `cf:*` | Cloudflare CLI, live logs, deployment (`cf:deploy`), throwaway check Workers (`cf:preview`, `cf:preview-delete`), stored logs and AI usage (`cf:events`, `cf:ai-*`); shared tasks, listed in the [tasks README](../tasks/README.md#cloudflare-tasks) |
 | `api:*` | The generated OpenAPI document a running Worker serves (`api:spec`, `--urls` for its operations; shared task) |
 | `browser:*` | Chrome DevTools CLI, session lifecycle and MCP server |
 | `web:*` | Modern web guidance search and retrieval |
@@ -93,7 +93,12 @@ will need its own tests when Better Auth is integrated.
 
 ### Verification
 
-Run `mise run project:verify` at any time; `project:setup` and `packages:upgrade` also finish with it. It checks
+Tests run in tiers, from `project:check` (typecheck and build) to `project:verify` (everything,
+every language); the tiers and when to use each are in
+[how we work](how-we-work.md#gates-before-anything-leaves-the-machine), the tasks in the
+[tasks README](../tasks/README.md). Deploys run no tests unless `GATE` picks a tier.
+
+Run `mise run project:verify` before a release; `project:setup` and `packages:upgrade` also finish with it. It checks
 mise tasks, installed dependencies, CLI versions, manifest/lockfile consistency,
 Wrangler configuration and observability settings, and every skill's pinned
 source, files and Claude symlink. It uses the existing local installation and
@@ -318,10 +323,7 @@ mise run cf:ai-gateway                     # REMOTE: the gateway's settings
 mise run cf:ai-gateway -- rate-limit off   # REMOTE: change a setting (read back after); also logs on|off
 ```
 
-Tokens, in the gitignored `mise.local.toml` (Wrangler's login covers AI Search and secrets, not the
-gateway or stored logs): `CLOUDFLARE_OBSERVE_TOKEN` with **AI Gateway Read** and **Workers
-Observability Write** for `cf:events`, `cf:ai-usage`, `cf:ai-check`; `CLOUDFLARE_AI_EDIT_TOKEN` with
-**AI Gateway Edit** for changing the gateway, kept apart because it can also delete it.
+Tokens: see [secrets](#secrets-fnox) below.
 
 Costs: indexing is a few embeddings (a full reindex about $0.0005); a search without an answer next to
 nothing; an answer about $0.0001 to $0.0007, and $0 when AI Search's cache has it.
@@ -336,10 +338,25 @@ mise run cf:ai-usage                    # AI Gateway, last 7 days: calls, cache,
 mise run cf:ai-check                    # AI Search and gateway settings against Cloudflare's advice; fails on FAIL
 ```
 
-Wrangler's login reads AI Search but cannot be granted AI Gateway or Workers Logs access. Those need
-`CLOUDFLARE_OBSERVE_TOKEN`, an API token with **AI Gateway Read** and **Workers Observability Write**
-(the only permission Cloudflare's query API accepts, even for reading), created at
-<https://dash.cloudflare.com/profile/api-tokens> and kept in the gitignored `mise.local.toml`:
+### Secrets: fnox
+
+Wrangler's login covers deploys, AI Search and Worker secrets, but cannot be granted AI Gateway or
+Workers Logs access. For those, the tasks read tokens from the environment:
+
+- `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`: the shared Cloudflare token and account, the
+  same keychain items in every joeblew999 repo. [`fnox.toml`](../fnox.toml) names them (values stay
+  in the macOS keychain, never in the file); `fnox` is pinned in `mise.toml`. Run a task with them:
+  `fnox exec -- mise run cf:ai-usage`. Set one with `fnox set -p keychain CLOUDFLARE_API_TOKEN <token>`
+  (never omit `-p keychain`: without it the value is written to `fnox.toml` in plain text). When set,
+  `CLOUDFLARE_API_TOKEN` is used for everything.
+- `CLOUDFLARE_OBSERVE_TOKEN`, a narrower alternative: **AI Gateway Read** and **Workers Observability
+  Write** (the only permission Cloudflare's query API accepts, even for reading), for `cf:events`,
+  `cf:ai-usage`, `cf:ai-check`.
+- `CLOUDFLARE_AI_EDIT_TOKEN`: **AI Gateway Edit**, only for changing the gateway with
+  `cf:ai-gateway`, kept apart because it can also delete it.
+
+The last two are created at <https://dash.cloudflare.com/profile/api-tokens> and kept in the
+gitignored `mise.local.toml`:
 
 ```toml
 [env]
