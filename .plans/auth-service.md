@@ -100,7 +100,7 @@ below, which assumed organizations for every tenant.
 
 ## Proposed decisions 1, 2, 4 and 5
 
-Proposed 2026-09-25, awaiting owner confirmation. Drafted from the
+Proposed 2026-09-25; confirmed by the owner 2026-09-25 ("I approve all your recommendations"), with decision 6 refining decision 1: organizations only for apps that ask for tenants. Drafted from the
 [ecosystem inventory](better-auth-ecosystem.md), the installed Better Auth skills
 (`better-auth-best-practices`, `better-auth-security-best-practices`, `organization-best-practices`,
 `two-factor-authentication-best-practices`), the runtime architecture below, and Better Auth's
