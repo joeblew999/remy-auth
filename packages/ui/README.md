@@ -14,8 +14,11 @@ Exports: `button`, `styles.css` (theme tokens and the language components' style
 (Paraglide's `getLocale`, `setLocale`, `localizeHref`, `localizeUrl`, `deLocalizeHref`,
 `cookieName` and text `direction`, plus `localeName`), `locale-info` (calendars, digits,
 clock and week conventions), `seo` (canonical and hreflang data from the URL patterns),
-`language` (switcher and hint), `react-router` (Paraglide's middleware as root middleware,
-`suggestedLocale`, `redirectToLocalized`, `pageMeta`; `react-router` is an optional peer),
+`language` (switcher and hint), `tanstack` (`localizedWorker`, the Worker entry combining
+`withObservability`, Paraglide's middleware and entry redirects around TanStack Start;
+`localeRewrite` for the router; `pageHead` for a route's title, description, canonical and
+hreflang; `suggestedLocale` and `suggestedLocaleInBrowser`; `@tanstack/react-router` is an
+optional peer; `pages` uses its `Link`),
 `client` (`useSuggestedLocale`, `DeviceTime` for prerendered apps), `cloudflare`
 (`placeFromCloudflare`), `samples` (the fixed values the formats and demo pages render) and
 `checks` (shared Playwright checks: public pages, entry URLs, demo, formats, Lighthouse and

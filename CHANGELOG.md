@@ -4,6 +4,29 @@ All notable changes to the shared UI package `@joeblew999/remy-ui` are documente
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 package follows [Semantic Versioning](https://semver.org/).
 
+## [0.9.0-rc.0] - 2026-09-25
+
+Pre-release for the move to TanStack Start and Router ([plan](.plans/tanstack.md)); not published.
+
+### Added
+- `@joeblew999/remy-ui/tanstack`: `localizedWorker(service, start)`, the Worker entry for a
+  server-rendered Start app (`withObservability` around Paraglide's middleware around Start's
+  handler, which gets the original request so `request.cf` reaches server functions;
+  un-localized entry URLs answer 302 with `Vary`; HTML is `no-store`); `entryRedirect`;
+  `localeRewrite`, the router `rewrite` (Paraglide's `deLocalizeUrl`/`localizeUrl`);
+  `pageHead({ path, title, description })` for a route's `head()`: title, description,
+  self-canonical and reciprocal hreflang; `suggestedLocale(request)` and
+  `suggestedLocaleInBrowser(page)` for the language hint.
+
+### Changed
+- `pages`: in-app links are TanStack `Link`s to de-localized paths with `preload="intent"`;
+  the router's rewrite adds the locale. Language changes stay plain anchors (full navigations).
+- Peer dependency `react-router` replaced by `@tanstack/react-router` (optional).
+
+### Removed
+- `@joeblew999/remy-ui/react-router` (`languageMiddleware`, `redirectToLocalized`, `pageMeta`,
+  `requireLocale`, `suggestedLocale`); routes no longer carry a `:locale` segment.
+
 ## [0.8.0] - 2026-09-24
 
 ### Added

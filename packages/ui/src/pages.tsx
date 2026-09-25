@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
+import { Link } from '@tanstack/react-router';
 import { ArrowLeftIcon } from 'lucide-react';
 import { locales, getTextDirection as direction, type Locale } from './paraglide/runtime.js';
 import { m } from './paraglide/messages.js';
@@ -15,7 +15,10 @@ import { Field, FieldError, FieldGroup, FieldLabel } from './components/field';
 import { Input } from './components/input';
 
 // The pages every Remy app built on this package shows, and that the shared checks test.
-// Apps keep their route modules (loaders, meta, runtime wiring) and render these.
+// Apps keep their route modules (loaders, head, runtime wiring) and render these.
+// In-app links are TanStack Links to de-localized paths: the router's rewrite (localeRewrite in
+// ./tanstack) adds the page's locale, and they preload on intent. Language changes stay full
+// navigations through the plain anchors of LanguageSwitcher and LanguageHint.
 
 export { publicPaths } from './paths.js';
 
@@ -25,7 +28,7 @@ export function Shell({ locale, path = '', preferred, children }: { locale: Loca
     <a className="skip-link sr-only focus:not-sr-only focus:fixed focus:start-2 focus:top-2 focus:z-10 focus:bg-background focus:p-3" href="#main">{m.skip_link({}, { locale })}</a>
     <LanguageHint locale={locale} path={path} preferred={preferred} />
     <header className="site-header flex items-center justify-between gap-5 border-b py-6">
-      <Link className="brand inline-flex items-center text-2xl font-bold tracking-tight text-foreground" to={`/${locale}`}>
+      <Link className="brand inline-flex items-center text-2xl font-bold tracking-tight text-foreground" to="/" preload="intent">
         <span aria-hidden="true" className="me-2 grid size-8 place-items-center rounded-lg bg-primary text-primary-foreground">r</span>remy<span aria-hidden="true" className="text-primary">.</span>
       </Link>
       <LanguageSwitcher locale={locale} path={path} />
@@ -39,7 +42,7 @@ export function Shell({ locale, path = '', preferred, children }: { locale: Loca
 
 function Intro({ locale, label, title, intro, back = true }: { locale: Locale; label: string; title: string; intro: string; back?: boolean }) {
   return <>
-    {back && <a className="inline-flex items-center gap-1 text-sm text-muted-foreground" href={`/${locale}`}><ArrowLeftIcon aria-hidden="true" className="size-4 rtl:rotate-180" />{m.home_link({}, { locale })}</a>}
+    {back && <Link className="inline-flex items-center gap-1 text-sm text-muted-foreground" to="/" preload="intent"><ArrowLeftIcon aria-hidden="true" className="size-4 rtl:rotate-180" />{m.home_link({}, { locale })}</Link>}
     <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{label}</p>
     <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">{title}</h1>
     <p className="max-w-lg text-lg leading-relaxed text-muted-foreground">{intro}</p>
@@ -52,8 +55,8 @@ export function HomePage({ locale, preferred }: { locale: Locale; preferred?: Lo
     <section className="mx-auto flex max-w-2xl flex-col gap-6">
       <Intro locale={locale} back={false} label={m.public_label({}, o)} title={m.home_title({}, o)} intro={m.home_intro({}, o)} />
       <div className="flex flex-wrap gap-3">
-        <a className={buttonVariants({ size: 'lg' })} href={`/${locale}/demo`}>{m.demo_link({}, o)}</a>
-        <a className={buttonVariants({ size: 'lg', variant: 'outline' })} href={`/${locale}/formats`}>{m.formats_link({}, o)}</a>
+        <Link className={buttonVariants({ size: 'lg' })} to="/demo" preload="intent">{m.demo_link({}, o)}</Link>
+        <Link className={buttonVariants({ size: 'lg', variant: 'outline' })} to="/formats" preload="intent">{m.formats_link({}, o)}</Link>
       </div>
     </section>
   </Shell>;
