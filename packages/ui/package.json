@@ -33,7 +33,9 @@
     "./components/*": "./src/components/*.tsx",
     "./pages": "./src/pages.tsx",
     "./paths": "./src/paths.js",
-    "./worker": "./src/worker.ts"
+    "./worker": "./src/worker.ts",
+    "./showcase/*.checks": "./src/showcase/*.checks.js",
+    "./showcase/*": "./src/showcase/*.tsx"
   },
   "peerDependencies": {
     "react": "^19.2.0",

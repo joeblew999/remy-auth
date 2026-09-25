@@ -17,6 +17,11 @@ Pre-release for the move to TanStack Start and Router ([plan](.plans/tanstack.md
   `pageHead({ path, title, description })` for a route's `head()`: title, description,
   self-canonical and reciprocal hreflang; `suggestedLocale(request)` and
   `suggestedLocaleInBrowser(page)` for the language hint.
+- `DemoPage` takes optional `onReserve` (called once the form's own validation passes; its
+  field errors or confirmation message are shown) and `onDirtyChange` (unsaved input), and
+  exports the `Reservation` and `ReservationResult` types. Without them it behaves as before.
+- Export patterns `./showcase/*` (`src/showcase/*.tsx`) and `./showcase/*.checks`
+  (`src/showcase/*.checks.js`) for the TanStack showcase's components and checks.
 
 ### Changed
 - `pages`: in-app links are TanStack `Link`s to de-localized paths with `preload="intent"`;

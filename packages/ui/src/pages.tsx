@@ -62,11 +62,28 @@ export function HomePage({ locale, preferred }: { locale: Locale; preferred?: Lo
   </Shell>;
 }
 
-export function DemoPage({ locale, preferred }: { locale: Locale; preferred?: Locale }) {
+/** A reservation the demo form accepted on its own checks. */
+export type Reservation = { name: string; guests: number };
+/** The answer to a reservation: field errors to show like the form's own, or the confirmation to show instead of the default one. */
+export type ReservationResult = { errors?: { name?: string; guests?: string }; message?: string };
+
+export function DemoPage({ locale, preferred, onReserve, onDirtyChange }: {
+  locale: Locale; preferred?: Locale;
+  /** Called once the form's own validation passes, for example a server function that validates again. Without it the form confirms locally. */
+  onReserve?: (reservation: Reservation) => ReservationResult | Promise<ReservationResult>;
+  /** Told whenever the form holds input that has not been reserved yet, for example to warn before leaving. */
+  onDirtyChange?: (dirty: boolean) => void;
+}) {
   const o = { locale };
   const [count, setCount] = useState(0);
   const [errors, setErrors] = useState<{ name?: string; guests?: string }>({});
-  const [reservation, setReservation] = useState<{ name: string; count: number } | null>(null);
+  const [reservation, setReservation] = useState<{ name: string; count: number; message?: string } | null>(null);
+  function settle(next: typeof errors, accepted: { name: string; count: number; message?: string }) {
+    const ok = Object.keys(next).length === 0;
+    setErrors(next);
+    setReservation(ok ? accepted : null);
+    if (ok) onDirtyChange?.(false);
+  }
   function reserve(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -75,8 +92,8 @@ export function DemoPage({ locale, preferred }: { locale: Locale; preferred?: Lo
     const next: typeof errors = {};
     if (!name) next.name = m.name_required({}, o);
     if (!Number.isInteger(guests) || guests < 1 || guests > 20) next.guests = m.guests_invalid({}, o);
-    setErrors(next);
-    setReservation(Object.keys(next).length ? null : { name, count: guests });
+    if (Object.keys(next).length || !onReserve) return settle(next, { name, count: guests });
+    void Promise.resolve(onReserve({ name, guests })).then(result => settle(result.errors ?? {}, { name, count: guests, message: result.message }));
   }
   return <Shell locale={locale} path="/demo" preferred={preferred}>
     <section className="mx-auto flex max-w-2xl flex-col gap-6">
@@ -94,7 +111,7 @@ export function DemoPage({ locale, preferred }: { locale: Locale; preferred?: Lo
       <Card>
         <CardHeader><CardTitle>{m.form_heading({}, o)}</CardTitle></CardHeader>
         <CardContent>
-          <form noValidate onSubmit={reserve} className="flex flex-col gap-6">
+          <form noValidate onSubmit={reserve} onInput={() => onDirtyChange?.(true)} className="flex flex-col gap-6">
             <FieldGroup>
               <Field data-invalid={errors.name ? true : undefined}>
                 <FieldLabel htmlFor="name">{m.name_label({}, o)}</FieldLabel>
@@ -108,7 +125,7 @@ export function DemoPage({ locale, preferred }: { locale: Locale; preferred?: Lo
               </Field>
             </FieldGroup>
             <div><Button type="submit">{m.submit({}, o)}</Button></div>
-            <p role="status" className="reserved min-h-6">{reservation && m.reserved({ name: reservation.name, count: reservation.count }, o)}</p>
+            <p role="status" className="reserved min-h-6">{reservation && (reservation.message ?? m.reserved({ name: reservation.name, count: reservation.count }, o))}</p>
           </form>
         </CardContent>
       </Card>
