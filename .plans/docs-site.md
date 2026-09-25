@@ -418,6 +418,20 @@ Enter follows the selected result, Escape closes; "Ask AI" makes no call while t
 chosen, and shows the local "no answer" with the link to the answer page (local only: a deployed
 target would pay for a model call).
 
+**Superseded the same day (owner: "The search dialogue in top is not great UX. It floats above and
+wastes screen real estate. Make it at the top of the docs area and then just update below").** The
+dialog is gone: `src/docs/live-search.tsx` is an inline box (`#docs-q`, the one `role="search"` form
+on a docs page) whose results replace the article as the visitor types (same Query + Pacer); choosing
+a result empties the box so the page it opens shows; "Ask AI" is the first submit button (Enter
+presses it), asks once and shows the answer in place, with a link to `/docs/ask`. The header link and
+⌘K / Ctrl+K focus the box. Without JavaScript the form goes to `/docs/search`, or `/docs/ask` through
+the button's `formaction`. `dialog`, `command` (and the `input-group` and `textarea` they brought) left
+`ui:components`, and `cmdk` left the package; `search_panel_ask` is no longer used. The checks keep
+their intents for the box: focus from the link and both shortcuts, results as you type linking to the
+heading, an in-app navigation that shows the page, Escape clears; no ask while typing, exactly one
+when asked (a call to a function the typing never called), the local "no answer" and the answer page
+link; and the no-JavaScript form (`answers`, the answer page check).
+
 ## Docs translations (2026-09-25)
 
 Owner: docs translation; plumbing proved with one language, Spanish. Survey: installed `fumadocs-core`

@@ -54,12 +54,17 @@ export function DocsLiveSearch({ locale, children }: { locale: Locale; children:
       <Button type="submit" variant="outline" formAction={localizeHref(docsSearchPath, { locale })}
         onClick={event => { event.preventDefault(); }}>{m.search_submit({}, o)}</Button>
     </form>
-    {question === '' ? children : <div className="flex flex-col gap-6" data-docs-live-results>
+    {/* Choosing a result (a plain click, which navigates in the app) empties the box, so the page it opens shows. */}
+    {question === '' ? children : <div className="flex flex-col gap-6" data-docs-live-results
+      onClick={event => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        if ((event.target as Element).closest('a')) { setInput(''); setAsked(undefined); }
+      }}>
       {asked !== undefined && <div className="flex flex-col gap-3 rounded-lg border p-4">
         {answer.isPending
           ? <p data-asking className="flex items-center gap-2 text-muted-foreground"><Spinner />{m.ask_pending({}, o)}</p>
           : <AskAnswer locale={locale} result={answer.data ?? { status: 'no-answer' }} />}
-        <Link to="/docs/ask" search={{ q: asked }} className="text-sm font-medium text-primary underline underline-offset-4">{m.search_panel_open({}, o)}</Link>
+        <Link to="/docs/ask" search={{ q: asked }} data-ask-page className="text-sm font-medium text-primary underline underline-offset-4">{m.search_panel_open({}, o)}</Link>
       </div>}
       {query !== '' && hits.data && <SearchResults locale={locale} hits={hits.data.slice(0, 20)} />}
     </div>}

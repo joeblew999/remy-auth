@@ -363,13 +363,16 @@ test.describe('docs search', () => {
   });
 });
 
-// The live search panel (.plans/docs-site.md, "Live search panel"): shadcn's Command in its dialog, from
-// the header's Search link or ⌘K / Ctrl+K. Without JavaScript that link is the way to /docs/search.
+// The live search box (.plans/docs-site.md, "Live search panel"): at the top of the docs area; as the
+// visitor types, the results replace the page below. The header's Search link and ⌘K / Ctrl+K focus it.
+// Without JavaScript that link is the way to /docs/search, and the box is a plain form.
 test.describe('live search panel', () => {
   const query = 'Workers Logs';
   const section = sectionOf('docs/tooling.md', query);
   const searchLink = (page: Page, locale: string) =>
     page.locator('header').getByRole('link', { name: m.search_submit({}, { locale }), exact: true });
+  const searchBox = (page: Page, locale: string) =>
+    page.locator('form[role="search"]').getByLabel(m.search_label({}, { locale }), { exact: true });
 
   test('without JavaScript, the header\'s Search link leads to the search page in every language', async ({ browser }) => {
     const context = await browser.newContext({ javaScriptEnabled: false });
@@ -388,40 +391,39 @@ test.describe('live search panel', () => {
     const start = docsUrl('how-we-work', 'en');
     await page.goto(start);
     await hydrated(searchLink(page, 'en'));
-    const dialog = page.getByRole('dialog');
-    // The link opens the panel in place of the search page.
+    const box = searchBox(page, 'en');
+    const article = page.locator('article[data-docs-article]');
+    // The link goes to the box at the top of the page in place of the search page.
     await searchLink(page, 'en').click();
-    await expect(dialog).toBeVisible();
+    await expect(box).toBeFocused();
     await expect(page).toHaveURL(new RegExp(`${start}$`));
-    await page.keyboard.press('Escape');
-    await expect(dialog).toBeHidden();
     // The shortcut, with either modifier.
     for (const shortcut of ['Control+k', 'Meta+k']) {
+      await box.blur();
+      await expect(box, shortcut).not.toBeFocused();
       await page.keyboard.press(shortcut);
-      await expect(dialog, shortcut).toBeVisible();
-      await page.keyboard.press('Escape');
-      await expect(dialog, shortcut).toBeHidden();
+      await expect(box, shortcut).toBeFocused();
     }
-    await page.keyboard.press('ControlOrMeta+k');
-    await dialog.getByRole('combobox').pressSequentially(query);
+    // Results replace the page below as the visitor types; Escape clears the box and brings the page back.
+    await box.pressSequentially(query);
+    const results = page.locator('[data-docs-live-results] [data-docs-results]');
+    await expect(results).toBeVisible();
+    await expect(article).toHaveCount(0);
+    await page.keyboard.press('Escape');
+    await expect(box).toHaveValue('');
+    await expect(article).toBeVisible();
+    await expect(results).toHaveCount(0);
+    await box.pressSequentially(query);
     const target = `${docsUrl('tooling', 'en')}#${section}`;
-    const hit = dialog.locator(`[data-docs-results] a[href="${target}"]`).filter({ has: page.locator('mark') }).first();
+    const hit = page.locator(`[data-docs-live-results] [data-docs-results] a[href="${target}"]`).filter({ has: page.locator('mark') }).first();
     await expect(hit, target).toBeVisible();
     let documents = 0;
     page.on('request', request => { if (request.resourceType() === 'document') documents++; });
     await hit.click();
     await expect(page).toHaveURL(new RegExp(`${target}$`));
-    await expect(dialog).toBeHidden();
     await expect(page.locator(`article [id="${section}"]`)).toHaveCount(1);
-    // Enter follows the selected result's link.
-    await page.keyboard.press('ControlOrMeta+k');
-    await dialog.getByRole('combobox').fill(query);
-    const selected = dialog.locator('[cmdk-item][data-selected="true"] a');
-    await expect(selected).toHaveAttribute('href', /\/en\/docs/);
-    const href = await selected.getAttribute('href');
-    await page.keyboard.press('Enter');
-    await expect(page).toHaveURL(new RegExp(`${href!.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`));
-    await expect(dialog).toBeHidden();
+    await expect(results).toHaveCount(0);
+    await expect(box).toHaveValue('');
     expect(documents).toBe(0);
     expect(errors).toEqual([]);
   });
@@ -431,25 +433,38 @@ test.describe('live search panel', () => {
     const context = await browser.newContext({ extraHTTPHeaders: visitor() });
     const page = await context.newPage();
     const errors = collectErrors(page);
-    // askDocs sends the question with the page's language; searchDocs only the query.
-    const asks: string[] = [];
-    page.on('request', request => { if (request.url().includes('/_serverFn/') && decodeURIComponent(request.url()).includes('"locale"')) asks.push(request.url()); });
+    // Every server function call, by function (its path). Both searchDocs and askDocs send the text and
+    // the language, so an ask is a call to a function the typing never called.
+    const calls: string[] = [];
+    page.on('request', request => { const url = new URL(request.url()); if (url.pathname.startsWith('/_serverFn/')) calls.push(url.pathname); });
     const question = 'Where do the docs live?';
     await page.goto(docsUrl('how-we-work', 'ar'));
     await hydrated(searchLink(page, 'ar'));
     await page.keyboard.press('ControlOrMeta+k');
-    const dialog = page.getByRole('dialog');
-    await dialog.getByRole('combobox').pressSequentially(question);
-    const ask = dialog.locator('[data-ask-ai]');
-    await expect(ask).toHaveText(m.search_panel_ask({ query: question }, { locale: 'ar' }));
-    await expect(dialog.locator('[data-docs-results]').first()).toBeVisible();
-    expect(asks, 'questions asked while typing').toEqual([]);
+    const box = searchBox(page, 'ar');
+    await expect(box).toBeFocused();
+    await box.pressSequentially(question);
+    const ask = page.locator('form[role="search"] [data-ask-ai]');
+    await expect(ask).toHaveText(m.ask_submit({}, { locale: 'ar' }));
+    await expect(page.locator('[data-docs-live-results] [data-docs-results]').first()).toBeVisible();
+    const typing = new Set(calls);
+    expect(typing.size, 'one function (the search) while typing').toBe(1);
+    const asked = calls.length;
+    // Enter presses "Ask AI"; asking the same question again does not ask again.
+    await page.keyboard.press('Enter');
+    const answer = page.locator('[data-docs-live-results] [data-ask="no-answer"]');
+    await expect(answer).toHaveText(m.ask_no_answer({}, { locale: 'ar' }));
     await ask.click();
-    await expect(dialog.locator('[data-ask="no-answer"]')).toHaveText(m.ask_no_answer({}, { locale: 'ar' }));
-    expect(asks).toHaveLength(1);
-    await expect(dialog.locator('[data-ask-page]')).toHaveAttribute('href', `${localizedPath(askPath, 'ar')}?q=${encodeURIComponent(question).replace(/%20/g, '+')}`);
-    await page.keyboard.press('Escape');
-    await expect(dialog).toBeHidden();
+    await expect(answer).toBeVisible();
+    const asks = () => calls.slice(asked);
+    expect(asks()).toHaveLength(1);
+    expect(typing.has(asks()[0]), 'the ask is not the search').toBe(false);
+    await expect(page.locator('[data-docs-live-results] [data-ask-page]')).toHaveAttribute('href', `${localizedPath(askPath, 'ar')}?q=${encodeURIComponent(question).replace(/%20/g, '+')}`);
+    // Clearing the box brings the page back.
+    await box.fill('');
+    await expect(page.locator('article[data-docs-article]')).toBeVisible();
+    await expect(answer).toHaveCount(0);
+    expect(asks()).toHaveLength(1);
     expect(errors).toEqual([]);
     await context.close();
   });
@@ -488,19 +503,33 @@ test.describe('answers', () => {
       expect(answer, url).toMatch(/<meta name="robots" content="noindex"/);
       expect(answer, url).not.toMatch(/<link rel="(canonical|alternate)"/);
     }
-    const context = await browser.newContext({ javaScriptEnabled: false });
+    const context = await browser.newContext({ javaScriptEnabled: false, extraHTTPHeaders: visitor() });
     const page = await context.newPage();
     for (const locale of checkedLocales) {
-      // The form on a docs page and on the answer page: GET to the localized answer page, the question as q.
-      for (const path of [docsUrl('how-we-work', locale), localizedPath(askPath, locale)]) {
-        await page.goto(path);
-        const form = page.locator('form[role="search"]');
-        await expect(form, path).toHaveAttribute('method', 'get');
-        await expect(form, path).toHaveAttribute('action', localizedPath(askPath, locale));
-        const input = form.getByLabel(m.ask_label({}, { locale }), { exact: true });
-        await expect(input, path).toHaveAttribute('name', 'q');
-        await expect(input, path).toHaveAttribute('maxlength', String(askMaxLength));
-      }
+      const answerPage = localizedPath(askPath, locale);
+      // A docs page has one box, a GET form: its "Ask AI" button (the first, so Enter presses it) sends
+      // the box's text as q to the localized answer page.
+      const path = docsUrl('how-we-work', locale);
+      await page.goto(path);
+      const box = page.locator('form[role="search"]');
+      await expect(box, path).toHaveCount(1);
+      await expect(box, path).toHaveAttribute('method', 'get');
+      await expect(box.getByRole('button').first(), path).toHaveAttribute('formaction', answerPage);
+      const q = box.getByLabel(m.search_label({}, { locale }), { exact: true });
+      await expect(q, path).toHaveAttribute('name', 'q');
+      await expect(q, path).toHaveAttribute('maxlength', String(askMaxLength));
+      // Past the box's maxlength, as a crafted URL would be: the answer page explains it, no call.
+      await q.evaluate((input: HTMLInputElement, value) => { input.value = value; }, question);
+      await q.press('Enter');
+      await expect(page, path).toHaveURL(`${answerPage}?q=${question}`);
+      // The answer page's own form: GET to itself, the question as q.
+      await page.goto(answerPage);
+      const form = page.locator('form[role="search"]');
+      await expect(form, answerPage).toHaveAttribute('method', 'get');
+      await expect(form, answerPage).toHaveAttribute('action', answerPage);
+      const input = form.getByLabel(m.ask_label({}, { locale }), { exact: true });
+      await expect(input, answerPage).toHaveAttribute('name', 'q');
+      await expect(input, answerPage).toHaveAttribute('maxlength', String(askMaxLength));
       await expect(page.locator('[data-ask]')).toHaveCount(0);
       // The site's frame: the answer page is a site page with its docs navigation.
       await expect(page.locator('[data-zone="site"]')).toHaveText(m.zone_site({}, { locale }));

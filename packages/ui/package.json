@@ -84,7 +84,6 @@
     "@tanstack/react-form": "1.33.5",
     "@tanstack/virtual-file-routes": "1.162.0",
     "class-variance-authority": "0.7.1",
-    "cmdk": "1.1.1",
     "cn": "0.4.0",
     "country-to-currency": "3.0.1",
     "lucide-react": "1.48.0",
