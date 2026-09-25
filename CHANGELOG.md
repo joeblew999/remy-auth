@@ -90,7 +90,7 @@ All in on shadcn, and site pages kept apart from app pages. Breaking for consume
 
 ## [0.9.0] - 2026-09-25
 
-The move to TanStack Start, Router and Query, with the TanStack showcase ([plan](.plans/tanstack.md)).
+The move to TanStack Start, Router and Query, with the TanStack showcase ([plan](.plans/done/tanstack.md)).
 Replaces React Router: consumers move their routes to TanStack file routes (see remy-auth and
 remy-auth-app).
 

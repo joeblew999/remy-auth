@@ -1,7 +1,7 @@
 # All in on TanStack: Start, Router and Query across both apps and the shared package
 
-Status: agreed by the owner 2026-09-25; items 1 to 3 done on branch `tanstack` in remy-auth (level 1 green, package 0.9.0-rc.0 not published); showcase next. Owner: remy-auth. Executor/Reviewer roles as in
-the [auth plan](auth-service.md). Replaces React Router in remy-auth, remy-auth-app and
+Status: done, closed 2026-09-25 (see [Close-out](#close-out-2026-09-25)). Agreed by the owner 2026-09-25. Owner: remy-auth. Executor/Reviewer roles as in
+the [auth plan](../auth-service.md). Replaces React Router in remy-auth, remy-auth-app and
 `@joeblew999/remy-ui`, and goes all in (owner, 2026-09-25: "I want to see what it can really
 do"): every TanStack strength is used somewhere visible and proven by a check. Done in a branch
 in each repository; main keeps working until every gate passes.
@@ -58,6 +58,8 @@ logout and role changes; the showcase's caching rows use public data only.
 
 ## Work items, in order
 
+All seven are done; the evidence is in the [close-out](#close-out-2026-09-25).
+
 1. **Spike and skills (about 1 hour).** Pin the versions above. Done 2026-09-25: 22 of the 23
    TanStack skills installed from `TanStack/router` at `ddad69a`, scanned first. Swapped on
    branch `tanstack`: the `remix-run/react-router` source is gone and TanStack's `react-router`
@@ -105,7 +107,7 @@ Estimate: about a day for items 1 to 4, and another day for the showcase.
 - No `react-router` dependency remains in either app or the package.
 - The TanStack skills are installed through the shared tasks and listed in the lockfile.
 - In-app links prefetch on intent; language switches remain full navigations.
-- A hands-on pass on the deployed preview (see [how we work](../docs/how-we-work.md#multi-agent-work)) finds nothing that feels bad.
+- A hands-on pass on the deployed preview (see [how we work](../../docs/how-we-work.md#multi-agent-work)) finds nothing that feels bad.
 
 ## Hands-on pass (2026-09-25)
 
@@ -121,6 +123,23 @@ On the Cloudflare preview `https://tanstack-remy-auth.gedw99.workers.dev`, phone
 | Language hint | On a phone its text ran under its two buttons (shadcn's `AlertAction` is absolutely placed) | Buttons now flow under the text |
 | Not-found and error pages | Bare page without logo, language switch or footer: felt like leaving the site | Rendered inside the shared `Shell` |
 | First paint under DevTools network throttling | Held until the scripts load, about 2.7 s on Fast 4G and 11 s on Slow 4G, on this branch and on the live React Router site alike | Root cause under investigation; not a regression |
+
+## Close-out (2026-09-25)
+
+| Item | Evidence |
+| --- | --- |
+| 1 Spike and skills | The 23 TanStack skills are in `skills-lock.json`, installed by `mise run project:setup` |
+| 2 Package | `@joeblew999/remy-ui` 0.9.0 released (commit `d9b042a`): `tanstack.tsx` replaces the React Router glue; no `react-router` dependency remains |
+| 3 remy-auth | TanStack file routes in `src/routes`; live at https://remy-auth.gedw99.workers.dev/en on 0.10.2 |
+| 4 remy-auth-app | Prerendered on TanStack Start; live at https://remy-auth-app.gedw99.workers.dev/en on the 0.10 line |
+| 5 Showcase | Every row of the table above has its shared check in `packages/ui/src/showcase/`; both apps run them |
+| 6 Shared tasks | `tasks/project.toml` runs the TanStack/Vite dev and build; consumers include it by tag ([tasks README](../../tasks/README.md)) |
+| 7 Ship | 0.9.0 and 0.9.1 released, both apps deployed, then 0.10.0 to 0.10.2 on the same foundation; [`docs/gui.md`](../../docs/gui.md) and the [package README](../../packages/ui/README.md) updated at close |
+| Hands-on pass | [Above](#hands-on-pass-2026-09-25), on the preview before the merge; its fixes are on main |
+
+Moved elsewhere: the formats page's speed (Google's simulated mobile LCP, live) is an item in
+[now](../now.md); regrouping the formats page shipped in 0.10.2; the auth slice continues in
+the [auth plan](../auth-service.md).
 
 ## Decisions
 

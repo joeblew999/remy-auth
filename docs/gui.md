@@ -27,8 +27,10 @@ Development uses the same Worker source and Cloudflare runtime with hot reload.
 | `project:build` | Build and Wrangler deployment dry run; no upload |
 | `project:preview` | Build, then serve the production artifact on Cloudflare's local host at `PREVIEW_PORT` (4173) |
 | `project:test` | Level 1: build, then run our own checks on the same local host (fast) |
+| `project:test:quick` | Level 1 in a few languages only, for the edit loop; not a gate |
 | `project:test:google` | Level 2: Lighthouse audits and Core Web Vitals locally (slow; CI runs it on every push) |
 | `cf:deploy` | Build, then upload to the authenticated Cloudflare account |
+| `cf:preview` | Upload this branch as a preview beside production, then run level 1 against it |
 | `project:test:remote` | Same tests against `TEST_BASE_URL`; no local server or deployment |
 | `project:report` / `project:report:remote` | Open the last local or remote run's HTML report, including Lighthouse reports |
 
@@ -57,55 +59,87 @@ each named environment. Do not copy the application or use remote bindings for
 ordinary local development. Local secrets stay in ignored `.dev.vars`; deployed
 secrets are managed through Cloudflare. Local data is not uploaded by deployment.
 
+## Two kinds of page
+
+[`packages/ui/src/paths.js`](../packages/ui/src/paths.js) is the one list of pages and says what
+each kind promises; the two are never mixed.
+
+- **Site pages** (`sitePaths`: the home and formats) are for Google: complete in the server's HTML
+  without JavaScript, indexed, in the sitemap with `hreflang` alternates, and judged by level 2.
+  Their frame is `SiteShell` in [`pages.tsx`](../packages/ui/src/pages.tsx), built from static
+  shadcn parts.
+- **App pages** (`appPaths`, under `/app`) need JavaScript, carry `noindex` (added by `pageHead`)
+  and stay out of the sitemap. Their frame is `AppShell` in
+  [`app-pages.tsx`](../packages/ui/src/app-pages.tsx), shadcn's sidebar-16 block owned in
+  [`blocks/sidebar-16`](../packages/ui/src/blocks/sidebar-16/README.md).
+
+The language picker follows the kind: site pages use `LanguageSwitcher`, plain links that need no
+JavaScript; app pages use `LanguageMenu`, shadcn's DropdownMenu calling Paraglide's `setLocale`
+(both in [`language.tsx`](../packages/ui/src/language.tsx)).
+
 ## What is implemented
 
-| Route | Behavior |
-| --- | --- |
-| `/`, `/demo`, `/formats` | Redirect to the visitor's language: Paraglide's `cookie` (a remembered choice), then `preferredLanguage` (Accept-Language), else English, with `Vary`. These entry URLs are the `x-default` targets |
-| `/en`, `/es`, `/ar` | Server-rendered public page with localized content, direction, metadata and alternate links, plus a live status card (TanStack Query over a status server function: server-rendered, polled every 10 s, and a refresh that invalidates every loader and query at once, `src/invalidate.ts`) |
-| `/en/demo`, `/es/demo`, `/ar/demo` | Client-rendered counter and a localized reservation form validated in the browser and again by a server function (`src/reserve.ts`) that answers in the page's language; leaving with unsaved input asks first (`useBlocker`); indexable, listed in the sitemap; public demo, not an account screen |
-| `/en/formats`, `/es/formats`, `/ar/formats` | Server-rendered examples of the locale's calendars, numbering system, hour cycle, week start and weekend, dates, ranges, relative time, the visitor's country, city, region and local time from Cloudflare's request geolocation (server-rendered, never stored), the device's own time zone (browser-rendered), numbers, compact numbers, units, currencies and their minor units, plurals, ordinals, value variants, interpolation, locale-aware sorting, region and currency names, endonyms and reading direction. Cloudflare's place is deferred data streamed behind `Await`; `?currency`, `?count` and `?calendar` are typed, validated search params (defaults left out of URLs, invalid values redirect to the canonical URL); loader data stays fresh for five minutes |
-| `/en/time-zones/Asia/Tokyo` (any IANA name, every locale) | Server-rendered sub-resource of the formats page: the zone's localized name, offset and the sample instant there. An unknown name is a localized 404 naming it (the loader throws `notFound()`); another spelling of a known name answers 301 to the runtime's spelling. Not in the sitemap |
-| `/robots.txt`, `/sitemap.xml` | Public crawl metadata as server routes, `Cache-Control: public, max-age=3600`; other methods than GET and HEAD answer 405 with `Allow`; the sitemap lists every public path in every locale with `hreflang` alternates |
-| Unknown route or locale | HTTP 404 with the localized not-found page (an un-localized unknown path first redirects to the visitor's language, as TanStack's rewrite canonicalizes it) |
-| A page's loader failing | That route's localized error page (500 when server-rendered), never the error itself, with a retry that re-runs the loaders; every page route and the root set both problem pages (`src/problem.tsx`) |
+Every page exists in every locale (`/en`, `/es`, `/ar` prefixes); the table names them without it.
+
+| Route | Kind | Behavior |
+| --- | --- | --- |
+| `/`, `/formats`, `/app`, ... (every path without a locale) | Entry | Redirect to the visitor's language: Paraglide's `cookie` (a remembered choice), then `preferredLanguage` (Accept-Language), else English, with `Vary`. These entry URLs are the `x-default` targets |
+| `/en` | Site | Localized home with direction, metadata and alternate links |
+| `/en/formats` | Site | The locale's conventions in five sections (this language, dates and times, numbers, money, words), each search-param control in the section it changes; the dates include the visitor's place from Cloudflare's request geolocation, streamed behind `Await` and never stored, and the device's own time zone. `?currency`, `?count` and `?calendar` are typed, validated search params (defaults left out of URLs, invalid values redirect to the canonical URL); loader data stays fresh for five minutes. The content is `FormatsContent`, shared with `/app/formats` |
+| `/en/time-zones/Asia/Tokyo` (any IANA name) | Site | Sub-resource of the formats page: the zone's localized name, offset and the sample instant there. An unknown name is a localized 404 naming it (`notFound()`); another spelling of a known name answers 301. Not in the sitemap |
+| `/en/app` | App | Live status card: TanStack Query over a status server function, server-rendered, polled every 10 s, with a refresh that invalidates every loader and query at once (`src/invalidate.ts`) |
+| `/en/app/formats` | App | The formats page's content in the app frame |
+| `/en/app/demo` | App | `ssr: false`. Counter and reservation form validated in the browser and again by a server function (`src/reserve.ts`) that answers in the page's language; leaving with unsaved input asks first (`useBlocker`) |
+| `/en/app/location` | App | Cloudflare's location of the request beside the device's own, which the Geolocation API gives only after the visitor presses its button |
+| `/robots.txt`, `/sitemap.xml` | Server routes | `Cache-Control: public, max-age=3600`; methods other than GET and HEAD answer 405 with `Allow`; the sitemap lists the site pages in every locale with `hreflang` alternates |
+| Unknown route or locale | | HTTP 404 with the localized not-found page (an un-localized unknown path first redirects to the visitor's language, as TanStack's rewrite canonicalizes it) |
+| A page's loader failing | | That route's localized error page (500 when server-rendered) with a retry that re-runs the loaders; every page route and the root set both problem pages (`src/problem.tsx`) |
 
 Localized pages never redirect. When the visitor's preferred language differs from the page, a dismissible hint offers that version; choosing or dismissing is remembered in Paraglide's `PARAGLIDE_LOCALE` cookie, which only the entry URLs act on. Locale detection, the cookie, URL localisation and the redirect are Paraglide's own strategies and middleware (`packages/ui/paraglide.mjs` holds the one compiler configuration), wired as Paraglide's official TanStack Start integration: the middleware wraps the Worker entry, and the router's `rewrite` removes the locale before matching and adds it to every link, so routes carry no locale segment.
 
-TanStack Start runs through Cloudflare's Vite plugin. Home and formats are server-rendered;
-the demo route is `ssr: false`, so the server sends the document, its metadata and a
-localized loading fallback, and the browser renders the interactive view. In-app links
-preload their route's code and data on intent; language changes are full navigations.
+TanStack Start runs through Cloudflare's Vite plugin ([`vite.config.ts`](../vite.config.ts)). Every
+route is server-rendered except the demo. In-app links preload their route's code and data on
+intent; language changes on site pages are full navigations.
+
+## shadcn, stock
+
+Components and the theme are what the shadcn CLI writes, in shadcn's monorepo layout: this app's
+[`components.json`](../components.json) routes `shadcn add` into the package
+([`packages/ui/components.json`](../packages/ui/components.json)), and
+`packages/ui/src/styles/globals.css` is written by the CLI too. Nobody edits either by hand; the
+tasks in [`mise.toml`](../mise.toml) are the only way they change:
+
+```sh
+mise run ui:components     # Re-add every shadcn component (extend the list there to add one)
+mise run ui:theme          # Rewrite globals.css with shadcn's default theme
+mise run ui:verify         # Re-run both and fail on any difference (runs before every release)
+mise run ui:pack           # Produce the package tarball locally
+```
+
+Blocks are owned copies, as shadcn intends; sidebar-16's README says what was changed.
+
+Fonts live in [`packages/ui/src/fonts.css`](../packages/ui/src/fonts.css), imported after
+`globals.css` (see [`src/styles.css`](../src/styles.css)); the file explains its rules. fontaine in
+[`vite.config.ts`](../vite.config.ts) generates the size-matched fallback faces it names.
+`publicPageChecks` fails on any named family that is not loaded.
 
 ## Structure and reuse
 
-- `src/routes/`: TanStack file routes (loaders, `head`, per-route rendering) that render the package's pages, plus this app's extra formats rows, and `robots.txt` and `sitemap.xml` as server routes; `src/routeTree.gen.ts` is generated by the router plugin during dev and build and committed. `publicPaths` from the package is the single list of public paths.
+- `src/routes/`: TanStack file routes (loaders, `head`, per-route rendering) that render the package's pages, plus this app's extra formats rows (`src/formats-extras.tsx`), and `robots.txt` and `sitemap.xml` as server routes; `src/routeTree.gen.ts` is generated by the router plugin during dev and build and committed.
 - `src/server.ts`: Worker entry through the package's `localizedWorker` (request IDs, structured status logs, `/healthz`, Paraglide's middleware, entry redirects). Start receives the original request, so server functions read Cloudflare's geolocation from `request.cf` in a server-only module under Start's import protection (`src/place.server.ts`). The wrapper passes its request ID inward as `X-Request-ID`; Start's request middleware exposes it as `context.requestId`, and a function middleware logs one `server_fn` line per call (`src/middleware.ts`). The service name has one home, `src/service.ts`.
 - `src/router.tsx`: a new router and TanStack Query client per request, with Query's SSR integration. Router and Query devtools load in `project:dev` only (`src/devtools.tsx`); the build-boundary check proves no devtools or server-only code reaches the browser.
-- `packages/ui/`: shadcn/Base UI button, Remy's theme, compiled Paraglide messages, Paraglide's locale runtime (detection, cookie, URL localisation) re-exported, hreflang data, the language switcher and hint, TanStack Router and Start glue, the shared Playwright checks and config, so consumers get the whole behaviour in either rendering mode.
-- `tests/gui.spec.ts` and `tests/lighthouse.spec.ts`: the package's shared checks (`@joeblew999/remy-ui/checks`) plus the checks only this repository owns (catalogs, concurrent server renders, hydration, its extra formats rows).
+- `packages/ui/`: everything both apps share; its [README](../packages/ui/README.md) lists the exports.
+- `tests/`: the package's shared checks (`@joeblew999/remy-ui/checks`, `showcase/*.checks`) plus the checks only this repository owns (catalogs, concurrent server renders, hydration, its extra formats rows); `lighthouse.spec.ts` and `performance.spec.ts` are level 2.
 
-The button and theme are sourced from Remy Sport's existing shadcn conventions. Fonts have one
-rule, in the package's `fonts.css`: generic CSS families only (`system-ui`, `sans-serif`,
-`monospace`) and no web fonts, because platform fonts cover every script and a named family that
-is not loaded stalls a fresh Chrome renderer for seconds. `publicPageChecks` enforces it on every
-page in every language.
-Both rendering modes import the package's public exports. Locale is passed
-explicitly into compiled message functions; concurrent requests share no mutable
-locale state. English, Spanish and Arabic are the catalogs; the Arabic catalog was
-written by an agent and is unreviewed. Direction, endonyms, dates, numbers,
-currency and plurals follow the decisions recorded in
+Locale is passed explicitly into compiled message functions; concurrent requests share no
+mutable locale state. English, Spanish and Arabic are the catalogs; the Arabic catalog was
+written by an agent and is unreviewed. Direction, endonyms, dates, numbers, currency and plurals
+follow the decisions recorded in
 [the GUI plan](../.plans/done/gui.md#dates-numbers-currency-and-direction).
 
-```sh
-mise run ui:pack           # Produce the package tarball locally
-mise run ui:components     # Regenerate the shadcn components from the registry
-```
-
-The package exports TSX and CSS for Vite/Tailwind consumers. Its real consumer is
-[remy-auth-app](https://github.com/joeblew999/remy-auth-app), which installs the published
-package and runs the package's own checks in client rendering, while this app runs them
-in server rendering.
+The package's real consumer is [remy-auth-app](https://github.com/joeblew999/remy-auth-app),
+which installs the published package and runs its checks on prerendered pages, while this app
+runs them on server-rendered ones.
 
 ## Evidence and limits
 
@@ -116,7 +150,7 @@ redirects and remembered choice, the language hint, concurrent locale requests, 
 client-only content and button interactions, the demo form's localized validation
 and plural confirmation, same-tab language navigation, HTTP status and sitemap
 behavior with every listed URL self-canonical and cross-linked by `hreflang`,
-right-to-left mirroring, and narrow-screen overflow on every page. Lighthouse audits `/en`, `/es`, `/ar`, `/en/demo` and `/en/formats`
+right-to-left mirroring, and narrow-screen overflow on every page. Lighthouse audits the site pages `/en`, `/es`, `/ar` and `/en/formats` (app pages are noindex by design)
 in its accessibility, SEO, best-practices and agentic-browsing categories; the pinned
 CLI excludes Performance by design, so Google's pinned `lighthouse` package gates that
 category on `/en` (mobile and desktop) and `/en/formats`: a Performance score of at least
