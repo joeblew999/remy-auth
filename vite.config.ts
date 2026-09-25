@@ -24,7 +24,9 @@ export default defineConfig({
     // generates), so the swap to Geist keeps the layout and LCP; fonts.css lists them. Before Tailwind.
     FontaineTransform.vite({ fallbacks: { 'Geist Variable': ['Arial'] } }),
     tailwindcss(),
-    tanstackStart(),
+    // TanStack Start's own option: the stylesheet inlined in the HTML, so the first paint needs no CSS
+    // fetch (Lighthouse's simulated mobile LCP counted the preloaded scripts as blocking that fetch).
+    tanstackStart({ server: { build: { inlineCss: true } } }),
     viteReact(),
   ],
   server: { host: '127.0.0.1', port: 5173, strictPort: true },
