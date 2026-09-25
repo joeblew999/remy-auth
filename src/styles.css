@@ -1,7 +1,6 @@
 @import "tailwindcss" source(none);
-@import "@joeblew999/remy-ui/styles.css";
+@import "@joeblew999/remy-ui/globals.css";
 @import "@joeblew999/remy-ui/fonts.css";
 @source "../src";
 @source "../packages/ui/src";
 
-body { font-family: var(--font-sans); color: var(--foreground); background: var(--background); }

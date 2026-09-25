@@ -1,6 +1,7 @@
 import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
 import { getLocale, direction } from '@joeblew999/remy-ui/locale';
+import { DirectionProvider } from '@joeblew999/remy-ui/components/direction';
 import { Devtools } from '../devtools';
 import { preferredLocale } from '../preferred';
 import { NotFound, ErrorPage } from '../problem';
@@ -25,6 +26,6 @@ function Document({ children }: { children: React.ReactNode }) {
   const locale = getLocale();
   return <html lang={locale} dir={direction(locale)}>
     <head><HeadContent /></head>
-    <body>{children}<Devtools /><Scripts /></body>
+    <body><DirectionProvider direction={direction(locale)}>{children}</DirectionProvider><Devtools /><Scripts /></body>
   </html>;
 }

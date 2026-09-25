@@ -1,10 +1,15 @@
-/* Fonts for every Remy app, the one home of this rule: only generic CSS families, no web fonts.
-   system-ui and monospace map to each platform's own fonts, which cover every script we ship
-   (Arabic, Hebrew, Thai, Ge'ez, Devanagari, CJK) and resolve at once. A named family that is not
-   loaded (Inter, ui-sans-serif, SFMono-Regular, Roboto, ...) makes a fresh Chrome renderer on
-   macOS stall its first layout for seconds. publicPageChecks fails if any element uses a
-   non-generic family or the page declares a web font.
-   Decided 2026-09-25: no brand web font. None covers every script (Noto ships one font per
-   script, CJK in large subsets); Japanese and Chinese need different glyphs, which system fonts
-   pick from the page's lang; and every download costs first-visit time and risks layout shift. */
-@theme { --font-sans: system-ui, sans-serif; --font-mono: monospace; }
+/* Fonts for every language, following shadcn's RTL guide (https://ui.shadcn.com/docs/rtl/start):
+   @fontsource-variable packages beside shadcn's Geist. styles/globals.css stays exactly what the
+   shadcn CLI writes; this file comes after it. One stack for every page: the browser takes each
+   character from the first family that has it, and each package's unicode-range means a page only
+   downloads the files for characters it shows. Add a language's Noto package here when its script
+   is new. Every named family must be loaded: an unloaded name (Inter, ui-monospace,
+   SFMono-Regular, ...) stalls a fresh Chrome renderer's first layout on macOS for seconds, and
+   publicPageChecks fails on one. */
+@import "@fontsource-variable/geist-mono";
+@import "@fontsource-variable/noto-sans-arabic";
+
+@theme inline {
+  --font-sans: 'Geist Variable', 'Noto Sans Arabic Variable', sans-serif;
+  --font-mono: 'Geist Mono Variable', monospace;
+}
