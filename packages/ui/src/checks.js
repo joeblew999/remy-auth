@@ -18,6 +18,7 @@ export const checkedLocales = process.env.CHECK_LOCALES
   : locales;
 import { m } from './paraglide/messages.js';
 import { samples } from './samples.js';
+import { ownValues, choicesFor, choiceKinds } from './locale-data.js';
 
 export const endonym = locale => new Intl.DisplayNames([locale], { type: 'language' }).of(locale);
 export const direction = locale => new Intl.Locale(locale).getTextInfo().direction;
@@ -301,10 +302,15 @@ export function demoChecks() {
   }
 }
 
+/** The formats page's sections, each opening with what it is for the page's language (data-own-area). */
+const formatsAreas = ['language', 'time', 'numbers', 'money', 'words'];
+
 /**
  * The formats page's shared rows match Node's Intl for every locale: language, calendar,
- * digits, clock, week start, dates, numbers, currency, plurals and ordinals. `extra` checks
- * an app's additional rows.
+ * digits, clock, week start, dates, numbers, currency, plurals and ordinals. Every section opens
+ * with its "for this language" card, and every control offers the page's language's own values
+ * first (marked), then every other locale's, all from locale-data.js: a new locale needs no edit
+ * here. `extra` checks an app's additional rows.
  */
 export function formatsChecks({ extra } = {}) {
   for (const locale of checkedLocales) {
@@ -342,7 +348,8 @@ export function formatsChecks({ extra } = {}) {
         decimal: new Intl.NumberFormat(format).format(samples.decimal),
         percent: new Intl.NumberFormat(format, { style: 'percent' }).format(samples.share),
         compact: new Intl.NumberFormat(format, { notation: 'compact' }).format(samples.big),
-        currency: new Intl.NumberFormat(format, { style: 'currency', currency: 'EUR' }).format(samples.amount),
+        currency: new Intl.NumberFormat(format, { style: 'currency', currency: ownValues(locale).currency }).format(samples.amount),
+        'plural-forms': list.format(ownValues(locale).counts.map(count => m.apps_count({ count }, o))),
         casing: samples.casing,
         'word-count': new Intl.NumberFormat(format).format(titleWords.length),
         'long-word': samples.longWord,
@@ -359,6 +366,15 @@ export function formatsChecks({ extra } = {}) {
       expect(await page.locator('[data-weekend]').evaluateAll(nodes => nodes.map(node => Number(node.dataset.weekday)))).toEqual(days.filter(day => weekend.includes(day)));
       // Words as Intl.Segmenter divides them, also for languages written without spaces.
       await expect(page.locator('[data-word]')).toHaveText(titleWords);
+      // Every section opens with its "for this language" card.
+      for (const area of formatsAreas) await expect(page.locator(`section#${area} > div.grid > :first-child`), area).toHaveAttribute('data-own-area', area);
+      // Every control: this language's own values first and marked, then every other locale's, as links (static labels on a prerendered page) without JavaScript.
+      for (const kind of choiceKinds) {
+        const { own, others } = choicesFor(locale, kind);
+        const items = page.locator(`[data-choices="${kind}"] li`);
+        expect(await items.evaluateAll(nodes => nodes.map(node => node.dataset.choiceValue)), kind).toEqual([...own, ...others].map(String));
+        expect(await items.evaluateAll(nodes => nodes.filter(node => node.hasAttribute('data-own')).map(node => node.dataset.choiceValue)), kind).toEqual(own.map(String));
+      }
       await extra?.(page, locale);
       await context.close();
     });

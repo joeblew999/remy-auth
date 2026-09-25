@@ -57,8 +57,8 @@ formatsChecks({ extra: async (page, locale) => {
   const list = new Intl.ListFormat(locale, { type: 'conjunction' });
   const format = formatTag(locale);
   const expected: Record<string, string> = {
-    region: new Intl.DisplayNames([locale], { type: 'region' }).of(samples.region)!,
-    'currency-name': new Intl.DisplayNames([locale], { type: 'currency' }).of('EUR')!,
+    region: new Intl.DisplayNames([locale], { type: 'region' }).of(info.region)!,
+    'currency-name': new Intl.DisplayNames([locale], { type: 'currency' }).of(info.currency)!,
     range: new Intl.DateTimeFormat(format, { dateStyle: 'medium', timeZone: 'UTC' }).formatRange(samples.rangeStart, samples.rangeEnd),
     distance: new Intl.NumberFormat(locale, { style: 'unit', unit: 'kilometer', unitDisplay: 'long' }).format(samples.km),
     currencies: list.format(samples.currencies.map(currency => new Intl.NumberFormat(format, { style: 'currency', currency }).format(samples.amount))),
@@ -126,7 +126,7 @@ test('concurrent server renders retain their requested language and direction', 
     const html = await response.text();
     expect(html).toContain(`<html lang="${locale}" dir="${direction(locale)}"`);
     expect(html).toContain(catalogs[locale].formats_title);
-    expect(html).toContain(new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(samples.amount));
+    expect(html).toContain(new Intl.NumberFormat(formatTag(locale), { style: 'currency', currency: localeInfo(locale as any).currency }).format(samples.amount));
   }));
 });
 
@@ -136,7 +136,7 @@ test('formats page hydrates in every language without errors and fills the devic
     await page.goto(localizedPath('/formats', locale));
     await page.waitForLoadState('networkidle');
     await expect(page.locator('html')).toHaveAttribute('dir', direction(locale));
-    await expect(page.locator('[data-sample="currency"]')).toHaveText(new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(samples.amount));
+    await expect(page.locator('[data-sample="currency"]')).toHaveText(new Intl.NumberFormat(formatTag(locale), { style: 'currency', currency: localeInfo(locale as any).currency }).format(samples.amount));
     await expect(page.locator('[data-sample="local"]')).toHaveText(new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'long', timeZone: 'Asia/Tokyo' }).format(samples.instant));
   }
   expect(errors).toEqual([]);

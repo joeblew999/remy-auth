@@ -48,7 +48,7 @@ export type FormatsExtras = {
   time?: React.ReactNode; numbers?: React.ReactNode; money?: React.ReactNode; words?: React.ReactNode;
 };
 /** The search-param controls, each shown in the section it changes (showcase/search-params: choiceCards). */
-export type FormatsControlCards = { calendar?: React.ReactNode; currency?: React.ReactNode; count?: React.ReactNode };
+export type FormatsControlCards = { calendar?: React.ReactNode; numbering?: React.ReactNode; currency?: React.ReactNode; count?: React.ReactNode };
 
 /** One section of the formats page: a heading, what it shows, then its cards, two per row on wide screens. */
 function FormatsSection({ id, title, note, children }: { id: string; title: string; note: string; children: React.ReactNode }) {
@@ -64,7 +64,8 @@ function FormatsSection({ id, title, note, children }: { id: string; title: stri
 /**
  * The formats page's content, the same on the site page and the app page (each wraps it in its own
  * frame), in five sections by the question a reader asks: this language, dates and times, numbers,
- * money and words. Each control sits in the section it changes.
+ * money and words. Every section opens with what it is for the page's language (the card marked
+ * data-own-area, all derived from the locale), then its samples, then its control where it has one.
  */
 export function FormatsContent({ locale, info, extras = {}, controls = {}, backTo = '/' }: { locale: Locale; info: LocaleInfo; extras?: FormatsExtras; controls?: FormatsControlCards; backTo?: '/' | '/app' }) {
   const o = { locale };
@@ -72,6 +73,7 @@ export function FormatsContent({ locale, info, extras = {}, controls = {}, backT
   const format = formatLocale(locale);
   const list = new Intl.ListFormat(locale, { type: 'conjunction' });
   const calendarName = new Intl.DisplayNames([locale], { type: 'calendar' });
+  const currencyName = new Intl.DisplayNames([locale], { type: 'currency' });
   const title = m.home_title({}, o);
   const titleWords = words(locale, title);
   const sections = [
@@ -86,7 +88,7 @@ export function FormatsContent({ locale, info, extras = {}, controls = {}, backT
       </nav>
     </div>
     <FormatsSection id="language" title={m.section_language({}, o)} note={m.section_language_note({}, o)}>
-      <Group title={m.language_label({}, o)}>
+      <Group title={m.language_label({}, o)} data-own-area="language">
         <Row sample="tag" label={m.language_tag({}, o)}><code>{locale}</code></Row>
         <Row sample="name" label={m.language_name({}, o)}>{localeName(locale)}</Row>
         <Row sample="direction" label={m.direction_label({}, o)} data-direction={dir}>{dir === 'rtl' ? m.direction_rtl({}, o) : m.direction_ltr({}, o)}</Row>
@@ -97,7 +99,7 @@ export function FormatsContent({ locale, info, extras = {}, controls = {}, backT
       </Group>
     </FormatsSection>
     <FormatsSection id="time" title={m.section_time({}, o)} note={m.section_time_note({}, o)}>
-      <Group title={m.systems_heading({}, o)}>
+      <Group title={m.systems_heading({}, o)} data-own-area="time">
         <Row sample="calendar" label={m.calendar_label({}, o)}>{calendarName.of(info.calendar)}</Row>
         <Row sample="hour-cycle" label={m.hour_cycle_label({}, o)}>{['h11', 'h12'].includes(info.hourCycle) ? m.hour_cycle_12({}, o) : m.hour_cycle_24({}, o)}</Row>
         <Row sample="week-start" label={m.week_start_label({}, o)}>{weekdayName(locale, info.firstDay)}</Row>
@@ -120,25 +122,32 @@ export function FormatsContent({ locale, info, extras = {}, controls = {}, backT
       {extras.time}
     </FormatsSection>
     <FormatsSection id="numbers" title={m.section_numbers({}, o)} note={m.section_numbers_note({}, o)}>
-      <Group title={m.numbers_heading({}, o)}>
+      <Group title={m.numbers_heading({}, o)} data-own-area="numbers">
         <Row sample="numbering" label={m.numbering_label({}, o)}><code>{info.numberingSystem}</code> · {new Intl.NumberFormat(format).format(samples.decimal)}</Row>
         <Row sample="decimal" label={m.decimal_label({}, o)}>{m.decimal_value({ value: samples.decimal }, o)}</Row>
         <Row sample="percent" label={m.percent_label({}, o)}>{m.percent_value({ value: samples.share }, o)}</Row>
         <Row sample="compact" label={m.compact_label({}, o)}>{m.compact_value({ value: samples.big }, o)}</Row>
       </Group>
       {extras.numbers}
+      {controls.numbering}
     </FormatsSection>
     <FormatsSection id="money" title={m.section_money({}, o)} note={m.section_money_note({}, o)}>
-      <Group title={m.currency_heading({}, o)}>
-        <Row sample="currency" label={m.currency_label({}, o)}>{m.currency_value({ amount: samples.amount }, o)}</Row>
+      <Group title={m.currency_heading({}, o)} data-own-area="money">
+        {/* The currency of the language's region (Intl.Locale maximize, then country-to-currency). */}
+        <Row sample="currency" label={currencyName.of(info.currency) ?? info.currency} data-value={info.currency}>{new Intl.NumberFormat(format, { style: 'currency', currency: info.currency }).format(samples.amount)}</Row>
         {extras.currency}
       </Group>
       {controls.currency}
       {extras.money}
     </FormatsSection>
     <FormatsSection id="words" title={m.section_words({}, o)} note={m.section_words_note({}, o)}>
-      <Card><CardHeader><CardTitle>{m.plural_heading({}, o)}</CardTitle></CardHeader>
-        <CardContent><ul className="flex flex-wrap gap-2">{samples.counts.map(count => <li key={count}><Badge variant="outline" data-count={count}>{m.apps_count({ count }, o)}</Badge></li>)}</ul></CardContent></Card>
+      <Card data-own-area="words"><CardHeader><CardTitle>{m.plural_heading({}, o)}</CardTitle></CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          {/* Each of this language's plural forms once, at the smallest count that takes it (Intl.PluralRules). */}
+          <dl className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-x-4 gap-y-3 text-sm">
+            <Row sample="plural-forms" label={m.section_language({}, o)}>{list.format(info.counts.map(count => m.apps_count({ count }, o)))}</Row>
+          </dl>
+          <ul className="flex flex-wrap gap-2">{samples.counts.map(count => <li key={count}><Badge variant="outline" data-count={count}>{m.apps_count({ count }, o)}</Badge></li>)}</ul></CardContent></Card>
       {controls.count}
       <Card><CardHeader><CardTitle>{m.ordinal_heading({}, o)}</CardTitle></CardHeader>
         <CardContent><ul className="flex flex-wrap gap-2">{samples.positions.map(n => <li key={n}><Badge variant="outline" data-position={n}>{m.position_value({ n }, o)}</Badge></li>)}</ul></CardContent></Card>
