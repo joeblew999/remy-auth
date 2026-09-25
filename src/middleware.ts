@@ -1,7 +1,6 @@
 import { createMiddleware } from '@tanstack/react-start';
 import { getResponseStatus } from '@tanstack/react-start/server';
 import { env } from 'cloudflare:workers';
-import { getLocale, isLocale } from '@joeblew999/remy-ui/locale';
 import { logContext, outcome, level, requestIdHeader, writeLog } from '@joeblew999/remy-ui/worker';
 import { service } from './service';
 
@@ -36,13 +35,3 @@ export const serverFnLog = createMiddleware({ type: 'function' })
       throw error;
     }
   });
-
-/**
- * Function middleware for server functions that answer in words: the browser sends its page's
- * language, and the server uses it when it is one of ours, else Paraglide's own choice for the
- * request (cookie, Accept-Language, base locale). A language is not a permission, so a shape
- * check is enough here.
- */
-export const pageLocale = createMiddleware({ type: 'function' })
-  .client(({ next }) => next({ sendContext: { locale: getLocale() } }))
-  .server(({ next, context }) => next({ context: { locale: isLocale(context.locale) ? context.locale : getLocale() } }));

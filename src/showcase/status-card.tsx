@@ -1,21 +1,20 @@
-import { queryOptions, useQuery, type QueryClient } from '@tanstack/react-query';
+import { useQuery, type QueryClient } from '@tanstack/react-query';
 import { useRouter } from '@tanstack/react-router';
 import { getLocale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
 import { Button } from '@joeblew999/remy-ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@joeblew999/remy-ui/components/card';
 import { invalidateEverything } from '../invalidate';
-import { getStatus } from './status';
+import { orpc } from '../api/client';
 
 /** How often an open page asks again, and how long an answer counts as fresh (so hydration does not refetch at once). */
 export const statusRefreshMs = 10_000;
 
-/** The live status as a query: the server function on the server during SSR, an RPC to it in the browser. */
-export const statusQuery = queryOptions({
-  queryKey: ['status'],
-  queryFn: () => getStatus(),
-  staleTime: statusRefreshMs,
-});
+/**
+ * The live status as a query on the contract's GET /api/status: the router itself on the server
+ * during SSR, HTTP with the response checked against the contract in the browser.
+ */
+export const statusQuery = orpc.status.queryOptions({ staleTime: statusRefreshMs });
 
 /** The loader of a route that shows the card: fills the request's QueryClient, so the server HTML holds the status. */
 export const statusCardLoader = async ({ context }: { context: { queryClient: QueryClient } }) => {
