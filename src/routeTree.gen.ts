@@ -14,6 +14,7 @@ import { Route as DemoRouteImport } from './routes/demo'
 import { Route as FormatsRouteImport } from './routes/formats'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TimeZonesSplatRouteImport } from './routes/time-zones.$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +41,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TimeZonesSplatRoute = TimeZonesSplatRouteImport.update({
+  id: '/time-zones/$',
+  path: '/time-zones/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/formats': typeof FormatsRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/time-zones/$': typeof TimeZonesSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/formats': typeof FormatsRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/time-zones/$': typeof TimeZonesSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,33 @@ export interface FileRoutesById {
   '/formats': typeof FormatsRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/time-zones/$': typeof TimeZonesSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/demo' | '/formats' | '/robots.txt' | '/sitemap.xml'
+  fullPaths:
+    | '/'
+    | '/demo'
+    | '/formats'
+    | '/robots.txt'
+    | '/sitemap.xml'
+    | '/time-zones/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/demo' | '/formats' | '/robots.txt' | '/sitemap.xml'
-  id: '__root__' | '/' | '/demo' | '/formats' | '/robots.txt' | '/sitemap.xml'
+  to:
+    | '/'
+    | '/demo'
+    | '/formats'
+    | '/robots.txt'
+    | '/sitemap.xml'
+    | '/time-zones/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/demo'
+    | '/formats'
+    | '/robots.txt'
+    | '/sitemap.xml'
+    | '/time-zones/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +105,7 @@ export interface RootRouteChildren {
   FormatsRoute: typeof FormatsRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TimeZonesSplatRoute: typeof TimeZonesSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -116,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/time-zones/$': {
+      id: '/time-zones/$'
+      path: '/time-zones/$'
+      fullPath: '/time-zones/$'
+      preLoaderRoute: typeof TimeZonesSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -125,6 +161,7 @@ const rootRouteChildren: RootRouteChildren = {
   FormatsRoute: FormatsRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TimeZonesSplatRoute: TimeZonesSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

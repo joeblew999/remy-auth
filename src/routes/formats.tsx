@@ -9,6 +9,7 @@ import { FormatsControls, validateSearch, searchDefaults } from '@joeblew999/rem
 import { getPlace } from '../place';
 import { usePreferred } from '../preferred';
 import { DeferredPlace } from '../showcase/deferred-place';
+import { problemPages } from '../problem';
 
 export const Route = createFileRoute('/formats')({
   // ?currency, ?count and ?calendar, validated with defaults; defaults are left out of URLs.
@@ -23,6 +24,7 @@ export const Route = createFileRoute('/formats')({
   staleTime: 5 * 60_000,
   head: () => pageHead({ path: '/formats', title: locale => m.formats_title({}, { locale }), description: locale => m.formats_description({}, { locale }) }),
   component: Formats,
+  ...problemPages,
 });
 
 // The shared page, plus rows only this server-rendered app has: Cloudflare's view of the

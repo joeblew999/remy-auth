@@ -7,6 +7,7 @@ import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { useLeaveGuard } from '@joeblew999/remy-ui/showcase/navigation-blocking';
 import { usePreferred } from '../preferred';
 import { reserve } from '../reserve';
+import { problemPages } from '../problem';
 
 // Rendered in the browser only: the server sends the document, its metadata and the pending fallback.
 export const Route = createFileRoute('/demo')({
@@ -14,6 +15,7 @@ export const Route = createFileRoute('/demo')({
   head: () => pageHead({ path: '/demo', title: locale => m.demo_title({}, { locale }), description: locale => m.demo_description({}, { locale }) }),
   pendingComponent: Loading,
   component: Demo,
+  ...problemPages,
 });
 
 function Loading() {
