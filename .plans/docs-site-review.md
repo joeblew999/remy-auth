@@ -37,7 +37,11 @@ translation: "The docs translation. Is this also paraglide based or what?"
    ([publisher-consumer.md](publisher-consumer.md)).
 10. Translation: only the page chrome (navigation, answer page) is Paraglide. The docs themselves
     are the repo's English Markdown, served under every language's URL with canonical to `/en`.
-11. Level 1 is now 2.1 minutes locally and 2.6 on a preview (280 checks).
+11. Observability is thin: only failures are logged (`ask_failed`), with the error's name alone
+    ("Error"), so a failure cannot be diagnosed. Nothing records answered, no-answer, rate-limited
+    or too-long, the AI call's time, cache hits or citations; no alert on failures; AI Gateway's own
+    logs and spend are not surfaced anywhere we look. The question is never logged (on purpose).
+12. Level 1 is now 2.1 minutes locally and 2.6 on a preview (280 checks).
 
 ## To review later
 
