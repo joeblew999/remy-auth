@@ -6,6 +6,14 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `SiteNavLinks` (`pages`): a context through which an app adds its own links to the site header;
+  remy-auth adds "Docs". Without it the header is unchanged.
+- `publicPageChecks({ oneLanguage })`: site pages written in one language only, listed once in the
+  sitemap without alternates and checked on a narrow screen like the others.
+- shadcn's `table` component (through `ui:components`), and messages for the docs and the answer
+  page in every language.
+
 ## [0.10.4] - 2026-09-25
 
 ### Added

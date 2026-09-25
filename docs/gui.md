@@ -73,6 +73,11 @@ each kind promises; the two are never mixed.
   [`app-pages.tsx`](../packages/ui/src/app-pages.tsx), shadcn's sidebar-16 block owned in
   [`blocks/sidebar-16`](../packages/ui/src/blocks/sidebar-16/README.md).
 
+remy-auth adds its own of each kind ([`src/paths.ts`](../src/paths.ts)): the docs at `/docs`, site
+pages in English only that render this repository's Markdown in place, and `/app/ask`, an app page
+that answers questions from them with links to the exact sections. The
+[docs site plan](../.plans/docs-site.md) owns both.
+
 The language picker follows the kind: site pages use `LanguageSwitcher`, plain links that need no
 JavaScript; app pages use `LanguageMenu`, shadcn's DropdownMenu calling Paraglide's `setLocale`
 (both in [`language.tsx`](../packages/ui/src/language.tsx)).
