@@ -1,0 +1,35 @@
+// The docs table: the one list of which repository files are the site's docs, and their slugs
+// (.plans/docs-site.md, decision 2). Plain JavaScript, so Fumadocs' config (source.config.ts), the
+// routes, the checks and the index task (scripts/docs-index.mjs) all read the same rows. The files are
+// read where they are: nothing is copied. Titles come from each file's first heading.
+
+/** Where the source lives, for links to files that are not docs pages. */
+export const repository = 'https://github.com/joeblew999/remy-auth';
+export const branch = 'main';
+
+/** Docs pages: the repository file and its slug; '' is /docs itself. English only. */
+export const docsTable = [
+  { file: 'README.md', slug: '' },
+  { file: 'docs/development.md', slug: 'development' },
+  { file: 'docs/how-we-work.md', slug: 'how-we-work' },
+  { file: 'docs/tooling.md', slug: 'tooling' },
+  { file: 'docs/gui.md', slug: 'gui' },
+  { file: 'packages/ui/README.md', slug: 'ui-package' },
+  { file: 'tasks/README.md', slug: 'tasks' },
+  { file: 'CHANGELOG.md', slug: 'changelog' },
+];
+
+/** The docs language: every locale serves the page in its frame, but the text and the canonical URL are English. */
+export const docsLocale = 'en';
+
+/** The de-localized path of a docs page: /docs or /docs/<slug>. */
+export const docsPath = slug => (slug ? `/docs/${slug}` : '/docs');
+
+/** Every docs page's de-localized path, in table order. Site pages (paths.js), English canonical. */
+export const docsPaths = docsTable.map(row => docsPath(row.slug));
+
+/** The docs row for a repository file, or undefined. */
+export const docsRowForFile = file => docsTable.find(row => row.file === file);
+
+/** The docs row for a slug, or undefined. */
+export const docsRowForSlug = slug => docsTable.find(row => row.slug === slug);

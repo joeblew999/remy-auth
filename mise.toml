@@ -55,6 +55,13 @@ run = [
   { task = "project:test" },
 ]
 
+[tasks."project:preview"]
+description = "Build, then serve the production artifact on Cloudflare's local host at PREVIEW_PORT, remote bindings off (overrides the shared default: the AI Search binding needs a login and costs model calls; /app/ask then shows its \"no answer\" path)"
+dir = "{{config_root}}"
+depends = ["project:build"]
+raw = true
+run = "./node_modules/.bin/wrangler dev --local --ip 127.0.0.1 --port \"${PREVIEW_PORT:-4173}\""
+
 [tasks."auth:info"]
 description = "Show Better Auth setup diagnostics"
 raw_args = true
@@ -74,9 +81,9 @@ run = [
 ]
 
 [tasks."project:generate"]
-description = "Compile the shared catalogs before type checking (overrides the shared hook, which project:typecheck runs first)"
+description = "Compile the shared catalogs and write Fumadocs MDX's docs entry files (.source/) before type checking (overrides the shared hook, which project:typecheck runs first)"
 dir = "{{config_root}}"
-run = [{ task = "ui:generate" }]
+run = [{ task = "ui:generate" }, "./node_modules/.bin/fumadocs-mdx"]
 
 [tasks."ui:pack"]
 description = "Compile and pack the shared UI for another Vite/Tailwind consumer"
@@ -89,7 +96,7 @@ run = [
 [tasks."ui:components"]
 description = "Regenerate every shadcn component from the registry into the shared package (run from the app, shadcn's monorepo layout; the only way those files change)"
 dir = "{{config_root}}"
-run = "./node_modules/.bin/shadcn add button card input label badge alert field separator direction skeleton empty sidebar breadcrumb collapsible dropdown-menu avatar sheet tooltip navigation-menu use-mobile --overwrite --yes"
+run = "./node_modules/.bin/shadcn add button card input label badge alert field separator direction skeleton empty sidebar breadcrumb collapsible dropdown-menu avatar sheet tooltip navigation-menu use-mobile table --overwrite --yes"
 
 [tasks."ui:theme"]
 description = "Rewrite the shared stylesheet with shadcn's default theme (Nova style, neutral) through shadcn apply; never edit packages/ui/src/styles/globals.css by hand"
@@ -123,3 +130,13 @@ description = "Compile the shared locale catalogs"
 dir = "{{config_root}}"
 run = "node packages/ui/paraglide.mjs"
 
+
+[tasks."docs:index"]
+description = "Replace the production AI Search index remy-docs with this checkout's docs, one item per section (~1 min; production only, after cf:deploy and on the owner's request; uses Wrangler's login or CLOUDFLARE_API_TOKEN)"
+dir = "{{config_root}}"
+run = "node scripts/docs-index.mjs"
+
+[tasks."docs:manifest"]
+description = "List the sections docs:index would upload (key, URL, size), without contacting Cloudflare. Instant"
+dir = "{{config_root}}"
+run = "node scripts/docs-manifest.mjs"
