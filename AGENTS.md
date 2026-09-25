@@ -8,7 +8,9 @@ changing anything, and follow them over your own defaults. Do not copy their con
 2. [Developer tooling](docs/tooling.md) — mise tasks, pinned tools and agent skills.
    Run project commands through `mise run <namespace:action>`.
 3. [GUI runtime workflow](docs/gui.md) — one Worker, local and remote test targets.
-4. The plan in [`.plans/`](.plans/) covering your task, and its Executor/Reviewer roles.
+4. [How we work](docs/how-we-work.md) — project tools first, surveys before tool choices,
+   local gates, multi-agent work. Record working rules there, not in agent memory.
+5. The plan in [`.plans/`](.plans/) covering your task, and its Executor/Reviewer roles.
 
 Start by running `mise run project:setup`: it installs dependencies and the pinned skills (not
 committed; `skills-lock.json` records them) and registers MCP, then verifies.
