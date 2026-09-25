@@ -447,10 +447,11 @@ export function performanceChecks({ pages, thresholds = {}, runs = 5 }) {
  * out of the sitemap and is labelled as the app once it runs.
  */
 export function zoneChecks({ sitePaths, appPaths }) {
-  test('site pages work without JavaScript, are indexable and say so', async ({ browser }) => {
+  // One test per language, as the other per-language checks: the work grows with the language count.
+  for (const locale of checkedLocales) test(`${locale}: site pages work without JavaScript, are indexable and say so`, async ({ browser }) => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
-    for (const locale of checkedLocales) for (const path of sitePaths) {
+    for (const path of sitePaths) {
       const url = localizedPath(path, locale);
       expect((await page.goto(url))?.status(), url).toBe(200);
       await expect(page.getByRole('heading', { level: 1 }), url).toBeVisible();
