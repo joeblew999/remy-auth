@@ -89,7 +89,7 @@ run = [
 [tasks."ui:components"]
 description = "Regenerate every shadcn component from the registry into the shared package (run from the app, shadcn's monorepo layout; the only way those files change)"
 dir = "{{config_root}}"
-run = "./node_modules/.bin/shadcn add button card input label badge alert field separator direction skeleton empty sidebar breadcrumb collapsible dropdown-menu avatar sheet tooltip use-mobile --overwrite --yes"
+run = "./node_modules/.bin/shadcn add button card input label badge alert field separator direction skeleton empty sidebar breadcrumb collapsible dropdown-menu avatar sheet tooltip navigation-menu use-mobile --overwrite --yes"
 
 [tasks."ui:theme"]
 description = "Rewrite the shared stylesheet with shadcn's default theme (Nova style, neutral) through shadcn apply; never edit packages/ui/src/styles/globals.css by hand"

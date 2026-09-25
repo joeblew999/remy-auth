@@ -289,5 +289,9 @@
   "section_money": "Dinero",
   "section_money_note": "Cómo se ven los importes, en este idioma y en otras monedas.",
   "section_words": "Palabras",
-  "section_words_note": "Cómo cambia el texto con un valor: plurales, orden, variantes y ordenación."
+  "section_words_note": "Cómo cambia el texto con un valor: plurales, orden, variantes y ordenación.",
+  "theme_toggle": "Tema",
+  "theme_light": "Claro",
+  "theme_dark": "Oscuro",
+  "theme_system": "Sistema"
 }

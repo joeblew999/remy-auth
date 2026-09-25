@@ -5,7 +5,9 @@ import { m } from './paraglide/messages.js';
 import { localeName } from './locale';
 import { weekdayName, type LocaleInfo } from './locale-info';
 import { DeviceTime } from './client';
-import { LanguageHint, LanguageSwitcher } from './language';
+import { LanguageHint, LanguageLinks, LanguageSwitcher } from './language';
+import { ModeToggle } from './theme';
+import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from './components/navigation-menu';
 import { samples } from './samples.js';
 import { Badge } from './components/badge';
 import { Button, buttonVariants } from './components/button';
@@ -16,7 +18,7 @@ import { Separator } from './components/separator';
 // Apps keep their route modules (loaders, head, runtime wiring) and render these.
 // In-app links are TanStack Links to de-localized paths: the router's rewrite (localeRewrite in
 // ./tanstack) adds the page's locale, and they preload on intent. Language changes stay full
-// navigations through the plain anchors of LanguageSwitcher and LanguageHint.
+// navigations through the plain anchors of LanguageSwitcher, LanguageLinks and LanguageHint.
 
 export { sitePaths, appPaths, allPaths, isAppPath } from './paths.js';
 
@@ -39,18 +41,33 @@ export function SiteShell({ locale, path = '', preferred, children }: { locale: 
   return <div className="flex min-h-svh w-full flex-col px-4 md:px-8">
     <SkipLink locale={locale} />
     <LanguageHint locale={locale} path={path} preferred={preferred} />
-    <header className="site-header flex items-center justify-between gap-3 pt-4">
+    <header className="site-header flex flex-wrap items-center gap-x-2 gap-y-1 py-3">
       <Link className={buttonVariants({ variant: 'ghost', className: 'brand font-semibold' })} to="/" preload="intent">Remy</Link>
-      <LanguageSwitcher locale={locale} path={path} />
+      <NavigationMenu aria-label={m.nav_heading({}, o)} className="order-last max-w-none basis-full justify-start sm:order-none sm:basis-auto">
+        <NavigationMenuList className="flex-wrap justify-start">
+          <NavigationMenuItem>
+            <NavigationMenuLink active={path === '/formats'} render={<Link to="/formats" preload="intent" />}>{m.nav_formats({}, o)}</NavigationMenuLink>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuLink href={repository}>GitHub</NavigationMenuLink>
+          </NavigationMenuItem>
+        </NavigationMenuList>
+      </NavigationMenu>
+      <div className="ms-auto flex items-center gap-1">
+        <LanguageSwitcher locale={locale} path={path} />
+        <ModeToggle locale={locale} />
+        <Link className={buttonVariants({ size: 'sm' })} to="/app" preload="intent">{m.open_app({}, o)}</Link>
+      </div>
     </header>
-    <nav aria-label={m.nav_heading({}, o)} className="flex flex-wrap items-center gap-1 py-2">
-      <Link className={buttonVariants({ variant: 'ghost', size: 'sm' })} to="/formats" preload="intent">{m.nav_formats({}, o)}</Link>
-      <Link className={buttonVariants({ size: 'sm', className: 'ms-auto' })} to="/app" preload="intent">{m.open_app({}, o)}</Link>
-    </nav>
     <Separator />
     <main id="main" className="flex-1 py-10"><div className="mb-6"><ZoneBadge locale={locale} app={false} /></div>{children}</main>
+    <Separator />
+    <footer className="py-4"><LanguageLinks locale={locale} path={path} /></footer>
   </div>;
 }
+
+/** Where evaluators find the source. */
+const repository = 'https://github.com/joeblew999/remy-auth';
 
 /** The frame of a site page, also for not-found and error pages. App pages use AppShell from ./app-pages. */
 export const Shell = SiteShell;

@@ -16,7 +16,7 @@ export function playwrightConfig({ webServer, testDir = './tests', timezoneId = 
     testDir,
     fullyParallel: true,
     reporter: [['list'], ['html', { open: 'never', outputFolder: `playwright-report/${remote ? 'remote' : 'local'}` }]],
-    use: { baseURL: target.origin, ...devices['Desktop Chrome'], channel: 'chrome', timezoneId },
+    use: { baseURL: target.origin, ...devices['Desktop Chrome'], channel: 'chrome', timezoneId, colorScheme: process.env.COLOR_SCHEME ?? 'light' },
     // Two levels. "ours": the app's own checks, fast, gate every local release.
     // "google" and "google-cwv": Lighthouse audits and Core Web Vitals, slow, run in CI.
     // Core Web Vitals run after the Lighthouse audits so no other browser inflates the timings.

@@ -4,6 +4,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools';
 import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { getLocale, direction } from '@joeblew999/remy-ui/locale';
+import { ThemeProvider } from '@joeblew999/remy-ui/theme';
 import { DirectionProvider } from '@joeblew999/remy-ui/components/direction';
 import { preferredLocale } from '../preferred';
 import { NotFound, ErrorPage } from '../problem';
@@ -30,9 +31,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
  */
 function Document({ children }: { children: React.ReactNode }) {
   const locale = getLocale();
-  return <html lang={locale} dir={direction(locale)}>
+  return <html lang={locale} dir={direction(locale)} suppressHydrationWarning>
     <head><HeadContent /></head>
-    <body><DirectionProvider direction={direction(locale)}>{children}</DirectionProvider>
+    <body><DirectionProvider direction={direction(locale)}><ThemeProvider defaultTheme="system" storageKey="theme">{children}</ThemeProvider></DirectionProvider>
       <TanStackDevtools plugins={[
         { name: 'TanStack Router', render: <TanStackRouterDevtoolsPanel /> },
         { name: 'TanStack Query', render: <ReactQueryDevtoolsPanel /> },

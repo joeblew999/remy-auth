@@ -25,6 +25,7 @@
     "./locale-info": "./src/locale-info.ts",
     "./seo": "./src/seo.ts",
     "./language": "./src/language.tsx",
+    "./theme": "./src/theme.tsx",
     "./client": "./src/client.tsx",
     "./tanstack": "./src/tanstack.tsx",
     "./cloudflare": "./src/cloudflare.ts",

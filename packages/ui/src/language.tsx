@@ -4,19 +4,42 @@ import { localeName } from './locale';
 import { m } from './paraglide/messages.js';
 import { Button, buttonVariants } from './components/button';
 import { Alert, AlertDescription } from './components/alert';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from './components/dropdown-menu';
-import { LanguagesIcon } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from './components/dropdown-menu';
+import { CheckIcon, LanguagesIcon } from 'lucide-react';
 
 // Plain anchors with Paraglide-localized hrefs: a language change is a full navigation, and
 // setLocale records the choice in Paraglide's cookie without a second navigation.
 
-/** Links to every language version of the current path, marking the current one. */
-export function LanguageSwitcher({ locale, path = '' }: { locale: Locale; path?: string }) {
-  return <nav aria-label={m.language_label({}, { locale })} className="languages flex gap-1">
+/** Links to every language version of the current path, marking the current one: the complete list a site page's footer carries, reachable without JavaScript. */
+export function LanguageLinks({ locale, path = '' }: { locale: Locale; path?: string }) {
+  return <nav id="languages" aria-label={m.languages_available({}, { locale })} className="language-list flex flex-wrap gap-1">
     {locales.map(value => <a key={value} className={buttonVariants({ variant: value === locale ? 'secondary' : 'ghost', size: 'sm' })}
       href={localizeHref(path || '/', { locale: value })} lang={value} hrefLang={value}
       aria-current={value === locale ? 'page' : undefined}
       onClick={() => setLocale(value, { reload: false })}>{localeName(value)}</a>)}
+  </nav>;
+}
+
+/**
+ * The language picker in a site page's header: shadcn's DropdownMenu whose items are the same real
+ * links. Its trigger is a link to the footer's LanguageLinks, so without JavaScript it still leads
+ * to every language; with JavaScript it opens the menu instead.
+ */
+export function LanguageSwitcher({ locale, path = '' }: { locale: Locale; path?: string }) {
+  return <nav aria-label={m.language_label({}, { locale })} className="languages">
+    <DropdownMenu>
+      <DropdownMenuTrigger nativeButton={false} render={<a href="#languages" onClick={event => event.preventDefault()} />}
+        className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
+        <LanguagesIcon />{localeName(locale)}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {locales.map(value => <DropdownMenuItem key={value}
+          render={<a href={localizeHref(path || '/', { locale: value })} lang={value} hrefLang={value}
+            aria-current={value === locale ? 'page' : undefined} onClick={() => setLocale(value, { reload: false })} />}>
+          {localeName(value)}{value === locale && <CheckIcon className="ms-auto" />}
+        </DropdownMenuItem>)}
+      </DropdownMenuContent>
+    </DropdownMenu>
   </nav>;
 }
 

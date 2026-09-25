@@ -249,6 +249,7 @@ export function lighthouseChecks({ pages }) {
       test(`${device}: ${path} passes every audit`, async ({ baseURL }, testInfo) => {
         const dir = testInfo.outputPath('lighthouse');
         rmSync(dir, { recursive: true, force: true });
+        if (process.env.COLOR_SCHEME) cli('emulate', '1', '--colorScheme', process.env.COLOR_SCHEME);
         cli('navigate_page', '1', '--url', `${baseURL}${path}`);
         cli('lighthouse_audit', '1', '--device', device, '--output-format', 'json', '--outputDirPath', dir);
         const report = JSON.parse(readFileSync(`${dir}/report.json`, 'utf8'));

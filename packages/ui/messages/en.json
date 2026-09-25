@@ -290,5 +290,9 @@
   "section_money": "Money",
   "section_money_note": "How amounts look, in this language and in other currencies.",
   "section_words": "Words",
-  "section_words_note": "How text changes with a value: plurals, order, variants and sorting."
+  "section_words_note": "How text changes with a value: plurals, order, variants and sorting.",
+  "theme_toggle": "Theme",
+  "theme_light": "Light",
+  "theme_dark": "Dark",
+  "theme_system": "System"
 }

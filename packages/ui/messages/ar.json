@@ -295,5 +295,9 @@
   "section_money": "المال",
   "section_money_note": "كيف تبدو المبالغ بهذه اللغة وبعملات أخرى.",
   "section_words": "الكلمات",
-  "section_words_note": "كيف يتغير النص مع قيمة ما: الجمع والترتيب والصيغ والفرز."
+  "section_words_note": "كيف يتغير النص مع قيمة ما: الجمع والترتيب والصيغ والفرز.",
+  "theme_toggle": "المظهر",
+  "theme_light": "فاتح",
+  "theme_dark": "داكن",
+  "theme_system": "النظام"
 }

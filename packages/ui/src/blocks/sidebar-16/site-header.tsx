@@ -7,6 +7,7 @@ import { Button } from '../../components/button';
 import { Separator } from '../../components/separator';
 import { useSidebar } from '../../components/sidebar';
 import { LanguageMenu } from '../../language';
+import { ModeToggle } from '../../theme';
 
 /** sidebar-16's SiteHeader: the sidebar toggle, the breadcrumb with the app's name, and the language menu where the block has its search form. */
 export function SiteHeader({ locale, path }: { locale: Locale; path: string }) {
@@ -25,7 +26,7 @@ export function SiteHeader({ locale, path }: { locale: Locale; path: string }) {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="ms-auto"><LanguageMenu locale={locale} /></div>
+        <div className="ms-auto flex items-center gap-1"><LanguageMenu locale={locale} /><ModeToggle locale={locale} /></div>
       </div>
     </header>
   );
