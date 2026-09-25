@@ -69,7 +69,7 @@ Las tareas de passthrough de la CLI aceptan directamente los flags originales, c
 | `ui:*` | Compila los catálogos compartidos (`ui:generate`), regenera los componentes y el tema de shadcn (`ui:components`, `ui:theme`), demuestra que no se han modificado (`ui:verify`), empaqueta y publica el paquete (`ui:pack`, `ui:release`) |
 | `skills:*` | Instala, lista y elimina los skills oficiales fijados |
 | `auth:*` | CLI de Better Auth y diagnóstico |
-| `cf:*` | CLI de Cloudflare, logs en vivo y despliegue (la CLI y los logs son tareas compartidas) |
+| `cf:*` | CLI de Cloudflare, logs en vivo, despliegue (`cf:deploy`), Workers de comprobación desechables (`cf:preview`, `cf:preview-delete`), logs almacenados y uso de IA (`cf:events`, `cf:ai-*`); tareas compartidas, listadas en el [README de tareas](../tasks/README.md#cloudflare-tasks) |
 | `api:*` | El documento OpenAPI generado que sirve un Worker en ejecución (`api:spec`, `--urls` para sus operaciones; tarea compartida) |
 | `browser:*` | CLI de Chrome DevTools, ciclo de vida de la sesión y servidor MCP |
 | `web:*` | Búsqueda y recuperación de Modern Web Guidance |
@@ -93,7 +93,12 @@ necesitará sus propias pruebas cuando se integre Better Auth.
 
 ### Verificación [#verification]
 
-Ejecuta `mise run project:verify` en cualquier momento; `project:setup` y `packages:upgrade` también terminan con ella. Comprueba
+Las pruebas se ejecutan por niveles, desde `project:check` (comprobación de tipos y build) hasta
+`project:verify` (todo, en todos los idiomas); los niveles y cuándo usar cada uno están en
+[cómo trabajamos](how-we-work.md#gates-before-anything-leaves-the-machine), y las tareas en el
+[README de tareas](../tasks/README.md). Los despliegues no ejecutan pruebas salvo que `GATE` elija un nivel.
+
+Ejecuta `mise run project:verify` antes de una publicación; `project:setup` y `packages:upgrade` también terminan con ella. Comprueba
 las tareas de mise, las dependencias instaladas, las versiones de las CLI, la consistencia del manifiesto/lockfile,
 la configuración de Wrangler y los ajustes de observabilidad, y la fuente fijada, los archivos
 y el symlink de Claude de cada skill. Usa la instalación local existente y
@@ -317,10 +322,7 @@ mise run cf:ai-gateway                     # REMOTE: the gateway's settings
 mise run cf:ai-gateway -- rate-limit off   # REMOTE: change a setting (read back after); also logs on|off
 ```
 
-Tokens, en el `mise.local.toml` ignorado por git (el login de Wrangler cubre AI Search y los secretos,
-no el gateway ni los logs almacenados): `CLOUDFLARE_OBSERVE_TOKEN` con **AI Gateway Read** y **Workers
-Observability Write** para `cf:events`, `cf:ai-usage`, `cf:ai-check`; `CLOUDFLARE_AI_EDIT_TOKEN` con
-**AI Gateway Edit** para cambiar el gateway, mantenido aparte porque también puede eliminarlo.
+Tokens: consulta [secretos](#secrets-fnox) más abajo.
 
 Costos: la indexación son unos pocos embeddings (una reindexación completa, unos $0.0005); una búsqueda
 sin respuesta, casi nada; una respuesta entre $0.0001 y $0.0007, y $0 cuando la caché de AI Search ya la tiene.
@@ -336,10 +338,25 @@ mise run cf:ai-usage                    # AI Gateway, last 7 days: calls, cache,
 mise run cf:ai-check                    # AI Search and gateway settings against Cloudflare's advice; fails on FAIL
 ```
 
-El login de Wrangler lee AI Search pero no se le puede otorgar acceso a AI Gateway ni a Workers Logs.
-Eso necesita `CLOUDFLARE_OBSERVE_TOKEN`, un token de API con **AI Gateway Read** y **Workers Observability
-Write** (el único permiso que acepta la API de consultas de Cloudflare, incluso para lectura), creado en
-<https://dash.cloudflare.com/profile/api-tokens> y guardado en el `mise.local.toml` ignorado por git:
+### Secretos: fnox [#secrets-fnox]
+
+El login de Wrangler cubre los despliegues, AI Search y los secretos del Worker, pero no se le puede
+otorgar acceso a AI Gateway ni a Workers Logs. Para eso, las tareas leen tokens del entorno:
+
+- `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID`: el token y la cuenta de Cloudflare compartidos, los
+  mismos elementos del llavero en todos los repositorios de joeblew999. [`fnox.toml`](../fnox.toml) los
+  nombra (los valores se quedan en el llavero de macOS, nunca en el archivo); `fnox` está fijado en
+  `mise.toml`. Ejecuta una tarea con ellos: `fnox exec -- mise run cf:ai-usage`. Guarda uno con
+  `fnox set -p keychain CLOUDFLARE_API_TOKEN <token>` (nunca omitas `-p keychain`: sin él el valor se
+  escribe en `fnox.toml` en texto plano). Cuando está definido, `CLOUDFLARE_API_TOKEN` se usa para todo.
+- `CLOUDFLARE_OBSERVE_TOKEN`, una alternativa más limitada: **AI Gateway Read** y **Workers Observability
+  Write** (el único permiso que acepta la API de consultas de Cloudflare, incluso para lectura), para
+  `cf:events`, `cf:ai-usage`, `cf:ai-check`.
+- `CLOUDFLARE_AI_EDIT_TOKEN`: **AI Gateway Edit**, solo para cambiar el gateway con `cf:ai-gateway`,
+  mantenido aparte porque también puede eliminarlo.
+
+Los dos últimos se crean en <https://dash.cloudflare.com/profile/api-tokens> y se guardan en el
+`mise.local.toml` ignorado por git:
 
 ```toml
 [env]
