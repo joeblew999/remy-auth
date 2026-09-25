@@ -3,7 +3,7 @@
 // carries no other route's code, and an in-app navigation fetches the next route's chunk on demand.
 import { test, expect } from '@playwright/test';
 import { baseLocale } from '../paraglide/runtime.js';
-import { localizedPath } from '../checks.js';
+import { localizedPath, hydrated } from '../checks.js';
 
 const isScript = url => /\.m?js(?:\?|$)/.test(new URL(url).pathname + new URL(url).search);
 
@@ -19,9 +19,6 @@ async function firstLoad(browser, path) {
   await context.close();
   return scripts;
 }
-
-/** Resolves once React has hydrated the element (React attaches its props to hydrated DOM nodes). */
-const hydrated = locator => expect.poll(() => locator.evaluate(node => Object.keys(node).some(key => key.startsWith('__reactProps'))), { message: 'link hydrated' }).toBe(true);
 
 /**
  * For every public path other than `home`: loading it directly fetches code the home page's first

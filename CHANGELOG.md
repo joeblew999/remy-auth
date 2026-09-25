@@ -4,6 +4,17 @@ All notable changes to the shared UI package `@joeblew999/remy-ui` are documente
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 package follows [Semantic Versioning](https://semver.org/).
 
+## [0.9.1] - 2026-09-25
+
+### Fixed
+- `DemoPage` notices input typed before hydration (a prerendered page fires no `onInput` for it),
+  so the leave warning still guards it.
+- `demoChecks`, `navigationBlockingChecks` and `codeSplittingChecks` act only once React has
+  hydrated the element, instead of racing hydration on prerendered pages.
+
+### Added
+- `hydrated(locator)` in `@joeblew999/remy-ui/checks`: resolves once React has hydrated an element.
+
 ## [0.9.0] - 2026-09-25
 
 The move to TanStack Start, Router and Query, with the TanStack showcase ([plan](.plans/tanstack.md)).

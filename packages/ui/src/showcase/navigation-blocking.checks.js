@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
 import { locales } from '../paraglide/runtime.js';
 import { m } from '../paraglide/messages.js';
 import { samples } from '../samples.js';
-import { localizedPath, collectErrors } from '../checks.js';
+import { localizedPath, collectErrors, hydrated } from '../checks.js';
 
 /** Answers each dialog from `answers` in turn (true accepts) and records its type and message. */
 function dialogs(page, answers) {
@@ -30,15 +30,17 @@ export function navigationBlockingChecks() {
       const name = page.getByLabel(m.name_label({}, o), { exact: true });
       const overview = page.getByRole('link', { name: m.home_link({}, o), exact: true });
 
-      // Untouched: leaving does not ask.
+      // Untouched: leaving does not ask. Act once React has hydrated the form, as a visitor's click
+      // before hydration is a plain page load that no script can guard.
       await page.goto(demo);
-      await expect(name).toBeVisible();
+      await hydrated(name);
       await overview.click();
       await expect(page).toHaveURL(`${baseURL}${home}`);
       expect(seen).toEqual([]);
 
       // Typed but not reserved: the first answer stays, the second leaves.
       await page.goto(demo);
+      await hydrated(name);
       await name.fill(samples.guest);
       await overview.click();
       await expect.poll(() => seen.length).toBe(1);
@@ -51,6 +53,7 @@ export function navigationBlockingChecks() {
 
       // Reserved: nothing left to lose, so leaving does not ask.
       await page.goto(demo);
+      await hydrated(name);
       await name.fill(samples.guest);
       await page.getByLabel(m.guests_label({}, o), { exact: true }).fill('3');
       await page.getByRole('button', { name: m.submit({}, o), exact: true }).click();

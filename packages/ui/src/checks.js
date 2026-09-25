@@ -147,6 +147,9 @@ export function entryChecks({ paths, mode }) {
   });
 }
 
+/** Resolves once React has hydrated the element (React attaches its props to hydrated DOM nodes). */
+export const hydrated = locator => expect.poll(() => locator.evaluate(node => Object.keys(node).some(key => key.startsWith('__reactProps'))), { message: 'hydrated' }).toBe(true);
+
 /** The interactive demo: the counter, the localized reservation form, and a same-tab language switch. */
 export function demoChecks() {
   for (const locale of locales) {
@@ -154,6 +157,8 @@ export function demoChecks() {
     test(`${locale}: demo counter, reservation form and language switch work after hydration`, async ({ page, context }) => {
       const errors = collectErrors(page);
       await page.goto(localizedPath('/demo', locale));
+      // Act once hydrated: before that a prerendered page's buttons have no handlers yet.
+      await hydrated(page.getByRole('button', { name: m.increment({}, o), exact: true }));
       await page.getByRole('button', { name: m.increment({}, o), exact: true }).click();
       await expect(page.locator('output')).toHaveText(new Intl.NumberFormat(locale).format(1));
       await page.getByRole('button', { name: m.submit({}, o), exact: true }).click();

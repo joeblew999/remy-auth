@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { ArrowLeftIcon } from 'lucide-react';
 import { locales, getTextDirection as direction, type Locale } from './paraglide/runtime.js';
@@ -64,6 +64,9 @@ export function HomePage({ locale, preferred, children }: { locale: Locale; pref
   </Shell>;
 }
 
+/** The demo form's starting number of seats. */
+const defaultGuests = 2;
+
 /** A reservation the demo form accepted on its own checks. */
 export type Reservation = { name: string; guests: number };
 /** The answer to a reservation: field errors to show like the form's own, or the confirmation to show instead of the default one. */
@@ -81,6 +84,12 @@ export function DemoPage({ locale, preferred, onReserve, onDirtyChange }: {
   const [errors, setErrors] = useState<{ name?: string; guests?: string }>({});
   const [reservation, setReservation] = useState<{ name: string; count: number; message?: string } | null>(null);
   const [failed, setFailed] = useState(false);
+  const form = useRef<HTMLFormElement>(null);
+  // Input typed before hydration (a prerendered page) fired no onInput, so check once hydrated.
+  useEffect(() => {
+    const data = form.current && new FormData(form.current);
+    if (data && (String(data.get('name') ?? '').trim() || Number(data.get('guests')) !== defaultGuests)) onDirtyChange?.(true);
+  }, []);
   function settle(next: typeof errors, accepted: { name: string; count: number; message?: string }) {
     const ok = Object.keys(next).length === 0;
     setFailed(false);
@@ -117,7 +126,7 @@ export function DemoPage({ locale, preferred, onReserve, onDirtyChange }: {
       <Card>
         <CardHeader><CardTitle>{m.form_heading({}, o)}</CardTitle></CardHeader>
         <CardContent>
-          <form noValidate onSubmit={reserve} onInput={() => onDirtyChange?.(true)} className="flex flex-col gap-6">
+          <form ref={form} noValidate onSubmit={reserve} onInput={() => onDirtyChange?.(true)} className="flex flex-col gap-6">
             <FieldGroup>
               <Field data-invalid={errors.name ? true : undefined}>
                 <FieldLabel htmlFor="name">{m.name_label({}, o)}</FieldLabel>
@@ -126,7 +135,7 @@ export function DemoPage({ locale, preferred, onReserve, onDirtyChange }: {
               </Field>
               <Field data-invalid={errors.guests ? true : undefined}>
                 <FieldLabel htmlFor="guests">{m.guests_label({}, o)}</FieldLabel>
-                <Input id="guests" name="guests" type="number" inputMode="numeric" min={1} max={20} step={1} defaultValue={2} aria-invalid={errors.guests ? true : undefined} aria-describedby={errors.guests ? 'guests-error' : undefined} />
+                <Input id="guests" name="guests" type="number" inputMode="numeric" min={1} max={20} step={1} defaultValue={defaultGuests} aria-invalid={errors.guests ? true : undefined} aria-describedby={errors.guests ? 'guests-error' : undefined} />
                 {errors.guests && <FieldError id="guests-error">{errors.guests}</FieldError>}
               </Field>
             </FieldGroup>

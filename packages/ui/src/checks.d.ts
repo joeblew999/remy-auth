@@ -1,8 +1,10 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 export declare const endonym: (locale: string) => string;
 export declare const direction: (locale: string) => 'ltr' | 'rtl';
 export declare const localizedPath: (path: string, locale: string) => string;
 export declare function collectErrors(page: Page): string[];
+/** Resolves once React has hydrated the element. */
+export declare function hydrated(locator: Locator): Promise<void>;
 export declare function publicPageChecks(options: { paths: string[]; prerendered?: boolean }): void;
 export declare function entryChecks(options: { paths: string[]; mode: 'redirect' | 'static' }): void;
 export declare function demoChecks(): void;
