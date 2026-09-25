@@ -29,6 +29,14 @@ export WRANGLER_OUTPUT_FILE_PATH="$output"
 ./node_modules/.bin/wrangler deploy --name "$name"
 "$(dirname "$0")/wait" "$origin" "$output"
 rm -f "$output"
+# A brand-new workers.dev name answers 404 from some places for a while: wait for ten answers in a row.
+ok=0
+for _ in $(seq 1 120); do
+  if [ "$(curl -s -o /dev/null -w '%{http_code}' "$origin/en/docs")" = 200 ]; then ok=$((ok + 1)); else ok=0; fi
+  [ "$ok" -ge 10 ] && break
+  sleep 1
+done
+[ "$ok" -ge 10 ] || { echo "cf:preview: $origin did not answer steadily within 2 minutes" >&2; exit 1; }
 
 export TEST_BASE_URL="$origin" TEST_TARGET=remote
 ./node_modules/.bin/playwright test --project=ours
