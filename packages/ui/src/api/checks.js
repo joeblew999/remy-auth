@@ -146,7 +146,9 @@ export function reservationApiChecks({ path = '/app/demo', endpoint = '/api/rese
       expect(refused.headers()['x-request-id']).not.toBe(id);
       expect(await refused.text()).not.toContain(reserved);
       // The only console errors are Chrome's own lines for the two refused calls above.
-      expect(errors).toEqual(Array(2).fill('Failed to load resource: the server responded with a status of 400 (Bad Request)'));
+      // Chrome's own line for each rejected call; HTTP/2 (Cloudflare) has no reason phrase, HTTP/1.1 (local) does.
+      expect(errors).toHaveLength(2);
+      for (const error of errors) expect(error).toMatch(/^Failed to load resource: the server responded with a status of 400 \((Bad Request)?\)$/);
     });
 
     test(`${locale}: a reservation answer that breaks the contract is refused in the browser`, async ({ page }) => {
