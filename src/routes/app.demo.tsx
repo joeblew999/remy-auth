@@ -2,25 +2,21 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useServerFn } from '@tanstack/react-start';
 import { getLocale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
-import { DemoPage, Shell } from '@joeblew999/remy-ui/pages';
+import { DemoPage } from '@joeblew999/remy-ui/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { useLeaveGuard } from '@joeblew999/remy-ui/showcase/navigation-blocking';
 import { usePreferred } from '../preferred';
 import { reserve } from '../reserve';
 import { problemPages } from '../problem';
 
-// Rendered in the browser only: the server sends the document, its metadata and the pending fallback.
-export const Route = createFileRoute('/demo')({
+// An app page rendered in the browser only: the server sends the document and its metadata.
+export const Route = createFileRoute('/app/demo')({
   ssr: false,
-  head: () => pageHead({ path: '/demo', title: locale => m.demo_title({}, { locale }), description: locale => m.demo_description({}, { locale }) }),
-  pendingComponent: Loading,
+  head: () => pageHead({ path: '/app/demo', title: locale => m.demo_title({}, { locale }), description: locale => m.demo_description({}, { locale }) }),
   component: Demo,
   ...problemPages,
 });
 
-function Loading() {
-  return <Shell locale={getLocale()}><p role="status" className="text-muted-foreground">{m.loading({}, { locale: getLocale() })}</p></Shell>;
-}
 
 function Demo() {
   // The form's own checks run first; the server function checks again and answers in the page's language.

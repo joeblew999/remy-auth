@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
 import { setResponseStatus } from '@tanstack/react-start/server';
 import { m } from '@joeblew999/remy-ui/messages';
-import type { Reservation, ReservationResult } from '@joeblew999/remy-ui/pages';
+import type { Reservation, ReservationResult } from '@joeblew999/remy-ui/app-pages';
 import { pageLocale } from './middleware';
 
 /**

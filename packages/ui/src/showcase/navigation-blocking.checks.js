@@ -20,8 +20,8 @@ function dialogs(page, answers) {
 export function navigationBlockingChecks() {
   for (const locale of checkedLocales) {
     const o = { locale };
-    const demo = localizedPath('/demo', locale);
-    const home = localizedPath('', locale);
+    const demo = localizedPath('/app/demo', locale);
+    const home = localizedPath('/app', locale);
 
     test(`${locale}: leaving the demo form with unsaved input asks first; after a reservation it does not`, async ({ page, baseURL }) => {
       const errors = collectErrors(page);

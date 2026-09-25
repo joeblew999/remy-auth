@@ -2,9 +2,9 @@ import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { locales } from '@joeblew999/remy-ui/runtime';
 import { samples } from '@joeblew999/remy-ui/samples';
-import { checkedLocales, publicPageChecks, entryChecks, demoChecks, formatsChecks, observabilityChecks, collectErrors, endonym, direction, localizedPath } from '@joeblew999/remy-ui/checks';
+import { checkedLocales, zoneChecks, publicPageChecks, entryChecks, demoChecks, formatsChecks, observabilityChecks, collectErrors, endonym, direction, localizedPath } from '@joeblew999/remy-ui/checks';
 import { localeInfo, weekdayName } from '../packages/ui/src/locale-info';
-import { publicPaths } from '@joeblew999/remy-ui/paths';
+import { sitePaths, appPaths, allPaths } from '@joeblew999/remy-ui/paths';
 import { searchParamsChecks } from '@joeblew999/remy-ui/showcase/search-params.checks';
 import { preloadChecks } from '@joeblew999/remy-ui/showcase/preload.checks';
 import { navigationBlockingChecks } from '@joeblew999/remy-ui/showcase/navigation-blocking.checks';
@@ -17,19 +17,22 @@ import { buildBoundaryChecks } from '@joeblew999/remy-ui/showcase/build-boundari
 import { devicePlaceChecks } from '@joeblew999/remy-ui/showcase/device-place.checks';
 
 // The shared checks cover what every app built on the package must satisfy.
-publicPageChecks({ paths: publicPaths });
-entryChecks({ paths: publicPaths, mode: 'redirect' });
+// Site pages (for Google) and app pages (for people using the app) never mix; see paths.js.
+zoneChecks({ sitePaths, appPaths });
+publicPageChecks({ paths: sitePaths });
+entryChecks({ paths: allPaths, mode: 'redirect' });
 demoChecks();
 serverFunctionChecks();
-codeSplittingChecks({ paths: publicPaths });
-buildBoundaryChecks({ paths: publicPaths, markers: [{ name: 'request.cf', pattern: /\.cf\b/, source: 'src/place.server.ts' }] });
-observabilityChecks({ service: 'remy-auth', paths: publicPaths });
+codeSplittingChecks({ paths: sitePaths });
+codeSplittingChecks({ paths: appPaths, home: '/app' });
+buildBoundaryChecks({ paths: allPaths, markers: [{ name: 'request.cf', pattern: /\.cf\b/, source: 'src/place.server.ts' }] });
+observabilityChecks({ service: 'remy-auth', paths: allPaths });
 searchParamsChecks();
 preloadChecks();
 navigationBlockingChecks();
 deferredPlaceChecks();
-devicePlaceChecks({ network: true });
-statusCardChecks({ service: 'remy-auth' });
+devicePlaceChecks({ path: '/app/location', network: true });
+statusCardChecks({ service: 'remy-auth', path: '/app' });
 problemChecks({ timeZones: { known: 'Asia/Tokyo', alias: 'asia/tokyo', unknown: 'Mars/Olympus_Mons' }, failingNavigation: { from: '', link: 'formats_link', fail: '**/_serverFn/**', heading: 'formats_title' }, serverRoutes: [{ path: '/robots.txt', type: 'text/plain; charset=utf-8', cache: 'public, max-age=3600', origin: true }, { path: '/sitemap.xml', type: 'application/xml; charset=utf-8', cache: 'public, max-age=3600', origin: true }] });
 formatsChecks({ extra: async (page, locale) => {
   // Rows only this server-rendered app has: more Intl examples and Cloudflare's geolocation.

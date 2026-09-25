@@ -166,7 +166,7 @@ export function demoChecks() {
     const o = { locale };
     test(`${locale}: demo counter, reservation form and language switch work after hydration`, async ({ page, context }) => {
       const errors = collectErrors(page);
-      await page.goto(localizedPath('/demo', locale));
+      await page.goto(localizedPath('/app/demo', locale));
       // Act once hydrated: before that a prerendered page's buttons have no handlers yet.
       await hydrated(page.getByRole('button', { name: m.increment({}, o), exact: true }));
       await page.getByRole('button', { name: m.increment({}, o), exact: true }).click();
@@ -179,7 +179,7 @@ export function demoChecks() {
       await expect(page.locator('.reserved')).toHaveText(m.reserved({ name: samples.guest, count: 3 }, o));
       const other = locales.find(value => value !== locale);
       await page.getByRole('link', { name: endonym(other), exact: true }).click();
-      await expect(page).toHaveURL(new RegExp(`${localizedPath('/demo', other)}$`));
+      await expect(page).toHaveURL(new RegExp(`${localizedPath('/app/demo', other)}$`));
       await expect(page.locator('html')).toHaveAttribute('lang', other);
       expect(context.pages()).toHaveLength(1);
       expect(errors).toEqual([]);
@@ -305,6 +305,39 @@ export function performanceChecks({ pages, thresholds = {} }) {
         if (metrics.totalBlockingTime > limits.tbt) failures.push(`TBT ${Math.round(metrics.totalBlockingTime)} ms > ${limits.tbt} ms`);
         expect(failures, 'See the performance.html attachment in the HTML report').toEqual([]);
       });
+    }
+  });
+}
+
+/**
+ * The two kinds of page stay apart (paths.js): every site page is complete in the server's HTML
+ * without JavaScript, indexable and labelled as a site page; every app page carries noindex, stays
+ * out of the sitemap and is labelled as the app once it runs.
+ */
+export function zoneChecks({ sitePaths, appPaths }) {
+  test('site pages work without JavaScript, are indexable and say so', async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    for (const locale of checkedLocales) for (const path of sitePaths) {
+      const url = localizedPath(path, locale);
+      expect((await page.goto(url))?.status(), url).toBe(200);
+      await expect(page.getByRole('heading', { level: 1 }), url).toBeVisible();
+      await expect(page.locator('[data-zone="site"]'), url).toHaveText(m.zone_site({}, { locale }));
+      await expect(page.locator('meta[name="robots"]'), url).toHaveCount(0);
+    }
+    await context.close();
+  });
+
+  test('app pages are kept out of search and say they are the app', async ({ page, request }) => {
+    const sitemap = await (await request.get('/sitemap.xml')).text();
+    for (const locale of checkedLocales) for (const path of appPaths) {
+      const url = localizedPath(path, locale);
+      const response = await request.get(url);
+      expect(response.status(), url).toBe(200);
+      expect(await response.text(), url).toContain('<meta name="robots" content="noindex"/>');
+      expect(sitemap, url).not.toContain(`${url}<`);
+      await page.goto(url);
+      await expect(page.locator('[data-zone="app"]'), url).toHaveText(m.zone_app({}, { locale }));
     }
   });
 }

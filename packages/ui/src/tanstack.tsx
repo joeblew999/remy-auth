@@ -5,7 +5,7 @@ import { deLocalizeUrl, localizeUrl, getLocale, getUrlOrigin, extractLocaleFromU
   shouldRedirect, type Locale } from './paraglide/runtime.js';
 import { alternates } from './seo';
 import { withObservability } from './worker';
-import { publicPaths } from './paths.js';
+import { allPaths, isAppPath } from './paths.js';
 
 // TanStack Router and Start glue over Paraglide's official integration
 // (https://paraglidejs.com/tanstack-start). Plain functions only: nothing here needs the Start
@@ -33,7 +33,7 @@ type StartFetch = (request: Request) => Response | Promise<Response>;
  * every other request type too, varying on Accept-Language and Cookie. HTML is never cached.
  */
 export function localizedWorker<E extends ObservedEnv>(service: string, start: { fetch: StartFetch },
-  { entryPaths = publicPaths }: { entryPaths?: readonly string[] } = {}) {
+  { entryPaths = allPaths }: { entryPaths?: readonly string[] } = {}) {
   return withObservability<E>(service, request => paraglideMiddleware(request, async () => {
     const entry = await entryRedirect(request, entryPaths);
     if (entry) return entry;
@@ -46,7 +46,7 @@ export function localizedWorker<E extends ObservedEnv>(service: string, start: {
 }
 
 /** A 302 to Paraglide's localized URL for an un-localized entry path, or undefined for anything else. */
-export async function entryRedirect(request: Request, entryPaths: readonly string[] = publicPaths): Promise<Response | undefined> {
+export async function entryRedirect(request: Request, entryPaths: readonly string[] = allPaths): Promise<Response | undefined> {
   if (request.method !== 'GET' && request.method !== 'HEAD') return undefined;
   const url = new URL(request.url);
   if (extractLocaleFromUrl(url) || !entryPaths.some(path => (path || '/') === url.pathname)) return undefined;
@@ -95,7 +95,8 @@ type HeadOptions = {
 export function pageHead({ path, title, description, locale = getLocale(), origin = getUrlOrigin(), brand = 'Remy' }: HeadOptions) {
   const links = alternates(origin, path, locale);
   return {
-    meta: [{ title: `${title(locale)} | ${brand}` }, { name: 'description', content: description(locale) }],
+    // App pages are for people using the app, not for search: kept out of the index (paths.js).
+    meta: [{ title: `${title(locale)} | ${brand}` }, { name: 'description', content: description(locale) }, ...(isAppPath(path) ? [{ name: 'robots', content: 'noindex' }] : [])],
     links: [
       { rel: 'canonical', href: links.canonical },
       ...links.alternates.map(link => ({ rel: 'alternate', hrefLang: link.hrefLang, href: link.href })),

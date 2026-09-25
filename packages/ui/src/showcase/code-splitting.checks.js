@@ -26,7 +26,7 @@ async function firstLoad(browser, path) {
  * as a client-side navigation (no document request) that loads nothing outside the route's own code.
  */
 export function codeSplittingChecks({ paths, home = '' }) {
-  test('each route\'s code stays out of the home page\'s first load and loads on demand when navigated to', async ({ browser }) => {
+  test(`from ${home || 'the site home'}, each route's code stays out of the first load and loads on demand when navigated to`, async ({ browser }) => {
     const homePath = localizedPath(home, baseLocale);
     const targets = paths.filter(path => path !== home).map(path => localizedPath(path, baseLocale));
     const [homeScripts, ...direct] = await Promise.all([homePath, ...targets].map(path => firstLoad(browser, path)));

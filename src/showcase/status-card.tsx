@@ -17,20 +17,10 @@ export const statusQuery = queryOptions({
   staleTime: statusRefreshMs,
 });
 
-/**
- * A route-level wrapper that adds the live status card inside a page (its children slot): the route's loader fills the
- * request's QueryClient, so the server HTML already holds the status (and the SSR integration
- * hands it to the browser), and the card keeps it fresh with useQuery. Spread it into the route:
- * `...withStatusCard(Page)`.
- */
-export function withStatusCard(Page: (props: { children?: React.ReactNode }) => React.ReactNode) {
-  return {
-    loader: async ({ context }: { context: { queryClient: QueryClient } }) => {
-      await context.queryClient.ensureQueryData(statusQuery);
-    },
-    component: () => <Page><StatusCard /></Page>,
-  };
-}
+/** The loader of a route that shows the card: fills the request's QueryClient, so the server HTML holds the status. */
+export const statusCardLoader = async ({ context }: { context: { queryClient: QueryClient } }) => {
+  await context.queryClient.ensureQueryData(statusQuery);
+};
 
 /** The Worker's status, release and service; polls while the page is open and visible. */
 export function StatusCard() {

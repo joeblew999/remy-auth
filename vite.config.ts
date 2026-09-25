@@ -19,7 +19,7 @@ export default defineConfig({
     cloudflare({ viteEnvironment: { name: 'ssr' } }),
     // Fallback faces sized to the web fonts (size-adjust and ascent/descent overrides, as Next.js
     // generates), so the swap to Geist keeps the layout and LCP; fonts.css lists them. Before Tailwind.
-    FontaineTransform.vite({ fallbacks: { 'Geist Variable': ['Arial'], 'Geist Mono Variable': ['Courier New'] } }),
+    FontaineTransform.vite({ fallbacks: { 'Geist Variable': ['Arial'] } }),
     tailwindcss(),
     tanstackStart(),
     viteReact(),

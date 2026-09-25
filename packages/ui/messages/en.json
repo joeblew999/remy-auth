@@ -268,5 +268,16 @@
   "nav_home": "Overview",
   "nav_demo": "Demo",
   "nav_formats": "Formats",
-  "toggle_sidebar": "Toggle the sidebar"
+  "toggle_sidebar": "Toggle the sidebar",
+  "zone_site": "Site page · works without JavaScript",
+  "zone_app": "App · needs JavaScript",
+  "open_app": "Open the app",
+  "back_to_site": "Back to the site",
+  "nav_location": "Location",
+  "app_home_title": "Your app",
+  "app_home_description": "The interactive side of Remy: live data, forms and your device.",
+  "app_home_intro": "Everything here runs in your browser. The site pages stay readable without JavaScript.",
+  "location_title": "Where you are",
+  "location_description": "Your network location from Cloudflare and, if you allow it, your device’s own.",
+  "location_intro": "Compare what the network says with what your device says."
 }

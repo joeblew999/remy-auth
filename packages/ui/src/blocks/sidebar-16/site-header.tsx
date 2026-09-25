@@ -21,7 +21,7 @@ export function SiteHeader({ locale, path }: { locale: Locale; path: string }) {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink className="brand" render={<Link to="/" preload="intent" />}>Remy</BreadcrumbLink>
+              <BreadcrumbLink className="brand" render={<Link to="/app" preload="intent" />}>Remy</BreadcrumbLink>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

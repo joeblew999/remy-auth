@@ -273,5 +273,16 @@
   "nav_home": "نظرة عامة",
   "nav_demo": "تجربة",
   "nav_formats": "التنسيقات",
-  "toggle_sidebar": "إظهار الشريط الجانبي أو إخفاؤه"
+  "toggle_sidebar": "إظهار الشريط الجانبي أو إخفاؤه",
+  "zone_site": "صفحة من الموقع · تعمل دون JavaScript",
+  "zone_app": "التطبيق · يحتاج إلى JavaScript",
+  "open_app": "افتح التطبيق",
+  "back_to_site": "العودة إلى الموقع",
+  "nav_location": "الموقع الجغرافي",
+  "app_home_title": "تطبيقك",
+  "app_home_description": "الجانب التفاعلي من Remy: بيانات مباشرة ونماذج وجهازك.",
+  "app_home_intro": "كل ما هنا يعمل في متصفحك. تبقى صفحات الموقع مقروءة دون JavaScript.",
+  "location_title": "أين أنت",
+  "location_description": "موقع شبكتك وفق Cloudflare، وموقع جهازك إن سمحت بذلك.",
+  "location_intro": "قارن ما تقوله الشبكة بما يقوله جهازك."
 }

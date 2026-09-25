@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { CalendarDaysIcon, GalleryVerticalEndIcon, HouseIcon, MousePointerClickIcon } from 'lucide-react';
+import { ArrowLeftIcon, GalleryVerticalEndIcon, LayoutDashboardIcon, MapPinIcon, MousePointerClickIcon } from 'lucide-react';
 import { getTextDirection, type Locale } from '../../paraglide/runtime.js';
 import { m } from '../../paraglide/messages.js';
 import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../components/sidebar';
@@ -13,7 +13,7 @@ export function AppSidebar({ locale }: { locale: Locale }) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link to="/" preload="intent" />}>
+            <SidebarMenuButton size="lg" render={<Link to="/app" preload="intent" />}>
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                 <GalleryVerticalEndIcon className="size-4" />
               </div>
@@ -26,10 +26,11 @@ export function AppSidebar({ locale }: { locale: Locale }) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain label={m.nav_heading({}, o)} items={[
-          { title: m.nav_home({}, o), to: '/', icon: <HouseIcon /> },
-          { title: m.nav_demo({}, o), to: '/demo', icon: <MousePointerClickIcon /> },
-          { title: m.nav_formats({}, o), to: '/formats', icon: <CalendarDaysIcon /> },
+          { title: m.nav_home({}, o), to: '/app', icon: <LayoutDashboardIcon /> },
+          { title: m.nav_demo({}, o), to: '/app/demo', icon: <MousePointerClickIcon /> },
+          { title: m.nav_location({}, o), to: '/app/location', icon: <MapPinIcon /> },
         ]} />
+        <NavMain label={m.back_to_site({}, o)} items={[{ title: m.back_to_site({}, o), to: '/', icon: <ArrowLeftIcon className="rtl:rotate-180" /> }]} />
       </SidebarContent>
     </Sidebar>
   );

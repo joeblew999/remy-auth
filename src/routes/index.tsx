@@ -4,15 +4,15 @@ import { m } from '@joeblew999/remy-ui/messages';
 import { HomePage } from '@joeblew999/remy-ui/pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { usePreferred } from '../preferred';
-import { withStatusCard } from '../showcase/status-card';
 import { problemPages } from '../problem';
 
+// A site page: complete in the server's HTML without JavaScript.
 export const Route = createFileRoute('/')({
   head: () => pageHead({ path: '', title: locale => m.home_title({}, { locale }), description: locale => m.home_description({}, { locale }) }),
-  ...withStatusCard(Home),
+  component: Home,
   ...problemPages,
 });
 
-function Home({ children }: { children?: React.ReactNode }) {
-  return <HomePage locale={getLocale()} preferred={usePreferred()}>{children}</HomePage>;
+function Home() {
+  return <HomePage locale={getLocale()} preferred={usePreferred()} />;
 }

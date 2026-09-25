@@ -32,7 +32,7 @@ function valueNode(tree, key) {
  * valid reservation with its own message, and refuses a malformed call with 400. Every call's response carries the Worker's X-Request-ID,
  * and the function middleware returns the same ID with the result, so it saw it too.
  */
-export function serverFunctionChecks({ path = '/demo' } = {}) {
+export function serverFunctionChecks({ path = '/app/demo' } = {}) {
   for (const locale of checkedLocales) {
     const o = { locale };
     test(`${locale}: the reservation server function validates again, answers in the page's language and keeps the request ID`, async ({ page }) => {

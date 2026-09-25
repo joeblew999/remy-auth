@@ -13,11 +13,11 @@ import { DevicePlace } from '@joeblew999/remy-ui/showcase/device-place';
  * skeleton with the same labels holds its space. Crawlers get the whole document at once
  * (TanStack waits for everything when the user agent is a bot).
  */
-export function DeferredPlace({ locale, place }: { locale: Locale; place: Promise<Place> }) {
+export function DeferredPlace({ locale, place, device = false }: { locale: Locale; place: Promise<Place>; device?: boolean }) {
   // Cloudflare's note stays with Cloudflare's group; the device's own location follows it.
   const note = <p className="text-sm leading-relaxed text-muted-foreground">{m.location_note({}, { locale })}</p>;
   return <Await promise={place} fallback={<><PlaceSkeleton locale={locale} />{note}</>}>
-    {value => <><PlaceGroup locale={locale} place={value} />{note}<DevicePlace locale={locale} network={value} /></>}
+    {value => <><PlaceGroup locale={locale} place={value} />{note}{device && <DevicePlace locale={locale} network={value} />}</>}
   </Await>;
 }
 
