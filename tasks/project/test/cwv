@@ -5,7 +5,13 @@
 set -euo pipefail
 log="$(mktemp)"
 # The throwaway check Worker is kept for the speed run, then deleted whatever happens.
-cleanup() { rm -f "$log"; name="$(sed -n 's/^Target: Cloudflare (remote), throwaway Worker \([^ ]*\) at .*/\1/p' "$log" 2>/dev/null | tail -1)"; [ -z "$name" ] || "$(dirname "$0")/../../cf/preview-delete" "$name"; }
+cleanup() {
+  status=$?
+  name="$(sed -n 's/^Target: Cloudflare (remote), throwaway Worker \([^ ]*\) at .*/\1/p' "$log" 2>/dev/null | tail -1)"
+  rm -f "$log"
+  [ -z "$name" ] || "$(dirname "$0")/../../cf/preview-delete" "$name" || echo "project:test:cwv: could not delete $name; run mise run cf:preview-delete -- $name" >&2
+  exit "$status"
+}
 trap cleanup EXIT
 KEEP_PREVIEW=1 mise run cf:preview ${usage_alias:+"$usage_alias"} | tee "$log"
 origin="$(sed -n 's/^Preview passed level 1: \(https:[^ ]*\)$/\1/p' "$log" | tail -1)"
