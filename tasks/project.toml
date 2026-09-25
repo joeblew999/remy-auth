@@ -78,7 +78,7 @@ run = "./node_modules/.bin/playwright test --project=ours tests/smoke.spec.ts"
 description = "Tier 2, targeted: build, then only the checks whose title matches the words given, in QUICK_LOCALES (en, ar), e.g. mise run project:test:only -- formats. For an area that looks broken"
 dir = "{{config_root}}"
 depends = ["project:build"]
-env = { TEST_TARGET = "local", CHECK_LOCALES = "{{ env.QUICK_LOCALES | default(value='en,ar') }}" }
+env = { TEST_TARGET = "local", CHECK_LOCALES = "{{ env.CHECK_LOCALES | default(value=env.QUICK_LOCALES | default(value='en,ar')) }}" }
 run = "./node_modules/.bin/playwright test --project=ours --grep"
 
 ["project:test:quick"]

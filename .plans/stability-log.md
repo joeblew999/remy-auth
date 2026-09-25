@@ -12,6 +12,9 @@ a full run (tier 4) catches what broke. Each break is logged with the boundary i
 | 09-25 | Docs page layout change broke translation/search checks (4 failures) | two agents changing the docs area in parallel | leaked, caught by the full run | fix agent |
 | 09-25 | Header importing the search box would have put it in every page's bundle | route-level code splitting | held (caught by review before deploy) | the id in its own module |
 | 09-25 | Answers mixed English and Spanish citations | AI Search index shared across languages | leaked, seen live by the owner | folder filter per language |
+| 09-25 | English docs edited by a tidy-up agent left the Spanish translation behind (3 failures) | translations vs their source | leaked, caught by the full run's heading-id check | Spanish caught up; translation drift needs a check before merge |
+| 09-25 | Choosing a search result left the query in the box, so results covered the new page | component state across navigation | leaked, found by the rewritten check | clear the box on a plain click |
+| 09-25 | `project:test:only` ignored `CHECK_LOCALES` | tier task defaults | leaked (tooling) | caller's `CHECK_LOCALES` wins |
 | 09-25 | Five merges into `CHANGELOG.md` and `now.md` conflicted | shared plan and changelog files | held (text conflicts only, no code) | resolved at merge |
 | 09-25 | Fonts, formats, parts, caching, sidebar, contracts merged in parallel | package vs app, parts, route files | held: typecheck clean, every page 200 live | — |
 
