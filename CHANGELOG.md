@@ -6,6 +6,8 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.10.3] - 2026-09-25
+
 ### Added
 - `./reservation`: the demo reservation's rules as one Zod 4 schema (`reservationSchema(locale)`,
   localized messages) for the browser and the server, the server function's input shape
@@ -257,7 +259,8 @@ remy-auth-app).
 - `@joeblew999/remy-ui/locale-info`: a locale's calendars, numbering system, hour cycle
   and week conventions, plus `weekdayName`.
 
-[Unreleased]: https://github.com/joeblew999/remy-auth/compare/v0.10.2...HEAD
+[Unreleased]: https://github.com/joeblew999/remy-auth/compare/v0.10.3...HEAD
+[0.10.3]: https://github.com/joeblew999/remy-auth/compare/v0.10.2...v0.10.3
 [0.10.2]: https://github.com/joeblew999/remy-auth/compare/v0.10.1...v0.10.2
 [0.10.1]: https://github.com/joeblew999/remy-auth/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/joeblew999/remy-auth/compare/v0.9.3...v0.10.0

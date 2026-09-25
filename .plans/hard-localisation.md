@@ -102,11 +102,12 @@ plural coverage and formatting, not wording.
   `zh-Hant-HK` and `zh-HK` would not reach `zh-TW`. The fix inside Paraglide's own extension point
   is one custom strategy (`defineCustomServerStrategy` and `defineCustomClientStrategy`) placed before
   `preferredLanguage`, mapping Chinese through `Intl.Locale.prototype.maximize()` (Hant to `zh-TW`,
-  Hans and plain `zh` to nothing) and leaving every other tag to Paraglide. **Owner decision.**
+  Hans and plain `zh` to nothing) and leaving every other tag to Paraglide. **Decided 2026-09-25 (owner delegated, recommendation a):** add
+  this strategy with the languages.
 - **Week info.** `Intl.Locale.prototype.getWeekInfo()` is Baseline newly available since
   2026-07-21 and present in workerd; the deprecated `weekInfo` getter is never used. A fallback only
-  matters for Firefox before 153 and Safari before 17. **Owner decision:** keep a small fallback, or
-  rely on Baseline.
+  matters for Firefox before 153 and Safari before 17. **Decided 2026-09-25 (owner delegated,
+  recommendation a):** rely on Baseline, no fallback.
 - **Calendars and digits.** workerd and Chrome carry every calendar (persian, buddhist, japanese,
   roc, hebrew, ethiopic, chinese, islamic) and numbering system tested and agree with each other;
   Node and Safari differ in places, so the evidence table above is re-measured in workerd. Locale

@@ -43,7 +43,7 @@ Tests run in tiers, chosen by cost and by what a change can break, never by skip
 | --- | --- | --- | --- |
 | Quick | `project:test:quick` | every check of ours in `QUICK_LOCALES` (default `en,ar`) | while editing; not a gate |
 | Level 1 | `project:test`, inside `project:verify` | every check of ours in every language | before every push, release and deploy |
-| Level 2 | `project:test:google` | Google's Lighthouse audits and Core Web Vitals | before a release locally, and in CI on every push and tag |
+| Level 2 | `project:test:google` (audits, local) and `project:test:cwv` (Core Web Vitals, on a Cloudflare preview) | Google's Lighthouse audits; Google's speed thresholds judged where Google and visitors meet the site | before every release (`ui:release` runs both); the audits also in CI on every push and tag |
 
 Where checks run: the shared package's own behaviour is proven once, in remy-auth, before each
 release. An app built on the package runs a contract set (its pages render, site and app pages stay

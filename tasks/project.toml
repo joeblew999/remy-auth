@@ -70,11 +70,11 @@ env = { TEST_TARGET = "local", CHECK_LOCALES = "{{ env.QUICK_LOCALES | default(v
 run = "./node_modules/.bin/playwright test --project=ours"
 
 ["project:test:google"]
-description = "Level 2: build, then run Google's Lighthouse audits and Core Web Vitals locally (slow, ~90 s; CI runs this). Uses dist/, PREVIEW_PORT and the Chrome DevTools daemon: never alongside another local level or a remote level 2"
+description = "Level 2, audits: build, then run Google's Lighthouse audits (accessibility, best practices, SEO) locally (~40 s; CI runs this). Core Web Vitals are judged on a Cloudflare preview instead: project:test:cwv. Uses dist/, PREVIEW_PORT and the Chrome DevTools daemon: never alongside another local level or a remote level 2"
 dir = "{{config_root}}"
 depends = ["project:build"]
 env = { TEST_TARGET = "local" }
-run = "./node_modules/.bin/playwright test --project=google --project=google-cwv"
+run = "./node_modules/.bin/playwright test --project=google"
 
 ["project:verify"]
 description = "Level 1: verify tasks, dependencies, MCP registration, types and our own checks (fast)"

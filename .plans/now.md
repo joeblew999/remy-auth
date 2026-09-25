@@ -37,16 +37,16 @@ formats speed), batch 3 (TanStack Form, Zod adapter, Devtools), a docs audit and
 
 | # | Work | Waits for | Then |
 | --- | --- | --- | --- |
-| 1 | Merge batch 3 (Form, Zod adapter, Devtools), regenerate the lockfile once, both levels, release 0.10.3, deploy | batch 3 | remy-auth-app moves to 0.10.3 |
+| 1 | Batch 3 merged (TanStack Form, Zod schema, TanStack Devtools); release 0.10.3, deploy | release gate | remy-auth-app moves to 0.10.3 |
 | 2 | ~~Merge batch 1~~ done 2026-09-25: remy-auth-app live on 0.10.2 (32 of 32 live), TanStack plan in done/, alert policy created | | |
 | 3 | Docs refactor: first pass merged 2026-09-25 (one home per fact, two rulebooks split); second pass: `docs/gui.md` evidence section, now.md history lines | | |
-| 4 | Tooling fixes from the review, smallest first | tooling review | shared tasks released with the next tag |
-| 5 | Formats speed fix, if an upstream-only fix exists | batch 2, formats speed | Google's level green on production |
+| 4 | Tooling fixes first pass merged (sequential release gate, rollout wait, per-agent ports, cf:urls, project:upgrade-ui); second pass: docs for the new tasks, remy-auth-app CI | | shared tasks released with 0.10.3 |
+| 5 | Formats speed: TanStack Start's `inlineCss`; Core Web Vitals judged on a Cloudflare preview (`project:test:cwv`), thresholds unchanged (decided 2026-09-25) | release 0.10.3 | Google's level green on production |
 | 6 | Structured data on the site pages | batch 2, structured data | check in the server HTML |
 | 7 | Security headers rollout, report-only first | batch 2 report and **owner decision** | enforce after a clean report period |
 | 8 | Contract-first APIs: build items 2 to 6 on oRPC 1.15.4 (chosen from the spike) | ready | status and reservation endpoints |
 | 9 | Parts: convert the existing parts with candidate 2 (virtual module, chosen from the spike) | ready | one line per part in each app |
-| 10 | Ten more languages and the hard localisation features | two **owner decisions** (Chinese matching strategy, week-info fallback) | one agent per two languages, then a hands-on pass |
+| 10 | Ten more languages and the hard localisation features | ready (both decisions made 2026-09-25) | one agent per two languages, then a hands-on pass |
 | 11 | Auth service decisions 1 to 6: runtime proof, drafts, sharing examples | **owner to launch** (items 1 to 3 of the last numbered choice) | owner confirms the drafts |
 | 12 | Auth service milestone 1: Better Auth on D1, issuer, sample app | 11 confirmed | login screens |
 | 13 | Auth portal screens from shadcn's login and signup blocks; admin lists on TanStack Table | 12 | shared login checks |
