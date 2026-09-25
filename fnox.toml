@@ -1,0 +1,14 @@
+# Secret resolution for remy-auth (fnox; values in the macOS keychain, never in this file).
+# Same item names as every joeblew999 repo (one Cloudflare account). Set with:
+#   fnox set -p keychain CLOUDFLARE_API_TOKEN <token>
+# (never omit `-p keychain`: without it the value is written here in plain text).
+# Tasks that need more than Wrangler's login (AI Gateway, stored Workers Logs, AI Search tokens)
+# run through `fnox exec --`.
+
+[providers.keychain]
+type = "keychain"
+service = "fnox"
+
+[secrets]
+CLOUDFLARE_API_TOKEN  = { provider = "keychain", value = "CLOUDFLARE_API_TOKEN" }
+CLOUDFLARE_ACCOUNT_ID = { provider = "keychain", value = "CLOUDFLARE_ACCOUNT_ID" }

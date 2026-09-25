@@ -3,6 +3,8 @@ min_version = "2026.9.12"
 
 [tools]
 node = "26.10.0"
+# Secrets from the macOS keychain (fnox.toml), as in every joeblew999 repo.
+fnox = "1.35.3"
 
 # Shared tasks live in tasks/, one file per namespace, so other projects can include the same
 # directory by git reference; see tasks/README.md.
