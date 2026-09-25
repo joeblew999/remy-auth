@@ -4,6 +4,8 @@ All notable changes to the shared UI package `@joeblew999/remy-ui` are documente
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 package follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
 ## [0.10.2] - 2026-09-25
 
 ### Changed
@@ -125,12 +127,6 @@ remy-auth-app).
 - `pages`: in-app links are TanStack `Link`s to de-localized paths with `preload="intent"`;
   the router's rewrite adds the locale. Language changes stay plain anchors (full navigations).
 - Peer dependency `react-router` replaced by `@tanstack/react-router` (optional).
-
-### Removed
-- `@joeblew999/remy-ui/react-router` (`languageMiddleware`, `redirectToLocalized`, `pageMeta`,
-  `requireLocale`, `suggestedLocale`); routes no longer carry a `:locale` segment.
-
-### Changed
 - `HomePage` takes `children`, shown inside the page under its links (the live status card).
 - `LanguageHint` puts its two actions under the text instead of shadcn's absolutely placed
   `AlertAction`, which overlapped the text at phone width.
@@ -143,6 +139,10 @@ remy-auth-app).
   `monospace`), which each app imports after `styles.css`.
 - `publicPageChecks` fails when any element on any page uses a non-generic font family or the
   page declares a web font.
+
+### Removed
+- `@joeblew999/remy-ui/react-router` (`languageMiddleware`, `redirectToLocalized`, `pageMeta`,
+  `requireLocale`, `suggestedLocale`); routes no longer carry a `:locale` segment.
 
 ## [0.8.0] - 2026-09-24
 
@@ -241,6 +241,14 @@ remy-auth-app).
 - `@joeblew999/remy-ui/locale-info`: a locale's calendars, numbering system, hour cycle
   and week conventions, plus `weekdayName`.
 
+[Unreleased]: https://github.com/joeblew999/remy-auth/compare/v0.10.2...HEAD
+[0.10.2]: https://github.com/joeblew999/remy-auth/compare/v0.10.1...v0.10.2
+[0.10.1]: https://github.com/joeblew999/remy-auth/compare/v0.10.0...v0.10.1
+[0.10.0]: https://github.com/joeblew999/remy-auth/compare/v0.9.3...v0.10.0
+[0.9.3]: https://github.com/joeblew999/remy-auth/compare/v0.9.2...v0.9.3
+[0.9.2]: https://github.com/joeblew999/remy-auth/compare/v0.9.1...v0.9.2
+[0.9.1]: https://github.com/joeblew999/remy-auth/compare/v0.9.0...v0.9.1
+[0.9.0]: https://github.com/joeblew999/remy-auth/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/joeblew999/remy-auth/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/joeblew999/remy-auth/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/joeblew999/remy-auth/compare/v0.5.0...v0.6.0
