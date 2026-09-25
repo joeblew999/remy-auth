@@ -1,6 +1,6 @@
 # Shared auth service
 
-Status: proposed, 2026-09-24. Minimal GUI proof implemented; auth service implementation has not started.
+Status: proposed, 2026-09-24; refreshed 2026-09-25 for TanStack Start. Minimal GUI proof implemented; auth service implementation has not started. Builds on the [TanStack plan](tanstack.md), which must land first.
 Owner: remy-auth. First consumer: in-repo sample; first external consumer: remy-data.
 Reviewer defines acceptance;
 Executor implements and verifies a bounded milestone. Do not begin a fleet rollout.
@@ -88,6 +88,38 @@ Do not silently drop a required feature or substitute a new store.
 
 Recheck primary documentation against the pinned versions during implementation.
 Do not treat these observations as a deployed-system compatibility test.
+
+## Building it on TanStack Start
+
+Refreshed 2026-09-25: both apps and the shared package move to TanStack Start and Router
+([TanStack plan](tanstack.md)), so the service, its screens and the sample are built on it.
+Sources: Better Auth's [TanStack Start integration](https://www.better-auth.com/docs/integrations/tanstack)
+and the installed skills `auth-server-primitives`, `auth-and-guards`, `server-functions`,
+`middleware`, `server-routes`, `execution-model` and `router-query`.
+
+| Concern | How it is built | Where it is enforced |
+| --- | --- | --- |
+| Better Auth endpoints | One catch-all server route, `src/routes/api/auth/$.ts`, whose `GET` and `POST` handlers return `auth.handler(request)`; OIDC, JWKS and MCP endpoints are served through it | Better Auth |
+| Cookies | Better Auth's `tanstackStartCookies()` plugin, last in the plugin list; secure cookies with a host-bound prefix, `HttpOnly`, `Secure`, `SameSite=Lax` | Better Auth configuration |
+| Reading the session | `auth.api.getSession({ headers: getRequestHeaders() })` inside a function middleware (`authMiddleware`) that puts a typed session in the server function's context; never at module scope, where Workers have no request | Server functions and server routes |
+| The data boundary | Every server function or server route touching private data uses `authMiddleware` or re-checks inside its handler, then checks membership and permission for the target record; a parsed ID is not authorization | Inside each handler, beside the operation |
+| Page UX | A root `beforeLoad` loads the session into router context; an `_authenticated` layout route redirects anonymous visitors to the localized login page with a validated return path | Routes (presentation only) |
+| CSRF and origins | Better Auth `trustedOrigins` with the exact registered origins; non-GET server functions and routes accept same-origin requests only | Better Auth and middleware |
+| Rate limits | Better Auth rate limiting on login, sign-up and recovery with shared storage (D1), since Workers run many instances and memory limits are per instance | Better Auth |
+| Bindings | D1 and secrets via `import { env } from 'cloudflare:workers'`, the Better Auth instance created per request from them | Request scope |
+| Login, sign-up, recovery, consent | Localized routes built from the shared shadcn components (Field, Input, Button, Alert, Card) and Paraglide, `noindex`, submitting through validated server functions; the same error message for unknown user and wrong password | remy-auth |
+| The sample consumer | `examples/sample-app/` on TanStack Start too: OAuth authorization code with `state` and PKCE against remy-auth, notes list and create through server functions with TanStack Query, the MCP adapter as a server route calling the same permission decision | The sample's own handlers |
+| Observability | The shared observability wrapper plus function middleware adding the request ID and a bounded reason code to every auth and authorization outcome | Middleware |
+
+Not documented for Workers by Better Auth, so the first step of milestone 1 is a spike on the
+pinned versions: `tanstackStartCookies()` and the catch-all route under the Cloudflare Vite plugin,
+the chosen D1 adapter with `auth generate` and Wrangler migrations, and session reads across two
+Worker instances. Report incompatibilities rather than switching stores or plugins silently.
+
+Checks to add, reusing the shared checks' style: an unauthenticated direct call to every
+protected server function and server route is rejected before any data is returned; anonymous
+redirects and login pages name no protected user, tenant or record; logout invalidates the
+session across instances.
 
 ## Milestone 1: service plus runnable in-repo sample
 
@@ -207,7 +239,8 @@ creation and these documents do not authorize production provisioning.
 
 ## Agent skills for this slice
 
-Carried over from the [agent-skills plan](done/agent-skills.md): before choosing the adapter
+Installed TanStack skills for this slice: `auth-server-primitives`, `auth-and-guards`,
+`server-functions`, `middleware`, `server-routes`, `execution-model`, `router-query`. Carried over from the [agent-skills plan](done/agent-skills.md): before choosing the adapter
 (Kysely D1 dialect or Drizzle), `auth generate` and numbered D1 migrations via Wrangler, check
 whether the installed `create-auth`, `better-auth-best-practices`, `wrangler` and
 `workers-best-practices` skills cover them for the pinned versions; otherwise use
