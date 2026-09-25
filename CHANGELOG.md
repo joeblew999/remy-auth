@@ -4,6 +4,15 @@ All notable changes to the shared UI package `@joeblew999/remy-ui` are documente
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 package follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- `showcase/search-params`: the formats search params are validated by a Zod 4 schema,
+  `formatsSearchSchema`, which TanStack Router takes directly as `validateSearch` (Standard
+  Schema, no adapter). It replaces the hand-written `validateSearch` function and its parsing
+  helpers; `FormatsSearch` is the schema's output type. Written with Zod Mini to keep the entry
+  chunk small. New dependency: `zod` 4.6.5.
+
 ## [0.10.2] - 2026-09-25
 
 ### Changed
