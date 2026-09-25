@@ -32,7 +32,7 @@ rm -f "$output"
 # A brand-new workers.dev name answers 404 from some places for a while: wait for ten answers in a row.
 ok=0
 for _ in $(seq 1 120); do
-  if [ "$(curl -s -o /dev/null -w '%{http_code}' "$origin/en/docs")" = 200 ]; then ok=$((ok + 1)); else ok=0; fi
+  if [ "$(curl -s -o /dev/null -w '%{http_code}' "$origin/healthz")" = 200 ]; then ok=$((ok + 1)); else ok=0; fi
   [ "$ok" -ge 10 ] && break
   sleep 1
 done
