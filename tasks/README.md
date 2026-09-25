@@ -1,7 +1,7 @@
 # Shared mise tasks
 
 One file per task namespace (`skills`, `mcp`, `browser`, `web`, `codex`, `claude`, `project`,
-`cf`); `mcp/register` is a file task in its namespace directory. remy-auth includes this
+`cf`); `mcp/register` and `cf/preview` are file tasks in their namespace directories. remy-auth includes this
 directory locally; any other project includes it by git reference pinned to a commit:
 
 ```toml
@@ -23,5 +23,7 @@ overrides the included task of the same name; remy-auth overrides `project:typec
 
 Tests run in two levels: `project:test` is ours (the app's own browser and HTTP checks,
 fast, part of `project:verify`); `project:test:google` is Google's Lighthouse audits and
-Core Web Vitals (slow; CI runs it). `project:test:remote` runs both against a deployment. Set `[settings] task.timings = true` in the including
+Core Web Vitals (slow; CI runs it). `project:test:remote` runs both against a deployment. `cf:preview` uploads the current branch as a
+Cloudflare preview beside production and runs level 1 against it; run file tasks through mise,
+because outside a task mise's Node shim reapplies `[env]` and would replace the preview's `PUBLIC_ORIGIN`. Set `[settings] task.timings = true` in the including
 `mise.toml` so each level prints per-task and total durations.

@@ -1,5 +1,5 @@
 # Cloudflare CLI, logs and deployment over the including project's pinned Wrangler; cf:deploy builds
-# with DEPLOY_ORIGIN as the public origin.
+# with DEPLOY_ORIGIN as the public origin; cf:preview (the file task cf/preview) uploads a branch preview.
 
 ["cf:cli"]
 description = "Run the pinned Cloudflare CLI (pass --help for commands)"

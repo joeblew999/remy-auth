@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#MISE description="Upload this branch as a Cloudflare preview beside production (production untouched), then run level 1 against it (~1 min). Pass an alias to override the branch name"
+#MISE dir="{{config_root}}"
+#USAGE arg "[alias]" help="Preview alias; defaults to the current git branch"
+# The preview lives at https://<alias>-<worker>.<subdomain>.workers.dev. Its origin is derived
+# from DEPLOY_ORIGIN and the Worker name in wrangler.jsonc, baked into the build as PUBLIC_ORIGIN
+# (prerendered links need it), and used as TEST_BASE_URL for the checks.
+set -euo pipefail
+alias="${usage_alias:-$(git rev-parse --abbrev-ref HEAD)}"
+alias="$(printf '%s' "$alias" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-' '-' | sed 's/^-*//; s/-*$//' | cut -c1-40)"
+worker="$(sed -n 's/^[[:space:]]*"name":[[:space:]]*"\([^"]*\)".*/\1/p' wrangler.jsonc | head -1)"
+host="${DEPLOY_ORIGIN#https://}"
+case "$host" in
+  "$worker".*.workers.dev) ;;
+  *) echo "cf:preview needs DEPLOY_ORIGIN on workers.dev as https://$worker.<subdomain>.workers.dev (got $DEPLOY_ORIGIN)" >&2; exit 1 ;;
+esac
+origin="https://$alias-$worker.${host#"$worker".}"
+echo "Preview: $origin"
+PUBLIC_ORIGIN="$origin" ./node_modules/.bin/vite build
+./node_modules/.bin/wrangler versions upload --preview-alias "$alias"
+TEST_BASE_URL="$origin" TEST_TARGET=remote ./node_modules/.bin/playwright test --project=ours
+echo "Preview passed level 1: $origin"
