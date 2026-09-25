@@ -105,6 +105,22 @@ Estimate: about a day for items 1 to 4, and another day for the showcase.
 - No `react-router` dependency remains in either app or the package.
 - The TanStack skills are installed through the shared tasks and listed in the lockfile.
 - In-app links prefetch on intent; language switches remain full navigations.
+- A hands-on pass on the deployed preview (see [how we work](../docs/how-we-work.md#multi-agent-work)) finds nothing that feels bad.
+
+## Hands-on pass (2026-09-25)
+
+On the Cloudflare preview `https://tanstack-remy-auth.gedw99.workers.dev`, phone viewport, Fast 4G,
+4x CPU, in Chrome through its DevTools. All 46 level-1 checks passed against the preview too.
+
+| Piece | How it felt | Action |
+| --- | --- | --- |
+| Formats search params | Controls answer at once with no page load; Arabic reads right to left with the Hijri date and three-decimal dinar | None |
+| Demo server function | The reply arrives in the page's language | A failed call used to leave the form silent; it now says "Please try again" |
+| Leave warning | Asks in the page's language, only while input is unsaved | None |
+| Live status card | Sat below the footer, outside the page, so it looked broken | Moved inside the home page through a new `HomePage` children slot |
+| Language hint | On a phone its text ran under its two buttons (shadcn's `AlertAction` is absolutely placed) | Buttons now flow under the text |
+| Not-found and error pages | Bare page without logo, language switch or footer: felt like leaving the site | Rendered inside the shared `Shell` |
+| First paint under DevTools network throttling | Held until the scripts load, about 2.7 s on Fast 4G and 11 s on Slow 4G, on this branch and on the live React Router site alike | Root cause under investigation; not a regression |
 
 ## Decisions
 
