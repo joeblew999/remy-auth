@@ -5,12 +5,14 @@ import { samples } from '@joeblew999/remy-ui/samples';
 import { publicPageChecks, entryChecks, demoChecks, formatsChecks, observabilityChecks, collectErrors, endonym, direction, localizedPath } from '@joeblew999/remy-ui/checks';
 import { localeInfo, weekdayName } from '../packages/ui/src/locale-info';
 import { publicPaths } from '@joeblew999/remy-ui/paths';
+import { problemChecks } from '@joeblew999/remy-ui/showcase/problem.checks';
 
 // The shared checks cover what every app built on the package must satisfy.
 publicPageChecks({ paths: publicPaths });
 entryChecks({ paths: publicPaths, mode: 'redirect' });
 demoChecks();
 observabilityChecks({ service: 'remy-auth', paths: publicPaths });
+problemChecks({ timeZones: { known: 'Asia/Tokyo', alias: 'asia/tokyo', unknown: 'Mars/Olympus_Mons' }, failingNavigation: { from: '', link: 'formats_link', fail: '**/_serverFn/**', heading: 'formats_title' }, serverRoutes: [{ path: '/robots.txt', type: 'text/plain; charset=utf-8', cache: 'public, max-age=3600', origin: true }, { path: '/sitemap.xml', type: 'application/xml; charset=utf-8', cache: 'public, max-age=3600', origin: true }] });
 formatsChecks({ extra: async (page, locale) => {
   // Rows only this server-rendered app has: more Intl examples and Cloudflare's geolocation.
   const messages = catalogs[locale];
