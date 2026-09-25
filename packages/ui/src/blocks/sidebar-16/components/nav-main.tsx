@@ -1,5 +1,5 @@
 import { Link, useMatchRoute } from '@tanstack/react-router';
-import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../components/sidebar';
+import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../../components/sidebar';
 
 /** sidebar-16's NavMain, for links without sub-items: TanStack Links that preload on intent and mark the current page. */
 export function NavMain({ label, items }: { label: string; items: { title: string; to: '/' | '/app' | '/app/formats' | '/app/demo' | '/app/location'; icon: React.ReactNode }[] }) {

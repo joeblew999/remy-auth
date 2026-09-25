@@ -1,8 +1,8 @@
 import { Link } from '@tanstack/react-router';
 import { ArrowLeftIcon, CalendarDaysIcon, GalleryVerticalEndIcon, LayoutDashboardIcon, MapPinIcon, MousePointerClickIcon } from 'lucide-react';
-import { getTextDirection, type Locale } from '../../paraglide/runtime.js';
-import { m } from '../../paraglide/messages.js';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../components/sidebar';
+import { getTextDirection, type Locale } from '../../../paraglide/runtime.js';
+import { m } from '../../../paraglide/messages.js';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../../components/sidebar';
 import { NavMain } from './nav-main';
 
 /** sidebar-16's AppSidebar with Remy's data; it opens on the reading side (right for right-to-left languages). */

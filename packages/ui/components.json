@@ -13,7 +13,7 @@
   "iconLibrary": "lucide",
   "rtl": true,
   "aliases": {
-    "components": "@joeblew999/remy-ui/components",
+    "components": "@joeblew999/remy-ui/blocks",
     "utils": "cn",
     "ui": "@joeblew999/remy-ui/components",
     "lib": "@joeblew999/remy-ui/lib",
