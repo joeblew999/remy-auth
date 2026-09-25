@@ -17,6 +17,12 @@ esac
 origin="https://$alias-$worker.${host#"$worker".}"
 echo "Preview: $origin"
 PUBLIC_ORIGIN="$origin" ./node_modules/.bin/vite build
-./node_modules/.bin/wrangler versions upload --preview-alias "$alias"
+upload="$(./node_modules/.bin/wrangler versions upload --preview-alias "$alias" | tee /dev/stderr)"
+version="$(printf '%s' "$upload" | sed -n 's/.*Worker Version ID: \([0-9a-f-]*\).*/\1/p' | head -1)"
+# Cloudflare rolls a new version out over a few seconds: check only once /healthz reports it.
+for _ in $(seq 1 30); do
+  curl -fsS "$origin/healthz" 2>/dev/null | grep -q "\"$version\"" && break
+  sleep 2
+done
 TEST_BASE_URL="$origin" TEST_TARGET=remote ./node_modules/.bin/playwright test --project=ours
 echo "Preview passed level 1: $origin"
