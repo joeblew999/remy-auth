@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#MISE description="Move an app to one shared release: install @joeblew999/remy-ui at <version> exactly, point mise.toml's tasks include at ref=v<version>, then run project:verify with the new tasks (~20 s plus project:verify; uses dist/ and PREVIEW_PORT, so not alongside a local level). GITHUB_TOKEN comes from the shell or else from `gh auth token`"
+#MISE dir="{{config_root}}"
+#MISE env={GITHUB_TOKEN="{% set token = get_env(name='GITHUB_TOKEN', default='') %}{% if token %}{{ token }}{% else %}{{ exec(command='gh auth token') }}{% endif %}"}
+#USAGE arg "<version>" help="Released version without the v, e.g. 0.10.3"
+# The package and the tasks are released together under one number (tasks/README.md), so both
+# move in one step. For an app that includes these tasks by git reference, not for remy-auth.
+set -euo pipefail
+version="${usage_version:?pass the version, e.g. mise run project:upgrade-ui 0.10.3}"
+[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "project:upgrade-ui: $version is not a release version like 0.10.3" >&2; exit 1; }
+include='remy-auth\.git//tasks\?ref=v[0-9]+\.[0-9]+\.[0-9]+'
+grep -Eq "$include" mise.toml || { echo "project:upgrade-ui: mise.toml does not include remy-auth's tasks by ref=vX.Y.Z" >&2; exit 1; }
+
+npm install --save-exact "@joeblew999/remy-ui@$version"
+sed -E -i.bak "s#(remy-auth\.git//tasks\?ref=)v[0-9]+\.[0-9]+\.[0-9]+#\1v$version#" mise.toml
+rm mise.toml.bak
+grep -q "remy-auth.git//tasks?ref=v$version" mise.toml
+
+# A new mise process, so project:verify runs the tasks of the release just selected.
+mise run project:verify
