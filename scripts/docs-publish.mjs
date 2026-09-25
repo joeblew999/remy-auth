@@ -4,7 +4,7 @@
 // Search's sync picks up new, changed and deleted files, so a page removed from the docs table is
 // removed from answers too. Production; Wrangler's login.
 import { execFileSync } from 'node:child_process';
-import { docsTable } from '../src/docs/table.js';
+import { docsObjectKey, docsTable } from '../src/docs/table.js';
 
 const bucket = 'remy-docs';
 const instance = 'remy-docs-pages';
@@ -13,7 +13,8 @@ const token = JSON.parse(wrangler('auth', 'token', '--json')).token;
 const account = JSON.parse(wrangler('whoami', '--json')).accounts[0].id;
 console.log(`Target: Cloudflare (remote), R2 bucket ${bucket} (PRODUCTION), then AI Search ${instance}`);
 
-const wanted = new Map(docsTable.map(row => [`${row.slug || 'index'}.md`, row.file]));
+// Keys from the docs table's one rule (docsObjectKey), which the answer code reads back for citations.
+const wanted = new Map(docsTable.map(row => [docsObjectKey(row.slug), row.file]));
 for (const [key, file] of wanted) {
   wrangler('r2', 'object', 'put', `${bucket}/${key}`, '--file', file, '--content-type', 'text/markdown', '--remote');
   console.log(`  put     ${key} <- ${file}`);

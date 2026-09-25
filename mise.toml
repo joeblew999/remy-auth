@@ -56,7 +56,7 @@ run = [
 ]
 
 [tasks."project:preview"]
-description = "Build, then serve the production artifact on Cloudflare's local host at PREVIEW_PORT, remote bindings off (overrides the shared default: the AI Search binding needs a login and costs model calls; /app/ask then shows its \"no answer\" path)"
+description = "Build, then serve the production artifact on Cloudflare's local host at PREVIEW_PORT, remote bindings off (overrides the shared default: the AI Search binding needs a login and costs model calls; /docs/ask then shows its \"no answer\" path)"
 dir = "{{config_root}}"
 depends = ["project:build"]
 raw = true
@@ -138,7 +138,7 @@ run = "node scripts/docs-index.mjs"
 
 # Working on the docs and answers without deploying and without touching production: a dev AI Search
 # instance (remy-docs-dev) holding only the pages you are working on, and the app run locally against it.
-# Typical loop: docs:dev:create once; docs:dev:index -- docs/tooling.md; docs:dev; ask at /en/app/ask;
+# Typical loop: docs:dev:create once; docs:dev:index -- docs/tooling.md; docs:dev; ask at /en/docs/ask;
 # edit, docs:dev:index again; docs:dev:delete when done. Each answer is a real model call (about
 # $0.0003); indexing a page costs a few embeddings.
 [tasks."docs:dev:create"]
@@ -152,7 +152,7 @@ dir = "{{config_root}}"
 run = "node scripts/docs-index.mjs --instance remy-docs-dev"
 
 [tasks."docs:dev"]
-description = "LOCAL app, REMOTE answers: run the app with hot reload on this machine, its answers from the Cloudflare instance remy-docs-dev (CLOUDFLARE_ENV=docs). Ask at /en/app/ask; docs pages at /en/docs. Needs Cloudflare login"
+description = "LOCAL app, REMOTE answers: run the app with hot reload on this machine, its answers from the Cloudflare instance remy-docs-dev (CLOUDFLARE_ENV=docs). Ask at /en/docs/ask; docs pages at /en/docs. Needs Cloudflare login"
 dir = "{{config_root}}"
 raw = true
 env = { CLOUDFLARE_ENV = "docs" }
@@ -178,7 +178,7 @@ run = "node scripts/docs-questions.mjs"
 # The emergency stop for answers: a Worker secret the answer code checks before any model call.
 # Takes effect in seconds (Wrangler deploys the secret as a new version, no build); the docs pages stay up.
 [tasks."docs:answers:off"]
-description = "REMOTE, PRODUCTION: stop all AI answers now (secret ASK_PAUSED; /app/ask shows \"no answer\" and the docs). Seconds, no build"
+description = "REMOTE, PRODUCTION: stop all AI answers now (secret ASK_PAUSED; /docs/ask shows \"no answer\" and the docs). Seconds, no build"
 dir = "{{config_root}}"
 run = "printf 1 | ./node_modules/.bin/wrangler secret put ASK_PAUSED"
 
