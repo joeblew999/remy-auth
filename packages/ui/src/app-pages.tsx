@@ -45,7 +45,7 @@ export function AppHomePage({ locale, preferred, children }: { locale: Locale; p
   const o = { locale };
   return <AppShell locale={locale} path="/app" preferred={preferred}>
     <section className="flex flex-col gap-6">
-      <Intro locale={locale} back={false} label={m.zone_app({}, o)} title={m.app_home_title({}, o)} intro={m.app_home_intro({}, o)} />
+      <Intro locale={locale} back={false} title={m.app_home_title({}, o)} intro={m.app_home_intro({}, o)} />
       <div className="flex flex-wrap gap-3">
         <Link className={buttonVariants({ size: 'lg' })} to="/app/demo" preload="intent">{m.demo_link({}, o)}</Link>
         <Link className={buttonVariants({ size: 'lg', variant: 'outline' })} to="/app/location" preload="intent">{m.nav_location({}, o)}</Link>
@@ -60,7 +60,7 @@ export function LocationPage({ locale, preferred, children }: { locale: Locale; 
   const o = { locale };
   return <AppShell locale={locale} path="/app/location" preferred={preferred}>
     <section className="flex flex-col gap-6">
-      <Intro locale={locale} label={m.zone_app({}, o)} title={m.location_title({}, o)} intro={m.location_intro({}, o)} backTo="/app" />
+      <Intro locale={locale} title={m.location_title({}, o)} intro={m.location_intro({}, o)} backTo="/app" />
       {children}
     </section>
   </AppShell>;

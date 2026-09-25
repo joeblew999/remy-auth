@@ -27,7 +27,7 @@ export function SkipLink({ locale }: { locale: Locale }) {
 
 /** The label every page shows, so anyone can see which kind of page it is (paths.js explains the two). */
 export function ZoneBadge({ locale, app }: { locale: Locale; app: boolean }) {
-  return <Badge variant={app ? 'default' : 'outline'} data-zone={app ? 'app' : 'site'}>{app ? m.zone_app({}, { locale }) : m.zone_site({}, { locale })}</Badge>;
+  return <Badge variant="secondary" data-zone={app ? 'app' : 'site'}>{app ? m.zone_app({}, { locale }) : m.zone_site({}, { locale })}</Badge>;
 }
 
 /**
@@ -55,10 +55,10 @@ export function SiteShell({ locale, path = '', preferred, children }: { locale: 
 /** The frame of a site page, also for not-found and error pages. App pages use AppShell from ./app-pages. */
 export const Shell = SiteShell;
 
-export function Intro({ locale, label, title, intro, back = true, backTo = '/' }: { locale: Locale; label: string; title: string; intro: string; back?: boolean; backTo?: '/' | '/app' }) {
+export function Intro({ locale, label, title, intro, back = true, backTo = '/' }: { locale: Locale; label?: string; title: string; intro: string; back?: boolean; backTo?: '/' | '/app' }) {
   return <>
     {back && <Link className="inline-flex items-center gap-1 text-sm text-muted-foreground" to={backTo} preload="intent"><ArrowLeftIcon aria-hidden="true" className="size-4 rtl:rotate-180" />{m.home_link({}, { locale })}</Link>}
-    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{label}</p>
+    {label && <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{label}</p>}
     <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">{title}</h1>
     <p className="max-w-lg text-lg leading-relaxed text-muted-foreground">{intro}</p>
   </>;
@@ -127,7 +127,7 @@ export function FormatsContent({ locale, info, extras = {}, controls = {}, backT
   ] as const;
   return <div className="flex flex-col gap-10">
     <div className="flex flex-col gap-6">
-      <Intro locale={locale} label={m.formats_label({}, o)} title={m.formats_title({}, o)} intro={m.formats_intro({}, o)} backTo={backTo} />
+      <Intro locale={locale} label={m.formats_label({}, o)} title={m.formats_title({}, o)} intro={m.formats_intro({}, o)} back={backTo === '/app'} backTo={backTo} />
       <nav aria-label={m.sections_nav({}, o)} className="flex flex-wrap gap-2">
         {sections.map(([id, title]) => <a key={id} className={buttonVariants({ variant: 'outline', size: 'sm' })} href={`#${id}`}>{title}</a>)}
       </nav>
