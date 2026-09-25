@@ -95,6 +95,27 @@ The new catalogs are machine-made by the agent. They are marked unreviewed in ea
 metadata and in the README until a native speaker reviews them. The checks prove structure,
 plural coverage and formatting, not wording.
 
+## Verified 2026-09-25 (work item 1)
+
+- **Language matching.** Paraglide 2.25.4 has no script or region matching: it compares the whole
+  tag, then the part before the first hyphen. `es-MX` and `fa-IR` already reach `es` and `fa`;
+  `zh-Hant-HK` and `zh-HK` would not reach `zh-TW`. The fix inside Paraglide's own extension point
+  is one custom strategy (`defineCustomServerStrategy` and `defineCustomClientStrategy`) placed before
+  `preferredLanguage`, mapping Chinese through `Intl.Locale.prototype.maximize()` (Hant to `zh-TW`,
+  Hans and plain `zh` to nothing) and leaving every other tag to Paraglide. **Owner decision.**
+- **Week info.** `Intl.Locale.prototype.getWeekInfo()` is Baseline newly available since
+  2026-07-21 and present in workerd; the deprecated `weekInfo` getter is never used. A fallback only
+  matters for Firefox before 153 and Safari before 17. **Owner decision:** keep a small fallback, or
+  rely on Baseline.
+- **Calendars and digits.** workerd and Chrome carry every calendar (persian, buddhist, japanese,
+  roc, hebrew, ethiopic, chinese, islamic) and numbering system tested and agree with each other;
+  Node and Safari differ in places, so the evidence table above is re-measured in workerd. Locale
+  tags name the calendar and digits explicitly (for example `fa-u-ca-persian-nu-arabext`,
+  `th-u-ca-buddhist`). The Hebrew calendar in Hebrew uses year, month and day fields, not
+  `dateStyle` (broken in Chrome and workerd); Hebrew numerals are not available, so that claim is
+  dropped. During hydration the server's text is the source of truth: client code does not format
+  it again.
+
 ## Work items, in order
 
 1. **Verify (about 1 hour):** Paraglide's language matching for scripts and regions; `getWeekInfo`

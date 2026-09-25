@@ -55,6 +55,22 @@ Choose by: lines an app writes to add a part (target: one), unused parts absent 
 (proved by the build-boundary check), type safety of options, and how little custom code the
 package owns. Survey first whether an existing Vite or TanStack plugin already does this.
 
+## Spike result (2026-09-25): candidate 2
+
+Both candidates were built on a scratch copy with two parts (status-card and time-zones) and pass
+level 1 with both parts, and with either removed; each needs one line to add or remove a part.
+**Chosen: candidate 2, a Vite virtual module generated from `src/parts.json`**, with routes through
+`tanstackStart`'s `virtualRouteConfig` and `physical()`. It is the only one where a removed part
+leaves no code in `dist/client` and no callable server function; with candidate 1 the removed card
+stayed in the bundle and its server function still answered 200.
+
+Found by the spike, to design in: a part's route file under `packages/ui/src/parts/` is still
+type-checked by remy-auth's `tsconfig` when remy-auth leaves the part out (7 errors; the build
+passes), so the package's own typecheck must include every part; links between parts (the
+location card links to `/time-zones/$`) fail at runtime when the target part is absent, so parts
+declare their dependencies; `parts.json` is untyped (a typed `parts.ts` with `satisfies` is
+untested); middleware contributions were not exercised.
+
 ## Work items
 
 1. **Spike (about 2 hours):** both candidates with two parts, `status-card` (UI, query, server
