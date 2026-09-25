@@ -106,10 +106,16 @@ run = [
 ]
 
 [tasks."ui:release"]
-description = "Run level 1 locally (~30 s in all), then publish the shared UI to GitHub Packages, tag, push and create the GitHub release; CI runs level 2 on the tag"
+description = "Run level 1, ui:verify and level 2 locally one after another (~2.5 min; uses dist/ and PREVIEW_PORT, so nothing else local at the same time), then publish the shared UI to GitHub Packages, tag, push and create the GitHub release; CI repeats level 2 on the tag"
 dir = "{{config_root}}"
-depends = ["project:verify", "ui:verify"]
-run = "bash scripts/release.sh"
+# A run list, not depends: mise runs depends in parallel, and ui:verify rewrites files while
+# project:verify builds.
+run = [
+  { task = "project:verify" },
+  { task = "ui:verify" },
+  { task = "project:test:google" },
+  "bash scripts/release.sh",
+]
 
 [tasks."ui:generate"]
 description = "Compile the shared locale catalogs"
