@@ -6,6 +6,8 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-09-25
+
 ### Added
 - Moves that remove copying from consumers (`.plans/publisher-consumer-analysis.md`, D4, D8, D9, D12):
   `./tailwind.css` (`globals.css`, `fonts.css`, `text.css` and the package's own `@source`, so an app
@@ -99,7 +101,6 @@ package follows [Semantic Versioning](https://semver.org/).
   options run in every page's first load (search params, time zones, device place) import them and
   the frame from there instead of from `pages`. `pages` still exports them.
 
-## [0.10.6] - 2026-09-25
 
 ### Added
 - `SiteNavLinks` (`pages`): a context through which an app adds its own links to the site header;

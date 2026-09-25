@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@joeblew999/remy-auth-contract": "0.1.0",
-    "@joeblew999/remy-ui": "0.10.6",
+    "@joeblew999/remy-ui": "0.11.0",
     "@orpc/client": "1.15.4",
     "@orpc/server": "1.15.4",
     "@orpc/tanstack-query": "1.15.4",

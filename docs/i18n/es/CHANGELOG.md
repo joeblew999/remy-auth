@@ -6,6 +6,8 @@ paquete sigue [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-09-25 [#0110---2026-09-25]
+
 ### Añadido [#added]
 - Partes (`.plans/parts.md`): `./parts` (`readParts`, `catalog`), `./parts/vite` (`remyParts()`: un
   plugin de Vite que genera `virtual:remy-parts` a partir del `src/parts.json` de la app, y la
@@ -62,8 +64,6 @@ paquete sigue [Semantic Versioning](https://semver.org/).
   (showcase) cuyas opciones de ruta se ejecutan en la primera carga de cada página (parámetros de
   búsqueda, zonas horarias, ubicación del dispositivo) las importan junto con el marco desde ahí en
   lugar de desde `pages`. `pages` sigue exportándolas.
-
-## [0.10.6] - 2026-09-25
 
 ### Añadido [#added-1]
 - `SiteNavLinks` (`pages`): un contexto mediante el cual una app añade sus propios enlaces a la
