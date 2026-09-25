@@ -317,5 +317,11 @@
   "ask_too_long": "Sorunuz {length} karakter uzunluğunda. En fazla {max} karakter olsun.",
   "ask_rate_limited": "Bağlantınızdan çok fazla soru geldi. Bir dakika bekleyip yeniden sorun.",
   "ask_no_answer": "Bu sefer yanıt yok. Bunun yerine belgelerde arayın.",
-  "ask_browse": "Belgelere göz at"
+  "ask_browse": "Belgelere göz at",
+  "search_label": "Belgelerde ara",
+  "search_submit": "Ara",
+  "search_title": "Belgelerde ara",
+  "search_description": "Remy belgelerinde bir sayfa ya da bölüm bulun.",
+  "search_none": "Hiçbir şey bulunamadı",
+  "search_none_hint": "Başka sözcükler deneyin ya da listedeki sayfalara göz atın."
 }

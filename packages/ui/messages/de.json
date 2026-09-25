@@ -317,5 +317,11 @@
   "ask_too_long": "Ihre Frage ist {length} Zeichen lang. Bitte höchstens {max} Zeichen.",
   "ask_rate_limited": "Zu viele Fragen von Ihrer Verbindung. Warten Sie eine Minute und fragen Sie dann erneut.",
   "ask_no_answer": "Diesmal keine Antwort. Durchsuchen Sie stattdessen die Dokumentation.",
-  "ask_browse": "Dokumentation durchsehen"
+  "ask_browse": "Dokumentation durchsehen",
+  "search_label": "Doku durchsuchen",
+  "search_submit": "Suchen",
+  "search_title": "Doku durchsuchen",
+  "search_description": "Finde eine Seite oder einen Abschnitt der Remy-Dokumentation.",
+  "search_none": "Nichts gefunden",
+  "search_none_hint": "Versuche andere Wörter oder sieh dir die aufgeführten Seiten an."
 }

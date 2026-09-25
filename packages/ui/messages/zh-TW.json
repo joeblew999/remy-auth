@@ -315,5 +315,11 @@
   "ask_too_long": "您的問題長 {length} 個字元，請保持在 {max} 個字元以內。",
   "ask_rate_limited": "您的連線提問次數過多。請等一分鐘後再問。",
   "ask_no_answer": "這次沒有回答。請改為搜尋說明文件。",
-  "ask_browse": "瀏覽說明文件"
+  "ask_browse": "瀏覽說明文件",
+  "search_label": "搜尋文件",
+  "search_submit": "搜尋",
+  "search_title": "搜尋文件",
+  "search_description": "在 Remy 文件中尋找頁面或章節。",
+  "search_none": "找不到結果",
+  "search_none_hint": "請換個關鍵字，或瀏覽下列頁面。"
 }

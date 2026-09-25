@@ -10,7 +10,7 @@ import { cn } from '../lib/utils';
  * Links the Markdown carries, as source.config.ts rewrote them: a docs page (/docs/<slug>#hash) is a
  * TanStack Link, localized by the router and preloaded on intent; anything else a plain anchor.
  */
-function DocsLink({ href = '', children, ...props }: React.ComponentProps<'a'>) {
+export function DocsLink({ href = '', children, ...props }: React.ComponentProps<'a'>) {
   const match = href.match(/^\/docs(?:\/([^#/]+))?(?:#(.*))?$/);
   if (!match) return <a href={href} {...props}>{children}</a>;
   const [, slug, hash] = match;

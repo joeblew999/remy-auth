@@ -317,5 +317,11 @@
   "ask_too_long": "ጥያቄዎ {length} ቁምፊዎች ነው። ከ{max} ቁምፊዎች አያሳልፉት።",
   "ask_rate_limited": "ከግንኙነትዎ በጣም ብዙ ጥያቄዎች መጥተዋል። አንድ ደቂቃ ቆይተው እንደገና ይጠይቁ።",
   "ask_no_answer": "በዚህ ጊዜ መልስ የለም። በምትኩ ሰነዶቹን ይፈልጉ።",
-  "ask_browse": "ሰነዶቹን ያስሱ"
+  "ask_browse": "ሰነዶቹን ያስሱ",
+  "search_label": "ሰነዶቹን ይፈልጉ",
+  "search_submit": "ፈልግ",
+  "search_title": "ሰነዶቹን ይፈልጉ",
+  "search_description": "በRemy ሰነዶች ውስጥ ገጽ ወይም ክፍል ያግኙ።",
+  "search_none": "ምንም አልተገኘም",
+  "search_none_hint": "ሌሎች ቃላትን ይሞክሩ፣ ወይም እዚህ የተዘረዘሩትን ገጾች ይመልከቱ።"
 }

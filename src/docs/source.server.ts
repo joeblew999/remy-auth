@@ -1,5 +1,6 @@
 import { createServerOnlyFn } from '@tanstack/react-start';
 import type { Root } from 'hast';
+import { createSearchAPI, type SearchAPI } from 'fumadocs-core/search/server';
 import { docs } from '../../.source/server';
 import { docsPath, docsTable, docsRowForSlug } from './table.js';
 
@@ -59,3 +60,37 @@ export const docsPage = createServerOnlyFn(async (slug: string): Promise<DocsPag
 
 /** Every docs page's slug, path and title, in table order: the docs navigation. */
 export const docsNav = createServerOnlyFn(() => docsTable.map(row => ({ slug: row.slug, path: docsPath(row.slug), title: entry(row.file).title })));
+
+/** A piece of a search hit's text; `mark` where it matches the query. */
+export type DocsSearchText = { text: string; mark?: true }[];
+/** A search hit: a page (its title), or a heading or paragraph on it, with its de-localized URL and anchor. */
+export type DocsSearchHit = { type: 'page' | 'heading' | 'text'; url: string; content: DocsSearchText };
+
+/**
+ * Fumadocs' own search server (fumadocs-core `createSearchAPI('advanced')`, which `createFromSource`
+ * builds from a Fumadocs loader; this app has a collection, not a loader, so it passes the same
+ * indexes itself): one index per docs page from its structured text, sections with their anchors.
+ * Built on the first search in each Worker isolate, then kept; none of it reaches the browser
+ * (.plans/docs-site.md, "Docs search").
+ */
+let search: SearchAPI | undefined;
+const searchServer = () => search ??= createSearchAPI('advanced', {
+  indexes: () => Promise.all(docsTable.map(async row => {
+    const doc = entry(row.file);
+    const { structuredData } = await doc.load();
+    return { id: docsPath(row.slug), url: docsPath(row.slug), title: doc.title, structuredData };
+  })),
+});
+
+/**
+ * Fumadocs returns a hit's text as Markdown with the matches in <mark>: split it into plain pieces
+ * (undoing Markdown's escapes), so the page renders text, never HTML.
+ */
+const plain = (markdown: string) => markdown.replace(/\\([!-/:-@[-`{-~])/g, '$1').replace(/&#x([0-9a-f]+);/gi, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)));
+const pieces = (content: string): DocsSearchText => content.split(/<mark>(.*?)<\/mark>/s)
+  .map((text, index) => (index % 2 ? { text: plain(text), mark: true as const } : { text: plain(text) }))
+  .filter(piece => piece.text);
+
+/** The docs' hits for a query, as Fumadocs orders them: each page, then its matching sections. */
+export const docsSearch = createServerOnlyFn(async (query: string): Promise<DocsSearchHit[]> =>
+  (await searchServer().search(query)).map(hit => ({ type: hit.type, url: hit.url, content: pieces(hit.content) })));

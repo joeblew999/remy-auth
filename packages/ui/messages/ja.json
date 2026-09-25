@@ -315,5 +315,11 @@
   "ask_too_long": "質問は {length} 文字です。{max} 文字以内にしてください。",
   "ask_rate_limited": "お使いの接続からの質問が多すぎます。1 分待ってからもう一度質問してください。",
   "ask_no_answer": "今回は回答がありません。代わりにドキュメントを検索してください。",
-  "ask_browse": "ドキュメントを見る"
+  "ask_browse": "ドキュメントを見る",
+  "search_label": "ドキュメントを検索",
+  "search_submit": "検索",
+  "search_title": "ドキュメントを検索",
+  "search_description": "Remy のドキュメントからページやセクションを探せます。",
+  "search_none": "見つかりませんでした",
+  "search_none_hint": "別の言葉で試すか、一覧のページをご覧ください。"
 }
