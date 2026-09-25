@@ -1,0 +1,50 @@
+# Publisher and consumers: check the approach after the big build-up
+
+Status: plan for an agent to analyse, then do; 2026-09-25. Owner: "our whole publisher / consumer
+approach relies on this". It may turn out that little needs doing; the point is to check.
+
+## The approach today
+
+remy-auth publishes; remy-auth-app is the reference consumer and the proof.
+- **Stack:** `@joeblew999/remy-ui` on GitHub Packages (components, blocks, pages, Paraglide
+  catalogs and runtime, fonts and text CSS, checks, samples, Playwright config, contract API).
+- **Tools and tasks:** consumers include remy-auth's `tasks/` by git ref, pinned to the release tag
+  that matches the package (`[task_config] includes`), and set only `[env]` inputs. `MISE_ENV=dev`
+  follows main; `mise.local.toml` points at a checkout.
+- **Skills and MCP:** pinned skills and MCP registration come through the included tasks
+  (`skills.toml`, `mcp.toml`); both repos have the same `.claude/skills` set.
+
+## What to check
+
+1. **What a new consumer gets, end to end.** From an empty repo: `mise.toml` with the include,
+   `npm install`, the tasks, skills, MCP, and a deploy. List every hand step and every file it had
+   to copy. Measure against remy-auth-app, then write the steps into the consumer section of
+   `docs/tooling.md` (or the package README) as the one recipe.
+2. **Drift.** Anything in remy-auth-app that duplicates or overrides the publisher (tasks,
+   `vite.config.ts`, `playwright.config.ts`, `wrangler.jsonc`, `_headers`, CSS imports, check
+   calls). Each is either moved into the package or tasks, or recorded as the consumer's own.
+   The consumer's `tests/gui.spec.ts` should be one line per shared check set (queue item 14).
+3. **More into the include.** Candidates: the build, preview, deploy and wait chain (already
+   there), `project:upgrade-ui`, level-2 audits, the language tiers
+   ([language-test-tiers.md](language-test-tiers.md)), the docs tasks below, and the CI workflow
+   (a reusable GitHub workflow in remy-auth, called by consumers, [ci-node24.md](ci-node24.md)).
+4. **Docs and AI answers for every consumer.** Today the docs engine lives in remy-auth's app code
+   (`src/docs/`, `/docs` and `/app/ask` routes, `docs:index`). A consumer gets nothing. Move the
+   reusable half into the package and tasks: the Fumadocs source over a consumer's own Markdown
+   folder, the docs pages in SiteShell, the ask page and endpoint, `docs:index`, and the checks.
+   Each consumer brings its Markdown and its **own** AI Search index, AI Gateway and spend limit
+   (created by a task, named after the app), so costs and content stay separate. The owner decides
+   the spend limit per consumer. remy-auth-app gets a small docs folder as the proof.
+5. **Fewer scripts.** Inventory every script the tasks run (`scripts/*.sh`, `scripts/*.mjs`,
+   `tasks/**/*.mjs`, file tasks). For each: is there a tool or mise feature that does it (mise
+   `usage` args, `depends`, `wait_for`, `sources`/`outputs`; `gh release`, `wrangler`, `npm`
+   commands)? Replace where the result is simpler and upstream-owned; keep a script only where it
+   is the clearest home, and say why in one line. No npm `scripts` in `package.json`: mise owns them.
+6. **mise itself.** Pin and check the mise version consumers need (`min_version`), the include
+   syntax and caching of git includes, and that `mise run` from a consumer works offline once
+   fetched.
+
+## Gates
+
+A second, throwaway consumer made from the recipe alone passes the shared checks and deploys to a
+preview; remy-auth-app passes its gate and Core Web Vitals after any move; no check is loosened.

@@ -58,6 +58,7 @@ formats speed), batch 3 (TanStack Form, Zod adapter, Devtools), a docs audit and
 | 18 | Fonts by writing system, font order fix, font check, fonts in the formats page ([plan](fonts.md)) | agent analysis; three owner decisions in the plan | |
 | 19 | Formats: every area for the page's language, every choice from the system's languages ([plan](formats-consistency.md)) | agent analysis | |
 | 20 | GitHub Actions off Node.js 20 ([plan](ci-node24.md)) | ready | |
+| 21 | Publisher and consumers checked: new-consumer recipe, drift, more in the include, docs and AI answers for every consumer, fewer scripts ([plan](publisher-consumer.md)) | agent analysis | |
 
 Decisions only the owner can make: the security headers rollout (7), launching the auth
 decisions (11) and confirming them, a native-speaker review of the Arabic and new catalogs, the
@@ -68,10 +69,6 @@ fontaine and Tailwind's inline theme), and deleting old Cloudflare preview versi
 
 Each is small; fix or decide, then delete the line.
 
-- One remote check fails now and then right after `cf:preview` uploads, even after waiting for the
-  new version at `/healthz`; the rerun passes. Find which check and why. 2026-09-25, 0.10.5 release:
-  `/he/app` in the browser landed on the English site home while the same URL fetched directly was
-  right; likely the previous build's scripts (3 languages) still served.
 - `shadcn apply` reinstalls components and writes `"use client"` differently from `shadcn add` for
   `label` and `separator`, so `ui:theme` applies the theme only. Report upstream (owner's call).
   Adding `table` to `ui:components` flips it again for `field`, `sheet` and `sidebar` (stable once
