@@ -23,7 +23,8 @@ evidence. Each item's detail lives in the plan it links to.
 - [ ] Formats also as an app page (/app/formats), same component in the app frame, if the owner
       wants it.
 - [ ] Parts: spike, then convert the existing parts ([plan](parts.md)).
-- [ ] Formats page regrouped, then ten more languages and the hard localisation features
+- [x] Ten more languages and the hard localisation features: 13 languages, 0.10.5 released,
+      both apps live (remy-auth 237 checks, remy-auth-app 140 and Core Web Vitals 3 of 3)
       ([plan](hard-localisation.md)).
 - [ ] Contract-first APIs: spike oRPC 2.0 against 1.15, then build ([plan](openapi-contracts.md)).
 - [x] Close the TanStack plan: moved to [`done/`](done/tanstack.md), `docs/gui.md` and the package
@@ -46,13 +47,17 @@ formats speed), batch 3 (TanStack Form, Zod adapter, Devtools), a docs audit and
 | 7 | Security headers rollout, report-only first | batch 2 report and **owner decision** | enforce after a clean report period |
 | 8 | Contract-first APIs: build items 2 to 6 on oRPC 1.15.4 (chosen from the spike) | ready | status and reservation endpoints |
 | 9 | Parts: convert the existing parts with candidate 2 (virtual module, chosen from the spike) | ready | one line per part in each app |
-| 10 | Ten more languages and the hard localisation features | ready (both decisions made 2026-09-25) | one agent per two languages, then a hands-on pass |
+| 10 | ~~Ten more languages~~ done 2026-09-25: 0.10.5, both apps live | | native-speaker review (owner) |
 | 11 | ~~Auth service decisions 1 to 6~~ done 2026-09-25: runtime proven (Better Auth 1.7.6 on D1), decisions drafted, sharing examples written, all confirmed by the owner | | |
 | 12 | Auth service milestone 1: Better Auth on D1, issuer, sample app | ready | login screens |
 | 13 | Auth portal screens from shadcn's login and signup blocks; admin lists on TanStack Table | 12 | shared login checks |
 | 14 | remy-auth-app runs the consumer contract set, not the whole package suite | 4 | faster consumer gates |
 | 15 | Caching: spike Workers Caching against prerendered site pages on a preview, then build ([plan](caching.md)) | load to settle; decisions 1 to 4 in the plan (delegated: recommendation first) | cached site pages, private app pages |
 | 16 | Docs section: fumadocs (headless, in SiteShell) over the repo's Markdown at /docs; AI answers with Cloudflare AI Search at /app/ask ([plan](docs-site.md)) | building (owner approved, $10 a month Workers AI ceiling) | docs live, then answers |
+| 17 | Language tests: every language at release and on demand, one per writing system every day ([plan](language-test-tiers.md)) | ready (owner decided) | faster everyday gate |
+| 18 | Fonts by writing system, font order fix, font check, fonts in the formats page ([plan](fonts.md)) | agent analysis; three owner decisions in the plan | |
+| 19 | Formats: every area for the page's language, every choice from the system's languages ([plan](formats-consistency.md)) | agent analysis | |
+| 20 | GitHub Actions off Node.js 20 ([plan](ci-node24.md)) | ready | |
 
 Decisions only the owner can make: the security headers rollout (7), launching the auth
 decisions (11) and confirming them, a native-speaker review of the Arabic and new catalogs, the
@@ -64,7 +69,9 @@ fontaine and Tailwind's inline theme), and deleting old Cloudflare preview versi
 Each is small; fix or decide, then delete the line.
 
 - One remote check fails now and then right after `cf:preview` uploads, even after waiting for the
-  new version at `/healthz`; the rerun passes. Find which check and why.
+  new version at `/healthz`; the rerun passes. Find which check and why. 2026-09-25, 0.10.5 release:
+  `/he/app` in the browser landed on the English site home while the same URL fetched directly was
+  right; likely the previous build's scripts (3 languages) still served.
 - `shadcn apply` reinstalls components and writes `"use client"` differently from `shadcn add` for
   `label` and `separator`, so `ui:theme` applies the theme only. Report upstream (owner's call).
 - fontaine 1.0.0 cannot add its fallback names inside Tailwind's `@theme inline`, so `fonts.css`
