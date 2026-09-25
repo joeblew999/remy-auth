@@ -11,6 +11,26 @@ will need to clean up previews too after they run. So make sure mise has the abi
 previews?", "commit based preview will allow agents to deploy and test if they need", and on
 translation: "The docs translation. Is this also paraglide based or what?"
 
+## Status, 2026-09-25 evening
+
+Done: 3, 17 (preview URLs off; cf:preview deploys a throwaway Worker and deletes it), 4, 14, 15 (route B:
+AI Search reads one Markdown file per page from R2, code blocks included; `docs:publish` after every
+deploy, about 15 s), 5 (one production index; `docs:dev` runs locally against it), 6 and 16 (spend limit
+confirmed not to stop postpaid calls; gateway rate limit kept as the cost cap), 11 (one `ask` event per
+question: outcome, model time, citations, language, the real error), 12 (answers kept for the visit),
+13 (docs content server-rendered; docs pages 19% less JavaScript), 18 (deploys untested unless GATE=1;
+releases run the full gate), 2 (checks split per language; the shared UI release is queue item 24).
+
+Open:
+- 1: native-speaker review of the ten new catalogs (owner).
+- 7: the build-boundary check's `request.cf` marker; moot since the docs text no longer ships as code.
+- 8: shadcn's `"use client"` differences (upstream, owner's call to report).
+- 9: docs and answers for other apps on the shared package ([publisher-consumer.md](publisher-consumer.md)).
+- 10: docs are English under 13 languages' addresses (design, owner). Translations would be one R2
+  folder per language and Markdown per language in the repo.
+- Design: search box in the site header (shared with remy-auth-app); search ranking; the look of
+  the docs pages.
+
 ## What went wrong on the way
 
 1. The docs agent built on a base from before the 13 languages; the merge conflicted, and the ten

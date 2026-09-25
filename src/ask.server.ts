@@ -27,14 +27,16 @@ export const answerQuestion = createServerOnlyFn(async (q: string, locale: Local
   const question = q.trim();
   if (!question) return { status: 'empty' };
   const request = getRequest();
+  const started = Date.now();
+  // One `ask` event per question (mise cf:events -- ask): its outcome, how long the model call took,
+  // how many sources it cited and the page's language. Never the question itself.
+  const log = (outcome: string, fields: Record<string, unknown> = {}, level: 'info' | 'error' = 'info') =>
+    writeLog({ ...logContext(service, env, request.headers.get(requestIdHeader) ?? '', 'GET'), event: 'ask', level, outcome, locale, ...fields });
   const { success } = await env.ASK_LIMIT.limit({ key: request.headers.get('CF-Connecting-IP') ?? 'unknown' });
-  if (!success) return { status: 'rate-limited' };
-  if (question.length > askMaxLength) return { status: 'too-long', length: question.length };
+  if (!success) { log('rate-limited'); return { status: 'rate-limited' }; }
+  if (question.length > askMaxLength) { log('too-long', { length: question.length }); return { status: 'too-long', length: question.length }; }
   // The emergency stop (mise docs:answers:off): the secret ASK_PAUSED set means no model call at all.
-  if ((env as { ASK_PAUSED?: string }).ASK_PAUSED) {
-    writeLog({ ...logContext(service, env, request.headers.get(requestIdHeader) ?? '', 'GET'), event: 'ask_paused', level: 'info' });
-    return { status: 'no-answer' };
-  }
+  if ((env as { ASK_PAUSED?: string }).ASK_PAUSED) { log('paused'); return { status: 'no-answer' }; }
   try {
     const response = await env.DOCS_SEARCH.chatCompletions({
       model,
@@ -46,10 +48,12 @@ export const answerQuestion = createServerOnlyFn(async (q: string, locale: Local
     // Each cited page or section once, in the order AI Search ranked them, on the page's language frame.
     const cited = await Promise.all(response.chunks.map(chunk => citation(chunk, locale)));
     const citations = [...new Map(cited.flatMap(item => (item ? [[item.url, item] as const] : []))).values()];
-    return answer && citations.length > 0 ? { status: 'answered', answer, citations } : { status: 'no-answer' };
+    const answered = Boolean(answer) && citations.length > 0;
+    log(answered ? 'answered' : 'no-answer', { durationMs: Date.now() - started, chunks: response.chunks.length, citations: citations.length });
+    return answered ? { status: 'answered', answer: answer!, citations } : { status: 'no-answer' };
   } catch (error) {
-    writeLog({ ...logContext(service, env, request.headers.get(requestIdHeader) ?? '', 'GET'), event: 'ask_failed', level: 'error',
-      error: error instanceof Error ? error.name : 'unknown' });
+    // The error's message says what failed (binding, AI Search, model); it never contains the question.
+    log('failed', { durationMs: Date.now() - started, error: error instanceof Error ? `${error.name}: ${error.message}`.slice(0, 300) : 'unknown' }, 'error');
     return { status: 'no-answer' };
   }
 });

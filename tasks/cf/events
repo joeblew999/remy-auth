@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="REMOTE, read only: Workers Logs of the deployed Worker: counts by event and level, then the latest events (all, or one event such as ask_failed). Read only; needs Cloudflare login"
+#MISE description="REMOTE, read only: Workers Logs of the deployed Worker: counts by event and level, then the latest events (all, or one event such as ask: one per question, with its outcome). Read only; needs Cloudflare login"
 #MISE dir="{{config_root}}"
 # A shell wrapper so the module beside it loads as ESM wherever this directory is included from.
 set -euo pipefail

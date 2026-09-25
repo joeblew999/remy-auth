@@ -331,7 +331,7 @@ instance and that instance's AI Gateway come from `wrangler.jsonc`, so an includ
 
 ```sh
 mise run cf:events                      # Workers Logs, last 24 h: counts by event and level, latest 10
-mise run cf:events -- ask_failed --since 7d --limit 20
+mise run cf:events -- ask --since 7d --limit 20   # one per question: outcome, time, citations
 mise run cf:ai-usage                    # AI Gateway, last 7 days: calls, cache, failures, tokens, cost, time
 mise run cf:ai-check                    # AI Search and gateway settings against Cloudflare's advice; fails on FAIL
 ```
