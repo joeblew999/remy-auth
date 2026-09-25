@@ -45,8 +45,12 @@ The sample is planned; its code and startup command do not exist yet.
 - Decisions that plans leave open, or fixes that conflict with a plan, belong to the
   owner. Ask; do not choose. Deploying, provisioning and filing upstream issues
   also wait for the owner's explicit request.
-- Do not add test-only routes, flags or bypasses to the app, and do not mock Better
-  Auth, D1 or the Workers runtime. Any test hook must be listed for owner review.
+- Do not mock Better Auth, D1 or the Workers runtime. Development conveniences (a seed route,
+  a sign-in picker for seeded people, a fixed sign-in code) are allowed only behind one
+  per-environment policy table whose default, and whose value for any unknown environment, is
+  production with everything off; they never create sessions outside Better Auth, never exist
+  in production, require authentication outside local development, and are listed in the
+  owning plan. No other test-only routes, flags or bypasses.
 
 Cloudflare storage is the chosen direction, with D1 as the planned identity and
 session database. Verify the required Better Auth plugins against the pinned D1

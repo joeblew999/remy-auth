@@ -72,44 +72,48 @@ Escalate any required feature incompatible with the chosen database/runtime,
 identity/tenant ambiguity, or need to change another repo's existing public access.
 Do not silently drop a required feature or substitute a new store.
 
-## Runtime architecture: decide centrally, enforce locally (decided 2026-09-25)
+## Runtime architecture: identity central, relationships local (decided 2026-09-25, refined)
 
-The owner chose this over the alternatives: remy-auth as the one backend for every app (couples
-every app's data, deploys and outages to one Worker, and one D1's size limit to the whole family)
-and the shared package alone as the backend (leaves identity and roles without one home). It is
-the Zanzibar pattern: one authority for who may do what, enforcement beside each app's data.
+The owner chose "decide centrally, enforce locally", then refined it after the remy-sport survey:
+relationships stay in each app's own data. remy-sport's working ReBAC (27 relations as data,
+derived from its domain tables such as `team_coaches`, no tuple store) shows why: a central
+relationship store would have to copy and re-sync every app's data. Rejected alternatives:
+remy-auth as the one backend for every app (couples every app's data, deploys, outages and one
+D1's size limit), and the shared package alone as the backend (leaves identity without a home).
 
 | Lives in | What |
 | --- | --- |
-| remy-auth | Identities, organizations, memberships, roles, app registrations, and relationship records if ReBAC is adopted; issues tokens and publishes its signing keys (JWKS); answers permission questions |
-| The shared package | `requireSession`, `requirePermission(resource, action)` and a `check()` client, as TanStack function middleware: token verification against remy-auth's keys, role permissions evaluated locally, relationship questions sent to remy-auth |
-| Each app | Its own data in its own D1; its permission declarations (resources, actions, which role grants which action) in its registration definition; thin server functions that start with one permission line |
+| remy-auth | Identities, sign-in, sessions, tokens and signing keys (JWKS), app registrations, platform roles (for example admin), organizations only where a registration asks for them, and the seeded identities with fixed IDs |
+| The shared package | Session and token verification, and remy-sport's relation engine generalised: the relation model as data (`via` table, parent, role or everyone), set-based checks (`holds`, `heldAmong`, `objectsHeldBy`, `canFor`), the `requireAction` guard (404 before 403, fail closed) as TanStack function middleware, and the check that fails the build when any server function or route has no policy |
+| Each app | Its own data in its own D1, its relation vocabulary and grants as data, enforcement beside each operation through the shared guard, and its own seed rows referring to remy-auth's seeded identity IDs |
 
 The contract, versioned and owned by remy-auth:
 
-- **Tokens:** short-lived signed tokens carrying issuer, audience (the app), subject, organization
-  and roles for that app. Apps verify them locally with the cached JWKS: no network call per
-  request. Role checks keep working through an auth outage until tokens expire, which bounds
-  revocation for roles.
-- **Decisions:** relationship questions (`check(subject, action, resource)`, and a batch form for
-  lists) go to remy-auth over a Cloudflare service binding, a private Worker-to-Worker call with no
-  public hop, with an HTTP endpoint for consumers outside Cloudflare. A failed or unavailable
-  check refuses (503), never grants.
-- **Caching:** decisions may be cached per Worker instance for no longer than the maximum
-  revocation delay (decision 5); logout and membership changes shorten it through token lifetime.
-- **Lists:** apps filter lists server-side with batch checks or relationship queries; they never
-  return records and hide them in the page.
-- **Same decision everywhere:** HTTP handlers, server functions and MCP tools in an app call the
-  same `requirePermission` or `check()`; there is no second policy for agents.
+- **Tokens:** short-lived signed tokens with issuer, audience (the app), subject and platform
+  roles. Apps verify them locally with the cached JWKS, with no call per request; a failed or
+  unknown key refuses.
+- **Relationships** are answered inside the app from its own tables. Service-binding calls to
+  remy-auth are only for questions remy-auth alone can answer (a platform role, a cross-app
+  relation); unavailable means refused.
+- **Lists** come back with a server-computed permission map per row (`canFor`), costing one
+  query per relation, not per row; nothing is hidden in the page.
+- **Same decision everywhere:** HTTP handlers, server functions and MCP tools call the same guard.
+- **Seed and sign-in:** one seed definition per service with stable IDs, used by dev startup,
+  tests and explicit seeding of a deployment; a sign-in picker for seeded people on remy-auth's
+  login screen, through a real Better Auth code sign-in, gated by the environment policy in
+  [development principles](../docs/development.md). Fixed from remy-sport's survey: no published
+  code outside local development, no account creation through a fixed code, authenticated seeding
+  outside local development, and re-seeding that does not silently overwrite edited rows unless
+  asked.
 
-What an app never has: its own users, sessions, login screens, role tables or RBAC code. What it
-always has: its own data, its own permission declarations, and enforcement beside each operation.
-The sample app (milestone 1) is the reference implementation of this contract, and the second
-isolated instance proves app A's tokens and relationships never grant anything in app B.
+What an app never has: its own users, sessions, login screens or authorization engine. What it
+always has: its own data, its own relation vocabulary, and enforcement beside each operation. The
+sample app (milestone 1) is the reference implementation, and its second isolated instance proves
+app A's tokens grant nothing in app B.
 
-Open within this decision: whether the enforcement helpers stay in `@joeblew999/remy-ui` or split
-into a server-only package once a second consumer exists (split only for a real boundary); the
-exact token lifetime and revocation delay (decision 5).
+Open within this decision: when the enforcement helpers split from `@joeblew999/remy-ui` into a
+server-only package (at the second consumer), and the token lifetime and revocation delay
+(decision 5).
 
 ## Evidence already checked (2026-09-24)
 
@@ -160,7 +164,7 @@ RBAC first, through Better Auth's organization roles and custom permissions (ins
 | Concern | How | Where |
 | --- | --- | --- |
 | Role checks | A function-middleware factory, `requirePermission(resource, action)`, composed after `authMiddleware`, so each server function states its rule in one line | Server functions and server routes |
-| Relationship checks (if ReBAC is adopted) | Inside the handler, after input validation, because they need the specific record; a membership or share lookup against the session principal | Handlers |
+| Relationship checks | The shared relation engine inside the app, from the app's own tables, after input validation, because they need the specific record | Handlers, through the shared guard |
 | Roles in the page | The session's roles and permissions travel in router context only to shape the page (hide an Edit button); `beforeLoad` role gates are navigation UX | Routes (presentation only) |
 | Client caches | Router loader cache and TanStack Query keys include user and organization; logout, role change and membership removal invalidate them (`router.invalidate`, Query invalidation); the cache lifetime counts towards the maximum revocation delay (decision 5) | Router and Query configuration |
 | Rendering | Protected routes are never prerendered and never share a public cache; they render per request or in the browser | Route `ssr` and `Cache-Control` |
