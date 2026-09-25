@@ -35,8 +35,7 @@ The including project supplies the npm packages the tasks run: `vite` with `@tan
 `wrangler`, `@playwright/test`, `chrome-devtools-mcp`, `modern-web-guidance`, `smol-toml`
 (and `@openai/codex` for the Codex tasks). A task defined in the project's own `mise.toml`
 overrides the included task of the same name; remy-auth overrides `project:typecheck` and
-`project:verify` because it owns the shared package. mise caches remote includes;
-`MISE_TASK_REMOTE_NO_CACHE=true` refreshes them.
+`project:verify` because it owns the shared package.
 
 Tests run in tiers, chosen by cost and by what a change can break, never by skipping checks:
 
