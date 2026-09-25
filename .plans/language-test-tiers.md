@@ -1,6 +1,6 @@
 # Language tests: when each language is checked
 
-Status: decided 2026-09-25 (owner: "We really don't need lang tests all the time"); to build.
+Status: built 2026-09-25 (cf:deploy and cf:preview run QUICK_LOCALES; project:verify and ui:release every language). Decided 2026-09-25 (owner: "We really don't need lang tests all the time"); to build.
 With 13 languages level 1 is 237 checks in about 1.6 minutes, and it grows with each language.
 
 - **Everyday gate (`project:verify`, `cf:deploy`, `cf:preview`):** one language per writing

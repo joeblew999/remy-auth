@@ -38,6 +38,6 @@ for _ in $(seq 1 120); do
 done
 [ "$ok" -ge 10 ] || { echo "cf:preview: $origin did not answer steadily within 2 minutes" >&2; exit 1; }
 
-export TEST_BASE_URL="$origin" TEST_TARGET=remote
+export TEST_BASE_URL="$origin" TEST_TARGET=remote CHECK_LOCALES="${CHECK_LOCALES:-${QUICK_LOCALES:-en,ar,ja,th}}"
 ./node_modules/.bin/playwright test --project=ours
 echo "Preview passed level 1: $origin"
