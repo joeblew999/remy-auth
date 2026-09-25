@@ -39,6 +39,8 @@ console.log(`${bucket} holds exactly the ${wanted.size} docs pages.`);
 try {
   wrangler('ai-search', 'jobs', 'create', instance);
   console.log(`Sync started for ${instance}; answers use the new files once it finishes (mise run cf:cli -- ai-search jobs list ${instance}).`);
-} catch {
-  console.log(`No sync started: ${instance} does not exist yet (create it with its R2 source ${bucket}).`);
+} catch (error) {
+  // Usually a sync already running (the hourly one, or the first after creation): it picks up the files too.
+  const reason = String(error.stderr ?? error.message).split('\n').find(line => /error|✘/i.test(line)) ?? 'unknown';
+  console.log(`No new sync started (${reason.replace(/\x1b\[[0-9;]*m/g, '').trim()}); a running or the hourly sync picks the files up.`);
 }
