@@ -218,6 +218,57 @@ No implicit or password grant (OAuth 2.1 has neither); `device_code` stays off u
 authorization is adopted. What would change it: `*.localhost` failing in the spike, a port clash
 on CI, or the choice of the production domain.
 
+### 5. Lifetimes, revocation, caching, key rotation, failures
+
+| Setting | Proposed | Better Auth default | Reason |
+| --- | --- | --- | --- |
+| remy-auth session (`expiresIn`, `updateAge`) | 7 days, refreshed daily | the same | Sign in once a week at most |
+| Session cookie cache (`cookieCache`) | Off | off | A cache keeps a revoked session alive for its age |
+| Access token, people and machines (`accessTokenExpiresIn`, `m2mAccessTokenExpiresIn`) | 5 minutes | 1 hour | JWT access tokens cannot be revoked server-side, so their lifetime is the revocation delay |
+| Refresh token | 30 days, rotated, reuse refused (`refreshTokenReuseInterval: 0`) | the same | Revoking it stops new access tokens |
+| ID token | 10 hours, never accepted as an access token (its `aud` is the client) | the same | Sign-in only |
+| Authorization code | 10 minutes, single use | the same | Replay fails |
+
+**Maximum revocation delay: 5 minutes** for anything a token carries (logout, session
+revocation, membership removal, platform-role change), and **none** for relationships, which each
+app reads from its own tables on every request. If removing a member in Better Auth does not also
+revoke that member's refresh tokens (assumed, to be tested), remy-auth does it in the same
+operation.
+
+**Permission-check caching:**
+
+- Apps cache the JWKS per isolate for at most 10 minutes; an unknown key ID triggers one refetch,
+  at most once every 30 seconds. Better Auth suggests caching keys indefinitely; the bound makes a
+  removed, compromised key stop being trusted.
+- Relationship checks and service-binding answers from remy-auth are not cached.
+- Browser caches (TanStack Query and router loaders) go stale within the 5 minutes and are
+  invalidated on logout and role change; they only shape the page, and the server checks again.
+- Nothing auth-related goes in KV, which is eventually consistent.
+
+**Signing-key rotation:** Ed25519, `rotationInterval` 30 days, `gracePeriod` 7 days (default
+30), far longer than any token's life. Emergency rotation: rotate, remove the compromised key,
+and every app stops trusting it within the 10-minute JWKS bound. Two Worker instances rotating at
+once is a spike check.
+
+**When auth is unavailable** (the rule: never grant access):
+
+- A valid token with cached keys keeps working until it expires, at most 5 minutes.
+- New sign-ins and refreshes fail, and the app says the sign-in service is unavailable.
+- JWKS unreachable: cached keys are used for up to 1 hour, then 503 `auth_unavailable`.
+- Unknown key ID: 401 `invalid_token` if the refetch succeeded, 503 if it failed.
+- A required service-binding call failing or taking over 2 seconds, or the app's own D1 failing
+  during a relationship check: 503, with zero writes.
+- remy-auth's D1 or rate-limit storage failing: sign-in refused with 503, never allowed without
+  limits.
+- MCP returns the same outcomes, with its `WWW-Authenticate` challenge on 401.
+- Public site pages do not depend on auth and stay up.
+
+Runner-up: opaque access tokens with introspection (`disableJwtPlugin`) revoke instantly, but add
+a remy-auth call to every request, which the runtime architecture rejected. What would change it:
+an operation needing instant revocation (introspect for that operation, give its scope a shorter
+`scopeExpirations` entry, or use back-channel logout, which needs the JWT plugin), or measured
+refresh load on D1 at 5 minutes.
+
 ## Runtime architecture: identity central, relationships local (decided 2026-09-25, refined)
 
 The owner chose "decide centrally, enforce locally", then refined it after the remy-sport survey:
