@@ -156,6 +156,11 @@ description = "REMOTE, PRODUCTION: make the R2 bucket remy-docs hold exactly the
 dir = "{{config_root}}"
 run = "node scripts/docs-publish.mjs"
 
+[tasks."docs:translations"]
+description = "LOCAL: every translation in docs/i18n/ keeps its English file's headings (same number and levels), so an English edit cannot leave it behind unseen. Instant; project:check runs it"
+dir = "{{config_root}}"
+run = "node scripts/docs-translations.mjs"
+
 [tasks."docs:questions"]
 description = "REMOTE, search only (no answers, next to no cost): each fixed question (src/docs/questions.json) must find its docs page in the top three. Instance: remy-docs-pages (default)"
 dir = "{{config_root}}"

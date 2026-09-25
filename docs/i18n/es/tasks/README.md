@@ -14,6 +14,36 @@ PUBLIC_ORIGIN = "http://127.0.0.1:4174"                 # origin in prerendered 
 DEPLOY_ORIGIN = "https://your-app.your-subdomain.workers.dev"   # origin used by cf:deploy
 ```
 
+### Un consumidor nuevo [#a-new-consumer]
+
+La receta única. [remy-auth-app](https://github.com/joeblew999/remy-auth-app) es el consumidor de
+referencia y el punto de partida: convertido en repositorio plantilla de GitHub, una aplicación nueva no
+copia ningún archivo a mano.
+
+1. Requisitos: mise >= 2026.9.12, `gh auth login` con un token que tenga `read:packages`, Google
+   Chrome (lo usan las comprobaciones) y `wrangler login` antes del primer despliegue.
+2. `gh repo create <nombre> --private --template joeblew999/remy-auth-app --clone`, luego `cd <nombre>`.
+3. Nombra la aplicación: `name` en `wrangler.jsonc` y `package.json`, el nombre del Worker de prerender en
+   `vite.config.ts`, el nombre del servicio en `workers/app.ts`, `src/server.ts` y `tests/gui.spec.ts`
+   (`grep -rn remy-auth-app --exclude-dir=node_modules .` los lista), y `DEPLOY_ORIGIN` en
+   `mise.toml` (`https://<nombre>.<tu-subdominio>.workers.dev`).
+4. `mise install`, luego `GITHUB_TOKEN=$(gh auth token) npm install` una vez para escribir el
+   `package-lock.json` de la aplicación nueva (`project:setup` ejecuta `npm ci`, que lo necesita), luego
+   `GITHUB_TOKEN=$(gh auth token) mise run project:setup` (npm ci, skills fijadas, registro MCP,
+   `project:verify`).
+5. Haz commit de `package-lock.json`, `skills-lock.json` y `src/routeTree.gen.ts`.
+6. `mise run cf:deploy`.
+7. CI: el `.github/workflows/google.yml` de la plantilla ejecuta los tipos y las auditorías de Google en
+   cada push a `main`. Da al repositorio nuevo acceso de lectura en la configuración del paquete
+   `@joeblew999/remy-ui` ("Manage Actions access"), o `npm ci` falla allí.
+
+La plantilla ya trae `min_version`, las tres entradas de arriba, `preview_urls: false` y
+`observability.redact_query_string` en `wrangler.jsonc`, el `.npmrc` para GitHub Packages, el
+`.gitignore`, las comprobaciones en `tests/` y un archivo de Dependabot que mantiene al día las acciones
+fijadas por SHA. Pasa a una versión nueva con `mise run project:upgrade-ui -- <versión>` (paquete y
+`ref` de las tareas a la vez). `ref=main` (`mise.dev.toml`) queda en caché y nunca se refresca solo:
+ejecuta con `MISE_TASK_REMOTE_NO_CACHE=true` cuando `main` avance.
+
 ### Elegir la versión: publicada, de desarrollo o local [#choosing-the-version-released-development-or-local]
 
 Las tareas y el paquete se publican juntos: `mise run ui:release` publica
