@@ -3,7 +3,7 @@ import { ArrowLeftIcon } from 'lucide-react';
 import { locales, getTextDirection as direction, type Locale } from './paraglide/runtime.js';
 import { m } from './paraglide/messages.js';
 import { localeName } from './locale';
-import { weekdayName, type LocaleInfo } from './locale-info';
+import { formatLocale, weekdayName, weekOrder, words, type LocaleInfo } from './locale-info';
 import { DeviceTime } from './client';
 import { LanguageHint, LanguageLinks, LanguageSwitcher } from './language';
 import { ModeToggle } from './theme';
@@ -136,8 +136,11 @@ function FormatsSection({ id, title, note, children }: { id: string; title: stri
 export function FormatsContent({ locale, info, extras = {}, controls = {}, backTo = '/' }: { locale: Locale; info: LocaleInfo; extras?: FormatsExtras; controls?: FormatsControlCards; backTo?: '/' | '/app' }) {
   const o = { locale };
   const dir = direction(locale);
+  const format = formatLocale(locale);
   const list = new Intl.ListFormat(locale, { type: 'conjunction' });
   const calendarName = new Intl.DisplayNames([locale], { type: 'calendar' });
+  const title = m.home_title({}, o);
+  const titleWords = words(locale, title);
   const sections = [
     ['language', m.section_language({}, o)], ['time', m.section_time({}, o)], ['numbers', m.section_numbers({}, o)],
     ['money', m.section_money({}, o)], ['words', m.section_words({}, o)],
@@ -155,6 +158,8 @@ export function FormatsContent({ locale, info, extras = {}, controls = {}, backT
         <Row sample="name" label={m.language_name({}, o)}>{localeName(locale)}</Row>
         <Row sample="direction" label={m.direction_label({}, o)} data-direction={dir}>{dir === 'rtl' ? m.direction_rtl({}, o) : m.direction_ltr({}, o)}</Row>
         <Row sample="languages" label={m.languages_available({}, o)}>{list.format(locales.map(value => localeName(value)))}</Row>
+        {/* Capitals come from CSS in the page's language (its lang), so Turkish gets İ from i. */}
+        <Row sample="casing-row" label={m.casing_label({}, o)}>{samples.casing} → <span className="uppercase" data-sample="casing">{samples.casing}</span></Row>
         {extras.language}
       </Group>
     </FormatsSection>
@@ -162,7 +167,13 @@ export function FormatsContent({ locale, info, extras = {}, controls = {}, backT
       <Group title={m.systems_heading({}, o)}>
         <Row sample="calendar" label={m.calendar_label({}, o)}>{calendarName.of(info.calendar)}</Row>
         <Row sample="hour-cycle" label={m.hour_cycle_label({}, o)}>{['h11', 'h12'].includes(info.hourCycle) ? m.hour_cycle_12({}, o) : m.hour_cycle_24({}, o)}</Row>
-        {info.firstDay && <Row sample="week-start" label={m.week_start_label({}, o)}>{weekdayName(locale, info.firstDay)}</Row>}
+        <Row sample="week-start" label={m.week_start_label({}, o)}>{weekdayName(locale, info.firstDay)}</Row>
+        <Row sample="weekend" label={m.weekend_label({}, o)}>{list.format(info.weekend.map(day => weekdayName(locale, day)))}</Row>
+        <Row sample="week" label={m.week_label({}, o)}>
+          <ol className="flex flex-wrap gap-1">{weekOrder(info.firstDay).map(day => <li key={day}>
+            <Badge variant={info.weekend.includes(day) ? 'secondary' : 'outline'} data-weekday={day} data-weekend={info.weekend.includes(day) || undefined}>{weekdayName(locale, day, 'short')}</Badge>
+          </li>)}</ol>
+        </Row>
         {extras.systems}
       </Group>
       <Group title={m.dates_heading({}, o)}>
@@ -177,7 +188,7 @@ export function FormatsContent({ locale, info, extras = {}, controls = {}, backT
     </FormatsSection>
     <FormatsSection id="numbers" title={m.section_numbers({}, o)} note={m.section_numbers_note({}, o)}>
       <Group title={m.numbers_heading({}, o)}>
-        <Row sample="numbering" label={m.numbering_label({}, o)}><code>{info.numberingSystem}</code> · {new Intl.NumberFormat(locale, { numberingSystem: info.numberingSystem }).format(samples.decimal)}</Row>
+        <Row sample="numbering" label={m.numbering_label({}, o)}><code>{info.numberingSystem}</code> · {new Intl.NumberFormat(format).format(samples.decimal)}</Row>
         <Row sample="decimal" label={m.decimal_label({}, o)}>{m.decimal_value({ value: samples.decimal }, o)}</Row>
         <Row sample="percent" label={m.percent_label({}, o)}>{m.percent_value({ value: samples.share }, o)}</Row>
         <Row sample="compact" label={m.compact_label({}, o)}>{m.compact_value({ value: samples.big }, o)}</Row>
@@ -198,6 +209,15 @@ export function FormatsContent({ locale, info, extras = {}, controls = {}, backT
       {controls.count}
       <Card><CardHeader><CardTitle>{m.ordinal_heading({}, o)}</CardTitle></CardHeader>
         <CardContent><ul className="flex flex-wrap gap-2">{samples.positions.map(n => <li key={n}><Badge variant="outline" data-position={n}>{m.position_value({ n }, o)}</Badge></li>)}</ul></CardContent></Card>
+      <Group title={m.word_breaks_heading({}, o)}>
+        {/* Intl.Segmenter finds the words, also in languages written without spaces (Thai, Japanese). */}
+        <Row sample="words-row" label={m.words_label({}, o)}>
+          <ul className="flex flex-wrap gap-1" data-sample="words">{titleWords.map((word, index) => <li key={index}><Badge variant="outline" data-word={word}>{word}</Badge></li>)}</ul>
+        </Row>
+        <Row sample="word-count" label={m.word_count_label({}, o)}>{new Intl.NumberFormat(format).format(titleWords.length)}</Row>
+        {/* A long German word breaks by German hyphenation (hyphens: auto, text.css) wherever it is shown. */}
+        <Row sample="long-word" label={m.long_word_label({}, o)}><span lang="de">{samples.longWord}</span></Row>
+      </Group>
       {extras.words}
     </FormatsSection>
   </div>;

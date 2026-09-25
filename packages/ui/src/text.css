@@ -1,0 +1,19 @@
+/* How text breaks in every language, after shadcn's stylesheet and the fonts (styles/globals.css
+   stays exactly what the shadcn CLI writes). The browser does the work from the page's `lang`,
+   which every page carries on <html>; textChecks (checks.js) proves each rule on every page. */
+
+/* Long words (German compounds, for example) hyphenate by the language's own rules; where the
+   browser has no hyphenation dictionary, a word too long for its line still breaks instead of
+   widening the page. Both inherit, so they hold for every element. */
+html {
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+/* Japanese is written without spaces: headings break between phrases rather than inside a word
+   (word-break: auto-phrase, Chrome 119+; other browsers keep their normal breaking). Only Japanese
+   needs it, so only Japanese gets it. Thai also has no spaces, and browsers already break it at
+   word boundaries with their own dictionary. */
+:is(h1, h2, h3, h4):lang(ja) {
+  word-break: auto-phrase;
+}

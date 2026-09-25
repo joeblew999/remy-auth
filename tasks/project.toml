@@ -56,7 +56,7 @@ raw = true
 run = "./node_modules/.bin/wrangler dev --ip 127.0.0.1 --port \"${PREVIEW_PORT:-4173}\""
 
 ["project:test"]
-description = "Level 1: build, then run our own browser and HTTP checks against the production artifact locally (every language; ~20 s with 3 languages). Uses dist/ and PREVIEW_PORT: never two local levels at once"
+description = "Level 1: build, then run our own browser and HTTP checks against the production artifact locally (every language; ~75 s with 13 languages). Uses dist/ and PREVIEW_PORT: never two local levels at once"
 dir = "{{config_root}}"
 depends = ["project:build"]
 env = { TEST_TARGET = "local" }

@@ -13,9 +13,17 @@ export const samples = {
   big: 1234567,
   currencies: ['JPY', 'KWD'],
   region: 'DE',
-  counts: [0, 1, 2, 3, 11, 100],
+  // 22 and 25 are Polish few and many; Arabic needs every one of its six forms among these.
+  counts: [0, 1, 2, 3, 11, 22, 25, 100],
   positions: [1, 2, 3, 4, 11, 22, 103],
   statuses: ['accepted', 'declined', 'pending'],
   guest: 'Alex',
   names: ['Zoë', 'Émile', 'ñandú', 'Nadia', 'Ángel', 'zebra', 'أحمد'],
+  // Uppercased by CSS in the page's language: Turkish gives İSTANBUL, every other language ISTANBUL.
+  casing: 'istanbul',
+  // A 63-letter German compound: with hyphens: auto and the page's language it must still fit 320 px.
+  longWord: 'Rindfleischetikettierungsüberwachungsaufgabenübertragungsgesetz',
+  // A date in another calendar is written with year, month and day fields, not dateStyle: the
+  // Hebrew calendar's dateStyle output in Hebrew is broken in Chrome and workerd (.plans/hard-localisation.md).
+  calendarDate: { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' },
 };

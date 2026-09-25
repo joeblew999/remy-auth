@@ -1,5 +1,5 @@
 import { getLocale, type Locale } from '@joeblew999/remy-ui/locale';
-import { localeInfo, weekdayName, type LocaleInfo } from '@joeblew999/remy-ui/locale-info';
+import { formatLocale, localeInfo, type LocaleInfo } from '@joeblew999/remy-ui/locale-info';
 import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { Group, Row, type FormatsExtras } from '@joeblew999/remy-ui/pages';
@@ -14,6 +14,7 @@ import { DeferredPlace } from './showcase/deferred-place';
  */
 export function formatsExtras({ locale, info, place }: { locale: Locale; info: LocaleInfo; place: Promise<Place> }): FormatsExtras {
   const o = { locale };
+  const format = formatLocale(locale);
   const list = new Intl.ListFormat(locale, { type: 'conjunction' });
   const calendarName = new Intl.DisplayNames([locale], { type: 'calendar' });
   const regionName = new Intl.DisplayNames([locale], { type: 'region' });
@@ -21,18 +22,17 @@ export function formatsExtras({ locale, info, place }: { locale: Locale; info: L
     language: <Row sample="region" label={m.region_label({}, o)}>{regionName.of(samples.region)}</Row>,
     time: <DeferredPlace locale={locale} place={place} />,
     systems: <>
-      {info.weekend && <Row sample="weekend" label={m.weekend_label({}, o)}>{list.format(info.weekend.map(day => weekdayName(locale, day)))}</Row>}
       <Row sample="other-calendars" label={m.other_calendars_label({}, o)}>
         {info.otherCalendars.length === 0 ? m.no_other_calendars({}, o) : <ul className="flex flex-col gap-1">
           {info.otherCalendars.map(calendar => <li key={calendar} data-calendar={calendar}>
-            {calendarName.of(calendar)}: {new Intl.DateTimeFormat(locale, { dateStyle: 'long', calendar, timeZone: 'UTC' }).format(samples.date)}
+            {calendarName.of(calendar)}: {new Intl.DateTimeFormat(format, { ...samples.calendarDate, calendar }).format(samples.date)}
           </li>)}
         </ul>}
       </Row>
     </>,
-    dates: <Row sample="range" label={m.range_label({}, o)}>{new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).formatRange(samples.rangeStart, samples.rangeEnd)}</Row>,
+    dates: <Row sample="range" label={m.range_label({}, o)}>{new Intl.DateTimeFormat(format, { dateStyle: 'medium', timeZone: 'UTC' }).formatRange(samples.rangeStart, samples.rangeEnd)}</Row>,
     currency: <>
-      <Row sample="currencies" label={m.currencies_label({}, o)}>{list.format(samples.currencies.map(currency => new Intl.NumberFormat(locale, { style: 'currency', currency }).format(samples.amount)))}</Row>
+      <Row sample="currencies" label={m.currencies_label({}, o)}>{list.format(samples.currencies.map(currency => new Intl.NumberFormat(format, { style: 'currency', currency }).format(samples.amount)))}</Row>
       <Row sample="currency-name" label={m.currency_name_label({}, o)}>{new Intl.DisplayNames([locale], { type: 'currency' }).of('EUR')}</Row>
     </>,
     money: <p className="text-sm leading-relaxed text-muted-foreground md:col-span-2">{m.currency_note({}, o)}</p>,

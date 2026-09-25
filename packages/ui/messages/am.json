@@ -1,0 +1,304 @@
+{
+  "home_title": "አንድ የሚታወቅ ቦታ። እያንዳንዱ የRemy መተግበሪያ።",
+  "home_description": "ለRemy የጋራ መሠረት፣ በቋንቋዎ።",
+  "home_intro": "ተመሳሳይ መቆጣጠሪያዎች፣ ቀለሞች እና ቋንቋ ከአንድ የRemy መተግበሪያ ወደ ሌላው ይከተሉዎታል።",
+  "public_label": "የጋራ መሠረት",
+  "demo_link": "በይነተገናኝ ማሳያውን ይሞክሩ",
+  "formats_link": "ቀኖችን፣ ቁጥሮችን እና ምንዛሬን ይመልከቱ",
+  "home_link": "አጠቃላይ እይታ",
+  "demo_title": "እንደ ቤትዎ ይሰማዎት።",
+  "demo_description": "ተመሳሳይ የጋራ መቆጣጠሪያዎችን በመጠቀም ትንሽ መስተጋብር ይሞክሩ።",
+  "demo_note": "ይህ ለሕዝብ ክፍት የሆነ ማሳያ ነው። የመለያ እና የመግቢያ ባህሪያት በቅርቡ ይመጣሉ።",
+  "count_label": "የአዝራር ጠቅታዎች",
+  "increment": "አንድ ጨምር",
+  "reset": "ዳግም አስጀምር",
+  "loading": "በይነተገናኝ ማሳያው በመጫን ላይ…",
+  "language_label": "ቋንቋ",
+  "skip_link": "ወደ ይዘቱ ዝለል",
+  "footer": "የሚታወቅ እንዲሆን ተሠርቷል።",
+  "not_found": "ገጹ አልተገኘም",
+  "not_found_detail": "ይህ ገጽ አይገኝም። ወደ አጠቃላይ እይታው ይመለሱ።",
+  "error_title": "የሆነ ችግር ተፈጥሯል",
+  "error_detail": "እባክዎ እንደገና ይሞክሩ።",
+  "retry": "እንደገና ሞክር",
+  "zone_description": "የሰዓት ሰቅ ስም፣ ከUTC ያለው ልዩነት እና የአካባቢ ሰዓት፣ በቋንቋዎ።",
+  "zone_intro": "እያንዳንዱ የሰዓት ሰቅ ስም፣ ከUTC ያለው ልዩነት እና የአካባቢ ሰዓት አለው፤ እያንዳንዳቸውም በቋንቋዎ ደንቦች ይጻፋሉ።",
+  "zone_id_label": "የIANA መለያ",
+  "utc_offset_label": "ከUTC ያለው ልዩነት",
+  "zone_not_found": "{zone} የሚባል የሰዓት ሰቅ የለም።",
+  "formats_back": "ወደ ቅርጸቶች ተመለስ",
+  "demo_label": "በይነተገናኝ ማሳያ",
+  "formats_title": "ቅርጸቶች በቋንቋዎ",
+  "formats_description": "Remy ቀኖችን፣ ሰዓቶችን፣ የቀን መቁጠሪያዎችን፣ ቁጥሮችን፣ ምንዛሬን፣ ብዙ ቁጥርን እና አደራደርን ከቋንቋዎ ጋር እንዴት እንደሚያስማማ።",
+  "formats_label": "ዓለም አቀፍ ቅርጸቶች",
+  "formats_intro": "ከዚህ በታች ያለው እያንዳንዱ እሴት ከጋራ የመልዕክት ካታሎግ እና ከቋንቋዎ ደንቦች የመጣ ሲሆን፣ በአገልጋዩም ሆነ በአሳሹ ላይ በተመሳሳይ መንገድ ይታያል።",
+  "language_tag": "የቋንቋ መለያ",
+  "language_name": "ስም በራሱ ቋንቋ",
+  "direction_label": "የንባብ አቅጣጫ",
+  "direction_ltr": "ከግራ ወደ ቀኝ",
+  "direction_rtl": "ከቀኝ ወደ ግራ",
+  "languages_available": "የሚገኙ ቋንቋዎች",
+  "dates_heading": "ቀኖች እና ሰዓቶች",
+  "instant_label": "ቅጽበት በUTC",
+  "plain_date_label": "የቀን መቁጠሪያ ቀን",
+  "relative_label": "አንጻራዊ ጊዜ",
+  "numbers_heading": "ቁጥሮች",
+  "decimal_label": "አስርዮሽ ቁጥር",
+  "percent_label": "መቶኛ",
+  "currency_heading": "ምንዛሬ",
+  "currency_label": "መጠን በዩሮ",
+  "currency_note": "እያንዳንዱ መተግበሪያ የራሱን ገንዘብ ያስተዳድራል፦ መጠኖችን በትንሹ አሃድ እንደ ሙሉ ቁጥር ከISO 4217 ኮድ ጋር ያስቀምጡ እና በዚህ ካታሎግ ይቅረጹ።",
+  "choices_heading": "ሌሎች እሴቶችን ይሞክሩ",
+  "choices_note": "ምርጫዎችዎ በአድራሻው ውስጥ ይቀመጣሉ፤ ስለዚህ ወደዚህ ገጽ የሚወስድ አገናኝ ተመሳሳይ እሴቶችን ያሳያል።",
+  "plural_heading": "ብዙ ቁጥር",
+  "instant_value": [
+    {
+      "declarations": [
+        "input instant",
+        "local formatted = instant: datetime dateStyle=full timeStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "instant=*": "{formatted}"
+      }
+    }
+  ],
+  "plain_date_value": [
+    {
+      "declarations": [
+        "input date",
+        "local formatted = date: datetime dateStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "date=*": "{formatted}"
+      }
+    }
+  ],
+  "relative_value": [
+    {
+      "declarations": [
+        "input days",
+        "local formatted = days: relativetime unit=day numeric=auto"
+      ],
+      "match": {
+        "days=*": "{formatted}"
+      }
+    }
+  ],
+  "decimal_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "percent_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number style=percent"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "currency_value": [
+    {
+      "declarations": [
+        "input amount",
+        "local formatted = amount: number style=currency currency=EUR"
+      ],
+      "match": {
+        "amount=*": "{formatted}"
+      }
+    }
+  ],
+  "apps_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{countText} መተግበሪያ",
+        "countPlural=other": "{countText} መተግበሪያዎች"
+      }
+    }
+  ],
+  "units_heading": "አሃዶች",
+  "distance_label": "ርቀት",
+  "compact_label": "የታመቀ ቁጥር",
+  "currencies_label": "ተመሳሳይ መጠን በሌሎች ምንዛሬዎች",
+  "currency_name_label": "የምንዛሬ ስም",
+  "region_label": "የናሙና አገር ስም",
+  "ordinal_heading": "የደረጃ ቁጥሮች",
+  "variants_heading": "እንደ እሴቱ የሚለያዩ ቅርጾች",
+  "greeting_label": "ሰላምታ",
+  "status_label": "ግብዣ",
+  "sorting_heading": "አደራደር",
+  "sorted_label": "ስሞች በዚህ ቋንቋ ቅደም ተከተል",
+  "range_label": "የቀን ክልል",
+  "form_heading": "መቀመጫዎችን ያስይዙ",
+  "name_label": "ስምዎ",
+  "guests_label": "መቀመጫዎች",
+  "submit": "አስይዝ",
+  "name_required": "ስምዎን ያስገቡ።",
+  "guests_invalid": "ከ1 እስከ 20 ያለ ሙሉ የመቀመጫ ቁጥር ያስገቡ።",
+  "leave_unsaved": "ከዚህ ገጽ ይውጡ? ቦታ ማስያዝዎ ገና አልተጠናቀቀም።",
+  "greeting": "እንኳን ደህና መጡ፣ {name}።",
+  "distance_value": [
+    {
+      "declarations": [
+        "input km",
+        "local formatted = km: number style=unit unit=kilometer unitDisplay=long"
+      ],
+      "match": {
+        "km=*": "{formatted}"
+      }
+    }
+  ],
+  "compact_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number notation=compact"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "position_value": [
+    {
+      "declarations": [
+        "input n",
+        "local ordinal = n: plural type=ordinal",
+        "local nText = n: number"
+      ],
+      "selectors": [
+        "ordinal"
+      ],
+      "match": {
+        "ordinal=other": "{nText}ኛ"
+      }
+    }
+  ],
+  "invite_status": [
+    {
+      "declarations": [
+        "input status"
+      ],
+      "selectors": [
+        "status"
+      ],
+      "match": {
+        "status=accepted": "ግብዣው ተቀባይነት አግኝቷል",
+        "status=declined": "ግብዣው ውድቅ ተደርጓል",
+        "status=*": "ግብዣው በመጠባበቅ ላይ ነው"
+      }
+    }
+  ],
+  "reserved": [
+    {
+      "declarations": [
+        "input name",
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{name} {countText} መቀመጫ አስይዘዋል።",
+        "countPlural=other": "{name} {countText} መቀመጫዎችን አስይዘዋል።"
+      }
+    }
+  ],
+  "systems_heading": "የቀን መቁጠሪያ፣ ሳምንት እና አሃዞች",
+  "calendar_label": "የቀን መቁጠሪያ",
+  "other_calendars_label": "በጥቅም ላይ ያሉ ሌሎች የቀን መቁጠሪያዎች",
+  "no_other_calendars": "የለም",
+  "week_start_label": "የሳምንቱ የመጀመሪያ ቀን",
+  "weekend_label": "የሳምንት መጨረሻ",
+  "hour_cycle_label": "የሰዓት አቆጣጠር",
+  "hour_cycle_12": "የ12 ሰዓት አቆጣጠር",
+  "hour_cycle_24": "የ24 ሰዓት አቆጣጠር",
+  "numbering_label": "የቁጥር ሥርዓት",
+  "timezone_heading": "የሰዓት ሰቅ",
+  "local_time_label": "በመሣሪያዎ የሰዓት ሰቅ",
+  "local_time_note": "ይህ ረድፍ በአሳሽዎ ውስጥ ይዘጋጃል፦ አገልጋዩ የመሣሪያዎን ሰዓት ስለማያይ በምትኩ የCloudflareን አካባቢ ይጠቀማል።",
+  "location_heading": "ያሉበት ቦታ",
+  "your_country_label": "አገርዎ",
+  "place_label": "ከተማ እና ክልል",
+  "cf_timezone_label": "ባሉበት አካባቢ ያለው የሰዓት ሰቅ",
+  "cf_local_time_label": "እዚያ ያለው የአካባቢ ሰዓት",
+  "location_unknown": "በዚህ ግንኙነት ላይ አይታወቅም",
+  "location_note": "Cloudflare በእያንዳንዱ ጥያቄ የአውታረ መረቡን አካባቢ ያሳውቃል፤ አገልጋዩ ከላይ ላለው የአካባቢ ሰዓት ይጠቀምበታል እንጂ አያስቀምጠውም።",
+  "live_status_heading": "የቀጥታ ሁኔታ",
+  "live_status_label": "ሁኔታ",
+  "live_status_ok": "በሥራ ላይ",
+  "live_service_label": "አገልግሎት",
+  "live_release_label": "ልቀት",
+  "live_status_note": "በአገልጋዩ ላይ ተዘጋጅቶ፣ ይህ ገጽ ክፍት እስከሆነ ድረስ በአሳሽዎ ይታደሳል።",
+  "live_refresh": "አሁን አድስ",
+  "continue_in": "በ{language} ይቀጥሉ",
+  "language_hint": "ይህ ገጽ በ{language} ቋንቋም ይገኛል።",
+  "keep_language": "በ{language} ይቆዩ",
+  "device_place_heading": "የመሣሪያዎ አካባቢ",
+  "device_place_note": "አሳሽዎ ይህ መሣሪያ የት እንዳለ ሊያጋራ ይችላል። መረጃው በዚህ ገጽ ላይ ብቻ ይቆያል፦ ወደ አገልጋዮቻችን ምንም አይላክም።",
+  "device_place_button": "የመሣሪያዬን አካባቢ ተጠቀም",
+  "device_place_asking": "አሳሽዎን በመጠበቅ ላይ…",
+  "device_place_denied": "አሳሽዎ አካባቢ አላጋራም።",
+  "device_place_unavailable": "መሣሪያዎ አካባቢውን ማግኘት አልቻለም።",
+  "device_place_unsupported": "ይህ አሳሽ አካባቢ ማጋራት አይችልም።",
+  "latitude_label": "ኬክሮስ",
+  "longitude_label": "ኬንትሮስ",
+  "accuracy_label": "ትክክለኛነት",
+  "network_distance_label": "ከአውታረ መረቡ አካባቢ ያለው ርቀት",
+  "nav_heading": "ገጾች",
+  "nav_home": "አጠቃላይ እይታ",
+  "nav_demo": "ማሳያ",
+  "nav_formats": "ቅርጸቶች",
+  "toggle_sidebar": "የጎን አሞሌውን አሳይ ወይም ደብቅ",
+  "zone_site": "የድረ-ገጽ ገጽ · ያለ JavaScript ይሠራል",
+  "zone_app": "መተግበሪያ · JavaScript ያስፈልገዋል",
+  "open_app": "መተግበሪያውን ክፈት",
+  "back_to_site": "ወደ ድረ-ገጹ ተመለስ",
+  "nav_location": "አካባቢ",
+  "app_home_title": "የእርስዎ መተግበሪያ",
+  "app_home_description": "የRemy በይነተገናኝ ክፍል፦ የቀጥታ ውሂብ፣ ቅጾች እና መሣሪያዎ።",
+  "app_home_intro": "እዚህ ያለው ሁሉ በአሳሽዎ ውስጥ ይሠራል። የድረ-ገጹ ገጾች ያለ JavaScript ሊነበቡ ይችላሉ።",
+  "location_title": "ያሉበት ቦታ",
+  "location_description": "ከCloudflare የተገኘው የአውታረ መረብዎ አካባቢ፣ እና ከፈቀዱ የመሣሪያዎ የራሱ አካባቢ።",
+  "location_intro": "አውታረ መረቡ የሚለውን መሣሪያዎ ከሚለው ጋር ያወዳድሩ።",
+  "sections_nav": "በዚህ ገጽ ላይ",
+  "section_language": "ይህ ቋንቋ",
+  "section_language_note": "ይህ የትኛው ቋንቋ እንደሆነ፣ እንዴት እንደሚጻፍ እና እንደሚነበብ።",
+  "section_time": "ቀኖች እና ሰዓቶች",
+  "section_time_note": "ዛሬ ምን ቀን እና ስንት ሰዓት እንደሆነ፣ ይህ ቋንቋም እንዴት እንደሚጽፋቸው።",
+  "section_numbers": "ቁጥሮች",
+  "section_numbers_note": "ቁጥሮች እንዴት እንደሚጻፉ፦ አሃዞች፣ መቧደን፣ መቶኛዎች እና አሃዶች።",
+  "section_money": "ገንዘብ",
+  "section_money_note": "መጠኖች በዚህ ቋንቋ እና በሌሎች ምንዛሬዎች እንዴት እንደሚታዩ።",
+  "section_words": "ቃላት",
+  "section_words_note": "ጽሑፍ እንደ እሴቱ እንዴት እንደሚለወጥ፦ ብዙ ቁጥር፣ ቅደም ተከተል፣ ቅርጾች እና አደራደር።",
+  "theme_toggle": "ገጽታ",
+  "theme_light": "ብሩህ",
+  "theme_dark": "ጨለማ",
+  "theme_system": "እንደ ሥርዓቱ",
+  "casing_label": "ትላልቅ ፊደላት",
+  "week_label": "ሳምንቱ፣ የሳምንቱ መጨረሻ ተለይቶ",
+  "word_breaks_heading": "የቃላት መለያየት",
+  "words_label": "በመነሻ ገጹ ርዕስ ውስጥ ያሉ ቃላት",
+  "word_count_label": "የቃላት ብዛት",
+  "long_word_label": "ረጅም የጀርመንኛ ቃል"
+}

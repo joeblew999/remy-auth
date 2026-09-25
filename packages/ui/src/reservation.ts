@@ -12,15 +12,40 @@ import { m } from './paraglide/messages.js';
 z.config({ jitless: true });
 
 /**
+ * Every decimal digit the runtime can write (Intl's numbering systems: Persian ۰–۹, Arabic-Indic
+ * ٠–٩, Devanagari, Thai, …) mapped to its ASCII digit, built once from Intl itself.
+ */
+let nativeDigits: Map<string, string> | undefined;
+function digitMap() {
+  if (nativeDigits) return nativeDigits;
+  nativeDigits = new Map();
+  for (const system of Intl.supportedValuesOf('numberingSystem')) {
+    const format = new Intl.NumberFormat('en', { numberingSystem: system, useGrouping: false });
+    const digits = Array.from({ length: 10 }, (_, digit) => format.format(digit));
+    // Decimal systems only: one character per digit (algorithmic systems such as Roman numerals are left out).
+    if (digits.every(digit => [...digit].length === 1)) digits.forEach((digit, value) => nativeDigits!.set(digit, String(value)));
+  }
+  return nativeDigits;
+}
+
+/** `text` with every native digit replaced by its ASCII digit, so "۱۲" and "١٢" read as "12". */
+export function asciiDigits(text: string): string {
+  const map = digitMap();
+  return [...text].map(character => map.get(character) ?? character).join('');
+}
+
+/**
  * A reservation's rules with messages in `locale`: a name that is not blank once trimmed, and a
- * whole number of seats from 1 to 20. Accepts the form's text for the seats and outputs a number.
+ * whole number of seats from 1 to 20. Accepts the form's text for the seats, typed in any script's
+ * digits, and outputs a number.
  */
 export function reservationSchema(locale: Locale) {
   const o = { locale };
   const guests = m.guests_invalid({}, o);
   return z.object({
     name: z.string().trim().min(1, m.name_required({}, o)),
-    guests: z.coerce.number<string | number>({ error: guests }).int(guests).min(1, guests).max(20, guests),
+    guests: z.union([z.number(), z.string().transform(asciiDigits)]).pipe(
+      z.coerce.number<string | number>({ error: guests }).int(guests).min(1, guests).max(20, guests)),
   });
 }
 

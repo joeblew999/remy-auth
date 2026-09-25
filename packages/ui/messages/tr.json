@@ -1,0 +1,304 @@
+{
+  "home_title": "Tanıdık tek bir yer. Tüm Remy uygulamaları.",
+  "home_description": "Remy için ortak bir temel, kendi dilinizde.",
+  "home_intro": "Aynı denetimler, renkler ve dil bir Remy uygulamasından diğerine sizinle gelir.",
+  "public_label": "Ortak temel",
+  "demo_link": "Etkileşimli demoyu deneyin",
+  "formats_link": "Tarihlere, sayılara ve para birimine bakın",
+  "home_link": "Genel bakış",
+  "demo_title": "Kendinizi evinizde hissedin.",
+  "demo_description": "Aynı ortak denetimlerle küçük bir etkileşimi deneyin.",
+  "demo_note": "Bu herkese açık bir demodur. Hesap ve oturum açma özellikleri yakında geliyor.",
+  "count_label": "Düğme tıklamaları",
+  "increment": "Bir ekle",
+  "reset": "Sıfırla",
+  "loading": "Etkileşimli demo yükleniyor…",
+  "language_label": "Dil",
+  "skip_link": "İçeriğe atla",
+  "footer": "Tanıdık gelsin diye yapıldı.",
+  "not_found": "Sayfa bulunamadı",
+  "not_found_detail": "Bu sayfa kullanılamıyor. Genel bakışa dönün.",
+  "error_title": "Bir sorun oluştu",
+  "error_detail": "Lütfen yeniden deneyin.",
+  "retry": "Yeniden dene",
+  "zone_description": "Bir saat diliminin adı, UTC farkı ve yerel saati, kendi dilinizde.",
+  "zone_intro": "Her saat diliminin bir adı, UTC'den bir farkı ve bir yerel saati vardır; her biri dilinizin kendi kurallarıyla yazılır.",
+  "zone_id_label": "IANA tanımlayıcısı",
+  "utc_offset_label": "UTC farkı",
+  "zone_not_found": "{zone} adında bir saat dilimi yok.",
+  "formats_back": "Biçimlere dön",
+  "demo_label": "Etkileşimli demo",
+  "formats_title": "Dilinizdeki biçimler",
+  "formats_description": "Remy'nin tarihleri, saatleri, takvimleri, sayıları, para birimini, çoğul biçimleri ve sıralamayı dilinize nasıl uyarladığı.",
+  "formats_label": "Uluslararası biçimler",
+  "formats_intro": "Aşağıdaki her değer ortak ileti kataloğundan ve dilinizin kendi kurallarından gelir; sunucuda ve tarayıcıda aynı biçimde gösterilir.",
+  "language_tag": "Yerel ayar etiketi",
+  "language_name": "Kendi dilindeki adı",
+  "direction_label": "Okuma yönü",
+  "direction_ltr": "Soldan sağa",
+  "direction_rtl": "Sağdan sola",
+  "languages_available": "Kullanılabilir diller",
+  "dates_heading": "Tarihler ve saatler",
+  "instant_label": "UTC olarak an",
+  "plain_date_label": "Takvim tarihi",
+  "relative_label": "Göreli zaman",
+  "numbers_heading": "Sayılar",
+  "decimal_label": "Ondalık sayı",
+  "percent_label": "Yüzde",
+  "currency_heading": "Para birimi",
+  "currency_label": "Avro cinsinden tutar",
+  "currency_note": "Her uygulama kendi parasını yönetir: tutarları ISO 4217 koduyla birlikte tam sayı alt birimler olarak saklayın ve bu katalogla biçimlendirin.",
+  "choices_heading": "Başka değerler deneyin",
+  "choices_note": "Seçimleriniz adreste saklanır; böylece bu sayfanın bağlantısı aynı değerleri gösterir.",
+  "plural_heading": "Çoğul biçimler",
+  "instant_value": [
+    {
+      "declarations": [
+        "input instant",
+        "local formatted = instant: datetime dateStyle=full timeStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "instant=*": "{formatted}"
+      }
+    }
+  ],
+  "plain_date_value": [
+    {
+      "declarations": [
+        "input date",
+        "local formatted = date: datetime dateStyle=long timeZone=UTC"
+      ],
+      "match": {
+        "date=*": "{formatted}"
+      }
+    }
+  ],
+  "relative_value": [
+    {
+      "declarations": [
+        "input days",
+        "local formatted = days: relativetime unit=day numeric=auto"
+      ],
+      "match": {
+        "days=*": "{formatted}"
+      }
+    }
+  ],
+  "decimal_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "percent_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number style=percent"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "currency_value": [
+    {
+      "declarations": [
+        "input amount",
+        "local formatted = amount: number style=currency currency=EUR"
+      ],
+      "match": {
+        "amount=*": "{formatted}"
+      }
+    }
+  ],
+  "apps_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{countText} uygulama",
+        "countPlural=other": "{countText} uygulama"
+      }
+    }
+  ],
+  "units_heading": "Birimler",
+  "distance_label": "Uzaklık",
+  "compact_label": "Kısa sayı",
+  "currencies_label": "Aynı tutar başka para birimlerinde",
+  "currency_name_label": "Para biriminin adı",
+  "region_label": "Örnek ülke adı",
+  "ordinal_heading": "Sıra sayıları",
+  "variants_heading": "Değere göre değişkenler",
+  "greeting_label": "Karşılama",
+  "status_label": "Davet",
+  "sorting_heading": "Sıralama",
+  "sorted_label": "Bu dilin sırasına göre adlar",
+  "range_label": "Tarih aralığı",
+  "form_heading": "Yer ayırtın",
+  "name_label": "Adınız",
+  "guests_label": "Kişi sayısı",
+  "submit": "Ayırt",
+  "name_required": "Adınızı girin.",
+  "guests_invalid": "Kişi sayısı için 1 ile 20 arasında bir tam sayı girin.",
+  "leave_unsaved": "Bu sayfadan ayrılmak istiyor musunuz? Rezervasyonunuz henüz yapılmadı.",
+  "greeting": "Hoş geldiniz, {name}.",
+  "distance_value": [
+    {
+      "declarations": [
+        "input km",
+        "local formatted = km: number style=unit unit=kilometer unitDisplay=long"
+      ],
+      "match": {
+        "km=*": "{formatted}"
+      }
+    }
+  ],
+  "compact_value": [
+    {
+      "declarations": [
+        "input value",
+        "local formatted = value: number notation=compact"
+      ],
+      "match": {
+        "value=*": "{formatted}"
+      }
+    }
+  ],
+  "position_value": [
+    {
+      "declarations": [
+        "input n",
+        "local ordinal = n: plural type=ordinal",
+        "local nText = n: number"
+      ],
+      "selectors": [
+        "ordinal"
+      ],
+      "match": {
+        "ordinal=other": "{nText}."
+      }
+    }
+  ],
+  "invite_status": [
+    {
+      "declarations": [
+        "input status"
+      ],
+      "selectors": [
+        "status"
+      ],
+      "match": {
+        "status=accepted": "Davet kabul edildi",
+        "status=declined": "Davet reddedildi",
+        "status=*": "Davet beklemede"
+      }
+    }
+  ],
+  "reserved": [
+    {
+      "declarations": [
+        "input name",
+        "input count",
+        "local countPlural = count: plural",
+        "local countText = count: number"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{name}, {countText} kişilik yer ayırttı.",
+        "countPlural=other": "{name}, {countText} kişilik yer ayırttı."
+      }
+    }
+  ],
+  "systems_heading": "Takvim, hafta ve rakamlar",
+  "calendar_label": "Takvim",
+  "other_calendars_label": "Kullanılan diğer takvimler",
+  "no_other_calendars": "Yok",
+  "week_start_label": "Haftanın ilk günü",
+  "weekend_label": "Hafta sonu",
+  "hour_cycle_label": "Saat biçimi",
+  "hour_cycle_12": "12 saatlik biçim",
+  "hour_cycle_24": "24 saatlik biçim",
+  "numbering_label": "Rakam sistemi",
+  "timezone_heading": "Saat dilimi",
+  "local_time_label": "Cihazınızın saat diliminde",
+  "local_time_note": "Bu satır tarayıcınızda oluşturulur: sunucu cihazınızın saatini hiç görmez, bu yüzden onun yerine Cloudflare'in konumunu kullanır.",
+  "location_heading": "Bulunduğunuz yer",
+  "your_country_label": "Ülkeniz",
+  "place_label": "Şehir ve bölge",
+  "cf_timezone_label": "Konumunuzdaki saat dilimi",
+  "cf_local_time_label": "Oradaki yerel saat",
+  "location_unknown": "Bu bağlantıda bilinmiyor",
+  "location_note": "Cloudflare her istekle birlikte ağın konumunu bildirir; sunucu bunu yukarıdaki yerel saat için kullanır ve saklamaz.",
+  "live_status_heading": "Canlı durum",
+  "live_status_label": "Durum",
+  "live_status_ok": "Çalışıyor",
+  "live_service_label": "Hizmet",
+  "live_release_label": "Sürüm",
+  "live_status_note": "Sunucuda oluşturulur, ardından bu sayfa açık kaldığı sürece tarayıcınız tarafından yenilenir.",
+  "live_refresh": "Şimdi yenile",
+  "continue_in": "{language} dilinde devam et",
+  "language_hint": "Bu sayfa {language} dilinde de mevcut.",
+  "keep_language": "{language} dilinde kal",
+  "device_place_heading": "Cihazınızın konumu",
+  "device_place_note": "Tarayıcınız bu cihazın nerede olduğunu paylaşabilir. Bu bilgi bu sayfada kalır: sunucularımıza hiçbir şey gönderilmez.",
+  "device_place_button": "Cihazımın konumunu kullan",
+  "device_place_asking": "Tarayıcınız bekleniyor…",
+  "device_place_denied": "Tarayıcınız konum paylaşmadı.",
+  "device_place_unavailable": "Cihazınız konumunu bulamadı.",
+  "device_place_unsupported": "Bu tarayıcı konum paylaşamıyor.",
+  "latitude_label": "Enlem",
+  "longitude_label": "Boylam",
+  "accuracy_label": "Doğruluk",
+  "network_distance_label": "Ağın konumuna uzaklık",
+  "nav_heading": "Sayfalar",
+  "nav_home": "Genel bakış",
+  "nav_demo": "Demo",
+  "nav_formats": "Biçimler",
+  "toggle_sidebar": "Kenar çubuğunu aç veya kapat",
+  "zone_site": "Site sayfası · JavaScript olmadan çalışır",
+  "zone_app": "Uygulama · JavaScript gerektirir",
+  "open_app": "Uygulamayı aç",
+  "back_to_site": "Siteye dön",
+  "nav_location": "Konum",
+  "app_home_title": "Uygulamanız",
+  "app_home_description": "Remy'nin etkileşimli yüzü: canlı veriler, formlar ve cihazınız.",
+  "app_home_intro": "Buradaki her şey tarayıcınızda çalışır. Site sayfaları JavaScript olmadan da okunabilir kalır.",
+  "location_title": "Bulunduğunuz yer",
+  "location_description": "Cloudflare'e göre ağ konumunuz ve izin verirseniz cihazınızın kendi konumu.",
+  "location_intro": "Ağın söylediğini cihazınızın söylediğiyle karşılaştırın.",
+  "sections_nav": "Bu sayfada",
+  "section_language": "Bu dil",
+  "section_language_note": "Bu hangi dil, nasıl yazılır ve okunur.",
+  "section_time": "Tarihler ve saatler",
+  "section_time_note": "Bugün hangi gün, saat kaç ve bu dil bunları nasıl yazar.",
+  "section_numbers": "Sayılar",
+  "section_numbers_note": "Sayıların yazılışı: rakamlar, gruplama, yüzdeler ve birimler.",
+  "section_money": "Para",
+  "section_money_note": "Tutarların bu dilde ve başka para birimlerinde görünüşü.",
+  "section_words": "Sözcükler",
+  "section_words_note": "Metnin bir değere göre değişimi: çoğul biçimler, sıra, değişkenler ve sıralama.",
+  "theme_toggle": "Tema",
+  "theme_light": "Açık",
+  "theme_dark": "Koyu",
+  "theme_system": "Sistem",
+  "casing_label": "Büyük harfler",
+  "week_label": "Hafta, hafta sonu işaretli",
+  "word_breaks_heading": "Sözcük sınırları",
+  "words_label": "Ana sayfa başlığındaki sözcükler",
+  "word_count_label": "Sözcük sayısı",
+  "long_word_label": "Uzun bir Almanca sözcük"
+}

@@ -2,7 +2,7 @@ import { ClientOnly, Link } from '@tanstack/react-router';
 import * as z from 'zod/mini';
 import { getLocale, type Locale } from '../paraglide/runtime.js';
 import { m } from '../paraglide/messages.js';
-import { localeInfo } from '../locale-info';
+import { formatLocale, localeInfo } from '../locale-info';
 import { samples } from '../samples.js';
 import { buttonVariants } from '../components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/card';
@@ -23,8 +23,12 @@ export type Currency = (typeof currencies)[number];
 /** The counts the controls offer; any whole number from 0 to 1000 is valid in the URL. */
 export const countChoices = [0, 1, 2, 3, 11, 100, 1000] as const;
 export const maxCount = 1000;
-/** Calendars offered in every language besides the language's own, so each has a choice. */
-const showcaseCalendars = ['gregory', 'islamic', 'hebrew', 'japanese', 'buddhist', 'persian'];
+/**
+ * Calendars offered in every language besides the language's own, so each has a choice: the era
+ * calendars (Japanese, Republic of China), the solar and lunar ones (Persian, Buddhist, Hebrew,
+ * Islamic, Ethiopian) and the Chinese lunisolar calendar.
+ */
+const showcaseCalendars = ['gregory', 'islamic', 'hebrew', 'japanese', 'roc', 'buddhist', 'persian', 'ethiopic', 'chinese'];
 
 export const searchDefaults = { currency: 'EUR', count: 3, calendar: 'gregory' } as const;
 
@@ -75,7 +79,8 @@ type ChoiceProps = { locale: Locale; search: FormatsSearch; interactive?: boolea
  */
 export function ChoiceCard({ kind, locale, search, interactive = true, to = '/formats' }: ChoiceProps & { kind: ChoiceKind }) {
   const o = { locale };
-  const number = new Intl.NumberFormat(locale);
+  const format = formatLocale(locale);
+  const number = new Intl.NumberFormat(format);
   const currencyName = new Intl.DisplayNames([locale], { type: 'currency' });
   const calendarName = new Intl.DisplayNames([locale], { type: 'calendar' });
   const link = { from: to, to, resetScroll: false, activeOptions: { exact: true }, activeProps: { className: chosen }, inactiveProps: { className: choice } } as const;
@@ -90,7 +95,7 @@ export function ChoiceCard({ kind, locale, search, interactive = true, to = '/fo
         </li>)}
       </Choices>
       <dl className={rows}><Row sample="chosen-currency" label={currencyName.of(search.currency) ?? search.currency} data-value={search.currency}>
-        {new Intl.NumberFormat(locale, { style: 'currency', currency: search.currency }).format(samples.amount)}
+        {new Intl.NumberFormat(format, { style: 'currency', currency: search.currency }).format(samples.amount)}
       </Row></dl>
     </>,
     count: <>
@@ -108,7 +113,7 @@ export function ChoiceCard({ kind, locale, search, interactive = true, to = '/fo
         </li>)}
       </Choices>
       <dl className={rows}><Row sample="chosen-calendar" label={calendarName.of(search.calendar) ?? search.calendar} data-value={search.calendar}>
-        <time dateTime={samples.date.toISOString().slice(0, 10)}>{new Intl.DateTimeFormat(locale, { dateStyle: 'long', calendar: search.calendar, timeZone: 'UTC' }).format(samples.date)}</time>
+        <time dateTime={samples.date.toISOString().slice(0, 10)}>{new Intl.DateTimeFormat(format, { ...samples.calendarDate, calendar: search.calendar }).format(samples.date)}</time>
       </Row></dl>
     </>,
   }[kind];

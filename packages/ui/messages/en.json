@@ -121,14 +121,15 @@
     {
       "declarations": [
         "input count",
-        "local countPlural = count: plural"
+        "local countPlural = count: plural",
+        "local countText = count: number"
       ],
       "selectors": [
         "countPlural"
       ],
       "match": {
-        "countPlural=one": "{count} app",
-        "countPlural=other": "{count} apps"
+        "countPlural=one": "{countText} app",
+        "countPlural=other": "{countText} apps"
       }
     }
   ],
@@ -179,16 +180,17 @@
     {
       "declarations": [
         "input n",
-        "local ordinal = n: plural type=ordinal"
+        "local ordinal = n: plural type=ordinal",
+        "local nText = n: number"
       ],
       "selectors": [
         "ordinal"
       ],
       "match": {
-        "ordinal=one": "{n}st",
-        "ordinal=two": "{n}nd",
-        "ordinal=few": "{n}rd",
-        "ordinal=other": "{n}th"
+        "ordinal=one": "{nText}st",
+        "ordinal=two": "{nText}nd",
+        "ordinal=few": "{nText}rd",
+        "ordinal=other": "{nText}th"
       }
     }
   ],
@@ -212,14 +214,15 @@
       "declarations": [
         "input name",
         "input count",
-        "local countPlural = count: plural"
+        "local countPlural = count: plural",
+        "local countText = count: number"
       ],
       "selectors": [
         "countPlural"
       ],
       "match": {
-        "countPlural=one": "{name} reserved {count} seat.",
-        "countPlural=other": "{name} reserved {count} seats."
+        "countPlural=one": "{name} reserved {countText} seat.",
+        "countPlural=other": "{name} reserved {countText} seats."
       }
     }
   ],
@@ -294,5 +297,11 @@
   "theme_toggle": "Theme",
   "theme_light": "Light",
   "theme_dark": "Dark",
-  "theme_system": "System"
+  "theme_system": "System",
+  "casing_label": "Capital letters",
+  "week_label": "The week, weekend marked",
+  "word_breaks_heading": "Word breaks",
+  "words_label": "Words in the home page title",
+  "word_count_label": "Number of words",
+  "long_word_label": "A long German word"
 }

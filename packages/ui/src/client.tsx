@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { extractLocaleFromCookie, extractLocaleFromNavigator, type Locale } from './paraglide/runtime.js';
+import { extractLocaleFromCookie, type Locale } from './paraglide/runtime.js';
+import { formatLocale } from './locale-info';
+import { preferredFromNavigator } from './matching.js';
 
 // Browser-only pieces for prerendered apps, which learn the visitor's languages after hydration
 // so their static HTML never depends on them.
@@ -11,7 +13,7 @@ const rememberedAtLoad = typeof document === 'undefined' ? undefined : extractLo
 export function useSuggestedLocale(page: Locale): Locale | undefined {
   const [suggested, setSuggested] = useState<Locale | undefined>(undefined);
   useEffect(() => {
-    const browser = extractLocaleFromNavigator();
+    const browser = preferredFromNavigator();
     setSuggested(browser && browser !== page && rememberedAtLoad !== page ? browser : undefined);
   }, [page]);
   return suggested;
@@ -20,6 +22,6 @@ export function useSuggestedLocale(page: Locale): Locale | undefined {
 /** A moment in the device's own time zone, which only the browser knows; empty until hydration. */
 export function DeviceTime({ locale, instant, ...rest }: { locale: Locale; instant: Date } & React.HTMLAttributes<HTMLSpanElement>) {
   const [text, setText] = useState('');
-  useEffect(() => { setText(new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'long' }).format(instant)); }, [locale, instant]);
+  useEffect(() => { setText(new Intl.DateTimeFormat(formatLocale(locale), { dateStyle: 'full', timeStyle: 'long' }).format(instant)); }, [locale, instant]);
   return <span {...rest}>{text}</span>;
 }

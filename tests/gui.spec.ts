@@ -2,8 +2,8 @@ import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { locales } from '@joeblew999/remy-ui/runtime';
 import { samples } from '@joeblew999/remy-ui/samples';
-import { checkedLocales, zoneChecks, publicPageChecks, entryChecks, demoChecks, formatsChecks, observabilityChecks, cspChecks, collectErrors, endonym, direction, localizedPath } from '@joeblew999/remy-ui/checks';
-import { localeInfo, weekdayName } from '../packages/ui/src/locale-info';
+import { checkedLocales, zoneChecks, publicPageChecks, entryChecks, demoChecks, formatsChecks, textChecks, observabilityChecks, cspChecks, collectErrors, endonym, direction, localizedPath, formatTag } from '@joeblew999/remy-ui/checks';
+import { localeInfo } from '../packages/ui/src/locale-info';
 import { sitePaths, appPaths, allPaths } from '@joeblew999/remy-ui/paths';
 import { searchParamsChecks } from '@joeblew999/remy-ui/showcase/search-params.checks';
 import { preloadChecks } from '@joeblew999/remy-ui/showcase/preload.checks';
@@ -22,6 +22,7 @@ import { devicePlaceChecks } from '@joeblew999/remy-ui/showcase/device-place.che
 // Site pages (for Google) and app pages (for people using the app) never mix; see paths.js.
 zoneChecks({ sitePaths, appPaths });
 publicPageChecks({ paths: sitePaths });
+textChecks({ paths: allPaths });
 entryChecks({ paths: allPaths, mode: 'redirect' });
 demoChecks();
 // The demo reservation and the status card are contract endpoints (@joeblew999/remy-auth-contract).
@@ -48,28 +49,28 @@ formatsChecks({ extra: async (page, locale) => {
   const messages = catalogs[locale];
   const info = localeInfo(locale as any);
   const list = new Intl.ListFormat(locale, { type: 'conjunction' });
+  const format = formatTag(locale);
   const expected: Record<string, string> = {
     region: new Intl.DisplayNames([locale], { type: 'region' }).of(samples.region)!,
     'currency-name': new Intl.DisplayNames([locale], { type: 'currency' }).of('EUR')!,
-    range: new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).formatRange(samples.rangeStart, samples.rangeEnd),
+    range: new Intl.DateTimeFormat(format, { dateStyle: 'medium', timeZone: 'UTC' }).formatRange(samples.rangeStart, samples.rangeEnd),
     distance: new Intl.NumberFormat(locale, { style: 'unit', unit: 'kilometer', unitDisplay: 'long' }).format(samples.km),
-    currencies: list.format(samples.currencies.map(currency => new Intl.NumberFormat(locale, { style: 'currency', currency }).format(samples.amount))),
+    currencies: list.format(samples.currencies.map(currency => new Intl.NumberFormat(format, { style: 'currency', currency }).format(samples.amount))),
     sorted: list.format([...samples.names].sort(new Intl.Collator(locale).compare)),
     greeting: messages.greeting.replace('{name}', samples.guest),
-    weekend: list.format(info.weekend!.map(day => weekdayName(locale as any, day))),
     ...Object.fromEntries(samples.statuses.map(status => [`status-${status}`, messages.invite_status[0].match[`status=${status}`] ?? messages.invite_status[0].match['status=*']])),
   };
   for (const [sample, text] of Object.entries(expected)) await expect(page.locator(`[data-sample="${sample}"]`), sample).toHaveText(text);
   if (info.otherCalendars.length === 0) await expect(page.locator('[data-sample="other-calendars"]')).toHaveText(messages.no_other_calendars);
   for (const calendar of info.otherCalendars) {
     await expect(page.locator(`[data-calendar="${calendar}"]`), calendar).toHaveText(
-      `${new Intl.DisplayNames([locale], { type: 'calendar' }).of(calendar)}: ${new Intl.DateTimeFormat(locale, { dateStyle: 'long', calendar, timeZone: 'UTC' }).format(samples.date)}`);
+      `${new Intl.DisplayNames([locale], { type: 'calendar' }).of(calendar)}: ${new Intl.DateTimeFormat(format, { ...samples.calendarDate, calendar }).format(samples.date)}`);
   }
   // Cloudflare's geolocation depends on where the request comes from; the page exposes what it used.
   const zone = await page.locator('[data-sample="cf-timezone"]').getAttribute('data-timezone');
   await expect(page.locator('[data-sample="cf-timezone"]')).toHaveText(zone || messages.location_unknown);
   await expect(page.locator('[data-sample="cf-local"]')).toHaveText(zone
-    ? new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'long', timeZone: zone }).format(samples.instant) : messages.location_unknown);
+    ? new Intl.DateTimeFormat(format, { dateStyle: 'full', timeStyle: 'long', timeZone: zone }).format(samples.instant) : messages.location_unknown);
   const country = await page.locator('[data-sample="country"]').getAttribute('data-country');
   await expect(page.locator('[data-sample="country"]')).toHaveText(country ? new Intl.DisplayNames([locale], { type: 'region' }).of(country)! : messages.location_unknown);
 } });

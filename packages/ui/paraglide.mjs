@@ -14,7 +14,9 @@ export const options = {
   emitGitIgnore: false,
   // A locale in the URL wins; otherwise a remembered choice, then Accept-Language or the
   // browser's languages, then the base locale. Paraglide's middleware and setLocale do the rest.
-  strategy: ['url', 'cookie', 'preferredLanguage', 'baseLocale'],
+  // custom-chinese (src/matching.ts) reaches zh-TW from Traditional Chinese tags such as
+  // zh-Hant-HK, which preferredLanguage's whole-tag-then-language match cannot.
+  strategy: ['url', 'cookie', 'custom-chinese', 'preferredLanguage', 'baseLocale'],
   // Every locale, including the base locale, lives under its own prefix (/en, /es, /ar).
   urlPatterns: [{
     pattern: ':protocol://:domain(.*)::port?/:path(.*)?',

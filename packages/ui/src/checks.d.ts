@@ -15,6 +15,10 @@ export declare function zoneChecks(options: { sitePaths: string[]; appPaths: str
 export declare function formatsChecks(options?: { extra?: (page: Page, locale: string) => Promise<void> }): void;
 export declare function lighthouseChecks(options: { pages: { path: string; device: 'mobile' | 'desktop' }[] }): void;
 export declare function performanceChecks(options: { pages: { path: string; device: 'mobile' | 'desktop' }[]; thresholds?: { score?: number; lcp?: number; cls?: number; tbt?: number }; runs?: number }): void;
+/** The locale with its own calendar and digits named explicitly (fa → fa-u-ca-persian-nu-arabext). */
+export declare const formatTag: (locale: string) => string;
+/** Every page at 320 px in every language, hyphenation, casing by language and Japanese phrase breaks (text.css). */
+export declare function textChecks(options: { paths: string[] }): void;
 export declare function observabilityChecks(options: { service: string; paths: string[] }): void;
 /** A strict nonce CSP (report-only): every page's scripts carry the response's nonce, no page violates it, the report endpoint answers. */
 export declare function cspChecks(options: { paths: string[]; reportPath?: string }): void;

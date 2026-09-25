@@ -3,6 +3,7 @@ import type { Locale } from '@joeblew999/remy-ui/locale';
 import type { Place } from '@joeblew999/remy-ui/cloudflare';
 import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
+import { formatLocale } from '@joeblew999/remy-ui/locale-info';
 import { Group, Row } from '@joeblew999/remy-ui/pages';
 import { Skeleton as Placeholder } from '@joeblew999/remy-ui/components/skeleton';
 import { DevicePlace } from '@joeblew999/remy-ui/showcase/device-place';
@@ -26,7 +27,7 @@ function PlaceGroup({ locale, place }: { locale: Locale; place: Place }) {
   const regionName = new Intl.DisplayNames([locale], { type: 'region' });
   const unknown = m.location_unknown({}, o);
   const localTime = (() => {
-    try { return place.timeZone ? new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'long', timeZone: place.timeZone }).format(samples.instant) : unknown; }
+    try { return place.timeZone ? new Intl.DateTimeFormat(formatLocale(locale), { dateStyle: 'full', timeStyle: 'long', timeZone: place.timeZone }).format(samples.instant) : unknown; }
     catch { return unknown; }
   })();
   return <Group title={m.location_heading({}, o)}>
