@@ -21,6 +21,10 @@ export const options = {
     localized: locales.map(locale => [locale, `:protocol://:domain(.*)::port?/${locale}/:path(.*)?`]),
   }],
   trailingSlash: 'never',
+  // The contract API (/api, .plans/openapi-contracts.md) is not a page: no locale in its URLs, no
+  // redirect, no cookie. A call answers in the language its Accept-Language asks for (the app's
+  // client sends the page's language), else the base locale.
+  routeStrategies: [{ match: '/api/:path(.*)?', strategy: ['preferredLanguage', 'baseLocale'] }],
 };
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) await compile(options);

@@ -8,7 +8,9 @@ import { sitePaths, appPaths, allPaths } from '@joeblew999/remy-ui/paths';
 import { searchParamsChecks } from '@joeblew999/remy-ui/showcase/search-params.checks';
 import { preloadChecks } from '@joeblew999/remy-ui/showcase/preload.checks';
 import { navigationBlockingChecks } from '@joeblew999/remy-ui/showcase/navigation-blocking.checks';
-import { serverFunctionChecks } from '@joeblew999/remy-ui/showcase/server-functions.checks';
+import { apiChecks, reservationApiChecks } from '@joeblew999/remy-ui/api/checks';
+import { info } from '@joeblew999/remy-auth-contract';
+import { router } from '../src/api/router';
 import { deferredPlaceChecks } from '@joeblew999/remy-ui/showcase/deferred-place.checks';
 import { statusCardChecks } from '@joeblew999/remy-ui/showcase/status-card.checks';
 import { problemChecks } from '@joeblew999/remy-ui/showcase/problem.checks';
@@ -22,7 +24,9 @@ zoneChecks({ sitePaths, appPaths });
 publicPageChecks({ paths: sitePaths });
 entryChecks({ paths: allPaths, mode: 'redirect' });
 demoChecks();
-serverFunctionChecks();
+// The demo reservation and the status card are contract endpoints (@joeblew999/remy-auth-contract).
+apiChecks({ router, title: info.title });
+reservationApiChecks();
 codeSplittingChecks({ paths: sitePaths });
 codeSplittingChecks({ paths: appPaths, home: '/app' });
 // The app mounts TanStack Devtools (src/routes/__root.tsx), whose shell must never ship either.
@@ -37,7 +41,7 @@ preloadChecks();
 navigationBlockingChecks();
 deferredPlaceChecks();
 devicePlaceChecks({ path: '/app/location', network: true });
-statusCardChecks({ service: 'remy-auth', path: '/app' });
+statusCardChecks({ service: 'remy-auth', path: '/app', endpoint: '/api/status' });
 problemChecks({ timeZones: { known: 'Asia/Tokyo', alias: 'asia/tokyo', unknown: 'Mars/Olympus_Mons' }, failingNavigation: { from: '', link: 'formats_link', fail: '**/_serverFn/**', heading: 'formats_title' }, serverRoutes: [{ path: '/robots.txt', type: 'text/plain; charset=utf-8', cache: 'public, max-age=3600', origin: true }, { path: '/sitemap.xml', type: 'application/xml; charset=utf-8', cache: 'public, max-age=3600', origin: true }] });
 formatsChecks({ extra: async (page, locale) => {
   // Rows only this server-rendered app has: more Intl examples and Cloudflare's geolocation.

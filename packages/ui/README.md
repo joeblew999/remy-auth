@@ -61,9 +61,13 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `samples` | The fixed values the pages render |
 | `checks`, `showcase/*.checks` | Shared Playwright checks: public pages, entry URLs, demo, formats, zones, observability, Content Security Policy, Lighthouse and Core Web Vitals, and one per showcase piece |
 | `playwright` | `playwrightConfig()`, the shared Playwright configuration |
+| `api/server` | `apiHandlers` (oRPC's OpenAPIHandler as a Start server route's handlers, with the reference page at `/api/doc` and the generated document at `/api/openapi.json`), `generateSpec`, `specOptions` |
+| `api/client` | `contractClient` (a typed client for any contract: OpenAPILink with ResponseValidationPlugin, the page's language as Accept-Language), `isomorphicClient` (an app's own client: the router on the server, `contractClient` in the browser, through `createIsomorphicFn`) |
+| `api/coverage` | `coverageProblems` (every procedure has a route under `/api/`, a policy, an output and documented errors), `procedures`, `ApiMeta` |
+| `api/checks` | `apiChecks` (coverage, the served document and reference page), `reservationApiChecks` (the demo reservation's typed 400 in every locale, and a response that breaks the contract refused in the browser) |
 
-`@tanstack/react-router`, `@playwright/test` and `lighthouse` are optional peers: the pages need
-the router, the checks need the other two.
+`@tanstack/react-router`, `@tanstack/react-start`, `@playwright/test` and `lighthouse` are optional
+peers: the pages need the router, `api/client` needs Start, the checks need the other two.
 
 ## Language
 

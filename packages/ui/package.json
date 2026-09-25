@@ -37,6 +37,10 @@
     "./pages": "./src/pages.tsx",
     "./app-pages": "./src/app-pages.tsx",
     "./reservation": "./src/reservation.ts",
+    "./api/server": "./src/api/server.ts",
+    "./api/client": "./src/api/client.ts",
+    "./api/coverage": "./src/api/coverage.js",
+    "./api/checks": "./src/api/checks.js",
     "./paths": "./src/paths.js",
     "./worker": "./src/worker.ts",
     "./showcase/*.checks": "./src/showcase/*.checks.js",
@@ -47,13 +51,20 @@
     "@tanstack/react-router": "^1.170.0",
     "lighthouse": "^13.5.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "@tanstack/react-start": "^1.168.0"
   },
   "dependencies": {
     "@base-ui/react": "1.8.0",
     "@fontsource-variable/geist": "5.3.0",
     "@fontsource-variable/noto-sans-arabic": "5.3.0",
     "@inlang/paraglide-js": "2.25.4",
+    "@orpc/client": "1.15.4",
+    "@orpc/contract": "1.15.4",
+    "@orpc/openapi": "1.15.4",
+    "@orpc/openapi-client": "1.15.4",
+    "@orpc/server": "1.15.4",
+    "@orpc/zod": "1.15.4",
     "@tanstack/react-form": "1.33.5",
     "class-variance-authority": "0.7.1",
     "cn": "0.4.0",
@@ -64,6 +75,9 @@
   },
   "peerDependenciesMeta": {
     "@tanstack/react-router": {
+      "optional": true
+    },
+    "@tanstack/react-start": {
       "optional": true
     },
     "@playwright/test": {

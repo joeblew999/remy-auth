@@ -3,7 +3,8 @@ import type { Locale } from './paraglide/runtime.js';
 import { m } from './paraglide/messages.js';
 
 // The demo reservation's rules, in one Zod schema that the browser (DemoPage's TanStack Form
-// validator) and the server (the app's server function) both check, with errors in the page's language.
+// validator) and the server (the app's POST /api/reservations, through its contract) both check,
+// with errors in the page's language. The wire shapes below are what a contract declares.
 
 // Zod's documented switch for pages whose Content Security Policy forbids eval: without it, Zod
 // probes for eval with `Function('')` on the first object parse, which the nonce CSP reports as a
@@ -23,15 +24,21 @@ export function reservationSchema(locale: Locale) {
   });
 }
 
-/** What a server function receives: a name and a number of seats, still unchecked against the rules. Anything else is a bad request. */
+/** What the server receives: a name and a number of seats, still unchecked against the rules. Anything else is a bad request. */
 export const reservationInput = z.object({ name: z.string(), guests: z.number() });
+
+/** The first broken rule per field, in the page's language: a rejected reservation's field errors. */
+export const reservationFieldErrors = z.object({ name: z.string().optional(), guests: z.string().optional() });
+
+/** A reservation the server accepted: its confirmation, in the page's language. */
+export const reservationConfirmation = z.object({ message: z.string() });
 
 /** A reservation as the form edits it: the seats as typed (text) or as a number. */
 export type ReservationDraft = z.input<ReturnType<typeof reservationSchema>>;
 /** A reservation the rules accepted. */
 export type Reservation = z.output<ReturnType<typeof reservationSchema>>;
 /** The answer to a reservation: field errors to show like the form's own, or the confirmation to show instead of the default one. */
-export type ReservationResult = { errors?: { name?: string; guests?: string }; message?: string };
+export type ReservationResult = { errors?: z.infer<typeof reservationFieldErrors>; message?: string };
 
 /** The first message for each field that broke the rules, as a ReservationResult's `errors`. */
 export function reservationErrors(error: z.ZodError<ReservationDraft>): NonNullable<ReservationResult['errors']> {

@@ -24,11 +24,27 @@ package follows [Semantic Versioning](https://semver.org/).
   every script, no violations while hydrating, report endpoint); `publicPageChecks` and
   `zoneChecks` cover the structured data; `observabilityChecks` covers the new headers.
 
+- `./api/server`, `./api/client`, `./api/coverage`, `./api/checks`: contract-first APIs on oRPC
+  1.15.4 (`.plans/openapi-contracts.md`). `apiHandlers` mounts an oRPC router in one TanStack Start
+  server route with the generated OpenAPI 3.1 document (`/api/openapi.json`) and its reference
+  page (`/api/doc`); `contractClient` calls any contract with every response validated;
+  `isomorphicClient` gives an app one client for its own contract on both sides; `coverageProblems`
+  and `apiChecks` fail on a procedure without a route, a policy or documented errors;
+  `reservationApiChecks` covers the demo reservation over HTTP. New dependencies: `@orpc/client`,
+  `@orpc/contract`, `@orpc/openapi`, `@orpc/openapi-client`, `@orpc/server`, `@orpc/zod`, all
+  1.15.4; `@tanstack/react-start` is a new optional peer.
+- `./reservation`: `reservationFieldErrors` and `reservationConfirmation`, the wire shapes a
+  contract declares for a rejected and an accepted reservation.
+- Paraglide's `routeStrategies` keep `/api/*` out of URL localisation: no redirect, and the
+  language comes from Accept-Language, else the base locale.
+
 ### Changed
 - One zone badge style (secondary) on site and app pages; the app pages no longer repeat it as a
   label; site pages have no back links (they navigate through the header).
 - `./reservation` sets Zod's `jitless` option, so Zod never probes for eval under a strict CSP.
 - `zoneChecks` accepts a `nonce` attribute on the app pages' robots meta.
+- `showcase/status-card.checks`: `statusCardChecks` takes `endpoint`, the path the card asks for
+  the status; without it, any server function as before.
 
 ## [0.10.3] - 2026-09-25
 

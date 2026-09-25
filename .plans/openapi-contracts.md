@@ -22,7 +22,7 @@ OpenAPI, in two halves:
 | --- | --- | --- |
 | Producing | oRPC 1.15.4, contract-first: `oc.errors().route().input().output()` in a contract, `implement(contract)` on the server | Only candidate proved to validate both directions by default; generates OpenAPI 3.1 from the contract alone with typed errors and per-operation security; official TanStack Start adapter and TanStack Query utilities. Scored 34 of 36; runner-up Hono with @hono/zod-openapi at 26 |
 | oRPC version | **1.15.4** (decided 2026-09-25 from the spike); move server and clients together when 2.0.0 final ships | Spike on both (TanStack Start 1.168 on Workers): Start, Router and Query integration are the same; 2.0 adds Query conveniences and OpenAPI 3.2 by default, but costs +3.3 KiB gzip in the client and +16.7 KiB in the Worker, moves HTTP status out of contract errors into a separate `errorStatusMap`, and makes a client validation failure look like a server 500. Moving the spike's contract to 2.0 took 7 lines. Not yet measured: Worker CPU for parsing, `OpenAPIReferencePlugin`, `zod/mini` |
-| Mounting | A Start server route `src/routes/api/$.ts` with `OpenAPIHandler`; `RPCHandler` only if the app's own pages need it | Start owns routing and the Worker entry; the adapter documents this route |
+| Mounting | A Start server route `src/routes/api.$.ts` with `OpenAPIHandler`; `RPCHandler` only if the app's own pages need it | Start owns routing and the Worker entry; the adapter documents this route |
 | Server functions | Only for page glue that no other client calls (locale, device, place) | They produce no OpenAPI, validate input only and live under `/_serverFn/*`, not stable paths |
 | Server-side calls | `createRouterClient` inside loaders, through `createIsomorphicFn`; the browser uses the link | No HTTP hop on the server; oRPC's documented pattern |
 | TanStack Query | `createTanstackQueryUtils(client)` for `queryOptions` and `mutationOptions`; loaders call `ensureQueryData`; SSR hydration with oRPC's serializer in `setupRouterSsrQueryIntegration` | Query keys come from the contract |
@@ -31,7 +31,7 @@ OpenAPI, in two halves:
 | Consuming third-party APIs | Not built until an app needs one. Then Kubb 5, proved first; fallback @hey-api/openapi-ts 0.99.0 | Kubb and Hey API tie at 19 of 21; Kubb wins on semver releases, 6 open issues against 639, and bringing its own TypeScript 6. Hey API is proved, but crashes on our TypeScript 7 unless run from a separate folder with TypeScript 6.0.3, and has published no release since June |
 | Reference page | oRPC's `OpenAPIReferencePlugin` at `/api/doc`; document at `/api/openapi.json` | As remy-sport, no extra package |
 | No committed spec | The document is generated in-process from the contract | One home for the facts: the contract. remy-sport works this way too |
-| Shared code | `@joeblew999/remy-ui/api`: server-route handler, isomorphic client factory, spec options, the coverage check | Shared mechanism, app-owned contracts, as in refined C |
+| Shared code | `@joeblew999/remy-ui/api/*` (`server`, `client`, `coverage`, `checks`): server-route handler, isomorphic client factory, spec options, the coverage check | Shared mechanism, app-owned contracts, as in refined C |
 
 ## Evidence
 
@@ -89,6 +89,30 @@ Query, Zod 4, fetch on Workers, maturity, size)
    the typed 400 in every locale.
 6. **Ship** with both levels, releases and both deploys, then a hands-on pass as in
    [how we work](../docs/how-we-work.md#multi-agent-work).
+
+## Progress and decisions, 2026-09-25 (branch contract-api)
+
+Done in remy-auth, under the owner's delegation: item 2 (package `api/*` and `api:spec`), item 3
+without the release (the contract is `packages/contract/`, private; its
+[README](../packages/contract/README.md) says how to publish it), and item 5's checks for remy-auth
+(`apiChecks`, `reservationApiChecks`, the status card's check on `/api/status`). Items 4 and 6 are
+open. Decisions, each with its reason:
+
+| Decision | Choice | Why |
+| --- | --- | --- |
+| Paths | Contract routes carry the full path (`/api/status`); the handler has no prefix | The document shows the real URLs, and a consumer's link needs only the origin |
+| Where the reservation shapes live | `reservationInput`, `reservationFieldErrors`, `reservationConfirmation` stay in `packages/ui/src/reservation.ts` beside the rules; the contract imports them and takes `@joeblew999/remy-ui` as a peer | `DemoPage` is shared by both apps; one home for the reservation, and the UI package never depends on an app's contract |
+| Invalid input | Broken rules are the typed `INVALID_RESERVATION` (400, first broken rule per field, in the asked language); a body of the wrong shape is oRPC's own `BAD_REQUEST` (400), which the generated document lists as the undefined-error alternative | The rules' messages depend on the language, so they cannot be the contract's input schema; the input schema stays language-neutral |
+| Language of an API call | Paraglide's `routeStrategies`: `/api/*` uses `preferredLanguage`, then `baseLocale`; the app's client sends the page's language as Accept-Language | Paraglide owns language; no redirect of `/api` documents and no cookie deciding for another tab; plain HTTP clients get standard content negotiation |
+| Policy | `meta.policy`, `'public'` for both endpoints until refined C's guard exists | The coverage rule needs a policy to check now; the type widens to the guard's actions later |
+| Documented errors | Required for every procedure that takes input; `GET /api/status` has none of its own | A procedure without input cannot reject input; its failures are oRPC's undefined 500 |
+| Coverage walks | The implemented router (`src/api/router.ts`), which has no Workers imports, so Playwright loads it in Node | The router is what the route mounts; the release reaches it through the call's context |
+| Server-side calls | `isomorphicClient` in the package takes the app's `createServerOnlyFn(() => createRouterClient(router, ...))` | The Start compiler strips the server-only body in the browser build, so the router never ships (checked: only the contract is in `dist/client`) |
+| SSR hydration serializer | Not added | Contract outputs are plain JSON, which TanStack's own dehydration carries; add oRPC's serializer when an output holds a Date, BigInt or the like |
+| Per-call log line | None beyond the Worker's `http_request` line | That line already has the route (`/api/reservations`), status and request ID; `server_fn` lines existed because `/_serverFn/<id>` routes are opaque. Calls from server loaders are not logged separately |
+| Reference page script | Scalar pinned to 1.72.0 (`scalarScript` in `api/server`) | oRPC's default URL follows Scalar's latest release |
+| Shared tasks | A file task `api:spec` (`tasks/api/spec`, `--urls` for the list) instead of `tasks/api.toml` | Same form as `cf:urls`; it asks a running Worker, because the document is generated, never committed |
+| Server function checks | `serverFunctionChecks` stays in the package but remy-auth no longer calls it; `reservationApiChecks` asserts the same things over HTTP (validation again, page language despite the cookie, request IDs, 400 for a malformed call) | The reservation is no longer a server function; the check is kept, not deleted, for any app whose `onReserve` still is one |
 
 ## Acceptance
 

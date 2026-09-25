@@ -6,10 +6,13 @@ import { locales } from '../paraglide/runtime.js';
 import { m } from '../paraglide/messages.js';
 import { localizedPath, collectErrors, checkedLocales } from '../checks.js';
 
-const serverFunction = response => new URL(response.url()).pathname.startsWith('/_serverFn/');
-
-/** `path` is the de-localized page that mounts the card; `service` is the Worker's name in /healthz. */
-export function statusCardChecks({ service, path = '', refreshMs = 10_000 }) {
+/**
+ * `path` is the de-localized page that mounts the card; `service` is the Worker's name in /healthz;
+ * `endpoint` is the path the browser asks for the status (a contract endpoint such as /api/status),
+ * or, by default, any server function.
+ */
+export function statusCardChecks({ service, path = '', refreshMs = 10_000, endpoint }) {
+  const serverFunction = response => endpoint ? new URL(response.url()).pathname === endpoint : new URL(response.url()).pathname.startsWith('/_serverFn/');
   test(`the live status card is in the server HTML of every language, with /healthz's service and release`, async ({ request }) => {
     const health = await (await request.get('/healthz')).json();
     for (const locale of checkedLocales) {
@@ -36,7 +39,7 @@ export function statusCardChecks({ service, path = '', refreshMs = 10_000 }) {
     const rendered = Number(await card.getAttribute('data-updated'));
     expect(rendered).toBeGreaterThan(0);
 
-    // Nothing touched: the interval alone asks the server function again.
+    // Nothing touched: the interval alone asks the server again.
     const polled = page.waitForResponse(serverFunction, { timeout: 5_000 });
     await page.clock.fastForward(refreshMs);
     expect((await polled).status()).toBe(200);

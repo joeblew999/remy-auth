@@ -14,6 +14,7 @@ import { Route as CspReportRouteImport } from './routes/csp-report'
 import { Route as FormatsRouteImport } from './routes/formats'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ApiSplatRouteImport } from './routes/api.$'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppDemoRouteImport } from './routes/app.demo'
 import { Route as AppFormatsRouteImport } from './routes/app.formats'
@@ -43,6 +44,11 @@ const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSplatRoute = ApiSplatRouteImport.update({
+  id: '/api/$',
+  path: '/api/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/formats': typeof FormatsRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/$': typeof ApiSplatRoute
   '/app/demo': typeof AppDemoRoute
   '/app/formats': typeof AppFormatsRoute
   '/app/location': typeof AppLocationRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/formats': typeof FormatsRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/$': typeof ApiSplatRoute
   '/app/demo': typeof AppDemoRoute
   '/app/formats': typeof AppFormatsRoute
   '/app/location': typeof AppLocationRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/formats': typeof FormatsRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/$': typeof ApiSplatRoute
   '/app/demo': typeof AppDemoRoute
   '/app/formats': typeof AppFormatsRoute
   '/app/location': typeof AppLocationRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/formats'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/api/$'
     | '/app/demo'
     | '/app/formats'
     | '/app/location'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/formats'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/api/$'
     | '/app/demo'
     | '/app/formats'
     | '/app/location'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/formats'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/api/$'
     | '/app/demo'
     | '/app/formats'
     | '/app/location'
@@ -153,6 +165,7 @@ export interface RootRouteChildren {
   FormatsRoute: typeof FormatsRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiSplatRoute: typeof ApiSplatRoute
   AppDemoRoute: typeof AppDemoRoute
   AppFormatsRoute: typeof AppFormatsRoute
   AppLocationRoute: typeof AppLocationRoute
@@ -195,6 +208,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/$': {
+      id: '/api/$'
+      path: '/api/$'
+      fullPath: '/api/$'
+      preLoaderRoute: typeof ApiSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/': {
@@ -241,6 +261,7 @@ const rootRouteChildren: RootRouteChildren = {
   FormatsRoute: FormatsRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiSplatRoute: ApiSplatRoute,
   AppDemoRoute: AppDemoRoute,
   AppFormatsRoute: AppFormatsRoute,
   AppLocationRoute: AppLocationRoute,
