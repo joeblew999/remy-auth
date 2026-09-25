@@ -20,6 +20,8 @@ a full run (tier 4) catches what broke. Each break is logged with the boundary i
 | 09-25 | Five merges into `CHANGELOG.md` and `now.md` conflicted | shared plan and changelog files | held (text conflicts only, no code) | resolved at merge |
 | 09-25 | Fonts, formats, parts, caching, sidebar, contracts merged in parallel | package vs app, parts, route files | held: typecheck clean, every page 200 live | — |
 
+Full run (tier 4) on 6fca2c1, 2026-09-25: 308 passed, 1 skipped, every language, after the fixes above.
+
 What holds so far: code boundaries (package vs app, parts, routes) survive parallel work; merges
 conflict only in shared text files. What leaks: assumptions baked into *shared* tasks and checks about one
 app's shape, and checks that don't move with the code they check.
