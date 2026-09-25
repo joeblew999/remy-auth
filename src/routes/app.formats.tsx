@@ -6,8 +6,8 @@ import { AppFormatsPage } from '@joeblew999/remy-ui/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { formatsExtras } from '../formats-extras';
 import { formatsRouteOptions } from '../formats-route';
-import { usePreferred } from '../preferred';
-import { problemPages } from '../problem';
+import { usePreferred } from '@joeblew999/remy-ui/preferred';
+import { problemPages } from '@joeblew999/remy-ui/problem';
 
 // The formats page inside the app: the same content and rows as the site page, in the app frame.
 export const Route = createFileRoute('/app/formats')({

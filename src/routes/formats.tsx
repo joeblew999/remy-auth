@@ -6,8 +6,8 @@ import { FormatsPage } from '@joeblew999/remy-ui/pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { formatsExtras } from '../formats-extras';
 import { formatsRouteOptions } from '../formats-route';
-import { usePreferred } from '../preferred';
-import { problemPages } from '../problem';
+import { usePreferred } from '@joeblew999/remy-ui/preferred';
+import { problemPages } from '@joeblew999/remy-ui/problem';
 
 // The formats site page: complete without JavaScript, for Google.
 export const Route = createFileRoute('/formats')({

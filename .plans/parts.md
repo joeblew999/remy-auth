@@ -71,6 +71,42 @@ location card links to `/time-zones/$`) fail at runtime when the target part is 
 declare their dependencies; `parts.json` is untyped (a typed `parts.ts` with `satisfies` is
 untested); middleware contributions were not exercised.
 
+## Conversion, first pass (2026-09-25)
+
+Done under the owner's delegation ("pump and deploy fast, no tests": only `project:check` ran; no
+test tier). **Mechanism:** `src/parts.json` (one name per line) is read by `readParts` (`./parts`:
+unknown names, duplicates and missing `requires` fail the build and the checks); `remyParts()`
+(`./parts/vite`) mounts listed parts' route directories with `rootRoute('__root.tsx', [physical('', '.'), physical('', <part>/routes)...])`
+and generates `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` (`./parts/checks`) runs listed
+parts' checks. The generated route tree keeps every route ID and path. **Converted:** `time-zones`
+(route moved to `packages/ui/src/parts/time-zones/routes/`; its checks split out of `problemChecks`'s
+call). To let a part's route render pages, `problem-pages` moved into the package (`./problem`) and
+`usePreferred` too (`./preferred`); problem pages stay always-on (every route uses them), so they
+are a package module, not a removable part.
+
+Decided: remy-auth's `tsconfig` excludes `packages/ui/src/parts/*/routes`; a listed part's route is
+still type-checked because the route tree imports it, and an unlisted one is not (the spike's
+7 errors are gone). With `time-zones` removed the build passes and no zone route chunk ships; the
+typecheck still fails on `src/showcase/deferred-place.tsx`'s typed `Link` to `/time-zones/$` (at
+runtime it is already guarded by `hasPart`). It goes away when deferred-place becomes a part that
+`requires` time-zones. Also: `project:check` type-checks the committed `routeTree.gen.ts` before the
+build regenerates it, so after changing the list run a build (or dev) once first.
+
+Not converted yet, each needing a design choice:
+
+- **status-card**: it reads the app's own contract (`orpc.status` from `@joeblew999/remy-auth-contract`),
+  which the package must not import. Options: the part takes its query from the app (a typed
+  `parts.ts`, untested), or it reads the package-owned `/healthz` (a self-fetch on the server).
+- **devtools**: the `devtools()` Vite plugin skips files under `node_modules`, so in an app that
+  installs the package the devtools would not be stripped from production. Stays in `__root.tsx`.
+- **seo-routes**: the sitemap lists this app's docs; needs a paths contribution per part first.
+- **observability**: already the package's `localizedWorker`; middleware contributions through
+  `createStart` are still unexercised.
+- **leave-guard, search-params, deferred-place**: live inside the shared pages' slots; they need the
+  page-slot contribution (`children`/`extras` from `virtual:remy-parts`).
+- **remy-auth-app**: adopts the parts list when it moves to the next package release (not edited here);
+  a physical route mount from `node_modules` is untried there.
+
 ## Work items
 
 1. **Spike (about 2 hours):** both candidates with two parts, `status-card` (UI, query, server

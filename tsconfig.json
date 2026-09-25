@@ -6,6 +6,9 @@
     "*.ts",
     "worker-configuration.d.ts"
   ],
+  "exclude": [
+    "packages/ui/src/parts/*/routes"
+  ],
   "compilerOptions": {
     "lib": [
       "DOM",

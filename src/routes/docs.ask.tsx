@@ -13,8 +13,8 @@ import { getDocsNav } from '../docs/page';
 import { searchDocs, searchQuery } from '../docs/search';
 import { SearchResults } from '../docs/search-results';
 import { askPath } from '../paths';
-import { usePreferred } from '../preferred';
-import { problemPages } from '../problem';
+import { usePreferred } from '@joeblew999/remy-ui/preferred';
+import { problemPages } from '@joeblew999/remy-ui/problem';
 
 // Answers (.plans/docs-ai-sync.md, "Ask from the site"): a site page beside the docs search, rendered
 // on the server from the question in its address, so it works without JavaScript and the visitor stays

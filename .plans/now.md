@@ -46,7 +46,7 @@ formats speed), batch 3 (TanStack Form, Zod adapter, Devtools), a docs audit and
 | 6 | Structured data on the site pages | batch 2, structured data | check in the server HTML |
 | 7 | Security headers rollout, report-only first | batch 2 report and **owner decision** | enforce after a clean report period |
 | 8 | Contract-first APIs: build items 2 to 6 on oRPC 1.15.4 (chosen from the spike) | ready | status and reservation endpoints |
-| 9 | Parts: convert the existing parts with candidate 2 (virtual module, chosen from the spike) | ready | one line per part in each app |
+| 9 | Parts: convert the existing parts with candidate 2 (virtual module, chosen from the spike). First pass 2026-09-25: the mechanism and `time-zones`; the rest need the designs in [the plan](parts.md#conversion-first-pass-2026-09-25) | ready | one line per part in each app |
 | 10 | ~~Ten more languages~~ done 2026-09-25: 0.10.5, both apps live | | native-speaker review (owner) |
 | 11 | ~~Auth service decisions 1 to 6~~ done 2026-09-25: runtime proven (Better Auth 1.7.6 on D1), decisions drafted, sharing examples written, all confirmed by the owner | | |
 | 12 | Auth service milestone 1: Better Auth on D1, issuer, sample app | ready | login screens |
