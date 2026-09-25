@@ -119,7 +119,9 @@ if (command === 'events') {
   const results = [
     ['FAIL', !instance.paused && instance.enable, `AI Search ${namespace}/${instance.id} is enabled and not paused`],
     ['FAIL', (stats.error ?? stats.errors ?? 0) === 0, `the index has no errors (${JSON.stringify(stats)})`],
-    ['FAIL', !gateway.rate_limiting_limit, `the gateway has no rate limit (Cloudflare: it also throttles AI Search's own calls, indexing included); limit ${gateway.rate_limiting_limit ?? 'none'} per ${gateway.rate_limiting_interval ?? '-'} s`],
+    // Kept on purpose (owner, 2026-09-25: "Safer for costs"): the only cap on total calls, since spend
+    // limits do not stop postpaid Workers AI. Cloudflare advises against it (it also slows indexing).
+    ['WARN', !gateway.rate_limiting_limit, `the gateway has no rate limit; kept at ${gateway.rate_limiting_limit ?? 'none'} per ${gateway.rate_limiting_interval ?? '-'} s as the only cap on total AI calls (it also slows AI Search's indexing)`],
     ['FAIL', !gateway.cache_ttl, `the gateway does not cache (Cloudflare: use AI Search's own cache); cache_ttl ${gateway.cache_ttl}`],
     ['FAIL', gateway.collect_logs === true, 'the gateway keeps logs (cost, tokens and time per call)'],
     ['FAIL', rules.length > 0, `a spend limit rule is set (${rules.map(rule => `${rule.id}: $${rule.limit} per ${rule.window / 86400} days`).join(', ') || 'none'})`],

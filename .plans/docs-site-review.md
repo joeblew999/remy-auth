@@ -58,7 +58,8 @@ translation: "The docs translation. Is this also paraglide based or what?"
 15. Code blocks are left out of the indexed sections (the manifest uses Fumadocs' structured text,
     which has no code), so a section that is mostly commands reads as prose about nothing: the
     answer to "which task streams Worker logs" said the docs do not cover it. Include code blocks.
-16. The gateway's 60-a-minute rate limit is still set: removing it through the API was refused by
+16. Decided 2026-09-25, owner: keep the gateway's 60-a-minute rate limit ("Safer for costs"): it is the
+    only cap on total AI calls while billing is postpaid. Was: The gateway's 60-a-minute rate limit is still set: removing it through the API was refused by
     the agent's permission check (it changes a shared resource). Owner: dashboard, AI > AI Gateway >
     remy-docs > Settings > Rate limiting off, or `mise run cf:ai-gateway -- rate-limit off` once
     `CLOUDFLARE_AI_EDIT_TOKEN` is set.

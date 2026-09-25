@@ -166,7 +166,7 @@ place to observe the AI part:
 1. **The $10 spend limit very likely does not stop anything.** Spend limits apply to Unified
    Billing (prepaid credits) and bring-your-own-key calls; the gateway's Workers AI billing is
    `postpaid`. A real cap means Unified Billing with prepaid credits (**owner: money**).
-2. **The gateway has a rate limit (60 a minute), which Cloudflare says not to set** on a gateway
+2. **Kept (owner, 2026-09-25: "Safer for costs"): the gateway's rate limit (60 a minute)**, although Cloudflare says not to set it on a gateway
    connected to AI Search: it also throttles AI Search's own calls, including indexing. A likely
    cause of the first `docs:index` run failing part way. Remove it; our own limit (10 a minute per
    visitor, in the Worker) stays. Gateway caching is off, as Cloudflare advises; AI Search's own
