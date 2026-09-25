@@ -4,6 +4,22 @@ All notable changes to the shared UI package `@joeblew999/remy-ui` are documente
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 package follows [Semantic Versioning](https://semver.org/).
 
+## [0.10.1] - 2026-09-25
+
+### Added
+- Formats as a site page and an app page: `FormatsContent` (the page's content once),
+  `FormatsPage` (site frame) and `AppFormatsPage` (app frame); `/app/formats` in `appPaths` and the
+  app sidebar; `FormatsControls` takes the page it belongs to (`to`).
+- `LanguageMenu`: the app pages' language picker, shadcn's DropdownMenu with a radio group; choosing
+  calls Paraglide's `setLocale`. Site pages keep the plain links.
+- `zoneChecks`: on a phone in landscape, the way back to the site stays in view.
+
+### Changed
+- The app sidebar's "Back to the site" moves into `SidebarFooter`, so it stays in view on short
+  screens.
+- `performanceChecks` judges the median of five runs (Lighthouse's `computeMedianRun`).
+- `demoChecks` switches language through the app's menu.
+
 ## [0.10.0] - 2026-09-25
 
 All in on shadcn, and site pages kept apart from app pages. Breaking for consumers.

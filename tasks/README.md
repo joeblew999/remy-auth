@@ -46,7 +46,10 @@ Tests run in tiers, chosen by cost and by what a change can break, never by skip
 | Level 1 | `project:test`, inside `project:verify` | every check of ours in every language | before every push, release and deploy |
 | Level 2 | `project:test:google` | Google's Lighthouse audits and Core Web Vitals | before a release locally, and in CI on every push and tag |
 
-A check that has become stable still runs at level 1: regressions come from new code, not from
+Where checks run: the shared package's own behaviour is proven once, in remy-auth, before each
+release. An app built on the package runs a contract set (its pages render, site and app pages stay
+apart, its own features work) plus Google's level on its own site pages, not the whole package
+suite again. A check that has become stable still runs at level 1: regressions come from new code, not from
 the check. Keep level 1 fast by making checks cheap instead (Playwright's clock rather than real
 waits, one browser page per check, parallel workers). Checks loop over `checkedLocales` from
 `@joeblew999/remy-ui/checks`, which honours `CHECK_LOCALES`. `project:test:remote` runs both against a deployment. `cf:preview` uploads the current branch as a
