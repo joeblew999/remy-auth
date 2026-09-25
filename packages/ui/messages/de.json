@@ -249,6 +249,7 @@
   "live_service_label": "Dienst",
   "live_release_label": "Version",
   "live_status_note": "Auf dem Server dargestellt und dann von Ihrem Browser aktualisiert, solange diese Seite geöffnet ist.",
+  "live_status_note_browser": "Von Ihrem Browser bei einem anderen Dienst abgefragt und aktualisiert, solange diese Seite geöffnet ist.",
   "live_refresh": "Jetzt aktualisieren",
   "continue_in": "Auf {language} fortfahren",
   "language_hint": "Diese Seite gibt es auch auf {language}.",

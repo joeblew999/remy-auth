@@ -95,8 +95,8 @@ Query, Zod 4, fetch on Workers, maturity, size)
 Done in remy-auth, under the owner's delegation: item 2 (package `api/*` and `api:spec`), item 3
 without the release (the contract is `packages/contract/`, private; its
 [README](../packages/contract/README.md) says how to publish it), and item 5's checks for remy-auth
-(`apiChecks`, `reservationApiChecks`, the status card's check on `/api/status`). Items 4 and 6 are
-open. Decisions, each with its reason:
+(`apiChecks`, `reservationApiChecks`, the status card's check on `/api/status`). Items 4 and 6: see
+the next section. Decisions, each with its reason:
 
 | Decision | Choice | Why |
 | --- | --- | --- |
@@ -113,6 +113,29 @@ open. Decisions, each with its reason:
 | Reference page script | Scalar pinned to 1.72.0 (`scalarScript` in `api/server`) | oRPC's default URL follows Scalar's latest release |
 | Shared tasks | A file task `api:spec` (`tasks/api/spec`, `--urls` for the list) instead of `tasks/api.toml` | Same form as `cf:urls`; it asks a running Worker, because the document is generated, never committed |
 | Server function checks | `serverFunctionChecks` stays in the package but remy-auth no longer calls it; `reservationApiChecks` asserts the same things over HTTP (validation again, page language despite the cookie, request IDs, 400 for a malformed call) | The reservation is no longer a server function; the check is kept, not deleted, for any app whose `onReserve` still is one |
+
+## Progress and decisions, 2026-09-25 (items 4 and 6)
+
+Item 4 is built: remy-auth on this branch, remy-auth-app on its branch `contract-status-card`
+(needs the release below before its `npm ci` works). Item 6 is prepared, not run: the contract is
+no longer private and `scripts/release.sh` and the tag's CI job publish it; no release, deploy or
+hands-on pass was made (owner's rule for this run). Checks were written, not run (tier 0 only).
+
+| Decision | Choice | Why |
+| --- | --- | --- |
+| Where the registered origins live | `src/api/origins.ts` in remy-auth, one exact origin per app (remy-auth-app's `DEPLOY_ORIGIN`); `apiHandlers(router, { origins })` passes them to oRPC's `CORSPlugin`; a wildcard throws | One home the route and the check both read; moves to refined C's registered clients when they exist |
+| Which origins | Deployed origins only; not the consumer's local, test or throwaway preview origins | "Limited to its registered origin"; local runs must not depend on production remy-auth |
+| When the consumer asks | Only the build for `DEPLOY_ORIGIN` gets `REMY_AUTH_ORIGIN` (the consumer's `vite.config.ts` defines it when `PUBLIC_ORIGIN` equals `DEPLOY_ORIGIN`, as `cf:deploy` builds); other builds render the card without asking | A refused cross-origin call is a console error, which would fail every check that visits `/app` locally |
+| The card | Moved to the package (`showcase/status-card`, with `invalidateEverything` as `./invalidate`); the app passes the query, so the package still never depends on an app's contract | Both apps show the same card; its checks were already in the package |
+| No status in the consumer's HTML | No loader; the browser asks after hydration (`serverRendered={false}`, its own note) | A prerendered page would bake a build-time status into a static file |
+| An answer that breaks the contract | The card shows an error (`data-status="error"`), never the data; checked in both apps by mocking the answer | Item 5 for the status card; before, only the reservation had this check |
+| Consumer checks | `statusCardChecks({ origin, registered })`: locally, no status in the HTML and nothing asked; against the deployed app (`project:test:remote`), the real cross-origin answer, its `Access-Control-Allow-Origin` and the broken-answer check | The cross-origin path can only be real on the registered origin |
+| Contract package form | TypeScript source, like `@joeblew999/remy-ui`; no build step; peer `@joeblew999/remy-ui ^0.10.5` | Consumers' Vite and `tsc` take it as they take the UI package; checks never import it |
+| Contract release | Same tag as the UI package, published only when its version is new (`npm view` first) | An unchanged contract must not fail the release |
+
+Order for item 6: release remy-ui and the contract (`mise run ui:release`), deploy remy-auth (its
+CORS must be live first), then in remy-auth-app merge `contract-status-card`, `npm install`,
+`mise run project:upgrade-ui <version>`, deploy, and run `project:test:remote` there.
 
 ## Acceptance
 

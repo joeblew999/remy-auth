@@ -253,6 +253,7 @@
   "live_service_label": "Usługa",
   "live_release_label": "Wydanie",
   "live_status_note": "Generowane na serwerze, a następnie odświeżane przez przeglądarkę, dopóki ta strona jest otwarta.",
+  "live_status_note_browser": "Przeglądarka pyta o to inną usługę i odświeża, dopóki ta strona jest otwarta.",
   "live_refresh": "Odśwież teraz",
   "continue_in": "Kontynuuj w języku: {language}",
   "language_hint": "Ta strona jest też dostępna w języku: {language}.",

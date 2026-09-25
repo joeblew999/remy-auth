@@ -251,6 +251,7 @@
   "live_service_label": "שירות",
   "live_release_label": "גרסה",
   "live_status_note": "מוצג בשרת, ואז הדפדפן שלך מרענן אותו כל עוד הדף פתוח.",
+  "live_status_note_browser": "הדפדפן שלך מבקש אותו משירות אחר ומרענן אותו כל עוד הדף פתוח.",
   "live_refresh": "רענון עכשיו",
   "continue_in": "להמשיך ב{language}",
   "language_hint": "הדף הזה זמין גם ב{language}.",

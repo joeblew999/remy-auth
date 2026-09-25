@@ -15,6 +15,21 @@ package follows [Semantic Versioning](https://semver.org/).
   `prerenderedAppChecks`: the shared check set in one call per kind of app, the app's own pages
   passed beside the shared ones). remy-auth uses them; its CSS, sitemap, robots.txt and registered
   checks are unchanged. The separate imports keep working.
+- `showcase/status-card`: the live status card (`StatusCard`, `LiveStatus`, `statusRefreshMs`), moved
+  from remy-auth so remy-auth-app shows it too. The app passes the query: its own client's
+  `queryOptions` (server-rendered), or a `contractClient` on another app's origin with
+  `serverRendered={false}` (asked by the browser, with its own note, message `live_status_note_browser`).
+  An answer that breaks the contract, or none, shows as an error (`data-status="error"`), never as data.
+- `./invalidate`: `invalidateEverything(router, queryClient)`, moved from remy-auth (it took the
+  router only and read the QueryClient from its context). `@tanstack/react-query` is a new optional peer.
+- `api/server`: `apiHandlers` takes `origins`, the registered apps' exact origins allowed to call
+  the API from their pages (oRPC's CORSPlugin; none by default, a wildcard is refused).
+- `api/checks`: `apiChecks({ origins })` checks CORS: each registered origin allowed on a simple call
+  and a preflight, any other origin not.
+- `showcase/status-card.checks`: `statusCardChecks({ origin, registered })` for a consumer that asks
+  another app's contract across origins (no status in the prerendered HTML, the other Worker names
+  the page's origin, nothing asked from an unregistered origin), and for every card on a contract
+  endpoint a check that an answer breaking the contract is shown as an error.
 - Parts (`.plans/parts.md`): `./parts` (`readParts`, `catalog`), `./parts/vite` (`remyParts()`: a Vite
   plugin generating `virtual:remy-parts` from the app's `src/parts.json`, and the route config that
   mounts each listed part's routes through TanStack's `virtualRouteConfig` and `physical()`),

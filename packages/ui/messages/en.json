@@ -252,6 +252,7 @@
   "live_service_label": "Service",
   "live_release_label": "Release",
   "live_status_note": "Rendered on the server, then refreshed by your browser while this page is open.",
+  "live_status_note_browser": "Asked of another service by your browser, and refreshed while this page is open.",
   "live_refresh": "Refresh now",
   "continue_in": "Continue in {language}",
   "language_hint": "This page is also available in {language}.",

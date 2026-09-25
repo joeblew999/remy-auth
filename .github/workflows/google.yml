@@ -76,6 +76,13 @@ jobs:
             mise run ui:generate
             npm publish --workspace @joeblew999/remy-ui --ignore-scripts
           fi
+          # The API contract under the same tag when its version is new (as scripts/release.sh).
+          contract=$(node -p "require('./packages/contract/package.json').version")
+          if npm view "@joeblew999/remy-auth-contract@$contract" version --registry https://npm.pkg.github.com >/dev/null 2>&1; then
+            echo "@joeblew999/remy-auth-contract@$contract is already published."
+          else
+            npm publish --workspace @joeblew999/remy-auth-contract --ignore-scripts
+          fi
       - name: Create the GitHub release unless it exists
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

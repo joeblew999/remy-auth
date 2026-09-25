@@ -249,6 +249,7 @@
   "live_service_label": "አገልግሎት",
   "live_release_label": "ልቀት",
   "live_status_note": "በአገልጋዩ ላይ ተዘጋጅቶ፣ ይህ ገጽ ክፍት እስከሆነ ድረስ በአሳሽዎ ይታደሳል።",
+  "live_status_note_browser": "ከሌላ አገልግሎት በአሳሽዎ የሚጠየቅ፣ ይህ ገጽ ክፍት እስከሆነ ድረስ የሚታደስ።",
   "live_refresh": "አሁን አድስ",
   "continue_in": "በ{language} ይቀጥሉ",
   "language_hint": "ይህ ገጽ በ{language} ቋንቋም ይገኛል።",

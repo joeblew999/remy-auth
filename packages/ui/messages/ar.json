@@ -257,6 +257,7 @@
   "live_service_label": "الخدمة",
   "live_release_label": "الإصدار",
   "live_status_note": "يُعرض على الخادم، ثم يحدّثه متصفحك ما دامت هذه الصفحة مفتوحة.",
+  "live_status_note_browser": "يطلبه متصفحك من خدمة أخرى، ويحدّثه ما دامت هذه الصفحة مفتوحة.",
   "live_refresh": "حدّث الآن",
   "continue_in": "تابع باللغة {language}",
   "language_hint": "هذه الصفحة متاحة أيضًا باللغة {language}.",
