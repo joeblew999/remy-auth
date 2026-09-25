@@ -44,7 +44,6 @@ evidence. Each item's detail lives in the plan it links to. Git history holds th
 | 6 | ~~Structured data on the site pages~~ done 2026-09-25: WebSite on the home page (6676ac6), checked (173ea97) | | |
 | 7 | Security headers: static headers (be82e16) and report-only CSP (36184b8) done; step 3, enforce ([plan](gui-portal.md)) | a clean report period and **owner decision** | `Content-Security-Policy` enforced |
 | 8 | Contract-first APIs: items 2, 3 and 5 done on oRPC 1.15.4 (05d2511, 61c2ed7); items 4 and 6 open ([plan](openapi-contracts.md#progress-and-decisions-2026-09-25-branch-contract-api)) | ready | the contract published, consumers on it |
-| 9 | Parts: convert the existing parts with candidate 2 (virtual module, chosen from the spike) | ready | one line per part in each app |
 | 1 | Batch 3 merged (TanStack Form, Zod schema, TanStack Devtools); release 0.10.3, deploy | release gate | remy-auth-app moves to 0.10.3 |
 | 2 | ~~Merge batch 1~~ done 2026-09-25: remy-auth-app live on 0.10.2 (32 of 32 live), TanStack plan in done/, alert policy created | | |
 | 3 | Docs refactor: first pass merged 2026-09-25 (one home per fact, two rulebooks split); second pass: `docs/gui.md` evidence section, now.md history lines | | |
