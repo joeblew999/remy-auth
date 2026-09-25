@@ -4,7 +4,7 @@
 import { test, expect } from '@playwright/test';
 import { locales } from '../paraglide/runtime.js';
 import { m } from '../paraglide/messages.js';
-import { localizedPath, collectErrors } from '../checks.js';
+import { localizedPath, collectErrors, checkedLocales } from '../checks.js';
 
 const serverFunction = response => new URL(response.url()).pathname.startsWith('/_serverFn/');
 
@@ -12,7 +12,7 @@ const serverFunction = response => new URL(response.url()).pathname.startsWith('
 export function statusCardChecks({ service, path = '', refreshMs = 10_000 }) {
   test(`the live status card is in the server HTML of every language, with /healthz's service and release`, async ({ request }) => {
     const health = await (await request.get('/healthz')).json();
-    for (const locale of locales) {
+    for (const locale of checkedLocales) {
       const response = await request.get(localizedPath(path, locale));
       expect(response.status(), locale).toBe(200);
       const html = await response.text();
@@ -25,9 +25,10 @@ export function statusCardChecks({ service, path = '', refreshMs = 10_000 }) {
   });
 
   test('the live status card refetches in the browser on its interval, and refreshing invalidates at once', async ({ page }) => {
-    test.setTimeout(refreshMs * 3 + 15_000);
     const errors = collectErrors(page);
     const card = page.locator('.status-card [data-status]');
+    // Playwright's clock lets the check jump the refresh interval instead of waiting it out.
+    await page.clock.install();
     await page.goto(localizedPath(path, 'en'));
     await page.waitForLoadState('networkidle');
     await expect(card).toHaveAttribute('data-status', 'ok');
@@ -36,7 +37,8 @@ export function statusCardChecks({ service, path = '', refreshMs = 10_000 }) {
     expect(rendered).toBeGreaterThan(0);
 
     // Nothing touched: the interval alone asks the server function again.
-    const polled = page.waitForResponse(serverFunction, { timeout: refreshMs * 2 });
+    const polled = page.waitForResponse(serverFunction, { timeout: 5_000 });
+    await page.clock.fastForward(refreshMs);
     expect((await polled).status()).toBe(200);
     await expect.poll(async () => Number(await card.getAttribute('data-updated')), { timeout: 5_000 }).toBeGreaterThan(rendered);
     const afterPoll = Number(await card.getAttribute('data-updated'));

@@ -7,7 +7,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { locales } from '../paraglide/runtime.js';
-import { localizedPath } from '../checks.js';
+import { localizedPath, checkedLocales } from '../checks.js';
 
 const own = file => new URL(`../${file}`, import.meta.url);
 
@@ -117,7 +117,7 @@ export function buildBoundaryChecks({ paths, markers = [], clientDir = 'dist/cli
   // The other direction: the device's own time is browser-only, so the server's HTML leaves it
   // empty and the browser fills it after hydration (the formats checks assert the filled value).
   test('the device time is rendered by the browser only', async ({ request }) => {
-    for (const locale of locales) {
+    for (const locale of checkedLocales) {
       const path = localizedPath('/formats', locale);
       const response = await request.get(path);
       expect(response.status(), path).toBe(200);

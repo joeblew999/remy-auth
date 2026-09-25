@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
 import { locales, cookieName } from '../paraglide/runtime.js';
 import { m } from '../paraglide/messages.js';
 import { samples } from '../samples.js';
-import { collectErrors, localizedPath } from '../checks.js';
+import { collectErrors, localizedPath, checkedLocales } from '../checks.js';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const isServerFn = url => new URL(url).pathname.startsWith('/_serverFn/');
@@ -33,7 +33,7 @@ function valueNode(tree, key) {
  * and the function middleware returns the same ID with the result, so it saw it too.
  */
 export function serverFunctionChecks({ path = '/demo' } = {}) {
-  for (const locale of locales) {
+  for (const locale of checkedLocales) {
     const o = { locale };
     test(`${locale}: the reservation server function validates again, answers in the page's language and keeps the request ID`, async ({ page }) => {
       const errors = collectErrors(page);

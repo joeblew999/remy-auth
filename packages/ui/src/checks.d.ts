@@ -2,6 +2,8 @@ import type { Locator, Page } from '@playwright/test';
 export declare const endonym: (locale: string) => string;
 export declare const direction: (locale: string) => 'ltr' | 'rtl';
 export declare const localizedPath: (path: string, locale: string) => string;
+/** Every locale, or the subset in CHECK_LOCALES. */
+export declare const checkedLocales: readonly string[];
 export declare function collectErrors(page: Page): string[];
 /** Resolves once React has hydrated the element. */
 export declare function hydrated(locator: Locator): Promise<void>;

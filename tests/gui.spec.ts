@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { locales } from '@joeblew999/remy-ui/runtime';
 import { samples } from '@joeblew999/remy-ui/samples';
-import { publicPageChecks, entryChecks, demoChecks, formatsChecks, observabilityChecks, collectErrors, endonym, direction, localizedPath } from '@joeblew999/remy-ui/checks';
+import { checkedLocales, publicPageChecks, entryChecks, demoChecks, formatsChecks, observabilityChecks, collectErrors, endonym, direction, localizedPath } from '@joeblew999/remy-ui/checks';
 import { localeInfo, weekdayName } from '../packages/ui/src/locale-info';
 import { publicPaths } from '@joeblew999/remy-ui/paths';
 import { searchParamsChecks } from '@joeblew999/remy-ui/showcase/search-params.checks';
@@ -111,7 +111,7 @@ test('concurrent server renders retain their requested language and direction', 
 
 test('formats page hydrates in every language without errors and fills the device time zone', async ({ page }) => {
   const errors = collectErrors(page);
-  for (const locale of locales) {
+  for (const locale of checkedLocales) {
     await page.goto(localizedPath('/formats', locale));
     await page.waitForLoadState('networkidle');
     await expect(page.locator('html')).toHaveAttribute('dir', direction(locale));

@@ -38,9 +38,18 @@ overrides the included task of the same name; remy-auth overrides `project:typec
 `project:verify` because it owns the shared package. mise caches remote includes;
 `MISE_TASK_REMOTE_NO_CACHE=true` refreshes them.
 
-Tests run in two levels: `project:test` is ours (the app's own browser and HTTP checks,
-fast, part of `project:verify`); `project:test:google` is Google's Lighthouse audits and
-Core Web Vitals (slow; CI runs it). `project:test:remote` runs both against a deployment. `cf:preview` uploads the current branch as a
+Tests run in tiers, chosen by cost and by what a change can break, never by skipping checks:
+
+| Tier | Task | Runs | When |
+| --- | --- | --- | --- |
+| Quick | `project:test:quick` | every check of ours in `QUICK_LOCALES` (default `en,ar`) | while editing; not a gate |
+| Level 1 | `project:test`, inside `project:verify` | every check of ours in every language | before every push, release and deploy |
+| Level 2 | `project:test:google` | Google's Lighthouse audits and Core Web Vitals | before a release locally, and in CI on every push and tag |
+
+A check that has become stable still runs at level 1: regressions come from new code, not from
+the check. Keep level 1 fast by making checks cheap instead (Playwright's clock rather than real
+waits, one browser page per check, parallel workers). Checks loop over `checkedLocales` from
+`@joeblew999/remy-ui/checks`, which honours `CHECK_LOCALES`. `project:test:remote` runs both against a deployment. `cf:preview` uploads the current branch as a
 Cloudflare preview beside production and runs level 1 against it; run file tasks through mise,
 because outside a task mise's Node shim reapplies `[env]` and would replace the preview's `PUBLIC_ORIGIN`. Set `[settings] task.timings = true` in the including
 `mise.toml` so each level prints per-task and total durations.

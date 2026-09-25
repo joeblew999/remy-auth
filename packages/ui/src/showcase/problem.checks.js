@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
 import { locales } from '../paraglide/runtime.js';
 import { m } from '../paraglide/messages.js';
 import { samples } from '../samples.js';
-import { direction, localizedPath } from '../checks.js';
+import { direction, localizedPath, checkedLocales } from '../checks.js';
 
 const zoneName = (locale, zone, style) => new Intl.DateTimeFormat(locale, { timeZone: zone, timeZoneName: style })
   .formatToParts(samples.instant).find(part => part.type === 'timeZoneName')?.value ?? zone;
@@ -28,7 +28,7 @@ const leak = /\bat \S+ \(|\bat \S+:\d+:\d+|\b(?:Type|Reference|Range|Syntax)?Err
 export function problemChecks({ timeZones, failingNavigation, serverRoutes = [] } = {}) {
   if (timeZones) {
     const { known, alias, unknown } = timeZones;
-    for (const locale of locales) {
+    for (const locale of checkedLocales) {
       const o = { locale };
       test(`${locale}: an unknown time zone is a localized 404 page; a known one renders without JavaScript`, async ({ browser, baseURL }) => {
         const context = await browser.newContext({ javaScriptEnabled: false });
@@ -61,13 +61,13 @@ export function problemChecks({ timeZones, failingNavigation, serverRoutes = [] 
     }
 
     test('another spelling of a time zone redirects permanently to its page; the unknown zone page fits and hydrates', async ({ request, page }) => {
-      for (const locale of locales) {
+      for (const locale of checkedLocales) {
         const response = await request.get(localizedPath(`/time-zones/${alias}`, locale), { maxRedirects: 0 });
         expect(response.status(), locale).toBe(301);
         expect(response.headers()['location']).toMatch(new RegExp(`${localizedPath(`/time-zones/${known}`, locale)}$`));
       }
       await page.setViewportSize({ width: 375, height: 812 });
-      for (const locale of locales) {
+      for (const locale of checkedLocales) {
         const response = await page.goto(localizedPath(`/time-zones/${unknown}`, locale));
         expect(response?.status()).toBe(404);
         await page.waitForLoadState('networkidle');
@@ -81,7 +81,7 @@ export function problemChecks({ timeZones, failingNavigation, serverRoutes = [] 
 
   if (failingNavigation) {
     const { from, link, fail, heading } = failingNavigation;
-    for (const locale of locales) {
+    for (const locale of checkedLocales) {
       const o = { locale };
       test(`${locale}: a loader that fails on the server shows the localized error page without the error, and retry recovers`, async ({ page }) => {
         await page.goto(localizedPath(from, locale));

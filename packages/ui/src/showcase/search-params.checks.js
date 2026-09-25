@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 import { locales } from '../paraglide/runtime.js';
 import { m } from '../paraglide/messages.js';
 import { samples } from '../samples.js';
-import { localizedPath, collectErrors } from '../checks.js';
+import { localizedPath, collectErrors, checkedLocales } from '../checks.js';
 
 // Mirrors search-params.tsx on purpose: the check states the contract, not the implementation.
 const defaults = { currency: 'EUR', count: 3, calendar: 'gregory' };
@@ -46,7 +46,7 @@ export function searchParamsChecks({ serverRendered = true } = {}) {
     ['?utm_source=x&count=0011', '?utm_source=x&count=11', { ...defaults, count: 11 }],
   ];
 
-  for (const locale of locales) {
+  for (const locale of checkedLocales) {
     const path = localizedPath('/formats', locale);
 
     test(`${locale}: invalid search params fall back to defaults and the URL is normalised`, async ({ page, request, baseURL }) => {

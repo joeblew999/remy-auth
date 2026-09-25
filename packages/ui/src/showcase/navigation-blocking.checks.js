@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
 import { locales } from '../paraglide/runtime.js';
 import { m } from '../paraglide/messages.js';
 import { samples } from '../samples.js';
-import { localizedPath, collectErrors, hydrated } from '../checks.js';
+import { localizedPath, collectErrors, hydrated, checkedLocales } from '../checks.js';
 
 /** Answers each dialog from `answers` in turn (true accepts) and records its type and message. */
 function dialogs(page, answers) {
@@ -18,7 +18,7 @@ function dialogs(page, answers) {
 }
 
 export function navigationBlockingChecks() {
-  for (const locale of locales) {
+  for (const locale of checkedLocales) {
     const o = { locale };
     const demo = localizedPath('/demo', locale);
     const home = localizedPath('', locale);

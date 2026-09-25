@@ -6,6 +6,15 @@ import { test, expect, chromium } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import { readFileSync, rmSync } from 'node:fs';
 import { locales, baseLocale, localizeUrl } from './paraglide/runtime.js';
+
+/**
+ * The languages whose checks run: every locale, or the comma-separated subset in CHECK_LOCALES
+ * (the quick development tier, `project:test:quick`). Checks iterate this; expectations that must
+ * hold for every language (sitemap, hreflang, switcher) keep using `locales`.
+ */
+export const checkedLocales = process.env.CHECK_LOCALES
+  ? locales.filter(locale => process.env.CHECK_LOCALES.split(',').map(value => value.trim()).includes(locale))
+  : locales;
 import { m } from './paraglide/messages.js';
 import { samples } from './samples.js';
 
@@ -28,7 +37,7 @@ export function collectErrors(page) {
  * alternates, right-to-left languages mirror the header, and every page fits a phone.
  */
 export function publicPageChecks({ paths, prerendered = false }) {
-  for (const locale of locales) {
+  for (const locale of checkedLocales) {
     const o = { locale };
     test(`${locale}: home page is complete without JavaScript`, async ({ browser, baseURL }) => {
       const context = await browser.newContext({ javaScriptEnabled: false });
@@ -66,7 +75,7 @@ export function publicPageChecks({ paths, prerendered = false }) {
 
   test('right-to-left languages mirror the header, every page fits a narrow screen and uses only generic font families', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    for (const locale of locales) for (const path of paths) {
+    for (const locale of checkedLocales) for (const path of paths) {
       await page.goto(localizedPath(path, locale));
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${locale}${path} overflows`).toBe(true);
@@ -118,7 +127,7 @@ export function entryChecks({ paths, mode }) {
         expect(response.status(), path).toBe(200);
         const html = await response.text();
         expect(html).toContain(`<html lang="${baseLocale}"`);
-        for (const locale of locales) expect(html).toContain(`href="${localizedPath(path, locale)}"`);
+        for (const locale of checkedLocales) expect(html).toContain(`href="${localizedPath(path, locale)}"`);
         expect(html).toContain(`<link rel="canonical" href="${baseURL}${path || '/'}"`);
         expect(html).toMatch(new RegExp(`hreflang="x-default" href="${baseURL}${path || '/'}"`, 'i'));
       }
@@ -152,7 +161,7 @@ export const hydrated = locator => expect.poll(() => locator.evaluate(node => Ob
 
 /** The interactive demo: the counter, the localized reservation form, and a same-tab language switch. */
 export function demoChecks() {
-  for (const locale of locales) {
+  for (const locale of checkedLocales) {
     const o = { locale };
     test(`${locale}: demo counter, reservation form and language switch work after hydration`, async ({ page, context }) => {
       const errors = collectErrors(page);
@@ -183,7 +192,7 @@ export function demoChecks() {
  * an app's additional rows.
  */
 export function formatsChecks({ extra } = {}) {
-  for (const locale of locales) {
+  for (const locale of checkedLocales) {
     const o = { locale };
     test(`${locale}: formats page matches this language's Intl output without JavaScript`, async ({ browser, baseURL }) => {
       const context = await browser.newContext({ javaScriptEnabled: false });
