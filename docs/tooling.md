@@ -313,7 +313,17 @@ mise run docs:dev                          # LOCAL app, answers from the dev ind
 mise run docs:questions -- remy-docs-dev   # REMOTE, search only: fixed questions find their sections
 mise run docs:dev:delete                   # REMOTE (dev): delete the dev index
 mise run docs:index                        # REMOTE, PRODUCTION: from a clean commit, after cf:deploy
+mise run docs:answers:off                  # REMOTE, PRODUCTION: emergency stop, seconds, no build
+mise run docs:answers:on                   # REMOTE, PRODUCTION: resume (confirms)
+mise run docs:answers:status               # REMOTE, read only
+mise run cf:ai-gateway                     # REMOTE: the gateway's settings
+mise run cf:ai-gateway -- rate-limit off   # REMOTE: change a setting (read back after); also logs on|off
 ```
+
+Tokens, in the gitignored `mise.local.toml` (Wrangler's login covers AI Search and secrets, not the
+gateway or stored logs): `CLOUDFLARE_OBSERVE_TOKEN` with **AI Gateway Read** and **Workers
+Observability Write** for `cf:events`, `cf:ai-usage`, `cf:ai-check`; `CLOUDFLARE_AI_EDIT_TOKEN` with
+**AI Gateway Edit** for changing the gateway, kept apart because it can also delete it.
 
 Costs: indexing is a few embeddings (a full reindex about $0.0005); a search without an answer next to
 nothing; an answer about $0.0001 to $0.0007, and $0 when AI Search's cache has it.

@@ -168,6 +168,24 @@ description = "REMOTE, search only (no answers, next to no cost): each fixed que
 dir = "{{config_root}}"
 run = "node scripts/docs-questions.mjs"
 
+# The emergency stop for answers: a Worker secret the answer code checks before any model call.
+# Takes effect in seconds (Wrangler deploys the secret as a new version, no build); the docs pages stay up.
+[tasks."docs:answers:off"]
+description = "REMOTE, PRODUCTION: stop all AI answers now (secret ASK_PAUSED; /app/ask shows \"no answer\" and the docs). Seconds, no build"
+dir = "{{config_root}}"
+run = "printf 1 | ./node_modules/.bin/wrangler secret put ASK_PAUSED"
+
+[tasks."docs:answers:on"]
+description = "REMOTE, PRODUCTION: turn AI answers back on (delete the secret ASK_PAUSED; Wrangler asks you to confirm)"
+dir = "{{config_root}}"
+raw = true
+run = "./node_modules/.bin/wrangler secret delete ASK_PAUSED"
+
+[tasks."docs:answers:status"]
+description = "REMOTE, read only: say whether AI answers are on or stopped in production"
+dir = "{{config_root}}"
+run = "./node_modules/.bin/wrangler secret list --format json | grep -q '\"ASK_PAUSED\"' && echo 'Answers: STOPPED (mise run docs:answers:on to resume)' || echo 'Answers: on'"
+
 [tasks."docs:manifest"]
 description = "LOCAL: list the sections docs:index would upload (key, URL, size), without contacting Cloudflare; name files or slugs for only those. Instant"
 dir = "{{config_root}}"

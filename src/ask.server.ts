@@ -29,6 +29,11 @@ export const answerQuestion = createServerOnlyFn(async (q: string, locale: Local
   const { success } = await env.ASK_LIMIT.limit({ key: request.headers.get('CF-Connecting-IP') ?? 'unknown' });
   if (!success) return { status: 'rate-limited' };
   if (question.length > askMaxLength) return { status: 'too-long', length: question.length };
+  // The emergency stop (mise docs:answers:off): the secret ASK_PAUSED set means no model call at all.
+  if ((env as { ASK_PAUSED?: string }).ASK_PAUSED) {
+    writeLog({ ...logContext(service, env, request.headers.get(requestIdHeader) ?? '', 'GET'), event: 'ask_paused', level: 'info' });
+    return { status: 'no-answer' };
+  }
   try {
     const response = await env.DOCS_SEARCH.chatCompletions({
       model,

@@ -60,7 +60,8 @@ translation: "The docs translation. Is this also paraglide based or what?"
     answer to "which task streams Worker logs" said the docs do not cover it. Include code blocks.
 16. The gateway's 60-a-minute rate limit is still set: removing it through the API was refused by
     the agent's permission check (it changes a shared resource). Owner: dashboard, AI > AI Gateway >
-    remy-docs > Settings > Rate limiting off.
+    remy-docs > Settings > Rate limiting off, or `mise run cf:ai-gateway -- rate-limit off` once
+    `CLOUDFLARE_AI_EDIT_TOKEN` is set.
 17. Level 1 is now 2.1 minutes locally and 2.6 on a preview (280 checks).
 
 ## To review later
