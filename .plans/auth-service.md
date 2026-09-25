@@ -50,7 +50,7 @@ The [ecosystem inventory](better-auth-ecosystem.md) records researched CLI, plug
 GUI and agent-tooling options, with a proposed feature adoption matrix. Its
 recommendations still require pinned-version runtime verification.
 
-Items 1, 2, 4 and 5 have [proposals awaiting owner confirmation](#proposed-decisions-1-2-4-and-5).
+Items 1, 2, 4 and 5 are [confirmed proposals](#proposed-decisions-1-2-4-and-5).
 
 1. Select the first login method and organization/membership model. Define how the
    first owner is explicitly provisioned; no default production admin or password.
