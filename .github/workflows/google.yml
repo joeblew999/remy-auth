@@ -60,6 +60,10 @@ jobs:
         env:
           TAG: ${{ github.ref_name }}
         run: test "$TAG" = "v$(node -p "require('./packages/ui/package.json').version")"
+      - name: Check the release notes (the same check as scripts/release.sh)
+        env:
+          TAG: ${{ github.ref_name }}
+        run: bash scripts/release-notes.sh "${TAG#v}" > "$RUNNER_TEMP/notes.md"
       - name: Publish unless already published
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -78,6 +82,4 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           if gh release view "$TAG" >/dev/null 2>&1; then echo "$TAG already released."; exit 0; fi
-          version="${TAG#v}"
-          awk -v v="$version" 'index($0, "## [" v "]") == 1 {p=1; next} /^## \[/ {p=0} p' CHANGELOG.md > notes.md
-          gh release create "$TAG" --title "Shared UI $version" --notes-file notes.md
+          gh release create "$TAG" --title "Shared UI ${TAG#v}" --notes-file "$RUNNER_TEMP/notes.md"
