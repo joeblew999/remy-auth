@@ -176,6 +176,48 @@ What would change it: a customer asking for SSO or directory provisioning (SCIM 
 reopen the storage decision), a consumer that cannot use OAuth (API keys), or the spike showing
 that a "now" plugin fails on Workers or D1, which is escalated, not dropped.
 
+### 4. Local ports, issuer, origins, callbacks, audiences, grants
+
+Cookies ignore ports, so two apps on `localhost` share one cookie jar. Recommended: remy-auth
+stays on `localhost`, and each sample instance gets its own `*.localhost` host name, so host-only
+cookies stay apart as they will in production. Chrome resolves `*.localhost` to loopback, and
+Node 26 was checked here to do so too (`sample-a.localhost` resolved to `::1`); whether
+Wrangler's local server answers on `::1` is assumed until the spike. Runner-up: plain
+`localhost` with a distinct cookie prefix per app, if `*.localhost` fails in the spike.
+
+| Service | Dev (`project:dev`) | Test and preview | Port home |
+| --- | --- | --- | --- |
+| remy-auth (issuer) | `http://localhost:5173` | `http://localhost:${PREVIEW_PORT}` (4173) | `mise.toml` |
+| Sample A | `http://sample-a.localhost:5183` | `http://sample-a.localhost:${SAMPLE_A_PORT}` (4183) | `mise.toml`, set from the shell like `PREVIEW_PORT` |
+| Sample B (tests only) | none | `http://sample-b.localhost:${SAMPLE_B_PORT}` (4184) | as above |
+| CLI loopback | `http://127.0.0.1:4199/callback` | the same | the CLI |
+
+- **Issuer:** exactly Better Auth's `baseURL` for the environment, as its discovery document
+  publishes it; consumers compare `iss` for equality. Deployed, that is `DEPLOY_ORIGIN` in
+  `mise.toml` for now; the production issuer waits for the production domain.
+- **Trusted origins:** remy-auth's `trustedOrigins` lists exactly that environment's sample
+  origins, with no wildcard.
+- **Callbacks,** exact strings, no wildcards, no trailing-slash variants: sample A
+  `<origin>/auth/callback` for each of its origins above, sample B likewise, and the CLI
+  `http://127.0.0.1:4199/callback`. If the spike shows Better Auth matches loopback redirects
+  regardless of port (RFC 8252, section 7.3), the CLI registers `http://127.0.0.1/callback` and
+  picks a free port instead. Post-logout redirects: each sample origin with path `/`.
+- **Audiences** (the OAuth Provider's `resources`, each becoming `aud`): per sample instance,
+  its origin for the HTTP API and `<origin>/mcp` for its MCP server, since MCP requires the
+  server's own URI. Scopes: `notes:read` and `notes:write`, plus `openid profile email
+  offline_access` for sign-in. A token for A names only A's audiences, so B refuses it.
+
+| Client | Type | Grants | Notes |
+| --- | --- | --- | --- |
+| `sample-a-web`, `sample-b-web` | Confidential (`client_secret_basic`, secret in a Worker secret) | `authorization_code` with S256 PKCE, `refresh_token` | Operator-registered first party; consent skipped (`skip_consent`) |
+| `remy-cli` | Public (`none`) | `authorization_code` with S256 PKCE, `refresh_token` | Resources A and B, one per login; consent shown |
+| `sample-mcp-test` | Public (`none`) | `authorization_code` with S256 PKCE, `refresh_token` | Consent shown; stands in for an agent |
+| `sample-a-machine` | Confidential | `client_credentials` only | `client_credentials_scopes` is `notes:read`; audience A only |
+
+No implicit or password grant (OAuth 2.1 has neither); `device_code` stays off until device
+authorization is adopted. What would change it: `*.localhost` failing in the spike, a port clash
+on CI, or the choice of the production domain.
+
 ## Runtime architecture: identity central, relationships local (decided 2026-09-25, refined)
 
 The owner chose "decide centrally, enforce locally", then refined it after the remy-sport survey:
