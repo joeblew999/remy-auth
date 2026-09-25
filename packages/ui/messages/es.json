@@ -251,5 +251,16 @@
   "live_refresh": "Actualizar ahora",
   "continue_in": "Continuar en {language}",
   "language_hint": "Esta página también está disponible en {language}.",
-  "keep_language": "Seguir en {language}"
+  "keep_language": "Seguir en {language}",
+  "device_place_heading": "La ubicación de tu dispositivo",
+  "device_place_note": "Tu navegador puede compartir dónde está este dispositivo. Se queda en esta página: no se envía nada a nuestros servidores.",
+  "device_place_button": "Usar la ubicación de mi dispositivo",
+  "device_place_asking": "Esperando a tu navegador…",
+  "device_place_denied": "Tu navegador no compartió una ubicación.",
+  "device_place_unavailable": "Tu dispositivo no pudo encontrar su ubicación.",
+  "device_place_unsupported": "Este navegador no puede compartir una ubicación.",
+  "latitude_label": "Latitud",
+  "longitude_label": "Longitud",
+  "accuracy_label": "Precisión",
+  "network_distance_label": "Distancia a la ubicación de la red"
 }

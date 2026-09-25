@@ -310,13 +310,14 @@ export function performanceChecks({ pages, thresholds = {} }) {
 
 /** Observability every Worker built on this package must show: a request ID on every response and a liveness route. */
 export function observabilityChecks({ service, paths }) {
-  test(`every response carries a request ID and /healthz answers for ${service}`, async ({ request }) => {
+  test(`every response carries a request ID and the permissions policy, and /healthz answers for ${service}`, async ({ request }) => {
     const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
     const seen = new Set();
     for (const path of [...locales.flatMap(locale => paths.map(p => localizedPath(p, locale))), '/zz', '/robots.txt', '/sitemap.xml']) {
       const response = await request.get(path, { maxRedirects: 0 });
       const id = response.headers()['x-request-id'];
       expect(id, path).toMatch(uuid);
+      expect(response.headers()['permissions-policy'], path).toBe('geolocation=(self), camera=(), microphone=()');
       expect(seen.has(id), `${path} reused a request ID`).toBe(false);
       seen.add(id);
     }

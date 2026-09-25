@@ -49,6 +49,8 @@ export function withObservability<E extends ObservedEnv>(service: string, handle
         out.headers.set(requestIdHeader, requestId);
         out.headers.set('X-Content-Type-Options', 'nosniff');
         out.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        // Powerful features off by default; location only for this origin (the device-place card).
+        out.headers.set('Permissions-Policy', 'geolocation=(self), camera=(), microphone=()');
         writeLog({ ...base, event, level: level(out.status), route, status: out.status, outcome: outcome(out.status), ...(reasonCode ? { reasonCode } : {}) });
         return out;
       };

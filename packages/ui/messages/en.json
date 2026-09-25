@@ -252,5 +252,16 @@
   "live_refresh": "Refresh now",
   "continue_in": "Continue in {language}",
   "language_hint": "This page is also available in {language}.",
-  "keep_language": "Keep {language}"
+  "keep_language": "Keep {language}",
+  "device_place_heading": "Your device's location",
+  "device_place_note": "Your browser can share where this device is. It stays on this page: nothing is sent to our servers.",
+  "device_place_button": "Use my device's location",
+  "device_place_asking": "Waiting for your browser…",
+  "device_place_denied": "Your browser did not share a location.",
+  "device_place_unavailable": "Your device could not find its location.",
+  "device_place_unsupported": "This browser cannot share a location.",
+  "latitude_label": "Latitude",
+  "longitude_label": "Longitude",
+  "accuracy_label": "Accuracy",
+  "network_distance_label": "Distance from the network's location"
 }

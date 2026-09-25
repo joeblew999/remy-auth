@@ -14,6 +14,7 @@ import { statusCardChecks } from '@joeblew999/remy-ui/showcase/status-card.check
 import { problemChecks } from '@joeblew999/remy-ui/showcase/problem.checks';
 import { codeSplittingChecks } from '@joeblew999/remy-ui/showcase/code-splitting.checks';
 import { buildBoundaryChecks } from '@joeblew999/remy-ui/showcase/build-boundaries.checks';
+import { devicePlaceChecks } from '@joeblew999/remy-ui/showcase/device-place.checks';
 
 // The shared checks cover what every app built on the package must satisfy.
 publicPageChecks({ paths: publicPaths });
@@ -27,6 +28,7 @@ searchParamsChecks();
 preloadChecks();
 navigationBlockingChecks();
 deferredPlaceChecks();
+devicePlaceChecks({ network: true });
 statusCardChecks({ service: 'remy-auth' });
 problemChecks({ timeZones: { known: 'Asia/Tokyo', alias: 'asia/tokyo', unknown: 'Mars/Olympus_Mons' }, failingNavigation: { from: '', link: 'formats_link', fail: '**/_serverFn/**', heading: 'formats_title' }, serverRoutes: [{ path: '/robots.txt', type: 'text/plain; charset=utf-8', cache: 'public, max-age=3600', origin: true }, { path: '/sitemap.xml', type: 'application/xml; charset=utf-8', cache: 'public, max-age=3600', origin: true }] });
 formatsChecks({ extra: async (page, locale) => {

@@ -4,6 +4,7 @@ import type { Place } from '@joeblew999/remy-ui/cloudflare';
 import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { Group, Row } from '@joeblew999/remy-ui/pages';
+import { DevicePlace } from '@joeblew999/remy-ui/showcase/device-place';
 
 /**
  * Cloudflare's view of the visitor, streamed: the loader returns the place unawaited, the page's
@@ -12,12 +13,11 @@ import { Group, Row } from '@joeblew999/remy-ui/pages';
  * (TanStack waits for everything when the user agent is a bot).
  */
 export function DeferredPlace({ locale, place }: { locale: Locale; place: Promise<Place> }) {
-  return <>
-    <Await promise={place} fallback={<PlaceSkeleton locale={locale} />}>
-      {value => <PlaceGroup locale={locale} place={value} />}
-    </Await>
-    <p className="text-sm leading-relaxed text-muted-foreground">{m.location_note({}, { locale })}</p>
-  </>;
+  // Cloudflare's note stays with Cloudflare's group; the device's own location follows it.
+  const note = <p className="text-sm leading-relaxed text-muted-foreground">{m.location_note({}, { locale })}</p>;
+  return <Await promise={place} fallback={<><PlaceSkeleton locale={locale} />{note}</>}>
+    {value => <><PlaceGroup locale={locale} place={value} />{note}<DevicePlace locale={locale} network={value} /></>}
+  </Await>;
 }
 
 function PlaceGroup({ locale, place }: { locale: Locale; place: Place }) {

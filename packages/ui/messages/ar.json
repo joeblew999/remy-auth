@@ -257,5 +257,16 @@
   "live_refresh": "حدّث الآن",
   "continue_in": "تابع باللغة {language}",
   "language_hint": "هذه الصفحة متاحة أيضًا باللغة {language}.",
-  "keep_language": "ابقَ على {language}"
+  "keep_language": "ابقَ على {language}",
+  "device_place_heading": "موقع جهازك",
+  "device_place_note": "يمكن لمتصفحك مشاركة مكان هذا الجهاز. يبقى الموقع في هذه الصفحة: لا يُرسل أي شيء إلى خوادمنا.",
+  "device_place_button": "استخدم موقع جهازي",
+  "device_place_asking": "بانتظار متصفحك…",
+  "device_place_denied": "لم يشارك متصفحك أي موقع.",
+  "device_place_unavailable": "تعذّر على جهازك تحديد موقعه.",
+  "device_place_unsupported": "لا يستطيع هذا المتصفح مشاركة موقع.",
+  "latitude_label": "خط العرض",
+  "longitude_label": "خط الطول",
+  "accuracy_label": "الدقة",
+  "network_distance_label": "المسافة من موقع الشبكة"
 }

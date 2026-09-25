@@ -4,6 +4,16 @@ All notable changes to the shared UI package `@joeblew999/remy-ui` are documente
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 package follows [Semantic Versioning](https://semver.org/).
 
+## [0.9.3] - 2026-09-25
+
+### Added
+- `showcase/device-place`: `DevicePlace`, the device's own location from the Geolocation API,
+  asked only when the visitor presses its button, explained before asking, never sent anywhere;
+  with Cloudflare's location it also shows the distance between the two. `devicePlaceChecks`.
+- `cloudflare`: `Place` carries Cloudflare's `latitude` and `longitude` when valid.
+- `worker`: every response sends `Permissions-Policy: geolocation=(self), camera=(), microphone=()`,
+  asserted by `observabilityChecks`.
+
 ## [0.9.2] - 2026-09-25
 
 ### Added
