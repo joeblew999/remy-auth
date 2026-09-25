@@ -53,14 +53,15 @@ formats speed), batch 3 (TanStack Form, Zod adapter, Devtools), a docs audit and
 | 13 | Auth portal screens from shadcn's login and signup blocks; admin lists on TanStack Table | 12 | shared login checks |
 | 14 | remy-auth-app runs the consumer contract set, not the whole package suite | 4 | faster consumer gates |
 | 15 | Caching: spike Workers Caching against prerendered site pages on a preview, then build ([plan](caching.md)) | load to settle; decisions 1 to 4 in the plan (delegated: recommendation first) | cached site pages, private app pages |
-| 16 | Docs section: fumadocs (headless, in SiteShell) over the repo's Markdown at /docs; AI answers with Cloudflare AI Search at /app/ask ([plan](docs-site.md)) | approved 2026-09-25 ($10 a month); resources created; D1 to D7 built on branch `docs-site`, local gates green; **Reviewer, then deploy, `docs:index`, `project:test:remote` and `project:test:cwv` on a preview** ([status](docs-site.md#implementation-2026-09-25)) | docs live, then answers |
-| 17 | Language tests: every language at release and on demand, one per writing system every day ([plan](language-test-tiers.md)) | ready (owner decided) | faster everyday gate |
+| 16 | ~~Docs section and AI answers~~ done 2026-09-25: docs at /docs (server-rendered, lighter pages), search at /docs/search (Fumadocs, no AI), ask at /docs/ask (AI Search remy-docs-pages reads the R2 bucket remy-docs; `docs:publish` after every `cf:deploy`); old indexes and upload code deleted ([plan](docs-ai-sync.md)) | | review later (22) |
+| 17 | ~~Language test tiers~~ done 2026-09-25: deploys run no tests unless GATE=1 (quick tier, 4 languages); releases run every language ([rule](../docs/how-we-work.md)) | | |
 | 18 | Fonts by writing system, font order fix, font check, fonts in the formats page ([plan](fonts.md)) | agent analysis; three owner decisions in the plan | |
 | 19 | Formats: every area for the page's language, every choice from the system's languages ([plan](formats-consistency.md)) | agent analysis | |
 | 20 | GitHub Actions off Node.js 20 ([plan](ci-node24.md)) | ready | |
 | 21 | Publisher and consumers checked: new-consumer recipe, drift, more in the include, docs and AI answers for every consumer, fewer scripts ([plan](publisher-consumer.md)) | agent analysis | |
-| 23 | Docs search on the site with Fumadocs (route A, no AI) | building | then route B ([plan](docs-ai-sync.md)): AI Search pulls the docs from R2, ask moves into the site |
+| 23 | ~~Docs search on the site (route A) and AI answers from R2 (route B)~~ done 2026-09-25, see 16 | | |
 | 22 | Docs site review: what went wrong, design, operations, efficiency ([plan](docs-site-review.md)) | owner, later | |
+| 24 | Release the shared UI (0.10.6: the lighter site frame module `shell`, SiteNavLinks, one-language pages) and move remy-auth-app to it; remy-auth-app is live on 0.10.5 | ready | |
 
 Decisions only the owner can make: the security headers rollout (7), launching the auth
 decisions (11) and confirming them, a native-speaker review of the Arabic and new catalogs, the
