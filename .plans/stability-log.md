@@ -15,6 +15,8 @@ a full run (tier 4) catches what broke. Each break is logged with the boundary i
 | 09-25 | English docs edited by a tidy-up agent left the Spanish translation behind (3 failures) | translations vs their source | leaked, caught by the full run's heading-id check | Spanish caught up; translation drift needs a check before merge |
 | 09-25 | Choosing a search result left the query in the box, so results covered the new page | component state across navigation | leaked, found by the rewritten check | clear the box on a plain click |
 | 09-25 | `project:test:only` ignored `CHECK_LOCALES` | tier task defaults | leaked (tooling) | caller's `CHECK_LOCALES` wins |
+| 09-25 | `field.tsx` lost shadcn's `"use client"` after an agent removed other components | shadcn CLI regenerating shared files | leaked, caught by `ui:verify` | regenerated with `ui:components` |
+| 09-25 | A background agent could not run the test tier (its permission check refused it) | agent permissions vs test tasks | leaked (process) | full runs run as the lead's own background command |
 | 09-25 | Five merges into `CHANGELOG.md` and `now.md` conflicted | shared plan and changelog files | held (text conflicts only, no code) | resolved at merge |
 | 09-25 | Fonts, formats, parts, caching, sidebar, contracts merged in parallel | package vs app, parts, route files | held: typecheck clean, every page 200 live | — |
 
