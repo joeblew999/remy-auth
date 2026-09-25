@@ -322,5 +322,8 @@
   "search_description": "Remy のドキュメントからページやセクションを探せます。",
   "search_none": "見つかりませんでした",
   "search_none_hint": "別の言葉で試すか、一覧のページをご覧ください。",
-  "ask_pending": "質問中…"
+  "ask_pending": "質問中…",
+  "search_panel_placeholder": "検索または質問…",
+  "search_panel_ask": "AIに質問: {query}",
+  "search_panel_open": "ページで開く"
 }

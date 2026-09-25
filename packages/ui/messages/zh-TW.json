@@ -322,5 +322,8 @@
   "search_description": "在 Remy 文件中尋找頁面或章節。",
   "search_none": "找不到結果",
   "search_none_hint": "請換個關鍵字，或瀏覽下列頁面。",
-  "ask_pending": "詢問中…"
+  "ask_pending": "詢問中…",
+  "search_panel_placeholder": "搜尋或提問…",
+  "search_panel_ask": "詢問 AI：{query}",
+  "search_panel_open": "以頁面開啟"
 }

@@ -326,5 +326,8 @@
   "search_description": "מצאו דף או סעיף בתיעוד של Remy.",
   "search_none": "לא נמצא דבר",
   "search_none_hint": "נסו מילים אחרות, או עיינו בדפים שברשימה.",
-  "ask_pending": "שואלים…"
+  "ask_pending": "שואלים…",
+  "search_panel_placeholder": "חפשו או שאלו…",
+  "search_panel_ask": "שאלו את הבינה המלאכותית: {query}",
+  "search_panel_open": "פתיחה כעמוד"
 }

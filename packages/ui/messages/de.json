@@ -324,5 +324,8 @@
   "search_description": "Finde eine Seite oder einen Abschnitt der Remy-Dokumentation.",
   "search_none": "Nichts gefunden",
   "search_none_hint": "Versuche andere Wörter oder sieh dir die aufgeführten Seiten an.",
-  "ask_pending": "Wird gefragt…"
+  "ask_pending": "Wird gefragt…",
+  "search_panel_placeholder": "Suchen oder fragen…",
+  "search_panel_ask": "KI fragen: {query}",
+  "search_panel_open": "Als Seite öffnen"
 }

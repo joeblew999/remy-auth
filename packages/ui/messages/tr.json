@@ -324,5 +324,8 @@
   "search_description": "Remy belgelerinde bir sayfa ya da bölüm bulun.",
   "search_none": "Hiçbir şey bulunamadı",
   "search_none_hint": "Başka sözcükler deneyin ya da listedeki sayfalara göz atın.",
-  "ask_pending": "Soruluyor…"
+  "ask_pending": "Soruluyor…",
+  "search_panel_placeholder": "Ara veya sor…",
+  "search_panel_ask": "Yapay zekâya sor: {query}",
+  "search_panel_open": "Sayfa olarak aç"
 }

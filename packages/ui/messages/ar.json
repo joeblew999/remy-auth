@@ -332,5 +332,8 @@
   "search_description": "اعثر على صفحة أو قسم في توثيق Remy.",
   "search_none": "لم يُعثر على شيء",
   "search_none_hint": "جرّب كلمات أخرى، أو تصفّح الصفحات المدرجة هنا.",
-  "ask_pending": "جارٍ السؤال…"
+  "ask_pending": "جارٍ السؤال…",
+  "search_panel_placeholder": "ابحث أو اسأل…",
+  "search_panel_ask": "اسأل الذكاء الاصطناعي: {query}",
+  "search_panel_open": "افتح في صفحة"
 }
