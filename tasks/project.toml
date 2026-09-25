@@ -3,9 +3,9 @@
 # same name in the project's own mise.toml.
 
 ["project:test:remote"]
-description = "Both levels against TEST_BASE_URL (~90 s). Touches no local build or port: run it in the background and keep coding"
+description = "Both levels against TEST_BASE_URL, default DEPLOY_ORIGIN (~90 s). Touches no local build or port: run it in the background and keep coding"
 dir = "{{config_root}}"
-env = { TEST_TARGET = "remote" }
+env = { TEST_TARGET = "remote", TEST_BASE_URL = "{{ get_env(name='TEST_BASE_URL', default=env.DEPLOY_ORIGIN) }}" }
 run = "./node_modules/.bin/playwright test"
 
 ["project:report"]
