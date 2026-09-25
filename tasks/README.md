@@ -14,7 +14,7 @@ PUBLIC_ORIGIN = "http://127.0.0.1:4174"                 # origin in prerendered 
 DEPLOY_ORIGIN = "https://your-app.your-subdomain.workers.dev"   # origin used by cf:deploy
 ```
 
-The including project supplies the npm packages the tasks run: `@react-router/dev`,
+The including project supplies the npm packages the tasks run: `vite` with `@tanstack/react-start`,
 `wrangler`, `@playwright/test`, `chrome-devtools-mcp`, `modern-web-guidance`, `smol-toml`
 (and `@openai/codex` for the Codex tasks). A task defined in the project's own `mise.toml`
 overrides the included task of the same name; remy-auth overrides `project:typecheck` and

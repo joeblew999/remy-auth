@@ -22,4 +22,4 @@ run = "./node_modules/.bin/wrangler tail --format json --status error"
 ["cf:deploy"]
 description = "Build with DEPLOY_ORIGIN as the public origin and upload to the authenticated Cloudflare account (~10 s). Then run project:test:remote in the background and keep working"
 dir = "{{config_root}}"
-run = ["PUBLIC_ORIGIN=\"$DEPLOY_ORIGIN\" ./node_modules/.bin/react-router build", "./node_modules/.bin/wrangler deploy"]
+run = ["PUBLIC_ORIGIN=\"$DEPLOY_ORIGIN\" ./node_modules/.bin/vite build", "./node_modules/.bin/wrangler deploy"]
