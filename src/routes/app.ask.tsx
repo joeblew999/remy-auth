@@ -22,9 +22,11 @@ export const Route = createFileRoute('/app/ask')({
     const [result, nav] = await Promise.all([askDocs({ data: { q: deps.q, locale: getLocale() } }), getDocsNav()]);
     return { question: deps.q, result, nav };
   },
-  // Answers are per request: never reused from the router's cache either.
-  staleTime: 0,
-  gcTime: 0,
+  // The router keeps each question's answer for the visit (keyed by q, loaderDeps), so going back from a
+  // cited docs page shows it again without asking again: every question asked is a model call. The
+  // response itself stays private and unstored by HTTP caches (headers below).
+  staleTime: Infinity,
+  gcTime: 30 * 60 * 1000,
   headers: () => ({ 'Cache-Control': 'private, no-store' }),
   head: () => pageHead({ path: '/app/ask', title: locale => m.ask_title({}, { locale }), description: locale => m.ask_description({}, { locale }) }),
   component: Ask,

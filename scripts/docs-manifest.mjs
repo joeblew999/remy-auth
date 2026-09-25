@@ -3,6 +3,7 @@
 // item's key is <slug>--<heading id>.md; its metadata carries the page URL with that heading's id,
 // the section title and the release. scripts/docs-index.mjs uploads it; the docs checks prove every
 // URL resolves to a heading on the built page.
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dynamic } from 'fumadocs-mdx/runtime/dynamic';
@@ -56,13 +57,12 @@ export async function docsManifest({ release = 'dev', rows = docsTable } = {}) {
       // A heading with no text of its own under it (an empty "Unreleased") answers nothing.
       if (body.every(part => part.startsWith('### '))) continue;
       const title = depth === 1 ? page.title : `${page.title}: ${text.get(id) ?? id}`;
-      items.push({
-        key: `${page.row.slug || 'index'}--${id}.md`,
-        url: `/${docsLocale}${docsPath(page.row.slug)}#${id}`,
-        title,
-        release,
-        text: `# ${title}\n\n${body.join('\n\n')}\n`,
-      });
+      const url = `/${docsLocale}${docsPath(page.row.slug)}#${id}`;
+      const markdown = `# ${title}\n\n${body.join('\n\n')}\n`;
+      // The key carries a hash of what is indexed (text, URL, title), so an unchanged section keeps its
+      // key and docs:index skips it; a changed one gets a new key, uploaded before the old is removed.
+      const hash = createHash('sha256').update(`${url}\n${title}\n${markdown}`).digest('hex').slice(0, 12);
+      items.push({ key: `${page.row.slug || 'index'}--${id}--${hash}.md`, url, title, release, text: markdown });
     }
   }
   return items;

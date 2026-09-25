@@ -290,6 +290,34 @@ Both tasks use the configured Worker; `cf:logs` also accepts an explicit Worker 
 `cf:errors` filters Worker invocation failures, not all HTTP error responses. Durable audit
 storage, dashboards and alert delivery are open work in the observability plan.
 
+### The docs answers on Cloudflare: AI Search and AI Gateway
+
+Two Cloudflare products sit behind `/app/ask`, and they are easy to mix up:
+
+- **AI Search** is the index. It holds the docs, one item per `##` section, finds the sections that
+  match a question, and asks a Workers AI model to write the answer. This is what `docs:*` tasks
+  upload to and delete from. Production is `remy-docs`; `remy-docs-dev` is for trying changes.
+- **AI Gateway** is the meter in front of the model. Every model call AI Search makes passes through
+  it (`remy-docs`), and it logs each one with its cost, tokens and time (and the question). It holds
+  no docs. Spend limits and rate limits live here; `cf:ai-usage` and `cf:ai-check` read it.
+
+Local or remote: the docs pages, the ask page and all checks run locally; searching and answering
+exist only on Cloudflare (AI Search has no local version). Every `docs:*` and `cf:*` task says
+LOCAL or REMOTE (and PRODUCTION) in `mise tasks`.
+
+```sh
+mise run docs:manifest -- tooling          # LOCAL: the sections a page becomes
+mise run docs:dev:create                   # REMOTE (dev), once: the dev index
+mise run docs:dev:index -- docs/tooling.md # REMOTE (dev): only that page; unchanged sections skipped
+mise run docs:dev                          # LOCAL app, answers from the dev index: /en/app/ask
+mise run docs:questions -- remy-docs-dev   # REMOTE, search only: fixed questions find their sections
+mise run docs:dev:delete                   # REMOTE (dev): delete the dev index
+mise run docs:index                        # REMOTE, PRODUCTION: from a clean commit, after cf:deploy
+```
+
+Costs: indexing is a few embeddings (a full reindex about $0.0005); a search without an answer next to
+nothing; an answer about $0.0001 to $0.0007, and $0 when AI Search's cache has it.
+
 Stored history and the AI answers, read only, from Cloudflare's own APIs. The Worker, its AI Search
 instance and that instance's AI Gateway come from `wrangler.jsonc`, so an including app gets its own:
 

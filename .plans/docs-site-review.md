@@ -55,7 +55,13 @@ translation: "The docs translation. Is this also paraglide based or what?"
 14. Indexing production took 7 minutes (2026-09-25): every section is deleted and re-uploaded one by
     one, and Cloudflare answers "overloaded" while it indexes. Research (docs-ai-tooling-research.md):
     hash each section into its key and skip unchanged ones; upload before delete.
-15. Level 1 is now 2.1 minutes locally and 2.6 on a preview (280 checks).
+15. Code blocks are left out of the indexed sections (the manifest uses Fumadocs' structured text,
+    which has no code), so a section that is mostly commands reads as prose about nothing: the
+    answer to "which task streams Worker logs" said the docs do not cover it. Include code blocks.
+16. The gateway's 60-a-minute rate limit is still set: removing it through the API was refused by
+    the agent's permission check (it changes a shared resource). Owner: dashboard, AI > AI Gateway >
+    remy-docs > Settings > Rate limiting off.
+17. Level 1 is now 2.1 minutes locally and 2.6 on a preview (280 checks).
 
 ## To review later
 

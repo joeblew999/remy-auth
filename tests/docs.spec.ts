@@ -268,6 +268,22 @@ test.describe('answers', () => {
     await context.close();
   });
 
+  test('going back to an answer from a docs page shows it again without asking again', async ({ browser }) => {
+    test.skip(remote, 'Locally, where the answer is "no answer" and its docs links are on the page.');
+    const context = await browser.newContext({ extraHTTPHeaders: visitor() });
+    const page = await context.newPage();
+    await page.goto(`${localizedPath(askPath, 'en')}?q=${encodeURIComponent('Where do the docs live?')}`);
+    await hydrated(page.locator('body'));
+    await page.getByRole('navigation', { name: m.docs_nav({}, { locale: 'en' }) }).getByRole('link').first().click();
+    await expect(page).toHaveURL(new RegExp(`${localizedPath('/docs', 'en')}$`));
+    const calls = [];
+    page.on('request', request => { if (request.url().includes('/_serverFn/')) calls.push(request.url()); });
+    await page.goBack();
+    await expect(page.locator('[data-ask="no-answer"]')).toBeVisible();
+    expect(calls, 'server functions called on the way back').toEqual([]);
+    await context.close();
+  });
+
   test('a fixed question gets an answer whose every citation opens an existing heading on a docs page', async ({ page, request }) => {
     test.skip(!remote, 'Answers come from the live AI Search index: checked against a deployed target (project:test:remote).');
     const question = 'What must I run before pushing or releasing, and why not pipe it through grep?';

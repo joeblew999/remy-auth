@@ -11,8 +11,9 @@ import { service } from './service';
 // first and cost nothing: every submitted question counts against the visitor's rate limit (10 a
 // minute per IP, wrangler.jsonc), then a question over askMaxLength is explained, not sent. Only
 // then does AI Search retrieve at most five sections and write a short answer, from its cache when
-// the same question was asked recently. Any failure is "no answer", never a blank page. The
-// question is never logged.
+// the same question was asked recently. Any failure is "no answer", never a blank page. This Worker
+// never logs the question; the AI Gateway does keep every model call, question included, for 7 days:
+// its logs are our record of cost per call (decided 2026-09-25, .plans/observability.md).
 
 /** The default Workers AI model of AI Search, named so a change of default does not change our answers unseen. */
 const model = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
