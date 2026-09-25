@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
-#MISE description="Build (no tests; GATE=1 runs the quick gate first, for code visitors run; releases run the full gate) with DEPLOY_ORIGIN as the public origin, upload to the authenticated Cloudflare account and wait until production serves the new version (~1 min), then docs:publish when the project has it. Builds into dist/: not alongside a local level. Then run project:test:remote in the background and keep working"
+#MISE description="Build (no tests; GATE=smoke|quick|full runs that tier first; releases run the full gate) with DEPLOY_ORIGIN as the public origin, upload to the authenticated Cloudflare account and wait until production serves the new version (~1 min), then docs:publish when the project has it. Builds into dist/: not alongside a local level. Then run project:test:remote in the background and keep working"
 #MISE dir="{{config_root}}"
 set -euo pipefail
 : "${DEPLOY_ORIGIN:?cf:deploy needs DEPLOY_ORIGIN in [env]}"
 
 # Development deploys run no tests (owner, 2026-09-25: the gate is for real releases; ui:release runs
-# the full one). GATE=1 runs the quick gate first, English and Arabic (QUICK_LOCALES),
-# for changes to code that visitors run: the deployer judges (docs/how-we-work.md).
-if [ "${GATE:-}" = 1 ]; then
-  export CHECK_LOCALES="${CHECK_LOCALES:-${QUICK_LOCALES:-en,ar}}"
-  mise run project:verify
-fi
+# the full one). GATE picks a tier first, by the deployer's judgement (docs/how-we-work.md, test tiers):
+# smoke (every page answers, ~15 s), quick (every check in en and ar; also GATE=1) or full (every language).
+case "${GATE:-}" in
+  "") ;;
+  smoke) mise run project:test:smoke ;;
+  1|quick) export CHECK_LOCALES="${CHECK_LOCALES:-${QUICK_LOCALES:-en,ar}}"; mise run project:verify ;;
+  full) mise run project:verify ;;
+  *) echo "cf:deploy: GATE is smoke, quick or full (got $GATE)" >&2; exit 1 ;;
+esac
 
 export PUBLIC_ORIGIN="$DEPLOY_ORIGIN"
 ./node_modules/.bin/vite build

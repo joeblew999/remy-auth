@@ -79,10 +79,21 @@ When the owner hands over decisions, for example to finish work unattended:
   runs it, and a tag or package release never goes out without it. Owner, 2026-09-25: "It's just
   only needed for real releases, we can't take forever in development. You have to start to use
   your judgement better on when a deploy needs a gateway test."
-- Development deploys (`mise run cf:deploy`) run no tests. Judge each one: a change to app or
-  shared-package code that visitors run gets the quick gate first (`GATE=1 mise run cf:deploy`,
-  English and Arabic: left to right and right to left; owner: "Just pick 2"); docs text, plans, tasks and config that do not change what
-  visitors get deploy straight away. Say which you chose when reporting.
+- Test tiers (owner, 2026-09-25: "do huge coding with no tests and then run through a different tier
+  if there are issues"). Code freely with tier 0; move up only when something looks wrong or before
+  something leaves the machine:
+
+  | Tier | Command | What | Time |
+  | --- | --- | --- | --- |
+  | 0 | `mise run project:check` | typecheck and build | ~15 s |
+  | 1 | `mise run project:test:smoke` | every page in en and ar answers; home and docs hydrate; search and ask respond | ~15 s |
+  | 2 | `mise run project:test:only -- <words>` | only the checks whose title matches, en and ar | varies |
+  | 3 | `mise run project:test:quick` | every check, en and ar | ~45 s |
+  | 4 | `mise run project:verify` | everything, every language | releases |
+
+- Deploys run no tests unless `GATE` picks a tier: `GATE=smoke` for most code changes, `GATE=quick`
+  for shared-package or cross-cutting changes, `GATE=full` rarely. Docs text, plans, tasks and config
+  deploy straight away. Say which tier ran when reporting.
 - Never pipe a gating command through `grep` or `tail` in a chain: the pipe hides its exit code.
   This once released a version whose checks had failed.
 - Report what was tested and what was not; never call untested work verified.
@@ -100,7 +111,7 @@ and timing-sensitive checks failed well before that. So:
   count. When more are needed, set `PLAYWRIGHT_WORKERS=2` for each.
 - Google's level (`project:test:google`, `project:test:cwv`) takes a machine-wide lock, so a second
   run waits rather than skewing the first.
-- `GATE=1 mise run cf:deploy` runs the quick gate itself; never chain a deploy after a gate with `;`.
+- `GATE=<tier> mise run cf:deploy` runs the tier itself; never chain a deploy after a gate with `;`.
 
 ## Reporting to the owner
 

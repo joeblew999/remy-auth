@@ -56,14 +56,33 @@ raw = true
 run = "./node_modules/.bin/wrangler dev --ip 127.0.0.1 --port \"${PREVIEW_PORT:-4173}\""
 
 ["project:test"]
-description = "Level 1: build, then run our own browser and HTTP checks against the production artifact locally (every language; ~75 s with 13 languages). Uses dist/ and PREVIEW_PORT: never two local levels at once"
+description = "Tier 4 with project:verify, releases: build, then every check of ours in every language ( ~75 s with 13 languages). Uses dist/ and PREVIEW_PORT: never two local levels at once"
 dir = "{{config_root}}"
 depends = ["project:build"]
 env = { TEST_TARGET = "local" }
 run = "./node_modules/.bin/playwright test --project=ours"
 
+["project:check"]
+description = "Tier 0 while coding: typecheck and build, no browser (~15 s). Code freely; run a test tier when something looks wrong (docs/how-we-work.md, test tiers)"
+dir = "{{config_root}}"
+run = [{ task = "project:typecheck" }, "./node_modules/.bin/vite build"]
+
+["project:test:smoke"]
+description = "Tier 1, smoke: build, then tests/smoke.spec.ts only: every page in en and ar answers with a heading, the home and a docs page hydrate without errors, search and ask respond (~15 s)"
+dir = "{{config_root}}"
+depends = ["project:build"]
+env = { TEST_TARGET = "local" }
+run = "./node_modules/.bin/playwright test --project=ours tests/smoke.spec.ts"
+
+["project:test:only"]
+description = "Tier 2, targeted: build, then only the checks whose title matches the words given, in QUICK_LOCALES (en, ar), e.g. mise run project:test:only -- formats. For an area that looks broken"
+dir = "{{config_root}}"
+depends = ["project:build"]
+env = { TEST_TARGET = "local", CHECK_LOCALES = "{{ env.QUICK_LOCALES | default(value='en,ar') }}" }
+run = "./node_modules/.bin/playwright test --project=ours --grep"
+
 ["project:test:quick"]
-description = "Quick tier for the edit loop: build, then every check of ours in QUICK_LOCALES only (default en and ar: left to right and right to left; languages not configured yet are skipped). Not a gate: project:verify, releases and CI run every language"
+description = "Tier 3, quick: build, then every check of ours in QUICK_LOCALES only (default en and ar: left to right and right to left; languages not configured yet are skipped). Not a gate: project:verify, releases and CI run every language"
 dir = "{{config_root}}"
 depends = ["project:build"]
 env = { TEST_TARGET = "local", CHECK_LOCALES = "{{ env.QUICK_LOCALES | default(value='en,ar') }}" }
