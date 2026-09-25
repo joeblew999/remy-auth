@@ -62,7 +62,10 @@ translation: "The docs translation. Is this also paraglide based or what?"
     the agent's permission check (it changes a shared resource). Owner: dashboard, AI > AI Gateway >
     remy-docs > Settings > Rate limiting off, or `mise run cf:ai-gateway -- rate-limit off` once
     `CLOUDFLARE_AI_EDIT_TOKEN` is set.
-17. Level 1 is now 2.1 minutes locally and 2.6 on a preview (280 checks).
+17. Preview URLs were on: 14 aliases and 55 versions public, recent ones able to spend on AI answers
+    and outside the ASK_PAUSED stop. Turned off in wrangler.jsonc (2026-09-25). cf:preview (release
+    gate's Core Web Vitals step) is broken until it moves to `wrangler preview` / `wrangler preview delete`.
+18. Level 1 is now 2.1 minutes locally and 2.6 on a preview (280 checks).
 
 ## To review later
 

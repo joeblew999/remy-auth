@@ -10,6 +10,10 @@
   "version_metadata": { "binding": "CF_VERSION_METADATA" },
   "vars": { "ENVIRONMENT": "production" },
   "assets": { "directory": "./dist/client" },
+  // Preview URLs off (2026-09-25): every uploaded version and alias was public, the recent ones with
+  // the AI answers on the production index, and old versions never see the ASK_PAUSED stop. cf:preview
+  // moves to Cloudflare's Previews (wrangler preview, with delete) before it is used again.
+  "preview_urls": false,
   // Answers on /app/ask (.plans/docs-site.md): the production AI Search instance remy-docs (built-in
   // storage, one item per docs heading, routed through the AI Gateway remy-docs with its monthly
   // spend limit). It has no local emulation and no remote proxy here, so local runs and the local
