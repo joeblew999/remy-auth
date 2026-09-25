@@ -25,3 +25,5 @@ node_modules/
 # Installed by mise run skills:install from skills-lock.json; not committed.
 .agents/skills/
 .claude/skills/
+# Temporary git worktrees that agents create; machine-local.
+.claude/worktrees/
