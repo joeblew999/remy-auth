@@ -12,12 +12,16 @@ import { serverFunctionChecks } from '@joeblew999/remy-ui/showcase/server-functi
 import { deferredPlaceChecks } from '@joeblew999/remy-ui/showcase/deferred-place.checks';
 import { statusCardChecks } from '@joeblew999/remy-ui/showcase/status-card.checks';
 import { problemChecks } from '@joeblew999/remy-ui/showcase/problem.checks';
+import { codeSplittingChecks } from '@joeblew999/remy-ui/showcase/code-splitting.checks';
+import { buildBoundaryChecks } from '@joeblew999/remy-ui/showcase/build-boundaries.checks';
 
 // The shared checks cover what every app built on the package must satisfy.
 publicPageChecks({ paths: publicPaths });
 entryChecks({ paths: publicPaths, mode: 'redirect' });
 demoChecks();
 serverFunctionChecks();
+codeSplittingChecks({ paths: publicPaths });
+buildBoundaryChecks({ paths: publicPaths, markers: [{ name: 'request.cf', pattern: /\.cf\b/, source: 'src/place.server.ts' }] });
 observabilityChecks({ service: 'remy-auth', paths: publicPaths });
 searchParamsChecks();
 preloadChecks();
