@@ -378,3 +378,42 @@ Checks (`tests/docs.spec.ts`, "docs search"): a known phrase leads from a docs p
 section's heading, without JavaScript, in every checked language, and result pages are `noindex`;
 the empty page shows the box, is indexable and self-canonical; a query with no hits says so and
 lists the docs; with JavaScript, results are in-app links with no errors.
+
+## Live search panel (2026-09-25)
+
+Owner, 2026-09-25: "The UX is pretty clunky for docs to be frank." "Yes integrating with tanstack
+and stuff like that will also improve the UX." "The search ask stuff can sit there with the results
+flying back."
+
+Chosen, stock pieces only: **shadcn's Command in its `CommandDialog`** (cmdk under Base UI's Dialog),
+added through `ui:components` (`dialog command`; the CLI also brought `input-group` and `textarea`,
+and rewrote `field.tsx` without its `"use client"` line, which is what it writes today). It opens
+from the site header's Search link and with ⌘K / Ctrl+K (`src/docs/header-link.tsx`); the panel
+itself is `src/docs/search-panel.tsx`.
+
+- **No JavaScript:** the header link keeps its `href` to `/docs/search`, and a modifier click still
+  opens it; the `/docs/search` and `/docs/ask` pages and forms stay the way without JavaScript.
+- **Results fly back:** TanStack Query's `useQuery` over the existing `searchDocs` server function,
+  the query debounced 150 ms with **TanStack Pacer**'s `useDebouncedValue` (`@tanstack/react-pacer`
+  0.23.0, the TanStack library for exactly this, instead of our own timer) and
+  `placeholderData: keepPreviousData`, so the list never blanks between keystrokes. Hits are grouped
+  by page (`byPage`, shared with the search page) and each is a router `Link` to its heading; a click
+  follows the link, Enter clicks the selected one.
+- **Ask only when chosen:** the last item, "Ask AI: <query>", runs `askDocs` only when selected, never
+  while typing (each question is a model call); shadcn's Spinner, then the answer and its citations
+  (`AskAnswer`, now shared with the answer page in `src/docs/ask-answer.tsx`) and a link to the full
+  `/docs/ask` page. The answer is a Query kept for the visit (`staleTime: Infinity`), as the page keeps it.
+- **Small JS:** the panel is `React.lazy`, loaded on first open (or on hovering the link). Docs page
+  (`/en/docs/development`, local build, every script body): **before 750.1 KB (255.1 KB gzip, 20
+  scripts), after 757.2 KB (262.7 KB gzip, 34 scripts)**; the lazy boundary makes Rolldown split the
+  modules the panel shares with the pages into their own small chunks. Opening the panel loads about
+  89 KB more (the panel chunk is 64 KB, 22 KB gzip: cmdk, the dialog, Pacer).
+- **Messages:** three new Paraglide messages in all 13 languages (`search_panel_placeholder`,
+  `search_panel_ask`, `search_panel_open`); titles and outcomes reuse the search and ask messages.
+
+Checks (`tests/docs.spec.ts`, "live search panel"): without JavaScript the header link leads to the
+search page in every checked language; with it, the link and both shortcuts open the panel, typing
+shows results that link to the known heading, clicking one navigates in the app (no document load),
+Enter follows the selected result, Escape closes; "Ask AI" makes no call while typing, one when
+chosen, and shows the local "no answer" with the link to the answer page (local only: a deployed
+target would pay for a model call).

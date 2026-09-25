@@ -328,5 +328,8 @@
   "search_description": "Remy के दस्तावेज़ों का कोई पेज या हिस्सा ढूँढें।",
   "search_none": "कुछ नहीं मिला",
   "search_none_hint": "दूसरे शब्द आज़माएँ, या यहाँ दिए पेज देखें।",
-  "ask_pending": "पूछा जा रहा है…"
+  "ask_pending": "पूछा जा रहा है…",
+  "search_panel_placeholder": "खोजें या पूछें…",
+  "search_panel_ask": "AI से पूछें: {query}",
+  "search_panel_open": "पेज के रूप में खोलें"
 }

@@ -324,5 +324,8 @@
   "search_description": "صفحه یا بخشی از مستندات Remy را پیدا کنید.",
   "search_none": "چیزی پیدا نشد",
   "search_none_hint": "واژه‌های دیگری را امتحان کنید یا صفحه‌های فهرست‌شده را ببینید.",
-  "ask_pending": "در حال پرسیدن…"
+  "ask_pending": "در حال پرسیدن…",
+  "search_panel_placeholder": "جستجو کنید یا بپرسید…",
+  "search_panel_ask": "از هوش مصنوعی بپرسید: {query}",
+  "search_panel_open": "باز کردن در یک صفحه"
 }

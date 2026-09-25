@@ -326,5 +326,8 @@
   "search_description": "Encuentra una página o sección de la documentación de Remy.",
   "search_none": "No se encontró nada",
   "search_none_hint": "Prueba con otras palabras o consulta las páginas de la lista.",
-  "ask_pending": "Preguntando…"
+  "ask_pending": "Preguntando…",
+  "search_panel_placeholder": "Busca o pregunta…",
+  "search_panel_ask": "Preguntar a la IA: {query}",
+  "search_panel_open": "Abrir como página"
 }

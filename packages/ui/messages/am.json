@@ -324,5 +324,8 @@
   "search_description": "በRemy ሰነዶች ውስጥ ገጽ ወይም ክፍል ያግኙ።",
   "search_none": "ምንም አልተገኘም",
   "search_none_hint": "ሌሎች ቃላትን ይሞክሩ፣ ወይም እዚህ የተዘረዘሩትን ገጾች ይመልከቱ።",
-  "ask_pending": "በመጠየቅ ላይ…"
+  "ask_pending": "በመጠየቅ ላይ…",
+  "search_panel_placeholder": "ይፈልጉ ወይም ይጠይቁ…",
+  "search_panel_ask": "AIን ይጠይቁ፦ {query}",
+  "search_panel_open": "እንደ ገጽ ይክፈቱ"
 }

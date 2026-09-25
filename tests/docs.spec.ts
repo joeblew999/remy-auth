@@ -1,4 +1,4 @@
-import { test, expect, type APIRequestContext } from '@playwright/test';
+import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import GithubSlugger from 'github-slugger';
@@ -282,6 +282,98 @@ test.describe('docs search', () => {
     await expect(page.locator(`article [id="${section}"]`)).toHaveCount(1);
     expect(documents).toBe(0);
     expect(errors).toEqual([]);
+  });
+});
+
+// The live search panel (.plans/docs-site.md, "Live search panel"): shadcn's Command in its dialog, from
+// the header's Search link or ⌘K / Ctrl+K. Without JavaScript that link is the way to /docs/search.
+test.describe('live search panel', () => {
+  const query = 'Workers Logs';
+  const section = sectionOf('docs/tooling.md', query);
+  const searchLink = (page: Page, locale: string) =>
+    page.locator('header').getByRole('link', { name: m.search_submit({}, { locale }), exact: true });
+
+  test('without JavaScript, the header\'s Search link leads to the search page in every language', async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    for (const locale of checkedLocales) {
+      await page.goto(docsUrl('how-we-work', locale));
+      await searchLink(page, locale).click();
+      await expect(page).toHaveURL(new RegExp(`${localizedPath(docsSearchPath, locale)}$`));
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText(m.search_title({}, { locale }));
+    }
+    await context.close();
+  });
+
+  test('opens from the header and with ⌘K / Ctrl+K; results come as the visitor types, each a link in the app to its heading; choosing one goes there; Escape closes', async ({ page }) => {
+    const errors = collectErrors(page);
+    const start = docsUrl('how-we-work', 'en');
+    await page.goto(start);
+    await hydrated(searchLink(page, 'en'));
+    const dialog = page.getByRole('dialog');
+    // The link opens the panel in place of the search page.
+    await searchLink(page, 'en').click();
+    await expect(dialog).toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`${start}$`));
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    // The shortcut, with either modifier.
+    for (const shortcut of ['Control+k', 'Meta+k']) {
+      await page.keyboard.press(shortcut);
+      await expect(dialog, shortcut).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(dialog, shortcut).toBeHidden();
+    }
+    await page.keyboard.press('ControlOrMeta+k');
+    await dialog.getByRole('combobox').pressSequentially(query);
+    const target = `${docsUrl('tooling', 'en')}#${section}`;
+    const hit = dialog.locator(`[data-docs-results] a[href="${target}"]`).filter({ has: page.locator('mark') }).first();
+    await expect(hit, target).toBeVisible();
+    let documents = 0;
+    page.on('request', request => { if (request.resourceType() === 'document') documents++; });
+    await hit.click();
+    await expect(page).toHaveURL(new RegExp(`${target}$`));
+    await expect(dialog).toBeHidden();
+    await expect(page.locator(`article [id="${section}"]`)).toHaveCount(1);
+    // Enter follows the selected result's link.
+    await page.keyboard.press('ControlOrMeta+k');
+    await dialog.getByRole('combobox').fill(query);
+    const selected = dialog.locator('[cmdk-item][data-selected="true"] a');
+    await expect(selected).toHaveAttribute('href', /\/en\/docs/);
+    const href = await selected.getAttribute('href');
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(new RegExp(`${href!.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`));
+    await expect(dialog).toBeHidden();
+    expect(documents).toBe(0);
+    expect(errors).toEqual([]);
+  });
+
+  test('"Ask AI" asks only when chosen, never while typing, and shows the local "no answer" with a link to the answer page', async ({ browser }) => {
+    test.skip(remote, 'Locally the binding is switched off, so the answer is "no answer" and no model is called; a deployed target would pay for one.');
+    const context = await browser.newContext({ extraHTTPHeaders: visitor() });
+    const page = await context.newPage();
+    const errors = collectErrors(page);
+    // askDocs sends the question with the page's language; searchDocs only the query.
+    const asks: string[] = [];
+    page.on('request', request => { if (request.url().includes('/_serverFn/') && decodeURIComponent(request.url()).includes('"locale"')) asks.push(request.url()); });
+    const question = 'Where do the docs live?';
+    await page.goto(docsUrl('how-we-work', 'ar'));
+    await hydrated(searchLink(page, 'ar'));
+    await page.keyboard.press('ControlOrMeta+k');
+    const dialog = page.getByRole('dialog');
+    await dialog.getByRole('combobox').pressSequentially(question);
+    const ask = dialog.locator('[data-ask-ai]');
+    await expect(ask).toHaveText(m.search_panel_ask({ query: question }, { locale: 'ar' }));
+    await expect(dialog.locator('[data-docs-results]').first()).toBeVisible();
+    expect(asks, 'questions asked while typing').toEqual([]);
+    await ask.click();
+    await expect(dialog.locator('[data-ask="no-answer"]')).toHaveText(m.ask_no_answer({}, { locale: 'ar' }));
+    expect(asks).toHaveLength(1);
+    await expect(dialog.locator('[data-ask-page]')).toHaveAttribute('href', `${localizedPath(askPath, 'ar')}?q=${encodeURIComponent(question).replace(/%20/g, '+')}`);
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    expect(errors).toEqual([]);
+    await context.close();
   });
 });
 

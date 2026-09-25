@@ -322,5 +322,8 @@
   "search_description": "ค้นหาหน้าหรือหัวข้อในเอกสารของ Remy",
   "search_none": "ไม่พบผลลัพธ์",
   "search_none_hint": "ลองใช้คำอื่น หรือดูหน้าที่แสดงไว้ที่นี่",
-  "ask_pending": "กำลังถาม…"
+  "ask_pending": "กำลังถาม…",
+  "search_panel_placeholder": "ค้นหาหรือถาม…",
+  "search_panel_ask": "ถาม AI: {query}",
+  "search_panel_open": "เปิดเป็นหน้า"
 }

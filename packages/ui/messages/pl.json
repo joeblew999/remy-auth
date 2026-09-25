@@ -328,5 +328,8 @@
   "search_description": "Znajdź stronę lub sekcję dokumentacji Remy.",
   "search_none": "Nic nie znaleziono",
   "search_none_hint": "Spróbuj innych słów albo przejrzyj strony z listy.",
-  "ask_pending": "Pytam…"
+  "ask_pending": "Pytam…",
+  "search_panel_placeholder": "Szukaj lub zapytaj…",
+  "search_panel_ask": "Zapytaj AI: {query}",
+  "search_panel_open": "Otwórz jako stronę"
 }
