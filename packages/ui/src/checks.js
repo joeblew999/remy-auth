@@ -109,9 +109,11 @@ export function publicPageChecks({ paths, prerendered = false, oneLanguage = { l
     expect(await (await request.get('/robots.txt')).text()).toContain('/sitemap.xml');
   });
 
-  test('right-to-left languages mirror the header, every page fits a narrow screen and names only fonts it loads', async ({ page }) => {
+  // One test per language, as the other per-language checks; one-language pages once, in their language.
+  const narrowCases = [...checkedLocales.map(locale => [locale, paths]), ...(oneLanguage.paths.length ? [[oneLanguage.locale, oneLanguage.paths, 'one-language pages']] : [])];
+  for (const [locale, casePaths, what = 'every page'] of narrowCases) test(`${locale}: ${what} mirror the header in right-to-left languages, fit a narrow screen and name only fonts they load`, async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    for (const locale of checkedLocales) for (const path of [...paths, ...oneLanguage.paths]) {
+    for (const path of casePaths) {
       await page.goto(localizedPath(path, locale));
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${locale}${path} overflows`).toBe(true);
