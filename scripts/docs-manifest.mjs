@@ -3,21 +3,33 @@
 // item's key is <slug>--<heading id>.md; its metadata carries the page URL with that heading's id,
 // the section title and the release. scripts/docs-index.mjs uploads it; the docs checks prove every
 // URL resolves to a heading on the built page.
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dynamic } from 'fumadocs-mdx/runtime/dynamic';
 import * as config from '../source.config.ts';
-import { docsLocale, docsPath, docsTable } from '../src/docs/table.js';
+import { docsLocale, docsPath, docsTable, firstHeading } from '../src/docs/table.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 
-/** Every docs page, compiled: its row, title, table of contents and structured text. */
-export async function docsPages() {
+/**
+ * The docs rows for a list of files or slugs ("docs/tooling.md", "tooling"); every row when the list
+ * is empty. An unknown name fails, listing the known ones.
+ */
+export function docsRows(names = []) {
+  if (names.length === 0) return docsTable;
+  return names.map(name => docsTable.find(row => row.file === name || row.slug === name || (name === 'index' && row.slug === ''))
+    ?? (() => { throw new Error(`Not a docs page: ${name}. Docs pages: ${docsTable.map(row => `${row.file} (${row.slug || 'index'})`).join(', ')}`); })());
+}
+
+/** The docs pages, compiled (every page, or the rows given): row, title, table of contents and structured text. */
+export async function docsPages(rows = docsTable) {
   const create = await dynamic(config, { environment: 'dynamic', root, configPath: 'source.config.ts', outDir: '.source' });
-  const entries = docsTable.map(row => ({ info: { path: row.file, fullPath: `${root}${row.file}` }, data: {} }));
+  const entries = rows.map(row => ({ info: { path: row.file, fullPath: `${root}${row.file}` }, data: {} }));
   const docs = await create.doc('docs', '', entries);
   return Promise.all(docs.map(async (doc, index) => {
     const loaded = await doc.load();
-    return { row: docsTable[index], title: doc.title, toc: loaded.toc, structured: loaded.structuredData };
+    // The same title the site shows (source.config.ts): the dynamic runtime leaves doc.title unset.
+    return { row: rows[index], title: firstHeading(readFileSync(`${root}${rows[index].file}`, 'utf8')), toc: loaded.toc, structured: loaded.structuredData };
   }));
 }
 
@@ -25,9 +37,9 @@ export async function docsPages() {
  * One item per "##" heading, and one for the page's opening text under its "#" heading. The text is
  * Markdown: the section title, then each paragraph, with its "###" sub-headings.
  */
-export async function docsManifest({ release = 'dev' } = {}) {
+export async function docsManifest({ release = 'dev', rows = docsTable } = {}) {
   const items = [];
-  for (const page of await docsPages()) {
+  for (const page of await docsPages(rows)) {
     const text = new Map(page.structured.headings.map(heading => [heading.id, heading.content]));
     const sections = [];
     for (const item of page.toc) {
@@ -57,6 +69,7 @@ export async function docsManifest({ release = 'dev' } = {}) {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const items = await docsManifest();
+  // Optional file or slug names: only those pages.
+  const items = await docsManifest({ rows: docsRows(process.argv.slice(2)) });
   for (const { key, url, text } of items) console.log(`${key}\t${url}\t${text.length} bytes`);
 }

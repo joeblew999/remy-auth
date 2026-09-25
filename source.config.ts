@@ -5,7 +5,7 @@ import { pageSchema } from 'fumadocs-core/source/schema';
 import type { Root, Link } from 'mdast';
 import type { VFile } from 'vfile';
 import { visit } from 'unist-util-visit';
-import { branch, docsPath, docsRowForFile, docsTable, repository } from './src/docs/table.js';
+import { branch, docsPath, docsRowForFile, docsTable, firstHeading, repository } from './src/docs/table.js';
 
 // Fumadocs MDX over the repository's own Markdown, read in place (.plans/docs-site.md, D1): the docs
 // table names the files, nothing is copied, and the generated entry files live in .source/ (ignored).
@@ -14,8 +14,6 @@ import { branch, docsPath, docsRowForFile, docsTable, repository } from './src/d
 
 const root = import.meta.dirname;
 
-/** The file's first "# " heading: plain Markdown has no frontmatter, so the title comes from the text. */
-const firstHeading = (source: string) => source.match(/^#\s+(.+)$/m)?.[1].trim() ?? '';
 
 /**
  * Relative links between repository files: a link to another docs file becomes its docs page

@@ -136,7 +136,34 @@ description = "Replace the production AI Search index remy-docs with this checko
 dir = "{{config_root}}"
 run = "node scripts/docs-index.mjs"
 
+# Working on the docs and answers without deploying and without touching production: a dev AI Search
+# instance (remy-docs-dev) holding only the pages you are working on, and the app run locally against it.
+# Typical loop: docs:dev:create once; docs:dev:index -- docs/tooling.md; docs:dev; ask at /en/app/ask;
+# edit, docs:dev:index again; docs:dev:delete when done. Each answer is a real model call (about
+# $0.0003); indexing a page costs a few embeddings.
+[tasks."docs:dev:create"]
+description = "Create the dev AI Search instance remy-docs-dev: production's settings, cache off so a reindexed page answers at once, same AI Gateway. Once; needs Cloudflare login"
+dir = "{{config_root}}"
+run = "node scripts/docs-dev.mjs create"
+
+[tasks."docs:dev:index"]
+description = "Index only the named docs pages (files or slugs, e.g. docs/tooling.md or tooling) into remy-docs-dev; anything else there is removed. Seconds per page; production untouched"
+dir = "{{config_root}}"
+run = "node scripts/docs-index.mjs --instance remy-docs-dev"
+
+[tasks."docs:dev"]
+description = "Run the app with hot reload, its answers from remy-docs-dev (CLOUDFLARE_ENV=docs). Ask at /en/app/ask; docs pages at /en/docs. Needs Cloudflare login"
+dir = "{{config_root}}"
+raw = true
+env = { CLOUDFLARE_ENV = "docs" }
+run = "./node_modules/.bin/vite dev"
+
+[tasks."docs:dev:delete"]
+description = "Delete the dev AI Search instance remy-docs-dev and everything indexed in it (production untouched)"
+dir = "{{config_root}}"
+run = "node scripts/docs-dev.mjs delete"
+
 [tasks."docs:manifest"]
-description = "List the sections docs:index would upload (key, URL, size), without contacting Cloudflare. Instant"
+description = "List the sections docs:index would upload (key, URL, size), without contacting Cloudflare; name files or slugs for only those. Instant"
 dir = "{{config_root}}"
 run = "node scripts/docs-manifest.mjs"

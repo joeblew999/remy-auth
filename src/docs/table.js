@@ -19,6 +19,9 @@ export const docsTable = [
   { file: 'CHANGELOG.md', slug: 'changelog' },
 ];
 
+/** A page's title: the file's first "# " heading (plain Markdown has no frontmatter). The site and the index task both use it. */
+export const firstHeading = source => source.match(/^#\s+(.+)$/m)?.[1].trim() ?? '';
+
 /** The docs language: every locale serves the page in its frame, but the text and the canonical URL are English. */
 export const docsLocale = 'en';
 
