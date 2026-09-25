@@ -1,6 +1,6 @@
 # Shared auth service
 
-Status: proposed, 2026-09-24; refreshed 2026-09-25 for TanStack Start. Minimal GUI proof implemented; auth service implementation has not started. Builds on the [TanStack plan](tanstack.md), which must land first.
+Status: proposed, 2026-09-24; refreshed 2026-09-25 for TanStack Start. Minimal GUI proof implemented; auth service implementation has not started. Builds on the [TanStack move](tanstack.md), on main since release 0.9.0.
 Owner: remy-auth. First consumer: in-repo sample; first external consumer: remy-data.
 Reviewer defines acceptance;
 Executor implements and verifies a bounded milestone. Do not begin a fleet rollout.
