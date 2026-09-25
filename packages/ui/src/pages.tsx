@@ -49,7 +49,8 @@ function Intro({ locale, label, title, intro, back = true }: { locale: Locale; l
   </>;
 }
 
-export function HomePage({ locale, preferred }: { locale: Locale; preferred?: Locale }) {
+/** The home page; `children` go inside the page under its links, for example an app's live status. */
+export function HomePage({ locale, preferred, children }: { locale: Locale; preferred?: Locale; children?: React.ReactNode }) {
   const o = { locale };
   return <Shell locale={locale} preferred={preferred}>
     <section className="mx-auto flex max-w-2xl flex-col gap-6">
@@ -58,6 +59,7 @@ export function HomePage({ locale, preferred }: { locale: Locale; preferred?: Lo
         <Link className={buttonVariants({ size: 'lg' })} to="/demo" preload="intent">{m.demo_link({}, o)}</Link>
         <Link className={buttonVariants({ size: 'lg', variant: 'outline' })} to="/formats" preload="intent">{m.formats_link({}, o)}</Link>
       </div>
+      {children}
     </section>
   </Shell>;
 }
@@ -78,8 +80,10 @@ export function DemoPage({ locale, preferred, onReserve, onDirtyChange }: {
   const [count, setCount] = useState(0);
   const [errors, setErrors] = useState<{ name?: string; guests?: string }>({});
   const [reservation, setReservation] = useState<{ name: string; count: number; message?: string } | null>(null);
+  const [failed, setFailed] = useState(false);
   function settle(next: typeof errors, accepted: { name: string; count: number; message?: string }) {
     const ok = Object.keys(next).length === 0;
+    setFailed(false);
     setErrors(next);
     setReservation(ok ? accepted : null);
     if (ok) onDirtyChange?.(false);
@@ -93,7 +97,9 @@ export function DemoPage({ locale, preferred, onReserve, onDirtyChange }: {
     if (!name) next.name = m.name_required({}, o);
     if (!Number.isInteger(guests) || guests < 1 || guests > 20) next.guests = m.guests_invalid({}, o);
     if (Object.keys(next).length || !onReserve) return settle(next, { name, count: guests });
-    void Promise.resolve(onReserve({ name, guests })).then(result => settle(result.errors ?? {}, { name, count: guests, message: result.message }));
+    void Promise.resolve().then(() => onReserve({ name, guests })).then(
+      result => settle(result.errors ?? {}, { name, count: guests, message: result.message }),
+      () => { setReservation(null); setFailed(true); });
   }
   return <Shell locale={locale} path="/demo" preferred={preferred}>
     <section className="mx-auto flex max-w-2xl flex-col gap-6">
@@ -125,7 +131,7 @@ export function DemoPage({ locale, preferred, onReserve, onDirtyChange }: {
               </Field>
             </FieldGroup>
             <div><Button type="submit">{m.submit({}, o)}</Button></div>
-            <p role="status" className="reserved min-h-6">{reservation && (reservation.message ?? m.reserved({ name: reservation.name, count: reservation.count }, o))}</p>
+            <p role="status" className="reserved min-h-6">{failed ? m.error_detail({}, o) : reservation && (reservation.message ?? m.reserved({ name: reservation.name, count: reservation.count }, o))}</p>
           </form>
         </CardContent>
       </Card>

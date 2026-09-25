@@ -18,17 +18,17 @@ export const statusQuery = queryOptions({
 });
 
 /**
- * A route-level wrapper that adds the live status card under a page: the route's loader fills the
+ * A route-level wrapper that adds the live status card inside a page (its children slot): the route's loader fills the
  * request's QueryClient, so the server HTML already holds the status (and the SSR integration
  * hands it to the browser), and the card keeps it fresh with useQuery. Spread it into the route:
  * `...withStatusCard(Page)`.
  */
-export function withStatusCard(Page: () => React.ReactNode) {
+export function withStatusCard(Page: (props: { children?: React.ReactNode }) => React.ReactNode) {
   return {
     loader: async ({ context }: { context: { queryClient: QueryClient } }) => {
       await context.queryClient.ensureQueryData(statusQuery);
     },
-    component: () => <><Page /><StatusCard /></>,
+    component: () => <Page><StatusCard /></Page>,
   };
 }
 
@@ -38,7 +38,7 @@ export function StatusCard() {
   const o = { locale };
   const router = useRouter();
   const { data, dataUpdatedAt, isFetching } = useQuery({ ...statusQuery, refetchInterval: statusRefreshMs });
-  return <aside aria-labelledby="live-status" className="status-card mx-auto w-full max-w-5xl px-5 pb-8 sm:px-8">
+  return <aside aria-labelledby="live-status" className="status-card mt-6">
     <Card data-status={data?.status} data-updated={dataUpdatedAt || undefined} aria-busy={isFetching}>
       <CardHeader><CardTitle><h2 id="live-status">{m.live_status_heading({}, o)}</h2></CardTitle></CardHeader>
       <CardContent className="flex flex-col gap-4">

@@ -13,6 +13,6 @@ export const Route = createFileRoute('/')({
   ...problemPages,
 });
 
-function Home() {
-  return <HomePage locale={getLocale()} preferred={usePreferred()} />;
+function Home({ children }: { children?: React.ReactNode }) {
+  return <HomePage locale={getLocale()} preferred={usePreferred()}>{children}</HomePage>;
 }

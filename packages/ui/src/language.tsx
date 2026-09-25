@@ -3,7 +3,7 @@ import { locales, localizeHref, setLocale, getTextDirection, type Locale } from 
 import { localeName } from './locale';
 import { m } from './paraglide/messages.js';
 import { Button, buttonVariants } from './components/button';
-import { Alert, AlertAction, AlertDescription } from './components/alert';
+import { Alert, AlertDescription } from './components/alert';
 
 // Plain anchors with Paraglide-localized hrefs: a language change is a full navigation, and
 // setLocale records the choice in Paraglide's cookie without a second navigation.
@@ -24,7 +24,7 @@ export function LanguageHint({ locale, path = '', preferred }: { locale: Locale;
   if (!preferred || preferred === locale || dismissed) return null;
   return <Alert className="language-hint mt-4" lang={preferred} dir={getTextDirection(preferred)}>
     <AlertDescription>{m.language_hint({ language: localeName(preferred) }, { locale: preferred })}</AlertDescription>
-    <AlertAction className="flex flex-wrap items-center gap-2">
+    <div className="mt-2 flex flex-wrap items-center gap-2">
       <a className={buttonVariants({ variant: 'link', size: 'sm' })} href={localizeHref(path || '/', { locale: preferred })} hrefLang={preferred}
         onClick={() => setLocale(preferred, { reload: false })}>
         {m.continue_in({ language: localeName(preferred) }, { locale: preferred })}
@@ -32,6 +32,6 @@ export function LanguageHint({ locale, path = '', preferred }: { locale: Locale;
       <Button variant="outline" size="sm" lang={locale} dir={getTextDirection(locale)} onClick={() => { setLocale(locale, { reload: false }); setDismissed(true); }}>
         {m.keep_language({ language: localeName(locale) }, { locale })}
       </Button>
-    </AlertAction>
+    </div>
   </Alert>;
 }
