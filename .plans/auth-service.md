@@ -62,7 +62,8 @@ recommendations still require pinned-version runtime verification.
    those checks to pass. Report incompatibilities rather than silently switching stores.
 4. Define local ports, issuer/origins, exact callback allowlists, token audiences
    and allowed grant types for the sample app and its second isolated test instance.
-5. Define token lifetime, maximum revocation delay, permission-check caching,
+5. Define token lifetime, maximum revocation delay, permission-check caching (see the runtime
+   architecture below),
    signing-key rotation and the failure behaviour when auth is unavailable.
 6. Write concrete resource-sharing examples before deciding whether ReBAC is needed.
    Start with Better Auth organization roles where they express the requirements.
@@ -70,6 +71,45 @@ recommendations still require pinned-version runtime verification.
 Escalate any required feature incompatible with the chosen database/runtime,
 identity/tenant ambiguity, or need to change another repo's existing public access.
 Do not silently drop a required feature or substitute a new store.
+
+## Runtime architecture: decide centrally, enforce locally (decided 2026-09-25)
+
+The owner chose this over the alternatives: remy-auth as the one backend for every app (couples
+every app's data, deploys and outages to one Worker, and one D1's size limit to the whole family)
+and the shared package alone as the backend (leaves identity and roles without one home). It is
+the Zanzibar pattern: one authority for who may do what, enforcement beside each app's data.
+
+| Lives in | What |
+| --- | --- |
+| remy-auth | Identities, organizations, memberships, roles, app registrations, and relationship records if ReBAC is adopted; issues tokens and publishes its signing keys (JWKS); answers permission questions |
+| The shared package | `requireSession`, `requirePermission(resource, action)` and a `check()` client, as TanStack function middleware: token verification against remy-auth's keys, role permissions evaluated locally, relationship questions sent to remy-auth |
+| Each app | Its own data in its own D1; its permission declarations (resources, actions, which role grants which action) in its registration definition; thin server functions that start with one permission line |
+
+The contract, versioned and owned by remy-auth:
+
+- **Tokens:** short-lived signed tokens carrying issuer, audience (the app), subject, organization
+  and roles for that app. Apps verify them locally with the cached JWKS: no network call per
+  request. Role checks keep working through an auth outage until tokens expire, which bounds
+  revocation for roles.
+- **Decisions:** relationship questions (`check(subject, action, resource)`, and a batch form for
+  lists) go to remy-auth over a Cloudflare service binding, a private Worker-to-Worker call with no
+  public hop, with an HTTP endpoint for consumers outside Cloudflare. A failed or unavailable
+  check refuses (503), never grants.
+- **Caching:** decisions may be cached per Worker instance for no longer than the maximum
+  revocation delay (decision 5); logout and membership changes shorten it through token lifetime.
+- **Lists:** apps filter lists server-side with batch checks or relationship queries; they never
+  return records and hide them in the page.
+- **Same decision everywhere:** HTTP handlers, server functions and MCP tools in an app call the
+  same `requirePermission` or `check()`; there is no second policy for agents.
+
+What an app never has: its own users, sessions, login screens, role tables or RBAC code. What it
+always has: its own data, its own permission declarations, and enforcement beside each operation.
+The sample app (milestone 1) is the reference implementation of this contract, and the second
+isolated instance proves app A's tokens and relationships never grant anything in app B.
+
+Open within this decision: whether the enforcement helpers stay in `@joeblew999/remy-ui` or split
+into a server-only package once a second consumer exists (split only for a real boundary); the
+exact token lifetime and revocation delay (decision 5).
 
 ## Evidence already checked (2026-09-24)
 
