@@ -74,6 +74,30 @@ Escalate any required feature incompatible with the chosen database/runtime,
 identity/tenant ambiguity, or need to change another repo's existing public access.
 Do not silently drop a required feature or substitute a new store.
 
+## Decisions 3 and 6 (2026-09-25, from agent research; owner delegated)
+
+**Decision 3, runtime: proven, no mocks.** A scratch TanStack Start 1.168.58 app on
+`@cloudflare/vite-plugin` 1.58.0 and wrangler 4.137.0 with **Better Auth 1.7.6** signed up, signed
+in, read the session in a loader through `auth.api.getSession({ headers })`, signed out, created
+an organization and a membership, all on local D1. Better Auth's native D1 support is used
+(`database: env.DB`): it picks its own Kysely D1 dialect and turns transactions off for D1, so no
+Drizzle, `kysely-d1` or wrapper package. Plugins: `organization()` first, `tanstackStartCookies()`
+last; the catch-all `src/routes/api/auth/$.ts` calls `auth.handler(request)`. One options module
+feeds a lazily built Worker instance and a CLI-only config; migrations come from Better Auth's
+`auth generate` diffed against the local D1 file and are applied with `wrangler d1 migrations
+apply`. Pin `better-auth` and the auth CLI at 1.7.6 exactly (the repo pins the CLI at 1.7.5). Not
+yet exercised: the OAuth provider, JWT and JWKS, MCP and client-metadata fetching on Workers, and
+scrypt CPU time on deployed Workers (local 56 to 76 ms per hash); these are milestone 1's first spike.
+
+**Decision 6, sharing: organization roles alone are not enough, even for the first slice.**
+Twelve concrete examples from remy-sport (its 27-row relation vocabulary, grants and invitations)
+and remy-data (public reads, one operator key for writes) show relationships such as coach of a
+team, co-organizer of a meeting and invited member that no organization role expresses. The first
+slice uses Better Auth platform roles (the admin plugin) plus the shared relation engine with a
+small sample vocabulary, as the runtime architecture above describes; the organization plugin is
+enabled for an app only when its registration asks for tenants. This refines decision 1's draft
+below, which assumed organizations for every tenant.
+
 ## Proposed decisions 1, 2, 4 and 5
 
 Proposed 2026-09-25, awaiting owner confirmation. Drafted from the
