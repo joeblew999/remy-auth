@@ -11,7 +11,7 @@ task.timings = true
 includes = ["tasks"]
 
 [env]
-# Inputs the shared pipeline tasks read; this project overrides only project:typecheck and
+# Inputs the shared pipeline tasks read; this project overrides only project:generate and
 # project:verify below, because it owns the shared package.
 # A worktree or agent picks its own port from the shell: PREVIEW_PORT=4231 mise run project:verify.
 PREVIEW_PORT = "{{ get_env(name='PREVIEW_PORT', default='4173') }}"
@@ -70,14 +70,10 @@ run = [
   "./node_modules/.bin/modern-web-guidance --version",
 ]
 
-[tasks."project:typecheck"]
-description = "Compile the shared catalogs, then generate Worker types and check the GUI, shared package and Worker (overrides the shared default)"
+[tasks."project:generate"]
+description = "Compile the shared catalogs before type checking (overrides the shared hook, which project:typecheck runs first)"
 dir = "{{config_root}}"
-run = [
-  { task = "ui:generate" },
-  "./node_modules/.bin/wrangler types",
-  "./node_modules/.bin/tsc",
-]
+run = [{ task = "ui:generate" }]
 
 [tasks."ui:pack"]
 description = "Compile and pack the shared UI for another Vite/Tailwind consumer"
