@@ -11,7 +11,10 @@ runs a thin Worker in front of its assets); `observabilityChecks` covers request
 liveness in level 1; the shared `cf:logs` and `cf:errors` tasks read both. A secret canary in
 a query string was verified absent from our log lines and from the persisted Workers Logs; live
 `wrangler tail` still shows Cloudflare's own request metadata with the full URL, including the
-query string, to anyone with account access, so never put secrets in URLs. Decisions for the rest are below.
+query string, to anyone with account access, so never put secrets in URLs. Done 2026-09-25:
+both notification policies exist (real-time issues, and alert rules firing and recovered), each
+emailing the account address; the 5xx and latency rules, saved views and an exercised recovery
+notice are still open. Decisions for the rest are below.
 
 ## Collection baseline
 
@@ -35,8 +38,8 @@ defined lifecycle and access policy; select and verify the export mechanism then
 | Item | Decision | Why |
 | --- | --- | --- |
 | Alert delivery | Email to the Cloudflare account address | Every existing account alert already goes there |
-| Real-time issues | Native policy "Remy Workers: real-time issues" created | Cloudflare detects Worker issues itself; no code |
-| Rule delivery, firing and recovery | Policy "Remy Workers: alert rules firing and recovered" still to create (API reset twice; one click in Notifications) | Needed before any rule below can email |
+| Real-time issues | Native policy "Remy Workers: real-time issues" created (id `d7ee777542904364914da603524f1c5e`, type `workers_observability_real_time_issue`, no filters, email to the account address) | Cloudflare detects Worker issues itself; no code |
+| Rule delivery, firing and recovery | Policy "Remy Workers: alert rules firing and recovered" created 2026-09-25 (id `26fa5f3e73e243a2bc2bfbf95809254a`, type `workers_observability_alert`, filter `status` = `FIRING_FAILED`, `NORMAL`, email to the account address) | Needed before any rule below can email; no rule exists yet, so it has not fired |
 | 5xx and latency rules | Defined in Workers Observability once there is real traffic | The plan's thresholds need traffic to calibrate |
 | Availability alerts | Deferred until a production domain exists | Cloudflare Health Checks need a zone; workers.dev has none |
 | Capacity and cost | Covered by the existing $10 budget alerts | Already in place |
