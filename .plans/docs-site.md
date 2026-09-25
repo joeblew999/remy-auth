@@ -212,9 +212,10 @@ needs prepaid credits (owner's call).
   paths with the docs and `/app/ask` for the entry redirects, the sitemap and the shared checks.
 - **"Docs" in the header through `SiteNavLinks`**, a context the shared `SiteShell` reads; an app
   that provides nothing (remy-auth-app) keeps the shared links only. D7's question stays open.
-- **Content loads before hydration**: the router's `hydrate` option (awaited by TanStack Router)
-  preloads the page's chunk; without it the article suspended during hydration and React replaced
-  the server's text with nothing until the chunk arrived. A check now fails on any such drop.
+- **Content loads before hydration** (superseded by [Server-rendered docs](#server-rendered-docs-2026-09-25):
+  there is no content chunk any more): the router's `hydrate` option (awaited by TanStack Router)
+  preloaded the page's chunk; without it the article suspended during hydration and React replaced
+  the server's text with nothing until the chunk arrived. A check still fails on any such drop.
 - **Local runs use `wrangler dev --local`** (`playwright.config.ts`, `project:preview`): an
   `ai_search` binding always runs remotely, and without a login Wrangler refuses to start at all,
   which would break CI and the "no Cloudflare account needed" rule. Locally the binding is off.
@@ -243,3 +244,86 @@ every item's URL is an existing heading on the built page.
 `mise run project:test:google` (6 of 6 pages pass every audit, `/en/docs/gui` included). Not run:
 `project:test:cwv` and the answer check, which need a Cloudflare preview; the hands-on pass on a
 throttled phone was done locally (screenshots, with and without JavaScript), not on a preview.
+
+## Server-rendered docs (2026-09-25)
+
+Owner, 2026-09-25: "I'm also a bit pissed off that this thing loads all the docs gui as
+JavaScript. Maybe it's possible to do it both on server and client, so that site has no js or very
+little. There is no reason for docs to be any other way perhaps because at the moment it's slow in
+the browser." And: "What about the server side rendering thing?"
+
+Before: the pages were already rendered on the server, but every page's text was also Fumadocs
+MDX's compiled Markdown shipped as its own JavaScript chunk (8 chunks, `README-*`, `how-we-work-*`,
+`CHANGELOG-*` …, 10 to 110 KiB each), fetched before hydration (the router's `hydrate` option)
+and on every client navigation.
+
+Survey (installed: Start 1.168.58, Router 1.170.39, fumadocs-mdx 15.4.5, React 19.3):
+
+| Candidate | Result |
+| --- | --- |
+| TanStack Start server components (`@tanstack/react-start/rsc`, `renderServerComponent`) | Rejected for now. Start's docs mark it **experimental** ("The API may see refinements", expected to stay experimental into early v1; `@tanstack/react-start-rsc` 0.1.57). It needs `@vitejs/plugin-rsc`, forwards *every* server function into a new `rsc` environment (`ssrResolverStrategy: vite-rsc-forward`) and sets `ssr.noExternal: true` app-wide; TanStack's RSC examples run on Nitro, none on Cloudflare's Vite plugin; and the browser still gets the tree (as a Flight payload) plus the Flight client. Revisit when stable. |
+| Selective SSR (`ssr: false / 'data-only'`) and prerendering | Not applicable: both change where or when the server renders, never what the browser downloads and hydrates. |
+| The server sends the article as an HTML string, shown with `dangerouslySetInnerHTML` | Tried and dropped: lightest (no renderer at all), but its links are not React elements, so a docs link is no longer a router `Link` (preload on intent, localized by the router) and the check "docs links navigate in the app" fails as written (it requires hydrated links). It would also have needed our own click handler: a reinvented `Link`. |
+| **Fumadocs' pattern for server-compiled Markdown** (`examples/tanstack-start-local-md`: the server sends the page's hast tree as loader data, the page renders it with `hast-util-to-jsx-runtime`) | **Chosen.** `@fumadocs/local-md` itself reads files from disk at runtime (no disk on Workers), so the tree comes from our existing fumadocs-mdx build instead: a rehype plugin exports the finished tree (after Shiki, heading ids and the link rewrite) as the page module's `tree`, the way fumadocs-mdx adds its own exports. Links stay TanStack `Link`s through the same `docsComponents`. |
+
+How it works: `getDocsPage(slug)` returns the page with `tree` (registered as serializable, as in
+Fumadocs' example); the route loader calls it, so the server's HTML carries the whole text,
+hydration renders the same tree from the loader data (nothing to fetch first: the router's
+`hydrate` preload and `src/docs/loader.tsx` are gone) and a client navigation fetches the next
+page's data, never its code. The compiled Markdown now exists only in the Worker. The earlier note
+about prose naming `request.cf` matching the build-boundary marker no longer applies: the docs text
+is not in any browser bundle.
+
+Measured once each, local production build in Chromium (`project:preview` artifact):
+
+| | Before | After |
+| --- | --- | --- |
+| Docs content chunks in `dist/client/assets` | 8 (≈ 280 KiB) | 0 |
+| JavaScript `/en/docs/how-we-work` loads | 18 files, 933,825 bytes | 16 files, 938,901 bytes |
+| JavaScript `/en/docs/changelog` loads | ≈ 981,600 bytes (shell + 69,492 chunk) | 938,901 bytes |
+| HTML of `/en/docs/how-we-work` | 396,799 bytes | 419,353 bytes (the tree as loader data) |
+
+Every docs page now loads the same JavaScript: the per-page code is gone, and one generic renderer
+(`hast-util-to-jsx-runtime`, about 29 KB in `view-*`) takes its place, so a short page loads about
+the same bytes and a long one fewer. The text still travels twice (as HTML and as data for
+hydration), as it did before (as HTML and as code).
+
+**What the owner feels as slow is the shell, not the docs:** `index-*` (React, Router, Start,
+347 KB) and the shared UI's `pages-*` (319 KB), plus app pieces the root pulled onto every page
+(≈ 216 KB) that a docs page never uses. The orchestrator chose option 1 below (trim what every
+page loads); done the same day, see [Trimmed first load](#trimmed-first-load-2026-09-25).
+
+### Trimmed first load (2026-09-25)
+
+Stock mechanisms only (TanStack Router's code splitting and moving imports to the modules that use
+them); no behaviour change, no check changed. What every page loaded, and why:
+
+- **TanStack keeps a route's `loader`, `validateSearch` and `search` options in the first load**
+  (critical); only components are split by default. `/app`'s loader (`statusCardLoader`) brought the
+  API client, its contract, oRPC and full Zod (≈ 120 KB) to every page: the route now sets
+  `codeSplitGroupings: [['loader', 'component']]` (TanStack's per-route option; the component needs
+  the same code, so no extra waterfall).
+- `/app/ask`'s `validateSearch` used full Zod (`src/ask.ts`): now Zod Mini, as the shared search
+  params already do; same schema, same results.
+- The formats routes' shared options came from `src/formats-extras.tsx`, which also renders the rows
+  (and `DeferredPlace`): they moved to `src/formats-route.ts`, so the rows go with the component.
+- The shared UI's `pages` module is both the site frame and the home and formats pages, and the root,
+  the problem pages and the docs imported the frame from it: the frame is now `@joeblew999/remy-ui/shell`
+  and the formats rows `rows.tsx` (both re-exported by `pages`, so remy-auth-app is unaffected), and
+  the showcase modules on the critical path import from them.
+
+Measured once each, local production build, Chromium, JavaScript bytes loaded:
+
+| Page | Before | After |
+| --- | --- | --- |
+| `/en/docs/how-we-work` | 16 files, 938,901 | 18 files, 762,456 (−19%) |
+| `/en` | 14 files, 891,380 | 17 files, 767,242 (−14%) |
+| `/en/app` | 16 files, 1,014,571 | 21 files, 977,276 (−4%) |
+
+What a docs page still loads: React DOM (203 KB) and Query core (26 KB) in `index-*`; the site
+frame's `shell-*` (257 KB: Base UI's navigation and dropdown menus with Floating UI, `cn`, the
+URLPattern polyfill and Paraglide's runtime and messages); Router core (`load-client-*`, 54 KB);
+Start's server-function client with seroval (36 KB); Zod Mini's core (51 KB), which the formats and
+answer pages' `validateSearch` keep in every first load. Going further means changing what the frame
+is built from (plain links instead of Base UI menus in the site header) or validating those search
+params without Zod: owner decisions, not trimming.

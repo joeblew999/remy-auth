@@ -11,7 +11,8 @@ import { Input } from './components/input';
 import { SidebarInset, SidebarProvider } from './components/sidebar';
 import { AppSidebar } from './blocks/sidebar-16/app-sidebar';
 import { SiteHeader } from './blocks/sidebar-16/site-header';
-import { FormatsContent, Intro, SkipLink, ZoneBadge, type FormatsControlCards, type FormatsExtras } from './pages';
+import { FormatsContent, type FormatsControlCards, type FormatsExtras } from './pages';
+import { Intro, SkipLink, ZoneBadge } from './shell';
 import { formatLocale, type LocaleInfo } from './locale-info';
 import { reservationSchema, type Reservation, type ReservationDraft, type ReservationResult } from './reservation';
 

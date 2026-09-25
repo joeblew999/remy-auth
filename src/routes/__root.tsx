@@ -6,7 +6,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { getLocale, direction } from '@joeblew999/remy-ui/locale';
 import { ThemeProvider } from '@joeblew999/remy-ui/theme';
 import { DirectionProvider } from '@joeblew999/remy-ui/components/direction';
-import { SiteNavLinks } from '@joeblew999/remy-ui/pages';
+import { SiteNavLinks } from '@joeblew999/remy-ui/shell';
 import { docsHeaderLink } from '../docs/header-link';
 import { preferredLocale } from '../preferred';
 import { NotFound, ErrorPage } from '../problem';

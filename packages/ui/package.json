@@ -36,6 +36,7 @@
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts",
     "./pages": "./src/pages.tsx",
+    "./shell": "./src/shell.tsx",
     "./app-pages": "./src/app-pages.tsx",
     "./reservation": "./src/reservation.ts",
     "./api/server": "./src/api/server.ts",

@@ -6,7 +6,7 @@ import { formatLocale, localeInfo } from '../locale-info';
 import { samples } from '../samples.js';
 import { buttonVariants } from '../components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/card';
-import { Row } from '../pages';
+import { Row } from '../rows';
 
 // Typed, validated search params on the formats page: /formats?currency=JPY&count=11&calendar=islamic.
 // The route wires `validateSearch` to a Zod 4 schema, which TanStack Router takes directly as a

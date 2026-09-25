@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start';
-import { z } from 'zod';
+import * as z from 'zod/mini';
 import { locales } from '@joeblew999/remy-ui/locale';
 import { answerQuestion } from './ask.server';
 
@@ -8,8 +8,12 @@ import { answerQuestion } from './ask.server';
 
 export { askMaxLength, type AskResult } from './ask-limits';
 
-/** The page's search params: the question, whatever its length, so a long one can be explained rather than refused. */
-export const askSearchSchema = z.object({ q: z.string().optional().catch(undefined) });
+/**
+ * The page's search params: the question, whatever its length, so a long one can be explained rather
+ * than refused. Zod Mini, as the shared search params use: the route's validateSearch runs in every
+ * page's first load (TanStack keeps it out of the split chunks), and full Zod would add ~85 KB there.
+ */
+export const askSearchSchema = z.object({ q: z.catch(z.optional(z.string()), undefined) });
 
 /** Asks on the server: the binding, the rate limit and the visitor's address live only there (ask.server.ts). */
 export const askDocs = createServerFn({ method: 'GET' })

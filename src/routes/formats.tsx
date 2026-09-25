@@ -4,7 +4,8 @@ import { getLocale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
 import { FormatsPage } from '@joeblew999/remy-ui/pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
-import { formatsExtras, formatsRouteOptions } from '../formats-extras';
+import { formatsExtras } from '../formats-extras';
+import { formatsRouteOptions } from '../formats-route';
 import { usePreferred } from '../preferred';
 import { problemPages } from '../problem';
 

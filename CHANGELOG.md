@@ -6,6 +6,17 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `shell`: the site frame (`SiteShell`, `Shell`, `SiteNavLinks`, `Intro`, `SkipLink`, `ZoneBadge`)
+  in a module of its own, so a page that needs only the frame (remy-auth's docs and problem pages)
+  no longer downloads the home and formats pages. `pages` re-exports all of it: nothing changes for
+  existing imports.
+
+### Changed
+- The formats rows (`Group`, `Row`) live in their own module and the showcase modules whose route
+  options run in every page's first load (search params, time zones, device place) import them and
+  the frame from there instead of from `pages`. `pages` still exports them.
+
 ## [0.10.6] - 2026-09-25
 
 ### Added

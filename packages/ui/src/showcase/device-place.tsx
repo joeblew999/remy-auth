@@ -3,7 +3,7 @@ import type { Locale } from '../paraglide/runtime.js';
 import { m } from '../paraglide/messages.js';
 import { Button } from '../components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/card';
-import { Row } from '../pages';
+import { Row } from '../rows';
 import { formatLocale } from '../locale-info';
 
 // The device's own location, from the browser's Geolocation API. Following privacy-by-design

@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { getLocale, type Locale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
 import { AppShell } from '@joeblew999/remy-ui/app-pages';
-import { Intro } from '@joeblew999/remy-ui/pages';
+import { Intro } from '@joeblew999/remy-ui/shell';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { Alert, AlertDescription } from '@joeblew999/remy-ui/components/alert';
 import { askDocs, askMaxLength, askSearchSchema, type AskResult } from '../ask';
