@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
-#MISE description="Upload this branch as a Cloudflare preview beside production (production untouched), then run level 1 against it (~1 min). Pass an alias to override the branch name"
+#MISE description="Upload this branch as a Cloudflare preview beside production (production untouched), wait until it serves the new version, then run level 1 against it (~1 min). Builds into dist/: not alongside a local level. Pass an alias to override the branch name"
 #MISE dir="{{config_root}}"
 #USAGE arg "[alias]" help="Preview alias; defaults to the current git branch"
 # The preview lives at https://<alias>-<worker>.<subdomain>.workers.dev. Its origin is derived
-# from DEPLOY_ORIGIN and the Worker name in wrangler.jsonc, baked into the build as PUBLIC_ORIGIN
-# (prerendered links need it), and used as TEST_BASE_URL for the checks.
+# from DEPLOY_ORIGIN and the Worker name (read by Wrangler's own config reader), baked into the
+# build as PUBLIC_ORIGIN (prerendered links need it), and used as TEST_BASE_URL for the checks.
 set -euo pipefail
 alias="${usage_alias:-$(git rev-parse --abbrev-ref HEAD)}"
 alias="$(printf '%s' "$alias" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-' '-' | sed 's/^-*//; s/-*$//' | cut -c1-40)"
-worker="$(sed -n 's/^[[:space:]]*"name":[[:space:]]*"\([^"]*\)".*/\1/p' wrangler.jsonc | head -1)"
+worker="$(node --input-type=module -e "import { unstable_readConfig } from 'wrangler'; console.log(unstable_readConfig({}).name ?? '')")"
+[ -n "$worker" ] || { echo "cf:preview: the Wrangler configuration has no Worker name" >&2; exit 1; }
 host="${DEPLOY_ORIGIN#https://}"
 case "$host" in
   "$worker".*.workers.dev) ;;
@@ -16,13 +17,17 @@ case "$host" in
 esac
 origin="https://$alias-$worker.${host#"$worker".}"
 echo "Preview: $origin"
-PUBLIC_ORIGIN="$origin" ./node_modules/.bin/vite build
-upload="$(./node_modules/.bin/wrangler versions upload --preview-alias "$alias" | tee /dev/stderr)"
-version="$(printf '%s' "$upload" | sed -n 's/.*Worker Version ID: \([0-9a-f-]*\).*/\1/p' | head -1)"
-# Cloudflare rolls a new version out over a few seconds: check only once /healthz reports it.
-for _ in $(seq 1 30); do
-  curl -fsS "$origin/healthz" 2>/dev/null | grep -q "\"$version\"" && break
-  sleep 2
-done
-TEST_BASE_URL="$origin" TEST_TARGET=remote ./node_modules/.bin/playwright test --project=ours
+
+export PUBLIC_ORIGIN="$origin"
+./node_modules/.bin/vite build
+
+# Wrangler records the uploaded version in its structured output file; cf:wait reads it.
+output="$(mktemp)"
+trap 'rm -f "$output"' EXIT
+export WRANGLER_OUTPUT_FILE_PATH="$output"
+./node_modules/.bin/wrangler versions upload --preview-alias "$alias"
+"$(dirname "$0")/wait" "$origin" "$output"
+
+export TEST_BASE_URL="$origin" TEST_TARGET=remote
+./node_modules/.bin/playwright test --project=ours
 echo "Preview passed level 1: $origin"
