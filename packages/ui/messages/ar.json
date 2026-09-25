@@ -284,5 +284,16 @@
   "app_home_intro": "كل ما هنا يعمل في متصفحك. تبقى صفحات الموقع مقروءة دون JavaScript.",
   "location_title": "أين أنت",
   "location_description": "موقع شبكتك وفق Cloudflare، وموقع جهازك إن سمحت بذلك.",
-  "location_intro": "قارن ما تقوله الشبكة بما يقوله جهازك."
+  "location_intro": "قارن ما تقوله الشبكة بما يقوله جهازك.",
+  "sections_nav": "في هذه الصفحة",
+  "section_language": "هذه اللغة",
+  "section_language_note": "ما هذه اللغة، وكيف تُكتب وتُقرأ.",
+  "section_time": "التواريخ والأوقات",
+  "section_time_note": "ما اليوم والوقت الآن، وكيف تكتبهما هذه اللغة.",
+  "section_numbers": "الأرقام",
+  "section_numbers_note": "كيف تُكتب الأرقام: الخانات والتجميع والنسب المئوية والوحدات.",
+  "section_money": "المال",
+  "section_money_note": "كيف تبدو المبالغ بهذه اللغة وبعملات أخرى.",
+  "section_words": "الكلمات",
+  "section_words_note": "كيف يتغير النص مع قيمة ما: الجمع والترتيب والصيغ والفرز."
 }

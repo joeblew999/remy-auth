@@ -62,60 +62,77 @@ function Choices({ label, name, children }: { label: string; name: string; child
   </div>;
 }
 
+/** Which search param a control sets. */
+export type ChoiceKind = 'currency' | 'count' | 'calendar';
+type ChoiceProps = { locale: Locale; search: FormatsSearch; interactive?: boolean; to?: '/formats' | '/app/formats' };
+
 /**
- * Controls for the formats page's search params, and the rows they change: an amount in the
- * chosen currency, a plural for the chosen count and a date in the chosen calendar. Every
- * control is a real, typed Link (shareable, works without JavaScript, preloads on intent); the
- * current choice is the exactly active one. Render it through FormatsPage's `after` extra with
- * `search={Route.useSearch()}`.
+ * One control for the formats page's search params, beside the row it changes: the currency (an
+ * amount in it), the count (a plural) or the calendar (a date in it). Every choice is a real, typed
+ * Link (shareable, works without JavaScript, preloads on intent); the current choice is the exactly
+ * active one. `to` is the page it sits on, the site's /formats or the app's /app/formats.
  */
-export function FormatsControls({ locale, search, interactive = true, to = '/formats' }: { locale: Locale; search: FormatsSearch; interactive?: boolean; to?: '/formats' | '/app/formats' }) {
+export function ChoiceCard({ kind, locale, search, interactive = true, to = '/formats' }: ChoiceProps & { kind: ChoiceKind }) {
   const o = { locale };
   const number = new Intl.NumberFormat(locale);
   const currencyName = new Intl.DisplayNames([locale], { type: 'currency' });
   const calendarName = new Intl.DisplayNames([locale], { type: 'calendar' });
   const link = { from: to, to, resetScroll: false, activeOptions: { exact: true }, activeProps: { className: chosen }, inactiveProps: { className: choice } } as const;
-  // Static stand-ins with the same look, for HTML rendered without a request (see PrerenderedFormatsControls).
+  // Static stand-ins with the same look, for HTML rendered without a request (see prerenderedChoiceCards).
   const still = (selected: boolean, text: React.ReactNode) => <span className={selected ? chosen : choice}>{text}</span>;
-  return <Card data-showcase="search-params">
-    <CardHeader><CardTitle>{m.choices_heading({}, o)}</CardTitle></CardHeader>
-    <CardContent className="flex flex-col gap-5">
-      <p className="text-sm leading-relaxed text-muted-foreground">{m.choices_note({}, o)}</p>
+  const rows = 'grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-x-4 gap-y-3 text-sm';
+  const body = {
+    currency: <>
       <Choices name="currency" label={m.currency_heading({}, o)}>
         {currencies.map(currency => <li key={currency}>
           {interactive ? <Link {...link} search={prev => ({ ...prev, currency })} title={currencyName.of(currency)} data-currency-choice={currency}>{currency}</Link> : still(currency === search.currency, currency)}
         </li>)}
       </Choices>
+      <dl className={rows}><Row sample="chosen-currency" label={currencyName.of(search.currency) ?? search.currency} data-value={search.currency}>
+        {new Intl.NumberFormat(locale, { style: 'currency', currency: search.currency }).format(samples.amount)}
+      </Row></dl>
+    </>,
+    count: <>
       <Choices name="count" label={m.plural_heading({}, o)}>
         {countChoices.map(count => <li key={count}>
           {interactive ? <Link {...link} search={prev => ({ ...prev, count })} data-count-choice={count}>{number.format(count)}</Link> : still(count === search.count, number.format(count))}
         </li>)}
       </Choices>
+      <dl className={rows}><Row sample="chosen-count" label={number.format(search.count)} data-value={search.count}>{m.apps_count({ count: search.count }, o)}</Row></dl>
+    </>,
+    calendar: <>
       <Choices name="calendar" label={m.calendar_label({}, o)}>
         {calendarsFor(locale).map(calendar => <li key={calendar}>
           {interactive ? <Link {...link} search={prev => ({ ...prev, calendar })} data-calendar-choice={calendar}>{calendarName.of(calendar)}</Link> : still(calendar === search.calendar, calendarName.of(calendar))}
         </li>)}
       </Choices>
-      <dl className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-x-4 gap-y-3 text-sm">
-        <Row sample="chosen-currency" label={currencyName.of(search.currency) ?? search.currency} data-value={search.currency}>
-          {new Intl.NumberFormat(locale, { style: 'currency', currency: search.currency }).format(samples.amount)}
-        </Row>
-        <Row sample="chosen-count" label={number.format(search.count)} data-value={search.count}>{m.apps_count({ count: search.count }, o)}</Row>
-        <Row sample="chosen-calendar" label={calendarName.of(search.calendar) ?? search.calendar} data-value={search.calendar}>
-          <time dateTime={samples.date.toISOString().slice(0, 10)}>{new Intl.DateTimeFormat(locale, { dateStyle: 'long', calendar: search.calendar, timeZone: 'UTC' }).format(samples.date)}</time>
-        </Row>
-      </dl>
+      <dl className={rows}><Row sample="chosen-calendar" label={calendarName.of(search.calendar) ?? search.calendar} data-value={search.calendar}>
+        <time dateTime={samples.date.toISOString().slice(0, 10)}>{new Intl.DateTimeFormat(locale, { dateStyle: 'long', calendar: search.calendar, timeZone: 'UTC' }).format(samples.date)}</time>
+      </Row></dl>
+    </>,
+  }[kind];
+  return <Card data-showcase="search-params" data-choice={kind}>
+    <CardHeader><CardTitle>{m.choices_heading({}, o)}</CardTitle></CardHeader>
+    <CardContent className="flex flex-col gap-5">
+      <p className="text-sm leading-relaxed text-muted-foreground">{m.choices_note({}, o)}</p>
+      {body}
     </CardContent>
   </Card>;
 }
 
+/** The three controls, for FormatsContent's `controls`: each is placed in the section it changes. */
+export function choiceCards(props: ChoiceProps) {
+  return { currency: <ChoiceCard kind="currency" {...props} />, count: <ChoiceCard kind="count" {...props} />, calendar: <ChoiceCard kind="calendar" {...props} /> };
+}
+
 /**
- * FormatsControls for a prerendered page. Its HTML is built without a request, so it cannot know
- * the address's search params: the HTML shows the defaults as static labels, and the live controls
- * with the address's values replace them once hydrated, at the same size.
+ * The controls for a prerendered page. Its HTML is built without a request, so it cannot know the
+ * address's search params: the HTML shows the defaults as static labels, and the live controls with
+ * the address's values replace them once hydrated, at the same size.
  */
-export function PrerenderedFormatsControls({ locale, search }: { locale: Locale; search: FormatsSearch }) {
-  return <ClientOnly fallback={<FormatsControls locale={locale} search={searchDefaults} interactive={false} />}>
-    <FormatsControls locale={locale} search={search} />
+export function prerenderedChoiceCards({ search, ...props }: ChoiceProps) {
+  const card = (kind: ChoiceKind) => <ClientOnly fallback={<ChoiceCard kind={kind} {...props} search={searchDefaults} interactive={false} />}>
+    <ChoiceCard kind={kind} {...props} search={search} />
   </ClientOnly>;
+  return { currency: card('currency'), count: card('count'), calendar: card('calendar') };
 }

@@ -1,5 +1,5 @@
 import { createFileRoute, stripSearchParams } from '@tanstack/react-router';
-import { searchDefaults } from '@joeblew999/remy-ui/showcase/search-params';
+import { choiceCards, searchDefaults } from '@joeblew999/remy-ui/showcase/search-params';
 import { getLocale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
 import { FormatsPage } from '@joeblew999/remy-ui/pages';
@@ -21,5 +21,5 @@ function Formats() {
   const { info, place } = Route.useLoaderData();
   const locale = getLocale();
   return <FormatsPage locale={locale} info={info} preferred={usePreferred()}
-    extras={formatsExtras({ locale, info, place, search: Route.useSearch(), to: '/formats' })} />;
+    extras={formatsExtras({ locale, info, place })} controls={choiceCards({ locale, search: Route.useSearch(), to: '/formats' })} />;
 }

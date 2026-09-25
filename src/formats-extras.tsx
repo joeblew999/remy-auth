@@ -4,7 +4,7 @@ import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { Group, Row, type FormatsExtras } from '@joeblew999/remy-ui/pages';
 import type { Place } from '@joeblew999/remy-ui/cloudflare';
-import { FormatsControls, validateSearch, type FormatsSearch } from '@joeblew999/remy-ui/showcase/search-params';
+import { validateSearch } from '@joeblew999/remy-ui/showcase/search-params';
 import { getPlace } from './place';
 import { DeferredPlace } from './showcase/deferred-place';
 
@@ -12,14 +12,14 @@ import { DeferredPlace } from './showcase/deferred-place';
  * The rows this server-rendered app adds to the shared formats content, on the site page and the
  * app page alike: Cloudflare's view of the visitor (streamed) and further Intl examples.
  */
-export function formatsExtras({ locale, info, place, search, to }: { locale: Locale; info: LocaleInfo; place: Promise<Place>; search: FormatsSearch; to: '/formats' | '/app/formats' }): FormatsExtras {
+export function formatsExtras({ locale, info, place }: { locale: Locale; info: LocaleInfo; place: Promise<Place> }): FormatsExtras {
   const o = { locale };
   const list = new Intl.ListFormat(locale, { type: 'conjunction' });
   const calendarName = new Intl.DisplayNames([locale], { type: 'calendar' });
   const regionName = new Intl.DisplayNames([locale], { type: 'region' });
   return {
     language: <Row sample="region" label={m.region_label({}, o)}>{regionName.of(samples.region)}</Row>,
-    beforeSystems: <DeferredPlace locale={locale} place={place} />,
+    time: <DeferredPlace locale={locale} place={place} />,
     systems: <>
       {info.weekend && <Row sample="weekend" label={m.weekend_label({}, o)}>{list.format(info.weekend.map(day => weekdayName(locale, day)))}</Row>}
       <Row sample="other-calendars" label={m.other_calendars_label({}, o)}>
@@ -35,12 +35,11 @@ export function formatsExtras({ locale, info, place, search, to }: { locale: Loc
       <Row sample="currencies" label={m.currencies_label({}, o)}>{list.format(samples.currencies.map(currency => new Intl.NumberFormat(locale, { style: 'currency', currency }).format(samples.amount)))}</Row>
       <Row sample="currency-name" label={m.currency_name_label({}, o)}>{new Intl.DisplayNames([locale], { type: 'currency' }).of('EUR')}</Row>
     </>,
-    after: <>
-      <FormatsControls locale={locale} search={search} to={to} />
-      <p className="text-sm leading-relaxed text-muted-foreground">{m.currency_note({}, o)}</p>
-      <Group title={m.units_heading({}, o)}>
-        <Row sample="distance" label={m.distance_label({}, o)}>{m.distance_value({ km: samples.km }, o)}</Row>
-      </Group>
+    money: <p className="text-sm leading-relaxed text-muted-foreground md:col-span-2">{m.currency_note({}, o)}</p>,
+    numbers: <Group title={m.units_heading({}, o)}>
+      <Row sample="distance" label={m.distance_label({}, o)}>{m.distance_value({ km: samples.km }, o)}</Row>
+    </Group>,
+    words: <>
       <Group title={m.variants_heading({}, o)}>
         <Row sample="greeting" label={m.greeting_label({}, o)}>{m.greeting({ name: samples.guest }, o)}</Row>
         {samples.statuses.map(status => <Row key={status} sample={`status-${status}`} label={m.status_label({}, o)}>{m.invite_status({ status }, o)}</Row>)}

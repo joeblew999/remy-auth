@@ -278,5 +278,16 @@
   "app_home_intro": "Todo aquí se ejecuta en tu navegador. Las páginas del sitio se leen sin JavaScript.",
   "location_title": "Dónde estás",
   "location_description": "La ubicación de tu red según Cloudflare y, si lo permites, la de tu dispositivo.",
-  "location_intro": "Compara lo que dice la red con lo que dice tu dispositivo."
+  "location_intro": "Compara lo que dice la red con lo que dice tu dispositivo.",
+  "sections_nav": "En esta página",
+  "section_language": "Este idioma",
+  "section_language_note": "Qué idioma es y cómo se escribe y se lee.",
+  "section_time": "Fechas y horas",
+  "section_time_note": "Qué día y qué hora es, y cómo los escribe este idioma.",
+  "section_numbers": "Números",
+  "section_numbers_note": "Cómo se escriben los números: dígitos, agrupación, porcentajes y unidades.",
+  "section_money": "Dinero",
+  "section_money_note": "Cómo se ven los importes, en este idioma y en otras monedas.",
+  "section_words": "Palabras",
+  "section_words_note": "Cómo cambia el texto con un valor: plurales, orden, variantes y ordenación."
 }

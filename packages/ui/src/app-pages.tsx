@@ -10,7 +10,7 @@ import { Input } from './components/input';
 import { SidebarInset, SidebarProvider } from './components/sidebar';
 import { AppSidebar } from './blocks/sidebar-16/app-sidebar';
 import { SiteHeader } from './blocks/sidebar-16/site-header';
-import { FormatsContent, Intro, SkipLink, ZoneBadge, type FormatsExtras } from './pages';
+import { FormatsContent, Intro, SkipLink, ZoneBadge, type FormatsControlCards, type FormatsExtras } from './pages';
 import type { LocaleInfo } from './locale-info';
 
 // App pages (paths.js): they need JavaScript and use the app shell. Kept apart from ./pages, the
@@ -30,7 +30,7 @@ export function AppShell({ locale, path = '/app', preferred, children }: { local
         <SidebarInset>
           <div className="flex flex-1 flex-col gap-4 p-4 md:p-8">
             <LanguageHint locale={locale} path={path} preferred={preferred} />
-            <main id="main" className="mx-auto w-full max-w-3xl flex-1"><div className="mb-6"><ZoneBadge locale={locale} app /></div>{children}</main>
+            <main id="main" className="mx-auto w-full max-w-5xl flex-1"><div className="mb-6"><ZoneBadge locale={locale} app /></div>{children}</main>
           </div>
         </SidebarInset>
       </div>
@@ -65,8 +65,8 @@ export function LocationPage({ locale, preferred, children }: { locale: Locale; 
 }
 
 /** The formats page inside the app: the same content as the site page, in the app frame. */
-export function AppFormatsPage({ locale, info, preferred, extras = {} }: { locale: Locale; info: LocaleInfo; preferred?: Locale; extras?: FormatsExtras }) {
-  return <AppShell locale={locale} path="/app/formats" preferred={preferred}><FormatsContent locale={locale} info={info} extras={extras} backTo="/app" /></AppShell>;
+export function AppFormatsPage({ locale, info, preferred, extras = {}, controls = {} }: { locale: Locale; info: LocaleInfo; preferred?: Locale; extras?: FormatsExtras; controls?: FormatsControlCards }) {
+  return <AppShell locale={locale} path="/app/formats" preferred={preferred}><FormatsContent locale={locale} info={info} extras={extras} controls={controls} backTo="/app" /></AppShell>;
 }
 
 /** The demo form's starting number of seats. */
