@@ -41,7 +41,7 @@ Tests run in tiers, chosen by cost and by what a change can break, never by skip
 
 | Tier | Task | Runs | When |
 | --- | --- | --- | --- |
-| Quick | `project:test:quick` | every check of ours in `QUICK_LOCALES` (default `en,ar,ja,th`: one language per writing system) | while editing; not a gate |
+| Quick | `project:test:quick` | every check of ours in `QUICK_LOCALES` (default `en,ar`: one language per writing system) | while editing; not a gate |
 | Level 1 | `project:test`, inside `project:verify` | every check of ours in every language | before every push, release and deploy |
 | Level 2 | `project:test:google` (audits, local) and `project:test:cwv` (Core Web Vitals, on a Cloudflare preview) | Google's Lighthouse audits; Google's speed thresholds judged where Google and visitors meet the site | before every release (`ui:release` runs both); the audits also in CI on every push and tag |
 
