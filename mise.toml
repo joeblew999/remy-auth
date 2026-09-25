@@ -98,7 +98,7 @@ run = [
 [tasks."ui:components"]
 description = "Regenerate every shadcn component from the registry into the shared package (run from the app, shadcn's monorepo layout; the only way those files change)"
 dir = "{{config_root}}"
-run = "./node_modules/.bin/shadcn add button card input label badge alert field separator direction skeleton empty sidebar breadcrumb collapsible dropdown-menu avatar sheet tooltip navigation-menu use-mobile table spinner dialog command --overwrite --yes"
+run = "./node_modules/.bin/shadcn add button card input label badge alert field separator direction skeleton empty sidebar breadcrumb collapsible dropdown-menu avatar sheet tooltip navigation-menu use-mobile table spinner --overwrite --yes"
 
 [tasks."ui:blocks"]
 description = "Show what upstream shadcn changed in each owned block, in place (shadcn add --diff from the package, whose components alias puts blocks in packages/ui/src/blocks/<name>/components); merge by hand, never --overwrite (it drops Remy's data)"
