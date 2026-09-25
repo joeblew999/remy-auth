@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { locales } from '@joeblew999/remy-ui/runtime';
 import { samples } from '@joeblew999/remy-ui/samples';
-import { checkedLocales, zoneChecks, publicPageChecks, entryChecks, demoChecks, formatsChecks, observabilityChecks, collectErrors, endonym, direction, localizedPath } from '@joeblew999/remy-ui/checks';
+import { checkedLocales, zoneChecks, publicPageChecks, entryChecks, demoChecks, formatsChecks, observabilityChecks, cspChecks, collectErrors, endonym, direction, localizedPath } from '@joeblew999/remy-ui/checks';
 import { localeInfo, weekdayName } from '../packages/ui/src/locale-info';
 import { sitePaths, appPaths, allPaths } from '@joeblew999/remy-ui/paths';
 import { searchParamsChecks } from '@joeblew999/remy-ui/showcase/search-params.checks';
@@ -31,6 +31,7 @@ buildBoundaryChecks({ paths: allPaths, markers: [
   { name: 'TanStack Devtools (the shell hosting the panels)', pattern: /tsd-(?:control|surface)\b/, source: { package: '@tanstack/devtools', from: '@tanstack/react-devtools' } },
 ] });
 observabilityChecks({ service: 'remy-auth', paths: allPaths });
+cspChecks({ paths: allPaths });
 searchParamsChecks();
 preloadChecks();
 navigationBlockingChecks();

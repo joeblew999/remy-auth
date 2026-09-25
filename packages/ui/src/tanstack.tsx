@@ -91,12 +91,16 @@ type HeadOptions = {
 /**
  * A route's `head()`: title, description, self-canonical URL and reciprocal hreflang links
  * (every locale plus x-default, the un-localized entry URL), from Paraglide's URL patterns.
+ * The site home page, in every language, also names the site for search with schema.org's
+ * WebSite (name and the site root), through TanStack's `script:ld+json` head entry.
  */
 export function pageHead({ path, title, description, locale = getLocale(), origin = getUrlOrigin(), brand = 'Remy' }: HeadOptions) {
   const links = alternates(origin, path, locale);
   return {
-    // App pages are for people using the app, not for search: kept out of the index (paths.js).
-    meta: [{ title: `${title(locale)} | ${brand}` }, { name: 'description', content: description(locale) }, ...(isAppPath(path) ? [{ name: 'robots', content: 'noindex' }] : [])],
+    meta: [{ title: `${title(locale)} | ${brand}` }, { name: 'description', content: description(locale) },
+      // App pages are for people using the app, not for search: kept out of the index (paths.js).
+      ...(isAppPath(path) ? [{ name: 'robots', content: 'noindex' }] : []),
+      ...(path === '' ? [{ 'script:ld+json': { '@context': 'https://schema.org', '@type': 'WebSite', name: brand, url: `${origin}/` } }] : [])],
     links: [
       { rel: 'canonical', href: links.canonical },
       ...links.alternates.map(link => ({ rel: 'alternate', hrefLang: link.hrefLang, href: link.href })),

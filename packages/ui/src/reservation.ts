@@ -5,6 +5,11 @@ import { m } from './paraglide/messages.js';
 // The demo reservation's rules, in one Zod schema that the browser (DemoPage's TanStack Form
 // validator) and the server (the app's server function) both check, with errors in the page's language.
 
+// Zod's documented switch for pages whose Content Security Policy forbids eval: without it, Zod
+// probes for eval with `Function('')` on the first object parse, which the nonce CSP reports as a
+// violation (and would block once enforced, with the same jitless result).
+z.config({ jitless: true });
+
 /**
  * A reservation's rules with messages in `locale`: a name that is not blank once trimmed, and a
  * whole number of seats from 1 to 20. Accepts the form's text for the seats and outputs a number.

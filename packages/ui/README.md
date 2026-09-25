@@ -59,7 +59,7 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `cloudflare` | `placeFromCloudflare` |
 | `showcase/*` | TanStack showcase pieces: search params and `choiceCards`, device place, leave guard, time zones |
 | `samples` | The fixed values the pages render |
-| `checks`, `showcase/*.checks` | Shared Playwright checks: public pages, entry URLs, demo, formats, zones, observability, Lighthouse and Core Web Vitals, and one per showcase piece |
+| `checks`, `showcase/*.checks` | Shared Playwright checks: public pages, entry URLs, demo, formats, zones, observability, Content Security Policy, Lighthouse and Core Web Vitals, and one per showcase piece |
 | `playwright` | `playwrightConfig()`, the shared Playwright configuration |
 
 `@tanstack/react-router`, `@playwright/test` and `lighthouse` are optional peers: the pages need

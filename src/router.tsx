@@ -1,5 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
 import { createRouter } from '@tanstack/react-router';
+import { getGlobalStartContext } from '@tanstack/react-start';
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query';
 import { localeRewrite } from '@joeblew999/remy-ui/tanstack';
 import { routeTree } from './routeTree.gen';
@@ -21,6 +22,9 @@ export function getRouter() {
     // staleTime, because loaders only ensureQueryData.
     defaultPreload: 'intent',
     scrollRestoration: true,
+    // The request's CSP nonce (src/middleware.ts) on every script and head tag the server renders;
+    // undefined in the browser, which needs none.
+    ssr: { nonce: getGlobalStartContext()?.nonce },
   });
   setupRouterSsrQueryIntegration({ router, queryClient });
   return router;

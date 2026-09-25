@@ -51,6 +51,13 @@ export function withObservability<E extends ObservedEnv>(service: string, handle
         out.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
         // Powerful features off by default; location only for this origin (the device-place card).
         out.headers.set('Permissions-Policy', 'geolocation=(self), camera=(), microphone=()');
+        // No page may frame ours: CSP's frame-ancestors, which supersedes X-Frame-Options. Appended,
+        // so a page's own enforced policy (if any) applies too: browsers enforce every policy sent.
+        out.headers.append('Content-Security-Policy', "frame-ancestors 'none'");
+        // Popups we open (sign-in providers) may keep their opener; no other window gets ours.
+        out.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+        // HTTPS only, for five minutes while the rollout proves itself; raised later (.plans/gui-portal.md, item 7).
+        out.headers.set('Strict-Transport-Security', 'max-age=300');
         writeLog({ ...base, event, level: level(out.status), route, status: out.status, outcome: outcome(out.status), ...(reasonCode ? { reasonCode } : {}) });
         return out;
       };

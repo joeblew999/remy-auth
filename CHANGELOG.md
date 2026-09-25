@@ -16,9 +16,19 @@ package follows [Semantic Versioning](https://semver.org/).
   app pages. Without JavaScript site pages show the default theme.
 - Breadcrumb on the time zone pages (shadcn Breadcrumb, server-rendered links).
 
+- `tanstack`: `pageHead` adds schema.org `WebSite` structured data (name, site root) to the site
+  home page through TanStack's `script:ld+json` head entry.
+- `worker`: every response sends `Content-Security-Policy: frame-ancestors 'none'`,
+  `Cross-Origin-Opener-Policy: same-origin-allow-popups` and `Strict-Transport-Security: max-age=300`.
+- `checks`: `cspChecks({ paths, reportPath })` for a nonce-based Content Security Policy (nonce on
+  every script, no violations while hydrating, report endpoint); `publicPageChecks` and
+  `zoneChecks` cover the structured data; `observabilityChecks` covers the new headers.
+
 ### Changed
 - One zone badge style (secondary) on site and app pages; the app pages no longer repeat it as a
   label; site pages have no back links (they navigate through the header).
+- `./reservation` sets Zod's `jitless` option, so Zod never probes for eval under a strict CSP.
+- `zoneChecks` accepts a `nonce` attribute on the app pages' robots meta.
 
 ## [0.10.3] - 2026-09-25
 
