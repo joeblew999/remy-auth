@@ -7,6 +7,7 @@ import { FormatsPage, Group, Row } from '@joeblew999/remy-ui/pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { getPlace } from '../place';
 import { usePreferred } from '../preferred';
+import { problemPages } from '../problem';
 
 export const Route = createFileRoute('/formats')({
   // Cloudflare's request geolocation (the network's country, region, city and time zone) comes
@@ -14,6 +15,7 @@ export const Route = createFileRoute('/formats')({
   loader: async () => ({ info: localeInfo(getLocale()), place: await getPlace() }),
   head: () => pageHead({ path: '/formats', title: locale => m.formats_title({}, { locale }), description: locale => m.formats_description({}, { locale }) }),
   component: Formats,
+  ...problemPages,
 });
 
 // The shared page, plus rows only this server-rendered app has: Cloudflare's view of the
