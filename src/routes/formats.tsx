@@ -16,6 +16,9 @@ export const Route = createFileRoute('/formats')({
   // Cloudflare's request geolocation (the network's country, region, city and time zone) comes
   // from a server function, so it is read in the Worker during SSR and client navigation alike.
   loader: async () => ({ info: localeInfo(getLocale()), place: await getPlace() }),
+  // The loader reads no search param (so no loaderDeps), and its data stays fresh for five
+  // minutes: Back, Forward and the controls reuse it instead of calling the server function again.
+  staleTime: 5 * 60_000,
   head: () => pageHead({ path: '/formats', title: locale => m.formats_title({}, { locale }), description: locale => m.formats_description({}, { locale }) }),
   component: Formats,
 });
