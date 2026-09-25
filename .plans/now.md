@@ -59,6 +59,7 @@ formats speed), batch 3 (TanStack Form, Zod adapter, Devtools), a docs audit and
 | 19 | Formats: every area for the page's language, every choice from the system's languages ([plan](formats-consistency.md)) | agent analysis | |
 | 20 | GitHub Actions off Node.js 20 ([plan](ci-node24.md)) | ready | |
 | 21 | Publisher and consumers checked: new-consumer recipe, drift, more in the include, docs and AI answers for every consumer, fewer scripts ([plan](publisher-consumer.md)) | agent analysis | |
+| 23 | Docs search on the site with Fumadocs (route A, no AI) | building | then route B ([plan](docs-ai-sync.md)): AI Search pulls the docs from R2, ask moves into the site |
 | 22 | Docs site review: what went wrong, design, operations, efficiency ([plan](docs-site-review.md)) | owner, later | |
 
 Decisions only the owner can make: the security headers rollout (7), launching the auth
