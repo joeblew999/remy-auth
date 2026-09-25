@@ -1,50 +1,85 @@
-# Remy UI proof
+# @joeblew999/remy-ui
 
-One local workspace package, used through public exports by the public page and
-client-rendered demo. Every file in `src/components` is what the pinned shadcn CLI
-generates from the official registry for the `base-nova` style on Base UI, including
-`cn` from shadcn's own `cn` package; nothing there is hand-edited. `mise run ui:components`
-regenerates them all (add a component by extending that task's list); the regeneration
-is committed, so review sees any drift.
-The stone/orange theme tokens in `src/styles.css` are shadcn's token format with Remy's
-values.
+The UI every Remy app shares: stock shadcn components and theme, fonts, Paraglide catalogs and
+locale helpers, the site and app pages, TanStack Start glue, and the Playwright checks that prove
+them. Consumers are remy-auth (server-rendered) and
+[remy-auth-app](https://github.com/joeblew999/remy-auth-app) (prerendered); both run the same checks.
 
-Exports: `button`, `styles.css` (theme tokens and the language components' styles),
-`messages`, `runtime` (the generated Paraglide runtime as plain JavaScript), `locale`
-(Paraglide's `getLocale`, `setLocale`, `localizeHref`, `localizeUrl`, `deLocalizeHref`,
-`cookieName` and text `direction`, plus `localeName`), `locale-info` (calendars, digits,
-clock and week conventions), `seo` (canonical and hreflang data from the URL patterns),
-`language` (switcher and hint), `tanstack` (`localizedWorker`, the Worker entry combining
-`withObservability`, Paraglide's middleware and entry redirects around TanStack Start;
-`localeRewrite` for the router; `pageHead` for a route's title, description, canonical and
-hreflang; `suggestedLocale` and `suggestedLocaleInBrowser`; `@tanstack/react-router` is an
-optional peer; `pages` uses its `Link`),
-`client` (`useSuggestedLocale`, `DeviceTime` for prerendered apps), `cloudflare`
-(`placeFromCloudflare`), `samples` (the fixed values the formats and demo pages render) and
-`checks` (shared Playwright checks: public pages, entry URLs, demo, formats, Lighthouse and
-Core Web Vitals; `@playwright/test` and `lighthouse` are optional peers) `playwright` (`playwrightConfig()`, the shared
-Playwright configuration), `pages` (the shell and the home, demo and formats pages the checks
-test) and `paths` (`publicPaths`), all under `@joeblew999/remy-ui/`.
+## shadcn, stock
 
-Language behaviour is Paraglide's: strategies `url`, `cookie`, `preferredLanguage`,
-`baseLocale` with every locale prefixed in the URL, configured once in `paraglide.mjs`.
-A server-rendered app runs the middleware and passes the visitor's preference down; a
-prerendered app resolves it in the browser after hydration; both render the same
-components, so consumers get the whole behaviour in either mode.
+Everything in `src/components`, `src/hooks` and `src/styles/globals.css` is what the pinned shadcn
+CLI writes (monorepo layout: the app's `components.json` routes `shadcn add` here), including `cn`
+from shadcn's own `cn` package; nothing there is edited by hand. `mise run ui:components` and
+`mise run ui:theme` regenerate them and `mise run ui:verify` fails on any drift (see
+[docs/gui.md](../../docs/gui.md#shadcn-stock)). Blocks are owned copies in `src/blocks`.
 
-Paraglide compiles `messages/*.json` during type generation and the Vite build.
-Pass `{ locale }` explicitly to every message call. This proof has no process-wide
-locale setter, browser-global locale detection or dependency on Remy Sport's API.
-English, Spanish and Arabic catalogs are implemented; Arabic is agent-authored and
-unreviewed. Formatting lives in the catalogs' `number`, `datetime`, `relativetime`
-and `plural` declarations. The 27-locale inventory and release/provenance
-integration remain in the GUI plan.
+## Usage
+
+Import the stylesheets in this order in the app's CSS (here `src/styles.css`), then tell Tailwind
+where classes live:
+
+```css
+@import "@joeblew999/remy-ui/globals.css";
+@import "@joeblew999/remy-ui/fonts.css";
+@source "../src";
+@source "../node_modules/@joeblew999/remy-ui/src";
+```
+
+`fonts.css` names fontaine's fallback faces; add `FontaineTransform.vite({ fallbacks: { 'Geist
+Variable': ['Arial'] } })` before Tailwind in the Vite config (remy-auth's
+[`vite.config.ts`](../../vite.config.ts) is the example).
+
+Every page is one of two kinds, listed in `paths` and never mixed:
+
+- **Site pages** (`sitePaths`) come from `pages`, framed by `SiteShell`: complete without
+  JavaScript, indexed, in the sitemap, judged by Lighthouse and Core Web Vitals.
+- **App pages** (`appPaths`, under `/app`) come from `app-pages`, framed by `AppShell` (shadcn's
+  sidebar-16 block): they need JavaScript and `pageHead` marks them `noindex`. They have their own
+  export so a site page never downloads the app shell.
+
+## Exports
+
+All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers.
+
+| Export | What it holds |
+| --- | --- |
+| `globals.css`, `fonts.css` | shadcn's stylesheet as the CLI writes it; the fonts for every language |
+| `components/*`, `hooks/*`, `button` | shadcn components and hooks (`button` is also a short path) |
+| `paths` | `sitePaths`, `appPaths`, `allPaths`, `isAppPath` |
+| `pages` | `SiteShell` (alias `Shell`), `HomePage`, `FormatsContent`, `FormatsPage`, `Intro`, `ZoneBadge`, `SkipLink`, `Group`, `Row` |
+| `app-pages` | `AppShell`, `AppHomePage`, `AppFormatsPage`, `LocationPage`, `DemoPage` |
+| `language` | `LanguageSwitcher` (plain links, site pages), `LanguageMenu` (shadcn DropdownMenu, app pages), `LanguageHint` |
+| `messages`, `runtime` | Compiled Paraglide messages and runtime |
+| `locale` | Paraglide's `getLocale`, `setLocale`, `localizeHref`, `localizeUrl`, `deLocalizeHref`, `cookieName` and more, plus `direction` and `localeName` |
+| `locale-info` | Calendars, digits, clock and week conventions |
+| `seo` | Canonical and `hreflang` alternates |
+| `tanstack` | `localizedWorker` (Worker entry: observability, Paraglide's middleware and entry redirects around TanStack Start), `localeRewrite`, `pageHead`, `suggestedLocale`, `suggestedLocaleInBrowser` |
+| `client` | `useSuggestedLocale`, `DeviceTime` for prerendered apps |
+| `worker` | `withObservability` and the request-ID helpers |
+| `cloudflare` | `placeFromCloudflare` |
+| `showcase/*` | TanStack showcase pieces: search params and `choiceCards`, device place, leave guard, time zones |
+| `samples` | The fixed values the pages render |
+| `checks`, `showcase/*.checks` | Shared Playwright checks: public pages, entry URLs, demo, formats, zones, observability, Lighthouse and Core Web Vitals, and one per showcase piece |
+| `playwright` | `playwrightConfig()`, the shared Playwright configuration |
+
+`@tanstack/react-router`, `@playwright/test` and `lighthouse` are optional peers: the pages need
+the router, the checks need the other two.
+
+## Language
+
+Language behaviour is Paraglide's: strategies `url`, `cookie`, `preferredLanguage`, `baseLocale`,
+every locale prefixed in the URL, configured once in `paraglide.mjs`, which compiles
+`messages/*.json` during type generation and the Vite build. Pass `{ locale }` explicitly to every
+message call; there is no process-wide locale. A server-rendered app runs the middleware and passes
+the visitor's preference down; a prerendered app resolves it in the browser after hydration; both
+render the same components. English, Spanish and Arabic are implemented; Arabic is agent-authored
+and unreviewed.
 
 ## Publishing
 
 The package is `@joeblew999/remy-ui` on GitHub Packages (the scope must equal the
 GitHub owner there). `mise run ui:release` does the whole release from this machine: it
-runs `project:verify` (every check, locally), publishes with your `gh` token, tags
+runs `project:verify` (every check, locally) and `ui:verify` (shadcn files unchanged), publishes with your `gh` token, tags
 `vX.Y.Z` from `packages/ui/package.json`, pushes, and creates the GitHub release from the
 matching CHANGELOG section, gated only on level 1 (our own checks, about 1½ minutes).
 CI (`.github/workflows/google.yml`) runs level 2, Google's Lighthouse audits and Core
@@ -59,6 +94,5 @@ Consumers add to their `.npmrc`:
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
-and install with a token that has `read:packages`. Version 0.1.0 is published;
-[remy-auth-app](https://github.com/joeblew999/remy-auth-app) consumes it and proves a
-client build and a server render from the tarball with `mise run package:verify`.
+and install with a token that has `read:packages`. Released versions are in the
+[changelog](../../CHANGELOG.md).

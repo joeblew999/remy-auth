@@ -1,6 +1,6 @@
 # Shared auth service
 
-Status: proposed, 2026-09-24; refreshed 2026-09-25 for TanStack Start. Minimal GUI proof implemented; auth service implementation has not started. Builds on the [TanStack plan](tanstack.md), which must land first.
+Status: proposed, 2026-09-24; refreshed 2026-09-25 for TanStack Start. Minimal GUI proof implemented; auth service implementation has not started. Builds on the [TanStack plan](done/tanstack.md), which landed on main 2026-09-25.
 Owner: remy-auth. First consumer: in-repo sample; first external consumer: remy-data.
 Reviewer defines acceptance;
 Executor implements and verifies a bounded milestone. Do not begin a fleet rollout.
@@ -136,7 +136,7 @@ Do not treat these observations as a deployed-system compatibility test.
 ## Building it on TanStack Start
 
 Refreshed 2026-09-25: both apps and the shared package move to TanStack Start and Router
-([TanStack plan](tanstack.md)), so the service, its screens and the sample are built on it.
+([TanStack plan](done/tanstack.md)), so the service, its screens and the sample are built on it.
 Sources: Better Auth's [TanStack Start integration](https://www.better-auth.com/docs/integrations/tanstack)
 and the installed skills `auth-server-primitives`, `auth-and-guards`, `server-functions`,
 `middleware`, `server-routes`, `execution-model` and `router-query`.

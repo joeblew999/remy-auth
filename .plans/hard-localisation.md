@@ -1,7 +1,7 @@
 # Localisation that proves the hard parts
 
-Status: proposed 2026-09-25 under the owner's delegation; starts after the
-[TanStack plan](tanstack.md) lands on main. Owner: remy-auth. Executor/Reviewer roles as in the
+Status: proposed 2026-09-25 under the owner's delegation; can start: the
+[TanStack plan](done/tanstack.md) landed on main 2026-09-25. Owner: remy-auth. Executor/Reviewer roles as in the
 [auth plan](auth-service.md).
 
 ## Why

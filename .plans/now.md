@@ -5,8 +5,8 @@ when it is on main, released and deployed where that applies, with its checks pa
 evidence. Each item's detail lives in the plan it links to.
 
 - [x] TanStack Start, Router and Query in both apps, with the showcase: 0.9.0 and 0.9.1 released,
-      both apps live ([plan](tanstack.md)).
-- [x] Hands-on feel pass and its four fixes ([findings](tanstack.md#hands-on-pass-2026-09-25)).
+      both apps live ([plan](done/tanstack.md)).
+- [x] Hands-on feel pass and its four fixes ([findings](done/tanstack.md#hands-on-pass-2026-09-25)).
 - [x] Fonts: generic families only, one home (`packages/ui/src/fonts.css`), enforced by a check.
 - [x] `mise run cf:preview`: a branch preview beside production, checked.
 - [x] Shared tasks pinned to the release tag; `MISE_ENV=dev` and `mise.local.toml` for development
@@ -26,7 +26,8 @@ evidence. Each item's detail lives in the plan it links to.
 - [ ] Formats page regrouped, then ten more languages and the hard localisation features
       ([plan](hard-localisation.md)).
 - [ ] Contract-first APIs: spike oRPC 2.0 against 1.15, then build ([plan](openapi-contracts.md)).
-- [ ] Close the TanStack plan: move it to `done/`, update `docs/gui.md` and the READMEs.
+- [x] Close the TanStack plan: moved to [`done/`](done/tanstack.md), `docs/gui.md` and the package
+      README brought up to date.
 - [ ] Cloudflare alert policy "alert rules firing and recovered" ([plan](observability.md)).
 
 ## Queued: what cannot be done yet, what it waits for, in order

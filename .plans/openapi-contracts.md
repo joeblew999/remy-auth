@@ -1,7 +1,7 @@
 # Contract-first APIs on TanStack: producing and consuming OpenAPI
 
 Status: decided 2026-09-25 under the owner's delegation, from a scored survey with scratch proofs
-(below). Implementation starts after the [TanStack plan](tanstack.md) lands on main. Owner:
+(below). Implementation can start: the [TanStack plan](done/tanstack.md) landed on main 2026-09-25. Owner:
 remy-auth. Executor/Reviewer roles as in the [auth plan](auth-service.md). Tools were chosen by
 survey, as [how we work](../docs/how-we-work.md) requires.
 
