@@ -19,6 +19,7 @@
     "@vitejs/plugin-react": "6.0.0",
     "auth": "1.7.5",
     "chrome-devtools-mcp": "1.10.1",
+    "fontaine": "^1.0.0",
     "lighthouse": "13.5.0",
     "modern-web-guidance": "0.0.190",
     "npm-check-updates": "23.1.0",

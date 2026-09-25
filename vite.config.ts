@@ -4,6 +4,7 @@ import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import viteReact from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import { FontaineTransform } from 'fontaine';
 import { options as paraglide } from './packages/ui/paraglide.mjs';
 
 // TanStack Start on Cloudflare's Vite plugin, per Cloudflare's and Paraglide's guides: the Worker
@@ -16,6 +17,9 @@ export default defineConfig({
   plugins: [
     paraglideVitePlugin(paraglide),
     cloudflare({ viteEnvironment: { name: 'ssr' } }),
+    // Fallback faces sized to the web fonts (size-adjust and ascent/descent overrides, as Next.js
+    // generates), so the swap to Geist keeps the layout and LCP; fonts.css lists them. Before Tailwind.
+    FontaineTransform.vite({ fallbacks: { 'Geist Variable': ['Arial'], 'Geist Mono Variable': ['Courier New'] } }),
     tailwindcss(),
     tanstackStart(),
     viteReact(),

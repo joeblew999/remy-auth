@@ -87,14 +87,28 @@ run = [
 ]
 
 [tasks."ui:components"]
-description = "Regenerate every shadcn component in the shared package from the registry (the only way those files change)"
+description = "Regenerate every shadcn component from the registry into the shared package (run from the app, shadcn's monorepo layout; the only way those files change)"
 dir = "{{config_root}}"
-run = "./node_modules/.bin/shadcn add button card input label badge alert field separator -c packages/ui --overwrite --yes"
+run = "./node_modules/.bin/shadcn add button card input label badge alert field separator direction --overwrite --yes"
+
+[tasks."ui:theme"]
+description = "Rewrite the shared stylesheet with shadcn's default theme (Nova style, neutral) through shadcn apply; never edit packages/ui/src/styles/globals.css by hand"
+dir = "{{config_root}}"
+run = "./node_modules/.bin/shadcn apply nova --only theme --yes"
+
+[tasks."ui:verify"]
+description = "Prove the shadcn files are exactly what the shadcn CLI writes: re-run ui:theme and ui:components, then fail on any difference (~15 s, needs the network)"
+dir = "{{config_root}}"
+run = [
+  { task = "ui:theme" },
+  { task = "ui:components" },
+  "git diff --exit-code -- packages/ui/src/components packages/ui/src/styles src/lib",
+]
 
 [tasks."ui:release"]
 description = "Run level 1 locally (~30 s in all), then publish the shared UI to GitHub Packages, tag, push and create the GitHub release; CI runs level 2 on the tag"
 dir = "{{config_root}}"
-depends = ["project:verify"]
+depends = ["project:verify", "ui:verify"]
 run = "bash scripts/release.sh"
 
 [tasks."ui:generate"]
