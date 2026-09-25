@@ -1,7 +1,7 @@
 # Shared mise tasks
 
 One file per task namespace (`skills`, `mcp`, `browser`, `web`, `codex`, `claude`, `project`,
-`cf`); `mcp/register` and `cf/preview` are file tasks in their namespace directories. remy-auth includes this
+`cf`, `api`); `mcp/register`, `cf/preview` and `api/spec` are file tasks in their namespace directories. remy-auth includes this
 directory locally; any other project includes it by git reference pinned to a commit:
 
 ```toml

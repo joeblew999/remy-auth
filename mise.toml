@@ -30,13 +30,13 @@ run = "./node_modules/.bin/auth"
 [tasks."packages:check"]
 description = "Preview latest npm package versions without changing files"
 dir = "{{config_root}}"
-run = "./node_modules/.bin/ncu --target latest --dep prod,dev,optional --workspaces --reject @joeblew999/remy-ui --removeRange"
+run = "./node_modules/.bin/ncu --target latest --dep prod,dev,optional --workspaces --reject @joeblew999/remy-ui,@joeblew999/remy-auth-contract --removeRange"
 
 [tasks."packages:upgrade"]
 description = "Upgrade npm packages beyond existing pins, including majors, then verify tooling"
 dir = "{{config_root}}"
 run = [
-  "./node_modules/.bin/ncu --target latest --dep prod,dev,optional --workspaces --reject @joeblew999/remy-ui --removeRange --upgrade",
+  "./node_modules/.bin/ncu --target latest --dep prod,dev,optional --workspaces --reject @joeblew999/remy-ui,@joeblew999/remy-auth-contract --removeRange --upgrade",
   "npm install --prefer-online --strict-peer-deps",
   { task = "project:verify" },
 ]

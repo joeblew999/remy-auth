@@ -70,6 +70,7 @@ CLI passthrough tasks accept upstream flags directly, such as
 | `skills:*` | Install, list and remove the pinned official skills |
 | `auth:*` | Better Auth CLI and diagnostics |
 | `cf:*` | Cloudflare CLI, live logs and deployment (CLI and logs are shared tasks) |
+| `api:*` | The generated OpenAPI document a running Worker serves (`api:spec`, `--urls` for its operations; shared task) |
 | `browser:*` | Chrome DevTools CLI, session lifecycle and MCP server |
 | `web:*` | Modern web guidance search and retrieval |
 | `mcp:*` | Register, verify and inspect project MCP connections |
@@ -83,7 +84,7 @@ Peer conflicts fail visibly; the task does not use npm's `--force` or
 migration requirements. If installation fails after manifest updates, resolve the
 reported conflict before using `project:setup`; no automatic rollback discards your edits.
 
-`project:setup` continues to reproduce the lockfile. Workspace dependencies are upgraded too; the local `@joeblew999/remy-ui` reference is excluded
+`project:setup` continues to reproduce the lockfile. Workspace dependencies are upgraded too; the local `@joeblew999/remy-ui` and `@joeblew999/remy-auth-contract` references are excluded
 from registry upgrades. Node and skill-source pins in
 `mise.toml` are managed separately. The verification workflow includes GUI type checking, a Worker build and browser
 tests. Auth runtime compatibility

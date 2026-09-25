@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+//MISE description="Print the OpenAPI 3.1 document a Worker generates from its contract, from /api/openapi.json (about a second; network only, safe beside anything). Pass an origin (a preview, or http://127.0.0.1:$PREVIEW_PORT while project:preview runs); defaults to DEPLOY_ORIGIN"
+//MISE dir="{{config_root}}"
+//USAGE arg "[origin]" help="Origin to ask; defaults to DEPLOY_ORIGIN"
+//USAGE flag "--urls" help="Print the reference page and one line per operation instead of the document"
+// The document is never committed: the Worker generates it from the contract in-process
+// (.plans/openapi-contracts.md), so this asks the running Worker for it.
+
+const args = process.argv.slice(2);
+const urls = args.includes('--urls') || process.env.usage_urls === 'true';
+const origin = args.find(arg => !arg.startsWith('--')) || process.env.DEPLOY_ORIGIN;
+if (!origin) { console.error('api:spec: pass an origin or set DEPLOY_ORIGIN'); process.exit(1); }
+const specUrl = new URL('/api/openapi.json', origin);
+const response = await fetch(specUrl, { headers: { Accept: 'application/json' } });
+if (!response.ok) { console.error(`api:spec: ${specUrl.href} answered ${response.status}`); process.exit(1); }
+const spec = await response.json();
+if (!/^3\.1\./.test(spec.openapi ?? '')) { console.error(`api:spec: ${specUrl.href} is not an OpenAPI 3.1 document`); process.exit(1); }
+
+if (!urls) {
+  console.log(JSON.stringify(spec, null, 2));
+} else {
+  console.log(`${spec.info.title} ${spec.info.version}`);
+  console.log(`Reference: ${new URL('/api/doc', origin).href}`);
+  console.log(`Document:  ${specUrl.href}`);
+  for (const [path, operations] of Object.entries(spec.paths ?? {})) {
+    for (const [method, operation] of Object.entries(operations)) {
+      console.log(`  ${method.toUpperCase().padEnd(6)} ${new URL(path, origin).href}  ${operation.summary ?? ''}`);
+    }
+  }
+}
