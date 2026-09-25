@@ -4,6 +4,19 @@ All notable changes to the shared UI package `@joeblew999/remy-ui` are documente
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 package follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- `./reservation`: the demo reservation's rules as one Zod 4 schema (`reservationSchema(locale)`,
+  localized messages) for the browser and the server, the server function's input shape
+  (`reservationInput`) and `reservationErrors` for a server's field errors.
+
+### Changed
+- `DemoPage`'s form runs on TanStack Form (`@tanstack/react-form` 1.33.5) with shadcn's Field
+  pattern: the shared schema validates on submit, a server's field errors show as the form's own,
+  and `onDirtyChange` follows the form's `isDirty`. Its own validation code and input tracking are
+  gone; `Reservation` and `ReservationResult` now come from `./reservation` (still re-exported).
+
 ## [0.10.2] - 2026-09-25
 
 ### Changed
