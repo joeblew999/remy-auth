@@ -13,7 +13,13 @@ import { m } from '../paraglide/messages.js';
 export function useLeaveGuard(locale: Locale = getLocale()): (dirty: boolean) => void {
   const [dirty, setDirty] = useState(false);
   useBlocker({
-    shouldBlockFn: () => !window.confirm(m.leave_unsaved({}, { locale })),
+    // Once the visitor chooses to leave, the input is abandoned: stop guarding, so a full
+    // navigation while the next route is still loading does not ask a second time.
+    shouldBlockFn: () => {
+      const stay = !window.confirm(m.leave_unsaved({}, { locale }));
+      if (!stay) setDirty(false);
+      return stay;
+    },
     disabled: !dirty,
     enableBeforeUnload: dirty,
   });
