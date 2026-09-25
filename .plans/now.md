@@ -57,7 +57,7 @@ formats speed), batch 3 (TanStack Form, Zod adapter, Devtools), a docs audit and
 | 17 | ~~Language test tiers~~ done 2026-09-25: deploys run no tests unless GATE=1 (quick tier, 4 languages); releases run every language ([rule](../docs/how-we-work.md)) | | |
 | 18 | Fonts by writing system, font order fix, font check, fonts in the formats page ([plan](fonts.md)) | agent analysis; three owner decisions in the plan | |
 | 19 | Formats: every area for the page's language, every choice from the system's languages ([plan](formats-consistency.md)) | agent analysis | |
-| 20 | GitHub Actions off Node.js 20 ([plan](ci-node24.md)) | ready | |
+| 20 | ~~GitHub Actions off Node.js 20~~ done 2026-09-25: upload-artifact v7.0.1, Dependabot keeps actions current ([plan](ci-node24.md)) | | |
 | 21 | Publisher and consumers checked: new-consumer recipe, drift, more in the include, docs and AI answers for every consumer, fewer scripts ([plan](publisher-consumer.md)) | agent analysis | |
 | 23 | ~~Docs search on the site (route A) and AI answers from R2 (route B)~~ done 2026-09-25, see 16 | | |
 | 22 | Docs site review: what went wrong, design, operations, efficiency ([plan](docs-site-review.md)) | owner, later | |

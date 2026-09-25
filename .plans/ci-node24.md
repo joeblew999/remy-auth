@@ -1,6 +1,6 @@
 # GitHub Actions: off Node.js 20
 
-Status: plan, 2026-09-25. The runner warns that `actions/upload-artifact@ea165f8…` (v4.6.2), in
+Status: done 2026-09-25 (upload-artifact v7.0.1, Dependabot for actions). The runner warns that `actions/upload-artifact@ea165f8…` (v4.6.2), in
 `.github/workflows/google.yml`, targets Node.js 20 and is forced onto Node.js 24
 ([GitHub's notice](https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/)).
 The fix is to pin `actions/upload-artifact` to v7.0.1 (`043fb46d1a93c77aae656e7c1c64a875d1fc6a0a`,
