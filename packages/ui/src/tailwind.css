@@ -1,0 +1,9 @@
+/* The package's whole stylesheet for an app, in one import: shadcn's stylesheet (written by the shadcn
+   CLI, never by hand), then the fonts for every language, then how text breaks in every language, then
+   where the package's own classes live. Tailwind resolves @source relative to the file that holds it,
+   so this line finds the package's components wherever it is installed; the app adds its own
+   `@source "../src"` next to the import. */
+@import "./styles/globals.css";
+@import "./fonts.css";
+@import "./text.css";
+@source "./";

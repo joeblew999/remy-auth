@@ -15,15 +15,13 @@ from shadcn's own `cn` package; nothing there is edited by hand. `mise run ui:co
 
 ## Usage
 
-Import the stylesheets in this order in the app's CSS (here `src/styles.css`), then tell Tailwind
-where classes live:
+Import the package's stylesheet in the app's CSS (here `src/styles.css`), then tell Tailwind where
+the app's own classes live. `tailwind.css` imports `globals.css`, `fonts.css` and `text.css` in
+that order and declares the package's own `@source`:
 
 ```css
-@import "@joeblew999/remy-ui/globals.css";
-@import "@joeblew999/remy-ui/fonts.css";
-@import "@joeblew999/remy-ui/text.css";
+@import "@joeblew999/remy-ui/tailwind.css";
 @source "../src";
-@source "../node_modules/@joeblew999/remy-ui/src";
 ```
 
 `fonts.css` names fontaine's fallback faces; add `FontaineTransform.vite({ fallbacks: { 'Geist
@@ -44,6 +42,7 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 
 | Export | What it holds |
 | --- | --- |
+| `tailwind.css` | The three stylesheets below in order, plus `@source` for the package's own classes: one import for an app |
 | `globals.css`, `fonts.css`, `text.css` | shadcn's stylesheet as the CLI writes it; the fonts for every language; how text breaks in every language (hyphenation by `lang`, Japanese phrase breaks) |
 | `components/*`, `hooks/*`, `button` | shadcn components and hooks (`button` is also a short path) |
 | `paths` | `sitePaths`, `appPaths`, `allPaths`, `isAppPath` |
@@ -56,7 +55,8 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `locale-info` | Calendars, digits, clock and week conventions from Intl Locale Info; `formatLocale` (the tag every formatter uses, naming the language's own calendar and digits), `weekOrder`, `words` (Intl.Segmenter) |
 | `matching` | The `custom-chinese` Paraglide strategy (Traditional Chinese tags reach `zh-TW`), `matchChinese`, `preferredFromHeader`, `preferredFromNavigator` |
 | `reservation` | The demo reservation's Zod schema (seats typed in any script's digits), `asciiDigits` |
-| `seo` | Canonical and `hreflang` alternates |
+| `seo` | Canonical and `hreflang` alternates; `sitemapXml({ origin, extra })` (every site page in every locale, then the app's own entries), `robotsTxt(origin)`, `sitemapType`, `robotsType` for the app's two server routes |
+| `prerender` | `prerenderPages({ notFoundPath })`: a prerendered app's TanStack Start `prerender.pages` (every page un-localized and per locale, robots.txt, sitemap.xml, each locale's 404.html) |
 | `tanstack` | `localizedWorker` (Worker entry: observability, Paraglide's middleware and entry redirects around TanStack Start), `localeRewrite`, `pageHead`, `suggestedLocale`, `suggestedLocaleInBrowser` |
 | `client` | `useSuggestedLocale`, `DeviceTime` for prerendered apps |
 | `worker` | `withObservability` and the request-ID helpers |
@@ -67,6 +67,7 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `showcase/*` | TanStack showcase pieces: search params and `choiceCards`, device place, leave guard, time zones |
 | `samples` | The fixed values the pages render |
 | `checks`, `showcase/*.checks` | Shared Playwright checks: public pages, entry URLs (with the Chinese strategy), demo (native digits), formats (own calendar and digits, week rules, word segmentation), text (`textChecks`: 320 px, hyphenation, casing by language), fonts (`fontChecks`: the font that draws each language is the one `fonts.css` names for its script), zones, observability, Lighthouse and Core Web Vitals, and one per showcase piece; zones, observability, the Content Security Policy, Lighthouse and Core Web Vitals, and one per showcase |
+| `app-checks` | One call per kind of app for the shared check set: `serverAppChecks({ service, ownSitePaths, oneLanguage, formats })` (server-rendered: redirecting entry URLs, CSP, fonts) and `prerenderedAppChecks({ service })` (static entry pages, showcase rows without server functions); the app adds only checks for what it adds |
 | `playwright` | `playwrightConfig()`, the shared Playwright configuration |
 | `api/server` | `apiHandlers` (oRPC's OpenAPIHandler as a Start server route's handlers, with the reference page at `/api/doc` and the generated document at `/api/openapi.json`), `generateSpec`, `specOptions` |
 | `api/client` | `contractClient` (a typed client for any contract: OpenAPILink with ResponseValidationPlugin, the page's language as Accept-Language), `isomorphicClient` (an app's own client: the router on the server, `contractClient` in the browser, through `createIsomorphicFn`) |

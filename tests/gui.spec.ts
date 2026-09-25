@@ -1,14 +1,12 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { locales } from '@joeblew999/remy-ui/runtime';
 import { samples } from '@joeblew999/remy-ui/samples';
-import { checkedLocales, zoneChecks, publicPageChecks, entryChecks, demoChecks, formatsChecks, textChecks, fontChecks, observabilityChecks, cspChecks, collectErrors, endonym, direction, localizedPath, formatTag } from '@joeblew999/remy-ui/checks';
+import { checkedLocales, collectErrors, endonym, direction, localizedPath, formatTag } from '@joeblew999/remy-ui/checks';
+import { serverAppChecks } from '@joeblew999/remy-ui/app-checks';
 import { localeInfo } from '../packages/ui/src/locale-info';
-import { sitePaths, appPaths, allPaths } from '@joeblew999/remy-ui/paths';
-import { appPagePaths, docsPaths, everyPath, siteAndDocsPaths } from '../src/paths';
-import { searchParamsChecks } from '@joeblew999/remy-ui/showcase/search-params.checks';
-import { preloadChecks } from '@joeblew999/remy-ui/showcase/preload.checks';
-import { navigationBlockingChecks } from '@joeblew999/remy-ui/showcase/navigation-blocking.checks';
+import { sitePaths, appPaths } from '@joeblew999/remy-ui/paths';
+import { askPath, docsPaths, docsSearchPath, everyPath } from '../src/paths';
 import { apiChecks, reservationApiChecks } from '@joeblew999/remy-ui/api/checks';
 import { info } from '@joeblew999/remy-auth-contract';
 import { router } from '../src/api/router';
@@ -19,21 +17,19 @@ import { problemChecks } from '@joeblew999/remy-ui/showcase/problem.checks';
 import { partChecks } from '@joeblew999/remy-ui/parts/checks';
 import { codeSplittingChecks } from '@joeblew999/remy-ui/showcase/code-splitting.checks';
 import { buildBoundaryChecks } from '@joeblew999/remy-ui/showcase/build-boundaries.checks';
-import { devicePlaceChecks } from '@joeblew999/remy-ui/showcase/device-place.checks';
 
-// The shared checks cover what every app built on the package must satisfy.
+// The shared checks cover what every app built on the package must satisfy: one call for a
+// server-rendered app (@joeblew999/remy-ui/app-checks), with this app's own pages beside the shared ones.
 // Site pages (for Google) and app pages (for people using the app) never mix; see paths.js.
-// This app adds the docs (site pages in English and their translations, docs/i18n/) and the answer page
-// (an app page): src/paths.ts.
-zoneChecks({ sitePaths: siteAndDocsPaths, appPaths: appPagePaths });
+// This app adds the docs (site pages in English and their translations, docs/i18n/), the docs search
+// and the answer page (site pages): src/paths.ts.
 const translations = Object.fromEntries(docsTable.map(row => [docsPath(row.slug), docsLangs(row, readdirSync(docsI18nDir), existsSync)]));
-publicPageChecks({ paths: sitePaths, oneLanguage: { locale: 'en', paths: docsPaths, translations } });
-// Text in every language: the shared pages (the docs are English only).
-textChecks({ paths: allPaths });
-// The font drawing each language is the one fonts.css names for its script: the site pages, in every language.
-fontChecks({ paths: sitePaths });
-entryChecks({ paths: everyPath, mode: 'redirect' });
-demoChecks();
+serverAppChecks({
+  service: 'remy-auth',
+  ownSitePaths: [...docsPaths, docsSearchPath, askPath],
+  oneLanguage: { locale: 'en', paths: docsPaths, translations },
+  formats: { extra: formatsExtra },
+});
 // The demo reservation and the status card are contract endpoints (@joeblew999/remy-auth-contract).
 apiChecks({ router, title: info.title });
 reservationApiChecks();
@@ -44,19 +40,13 @@ buildBoundaryChecks({ paths: everyPath, markers: [
   { name: 'request.cf', pattern: /\.cf\b/, source: 'src/place.server.ts' },
   { name: 'TanStack Devtools (the shell hosting the panels)', pattern: /tsd-(?:control|surface)\b/, source: { package: '@tanstack/devtools', from: '@tanstack/react-devtools' } },
 ] });
-observabilityChecks({ service: 'remy-auth', paths: everyPath });
-cspChecks({ paths: everyPath });
-searchParamsChecks();
-preloadChecks();
-navigationBlockingChecks();
 deferredPlaceChecks();
-devicePlaceChecks({ path: '/app/location', network: true });
 statusCardChecks({ service: 'remy-auth', path: '/app', endpoint: '/api/status' });
 // Every part listed in src/parts.json brings its own checks.
 partChecks();
 problemChecks({ failingNavigation: { from: '', link: 'formats_link', fail: '**/_serverFn/**', heading: 'formats_title' }, serverRoutes: [{ path: '/robots.txt', type: 'text/plain; charset=utf-8', cache: 'public, max-age=3600, s-maxage=3600', origin: true }, { path: '/sitemap.xml', type: 'application/xml; charset=utf-8', cache: 'public, max-age=3600, s-maxage=3600', origin: true }] });
-formatsChecks({ extra: async (page, locale) => {
-  // Rows only this server-rendered app has: more Intl examples and Cloudflare's geolocation.
+// Rows only this server-rendered app has on the formats page: more Intl examples and Cloudflare's geolocation.
+async function formatsExtra(page: Page, locale: string) {
   const messages = catalogs[locale];
   const info = localeInfo(locale as any);
   const list = new Intl.ListFormat(locale, { type: 'conjunction' });
@@ -84,7 +74,7 @@ formatsChecks({ extra: async (page, locale) => {
     ? new Intl.DateTimeFormat(format, { dateStyle: 'full', timeStyle: 'long', timeZone: zone }).format(samples.instant) : messages.location_unknown);
   const country = await page.locator('[data-sample="country"]').getAttribute('data-country');
   await expect(page.locator('[data-sample="country"]')).toHaveText(country ? new Intl.DisplayNames([locale], { type: 'region' }).of(country)! : messages.location_unknown);
-} });
+}
 
 // Checks that belong to this repository: the catalogs it owns, and server rendering itself.
 const settings = JSON.parse(readFileSync('packages/ui/project.inlang/settings.json', 'utf8'));

@@ -1,10 +1,7 @@
-/* shadcn's stylesheet from the shared package (written by the shadcn CLI, never by hand), then
-   the fonts for every language, then how text breaks in every language, then where this app's classes live. */
-@import "@joeblew999/remy-ui/globals.css";
-@import "@joeblew999/remy-ui/fonts.css";
-@import "@joeblew999/remy-ui/text.css";
+/* The shared package's stylesheet (shadcn's, the fonts and text rules for every language, and the
+   package's own classes: tailwind.css), then where this app's classes live. */
+@import "@joeblew999/remy-ui/tailwind.css";
 @source "../src";
-@source "../packages/ui/src";
 
 /* Code blocks in the docs: Shiki writes both themes as CSS variables (source.config.ts), and this is
    Shiki's documented rule for showing one of them (shiki.style/guide/dual-themes), following the

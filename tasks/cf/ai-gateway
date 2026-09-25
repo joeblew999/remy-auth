@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="REMOTE: show or change the AI Gateway in front of this Worker's AI Search: show | rate-limit off | rate-limit <requests>/<seconds> | logs on|off. Changes are read back; they need CLOUDFLARE_AI_EDIT_TOKEN (AI Gateway Edit)"
+#MISE description="REMOTE: show or change the AI Gateway in front of this Worker's AI Search: show | rate-limit off | rate-limit <requests>/<seconds> | logs on|off. Changes are read back; they need CLOUDFLARE_AI_EDIT_TOKEN (AI Gateway Edit). Needs an ai_search binding in the Wrangler configuration (fails on an app without one)"
 #MISE dir="{{config_root}}"
 # A shell wrapper so the module beside it loads as ESM wherever this directory is included from.
 set -euo pipefail
