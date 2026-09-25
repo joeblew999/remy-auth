@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+#MISE description="REMOTE: delete a throwaway check Worker made by cf:preview (<worker>-check-<name>); with no argument, list them. Never deletes the production Worker"
+#MISE dir="{{config_root}}"
+#USAGE arg "[name]" help="The check Worker's full name, e.g. remy-auth-check-4f85209"
+set -euo pipefail
+worker="$(node --input-type=module -e "import { unstable_readConfig } from 'wrangler'; console.log(unstable_readConfig({}).name ?? '')")"
+name="${1:-${usage_name:-}}"
+if [ -z "$name" ]; then
+  echo "Check Workers of $worker on Cloudflare:"
+  ./node_modules/.bin/wrangler whoami >/dev/null 2>&1
+  node --input-type=module -e "
+    import { execFileSync } from 'node:child_process';
+    const w = (...a) => execFileSync('./node_modules/.bin/wrangler', a, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    const token = JSON.parse(w('auth', 'token', '--json')).token;
+    const account = JSON.parse(w('whoami', '--json')).accounts[0].id;
+    const r = await (await fetch('https://api.cloudflare.com/client/v4/accounts/' + account + '/workers/scripts', { headers: { Authorization: 'Bearer ' + token } })).json();
+    for (const s of r.result ?? []) if (s.id.startsWith('$worker-check-')) console.log('  ' + s.id);"
+  exit 0
+fi
+case "$name" in
+  "$worker-check-"?*) ;;
+  *) echo "cf:preview-delete only deletes check Workers named $worker-check-<name> (got $name)" >&2; exit 1 ;;
+esac
+echo "Target: Cloudflare (remote), deleting Worker $name"
+./node_modules/.bin/wrangler delete --name "$name" --force </dev/null
