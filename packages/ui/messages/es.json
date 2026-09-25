@@ -325,5 +325,6 @@
   "search_title": "Buscar en la documentación",
   "search_description": "Encuentra una página o sección de la documentación de Remy.",
   "search_none": "No se encontró nada",
-  "search_none_hint": "Prueba con otras palabras o consulta las páginas de la lista."
+  "search_none_hint": "Prueba con otras palabras o consulta las páginas de la lista.",
+  "ask_pending": "Preguntando…"
 }

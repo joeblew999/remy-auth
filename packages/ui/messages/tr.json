@@ -323,5 +323,6 @@
   "search_title": "Belgelerde ara",
   "search_description": "Remy belgelerinde bir sayfa ya da bölüm bulun.",
   "search_none": "Hiçbir şey bulunamadı",
-  "search_none_hint": "Başka sözcükler deneyin ya da listedeki sayfalara göz atın."
+  "search_none_hint": "Başka sözcükler deneyin ya da listedeki sayfalara göz atın.",
+  "ask_pending": "Soruluyor…"
 }

@@ -323,5 +323,6 @@
   "search_title": "Doku durchsuchen",
   "search_description": "Finde eine Seite oder einen Abschnitt der Remy-Dokumentation.",
   "search_none": "Nichts gefunden",
-  "search_none_hint": "Versuche andere Wörter oder sieh dir die aufgeführten Seiten an."
+  "search_none_hint": "Versuche andere Wörter oder sieh dir die aufgeführten Seiten an.",
+  "ask_pending": "Wird gefragt…"
 }

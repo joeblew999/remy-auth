@@ -326,5 +326,6 @@
   "search_title": "Search the docs",
   "search_description": "Find a page or section of the Remy documentation.",
   "search_none": "Nothing found",
-  "search_none_hint": "Try other words, or browse the pages listed here."
+  "search_none_hint": "Try other words, or browse the pages listed here.",
+  "ask_pending": "Asking…"
 }

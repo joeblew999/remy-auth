@@ -327,5 +327,6 @@
   "search_title": "Szukaj w dokumentacji",
   "search_description": "Znajdź stronę lub sekcję dokumentacji Remy.",
   "search_none": "Nic nie znaleziono",
-  "search_none_hint": "Spróbuj innych słów albo przejrzyj strony z listy."
+  "search_none_hint": "Spróbuj innych słów albo przejrzyj strony z listy.",
+  "ask_pending": "Pytam…"
 }

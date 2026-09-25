@@ -321,5 +321,6 @@
   "search_title": "ドキュメントを検索",
   "search_description": "Remy のドキュメントからページやセクションを探せます。",
   "search_none": "見つかりませんでした",
-  "search_none_hint": "別の言葉で試すか、一覧のページをご覧ください。"
+  "search_none_hint": "別の言葉で試すか、一覧のページをご覧ください。",
+  "ask_pending": "質問中…"
 }

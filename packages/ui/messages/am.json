@@ -323,5 +323,6 @@
   "search_title": "ሰነዶቹን ይፈልጉ",
   "search_description": "በRemy ሰነዶች ውስጥ ገጽ ወይም ክፍል ያግኙ።",
   "search_none": "ምንም አልተገኘም",
-  "search_none_hint": "ሌሎች ቃላትን ይሞክሩ፣ ወይም እዚህ የተዘረዘሩትን ገጾች ይመልከቱ።"
+  "search_none_hint": "ሌሎች ቃላትን ይሞክሩ፣ ወይም እዚህ የተዘረዘሩትን ገጾች ይመልከቱ።",
+  "ask_pending": "በመጠየቅ ላይ…"
 }
