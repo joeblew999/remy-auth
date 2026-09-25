@@ -5,14 +5,15 @@ import { Button } from '@joeblew999/remy-ui/components/button';
 import { Field, FieldDescription, FieldLabel } from '@joeblew999/remy-ui/components/field';
 import { Input } from '@joeblew999/remy-ui/components/input';
 import { askMaxLength } from '../ask';
+import { askPath } from '../paths';
 
 /**
- * The question box: a plain GET form to the app page /app/ask, so it works without JavaScript
- * (.plans/docs-site.md, decision 5). The browser enforces the length; the server checks again.
+ * The question box: a plain GET form to the site page /docs/ask, so it works without JavaScript
+ * (.plans/docs-ai-sync.md, "Ask from the site"). The browser enforces the length; the server checks again.
  */
 export function AskForm({ locale, question = '' }: { locale: Locale; question?: string }) {
   const o = { locale };
-  return <form method="get" action={localizeHref('/app/ask', { locale })} role="search" className="flex flex-col gap-2">
+  return <form method="get" action={localizeHref(askPath, { locale })} role="search" className="flex flex-col gap-2">
     <Field>
       <FieldLabel htmlFor="ask-q">{m.ask_label({}, o)}</FieldLabel>
       <div className="flex gap-2">

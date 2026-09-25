@@ -22,6 +22,7 @@ import { Route as AppFormatsRouteImport } from './routes/app.formats'
 import { Route as AppLocationRouteImport } from './routes/app.location'
 import { Route as DocsIndexRouteImport } from './routes/docs.index'
 import { Route as DocsSlugRouteImport } from './routes/docs.$slug'
+import { Route as DocsAskRouteImport } from './routes/docs.ask'
 import { Route as DocsSearchRouteImport } from './routes/docs.search'
 import { Route as TimeZonesSplatRouteImport } from './routes/time-zones.$'
 
@@ -90,6 +91,11 @@ const DocsSlugRoute = DocsSlugRouteImport.update({
   path: '/docs/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsAskRoute = DocsAskRouteImport.update({
+  id: '/docs/ask',
+  path: '/docs/ask',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DocsSearchRoute = DocsSearchRouteImport.update({
   id: '/docs/search',
   path: '/docs/search',
@@ -113,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/app/formats': typeof AppFormatsRoute
   '/app/location': typeof AppLocationRoute
   '/docs/$slug': typeof DocsSlugRoute
+  '/docs/ask': typeof DocsAskRoute
   '/docs/search': typeof DocsSearchRoute
   '/time-zones/$': typeof TimeZonesSplatRoute
   '/app/': typeof AppIndexRoute
@@ -130,6 +137,7 @@ export interface FileRoutesByTo {
   '/app/formats': typeof AppFormatsRoute
   '/app/location': typeof AppLocationRoute
   '/docs/$slug': typeof DocsSlugRoute
+  '/docs/ask': typeof DocsAskRoute
   '/docs/search': typeof DocsSearchRoute
   '/time-zones/$': typeof TimeZonesSplatRoute
   '/app': typeof AppIndexRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   '/app/formats': typeof AppFormatsRoute
   '/app/location': typeof AppLocationRoute
   '/docs/$slug': typeof DocsSlugRoute
+  '/docs/ask': typeof DocsAskRoute
   '/docs/search': typeof DocsSearchRoute
   '/time-zones/$': typeof TimeZonesSplatRoute
   '/app/': typeof AppIndexRoute
@@ -167,6 +176,7 @@ export interface FileRouteTypes {
     | '/app/formats'
     | '/app/location'
     | '/docs/$slug'
+    | '/docs/ask'
     | '/docs/search'
     | '/time-zones/$'
     | '/app/'
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
     | '/app/formats'
     | '/app/location'
     | '/docs/$slug'
+    | '/docs/ask'
     | '/docs/search'
     | '/time-zones/$'
     | '/app'
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '/app/formats'
     | '/app/location'
     | '/docs/$slug'
+    | '/docs/ask'
     | '/docs/search'
     | '/time-zones/$'
     | '/app/'
@@ -219,6 +231,7 @@ export interface RootRouteChildren {
   AppFormatsRoute: typeof AppFormatsRoute
   AppLocationRoute: typeof AppLocationRoute
   DocsSlugRoute: typeof DocsSlugRoute
+  DocsAskRoute: typeof DocsAskRoute
   DocsSearchRoute: typeof DocsSearchRoute
   TimeZonesSplatRoute: typeof TimeZonesSplatRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -318,6 +331,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs/ask': {
+      id: '/docs/ask'
+      path: '/docs/ask'
+      fullPath: '/docs/ask'
+      preLoaderRoute: typeof DocsAskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/docs/search': {
       id: '/docs/search'
       path: '/docs/search'
@@ -347,6 +367,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppFormatsRoute: AppFormatsRoute,
   AppLocationRoute: AppLocationRoute,
   DocsSlugRoute: DocsSlugRoute,
+  DocsAskRoute: DocsAskRoute,
   DocsSearchRoute: DocsSearchRoute,
   TimeZonesSplatRoute: TimeZonesSplatRoute,
   AppIndexRoute: AppIndexRoute,

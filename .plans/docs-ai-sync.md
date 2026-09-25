@@ -31,3 +31,19 @@ the docs itself, on its own schedule, and our upload code goes.
 - Whether R2 object metadata can carry page title and URL for citations (else the docs table maps them).
 - The R2 bucket is a new resource (storage cost is negligible for a few hundred KB of Markdown).
 - Other languages: one folder per language in the bucket and a metadata filter on search.
+
+## Built (2026-09-25)
+
+- **Ask from the site:** `/docs/ask?q=` (src/routes/docs.ask.tsx) is a site page in SiteShell beside
+  `/docs/search`, treated as it is: the empty page is indexable with its canonical and alternates (not
+  in the sitemap); a page with a question is noindex without them. Every response stays
+  `private, no-store`, and the router keeps each answer for the visit (staleTime Infinity, keyed by q).
+  The docs pages' question box posts there. `/app/ask` in every language answers 301 to `/docs/ask`
+  with its question (src/routes/app.ask.tsx). Limits, too-long, no-answer and ASK_PAUSED are unchanged.
+- **Citations from the R2 source:** the production binding names the instance `remy-docs-pages`,
+  whose items are the R2 objects `<slug>.md` (`index.md` for /docs; `docsObjectKey` in
+  src/docs/table.js, for the upload task too). Chunks carry no metadata, so src/ask.server.ts maps
+  `chunk.item.key` to its docs row: the citation is the page (its title), or, when the chunk's text
+  has a Markdown heading line that is one of the page's "On this page" headings, that section
+  (`<page>: <heading>`, linked to its id). So heading-level citations are kept where the chunk shows
+  its heading.

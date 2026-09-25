@@ -36,3 +36,9 @@ export const docsRowForFile = file => docsTable.find(row => row.file === file);
 
 /** The docs row for a slug, or undefined. */
 export const docsRowForSlug = slug => docsTable.find(row => row.slug === slug);
+
+/** A docs page's object in the R2 bucket AI Search reads (.plans/docs-ai-sync.md): <slug>.md, index.md for /docs. */
+export const docsObjectKey = slug => `${slug || 'index'}.md`;
+
+/** The docs row for an object key in that bucket, or undefined. */
+export const docsRowForObjectKey = key => docsTable.find(row => docsObjectKey(row.slug) === key);
