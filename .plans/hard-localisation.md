@@ -64,6 +64,31 @@ Each item is shown on the formats or demo page and proven by a shared check.
 Name order (family name first in Japanese and Chinese) needs separate name fields in the shared
 demo form. It is listed, but waits until a real app needs it.
 
+## The formats page, regrouped
+
+Today the page is thirteen cards in the order they were added: numbering sits under the calendar,
+the local time is split from the other times, units and sorting come after the controls, and one
+"Try other values" card changes values that live in three other cards. Adding ten languages makes
+that worse, so the page is regrouped first, by the question a reader asks:
+
+| Section | Answers | Holds |
+| --- | --- | --- |
+| This language | Which language and script is this? | Tag, own name, direction, script, available languages, casing sample |
+| Dates and times | What day and time is it, and how is it written? | Calendar with its control, week rules, hour cycle, dates, ranges, relative time, the device's time zone, where you are and the local time there |
+| Numbers | How are numbers written and read? | Digits, grouping, decimals, percentages, compact numbers, units, native-digit input |
+| Money | How are amounts shown? | Currency with its control, amounts, decimals per currency |
+| Words | How does text change with a value? | Plurals with the count control, ordinals, variants by value, lists, sorting, word breaks |
+
+Rules for the regrouping:
+
+- Each control sits in the section it changes, so a reader sees the result next to the control.
+  The search-param names and the shareable addresses stay the same.
+- One short line under each section heading says what it demonstrates.
+- A short list of links to the five sections at the top of the page.
+- Stock shadcn parts only (cards, the existing label/value rows), no new component.
+- The shared formats check and the search-param checks keep their assertions; only the places
+  they look change. The hands-on pass compares before and after screenshots at phone width.
+
 ## Translations
 
 The new catalogs are machine-made by the agent. They are marked unreviewed in each catalog's
@@ -75,18 +100,19 @@ plural coverage and formatting, not wording.
 1. **Verify (about 1 hour):** Paraglide's language matching for scripts and regions; `getWeekInfo`
    in Chrome, Safari, Firefox and workerd; which calendars and numbering systems workerd's ICU
    carries.
-2. **System features 1 to 8** in the package, each with its shared check, on the existing three
+2. **Regroup the formats page** as above, on the existing three languages.
+3. **System features 1 to 8** in the package, each with its shared check, on the existing three
    languages first.
-3. **Catalogs** for the 10 new languages, added to Paraglide's settings. Parallel agents, one per
+4. **Catalogs** for the 10 new languages, added to Paraglide's settings. Parallel agents, one per
    two languages.
-4. **Both apps** pick them up: new prefixes, prerendered pages in remy-auth-app, sitemap and
+5. **Both apps** pick them up: new prefixes, prerendered pages in remy-auth-app, sitemap and
    hreflang.
-5. **Gates and timing.** Level 1 grows with the language count, from about 35 seconds to an
+6. **Gates and timing.** Level 1 grows with the language count, from about 35 seconds to an
    estimated 2 minutes; state the new timings in the task descriptions. Level 2 audits one page
    per script family, not every page in every language.
-6. **Hands-on pass** on a preview deployment: every page in every language at phone width,
+7. **Hands-on pass** on a preview deployment: every page in every language at phone width,
    screenshots, and notes on anything that reads wrong.
-7. **Ship** as in the TanStack plan.
+8. **Ship** as in the TanStack plan.
 
 ## Acceptance
 
@@ -95,3 +121,4 @@ plural coverage and formatting, not wording.
   native digits.
 - No page overflows at 320 px in any language.
 - A screenshot of every page in every language shows no missing glyphs.
+- The formats page has the five sections above, each control beside what it changes.
