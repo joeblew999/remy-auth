@@ -19,6 +19,7 @@ a full run (tier 4) catches what broke. Each break is logged with the boundary i
 | 09-25 | A background agent could not run the test tier (its permission check refused it) | agent permissions vs test tasks | leaked (process) | full runs run as the lead's own background command |
 | 09-25 | Parts (pass 2) and package moves both reworked the sitemap route and the app's check calls, in opposite directions (route into a part vs a shared builder; checks split into parts vs one serverAppChecks) | two agents given overlapping scopes on the same files | leaked: a design clash, not a text conflict | one agent reconciles; lesson: give parallel agents disjoint files |
 | 09-25 | The recipe agent's English `tasks/README.md` edit left the Spanish behind again (1 failure) | translations vs their source, second time | leaked, caught by the full run | `docs:translations` in tier 0 (`project:check`) now catches it before merge |
+| 09-25 | Releasing 0.11.0 broke `npm install`: the contract package still required remy-ui `^0.10.5`, so npm looked on the public registry | package versions vs their peers in one workspace | leaked, caught by the release gate's `npm ls` | contract 0.2.0 requires `^0.11.0`; bump peers with the package |
 | 09-25 | Five merges into `CHANGELOG.md` and `now.md` conflicted | shared plan and changelog files | held (text conflicts only, no code) | resolved at merge |
 | 09-25 | Fonts, formats, parts, caching, sidebar, contracts merged in parallel | package vs app, parts, route files | held: typecheck clean, every page 200 live | — |
 
