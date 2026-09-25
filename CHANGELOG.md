@@ -6,6 +6,25 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.10.5] - 2026-09-25
+
+### Added
+- Ten more languages: fa, he, th, ja, zh-TW, hi, am, pl, tr, de (13 in all), each with its Noto
+  font from fontsource where Geist has no glyphs, applied by `:lang()`.
+- `text.css`: hyphenation by the page's language, casing by `lang` (Turkish İ), phrase breaking for
+  Japanese headings. `checks`: `textChecks({ paths })` (every page fits 320 px, per language).
+- Formats: each language's own calendar and digits through one explicit format tag
+  (`formatTag`), more calendars in the control, week rules from `Intl.Locale` `getWeekInfo`,
+  word segmentation with `Intl.Segmenter`, native digits in counts through Paraglide's number
+  function.
+- `matching.js`: a Paraglide custom strategy that sends Chinese browsers to zh-TW.
+- Quick test tier (`project:test:quick`): one language per writing system (`QUICK_LOCALES`,
+  default en, ar, ja, th).
+
+### Changed
+- Per-language checks (app pages kept out of search, CSP violations while hydrating, text) run as
+  one test per language, so the time per test does not grow with the language count.
+
 ## [0.10.4] - 2026-09-25
 
 ### Added
