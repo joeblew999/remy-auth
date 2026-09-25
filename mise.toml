@@ -70,12 +70,11 @@ run = [
 ]
 
 [tasks."project:typecheck"]
-description = "Compile the shared catalogs, then generate types and check the GUI, shared package and Worker (overrides the shared default)"
+description = "Compile the shared catalogs, then generate Worker types and check the GUI, shared package and Worker (overrides the shared default)"
 dir = "{{config_root}}"
 run = [
   { task = "ui:generate" },
   "./node_modules/.bin/wrangler types",
-  "./node_modules/.bin/react-router typegen",
   "./node_modules/.bin/tsc",
 ]
 

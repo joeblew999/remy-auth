@@ -1,26 +1,26 @@
+import { createFileRoute } from '@tanstack/react-router';
+import { getLocale } from '@joeblew999/remy-ui/locale';
 import { weekdayName, localeInfo } from '@joeblew999/remy-ui/locale-info';
-import { placeFromCloudflare } from '@joeblew999/remy-ui/cloudflare';
 import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { FormatsPage, Group, Row } from '@joeblew999/remy-ui/pages';
-import { requireLocale } from '@joeblew999/remy-ui/react-router';
-import { cloudflareContext } from '../context';
-import { pageMeta } from '../seo';
+import { pageHead } from '@joeblew999/remy-ui/tanstack';
+import { getPlace } from '../place';
 import { usePreferred } from '../preferred';
-import type { Route } from './+types/formats';
 
-export function loader({ params, context }: Route.LoaderArgs) {
-  const locale = requireLocale(params.locale);
-  // Cloudflare's request geolocation: the network's country, region, city and time zone.
-  return { locale, info: localeInfo(locale), place: placeFromCloudflare(context.get(cloudflareContext).cf) };
-}
-export function meta({ params, matches }: Route.MetaArgs) {
-  return pageMeta(params, matches, '/formats', locale => m.formats_title({}, { locale }), locale => m.formats_description({}, { locale }));
-}
+export const Route = createFileRoute('/formats')({
+  // Cloudflare's request geolocation (the network's country, region, city and time zone) comes
+  // from a server function, so it is read in the Worker during SSR and client navigation alike.
+  loader: async () => ({ info: localeInfo(getLocale()), place: await getPlace() }),
+  head: () => pageHead({ path: '/formats', title: locale => m.formats_title({}, { locale }), description: locale => m.formats_description({}, { locale }) }),
+  component: Formats,
+});
 
 // The shared page, plus rows only this server-rendered app has: Cloudflare's view of the
 // visitor and further Intl examples.
-export default function Formats({ loaderData: { locale, info, place } }: Route.ComponentProps) {
+function Formats() {
+  const { info, place } = Route.useLoaderData();
+  const locale = getLocale();
   const o = { locale };
   const list = new Intl.ListFormat(locale, { type: 'conjunction' });
   const calendarName = new Intl.DisplayNames([locale], { type: 'calendar' });

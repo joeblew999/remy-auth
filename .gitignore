@@ -14,8 +14,7 @@ node_modules/
 /.mcp.json
 /.mcp.json.bak
 
-/build/
-/.react-router/
+/dist/
 /worker-configuration.d.ts
 /packages/ui/src/paraglide/
 /test-results/
