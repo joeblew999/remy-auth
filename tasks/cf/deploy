@@ -5,10 +5,10 @@ set -euo pipefail
 : "${DEPLOY_ORIGIN:?cf:deploy needs DEPLOY_ORIGIN in [env]}"
 
 # Development deploys run no tests (owner, 2026-09-25: the gate is for real releases; ui:release runs
-# the full one). GATE=1 runs the quick gate first, one language per writing system (QUICK_LOCALES),
+# the full one). GATE=1 runs the quick gate first, English and Arabic (QUICK_LOCALES),
 # for changes to code that visitors run: the deployer judges (docs/how-we-work.md).
 if [ "${GATE:-}" = 1 ]; then
-  export CHECK_LOCALES="${CHECK_LOCALES:-${QUICK_LOCALES:-en,ar,ja,th}}"
+  export CHECK_LOCALES="${CHECK_LOCALES:-${QUICK_LOCALES:-en,ar}}"
   mise run project:verify
 fi
 

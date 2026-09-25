@@ -81,7 +81,7 @@ When the owner hands over decisions, for example to finish work unattended:
   your judgement better on when a deploy needs a gateway test."
 - Development deploys (`mise run cf:deploy`) run no tests. Judge each one: a change to app or
   shared-package code that visitors run gets the quick gate first (`GATE=1 mise run cf:deploy`,
-  one language per writing system); docs text, plans, tasks and config that do not change what
+  English and Arabic: left to right and right to left; owner: "Just pick 2"); docs text, plans, tasks and config that do not change what
   visitors get deploy straight away. Say which you chose when reporting.
 - Never pipe a gating command through `grep` or `tail` in a chain: the pipe hides its exit code.
   This once released a version whose checks had failed.
