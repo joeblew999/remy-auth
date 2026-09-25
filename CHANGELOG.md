@@ -4,9 +4,12 @@ All notable changes to the shared UI package `@joeblew999/remy-ui` are documente
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 package follows [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.9.2] - 2026-09-25
 
 ### Added
+- `showcase/search-params`: `PrerenderedFormatsControls`, the formats controls for a prerendered
+  page (static defaults in the HTML, the address's values once hydrated, through TanStack's
+  `ClientOnly`), and `FormatsControls`' `interactive` option behind it.
 - `checkedLocales` in `@joeblew999/remy-ui/checks`: every locale, or the subset in `CHECK_LOCALES`;
   every per-language check iterates it, so the shared `project:test:quick` tier can run the checks
   on a few representative languages.

@@ -1,4 +1,4 @@
-import { Link, type SearchSchemaInput } from '@tanstack/react-router';
+import { ClientOnly, Link, type SearchSchemaInput } from '@tanstack/react-router';
 import { getLocale, type Locale } from '../paraglide/runtime.js';
 import { m } from '../paraglide/messages.js';
 import { localeInfo } from '../locale-info';
@@ -69,29 +69,31 @@ function Choices({ label, name, children }: { label: string; name: string; child
  * current choice is the exactly active one. Render it through FormatsPage's `after` extra with
  * `search={Route.useSearch()}`.
  */
-export function FormatsControls({ locale, search }: { locale: Locale; search: FormatsSearch }) {
+export function FormatsControls({ locale, search, interactive = true }: { locale: Locale; search: FormatsSearch; interactive?: boolean }) {
   const o = { locale };
   const number = new Intl.NumberFormat(locale);
   const currencyName = new Intl.DisplayNames([locale], { type: 'currency' });
   const calendarName = new Intl.DisplayNames([locale], { type: 'calendar' });
   const link = { from: '/formats', to: '/formats', resetScroll: false, activeOptions: { exact: true }, activeProps: { className: chosen }, inactiveProps: { className: choice } } as const;
+  // Static stand-ins with the same look, for HTML rendered without a request (see PrerenderedFormatsControls).
+  const still = (selected: boolean, text: React.ReactNode) => <span className={selected ? chosen : choice}>{text}</span>;
   return <Card data-showcase="search-params">
     <CardHeader><CardTitle>{m.choices_heading({}, o)}</CardTitle></CardHeader>
     <CardContent className="flex flex-col gap-5">
       <p className="text-sm leading-relaxed text-muted-foreground">{m.choices_note({}, o)}</p>
       <Choices name="currency" label={m.currency_heading({}, o)}>
         {currencies.map(currency => <li key={currency}>
-          <Link {...link} search={prev => ({ ...prev, currency })} title={currencyName.of(currency)} data-currency-choice={currency}>{currency}</Link>
+          {interactive ? <Link {...link} search={prev => ({ ...prev, currency })} title={currencyName.of(currency)} data-currency-choice={currency}>{currency}</Link> : still(currency === search.currency, currency)}
         </li>)}
       </Choices>
       <Choices name="count" label={m.plural_heading({}, o)}>
         {countChoices.map(count => <li key={count}>
-          <Link {...link} search={prev => ({ ...prev, count })} data-count-choice={count}>{number.format(count)}</Link>
+          {interactive ? <Link {...link} search={prev => ({ ...prev, count })} data-count-choice={count}>{number.format(count)}</Link> : still(count === search.count, number.format(count))}
         </li>)}
       </Choices>
       <Choices name="calendar" label={m.calendar_label({}, o)}>
         {calendarsFor(locale).map(calendar => <li key={calendar}>
-          <Link {...link} search={prev => ({ ...prev, calendar })} data-calendar-choice={calendar}>{calendarName.of(calendar)}</Link>
+          {interactive ? <Link {...link} search={prev => ({ ...prev, calendar })} data-calendar-choice={calendar}>{calendarName.of(calendar)}</Link> : still(calendar === search.calendar, calendarName.of(calendar))}
         </li>)}
       </Choices>
       <dl className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-x-4 gap-y-3 text-sm">
@@ -105,4 +107,15 @@ export function FormatsControls({ locale, search }: { locale: Locale; search: Fo
       </dl>
     </CardContent>
   </Card>;
+}
+
+/**
+ * FormatsControls for a prerendered page. Its HTML is built without a request, so it cannot know
+ * the address's search params: the HTML shows the defaults as static labels, and the live controls
+ * with the address's values replace them once hydrated, at the same size.
+ */
+export function PrerenderedFormatsControls({ locale, search }: { locale: Locale; search: FormatsSearch }) {
+  return <ClientOnly fallback={<FormatsControls locale={locale} search={searchDefaults} interactive={false} />}>
+    <FormatsControls locale={locale} search={search} />
+  </ClientOnly>;
 }
