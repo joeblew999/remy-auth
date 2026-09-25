@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CspReportRouteImport } from './routes/csp-report'
 import { Route as FormatsRouteImport } from './routes/formats'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -22,6 +23,11 @@ import { Route as TimeZonesSplatRouteImport } from './routes/time-zones.$'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CspReportRoute = CspReportRouteImport.update({
+  id: '/csp-report',
+  path: '/csp-report',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FormatsRoute = FormatsRouteImport.update({
@@ -67,6 +73,7 @@ const TimeZonesSplatRoute = TimeZonesSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/csp-report': typeof CspReportRoute
   '/formats': typeof FormatsRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/csp-report': typeof CspReportRoute
   '/formats': typeof FormatsRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -90,6 +98,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/csp-report': typeof CspReportRoute
   '/formats': typeof FormatsRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -103,6 +112,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/csp-report'
     | '/formats'
     | '/robots.txt'
     | '/sitemap.xml'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/csp-report'
     | '/formats'
     | '/robots.txt'
     | '/sitemap.xml'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/csp-report'
     | '/formats'
     | '/robots.txt'
     | '/sitemap.xml'
@@ -137,6 +149,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CspReportRoute: typeof CspReportRoute
   FormatsRoute: typeof FormatsRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -154,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/csp-report': {
+      id: '/csp-report'
+      path: '/csp-report'
+      fullPath: '/csp-report'
+      preLoaderRoute: typeof CspReportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/formats': {
@@ -217,6 +237,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CspReportRoute: CspReportRoute,
   FormatsRoute: FormatsRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
