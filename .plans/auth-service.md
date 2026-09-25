@@ -50,6 +50,8 @@ The [ecosystem inventory](better-auth-ecosystem.md) records researched CLI, plug
 GUI and agent-tooling options, with a proposed feature adoption matrix. Its
 recommendations still require pinned-version runtime verification.
 
+Items 1, 2, 4 and 5 have [proposals awaiting owner confirmation](#proposed-decisions-1-2-4-and-5).
+
 1. Select the first login method and organization/membership model. Define how the
    first owner is explicitly provisioned; no default production admin or password.
 2. Record a feature matrix: organization RBAC, passkeys, MFA, SSO, SCIM, API/service
@@ -71,6 +73,78 @@ recommendations still require pinned-version runtime verification.
 Escalate any required feature incompatible with the chosen database/runtime,
 identity/tenant ambiguity, or need to change another repo's existing public access.
 Do not silently drop a required feature or substitute a new store.
+
+## Proposed decisions 1, 2, 4 and 5
+
+Proposed 2026-09-25, awaiting owner confirmation. Drafted from the
+[ecosystem inventory](better-auth-ecosystem.md), the installed Better Auth skills
+(`better-auth-best-practices`, `better-auth-security-best-practices`, `organization-best-practices`,
+`two-factor-authentication-best-practices`), the runtime architecture below, and Better Auth's
+documentation read on 2026-09-25:
+[OAuth Provider](https://better-auth.com/docs/plugins/oauth-provider),
+[JWT](https://better-auth.com/docs/plugins/jwt),
+[Email OTP](https://better-auth.com/docs/plugins/email-otp),
+[Admin](https://better-auth.com/docs/plugins/admin),
+[Passkey](https://better-auth.com/docs/plugins/passkey) and the
+[CLI](https://better-auth.com/docs/concepts/cli). Nothing here has run on pinned versions:
+"documented" below means documented upstream, and the decision 3 spike must confirm it on
+Workers and D1. Once confirmed, each value moves to its home (the auth configuration, the
+sample's registration definition, `mise.toml` for ports) and this section links there instead.
+
+### 1. First login method, organization model, first owner
+
+**Login method.** Options: email and password; email one-time code (`emailOTP`); magic link;
+passkey first; a social provider.
+
+Recommended: **email one-time code**, with `storeOTP: "hashed"` (the default is plain) and the
+documented defaults otherwise (6 digits, 300 seconds, 3 attempts). Email and password stays off.
+
+- No password is stored, reset or leaked, which removes the reset and breach-check flows.
+- The code proves the address, so every account has a verified email by construction.
+- The plan's seeded sign-in picker already requires "a real Better Auth code sign-in"; one
+  method then serves people, tests and local development, gated by the environment policy.
+- Password hashing (scrypt by default) is CPU-heavy for Workers; avoiding it removes a runtime
+  risk (assumed, not measured).
+- Cost: it needs mail delivery. Deployed: Cloudflare Email Service (installed skill
+  `cloudflare-email-service`). Local and tests: codes are captured locally and no real mail is
+  sent, as the definition of done requires. A delivery failure is shown as an error, never
+  replaced by a fallback code.
+- Runner-up: email and password. It needs mail for recovery anyway, so it removes no dependency.
+
+Sign-up: **open, but a new account holds nothing.** It has no organization, no platform role and
+no app grant, so a shared login never implies access to any app. Better Auth rate limits (stored
+in D1) apply from the start; Turnstile or a captcha is production hardening.
+
+**Organization model.** Options: no organizations (users plus per-app grants); Better Auth's
+`organization` plugin with one organization per tenant; a personal organization per user.
+
+Recommended: **the `organization` plugin, one organization per tenant, no teams yet, no
+personal organizations.** `allowUserToCreateOrganization` is limited to platform admins at first.
+Membership roles are Better Auth's `owner`, `admin` and `member`, and they govern the
+organization's own administration only. App permissions stay in the app, as the runtime
+architecture decided: the sample's `reader` and `editor` are relations in the sample's own data,
+where `reader` comes from any membership and `editor` from the `owner` or `admin` role or an
+explicit app grant, through the relation engine's role kind. The token carries the active
+organization and the member's role in it.
+
+**First owner.** Options: `auth create-admin` (prompts for a password when `--password` is
+omitted, and runs in Node against a database connection, which a D1 binding is not; both
+unverified for our setup); a direct D1 write (bypasses hooks and audit, which the ecosystem
+inventory forbids); Better Auth's `adminUserIds` option, set per environment.
+
+Recommended: **`adminUserIds` from a per-environment Worker variable.**
+
+- Deployed: the owner signs in with a code, which creates an ordinary empty account; an explicit,
+  environment-specific task puts that user ID in the environment's variable, and a deploy makes
+  it an admin. There is no default admin and no password at any step, and the account has no
+  privilege before that deploy.
+- Local: the seed definition's owner identity has a fixed ID, and the local variable names it.
+- The first admin then creates the first organization (becoming its `owner`) and grants further
+  admins through the Admin API, which is audited.
+
+What would change it: `create-admin` gaining a passwordless mode that works against D1, or the
+owner wanting several bootstrap operators without a deploy. The login method would change for
+users without reliable email, or for a customer requiring its own identity provider (SSO).
 
 ## Runtime architecture: identity central, relationships local (decided 2026-09-25, refined)
 
