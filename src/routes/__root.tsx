@@ -1,5 +1,6 @@
 import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router';
 import { getLocale, direction } from '@joeblew999/remy-ui/locale';
+import { Devtools } from '../devtools';
 import { preferredLocale } from '../preferred';
 import { NotFound, ErrorPage } from '../problem';
 import styles from '../styles.css?url';
@@ -22,6 +23,6 @@ function Document({ children }: { children: React.ReactNode }) {
   const locale = getLocale();
   return <html lang={locale} dir={direction(locale)}>
     <head><HeadContent /></head>
-    <body>{children}<Scripts /></body>
+    <body>{children}<Devtools /><Scripts /></body>
   </html>;
 }
