@@ -4,9 +4,11 @@ All notable changes to the shared UI package `@joeblew999/remy-ui` are documente
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 package follows [Semantic Versioning](https://semver.org/).
 
-## [0.9.0-rc.0] - 2026-09-25
+## [0.9.0] - 2026-09-25
 
-Pre-release for the move to TanStack Start and Router ([plan](.plans/tanstack.md)); not published.
+The move to TanStack Start, Router and Query, with the TanStack showcase ([plan](.plans/tanstack.md)).
+Replaces React Router: consumers move their routes to TanStack file routes (see remy-auth and
+remy-auth-app).
 
 ### Added
 - `@joeblew999/remy-ui/tanstack`: `localizedWorker(service, start)`, the Worker entry for a
