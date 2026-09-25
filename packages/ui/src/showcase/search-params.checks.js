@@ -5,16 +5,20 @@ import { locales } from '../paraglide/runtime.js';
 import { m } from '../paraglide/messages.js';
 import { samples } from '../samples.js';
 import { localizedPath, collectErrors, checkedLocales, formatTag } from '../checks.js';
+import { allChoices, choiceKinds, searchDefaults as defaults } from '../locale-data.js';
 
-// Mirrors search-params.tsx on purpose: the check states the contract, not the implementation.
-const defaults = { currency: 'EUR', count: 3, calendar: 'gregory' };
+// The defaults and choices come from the same derived module the page and its schema read
+// (../locale-data.js), so a new locale's calendar, digits, currency and plural forms need no edit here.
+/** A choice of each control other than its default: the last one over all locales. */
+const other = Object.fromEntries(choiceKinds.map(kind => [kind, allChoices(kind).findLast(value => value !== defaults[kind])]));
 
 /** What the chosen rows must show for these values in this locale. */
-function expected(locale, { currency, count, calendar }) {
+function expected(locale, { currency, count, calendar, numbering }) {
   return {
     'chosen-currency': new Intl.NumberFormat(formatTag(locale), { style: 'currency', currency }).format(samples.amount),
     'chosen-count': m.apps_count({ count }, { locale }),
     'chosen-calendar': new Intl.DateTimeFormat(formatTag(locale), { ...samples.calendarDate, calendar }).format(samples.date),
+    'chosen-numbering': new Intl.NumberFormat(formatTag(locale), { numberingSystem: numbering }).format(samples.decimal),
   };
 }
 
@@ -23,10 +27,8 @@ async function expectChosen(page, locale, values) {
     await expect(page.locator(`[data-sample="${sample}"]`), `${locale} ${sample}`).toHaveText(text);
   }
   const controls = page.locator('[data-showcase="search-params"]');
-  await expect(controls.locator(`[data-currency-choice="${values.currency}"]`)).toHaveAttribute('aria-current', 'page');
-  await expect(controls.locator(`[data-count-choice="${values.count}"]`)).toHaveAttribute('aria-current', 'page');
-  await expect(controls.locator(`[data-calendar-choice="${values.calendar}"]`)).toHaveAttribute('aria-current', 'page');
-  await expect(controls.locator('[aria-current="page"]')).toHaveCount(3);
+  for (const kind of choiceKinds) await expect(controls.locator(`[data-${kind}-choice="${values[kind]}"]`)).toHaveAttribute('aria-current', 'page');
+  await expect(controls.locator('[aria-current="page"]')).toHaveCount(choiceKinds.length);
 }
 
 /**
@@ -36,14 +38,16 @@ async function expectChosen(page, locale, values) {
  * shared into a fresh browser, shows the same values. Every locale.
  */
 export function searchParamsChecks({ serverRendered = true } = {}) {
+  const { currency, count, calendar, numbering } = other;
   const cases = [
-    ['?currency=XYZ&count=abc&calendar=nope', '', defaults],
-    ['?currency=EUR&count=3&calendar=gregory', '', defaults],
-    ['?currency=JPY&count=-1', '?currency=JPY', { ...defaults, currency: 'JPY' }],
-    ['?count=2.5&calendar=islamic', '?calendar=islamic', { ...defaults, calendar: 'islamic' }],
-    ['?count=1001&currency=jpy', '', defaults],
+    ['?currency=XYZ&count=abc&calendar=nope&numbering=nope', '', defaults],
+    [`?currency=${defaults.currency}&count=${defaults.count}&calendar=${defaults.calendar}&numbering=${defaults.numbering}`, '', defaults],
+    [`?currency=${currency}&count=-1`, `?currency=${currency}`, { ...defaults, currency }],
+    [`?count=2.5&calendar=${calendar}`, `?calendar=${calendar}`, { ...defaults, calendar }],
+    [`?numbering=${numbering}&count=1001`, `?numbering=${numbering}`, { ...defaults, numbering }],
+    [`?count=1001&currency=${currency.toLowerCase()}`, '', defaults],
     // Params the page does not own are left alone (analytics tags, for example).
-    ['?utm_source=x&count=0011', '?utm_source=x&count=11', { ...defaults, count: 11 }],
+    [`?utm_source=x&count=000${count}`, `?utm_source=x&count=${count}`, { ...defaults, count }],
   ];
 
   for (const locale of checkedLocales) {
@@ -76,28 +80,31 @@ export function searchParamsChecks({ serverRendered = true } = {}) {
       await page.waitForLoadState('networkidle');
       await expectChosen(page, locale, defaults);
       const controls = page.locator('[data-showcase="search-params"]');
-      const chosen = { currency: 'JPY', count: 11, calendar: 'islamic' };
-      await controls.locator('[data-currency-choice="JPY"]').click();
-      await expect(page).toHaveURL(`${baseURL}${path}?currency=JPY`);
-      await expectChosen(page, locale, { ...defaults, currency: 'JPY' });
-      await controls.locator('[data-count-choice="11"]').click();
-      await expect(page).toHaveURL(`${baseURL}${path}?currency=JPY&count=11`);
-      await controls.locator('[data-calendar-choice="islamic"]').click();
-      await expect(page).toHaveURL(`${baseURL}${path}?currency=JPY&count=11&calendar=islamic`);
+      const chosen = other;
+      const query = `?currency=${currency}&count=${count}&calendar=${calendar}&numbering=${numbering}`;
+      await controls.locator(`[data-currency-choice="${currency}"]`).click();
+      await expect(page).toHaveURL(`${baseURL}${path}?currency=${currency}`);
+      await expectChosen(page, locale, { ...defaults, currency });
+      await controls.locator(`[data-count-choice="${count}"]`).click();
+      await expect(page).toHaveURL(`${baseURL}${path}?currency=${currency}&count=${count}`);
+      await controls.locator(`[data-calendar-choice="${calendar}"]`).click();
+      await expect(page).toHaveURL(`${baseURL}${path}?currency=${currency}&count=${count}&calendar=${calendar}`);
+      await controls.locator(`[data-numbering-choice="${numbering}"]`).click();
+      await expect(page).toHaveURL(`${baseURL}${path}${query}`);
       await expectChosen(page, locale, chosen);
       // Back to the default currency: the param leaves the URL again.
-      await controls.locator('[data-currency-choice="EUR"]').click();
-      await expect(page).toHaveURL(`${baseURL}${path}?count=11&calendar=islamic`);
+      await controls.locator(`[data-currency-choice="${defaults.currency}"]`).click();
+      await expect(page).toHaveURL(`${baseURL}${path}?count=${count}&calendar=${calendar}&numbering=${numbering}`);
       await page.goBack();
-      await expect(page).toHaveURL(`${baseURL}${path}?currency=JPY&count=11&calendar=islamic`);
+      await expect(page).toHaveURL(`${baseURL}${path}${query}`);
       await expectChosen(page, locale, chosen);
       expect(errors).toEqual([]);
 
       // Shareable: the same URL in a fresh browser shows the same values, without JavaScript when server-rendered.
       const shared = await browser.newContext({ javaScriptEnabled: !serverRendered });
-      const other = await shared.newPage();
-      expect((await other.goto(`${baseURL}${path}?currency=JPY&count=11&calendar=islamic`))?.status()).toBe(200);
-      await expectChosen(other, locale, chosen);
+      const fresh = await shared.newPage();
+      expect((await fresh.goto(`${baseURL}${path}${query}`))?.status()).toBe(200);
+      await expectChosen(fresh, locale, chosen);
       await shared.close();
     });
   }

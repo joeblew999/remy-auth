@@ -17,7 +17,7 @@ export function formatsExtras({ locale, info, place }: { locale: Locale; info: L
   const calendarName = new Intl.DisplayNames([locale], { type: 'calendar' });
   const regionName = new Intl.DisplayNames([locale], { type: 'region' });
   return {
-    language: <Row sample="region" label={m.region_label({}, o)}>{regionName.of(samples.region)}</Row>,
+    language: <Row sample="region" label={m.region_label({}, o)}>{regionName.of(info.region)}</Row>,
     time: <DeferredPlace locale={locale} place={place} />,
     systems: <>
       <Row sample="other-calendars" label={m.other_calendars_label({}, o)}>
@@ -31,7 +31,7 @@ export function formatsExtras({ locale, info, place }: { locale: Locale; info: L
     dates: <Row sample="range" label={m.range_label({}, o)}>{new Intl.DateTimeFormat(format, { dateStyle: 'medium', timeZone: 'UTC' }).formatRange(samples.rangeStart, samples.rangeEnd)}</Row>,
     currency: <>
       <Row sample="currencies" label={m.currencies_label({}, o)}>{list.format(samples.currencies.map(currency => new Intl.NumberFormat(format, { style: 'currency', currency }).format(samples.amount)))}</Row>
-      <Row sample="currency-name" label={m.currency_name_label({}, o)}>{new Intl.DisplayNames([locale], { type: 'currency' }).of('EUR')}</Row>
+      <Row sample="currency-name" label={m.currency_name_label({}, o)}>{new Intl.DisplayNames([locale], { type: 'currency' }).of(info.currency)}</Row>
     </>,
     money: <p className="text-sm leading-relaxed text-muted-foreground md:col-span-2">{m.currency_note({}, o)}</p>,
     numbers: <Group title={m.units_heading({}, o)}>

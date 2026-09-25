@@ -11,8 +11,24 @@ package follows [Semantic Versioning](https://semver.org/).
   in a module of its own, so a page that needs only the frame (remy-auth's docs and problem pages)
   no longer downloads the home and formats pages. `pages` re-exports all of it: nothing changes for
   existing imports.
+- `locale-data` (plain JavaScript, re-exported by `locale-info`): one module that derives, per locale,
+  its region, script, currency, calendars, numbering systems and plural counts (`ownValues`), each
+  control's choices over all of Paraglide's locales (`allChoices`, `choicesFor`: the page's language's
+  own first) and the formats page's `searchDefaults` (from the base locale). The region's currency
+  comes from `country-to-currency` (new dependency; the runtime has no currency-for-region API).
+- A numbering-system control on the formats page (`?numbering=`), in the Numbers section.
+- `LocaleInfo` has `region`, `currency` and `counts`; `Group` passes other props (data attributes) to its card.
 
 ### Changed
+- Formats page: every section opens with what it is for the page's language (`data-own-area`):
+  Money shows the amount in the language's own currency (was euros), Words lists the language's
+  plural forms. Every control offers the union over all locales, the page's own values first, in
+  the secondary look and described by a "This language" badge. `currencies`, `countChoices` and the
+  showcase calendar list are gone; the currency default is the base locale's (USD, was EUR) and the
+  count default its first count above one in the general form (2, was 3).
+- `formatsChecks` and `searchParamsChecks` iterate the derived values, so a new locale needs no
+  check edit; they also check the "for this language" card of every section and each control's
+  order and marking.
 - The formats rows (`Group`, `Row`) live in their own module and the showcase modules whose route
   options run in every page's first load (search params, time zones, device place) import them and
   the frame from there instead of from `pages`. `pages` still exports them.

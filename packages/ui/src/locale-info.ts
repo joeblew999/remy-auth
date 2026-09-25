@@ -1,9 +1,14 @@
 import type { Locale } from './paraglide/runtime.js';
+import { ownValues } from './locale-data.js';
 
-/** A locale's own calendar, digit, clock and week conventions, from the runtime's CLDR data. */
+// Every language's own values and the formats page's choices (the union over all languages) come
+// from one plain-JavaScript module, which the shared checks read too.
+export { ownValues, allChoices, choicesFor, choiceKinds, searchDefaults, maxCount, type ChoiceKind, type OwnValues } from './locale-data.js';
+
+/** A locale's own calendar, digit, clock, week, region, currency and plural conventions, derived from the locale. */
 export type LocaleInfo = {
   calendar: string; otherCalendars: string[]; numberingSystem: string; hourCycle: string;
-  firstDay: number; weekend: number[];
+  firstDay: number; weekend: number[]; region: string; currency: string; counts: number[];
 };
 
 // Intl Locale Info (getCalendars, getNumberingSystems, getWeekInfo) is Baseline since 2026-07-21
@@ -31,11 +36,13 @@ export function localeInfo(locale: Locale): LocaleInfo {
   const tag = withInfo(locale);
   const [calendar, ...otherCalendars] = tag.getCalendars();
   const { firstDay, weekend } = tag.getWeekInfo();
+  const { region, currency, counts } = ownValues(locale);
   return {
     calendar, otherCalendars,
     numberingSystem: tag.getNumberingSystems()[0],
     hourCycle: new Intl.DateTimeFormat(formatLocale(locale), { hour: 'numeric' }).resolvedOptions().hourCycle ?? 'h23',
     firstDay, weekend,
+    region, currency, counts,
   };
 }
 
