@@ -241,6 +241,13 @@
   "cf_local_time_label": "الوقت المحلي هناك",
   "location_unknown": "غير معروف على هذا الاتصال",
   "location_note": "يبلّغ Cloudflare عن موقع الشبكة مع كل طلب؛ يستخدمه الخادم للوقت المحلي أعلاه ولا يخزّنه.",
+  "live_status_heading": "الحالة المباشرة",
+  "live_status_label": "الحالة",
+  "live_status_ok": "يعمل",
+  "live_service_label": "الخدمة",
+  "live_release_label": "الإصدار",
+  "live_status_note": "يُعرض على الخادم، ثم يحدّثه متصفحك ما دامت هذه الصفحة مفتوحة.",
+  "live_refresh": "حدّث الآن",
   "continue_in": "تابع باللغة {language}",
   "language_hint": "هذه الصفحة متاحة أيضًا باللغة {language}.",
   "keep_language": "ابقَ على {language}"

@@ -1,10 +1,12 @@
-import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router';
+import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from '@tanstack/react-router';
+import type { QueryClient } from '@tanstack/react-query';
 import { getLocale, direction } from '@joeblew999/remy-ui/locale';
 import { preferredLocale } from '../preferred';
 import { NotFound, ErrorPage } from '../problem';
 import styles from '../styles.css?url';
 
-export const Route = createRootRoute({
+// Router context: the per-request QueryClient from getRouter (src/router.tsx).
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   // The language worth offering on this page, if any (see preferred.ts); cheap, so it reruns on every navigation.
   loader: () => ({ preferred: preferredLocale() }),
   head: () => ({

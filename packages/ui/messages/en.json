@@ -236,6 +236,13 @@
   "cf_local_time_label": "Local time there",
   "location_unknown": "Unknown on this connection",
   "location_note": "Cloudflare reports the network's location with each request; the server uses it for the local time above and does not store it.",
+  "live_status_heading": "Live status",
+  "live_status_label": "Status",
+  "live_status_ok": "Operational",
+  "live_service_label": "Service",
+  "live_release_label": "Release",
+  "live_status_note": "Rendered on the server, then refreshed by your browser while this page is open.",
+  "live_refresh": "Refresh now",
   "continue_in": "Continue in {language}",
   "language_hint": "This page is also available in {language}.",
   "keep_language": "Keep {language}"

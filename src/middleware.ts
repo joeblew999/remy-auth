@@ -3,9 +3,8 @@ import { getResponseStatus } from '@tanstack/react-start/server';
 import { env } from 'cloudflare:workers';
 import { getLocale, isLocale } from '@joeblew999/remy-ui/locale';
 import { logContext, outcome, level, requestIdHeader, writeLog } from '@joeblew999/remy-ui/worker';
+import { service } from './service';
 
-/** This Worker's name in the shared log contract; the Worker entry (src/server.ts) uses the same. */
-export const service = 'remy-auth';
 
 /**
  * Request middleware (every server request: pages, server routes, server functions): the request

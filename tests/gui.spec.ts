@@ -9,6 +9,8 @@ import { searchParamsChecks } from '@joeblew999/remy-ui/showcase/search-params.c
 import { preloadChecks } from '@joeblew999/remy-ui/showcase/preload.checks';
 import { navigationBlockingChecks } from '@joeblew999/remy-ui/showcase/navigation-blocking.checks';
 import { serverFunctionChecks } from '@joeblew999/remy-ui/showcase/server-functions.checks';
+import { deferredPlaceChecks } from '@joeblew999/remy-ui/showcase/deferred-place.checks';
+import { statusCardChecks } from '@joeblew999/remy-ui/showcase/status-card.checks';
 
 // The shared checks cover what every app built on the package must satisfy.
 publicPageChecks({ paths: publicPaths });
@@ -19,6 +21,8 @@ observabilityChecks({ service: 'remy-auth', paths: publicPaths });
 searchParamsChecks();
 preloadChecks();
 navigationBlockingChecks();
+deferredPlaceChecks();
+statusCardChecks({ service: 'remy-auth' });
 formatsChecks({ extra: async (page, locale) => {
   // Rows only this server-rendered app has: more Intl examples and Cloudflare's geolocation.
   const messages = catalogs[locale];
