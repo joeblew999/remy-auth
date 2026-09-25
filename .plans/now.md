@@ -29,6 +29,33 @@ evidence. Each item's detail lives in the plan it links to.
 - [ ] Close the TanStack plan: move it to `done/`, update `docs/gui.md` and the READMEs.
 - [ ] Cloudflare alert policy "alert rules firing and recovered" ([plan](observability.md)).
 
+## Queued: what cannot be done yet, what it waits for, in order
+
+Agents running on 2026-09-25: batch 1 (A to F), batch 2 (security headers, structured data,
+formats speed), batch 3 (TanStack Form, Zod adapter, Devtools), a docs audit and a tooling review.
+
+| # | Work | Waits for | Then |
+| --- | --- | --- | --- |
+| 1 | Merge batch 3 (Form, Zod adapter, Devtools), regenerate the lockfile once, both levels, release 0.10.3, deploy | batch 3 | remy-auth-app moves to 0.10.3 |
+| 2 | Merge batch 1: remy-auth-app on 0.10.2, TanStack plan closed, alert policy recorded | batch 1 A, B, C | deploy remy-auth-app |
+| 3 | Docs refactor: one home per fact, overlaps removed, stale text fixed | docs audit and batch 1 B merged | gate, push |
+| 4 | Tooling fixes from the review, smallest first | tooling review | shared tasks released with the next tag |
+| 5 | Formats speed fix, if an upstream-only fix exists | batch 2, formats speed | Google's level green on production |
+| 6 | Structured data on the site pages | batch 2, structured data | check in the server HTML |
+| 7 | Security headers rollout, report-only first | batch 2 report and **owner decision** | enforce after a clean report period |
+| 8 | Contract-first APIs: build items 2 to 6 on the chosen oRPC version | batch 1 D | status and reservation endpoints |
+| 9 | Parts: convert the existing parts | batch 1 E | one line per part in each app |
+| 10 | Ten more languages and the hard localisation features | batch 1 F | one agent per two languages, then a hands-on pass |
+| 11 | Auth service decisions 1 to 6: runtime proof, drafts, sharing examples | **owner to launch** (items 1 to 3 of the last numbered choice) | owner confirms the drafts |
+| 12 | Auth service milestone 1: Better Auth on D1, issuer, sample app | 11 confirmed | login screens |
+| 13 | Auth portal screens from shadcn's login and signup blocks; admin lists on TanStack Table | 12 | shared login checks |
+| 14 | remy-auth-app runs the consumer contract set, not the whole package suite | 4 | faster consumer gates |
+
+Decisions only the owner can make: the security headers rollout (7), launching the auth
+decisions (11) and confirming them, a native-speaker review of the Arabic and new catalogs, the
+production origin and Search Console, filing upstream issues (shadcn apply and "use client";
+fontaine and Tailwind's inline theme), and deleting old Cloudflare preview versions.
+
 ## Rough edges found along the way
 
 Each is small; fix or decide, then delete the line.
