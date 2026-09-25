@@ -1,6 +1,6 @@
 # Caching (quick plan)
 
-Status: open, 2026-09-25; a plan only, nothing built. Owner's request: "a proper solution for
+Status: open, 2026-09-25; step 0 built (see "Decision 2026-09-25"), HTML caching not started. Owner's request: "a proper solution for
 caching. TanStack must have one?" Applies to both apps through the shared package and tasks.
 Checked 2026-09-25 against the TanStack skills, Start 1.168.58, Wrangler 4.137.0, TanStack's ISR
 guide and Cloudflare's docs. Anything else is marked **assumed**.
@@ -18,6 +18,25 @@ Cache API do not apply to it ([docs](https://developers.cloudflare.com/workers/c
 domain is now about branding and alerts, not caching. Trade-offs: with caching on, **every**
 request is billed, including static assets and calls between entrypoints, which are free today
 (hits use no CPU); `Set-Cookie` responses and `Authorization` requests skip the cache.
+
+## Decision 2026-09-25: don't cache HTML yet
+
+Survey result, unattended run (owner: "pump and deploy fast"): every HTML response carries a
+per-request CSP nonce (`cspNonce` in `src/start.ts`, router `ssr.nonce`), an `X-Request-ID`, and
+on site pages the cookie/Accept-Language hint and the `request.cf` place card. Caching any of it at
+the edge would serve one visitor's nonce, request ID and hints to the next, so HTML stays `no-store`
+until W2 to W4 land. TanStack Start has no hash-based CSP (stock `ssr.nonce` only), so dropping the
+nonce for cached pages is our own code and waits for W3. `"cache": { "enabled": true }` is **not**
+switched on: with HTML uncacheable the only cacheable responses are robots.txt and sitemap.xml, and
+turning it on bills every asset request (decision 1 below), so today it costs more than it saves.
+Hashed `/assets/*` are already `immutable` (`public/_headers`), which is the real win in place.
+
+Built (step 0): `crawlCache` now says `public, max-age=3600, s-maxage=3600`, so robots.txt and
+sitemap.xml are cache-ready the day Workers Caching is on (**assumed:** the key includes the host, so the
+origin in their bodies stays correct; their `X-Request-ID` would repeat on a hit, accepted for
+crawl metadata). `/api` stays `no-store` (contracts plan decides per route); docs search
+(`searchDocs`, a GET server function keyed by the query) is left uncached until Workers Caching
+is on; it is the next candidate for `public, s-maxage`.
 
 ## TanStack's model and how it maps
 

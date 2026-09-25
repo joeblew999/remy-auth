@@ -98,7 +98,7 @@ Every page exists in every locale (13 prefixes such as `/en`, `/ar`, `/ja`; the 
 | `/en/app/location` | App | Cloudflare's location of the request beside the device's own, which the Geolocation API gives only after the visitor presses its button |
 | `/api/status`, `/api/reservations` | API | Contract endpoints ([@joeblew999/remy-auth-contract](../packages/contract/README.md)) served by oRPC behind one Start server route (`src/routes/api.$.ts`, `src/api/`): input and output validated, typed errors, the language from Accept-Language (Paraglide's `routeStrategies`), no locale in the URL |
 | `/api/openapi.json`, `/api/doc` | API | The OpenAPI 3.1 document generated from the router in-process, and its reference page (oRPC's Scalar page, script pinned) |
-| `/robots.txt`, `/sitemap.xml` | Server routes | `Cache-Control: public, max-age=3600`; methods other than GET and HEAD answer 405 with `Allow`; the sitemap lists the site pages in every locale with `hreflang` alternates |
+| `/robots.txt`, `/sitemap.xml` | Server routes | `Cache-Control: public, max-age=3600, s-maxage=3600`; methods other than GET and HEAD answer 405 with `Allow`; the sitemap lists the site pages in every locale with `hreflang` alternates |
 | Unknown route or locale | | HTTP 404 with the localized not-found page (an un-localized unknown path first redirects to the visitor's language, as TanStack's rewrite canonicalizes it) |
 | A page's loader failing | | That route's localized error page (500 when server-rendered) with a retry that re-runs the loaders; every page route and the root set both problem pages (`src/problem.tsx`) |
 
