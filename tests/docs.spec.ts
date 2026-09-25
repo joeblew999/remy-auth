@@ -275,11 +275,15 @@ test.describe('docs search', () => {
     for (const locale of checkedLocales) {
       const searchUrl = localizedPath(docsSearchPath, locale);
       await page.goto(docsUrl('how-we-work', locale));
-      const form = page.locator('form[data-docs-search]');
+      // The search-and-ask box at the top of the docs area (live-search.tsx): without JavaScript, its
+      // Search button submits the GET form to the search page.
+      const form = page.locator('form[role="search"][data-docs-live]');
       await expect(form).toHaveAttribute('method', 'get');
       await expect(form).toHaveAttribute('action', searchUrl);
       await form.getByLabel(m.search_label({}, { locale }), { exact: true }).fill(query);
-      await form.getByRole('button', { name: m.search_submit({}, { locale }), exact: true }).click();
+      const search = form.getByRole('button', { name: m.search_submit({}, { locale }), exact: true });
+      await expect(search).toHaveAttribute('formaction', searchUrl);
+      await search.click();
       await expect(page).toHaveURL(new RegExp(`${searchUrl}\\?q=Workers\\+Logs$`));
       await expect(page.locator('#docs-search-q')).toHaveValue(query);
       // Not for Google: noindex, and no canonical or alternates pointing elsewhere.

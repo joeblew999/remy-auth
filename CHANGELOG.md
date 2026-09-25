@@ -16,8 +16,6 @@ package follows [Semantic Versioning](https://semver.org/).
   moved from remy-auth so parts' routes can use them. Nothing changes for existing imports.
 - `./smoke`: `smokeChecks({ sitePaths, appPaths, hydrate, locales })`, tier 1 of the test tiers (every page
   answers, site pages with a heading, chosen pages hydrate cleanly) for any app on the package.
-
-### Added
 - `shell`: the site frame (`SiteShell`, `Shell`, `SiteNavLinks`, `Intro`, `SkipLink`, `ZoneBadge`)
   in a module of its own, so a page that needs only the frame (remy-auth's docs and problem pages)
   no longer downloads the home and formats pages. `pages` re-exports all of it: nothing changes for

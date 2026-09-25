@@ -7,6 +7,18 @@ paquete sigue [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Añadido [#added]
+- Partes (`.plans/parts.md`): `./parts` (`readParts`, `catalog`), `./parts/vite` (`remyParts()`: un
+  plugin de Vite que genera `virtual:remy-parts` a partir del `src/parts.json` de la app, y la
+  configuración de rutas que monta las rutas de cada parte listada mediante `virtualRouteConfig` y
+  `physical()` de TanStack), `./parts/checks` (`partChecks()`). Primera parte: `time-zones` (la ruta
+  `/time-zones/$` y sus comprobaciones), de modo que una app la añade o la quita con una línea. Nueva
+  dependencia `@tanstack/virtual-file-routes`.
+- `./problem` (`Problem`, `NotFound`, `ErrorPage`, `problemPages`) y `./preferred` (`usePreferred`),
+  trasladados desde remy-auth para que las rutas de las partes puedan usarlos. Nada cambia en las
+  importaciones existentes.
+- `./smoke`: `smokeChecks({ sitePaths, appPaths, hydrate, locales })`, el nivel 1 de los niveles de
+  pruebas (cada página responde, las páginas del sitio con un encabezado, las páginas elegidas se
+  hidratan sin errores) para cualquier app sobre el paquete.
 - `shell`: el marco del sitio (`SiteShell`, `Shell`, `SiteNavLinks`, `Intro`, `SkipLink`, `ZoneBadge`)
   en un módulo propio, de modo que una página que solo necesita el marco (las páginas de
   documentación y de problemas de remy-auth) ya no descarga las páginas de inicio y de formatos.
@@ -14,8 +26,38 @@ paquete sigue [Semantic Versioning](https://semver.org/).
 - `publicPageChecks({ oneLanguage: { translations } })`: las páginas de un solo idioma que también
   tienen su propio texto en otros idiomas (la documentación traducida de remy-auth) se esperan en el
   sitemap una vez por idioma, con canonical propio, esos idiomas como alternativas y x-default.
+- `locale-data` (JavaScript plano, reexportado por `locale-info`): un módulo que deriva, por idioma,
+  su región, escritura, moneda, calendarios, sistemas de numeración y formas de plural (`ownValues`),
+  las opciones de cada control sobre todos los idiomas de Paraglide (`allChoices`, `choicesFor`: las
+  del idioma de la página primero) y los `searchDefaults` de la página de formatos (a partir del idioma
+  base). La moneda de la región viene de `country-to-currency` (nueva dependencia; el runtime no tiene
+  una API de moneda por región).
+- Un control de sistema de numeración en la página de formatos (`?numbering=`), en la sección Números.
+- `LocaleInfo` tiene `region`, `currency` y `counts`; `Group` pasa otras props (atributos de datos) a su tarjeta.
+- `fontChecks({ paths })` (`checks`): por idioma, las fuentes que realmente dibujan el encabezado y la
+  introducción (`CSS.getPlatformFontsForNode` del Chrome DevTools Protocol) son las que `fonts.css`
+  nombra para él; una fuente del sistema o de respaldo que dibuja el texto falla indicando la escritura
+  de la página y la fuente que hay que añadir, una fuente de escritura nombrada que no dibuja nada
+  falla, y el japonés y el chino tradicional deben nombrar fuentes distintas.
+
+### Corregido [#fixed]
+- `fonts.css`: las páginas en árabe, persa y hebreo se dibujan con Noto Sans Arabic y Hebrew en macOS
+  y Windows. La fuente de escritura de cada idioma va ahora antes del respaldo de Geist de fontaine
+  (Arial local, que incluye árabe y hebreo y por eso los dibujaba ella misma), seguida de la cara de
+  respaldo con métricas ajustadas de la propia fuente de escritura; el respaldo de Geist queda al final.
+  Sin nuevas precargas.
 
 ### Cambiado [#changed]
+- Página de formatos: cada sección empieza con lo que es para el idioma de la página
+  (`data-own-area`): Dinero muestra la cantidad en la moneda del propio idioma (antes euros), Palabras
+  lista las formas de plural del idioma. Cada control ofrece la unión sobre todos los idiomas, con los
+  valores propios de la página primero, en el aspecto secundario y descritos por una insignia "Este
+  idioma". `currencies`, `countChoices` y la lista de calendarios de muestra desaparecen; la moneda por
+  defecto es la del idioma base (USD, antes EUR) y el recuento por defecto su primer recuento mayor que
+  uno en la forma general (2, antes 3).
+- `formatsChecks` y `searchParamsChecks` recorren los valores derivados, así que un idioma nuevo no
+  necesita editar ninguna comprobación; también comprueban la tarjeta "para este idioma" de cada
+  sección y el orden y el marcado de cada control.
 - Las filas de formatos (`Group`, `Row`) viven en su propio módulo y los módulos de muestra
   (showcase) cuyas opciones de ruta se ejecutan en la primera carga de cada página (parámetros de
   búsqueda, zonas horarias, ubicación del dispositivo) las importan junto con el marco desde ahí en
@@ -215,7 +257,7 @@ disruptivo para los consumidores.
 
 ## [0.9.1] - 2026-09-25
 
-### Corregido [#fixed]
+### Corregido [#fixed-1]
 - `DemoPage` detecta la entrada escrita antes de la hidratación (una página
   prerrenderizada no dispara `onInput` para ella), de modo que el aviso de salida sigue
   protegiéndola.
