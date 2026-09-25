@@ -10,7 +10,8 @@ import { Input } from './components/input';
 import { SidebarInset, SidebarProvider } from './components/sidebar';
 import { AppSidebar } from './blocks/sidebar-16/app-sidebar';
 import { SiteHeader } from './blocks/sidebar-16/site-header';
-import { Intro, SkipLink, ZoneBadge } from './pages';
+import { FormatsContent, Intro, SkipLink, ZoneBadge, type FormatsExtras } from './pages';
+import type { LocaleInfo } from './locale-info';
 
 // App pages (paths.js): they need JavaScript and use the app shell. Kept apart from ./pages, the
 // site pages, so a site page never downloads the app shell's code.
@@ -61,6 +62,11 @@ export function LocationPage({ locale, preferred, children }: { locale: Locale; 
       {children}
     </section>
   </AppShell>;
+}
+
+/** The formats page inside the app: the same content as the site page, in the app frame. */
+export function AppFormatsPage({ locale, info, preferred, extras = {} }: { locale: Locale; info: LocaleInfo; preferred?: Locale; extras?: FormatsExtras }) {
+  return <AppShell locale={locale} path="/app/formats" preferred={preferred}><FormatsContent locale={locale} info={info} extras={extras} backTo="/app" /></AppShell>;
 }
 
 /** The demo form's starting number of seats. */

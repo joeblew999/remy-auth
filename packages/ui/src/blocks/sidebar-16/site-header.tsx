@@ -6,9 +6,9 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from '../.
 import { Button } from '../../components/button';
 import { Separator } from '../../components/separator';
 import { useSidebar } from '../../components/sidebar';
-import { LanguageSwitcher } from '../../language';
+import { LanguageMenu } from '../../language';
 
-/** sidebar-16's SiteHeader: the sidebar toggle, the breadcrumb with the app's name, and the language switcher where the block has its search form. */
+/** sidebar-16's SiteHeader: the sidebar toggle, the breadcrumb with the app's name, and the language menu where the block has its search form. */
 export function SiteHeader({ locale, path }: { locale: Locale; path: string }) {
   const { toggleSidebar } = useSidebar();
   return (
@@ -25,7 +25,7 @@ export function SiteHeader({ locale, path }: { locale: Locale; path: string }) {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="ms-auto"><LanguageSwitcher locale={locale} path={path} /></div>
+        <div className="ms-auto"><LanguageMenu locale={locale} /></div>
       </div>
     </header>
   );

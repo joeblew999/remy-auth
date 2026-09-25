@@ -2,17 +2,17 @@ import { createFileRoute, stripSearchParams } from '@tanstack/react-router';
 import { searchDefaults } from '@joeblew999/remy-ui/showcase/search-params';
 import { getLocale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
-import { FormatsPage } from '@joeblew999/remy-ui/pages';
+import { AppFormatsPage } from '@joeblew999/remy-ui/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { formatsExtras, formatsRouteOptions } from '../formats-extras';
 import { usePreferred } from '../preferred';
 import { problemPages } from '../problem';
 
-// The formats site page: complete without JavaScript, for Google.
-export const Route = createFileRoute('/formats')({
+// The formats page inside the app: the same content and rows as the site page, in the app frame.
+export const Route = createFileRoute('/app/formats')({
   ...formatsRouteOptions,
   search: { middlewares: [stripSearchParams(searchDefaults)] },
-  head: () => pageHead({ path: '/formats', title: locale => m.formats_title({}, { locale }), description: locale => m.formats_description({}, { locale }) }),
+  head: () => pageHead({ path: '/app/formats', title: locale => m.formats_title({}, { locale }), description: locale => m.formats_description({}, { locale }) }),
   component: Formats,
   ...problemPages,
 });
@@ -20,6 +20,6 @@ export const Route = createFileRoute('/formats')({
 function Formats() {
   const { info, place } = Route.useLoaderData();
   const locale = getLocale();
-  return <FormatsPage locale={locale} info={info} preferred={usePreferred()}
-    extras={formatsExtras({ locale, info, place, search: Route.useSearch(), to: '/formats' })} />;
+  return <AppFormatsPage locale={locale} info={info} preferred={usePreferred()}
+    extras={formatsExtras({ locale, info, place, search: Route.useSearch(), to: '/app/formats' })} />;
 }

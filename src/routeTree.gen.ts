@@ -15,6 +15,7 @@ import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppDemoRouteImport } from './routes/app.demo'
+import { Route as AppFormatsRouteImport } from './routes/app.formats'
 import { Route as AppLocationRouteImport } from './routes/app.location'
 import { Route as TimeZonesSplatRouteImport } from './routes/time-zones.$'
 
@@ -48,6 +49,11 @@ const AppDemoRoute = AppDemoRouteImport.update({
   path: '/app/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppFormatsRoute = AppFormatsRouteImport.update({
+  id: '/app/formats',
+  path: '/app/formats',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppLocationRoute = AppLocationRouteImport.update({
   id: '/app/location',
   path: '/app/location',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app/demo': typeof AppDemoRoute
+  '/app/formats': typeof AppFormatsRoute
   '/app/location': typeof AppLocationRoute
   '/time-zones/$': typeof TimeZonesSplatRoute
   '/app/': typeof AppIndexRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app/demo': typeof AppDemoRoute
+  '/app/formats': typeof AppFormatsRoute
   '/app/location': typeof AppLocationRoute
   '/time-zones/$': typeof TimeZonesSplatRoute
   '/app': typeof AppIndexRoute
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app/demo': typeof AppDemoRoute
+  '/app/formats': typeof AppFormatsRoute
   '/app/location': typeof AppLocationRoute
   '/time-zones/$': typeof TimeZonesSplatRoute
   '/app/': typeof AppIndexRoute
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/app/demo'
+    | '/app/formats'
     | '/app/location'
     | '/time-zones/$'
     | '/app/'
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/app/demo'
+    | '/app/formats'
     | '/app/location'
     | '/time-zones/$'
     | '/app'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/app/demo'
+    | '/app/formats'
     | '/app/location'
     | '/time-zones/$'
     | '/app/'
@@ -129,6 +141,7 @@ export interface RootRouteChildren {
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AppDemoRoute: typeof AppDemoRoute
+  AppFormatsRoute: typeof AppFormatsRoute
   AppLocationRoute: typeof AppLocationRoute
   TimeZonesSplatRoute: typeof TimeZonesSplatRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -178,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDemoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/formats': {
+      id: '/app/formats'
+      path: '/app/formats'
+      fullPath: '/app/formats'
+      preLoaderRoute: typeof AppFormatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/location': {
       id: '/app/location'
       path: '/app/location'
@@ -201,6 +221,7 @@ const rootRouteChildren: RootRouteChildren = {
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   AppDemoRoute: AppDemoRoute,
+  AppFormatsRoute: AppFormatsRoute,
   AppLocationRoute: AppLocationRoute,
   TimeZonesSplatRoute: TimeZonesSplatRoute,
   AppIndexRoute: AppIndexRoute,

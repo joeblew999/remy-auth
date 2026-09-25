@@ -9,7 +9,7 @@
  * use the app shell (shadcn's sidebar-16 block). Their checks are the app's own.
  */
 export const sitePaths = ['', '/formats'];
-export const appPaths = ['/app', '/app/demo', '/app/location'];
+export const appPaths = ['/app', '/app/formats', '/app/demo', '/app/location'];
 /** Every page, both kinds: entry redirects, request IDs and code splitting cover them all. */
 export const allPaths = [...sitePaths, ...appPaths];
 /** Whether a de-localized path is an app page. */

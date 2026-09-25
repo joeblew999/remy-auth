@@ -1,8 +1,8 @@
 import { Link } from '@tanstack/react-router';
-import { ArrowLeftIcon, GalleryVerticalEndIcon, LayoutDashboardIcon, MapPinIcon, MousePointerClickIcon } from 'lucide-react';
+import { ArrowLeftIcon, CalendarDaysIcon, GalleryVerticalEndIcon, LayoutDashboardIcon, MapPinIcon, MousePointerClickIcon } from 'lucide-react';
 import { getTextDirection, type Locale } from '../../paraglide/runtime.js';
 import { m } from '../../paraglide/messages.js';
-import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../components/sidebar';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../components/sidebar';
 import { NavMain } from './nav-main';
 
 /** sidebar-16's AppSidebar with Remy's data; it opens on the reading side (right for right-to-left languages). */
@@ -27,11 +27,22 @@ export function AppSidebar({ locale }: { locale: Locale }) {
       <SidebarContent>
         <NavMain label={m.nav_heading({}, o)} items={[
           { title: m.nav_home({}, o), to: '/app', icon: <LayoutDashboardIcon /> },
+          { title: m.nav_formats({}, o), to: '/app/formats', icon: <CalendarDaysIcon /> },
           { title: m.nav_demo({}, o), to: '/app/demo', icon: <MousePointerClickIcon /> },
           { title: m.nav_location({}, o), to: '/app/location', icon: <MapPinIcon /> },
         ]} />
-        <NavMain label={m.back_to_site({}, o)} items={[{ title: m.back_to_site({}, o), to: '/', icon: <ArrowLeftIcon className="rtl:rotate-180" /> }]} />
       </SidebarContent>
+      {/* In the footer, which stays in view however short the screen (a phone in landscape). */}
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton render={<Link to="/" />}>
+              <ArrowLeftIcon className="rtl:rotate-180" />
+              <span>{m.back_to_site({}, o)}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }

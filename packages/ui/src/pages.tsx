@@ -92,14 +92,14 @@ export function Row({ sample, label, children, ...rest }: { sample: string; labe
 /** Extra rows an app adds inside the shared groups, and extra sections before and after them. */
 export type FormatsExtras = { language?: React.ReactNode; systems?: React.ReactNode; dates?: React.ReactNode; currency?: React.ReactNode; beforeSystems?: React.ReactNode; after?: React.ReactNode };
 
-export function FormatsPage({ locale, info, preferred, extras = {} }: { locale: Locale; info: LocaleInfo; preferred?: Locale; extras?: FormatsExtras }) {
+/** The formats page's content, the same on the site page and the app page; each wraps it in its own frame. */
+export function FormatsContent({ locale, info, extras = {}, backTo = '/' }: { locale: Locale; info: LocaleInfo; extras?: FormatsExtras; backTo?: '/' | '/app' }) {
   const o = { locale };
   const dir = direction(locale);
   const list = new Intl.ListFormat(locale, { type: 'conjunction' });
   const calendarName = new Intl.DisplayNames([locale], { type: 'calendar' });
-  return <Shell locale={locale} path="/formats" preferred={preferred}>
-    <section className="flex flex-col gap-6">
-      <Intro locale={locale} label={m.formats_label({}, o)} title={m.formats_title({}, o)} intro={m.formats_intro({}, o)} />
+  return <section className="flex flex-col gap-6">
+      <Intro locale={locale} label={m.formats_label({}, o)} title={m.formats_title({}, o)} intro={m.formats_intro({}, o)} backTo={backTo} />
       <Group title={m.language_label({}, o)}>
         <Row sample="tag" label={m.language_tag({}, o)}><code>{locale}</code></Row>
         <Row sample="name" label={m.language_name({}, o)}>{localeName(locale)}</Row>
@@ -136,6 +136,10 @@ export function FormatsPage({ locale, info, preferred, extras = {} }: { locale: 
       <Card><CardHeader><CardTitle>{m.ordinal_heading({}, o)}</CardTitle></CardHeader>
         <CardContent><ul className="flex flex-wrap gap-2">{samples.positions.map(n => <li key={n}><Badge variant="outline" data-position={n}>{m.position_value({ n }, o)}</Badge></li>)}</ul></CardContent></Card>
       {extras.after}
-    </section>
-  </Shell>;
+  </section>;
+}
+
+/** The formats site page: FormatsContent in the site frame, complete without JavaScript. */
+export function FormatsPage({ locale, info, preferred, extras = {} }: { locale: Locale; info: LocaleInfo; preferred?: Locale; extras?: FormatsExtras }) {
+  return <Shell locale={locale} path="/formats" preferred={preferred}><FormatsContent locale={locale} info={info} extras={extras} /></Shell>;
 }

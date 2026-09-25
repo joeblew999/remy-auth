@@ -69,12 +69,12 @@ function Choices({ label, name, children }: { label: string; name: string; child
  * current choice is the exactly active one. Render it through FormatsPage's `after` extra with
  * `search={Route.useSearch()}`.
  */
-export function FormatsControls({ locale, search, interactive = true }: { locale: Locale; search: FormatsSearch; interactive?: boolean }) {
+export function FormatsControls({ locale, search, interactive = true, to = '/formats' }: { locale: Locale; search: FormatsSearch; interactive?: boolean; to?: '/formats' | '/app/formats' }) {
   const o = { locale };
   const number = new Intl.NumberFormat(locale);
   const currencyName = new Intl.DisplayNames([locale], { type: 'currency' });
   const calendarName = new Intl.DisplayNames([locale], { type: 'calendar' });
-  const link = { from: '/formats', to: '/formats', resetScroll: false, activeOptions: { exact: true }, activeProps: { className: chosen }, inactiveProps: { className: choice } } as const;
+  const link = { from: to, to, resetScroll: false, activeOptions: { exact: true }, activeProps: { className: chosen }, inactiveProps: { className: choice } } as const;
   // Static stand-ins with the same look, for HTML rendered without a request (see PrerenderedFormatsControls).
   const still = (selected: boolean, text: React.ReactNode) => <span className={selected ? chosen : choice}>{text}</span>;
   return <Card data-showcase="search-params">

@@ -4,6 +4,8 @@ import { localeName } from './locale';
 import { m } from './paraglide/messages.js';
 import { Button, buttonVariants } from './components/button';
 import { Alert, AlertDescription } from './components/alert';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from './components/dropdown-menu';
+import { LanguagesIcon } from 'lucide-react';
 
 // Plain anchors with Paraglide-localized hrefs: a language change is a full navigation, and
 // setLocale records the choice in Paraglide's cookie without a second navigation.
@@ -16,6 +18,24 @@ export function LanguageSwitcher({ locale, path = '' }: { locale: Locale; path?:
       aria-current={value === locale ? 'page' : undefined}
       onClick={() => setLocale(value, { reload: false })}>{localeName(value)}</a>)}
   </nav>;
+}
+
+/**
+ * The language picker for app pages: shadcn's DropdownMenu with a radio group, the menu pattern for
+ * choosing one option. Choosing calls Paraglide's setLocale, which remembers the choice and loads
+ * this page in that language. Site pages use LanguageSwitcher's plain links, which need no JavaScript.
+ */
+export function LanguageMenu({ locale }: { locale: Locale }) {
+  return <DropdownMenu>
+    <DropdownMenuTrigger render={<Button variant="ghost" size="sm" />} aria-label={m.language_label({}, { locale })}>
+      <LanguagesIcon />{localeName(locale)}
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end">
+      <DropdownMenuRadioGroup value={locale} onValueChange={value => setLocale(value as Locale)}>
+        {locales.map(value => <DropdownMenuRadioItem key={value} value={value} lang={value}>{localeName(value)}</DropdownMenuRadioItem>)}
+      </DropdownMenuRadioGroup>
+    </DropdownMenuContent>
+  </DropdownMenu>;
 }
 
 /** Offers the visitor's preferred language without redirecting; dismissing remembers the current one. */

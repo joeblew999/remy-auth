@@ -178,7 +178,9 @@ export function demoChecks() {
       await page.getByRole('button', { name: m.submit({}, o), exact: true }).click();
       await expect(page.locator('.reserved')).toHaveText(m.reserved({ name: samples.guest, count: 3 }, o));
       const other = locales.find(value => value !== locale);
-      await page.getByRole('link', { name: endonym(other), exact: true }).click();
+      // App pages switch language through the header's menu (shadcn's DropdownMenu with a radio group).
+      await page.getByRole('button', { name: m.language_label({}, o), exact: true }).click();
+      await page.getByRole('menuitemradio', { name: endonym(other), exact: true }).click();
       await expect(page).toHaveURL(new RegExp(`${localizedPath('/app/demo', other)}$`));
       await expect(page.locator('html')).toHaveAttribute('lang', other);
       expect(context.pages()).toHaveLength(1);
@@ -347,6 +349,14 @@ export function zoneChecks({ sitePaths, appPaths }) {
       expect(sitemap, url).not.toContain(`${url}<`);
       await page.goto(url);
       await expect(page.locator('[data-zone="app"]'), url).toHaveText(m.zone_app({}, { locale }));
+    }
+  });
+
+  test('on a phone in landscape the way back to the site stays in view', async ({ page }) => {
+    await page.setViewportSize({ width: 844, height: 340 });
+    for (const locale of checkedLocales) {
+      await page.goto(localizedPath(appPaths[0], locale));
+      await expect(page.getByRole('link', { name: m.back_to_site({}, { locale }), exact: true })).toBeInViewport();
     }
   });
 }
