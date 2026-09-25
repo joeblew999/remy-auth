@@ -7,7 +7,7 @@ import { m } from '@joeblew999/remy-ui/messages';
 import { checkedLocales, collectErrors, hydrated, localizedPath } from '@joeblew999/remy-ui/checks';
 import { branch, docsLocale, docsPath, docsTable, repository } from '../src/docs/table.js';
 import { askMaxLength } from '../src/ask-limits';
-import { askPath, docsPaths } from '../src/paths';
+import { askPath, docsPaths, docsSearchPath } from '../src/paths';
 import { docsManifest } from '../scripts/docs-manifest.mjs';
 
 // The docs site and its answers (.plans/docs-site.md, "Checks"). The source of truth for what a page
@@ -203,6 +203,92 @@ test.describe('docs pages', () => {
       expect(pages.get(path), `${item.key} → ${item.url}`).toMatch(new RegExp(`<h[1-6][^>]* id="${id}"`));
       expect(item.text.length, item.key).toBeLessThan(4 * 1024 * 1024);
     }
+  });
+});
+
+/** The GitHub id of the heading a phrase first appears under, outside code blocks, in a Markdown file. */
+function sectionOf(file: string, phrase: string) {
+  const slugger = new GithubSlugger();
+  let id: string | undefined, fence: string | undefined;
+  for (const line of readFileSync(file, 'utf8').split('\n')) {
+    const opens = line.match(/^\s*(```+|~~~+)/);
+    if (opens) { if (!fence) fence = opens[1]; else if (line.trim().startsWith(fence)) fence = undefined; continue; }
+    if (fence) continue;
+    const heading = line.match(/^#{1,6}\s+(.+?)\s*#*\s*$/);
+    if (heading) id = slugger.slug(heading[1].replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[`*_]/g, ''));
+    else if (line.includes(phrase)) return id;
+  }
+  throw new Error(`${phrase} is not in ${file} outside code blocks`);
+}
+
+test.describe('docs search', () => {
+  // A phrase only one section's prose has: the search must lead to that section's heading.
+  const query = 'Workers Logs';
+  const section = sectionOf('docs/tooling.md', query);
+
+  test(`"${query}" leads from a docs page to its section in docs/tooling.md, without JavaScript, in every language; result pages are noindex`, async ({ browser, request }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    for (const locale of checkedLocales) {
+      const searchUrl = localizedPath(docsSearchPath, locale);
+      await page.goto(docsUrl('how-we-work', locale));
+      const form = page.locator('form[data-docs-search]');
+      await expect(form).toHaveAttribute('method', 'get');
+      await expect(form).toHaveAttribute('action', searchUrl);
+      await form.getByLabel(m.search_label({}, { locale }), { exact: true }).fill(query);
+      await form.getByRole('button', { name: m.search_submit({}, { locale }), exact: true }).click();
+      await expect(page).toHaveURL(new RegExp(`${searchUrl}\\?q=Workers\\+Logs$`));
+      await expect(page.locator('#docs-search-q')).toHaveValue(query);
+      // Not for Google: noindex, and no canonical or alternates pointing elsewhere.
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex');
+      await expect(page.locator('link[rel="canonical"], link[hreflang]')).toHaveCount(0);
+      const target = `${docsUrl('tooling', locale)}#${section}`;
+      // The section's text, the query's words marked.
+      const hit = page.locator(`[data-docs-results] a[href="${target}"]`).filter({ has: page.locator('mark') }).first();
+      await expect(hit, target).toBeVisible();
+      await hit.click();
+      await expect(page).toHaveURL(new RegExp(`${target}$`));
+      await expect(page.locator(`article [id="${section}"]`)).toHaveCount(1);
+    }
+    await context.close();
+    // The server's own HTML says so too, before any script.
+    expect(await (await request.get(`${localizedPath(docsSearchPath, 'en')}?q=${encodeURIComponent(query)}`)).text()).toMatch(/<meta name="robots" content="noindex"/);
+  });
+
+  test('the empty search page shows the box and is indexable; a query that finds nothing says so', async ({ browser, baseURL }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    for (const locale of checkedLocales) {
+      for (const url of [localizedPath(docsSearchPath, locale), `${localizedPath(docsSearchPath, locale)}?q=`]) {
+        expect((await page.goto(url))?.status(), url).toBe(200);
+        await expect(page.getByRole('heading', { level: 1 }), url).toHaveText(m.search_title({}, { locale }));
+        await expect(page.getByLabel(m.search_label({}, { locale }), { exact: true }), url).toHaveValue('');
+        await expect(page.locator('[data-docs-results]'), url).toHaveCount(0);
+        await expect(page.locator('meta[name="robots"]'), url).toHaveCount(0);
+        await expect(page.locator('link[rel="canonical"]'), url).toHaveAttribute('href', `${baseURL}${localizedPath(docsSearchPath, locale)}`);
+      }
+      const url = `${localizedPath(docsSearchPath, locale)}?q=qqqzzzxxyy`;
+      await page.goto(url);
+      await expect(page.locator('[data-docs-results="none"]'), url).toContainText(m.search_none({}, { locale }));
+      await expect(page.locator('meta[name="robots"]'), url).toHaveAttribute('content', 'noindex');
+      // The way on: every docs page.
+      await expect(page.getByRole('navigation', { name: m.docs_nav({}, { locale }) }).getByRole('link'), url).toHaveCount(docsTable.length);
+    }
+    await context.close();
+  });
+
+  test('with JavaScript, results are links in the app and the page has no errors', async ({ page }) => {
+    const errors = collectErrors(page);
+    await page.goto(`${localizedPath(docsSearchPath, 'en')}?q=${encodeURIComponent(query)}`);
+    const target = `${docsUrl('tooling', 'en')}#${section}`;
+    await hydrated(page.locator(`[data-docs-results] a[href="${target}"]`).first());
+    let documents = 0;
+    page.on('request', request => { if (request.resourceType() === 'document') documents++; });
+    await page.locator(`[data-docs-results] a[href="${target}"]`).first().click();
+    await expect(page).toHaveURL(new RegExp(`${target}$`));
+    await expect(page.locator(`article [id="${section}"]`)).toHaveCount(1);
+    expect(documents).toBe(0);
+    expect(errors).toEqual([]);
   });
 });
 

@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import { Link } from '@tanstack/react-router';
 import type { Locale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
 import { SiteShell } from '@joeblew999/remy-ui/shell';
@@ -9,9 +8,14 @@ import { Separator } from '@joeblew999/remy-ui/components/separator';
 import type { DocsPageData } from './source.server';
 import { docsComponents } from './content';
 import { AskForm } from './ask-form';
+import { DocsNav } from './nav';
+import { SearchForm } from './search-form';
 import { branch, docsPath, repository } from './table.js';
 
-// A docs page (.plans/docs-site.md, decision 4): text first, then the question box, "On this page"
+// The answer page imports the docs navigation from here; it lives in ./nav.
+export { DocsNav };
+
+// A docs page (.plans/docs-site.md, decision 4): text first, then the search and question boxes, "On this page"
 // and the docs navigation; no hero, no cards. It is a site page in SiteShell, complete in the server's
 // HTML. The article is English (lang="en") inside a frame in the visitor's language. Its text comes
 // as data, the Markdown's finished tree from the server (source.server.ts), rendered with
@@ -32,6 +36,7 @@ export function DocsView({ locale, page, preferred }: { locale: Locale; page: Do
         </p>
       </article>
       <aside className="flex flex-col gap-8 lg:col-start-3 lg:row-start-1">
+        <SearchForm locale={locale} />
         <AskForm locale={locale} />
         {page.headings.length > 0 && <nav aria-labelledby="docs-toc" className="flex flex-col gap-2 text-sm">
           <p id="docs-toc" className="font-medium">{m.docs_toc({}, o)}</p>
@@ -46,22 +51,4 @@ export function DocsView({ locale, page, preferred }: { locale: Locale; page: Do
       </div>
     </div>
   </SiteShell>;
-}
-
-/** The docs navigation: every docs page by title, the current one marked. */
-export function DocsNav({ locale, nav, current }: { locale: Locale; nav: DocsPageData['nav']; current?: string }) {
-  return <nav aria-labelledby="docs-nav" className="flex flex-col gap-2 text-sm">
-    <p id="docs-nav" className="font-medium">{m.docs_nav({}, { locale })}</p>
-    <ul lang="en" dir="ltr" className="flex flex-col gap-2">
-      {nav.map(item => <li key={item.slug}><DocsNavLink slug={item.slug} current={item.slug === current}>{item.title}</DocsNavLink></li>)}
-    </ul>
-  </nav>;
-}
-
-function DocsNavLink({ slug, current, children }: { slug: string; current: boolean; children: React.ReactNode }) {
-  const className = current ? 'font-medium text-foreground' : 'text-muted-foreground hover:text-foreground';
-  const aria = current ? 'page' as const : undefined;
-  return slug
-    ? <Link to="/docs/$slug" params={{ slug }} preload="intent" className={className} aria-current={aria}>{children}</Link>
-    : <Link to="/docs" preload="intent" activeOptions={{ exact: true }} className={className} aria-current={aria}>{children}</Link>;
 }

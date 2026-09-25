@@ -320,5 +320,11 @@
   "ask_too_long": "Your question is {length} characters long. Keep it to {max} characters.",
   "ask_rate_limited": "Too many questions from your connection. Wait a minute, then ask again.",
   "ask_no_answer": "No answer this time. Search the documentation instead.",
-  "ask_browse": "Browse the documentation"
+  "ask_browse": "Browse the documentation",
+  "search_label": "Search the docs",
+  "search_submit": "Search",
+  "search_title": "Search the docs",
+  "search_description": "Find a page or section of the Remy documentation.",
+  "search_none": "Nothing found",
+  "search_none_hint": "Try other words, or browse the pages listed here."
 }

@@ -319,5 +319,11 @@
   "ask_too_long": "Tu pregunta tiene {length} caracteres. Limítala a {max} caracteres.",
   "ask_rate_limited": "Demasiadas preguntas desde tu conexión. Espera un minuto y vuelve a preguntar.",
   "ask_no_answer": "Esta vez no hay respuesta. Busca en la documentación.",
-  "ask_browse": "Explorar la documentación"
+  "ask_browse": "Explorar la documentación",
+  "search_label": "Buscar en la documentación",
+  "search_submit": "Buscar",
+  "search_title": "Buscar en la documentación",
+  "search_description": "Encuentra una página o sección de la documentación de Remy.",
+  "search_none": "No se encontró nada",
+  "search_none_hint": "Prueba con otras palabras o consulta las páginas de la lista."
 }

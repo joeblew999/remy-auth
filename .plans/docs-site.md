@@ -327,3 +327,54 @@ Start's server-function client with seroval (36 KB); Zod Mini's core (51 KB), wh
 answer pages' `validateSearch` keep in every first load. Going further means changing what the frame
 is built from (plain links instead of Base UI menus in the site header) or validating those search
 params without Zod: owner decisions, not trimming.
+
+## Docs search (2026-09-25)
+
+Owner, 2026-09-25: "Most users though will want to ask from the site ... And stay in the site." The
+owner chose A: plain docs search with Fumadocs' own built-in search (no AI, no Cloudflare service,
+no cost), minimal code. B (AI answers with Cloudflare reading the docs) comes later from someone
+else; `/app/ask` and the AI code are untouched.
+
+Survey (installed `fumadocs-core` 16.15.14, read in `dist/search/*`; Fumadocs' search docs):
+
+| Candidate | Result |
+| --- | --- |
+| **Fumadocs' search server, `createSearchAPI('advanced')`** (its built-in engine, `zbsearch`, Fumadocs' Orama fork, already a dependency of `fumadocs-core`) | **Chosen.** Indexes each page's `structuredData` (headings and paragraphs, each with its heading's anchor), groups hits by page, marks matches. `createFromSource` is the same server built from a Fumadocs `loader()`; this app has a `defineCollections` collection read by the docs table, not a loader, so it passes the same indexes itself (id, url, title, structuredData: what `createFromSource`'s default `buildIndex` passes). |
+| Fumadocs' static search (`staticGET` export + `search/client/orama-static` or `flexsearch-static`) | Rejected: ships the whole index and the engine to the browser, which the owner asked not to do; needs JavaScript. |
+| `search/flexsearch` server | Works the same way but needs `flexsearch` installed; the built-in engine needs nothing new. Runner-up: switch if the built-in engine's ranking proves poor. |
+| Orama Cloud, Algolia, Mixedbread | Rejected: external services, accounts and cost. |
+
+How it works: `/docs/search?q=` is a **site page** (`docsSearchPath` in `src/paths.ts`, in
+`siteAndDocsPaths` and `everyPath`, so the zone, entry, CSP and observability checks cover it). Its
+loader calls a server function; the Worker builds the index once per isolate on the first search
+(`docsSearch` in `src/docs/source.server.ts`) and returns plain data. The page renders server-side
+inside `SiteShell`, the search box is a plain GET form (works without JavaScript), and each hit is a
+router `Link` to `/<locale>/docs/<slug>#<heading>`. Fumadocs gives the hit text as Markdown with
+`<mark>`; the server splits it into plain pieces, so the page renders text, never HTML.
+
+Decisions (delegated):
+
+- **Indexing:** the empty page is an ordinary indexable site page (self-canonical, hreflang
+  alternates via `pageHead`) but **not in the sitemap**: it has no content of its own. A page with a
+  query carries `noindex` and no canonical or alternates (search results are not for Google, and
+  noindex with a canonical sends mixed signals).
+- **Where the box is:** on every docs page (above the question box) and the search page. **Not in the
+  site header:** the header's app links are `NavigationMenuItem`s in Base UI's NavigationMenu
+  (`SiteNavLinks`, shared with remy-auth-app), and a form does not belong in that menu's roving list;
+  adding a slot to the shared `SiteShell` is a package change for the owner.
+- The box uses the `<search>` landmark element rather than `role="search"` on its form, so the
+  question box keeps the only `form[role="search"]` (its checks select it that way).
+- The docs navigation moved to `src/docs/nav.tsx` (re-exported from `view.tsx`), so the search page
+  does not load the article renderer.
+- Query length: at most 100 characters (box and server).
+- Code blocks are not searched: Fumadocs' structured text leaves them out (as the answers index notes).
+- Ranking is Fumadocs' default (any word, tolerance 1, grouped by page); "Workers Logs" finds its
+  section in `docs/tooling.md` but not first. Tune through `search` options only if people complain.
+
+Cost: the client gets the route (4 KB) and the form (6 KB); the engine and index stay in the Worker
+(`source.server` server chunk grew to about 560 KB uncompressed, zbsearch and remark).
+
+Checks (`tests/docs.spec.ts`, "docs search"): a known phrase leads from a docs page's box to its
+section's heading, without JavaScript, in every checked language, and result pages are `noindex`;
+the empty page shows the box, is indexable and self-canonical; a query with no hits says so and
+lists the docs; with JavaScript, results are in-app links with no errors.
