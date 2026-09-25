@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+//MISE description="Print the production URL, every site and app page (base language) and the health URL, for reports (instant, offline; safe beside anything). Pass a preview's origin to list that instead"
+//MISE dir="{{config_root}}"
+//USAGE arg "[origin]" help="Origin to list; defaults to DEPLOY_ORIGIN"
+// Pages come from the shared package's paths and Paraglide runtime, resolved from the including
+// project's root, so the list always matches what its checks cover.
+import { createRequire } from 'node:module';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+const origin = process.argv[2] || process.env.DEPLOY_ORIGIN;
+if (!origin) { console.error('cf:urls: pass an origin or set DEPLOY_ORIGIN'); process.exit(1); }
+const resolve = createRequire(join(process.cwd(), 'package.json')).resolve;
+const load = specifier => import(pathToFileURL(resolve(specifier)).href);
+const { sitePaths, appPaths } = await load('@joeblew999/remy-ui/paths');
+const { baseLocale, localizeUrl } = await load('@joeblew999/remy-ui/runtime');
+const page = path => localizeUrl(new URL(path || '/', origin), { locale: baseLocale }).href;
+
+console.log(`${process.argv[2] ? "Origin" : "Production"}: ${new URL(origin).origin}`);
+console.log('Site pages:');
+for (const path of sitePaths) console.log(`  ${page(path)}`);
+console.log('App pages:');
+for (const path of appPaths) console.log(`  ${page(path)}`);
+console.log(`Health: ${new URL('/healthz', origin).href}`);
