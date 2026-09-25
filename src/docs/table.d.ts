@@ -9,3 +9,5 @@ export declare const docsPath: (slug: string) => string;
 export declare const docsPaths: string[];
 export declare const docsRowForFile: (file: string) => DocsRow | undefined;
 export declare const docsRowForSlug: (slug: string) => DocsRow | undefined;
+export declare const docsObjectKey: (slug: string) => string;
+export declare const docsRowForObjectKey: (key: string) => DocsRow | undefined;

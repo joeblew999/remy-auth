@@ -14,11 +14,12 @@
   // the AI answers on the production index, and old versions never see the ASK_PAUSED stop. Cloudflare's
   // newer Previews are served through this same switch, so cf:preview deploys a throwaway Worker instead.
   "preview_urls": false,
-  // Answers on /app/ask (.plans/docs-site.md): the production AI Search instance remy-docs (built-in
-  // storage, one item per docs heading, routed through the AI Gateway remy-docs with its monthly
-  // spend limit). It has no local emulation and no remote proxy here, so local runs and the local
-  // checks see the page's "no answer" path; answers are checked against a preview.
-  "ai_search": [{ "binding": "DOCS_SEARCH", "instance_name": "remy-docs" }],
+  // Answers on /docs/ask (.plans/docs-ai-sync.md): the production AI Search instance remy-docs-pages,
+  // R2-synced: AI Search pulls one Markdown object per docs page from an R2 bucket itself (key
+  // <slug>.md, index.md for /docs: src/docs/table.js), routed through the AI Gateway remy-docs with
+  // its monthly spend limit. It has no local emulation and no remote proxy here, so local runs and the
+  // local checks see the page's "no answer" path; answers are checked against a preview.
+  "ai_search": [{ "binding": "DOCS_SEARCH", "instance_name": "remy-docs-pages" }],
   // Questions per visitor: every submitted question counts, keyed by the client's IP, 10 a minute.
   "ratelimits": [{ "name": "ASK_LIMIT", "namespace_id": "4281", "simple": { "limit": 10, "period": 60 } }],
   // Working on the docs and answers (docs:dev): the same Worker, locally, with its AI Search binding

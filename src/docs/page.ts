@@ -23,7 +23,7 @@ export const getDocsPage = createServerFn({ method: 'GET' })
     return page;
   });
 
-/** The docs navigation alone, for pages outside the docs (the answer page's way back). */
+/** The docs navigation alone, for the docs pages that show no article (search, answers). */
 export const getDocsNav = createServerFn({ method: 'GET' }).handler(() => docsNav());
 
 /**

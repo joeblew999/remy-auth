@@ -12,9 +12,6 @@ import { DocsNav } from './nav';
 import { SearchForm } from './search-form';
 import { branch, docsPath, repository } from './table.js';
 
-// The answer page imports the docs navigation from here; it lives in ./nav.
-export { DocsNav };
-
 // A docs page (.plans/docs-site.md, decision 4): text first, then the search and question boxes, "On this page"
 // and the docs navigation; no hero, no cards. It is a site page in SiteShell, complete in the server's
 // HTML. The article is English (lang="en") inside a frame in the visitor's language. Its text comes

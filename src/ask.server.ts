@@ -4,13 +4,14 @@ import { env } from 'cloudflare:workers';
 import { logContext, requestIdHeader, writeLog } from '@joeblew999/remy-ui/worker';
 import type { Locale } from '@joeblew999/remy-ui/locale';
 import { askMaxLength, type AskResult } from './ask-limits';
-import { docsLocale } from './docs/table.js';
+import { docsPage } from './docs/source.server';
+import { docsPath, docsRowForObjectKey } from './docs/table.js';
 import { service } from './service';
 
 // The answer itself, in the Worker only (`.server.ts`: never in a browser bundle). Limits come
 // first and cost nothing: every submitted question counts against the visitor's rate limit (10 a
 // minute per IP, wrangler.jsonc), then a question over askMaxLength is explained, not sent. Only
-// then does AI Search retrieve at most five sections and write a short answer, from its cache when
+// then does AI Search retrieve at most five chunks and write a short answer, from its cache when
 // the same question was asked recently. Any failure is "no answer", never a blank page. This Worker
 // never logs the question; the AI Gateway does keep every model call, question included, for 7 days:
 // its logs are our record of cost per call (decided 2026-09-25, .plans/observability.md).
@@ -42,12 +43,9 @@ export const answerQuestion = createServerOnlyFn(async (q: string, locale: Local
       ai_search_options: { retrieval: { max_num_results: 5 }, cache: { enabled: true } },
     });
     const answer = response.choices[0]?.message.content?.trim();
-    // Each cited section once, in the order AI Search ranked them, on the page's language frame.
-    const citations = [...new Map(response.chunks.flatMap(chunk => {
-      const { url, title } = chunk.item.metadata ?? {};
-      return typeof url === 'string' && typeof title === 'string' && url.startsWith(`/${docsLocale}/docs`)
-        ? [[url, { url: `/${locale}${url.slice(docsLocale.length + 1)}`, title }] as const] : [];
-    })).values()];
+    // Each cited page or section once, in the order AI Search ranked them, on the page's language frame.
+    const cited = await Promise.all(response.chunks.map(chunk => citation(chunk, locale)));
+    const citations = [...new Map(cited.flatMap(item => (item ? [[item.url, item] as const] : []))).values()];
     return answer && citations.length > 0 ? { status: 'answered', answer, citations } : { status: 'no-answer' };
   } catch (error) {
     writeLog({ ...logContext(service, env, request.headers.get(requestIdHeader) ?? '', 'GET'), event: 'ask_failed', level: 'error',
@@ -55,3 +53,22 @@ export const answerQuestion = createServerOnlyFn(async (q: string, locale: Local
     return { status: 'no-answer' };
   }
 });
+
+/** A heading line's text as the page shows it: no link targets, code or emphasis marks, no Markdown escapes. */
+const headingText = (line: string) => line.match(/^#{1,6}\s+(.+?)\s*#*\s*$/)?.[1]
+  .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[`*_]/g, '').replace(/\\([!-/:-@[-`{-~])/g, '$1').replace(/\s+/g, ' ').trim();
+
+/**
+ * A chunk as a citation. The instance remy-docs-pages reads one Markdown object per docs page from R2
+ * (key <slug>.md, index.md for /docs: src/docs/table.js), and its chunks carry no metadata, so the key
+ * names the page. The citation is that page, or, when the chunk's text holds a heading the page lists
+ * in "On this page", that section. Chunks of anything else are not cited.
+ */
+async function citation(chunk: AiSearchSearchResponse['chunks'][number], locale: Locale) {
+  const row = docsRowForObjectKey(chunk.item.key);
+  const page = row && await docsPage(row.slug);
+  if (!page) return undefined;
+  const url = `/${locale}${docsPath(page.slug)}`;
+  const heading = chunk.text.split('\n').map(headingText).flatMap(text => page.headings.filter(item => item.text === text)).at(0);
+  return heading ? { url: `${url}#${heading.id}`, title: `${page.title}: ${heading.text}` } : { url, title: page.title };
+}

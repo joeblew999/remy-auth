@@ -304,14 +304,26 @@ test.describe('answers', () => {
   // so the answer comes before the check that runs the limit out.
   test.describe.configure({ mode: 'serial' });
 
-  test('the answer page is an app page: noindex, never stored, a plain form that works without JavaScript', async ({ browser, request }) => {
+  test('the answer page is a site page beside the search: indexable when empty, noindex with a question, never stored, a plain form that works without JavaScript', async ({ browser, request, baseURL }) => {
+    const sitemap = await (await request.get('/sitemap.xml')).text();
+    // An over-long question: a question page that costs nothing (limits come before any call).
+    const question = 'z'.repeat(askMaxLength + 1);
     for (const locale of checkedLocales) {
       const url = localizedPath(askPath, locale);
-      const response = await request.get(url);
-      expect(response.status(), url).toBe(200);
-      expect(response.headers()['cache-control'], url).toBe('private, no-store');
-      const html = await response.text();
-      expect(html, url).toMatch(/<meta name="robots" content="noindex"/);
+      const empty = await request.get(url);
+      expect(empty.status(), url).toBe(200);
+      expect(empty.headers()['cache-control'], url).toBe('private, no-store');
+      const html = await empty.text();
+      expect(html, url).not.toMatch(/<meta name="robots"/);
+      expect(html, url).toContain(`<link rel="canonical" href="${baseURL}${url}"`);
+      // Like the search page: not in the sitemap.
+      expect(sitemap, url).not.toContain(`${url}<`);
+      const asked = await request.get(`${url}?q=${question}`, { headers: visitor() });
+      expect(asked.status(), url).toBe(200);
+      expect(asked.headers()['cache-control'], url).toBe('private, no-store');
+      const answer = await asked.text();
+      expect(answer, url).toMatch(/<meta name="robots" content="noindex"/);
+      expect(answer, url).not.toMatch(/<link rel="(canonical|alternate)"/);
     }
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
@@ -327,8 +339,22 @@ test.describe('answers', () => {
         await expect(input, path).toHaveAttribute('maxlength', String(askMaxLength));
       }
       await expect(page.locator('[data-ask]')).toHaveCount(0);
+      // The site's frame: the answer page is a site page with its docs navigation.
+      await expect(page.locator('[data-zone="site"]')).toHaveText(m.zone_site({}, { locale }));
+      await expect(page.getByRole('navigation', { name: m.docs_nav({}, { locale }) }).getByRole('link')).toHaveCount(docsTable.length);
     }
     await context.close();
+  });
+
+  test('the old app page /app/ask redirects permanently to the answer page in every language, keeping the question', async ({ request }) => {
+    for (const locale of checkedLocales) {
+      for (const query of ['', '?q=docs']) {
+        const url = `${localizedPath('/app/ask', locale)}${query}`;
+        const response = await request.get(url, { maxRedirects: 0 });
+        expect(response.status(), url).toBe(301);
+        expect(response.headers()['location'], url).toMatch(new RegExp(`${localizedPath(askPath, locale)}${query.replace('?', '\\?')}$`));
+      }
+    }
   });
 
   test(`a question over ${askMaxLength} characters is explained, not sent`, async ({ browser }) => {
@@ -370,20 +396,29 @@ test.describe('answers', () => {
     await context.close();
   });
 
-  test('a fixed question gets an answer whose every citation opens an existing heading on a docs page', async ({ page, request }) => {
+  test('a fixed question gets an answer whose every citation opens an existing docs page, or a heading on it', async ({ page, request }) => {
     test.skip(!remote, 'Answers come from the live AI Search index: checked against a deployed target (project:test:remote).');
     const question = 'What must I run before pushing or releasing, and why not pipe it through grep?';
     await page.goto(`${localizedPath(askPath, 'es')}?q=${encodeURIComponent(question)}`);
     await expect(page.locator('[data-ask="answered"]')).toBeVisible();
-    const hrefs = await page.locator('a[data-citation]').evaluateAll(links => links.map(link => link.getAttribute('href')!));
-    expect(hrefs.length).toBeGreaterThan(0);
-    for (const href of hrefs) {
-      // Citations open the docs in the visitor's frame language, at the exact heading.
-      expect(href).toMatch(/^\/es\/docs(\/[^#]+)?#.+/);
+    const citations = await page.locator('a[data-citation]').evaluateAll(links => links.map(link => ({ href: link.getAttribute('href')!, title: link.textContent! })));
+    expect(citations.length).toBeGreaterThan(0);
+    expect(new Set(citations.map(citation => citation.href)).size, 'each cited once').toBe(citations.length);
+    const titles: { href: string; path: string; id?: string; title: string }[] = [];
+    for (const { href, title } of citations) {
+      // Citations open the docs in the visitor's frame language: a docs page, or a section of it.
+      expect(href).toMatch(/^\/es\/docs(\/[^#/]+)?(#.+)?$/);
       const [path, id] = href.split('#');
       const response = await request.get(path);
       expect(response.status(), href).toBe(200);
-      expect(await response.text(), href).toMatch(new RegExp(`<h[1-6][^>]* id="${id}"`));
+      if (id) expect(await response.text(), href).toMatch(new RegExp(`<h[1-6][^>]* id="${id}"`));
+      // The title is the page's own, then the section's heading when the citation names one.
+      titles.push({ href, path, id, title });
+    }
+    for (const { href, path, id, title } of titles) {
+      await page.goto(path);
+      const pageTitle = (await page.getByRole('heading', { level: 1 }).textContent())!.trim();
+      expect(title, href).toBe(id ? `${pageTitle}: ${(await page.locator(`article [id="${id}"]`).textContent())!.trim()}` : pageTitle);
     }
   });
 

@@ -73,7 +73,7 @@ CLI passthrough tasks accept upstream flags directly, such as
 | `api:*` | The generated OpenAPI document a running Worker serves (`api:spec`, `--urls` for its operations; shared task) |
 | `browser:*` | Chrome DevTools CLI, session lifecycle and MCP server |
 | `web:*` | Modern web guidance search and retrieval |
-| `docs:*` | The AI Search index behind `/app/ask`: list the sections (`docs:manifest`), replace the production index after a deploy (`docs:index`, owner's request) |
+| `docs:*` | The AI Search index behind `/docs/ask`: list the sections (`docs:manifest`), replace the production index after a deploy (`docs:index`, owner's request) |
 | `mcp:*` | Register, verify and inspect project MCP connections |
 | `codex:*` / `claude:*` | Start or resume an interactive agent session (shared tasks) |
 
@@ -292,7 +292,7 @@ storage, dashboards and alert delivery are open work in the observability plan.
 
 ### The docs answers on Cloudflare: AI Search and AI Gateway
 
-Two Cloudflare products sit behind `/app/ask`, and they are easy to mix up:
+Two Cloudflare products sit behind `/docs/ask`, and they are easy to mix up:
 
 - **AI Search** is the index. It holds the docs, one item per `##` section, finds the sections that
   match a question, and asks a Workers AI model to write the answer. This is what `docs:*` tasks
@@ -309,7 +309,7 @@ LOCAL or REMOTE (and PRODUCTION) in `mise tasks`.
 mise run docs:manifest -- tooling          # LOCAL: the sections a page becomes
 mise run docs:dev:create                   # REMOTE (dev), once: the dev index
 mise run docs:dev:index -- docs/tooling.md # REMOTE (dev): only that page; unchanged sections skipped
-mise run docs:dev                          # LOCAL app, answers from the dev index: /en/app/ask
+mise run docs:dev                          # LOCAL app, answers from the dev index: /en/docs/ask
 mise run docs:questions -- remy-docs-dev   # REMOTE, search only: fixed questions find their sections
 mise run docs:dev:delete                   # REMOTE (dev): delete the dev index
 mise run docs:index                        # REMOTE, PRODUCTION: from a clean commit, after cf:deploy
