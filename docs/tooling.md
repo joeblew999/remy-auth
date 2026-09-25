@@ -27,8 +27,8 @@ An `Unknown` Better Auth version in `auth:info` is expected until the applicatio
 library is added; `project:doctor` reports the installed CLI version separately.
 
 These are developer/operator tools. Remy end-user CLI login and delegated API calls
-remain part of the service milestone. Cloudflare login, provisioning and deployment
-are explicit later operations.
+remain part of the service milestone. Both apps are live on Cloudflare; `cf:deploy` uploads to
+`DEPLOY_ORIGIN`, set in [mise.toml](../mise.toml), and runs only on the owner's request.
 
 ### Package upgrades
 
@@ -66,7 +66,7 @@ CLI passthrough tasks accept upstream flags directly, such as
 | --- | --- |
 | `project:*` | Setup, pipeline and verification (shared defaults from `tasks/project.toml`; `[env]` supplies the inputs) and tool diagnostics |
 | `packages:*` | Check and upgrade npm packages |
-| `ui:*` | Compile the shared catalogs, regenerate the shadcn components, pack the package |
+| `ui:*` | Compile the shared catalogs (`ui:generate`), regenerate the shadcn components and theme (`ui:components`, `ui:theme`), prove them untouched (`ui:verify`), pack and release the package (`ui:pack`, `ui:release`) |
 | `skills:*` | Install, list and remove the pinned official skills |
 | `auth:*` | Better Auth CLI and diagnostics |
 | `cf:*` | Cloudflare CLI, live logs and deployment (CLI and logs are shared tasks) |
@@ -157,17 +157,8 @@ The skill sources are the `*_skills_source` vars of the `skills:install` task in
 Guidance, shadcn, Playwright CLI, GitHub release and TanStack Router/Start. TanStack's skills are
 named one by one, including its `react-router` skill (the React bindings), which replaced Remix's
 skill of the same name: skills install flat by name, so the two cannot coexist. The directory holds one file per task
-namespace, described in [tasks/README.md](../tasks/README.md). `mise.toml` includes that directory (`[task_config] includes = ["tasks"]`),
-and any other project can include the same directory by git reference pinned to a commit:
-
-```toml
-[task_config]
-includes = ["git::https://github.com/joeblew999/remy-auth.git//tasks?ref=<commit>"]
-```
-
-The including project supplies the npm packages the tasks run (`chrome-devtools-mcp`,
-`modern-web-guidance`, `smol-toml`, and `@openai/codex` for `mcp:status`); mise caches the
-remote include and `MISE_TASK_REMOTE_NO_CACHE=true` refreshes it. Install the skills locally:
+namespace; `mise.toml` includes it, and [tasks/README.md](../tasks/README.md) says how another
+project includes it and which npm packages that project supplies. Install the skills locally:
 
 ```sh
 mise install
@@ -291,8 +282,6 @@ mise run cf:logs -- --help
 mise run cf:errors -- --help
 ```
 
-After deployment, both tasks use the configured Worker; `cf:logs` also accepts an
-explicit Worker name. `cf:errors` filters Worker
-invocation failures, not all HTTP error responses. Instrumentation, durable audit
-storage, dashboards and alert delivery are required implementation work; they are
-not live yet.
+Both tasks use the configured Worker; `cf:logs` also accepts an explicit Worker name.
+`cf:errors` filters Worker invocation failures, not all HTTP error responses. Durable audit
+storage, dashboards and alert delivery are open work in the observability plan.
