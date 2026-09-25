@@ -11,10 +11,8 @@ storage are still planned; open work is listed in [.plans/now.md](.plans/now.md)
 
 ## Where to look
 
-Two live sites, each with two kinds of page ([paths](packages/ui/src/paths.js)): **site pages**
-for Google (complete without JavaScript, indexed, labelled "Site page") and **app pages** under
-`/app` (need JavaScript, hidden from search, shadcn's sidebar app shell, labelled "App"). Swap `/en`
-for `/es` or `/ar` anywhere.
+Two live sites, each with site pages for Google and app pages under `/app`;
+[paths.js](packages/ui/src/paths.js) defines both kinds. Swap `/en` for `/es` or `/ar` anywhere.
 
 | Site | Rendering | Open |
 | --- | --- | --- |
