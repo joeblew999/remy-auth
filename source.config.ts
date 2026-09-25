@@ -3,6 +3,8 @@ import { statSync } from 'node:fs';
 import { defineCollections, defineConfig } from 'fumadocs-mdx/config';
 import { pageSchema } from 'fumadocs-core/source/schema';
 import type { Root, Link } from 'mdast';
+import type { Root as HastRoot, Element } from 'hast';
+import { valueToEstree } from 'estree-util-value-to-estree';
 import type { VFile } from 'vfile';
 import { visit } from 'unist-util-visit';
 import { branch, docsPath, docsRowForFile, docsTable, firstHeading, repository } from './src/docs/table.js';
@@ -34,11 +36,35 @@ function remarkRepositoryLinks() {
   };
 }
 
+/**
+ * The page's finished HTML tree (after Shiki, heading ids and the link rewrite), exported as `tree`
+ * (.plans/docs-site.md, "Server-rendered docs"). The server sends it with the page's loader data and
+ * the page renders it with hast-util-to-jsx-runtime, as Fumadocs' own server-compiled Markdown does
+ * (`@fumadocs/local-md`), so no page's compiled code reaches the browser. The export is an MDX ESM
+ * node, the way fumadocs-mdx adds its own exports; positions and Shiki's `icon` (for Fumadocs UI's
+ * code block, unused here) are dropped to keep the data small.
+ */
+function rehypeExportTree() {
+  return (tree: HastRoot) => {
+    // Only the HTML: Fumadocs' own exports (frontmatter, toc, structuredData) are ESM nodes in the tree.
+    const copy = { ...tree, children: structuredClone(tree.children.filter(node => node.type !== 'mdxjsEsm')) };
+    visit(copy, node => { delete node.position; });
+    visit(copy, 'element', (node: Element) => { delete node.properties.icon; });
+    const program = { type: 'Program' as const, sourceType: 'module' as const, body: [{
+      type: 'ExportNamedDeclaration' as const, specifiers: [], attributes: [], source: null,
+      declaration: { type: 'VariableDeclaration' as const, kind: 'const' as const,
+        declarations: [{ type: 'VariableDeclarator' as const, id: { type: 'Identifier' as const, name: 'tree' }, init: valueToEstree(copy) }] },
+    }] };
+    tree.children.push({ type: 'mdxjsEsm', value: '', data: { estree: program } });
+  };
+}
+
 export const docs = defineCollections({
   type: 'doc',
   dir: '.',
   files: docsTable.map(row => row.file),
-  // Lazy: each page's compiled content is its own chunk, loaded only on that page.
+  // Lazy: the Worker loads a page's compiled content only when that page is requested; the page's
+  // `tree` export travels as data (src/docs/source.server.ts), and the browser entry is not used.
   async: true,
   schema: ({ source }) => pageSchema.extend({ title: pageSchema.shape.title.default(firstHeading(source)) }),
 });
@@ -46,6 +72,7 @@ export const docs = defineCollections({
 export default defineConfig({
   mdxOptions: {
     remarkPlugins: plugins => [remarkRepositoryLinks, ...plugins],
+    rehypePlugins: plugins => [...plugins, rehypeExportTree],
     // GitHub's own "default" themes: their comment colours keep 4.5:1 contrast on both backgrounds
     // (the older github-dark's comments do not), which Lighthouse's accessibility audit requires.
     rehypeCodeOptions: { themes: { light: 'github-light-default', dark: 'github-dark-default' } },

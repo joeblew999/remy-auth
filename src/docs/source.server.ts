@@ -1,18 +1,23 @@
 import { createServerOnlyFn } from '@tanstack/react-start';
+import type { Root } from 'hast';
 import { docs } from '../../.source/server';
 import { docsPath, docsTable, docsRowForSlug } from './table.js';
 
-// The docs pages' metadata, read on the server from Fumadocs MDX's server entry (source.config.ts):
-// titles for the docs navigation, the page's description and its "On this page" headings. The
-// `.server.ts` name keeps it out of every browser bundle (Start's import protection).
+// The docs pages, read on the server from Fumadocs MDX's server entry (source.config.ts): the
+// article's finished HTML tree, titles for the docs navigation, the page's description and its "On
+// this page" headings. The `.server.ts` name keeps it, and every page's compiled Markdown, out of
+// every browser bundle (Start's import protection): the browser gets the page as data, never as code
+// (.plans/docs-site.md, "Server-rendered docs").
 
 /** A heading in "On this page": its id and plain text. */
 export type DocsHeading = { id: string; text: string };
-/** Everything a docs page needs besides its compiled content, all serializable. */
+/** Everything a docs page needs, all serializable. */
 export type DocsPageData = {
   slug: string;
-  /** The Fumadocs file path the browser entry loads the content by. */
+  /** The repository file the page is read from. */
   file: string;
+  /** The article: the Markdown's finished HTML tree (hast), which view.tsx renders. */
+  tree: Root;
   title: string;
   description: string;
   headings: DocsHeading[];
@@ -39,11 +44,12 @@ export const docsPage = createServerOnlyFn(async (slug: string): Promise<DocsPag
   const row = docsRowForSlug(slug);
   if (!row) return undefined;
   const doc = entry(row.file);
-  const { toc, structuredData } = await doc.load();
+  const { toc, structuredData, _exports } = await doc.load();
   const text = new Map(structuredData.headings.map(heading => [heading.id, heading.content]));
   return {
     slug,
     file: row.file,
+    tree: (_exports as { tree: Root }).tree,
     title: doc.title,
     description: describe(structuredData.contents, doc.title),
     headings: toc.filter(item => item.depth === 2).map(item => ({ id: item.url.slice(1), text: text.get(item.url.slice(1)) ?? item.url.slice(1) })),

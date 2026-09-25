@@ -1,11 +1,20 @@
 import { notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
+import type { Root } from 'hast';
 import { getUrlOrigin } from '@joeblew999/remy-ui/runtime';
 import { docsNav, docsPage } from './source.server';
-import { docsContent } from './loader';
 import { docsLocale, docsPath } from './table.js';
 
-/** A docs page's metadata from the server (source.server.ts); unknown slugs are 404s. */
+// Start checks at the type level that server function results are serializable, but cannot see
+// into the hast tree's unions: registered as a serializable type, as Fumadocs' TanStack Start
+// example does for its serialized Markdown (the tree is plain JSON).
+declare module '@tanstack/router-core' {
+  interface SerializableExtensions {
+    docsTree: Root;
+  }
+}
+
+/** A docs page from the server (source.server.ts), its article as data; unknown slugs are 404s. */
 export const getDocsPage = createServerFn({ method: 'GET' })
   .validator((slug: string) => slug)
   .handler(async ({ data: slug }) => {
@@ -18,14 +27,12 @@ export const getDocsPage = createServerFn({ method: 'GET' })
 export const getDocsNav = createServerFn({ method: 'GET' }).handler(() => docsNav());
 
 /**
- * A docs route's loader: the page's metadata, and its compiled content loaded before rendering, so
- * the server's HTML carries the whole text (complete without JavaScript) and a client navigation
- * renders at once.
+ * A docs route's loader: the whole page from the server, so the server's HTML carries the whole text
+ * (complete without JavaScript), hydration renders the same tree from the loader data, and a client
+ * navigation fetches the next page's data, never its code.
  */
-export async function loadDocsPage(slug: string) {
-  const page = await getDocsPage({ data: slug });
-  await docsContent.preload(page.file);
-  return page;
+export function loadDocsPage(slug: string) {
+  return getDocsPage({ data: slug });
 }
 
 /**

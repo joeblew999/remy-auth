@@ -1,4 +1,6 @@
-import { Suspense } from 'react';
+import { useMemo } from 'react';
+import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
+import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { Link } from '@tanstack/react-router';
 import type { Locale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
@@ -6,24 +8,25 @@ import { SiteShell } from '@joeblew999/remy-ui/pages';
 import { Separator } from '@joeblew999/remy-ui/components/separator';
 import type { DocsPageData } from './source.server';
 import { docsComponents } from './content';
-import { docsContent } from './loader';
 import { AskForm } from './ask-form';
 import { branch, docsPath, repository } from './table.js';
 
 // A docs page (.plans/docs-site.md, decision 4): text first, then the question box, "On this page"
 // and the docs navigation; no hero, no cards. It is a site page in SiteShell, complete in the server's
-// HTML. The article is English (lang="en") inside a frame in the visitor's language.
+// HTML. The article is English (lang="en") inside a frame in the visitor's language. Its text comes
+// as data, the Markdown's finished tree from the server (source.server.ts), rendered with
+// hast-util-to-jsx-runtime as Fumadocs renders server-compiled Markdown: no page ships as code.
 
 export function DocsView({ locale, page, preferred }: { locale: Locale; page: DocsPageData; preferred?: Locale }) {
   const o = { locale };
   const path = docsPath(page.slug);
-  const Content = docsContent.getComponent(page.file);
+  const content = useMemo(() => toJsxRuntime(page.tree, { Fragment, jsx, jsxs, components: docsComponents }), [page.tree]);
   return <SiteShell locale={locale} path={path} preferred={preferred}>
     <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[12rem_minmax(0,1fr)_14rem]">
       <article lang="en" dir="ltr" className="min-w-0 max-w-3xl break-words lg:col-start-2 lg:row-start-1" data-docs-article={page.slug}>
-        {/* The content is loaded before rendering: by the loader on the server and on navigations, and
-            before hydration by the router (loader.tsx), so no fallback ever shows. */}
-        <Suspense><Content components={docsComponents} /></Suspense>
+        {/* The tree is in the loader data on the server, at hydration and on navigations, so the
+            article renders at once and hydration keeps the server's text. */}
+        {content}
         <p className="mt-10 text-sm text-muted-foreground">
           <a className="underline underline-offset-4" href={`${repository}/blob/${branch}/${page.file}`}>{m.docs_source({}, o)}</a>
         </p>

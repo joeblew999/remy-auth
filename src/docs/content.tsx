@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@joeblew999/remy-ui/components/table';
 import { cn } from '../lib/utils';
 
-// How the docs' compiled Markdown (loader.tsx) renders: stock shadcn pieces (Table) and shadcn's
+// How the docs' Markdown tree (view.tsx) renders: stock shadcn pieces (Table) and shadcn's
 // typography classes, and links that the router localizes.
 
 /**
@@ -40,8 +40,7 @@ export const docsComponents: MDXComponents = {
   blockquote: styled('blockquote', 'mt-6 border-s-2 ps-6 italic'),
   hr: styled('hr', 'my-8'),
   code: styled('code', 'relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm [pre_&]:bg-transparent [pre_&]:p-0 [pre_&]:font-normal'),
-  // Fumadocs' code highlighter adds an `icon` for its own UI's code block; a plain <pre> has no use for it.
-  pre: ({ icon: _icon, className, ...props }: React.ComponentProps<'pre'> & { icon?: unknown }) =>
+  pre: ({ className, ...props }) =>
     <pre className={cn('my-6 overflow-x-auto rounded-lg border p-4 text-sm', className)} {...props} />,
   table: props => <div className="my-6"><Table {...props} /></div>,
   thead: props => <TableHeader {...props} />,
