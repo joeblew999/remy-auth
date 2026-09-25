@@ -2,7 +2,7 @@
 # only list of skill sources; verification rejects skills installed from anything else.
 
 ["skills:install"]
-description = "Install official auth, Cloudflare, Chrome DevTools, modern web, React Router, shadcn, Playwright and GitHub release skills for Codex and Claude"
+description = "Install official auth, Cloudflare, Chrome DevTools, modern web, React Router, shadcn, Playwright, GitHub release and TanStack Router/Start skills for Codex and Claude"
 dir = "{{config_root}}"
 vars = { skills_cli_version = "1.7.0",
   better_auth_skills_source = "https://github.com/better-auth/skills/tree/20c9e88a5c007461a703f1c213572b073196113e",
@@ -12,7 +12,8 @@ vars = { skills_cli_version = "1.7.0",
   react_router_skills_source = "https://github.com/remix-run/react-router/tree/2d9827bc09bc562647553f8abf026823e3bfd9dd",
   shadcn_skills_source = "https://github.com/shadcn-ui/ui/tree/98a1fe67b439324ddc857f47fbdce056600a4329",
   playwright_skills_source = "https://github.com/microsoft/playwright-cli/tree/74354ecc7a43da16d91a9bc54fa8db8283a3fcf5",
-  github_skills_source = "https://github.com/github/awesome-copilot/tree/1f5644080a525d26a2e24f61a7609fb9b261c21a" }
+  github_skills_source = "https://github.com/github/awesome-copilot/tree/1f5644080a525d26a2e24f61a7609fb9b261c21a",
+  tanstack_skills_source = "https://github.com/TanStack/router/tree/ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7" }
 run = [
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.better_auth_skills_source}} --skill '*' --agent codex claude-code --full-depth --yes",
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.cloudflare_skills_source}} --skill '*' --agent codex claude-code --full-depth --yes",
@@ -22,6 +23,7 @@ run = [
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.shadcn_skills_source}} --skill shadcn --agent codex claude-code --full-depth --yes",
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.playwright_skills_source}} --skill playwright-cli --agent codex claude-code --full-depth --yes",
   "npx --yes skills@{{vars.skills_cli_version}} add {{vars.github_skills_source}} --skill github-release --agent codex claude-code --full-depth --yes",
+  "npx --yes skills@{{vars.skills_cli_version}} add {{vars.tanstack_skills_source}} --skill react-start --skill start-core --skill start-server-core --skill router-core --skill router-plugin --skill router-query --skill data-loading --skill navigation --skill path-params --skill search-params --skill type-safety --skill ssr --skill not-found-and-errors --skill code-splitting --skill middleware --skill server-functions --skill server-routes --skill execution-model --skill deployment --skill auth-and-guards --skill auth-server-primitives --skill migrate-from-react-router --agent codex claude-code --full-depth --yes",
 ]
 
 ["skills:list"]

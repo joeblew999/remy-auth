@@ -30,10 +30,10 @@ prefetch-on-intent default; how prerendering writes the locale-prefixed paths an
 
 ## Work items, in order
 
-1. **Spike and skills (about 1 hour).** Pin the versions above. In `tasks/skills.toml`, add the
-   `TanStack/router` source pinned to a commit with the 23 skills listed above, read each first,
-   and remove the `remix-run/react-router` source: both publish a skill named `react-router`, and
-   skills install flat by name, so they would collide. In a scratch app, prove the four
+1. **Spike and skills (about 1 hour).** Pin the versions above. Done 2026-09-25: 22 of the 23
+   TanStack skills installed from `TanStack/router` at `ddad69a`, scanned first. At migration,
+   swap the `remix-run/react-router` source for TanStack's `react-router` skill: both use that
+   name, and skills install flat by name, so they cannot coexist. In a scratch app, prove the four
    unverified points above on Cloudflare's local host. Stop and report if any is a blocker.
 2. **Package (`@joeblew999/remy-ui`).** Replace `react-router.tsx` with `tanstack.tsx`: the
    server-entry wrapper combining `paraglideMiddleware` and `withObservability`, the router

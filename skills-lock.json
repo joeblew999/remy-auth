@@ -15,6 +15,20 @@
       "skillPath": "skills/agents-sdk/SKILL.md",
       "computedHash": "a9f1d15143627d772d318e8675f8a26999d372592d21a2134d25c2ed15ebc8e5"
     },
+    "auth-and-guards": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/auth-and-guards/SKILL.md",
+      "computedHash": "aeafd0cc69a39b769eae38df5a764300a744ba24e8729cec5687673ca797bb43"
+    },
+    "auth-server-primitives": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/start-client-core/skills/start-core/auth-server-primitives/SKILL.md",
+      "computedHash": "e2a3a8748df140dcb0a18a33562514ae58cbc13d430caa9c16fdd81285c16051"
+    },
     "better-auth-best-practices": {
       "source": "better-auth/skills",
       "ref": "20c9e88a5c007461a703f1c213572b073196113e",
@@ -71,6 +85,13 @@
       "skillPath": "skills/cloudflare-one-migrations/SKILL.md",
       "computedHash": "24b397f739cc639f8bff90255a8c237c14ab84753a04ccc934e9a7030dce9549"
     },
+    "code-splitting": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/code-splitting/SKILL.md",
+      "computedHash": "54ee83186645be00d63d200da0fb3162ba555a78a08dce739e17760b8e975a37"
+    },
     "cookie-debugging": {
       "source": "ChromeDevTools/chrome-devtools-mcp",
       "ref": "6a7e51fecaaefbea46b89e68892d42c175ee9163",
@@ -85,12 +106,26 @@
       "skillPath": "better-auth/create-auth/SKILL.md",
       "computedHash": "9a9b498bc144367b8e237233f89def63fb2bd69e8cafe173eaa58fe3a863cdc4"
     },
+    "data-loading": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/data-loading/SKILL.md",
+      "computedHash": "8e38170db8d7ef196cc3f4fe54face009690f92aff81cc7244e6834e138f41dc"
+    },
     "debug-optimize-lcp": {
       "source": "ChromeDevTools/chrome-devtools-mcp",
       "ref": "6a7e51fecaaefbea46b89e68892d42c175ee9163",
       "sourceType": "github",
       "skillPath": "skills/debug-optimize-lcp/SKILL.md",
       "computedHash": "6d8a0d83f5375437d5b8375d85a4869141799ab5cb0286d2542441e5b0fbd2cc"
+    },
+    "deployment": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/start-client-core/skills/start-core/deployment/SKILL.md",
+      "computedHash": "4615ab7b6fdc262c7ab81e7ec50a5be0f2e9e61120b394974c53c89be69238fe"
     },
     "durable-objects": {
       "source": "cloudflare/skills",
@@ -106,6 +141,13 @@
       "skillPath": "better-auth/emailAndPassword/SKILL.md",
       "computedHash": "863886759f729081e265941f4f72c503835d55a1f34f6d63cebe6571159fff4a"
     },
+    "execution-model": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/start-client-core/skills/start-core/execution-model/SKILL.md",
+      "computedHash": "5b0c903da99f1541e7d0ea076aeb5badbb417319c070c5199d91ebc17853f239"
+    },
     "github-release": {
       "source": "github/awesome-copilot",
       "ref": "1f5644080a525d26a2e24f61a7609fb9b261c21a",
@@ -120,12 +162,33 @@
       "skillPath": "skills/memory-leak-debugging/SKILL.md",
       "computedHash": "a43e2037aecc34dcd87c97e26ac306e66b9249676802197bff1316ba84c1a8c7"
     },
+    "middleware": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/start-client-core/skills/start-core/middleware/SKILL.md",
+      "computedHash": "e28f747876f4fade18b04a33978380010b0395284cb8dac9ab7c7eb61935f3ac"
+    },
+    "migrate-from-react-router": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/react-router/skills/lifecycle/migrate-from-react-router/SKILL.md",
+      "computedHash": "59ad97eb4362c91fd1061e22f1caaaaec578af03154dbb3e11c1e5c26f37650d"
+    },
     "modern-web-guidance": {
       "source": "GoogleChrome/modern-web-guidance",
       "ref": "22ab18dfb50a5d7e3bdcf471c14076a5534eae4e",
       "sourceType": "github",
       "skillPath": "skills/modern-web-guidance/SKILL.md",
       "computedHash": "6ac08f66a37cadf7a60310aa0d03c8d4be0908d8050265de5f36db872a0c5214"
+    },
+    "navigation": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/navigation/SKILL.md",
+      "computedHash": "6c015b0215a6dabc9eea87bad6d7953cfdd61c7a0012b2889d397a29259136f8"
     },
     "nextjs-on-cloudflare": {
       "source": "cloudflare/skills",
@@ -134,12 +197,26 @@
       "skillPath": "skills/nextjs-on-cloudflare/SKILL.md",
       "computedHash": "bd6ffed7a3d8ed0fcddedb370f64808750b1f5a7d9f4c70fd1ba6cb4c7933b12"
     },
+    "not-found-and-errors": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/not-found-and-errors/SKILL.md",
+      "computedHash": "1f4b33882b6f59803d46ebdd1bac8d8273d318005accec8795c4cbe2ff661f34"
+    },
     "organization-best-practices": {
       "source": "better-auth/skills",
       "ref": "20c9e88a5c007461a703f1c213572b073196113e",
       "sourceType": "github",
       "skillPath": "better-auth/organization/SKILL.md",
       "computedHash": "8c85e683dabef4532f1e8b67bbed5c453d39e0e3d5aeedd69d16b568f6e6d44f"
+    },
+    "path-params": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/path-params/SKILL.md",
+      "computedHash": "f8e3bed1f8dfc96cc7d6015adc3cd31486811cb686dd277213391e3cf56174c9"
     },
     "playwright-cli": {
       "source": "microsoft/playwright-cli",
@@ -154,6 +231,34 @@
       "sourceType": "github",
       "skillPath": ".agents/skills/react-router/SKILL.md",
       "computedHash": "ff4d9bc724f0e56a51c453eef5b93caef1c16d3623ac49345d74fc1a5efbc05a"
+    },
+    "react-start": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/react-start/skills/react-start/SKILL.md",
+      "computedHash": "e508e5a82d7eb15cc7fcbf16763f6c270cd0be31bfb0d80d51eb2cbb43eacaca"
+    },
+    "router-core": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/SKILL.md",
+      "computedHash": "62eb2d9340f84c2eb01294935d9e707ca2e95cc31c17c1f2754f4f1245790218"
+    },
+    "router-plugin": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/router-plugin/skills/router-plugin/SKILL.md",
+      "computedHash": "9954f6c52398cb2a84cd67cf79eac683e6e72848a3eb10c5bf79e14ac056e3a5"
+    },
+    "router-query": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/react-router/skills/compositions/router-query/SKILL.md",
+      "computedHash": "63fc32c213852863cb237c83c783a46d77f87e1551ef3e48abdda4c3667ba1e2"
     },
     "sandbox-migrate-to-next": {
       "source": "cloudflare/skills",
@@ -176,12 +281,54 @@
       "skillPath": "skills/sandbox-stable/SKILL.md",
       "computedHash": "1b77b09631eb6c01d4b2d5c97afd7e24fd588d6fa8c8dc421abeb7acdf26d2bb"
     },
+    "search-params": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/search-params/SKILL.md",
+      "computedHash": "abfbd24aae8f8f9e08bff34dfbea830bd03ac41ba131d017ebbf8b84d47d789d"
+    },
+    "server-functions": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/start-client-core/skills/start-core/server-functions/SKILL.md",
+      "computedHash": "224e3b20425289a5255429933671232be0ce9f9e8eb8a5f18421272193c46714"
+    },
+    "server-routes": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/start-client-core/skills/start-core/server-routes/SKILL.md",
+      "computedHash": "2af3c4193f978eda8f08844a2dde4cc2640aac284b8b5590611a58909c683f46"
+    },
     "shadcn": {
       "source": "shadcn-ui/ui",
       "ref": "98a1fe67b439324ddc857f47fbdce056600a4329",
       "sourceType": "github",
       "skillPath": "skills/shadcn/SKILL.md",
       "computedHash": "f615de216e085a84e31593ad0fa9062232adc40cd87b7c7ab2b8e49abf6500be"
+    },
+    "ssr": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/ssr/SKILL.md",
+      "computedHash": "24f98b721452c3408631a09552d1df91d9d2326b75ce39af0a4cd8216dda9037"
+    },
+    "start-core": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/start-client-core/skills/start-core/SKILL.md",
+      "computedHash": "cfeffe68b82aa6aa0f70d1ee0184d517423385a7b55917fc91aeedd160109d9f"
+    },
+    "start-server-core": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/start-server-core/skills/start-server-core/SKILL.md",
+      "computedHash": "1ababf4f17a9bc6ecde76c226043e109b7700fbe710e0d2347846e137bc6ea72"
     },
     "troubleshooting": {
       "source": "ChromeDevTools/chrome-devtools-mcp",
@@ -203,6 +350,13 @@
       "sourceType": "github",
       "skillPath": "better-auth/twoFactor/SKILL.md",
       "computedHash": "5bc3051aef5060db013f0b3cbe812c40dbae5c22d6ba3ddde4b941158362a197"
+    },
+    "type-safety": {
+      "source": "TanStack/router",
+      "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/type-safety/SKILL.md",
+      "computedHash": "041448d7d5f4759ce98fcd267fbc511c9d7c18b5ffd0c36ab4d1953c8a3a7d28"
     },
     "web-perf": {
       "source": "cloudflare/skills",
