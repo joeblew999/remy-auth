@@ -266,13 +266,16 @@ export function lighthouseChecks({ pages }) {
  * Core Web Vitals through Google's own `lighthouse` package (the Chrome DevTools CLI excludes
  * the Performance category), driving Playwright's Chrome over a debugging port. The gate is
  * Google's published "good" thresholds for the lab metrics and a Performance score of at least
- * 0.9; every failing audit is in the attached report. Call it from tests/performance.spec.ts, which
+ * 0.9; every failing audit is in the attached report. One run varies by hundreds of milliseconds, so
+ * each page runs `runs` times and Lighthouse's own computeMedianRun picks the run that is judged, as
+ * Lighthouse's variability guidance advises (github.com/GoogleChrome/lighthouse/blob/main/docs/variability.md).
+ * Call it from tests/performance.spec.ts, which
  * the shared Playwright config runs alone after all other checks. Tighten `thresholds` per project if needed.
  */
-export function performanceChecks({ pages, thresholds = {} }) {
+export function performanceChecks({ pages, thresholds = {}, runs = 5 }) {
   const limits = { score: 0.9, lcp: 2500, cls: 0.1, tbt: 200, ...thresholds };
   test.describe('core web vitals', () => {
-    test.describe.configure({ mode: 'serial', timeout: 180_000 });
+    test.describe.configure({ mode: 'serial', timeout: 600_000 });
     const port = 9222 + Math.floor(Math.random() * 1000);
     let browser, puppeteerBrowser;
     test.beforeAll(async () => {
@@ -287,13 +290,19 @@ export function performanceChecks({ pages, thresholds = {} }) {
     for (const { path, device } of pages) {
       test(`${device}: ${path} meets Google's good thresholds`, async ({ baseURL }, testInfo) => {
         const { navigation, desktopConfig, generateReport } = await import('lighthouse');
-        const page = await puppeteerBrowser.newPage();
-        const result = await navigation(page, `${baseURL}${path}`, {
-          flags: { output: 'json', logLevel: 'error', onlyCategories: ['performance'] },
-          config: device === 'desktop' ? desktopConfig : undefined,
-        });
-        await page.close();
-        const { lhr } = result;
+        const { computeMedianRun } = await import('lighthouse/core/lib/median-run.js');
+        const lhrs = [];
+        for (let run = 0; run < runs; run++) {
+          const page = await puppeteerBrowser.newPage();
+          const result = await navigation(page, `${baseURL}${path}`, {
+            flags: { output: 'json', logLevel: 'error', onlyCategories: ['performance'] },
+            config: device === 'desktop' ? desktopConfig : undefined,
+          });
+          await page.close();
+          lhrs.push(result.lhr);
+        }
+        const lhr = computeMedianRun(lhrs);
+        await testInfo.attach('runs.txt', { body: lhrs.map(run => `LCP ${Math.round(run.audits['largest-contentful-paint'].numericValue)} ms, score ${run.categories.performance.score}`).join('\n'), contentType: 'text/plain' });
         await testInfo.attach('performance.html', { body: generateReport(lhr, 'html'), contentType: 'text/html' });
         expect(lhr.finalDisplayedUrl).toBe(`${baseURL}${path}`);
         const metrics = lhr.audits.metrics.details.items[0];
