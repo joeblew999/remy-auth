@@ -14,6 +14,23 @@ PUBLIC_ORIGIN = "http://127.0.0.1:4174"                 # origin in prerendered 
 DEPLOY_ORIGIN = "https://your-app.your-subdomain.workers.dev"   # origin used by cf:deploy
 ```
 
+### Choosing the version: released, development or local
+
+The tasks and the package are released together: `mise run ui:release` publishes
+`@joeblew999/remy-ui` X.Y.Z and tags the same commit `vX.Y.Z`. A consumer therefore pins both to
+one number, and changes it in two places together:
+
+| Want | How | Where |
+| --- | --- | --- |
+| Released (default, stable) | `ref=vX.Y.Z`, matching the `@joeblew999/remy-ui` version in `package.json` | `mise.toml`, committed |
+| Development line | `MISE_ENV=dev mise run …` with `ref=main` | `mise.dev.toml`, committed |
+| Your own checkout, editing the tasks | the sibling path `../remy-auth/tasks` | `mise.local.toml`, gitignored |
+
+mise uses the most specific file's `includes` instead of the default (verified with mise
+2026.9.12), so the overrides never merge with the release. Remote includes are cached: after
+`main` moves, refresh with `MISE_TASK_REMOTE_NO_CACHE=true`. Pin a commit SHA only while a branch
+is under test before release; move back to a tag at release.
+
 The including project supplies the npm packages the tasks run: `vite` with `@tanstack/react-start`,
 `wrangler`, `@playwright/test`, `chrome-devtools-mcp`, `modern-web-guidance`, `smol-toml`
 (and `@openai/codex` for the Codex tasks). A task defined in the project's own `mise.toml`
