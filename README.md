@@ -50,25 +50,8 @@ Install **Google Chrome** before setup; browser checks use the installed Chrome.
 
 ## Work with an agent
 
-**VS Code:** use the installed Codex extension. After changing skills or MCP,
-run `mise run mcp:register`, then open the Command Palette (`Cmd+Shift+P` on Mac)
-and select **Developer: Reload Window**. Reopen Codex and continue your conversation.
-The extension uses Codex configuration; it does not need the terminal CLI to run.
-
-**Terminal:** use these tasks for standalone agent sessions:
-
-| | Codex | Claude Code |
-| --- | --- | --- |
-| Start a conversation | `mise run codex:start` | `mise run claude:start` |
-| Resume the latest conversation | `mise run codex:resume` | `mise run claude:resume` |
-
-To reload a terminal agent, type `/exit` in the agent, then run its
-resume command. Each launch refreshes MCP registration. Use `/mcp` inside the
-agent to check the connection; accept any project trust or server approval prompt.
-
-Skills supply guidance; MCP supplies callable tools. Setup includes Better Auth,
-Cloudflare, Chrome DevTools, Modern Web Guidance, shadcn, Playwright, GitHub release
-and TanStack Router/Start skills, plus the Chrome DevTools MCP server.
+Starting, resuming and reloading Codex or Claude Code, in VS Code or a terminal, is in
+[developer tooling](docs/tooling.md#start-or-reload-your-agent).
 
 ## Everyday commands
 
@@ -96,18 +79,11 @@ skill-source commits and the shared agent bootstrap tasks live in
 
 ## Project documentation
 
-- [GUI proof](docs/gui.md) — routes, shared package and what the checks prove.
-- [Tooling reference](docs/tooling.md) — skills, MCP, browser sessions, upgrades and troubleshooting.
-- [GUI plan](.plans/done/gui.md) — done: reusable React packages, internationalisation and SEO.
-- [TanStack plan](.plans/tanstack.md) — agreed: move both apps and the package from React Router to TanStack Start and Router.
-- [OpenAPI contracts plan](.plans/openapi-contracts.md) — proposed: contract-first APIs with oRPC, producing and consuming OpenAPI with runtime validation.
-- [Portal plan](.plans/gui-portal.md) — open: hosted login screens, and the GUI decisions still yours.
-- [Shared UI plan](.plans/done/shared-ui.md) — done: the language code in the package, SSR proven from the tarball, and the `remy-auth-app` consumer.
-- [Implementation plan](.plans/auth-service.md) — auth service and the first local sample app.
-- [Better Auth ecosystem](.plans/better-auth-ecosystem.md) — plugins, CLI and GUI options.
-- [Observability plan](.plans/observability.md) — Cloudflare logs, traces, metrics and audit records.
-- [Agent skills plan](.plans/done/agent-skills.md) — finding and vetting skills for uncovered dependencies.
-- [Development principles](docs/development.md) — ownership, storage and contribution rules.
-
-The next slice adds Better Auth and local D1. The GUI proof emits request logs;
-production observability and the independent authenticated sample remain planned.
+- [Agent index](AGENTS.md): where agents start.
+- [Development principles](docs/development.md): what the code must be, and how plans work.
+- [How we work](docs/how-we-work.md): how people and agents work.
+- [Developer tooling](docs/tooling.md): mise tasks, skills, MCP and browser tools.
+- [GUI runtime workflow](docs/gui.md): one Worker, local and remote test targets.
+- [Shared tasks](tasks/README.md): the mise tasks other projects include.
+- [Shared UI package](packages/ui/README.md) and its [changelog](CHANGELOG.md).
+- [Plans](.plans/): [.plans/now.md](.plans/now.md) is the only list of what is open and where it stands.
