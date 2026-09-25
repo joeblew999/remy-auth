@@ -48,3 +48,15 @@ remy-auth publishes; remy-auth-app is the reference consumer and the proof.
 
 A second, throwaway consumer made from the recipe alone passes the shared checks and deploys to a
 preview; remy-auth-app passes its gate and Core Web Vitals after any move; no check is loosened.
+
+## Decisions
+
+- 2026-09-25, package moves (analysis D4, D8, D9, D12; D10 `Problem` was already in `./problem`):
+  `./tailwind.css`, `./prerender` (`prerenderPages`, its own module so `paths` stays import-free
+  data), `seo`'s `sitemapXml`/`robotsTxt`, `./app-checks` (`serverAppChecks`,
+  `prerenderedAppChecks`, taking the app's own pages as `ownSitePaths`/`ownAppPaths`). The check sets
+  live beside `checks.js`, not in it, because the showcase checks import `checks.js`. remy-auth uses
+  them with the same CSS bytes, sitemap and robots output and the same 276 registered checks.
+  remy-auth-app moves after the next release (it installs the package from GitHub Packages).
+- `cf:preview-delete` keeps `${1:-…}`: `cf:preview` calls the file directly, not through mise, so
+  there is no `usage_name` there (the analysis's "drop it" would break the cleanup).

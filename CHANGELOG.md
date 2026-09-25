@@ -7,6 +7,14 @@ package follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- Moves that remove copying from consumers (`.plans/publisher-consumer-analysis.md`, D4, D8, D9, D12):
+  `./tailwind.css` (`globals.css`, `fonts.css`, `text.css` and the package's own `@source`, so an app
+  writes one import and its own `@source "../src"`); `./prerender` (`prerenderPages({ notFoundPath })`,
+  a prerendered app's page list); `seo`'s `sitemapXml({ origin, paths, extra })`, `sitemapEntries`,
+  `robotsTxt(origin)`, `sitemapType`, `robotsType`; `./app-checks` (`serverAppChecks`,
+  `prerenderedAppChecks`: the shared check set in one call per kind of app, the app's own pages
+  passed beside the shared ones). remy-auth uses them; its CSS, sitemap, robots.txt and registered
+  checks are unchanged. The separate imports keep working.
 - Parts (`.plans/parts.md`): `./parts` (`readParts`, `catalog`), `./parts/vite` (`remyParts()`: a Vite
   plugin generating `virtual:remy-parts` from the app's `src/parts.json`, and the route config that
   mounts each listed part's routes through TanStack's `virtualRouteConfig` and `physical()`),
