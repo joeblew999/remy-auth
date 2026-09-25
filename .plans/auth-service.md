@@ -50,6 +50,8 @@ The [ecosystem inventory](better-auth-ecosystem.md) records researched CLI, plug
 GUI and agent-tooling options, with a proposed feature adoption matrix. Its
 recommendations still require pinned-version runtime verification.
 
+Items 1, 2, 4 and 5 have [proposals awaiting owner confirmation](#proposed-decisions-1-2-4-and-5).
+
 1. Select the first login method and organization/membership model. Define how the
    first owner is explicitly provisioned; no default production admin or password.
 2. Record a feature matrix: organization RBAC, passkeys, MFA, SSO, SCIM, API/service
@@ -71,6 +73,201 @@ recommendations still require pinned-version runtime verification.
 Escalate any required feature incompatible with the chosen database/runtime,
 identity/tenant ambiguity, or need to change another repo's existing public access.
 Do not silently drop a required feature or substitute a new store.
+
+## Proposed decisions 1, 2, 4 and 5
+
+Proposed 2026-09-25, awaiting owner confirmation. Drafted from the
+[ecosystem inventory](better-auth-ecosystem.md), the installed Better Auth skills
+(`better-auth-best-practices`, `better-auth-security-best-practices`, `organization-best-practices`,
+`two-factor-authentication-best-practices`), the runtime architecture below, and Better Auth's
+documentation read on 2026-09-25:
+[OAuth Provider](https://better-auth.com/docs/plugins/oauth-provider),
+[JWT](https://better-auth.com/docs/plugins/jwt),
+[Email OTP](https://better-auth.com/docs/plugins/email-otp),
+[Admin](https://better-auth.com/docs/plugins/admin),
+[Passkey](https://better-auth.com/docs/plugins/passkey) and the
+[CLI](https://better-auth.com/docs/concepts/cli). Nothing here has run on pinned versions:
+"documented" below means documented upstream, and the decision 3 spike must confirm it on
+Workers and D1. Once confirmed, each value moves to its home (the auth configuration, the
+sample's registration definition, `mise.toml` for ports) and this section links there instead.
+
+### 1. First login method, organization model, first owner
+
+**Login method.** Options: email and password; email one-time code (`emailOTP`); magic link;
+passkey first; a social provider.
+
+Recommended: **email one-time code**, with `storeOTP: "hashed"` (the default is plain) and the
+documented defaults otherwise (6 digits, 300 seconds, 3 attempts). Email and password stays off.
+
+- No password is stored, reset or leaked, which removes the reset and breach-check flows.
+- The code proves the address, so every account has a verified email by construction.
+- The plan's seeded sign-in picker already requires "a real Better Auth code sign-in"; one
+  method then serves people, tests and local development, gated by the environment policy.
+- Password hashing (scrypt by default) is CPU-heavy for Workers; avoiding it removes a runtime
+  risk (assumed, not measured).
+- Cost: it needs mail delivery. Deployed: Cloudflare Email Service (installed skill
+  `cloudflare-email-service`). Local and tests: codes are captured locally and no real mail is
+  sent, as the definition of done requires. A delivery failure is shown as an error, never
+  replaced by a fallback code.
+- Runner-up: email and password. It needs mail for recovery anyway, so it removes no dependency.
+
+Sign-up: **open, but a new account holds nothing.** It has no organization, no platform role and
+no app grant, so a shared login never implies access to any app. Better Auth rate limits (stored
+in D1) apply from the start; Turnstile or a captcha is production hardening.
+
+**Organization model.** Options: no organizations (users plus per-app grants); Better Auth's
+`organization` plugin with one organization per tenant; a personal organization per user.
+
+Recommended: **the `organization` plugin, one organization per tenant, no teams yet, no
+personal organizations.** `allowUserToCreateOrganization` is limited to platform admins at first.
+Membership roles are Better Auth's `owner`, `admin` and `member`, and they govern the
+organization's own administration only. App permissions stay in the app, as the runtime
+architecture decided: the sample's `reader` and `editor` are relations in the sample's own data,
+where `reader` comes from any membership and `editor` from the `owner` or `admin` role or an
+explicit app grant, through the relation engine's role kind. The token carries the active
+organization and the member's role in it.
+
+**First owner.** Options: `auth create-admin` (prompts for a password when `--password` is
+omitted, and runs in Node against a database connection, which a D1 binding is not; both
+unverified for our setup); a direct D1 write (bypasses hooks and audit, which the ecosystem
+inventory forbids); Better Auth's `adminUserIds` option, set per environment.
+
+Recommended: **`adminUserIds` from a per-environment Worker variable.**
+
+- Deployed: the owner signs in with a code, which creates an ordinary empty account; an explicit,
+  environment-specific task puts that user ID in the environment's variable, and a deploy makes
+  it an admin. There is no default admin and no password at any step, and the account has no
+  privilege before that deploy.
+- Local: the seed definition's owner identity has a fixed ID, and the local variable names it.
+- The first admin then creates the first organization (becoming its `owner`) and grants further
+  admins through the Admin API, which is audited.
+
+What would change it: `create-admin` gaining a passwordless mode that works against D1, or the
+owner wanting several bootstrap operators without a deploy. The login method would change for
+users without reliable email, or for a customer requiring its own identity provider (SSO).
+
+### 2. Feature matrix
+
+Evidence levels: **documented** (Better Auth or Cloudflare documentation says so), **assumed**
+(not yet shown on Workers and D1) and **excluded by documentation**. Better Auth documents
+[native D1 support](https://better-auth.com/blog/1-5); D1 has no interactive transactions, only
+atomic batches, so any plugin step that relies on a transaction is assumed non-atomic until the
+spike proves otherwise.
+
+| Feature | Stage | Runtime and D1 evidence | Reason |
+| --- | --- | --- | --- |
+| Email one-time code | Now | Documented plugin, using the verification table; delivery through Cloudflare Email Service documented; Workers run assumed | Decision 1 |
+| Organization RBAC (`organization`) | Now | Documented tables for organizations, members and invitations; creating an organization and its owner is several writes, atomicity on D1 assumed | The sample's notes are organization-owned; roles cover organization administration |
+| Platform roles (`admin`) | Now | Documented; adds fields to the user table | First owner and operator actions |
+| JWT and JWKS (`jwt`) | Now | Documented: EdDSA (Ed25519), keys in a D1 table, private keys encrypted with AES-256-GCM; Web Crypto on Workers assumed | Apps verify tokens locally |
+| CLI login | Now | Documented: authorization code with S256 PKCE for public clients (`token_endpoint_auth_method: "none"`) | Required by milestone 1 |
+| User-delegated agent access (MCP) | Now, explicitly registered clients only | Documented `@better-auth/mcp`, which configures the OAuth provider itself; client metadata discovery (CIMD) needs a Worker-safe fetch transport, assumed missing | Required by milestone 1; discovery waits for that transport |
+| Service accounts | Now, as OAuth `client_credentials` | Documented fail-closed grant: an admin must set `client_credentials_scopes` | The milestone's machine-access flow; a machine never inherits a person's rights |
+| API keys (`apiKey`) | Later, when a consumer needs one | Documented; storage and rate-limit behaviour on D1 assumed | Duplicates `client_credentials` until a consumer cannot use OAuth |
+| Device authorization | Later, CLI follow-up | Documented `device_code` grant | Headless terminals; needs an approval screen |
+| Passkeys (`@better-auth/passkey`) | Later, before production sign-off | Documented single table; the relying party ID is bound to a domain; the WebAuthn library on Workers assumed | Passkeys enrolled on a temporary host are lost when the production domain changes, so enrol only once it is chosen |
+| MFA (`twoFactor`, TOTP and backup codes) | Later, with passkeys | Documented table; an email second factor adds nothing to an email first factor | Step-up rules belong to the production policy |
+| SSO (`@better-auth/sso`, OIDC and SAML) | Later, on a customer's request | SAML's XML dependencies on Workers assumed, not shown | No customer needs it yet |
+| SCIM | Excluded | Excluded by documentation: it [requires interactive transactions and excludes D1](https://better-auth.com/docs/plugins/scim#enable-database-transactions) | Revisit only with a directory-provisioning requirement |
+| Agent Auth | Later, separate evaluation | Not assessed | MCP delegation covers the sample |
+| Social login, magic link | Later, on demand | Provider secrets or mail | Not needed for the sample |
+
+What would change it: a customer asking for SSO or directory provisioning (SCIM would also
+reopen the storage decision), a consumer that cannot use OAuth (API keys), or the spike showing
+that a "now" plugin fails on Workers or D1, which is escalated, not dropped.
+
+### 4. Local ports, issuer, origins, callbacks, audiences, grants
+
+Cookies ignore ports, so two apps on `localhost` share one cookie jar. Recommended: remy-auth
+stays on `localhost`, and each sample instance gets its own `*.localhost` host name, so host-only
+cookies stay apart as they will in production. Chrome resolves `*.localhost` to loopback, and
+Node 26 was checked here to do so too (`sample-a.localhost` resolved to `::1`); whether
+Wrangler's local server answers on `::1` is assumed until the spike. Runner-up: plain
+`localhost` with a distinct cookie prefix per app, if `*.localhost` fails in the spike.
+
+| Service | Dev (`project:dev`) | Test and preview | Port home |
+| --- | --- | --- | --- |
+| remy-auth (issuer) | `http://localhost:5173` | `http://localhost:${PREVIEW_PORT}` (4173) | `mise.toml` |
+| Sample A | `http://sample-a.localhost:5183` | `http://sample-a.localhost:${SAMPLE_A_PORT}` (4183) | `mise.toml`, set from the shell like `PREVIEW_PORT` |
+| Sample B (tests only) | none | `http://sample-b.localhost:${SAMPLE_B_PORT}` (4184) | as above |
+| CLI loopback | `http://127.0.0.1:4199/callback` | the same | the CLI |
+
+- **Issuer:** exactly Better Auth's `baseURL` for the environment, as its discovery document
+  publishes it; consumers compare `iss` for equality. Deployed, that is `DEPLOY_ORIGIN` in
+  `mise.toml` for now; the production issuer waits for the production domain.
+- **Trusted origins:** remy-auth's `trustedOrigins` lists exactly that environment's sample
+  origins, with no wildcard.
+- **Callbacks,** exact strings, no wildcards, no trailing-slash variants: sample A
+  `<origin>/auth/callback` for each of its origins above, sample B likewise, and the CLI
+  `http://127.0.0.1:4199/callback`. If the spike shows Better Auth matches loopback redirects
+  regardless of port (RFC 8252, section 7.3), the CLI registers `http://127.0.0.1/callback` and
+  picks a free port instead. Post-logout redirects: each sample origin with path `/`.
+- **Audiences** (the OAuth Provider's `resources`, each becoming `aud`): per sample instance,
+  its origin for the HTTP API and `<origin>/mcp` for its MCP server, since MCP requires the
+  server's own URI. Scopes: `notes:read` and `notes:write`, plus `openid profile email
+  offline_access` for sign-in. A token for A names only A's audiences, so B refuses it.
+
+| Client | Type | Grants | Notes |
+| --- | --- | --- | --- |
+| `sample-a-web`, `sample-b-web` | Confidential (`client_secret_basic`, secret in a Worker secret) | `authorization_code` with S256 PKCE, `refresh_token` | Operator-registered first party; consent skipped (`skip_consent`) |
+| `remy-cli` | Public (`none`) | `authorization_code` with S256 PKCE, `refresh_token` | Resources A and B, one per login; consent shown |
+| `sample-mcp-test` | Public (`none`) | `authorization_code` with S256 PKCE, `refresh_token` | Consent shown; stands in for an agent |
+| `sample-a-machine` | Confidential | `client_credentials` only | `client_credentials_scopes` is `notes:read`; audience A only |
+
+No implicit or password grant (OAuth 2.1 has neither); `device_code` stays off until device
+authorization is adopted. What would change it: `*.localhost` failing in the spike, a port clash
+on CI, or the choice of the production domain.
+
+### 5. Lifetimes, revocation, caching, key rotation, failures
+
+| Setting | Proposed | Better Auth default | Reason |
+| --- | --- | --- | --- |
+| remy-auth session (`expiresIn`, `updateAge`) | 7 days, refreshed daily | the same | Sign in once a week at most |
+| Session cookie cache (`cookieCache`) | Off | off | A cache keeps a revoked session alive for its age |
+| Access token, people and machines (`accessTokenExpiresIn`, `m2mAccessTokenExpiresIn`) | 5 minutes | 1 hour | JWT access tokens cannot be revoked server-side, so their lifetime is the revocation delay |
+| Refresh token | 30 days, rotated, reuse refused (`refreshTokenReuseInterval: 0`) | the same | Revoking it stops new access tokens |
+| ID token | 10 hours, never accepted as an access token (its `aud` is the client) | the same | Sign-in only |
+| Authorization code | 10 minutes, single use | the same | Replay fails |
+
+**Maximum revocation delay: 5 minutes** for anything a token carries (logout, session
+revocation, membership removal, platform-role change), and **none** for relationships, which each
+app reads from its own tables on every request. If removing a member in Better Auth does not also
+revoke that member's refresh tokens (assumed, to be tested), remy-auth does it in the same
+operation.
+
+**Permission-check caching:**
+
+- Apps cache the JWKS per isolate for at most 10 minutes; an unknown key ID triggers one refetch,
+  at most once every 30 seconds. Better Auth suggests caching keys indefinitely; the bound makes a
+  removed, compromised key stop being trusted.
+- Relationship checks and service-binding answers from remy-auth are not cached.
+- Browser caches (TanStack Query and router loaders) go stale within the 5 minutes and are
+  invalidated on logout and role change; they only shape the page, and the server checks again.
+- Nothing auth-related goes in KV, which is eventually consistent.
+
+**Signing-key rotation:** Ed25519, `rotationInterval` 30 days, `gracePeriod` 7 days (default
+30), far longer than any token's life. Emergency rotation: rotate, remove the compromised key,
+and every app stops trusting it within the 10-minute JWKS bound. Two Worker instances rotating at
+once is a spike check.
+
+**When auth is unavailable** (the rule: never grant access):
+
+- A valid token with cached keys keeps working until it expires, at most 5 minutes.
+- New sign-ins and refreshes fail, and the app says the sign-in service is unavailable.
+- JWKS unreachable: cached keys are used for up to 1 hour, then 503 `auth_unavailable`.
+- Unknown key ID: 401 `invalid_token` if the refetch succeeded, 503 if it failed.
+- A required service-binding call failing or taking over 2 seconds, or the app's own D1 failing
+  during a relationship check: 503, with zero writes.
+- remy-auth's D1 or rate-limit storage failing: sign-in refused with 503, never allowed without
+  limits.
+- MCP returns the same outcomes, with its `WWW-Authenticate` challenge on 401.
+- Public site pages do not depend on auth and stay up.
+
+Runner-up: opaque access tokens with introspection (`disableJwtPlugin`) revoke instantly, but add
+a remy-auth call to every request, which the runtime architecture rejected. What would change it:
+an operation needing instant revocation (introspect for that operation, give its scope a shorter
+`scopeExpirations` entry, or use back-channel logout, which needs the JWT plugin), or measured
+refresh load on D1 at 5 minutes.
 
 ## Runtime architecture: identity central, relationships local (decided 2026-09-25, refined)
 
