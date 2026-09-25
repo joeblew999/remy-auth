@@ -10,7 +10,7 @@ import { Input } from './components/input';
 import { SidebarInset, SidebarProvider } from './components/sidebar';
 import { AppSidebar } from './blocks/sidebar-16/app-sidebar';
 import { SiteHeader } from './blocks/sidebar-16/site-header';
-import { Intro, ZoneBadge } from './pages';
+import { Intro, SkipLink, ZoneBadge } from './pages';
 
 // App pages (paths.js): they need JavaScript and use the app shell. Kept apart from ./pages, the
 // site pages, so a site page never downloads the app shell's code.
@@ -21,7 +21,7 @@ import { Intro, ZoneBadge } from './pages';
  */
 export function AppShell({ locale, path = '/app', preferred, children }: { locale: Locale; path?: string; preferred?: Locale; children: React.ReactNode }) {
   return <div className="[--header-height:calc(--spacing(14))]">
-    <a className="skip-link sr-only focus:not-sr-only focus:fixed focus:start-2 focus:top-2 focus:z-60 focus:bg-background focus:p-3" href="#main">{m.skip_link({}, { locale })}</a>
+    <SkipLink locale={locale} />
     <SidebarProvider className="flex flex-col">
       <SiteHeader locale={locale} path={path} />
       <div className="flex flex-1">

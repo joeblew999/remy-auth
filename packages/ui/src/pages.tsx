@@ -20,6 +20,11 @@ import { Separator } from './components/separator';
 
 export { sitePaths, appPaths, allPaths, isAppPath } from './paths.js';
 
+/** "Skip to content", the first thing in every frame, site or app. */
+export function SkipLink({ locale }: { locale: Locale }) {
+  return <a className="skip-link sr-only focus:not-sr-only focus:fixed focus:start-2 focus:top-2 focus:z-60 focus:bg-background focus:p-3" href="#main">{m.skip_link({}, { locale })}</a>;
+}
+
 /** The label every page shows, so anyone can see which kind of page it is (paths.js explains the two). */
 export function ZoneBadge({ locale, app }: { locale: Locale; app: boolean }) {
   return <Badge variant={app ? 'default' : 'outline'} data-zone={app ? 'app' : 'site'}>{app ? m.zone_app({}, { locale }) : m.zone_site({}, { locale })}</Badge>;
@@ -32,7 +37,7 @@ export function ZoneBadge({ locale, app }: { locale: Locale; app: boolean }) {
 export function SiteShell({ locale, path = '', preferred, children }: { locale: Locale; path?: string; preferred?: Locale; children: React.ReactNode }) {
   const o = { locale };
   return <div className="mx-auto flex min-h-svh w-full max-w-3xl flex-col px-5 sm:px-8">
-    <a className="skip-link sr-only focus:not-sr-only focus:fixed focus:start-2 focus:top-2 focus:z-10 focus:bg-background focus:p-3" href="#main">{m.skip_link({}, o)}</a>
+    <SkipLink locale={locale} />
     <LanguageHint locale={locale} path={path} preferred={preferred} />
     <header className="site-header flex items-center justify-between gap-3 pt-4">
       <Link className={buttonVariants({ variant: 'ghost', className: 'brand font-semibold' })} to="/" preload="intent">Remy</Link>
