@@ -46,7 +46,7 @@ navigationBlockingChecks();
 deferredPlaceChecks();
 devicePlaceChecks({ path: '/app/location', network: true });
 statusCardChecks({ service: 'remy-auth', path: '/app', endpoint: '/api/status' });
-problemChecks({ timeZones: { known: 'Asia/Tokyo', alias: 'asia/tokyo', unknown: 'Mars/Olympus_Mons' }, failingNavigation: { from: '', link: 'formats_link', fail: '**/_serverFn/**', heading: 'formats_title' }, serverRoutes: [{ path: '/robots.txt', type: 'text/plain; charset=utf-8', cache: 'public, max-age=3600', origin: true }, { path: '/sitemap.xml', type: 'application/xml; charset=utf-8', cache: 'public, max-age=3600', origin: true }] });
+problemChecks({ timeZones: { known: 'Asia/Tokyo', alias: 'asia/tokyo', unknown: 'Mars/Olympus_Mons' }, failingNavigation: { from: '', link: 'formats_link', fail: '**/_serverFn/**', heading: 'formats_title' }, serverRoutes: [{ path: '/robots.txt', type: 'text/plain; charset=utf-8', cache: 'public, max-age=3600, s-maxage=3600', origin: true }, { path: '/sitemap.xml', type: 'application/xml; charset=utf-8', cache: 'public, max-age=3600, s-maxage=3600', origin: true }] });
 formatsChecks({ extra: async (page, locale) => {
   // Rows only this server-rendered app has: more Intl examples and Cloudflare's geolocation.
   const messages = catalogs[locale];
