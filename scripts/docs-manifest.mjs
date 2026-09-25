@@ -35,6 +35,30 @@ export async function docsPages(rows = docsTable) {
 }
 
 /**
+ * The fenced code blocks of a Markdown file, each under the heading it follows, by heading position
+ * (the n-th heading of the file is the n-th entry of Fumadocs' table of contents). Fumadocs' structured
+ * text leaves code out, and the docs' commands live in code blocks.
+ */
+function codeByHeading(source, toc) {
+  const blocks = new Map();
+  let heading = -1, fence = null, lines = [];
+  for (const line of source.split('\n')) {
+    const open = /^(\s*)(`{3,}|~{3,})(.*)$/.exec(line);
+    if (fence) {
+      if (open && open[2].startsWith(fence) && !open[3].trim()) {
+        const id = toc[heading]?.url.slice(1);
+        if (id) blocks.set(id, [...(blocks.get(id) ?? []), `\`\`\`${lang}\n${lines.join('\n')}\n\`\`\``]);
+        fence = null;
+      } else lines.push(line);
+      continue;
+    }
+    if (open) { fence = open[2]; var lang = open[3].trim(); lines = []; continue; }
+    if (/^#{1,6}\s/.test(line)) heading++;
+  }
+  return blocks;
+}
+
+/**
  * One item per "##" heading, and one for the page's opening text under its "#" heading. The text is
  * Markdown: the section title, then each paragraph, with its "###" sub-headings.
  */
@@ -42,6 +66,7 @@ export async function docsManifest({ release = 'dev', rows = docsTable } = {}) {
   const items = [];
   for (const page of await docsPages(rows)) {
     const text = new Map(page.structured.headings.map(heading => [heading.id, heading.content]));
+    const code = codeByHeading(readFileSync(`${root}${page.row.file}`, 'utf8'), page.toc);
     const sections = [];
     for (const item of page.toc) {
       const id = item.url.slice(1);
@@ -53,6 +78,7 @@ export async function docsManifest({ release = 'dev', rows = docsTable } = {}) {
       for (const heading of headings) {
         if (heading !== id) body.push(`### ${text.get(heading) ?? heading}`);
         for (const content of page.structured.contents) if (content.heading === heading) body.push(content.content);
+        body.push(...(code.get(heading) ?? []));
       }
       // A heading with no text of its own under it (an empty "Unreleased") answers nothing.
       if (body.every(part => part.startsWith('### '))) continue;
