@@ -53,6 +53,13 @@ export const docsLangs = createServerOnlyFn((slug: string) => {
   return row ? langsOf(row, docsLocales, file => entries.has(file)) : [];
 });
 
+/**
+ * The R2 folder the AI answers search for a locale: its own translations (`es/`) when it has any, else
+ * the English files at the bucket's root (folder ""). AI Search filters by folder before it searches, so
+ * an answer never mixes languages.
+ */
+export const docsAnswerFolder = createServerOnlyFn((locale: string) => (locale !== docsLocale && docsLocales.includes(locale) ? `${locale}/` : ''));
+
 /** A description for search results: the page's first sentence-sized paragraph, cut at a word near 160 characters. */
 function describe(contents: { heading?: string; content: string }[], title: string) {
   const text = contents.map(content => content.content.trim()).find(content => content.length >= 40 && /[a-z]/i.test(content)) ?? title;

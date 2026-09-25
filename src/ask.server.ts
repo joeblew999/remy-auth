@@ -4,7 +4,7 @@ import { env } from 'cloudflare:workers';
 import { logContext, requestIdHeader, writeLog } from '@joeblew999/remy-ui/worker';
 import type { Locale } from '@joeblew999/remy-ui/locale';
 import { askMaxLength, type AskResult } from './ask-limits';
-import { docsPage } from './docs/source.server';
+import { docsAnswerFolder, docsPage } from './docs/source.server';
 import { docsLocale, docsObjectForKey, docsPath } from './docs/table.js';
 import { service } from './service';
 
@@ -42,7 +42,8 @@ export const answerQuestion = createServerOnlyFn(async (q: string, locale: Local
       model,
       max_tokens: 300,
       messages: [{ role: 'system', content: instructions }, { role: 'user', content: question }],
-      ai_search_options: { retrieval: { max_num_results: 5 }, cache: { enabled: true } },
+      // Only the page language's files (docsAnswerFolder): Spanish questions from Spanish docs, others from English.
+      ai_search_options: { retrieval: { max_num_results: 5, filters: { folder: docsAnswerFolder(locale) } }, cache: { enabled: true } },
     });
     const answer = response.choices[0]?.message.content?.trim();
     // Each cited page or section once, in the order AI Search ranked them, on the page's language frame.
