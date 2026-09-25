@@ -111,6 +111,29 @@ and the installed skills `auth-server-primitives`, `auth-and-guards`, `server-fu
 | The sample consumer | `examples/sample-app/` on TanStack Start too: OAuth authorization code with `state` and PKCE against remy-auth, notes list and create through server functions with TanStack Query, the MCP adapter as a server route calling the same permission decision | The sample's own handlers |
 | Observability | The shared observability wrapper plus function middleware adding the request ID and a bounded reason code to every auth and authorization outcome | Middleware |
 
+
+### Roles and relationships on TanStack
+
+RBAC first, through Better Auth's organization roles and custom permissions (installed skill
+`organization-best-practices`); ReBAC only if the sharing examples below need it (decision 6).
+
+| Concern | How | Where |
+| --- | --- | --- |
+| Role checks | A function-middleware factory, `requirePermission(resource, action)`, composed after `authMiddleware`, so each server function states its rule in one line | Server functions and server routes |
+| Relationship checks (if ReBAC is adopted) | Inside the handler, after input validation, because they need the specific record; a membership or share lookup against the session principal | Handlers |
+| Roles in the page | The session's roles and permissions travel in router context only to shape the page (hide an Edit button); `beforeLoad` role gates are navigation UX | Routes (presentation only) |
+| Client caches | Router loader cache and TanStack Query keys include user and organization; logout, role change and membership removal invalidate them (`router.invalidate`, Query invalidation); the cache lifetime counts towards the maximum revocation delay (decision 5) | Router and Query configuration |
+| Rendering | Protected routes are never prerendered and never share a public cache; they render per request or in the browser | Route `ssr` and `Cache-Control` |
+
+Checks: a role removed mid-session is refused on the next server call, and the client drops the
+cached protected data within the recorded revocation delay.
+
+Sharing examples to write before the ReBAC decision (fill in with the owner):
+
+1. A note shared with one person outside the organization's roles: _to define_.
+2. A record visible to a team within an organization but not the whole organization: _to define_.
+3. Delegated access for an agent or CLI to one resource only: _to define_.
+
 Not documented for Workers by Better Auth, so the first step of milestone 1 is a spike on the
 pinned versions: `tanstackStartCookies()` and the catch-all route under the Cloudflare Vite plugin,
 the chosen D1 adapter with `auth generate` and Wrangler migrations, and session reads across two

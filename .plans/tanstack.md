@@ -51,7 +51,10 @@ check, so it keeps working in both apps.
 | Devtools | Router and Query devtools in development only | Not in production bundles (build check) | `start-core` |
 
 The auth slice will then use `auth-and-guards` and `auth-server-primitives` (sessions, CSRF,
-OAuth with PKCE) on the same foundation.
+OAuth with PKCE) on the same foundation. Two choices here shape it (see the auth plan's "Roles and
+relationships on TanStack"): cache keys for loader data and Query must be able to include the
+user and organization, and the shared glue should expose one invalidate-everything call for
+logout and role changes; the showcase's caching rows use public data only.
 
 ## Work items, in order
 
