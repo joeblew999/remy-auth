@@ -163,6 +163,13 @@ description = "REMOTE (dev): delete the AI Search instance remy-docs-dev and eve
 dir = "{{config_root}}"
 run = "node scripts/docs-dev.mjs delete"
 
+# Route B (.plans/docs-ai-sync.md): the docs as files in the R2 bucket remy-docs, one per page; AI
+# Search's R2 source syncs from it (new, changed and deleted files).
+[tasks."docs:publish"]
+description = "REMOTE, PRODUCTION: make the R2 bucket remy-docs hold exactly the docs pages (put each, delete any other file), then start an AI Search sync. Seconds"
+dir = "{{config_root}}"
+run = "node scripts/docs-publish.mjs"
+
 [tasks."docs:questions"]
 description = "REMOTE, search only (no answers, next to no cost): each fixed question (src/docs/questions.json) must find its docs section in the top three. Instance: remy-docs (default) or remy-docs-dev"
 dir = "{{config_root}}"
