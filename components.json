@@ -5,7 +5,7 @@
   "tsx": true,
   "tailwind": {
     "config": "",
-    "css": "src/styles/globals.css",
+    "css": "packages/ui/src/styles/globals.css",
     "baseColor": "stone",
     "cssVariables": true,
     "prefix": ""
@@ -13,11 +13,11 @@
   "iconLibrary": "lucide",
   "rtl": true,
   "aliases": {
-    "components": "@joeblew999/remy-ui/components",
+    "components": "@/components",
+    "hooks": "@/hooks",
+    "lib": "@/lib",
     "utils": "cn",
-    "ui": "@joeblew999/remy-ui/components",
-    "lib": "@joeblew999/remy-ui/lib",
-    "hooks": "@joeblew999/remy-ui/hooks"
+    "ui": "@joeblew999/remy-ui/components"
   },
   "menuColor": "default",
   "menuAccent": "subtle",

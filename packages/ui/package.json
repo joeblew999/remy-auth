@@ -17,7 +17,7 @@
   ],
   "exports": {
     "./button": "./src/components/button.tsx",
-    "./styles.css": "./src/styles.css",
+    "./globals.css": "./src/styles/globals.css",
     "./fonts.css": "./src/fonts.css",
     "./messages": "./src/paraglide/messages.js",
     "./runtime": "./src/paraglide/runtime.js",
