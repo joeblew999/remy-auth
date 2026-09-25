@@ -146,6 +146,36 @@ What would change it: `create-admin` gaining a passwordless mode that works agai
 owner wanting several bootstrap operators without a deploy. The login method would change for
 users without reliable email, or for a customer requiring its own identity provider (SSO).
 
+### 2. Feature matrix
+
+Evidence levels: **documented** (Better Auth or Cloudflare documentation says so), **assumed**
+(not yet shown on Workers and D1) and **excluded by documentation**. Better Auth documents
+[native D1 support](https://better-auth.com/blog/1-5); D1 has no interactive transactions, only
+atomic batches, so any plugin step that relies on a transaction is assumed non-atomic until the
+spike proves otherwise.
+
+| Feature | Stage | Runtime and D1 evidence | Reason |
+| --- | --- | --- | --- |
+| Email one-time code | Now | Documented plugin, using the verification table; delivery through Cloudflare Email Service documented; Workers run assumed | Decision 1 |
+| Organization RBAC (`organization`) | Now | Documented tables for organizations, members and invitations; creating an organization and its owner is several writes, atomicity on D1 assumed | The sample's notes are organization-owned; roles cover organization administration |
+| Platform roles (`admin`) | Now | Documented; adds fields to the user table | First owner and operator actions |
+| JWT and JWKS (`jwt`) | Now | Documented: EdDSA (Ed25519), keys in a D1 table, private keys encrypted with AES-256-GCM; Web Crypto on Workers assumed | Apps verify tokens locally |
+| CLI login | Now | Documented: authorization code with S256 PKCE for public clients (`token_endpoint_auth_method: "none"`) | Required by milestone 1 |
+| User-delegated agent access (MCP) | Now, explicitly registered clients only | Documented `@better-auth/mcp`, which configures the OAuth provider itself; client metadata discovery (CIMD) needs a Worker-safe fetch transport, assumed missing | Required by milestone 1; discovery waits for that transport |
+| Service accounts | Now, as OAuth `client_credentials` | Documented fail-closed grant: an admin must set `client_credentials_scopes` | The milestone's machine-access flow; a machine never inherits a person's rights |
+| API keys (`apiKey`) | Later, when a consumer needs one | Documented; storage and rate-limit behaviour on D1 assumed | Duplicates `client_credentials` until a consumer cannot use OAuth |
+| Device authorization | Later, CLI follow-up | Documented `device_code` grant | Headless terminals; needs an approval screen |
+| Passkeys (`@better-auth/passkey`) | Later, before production sign-off | Documented single table; the relying party ID is bound to a domain; the WebAuthn library on Workers assumed | Passkeys enrolled on a temporary host are lost when the production domain changes, so enrol only once it is chosen |
+| MFA (`twoFactor`, TOTP and backup codes) | Later, with passkeys | Documented table; an email second factor adds nothing to an email first factor | Step-up rules belong to the production policy |
+| SSO (`@better-auth/sso`, OIDC and SAML) | Later, on a customer's request | SAML's XML dependencies on Workers assumed, not shown | No customer needs it yet |
+| SCIM | Excluded | Excluded by documentation: it [requires interactive transactions and excludes D1](https://better-auth.com/docs/plugins/scim#enable-database-transactions) | Revisit only with a directory-provisioning requirement |
+| Agent Auth | Later, separate evaluation | Not assessed | MCP delegation covers the sample |
+| Social login, magic link | Later, on demand | Provider secrets or mail | Not needed for the sample |
+
+What would change it: a customer asking for SSO or directory provisioning (SCIM would also
+reopen the storage decision), a consumer that cannot use OAuth (API keys), or the spike showing
+that a "now" plugin fails on Workers or D1, which is escalated, not dropped.
+
 ## Runtime architecture: identity central, relationships local (decided 2026-09-25, refined)
 
 The owner chose "decide centrally, enforce locally", then refined it after the remy-sport survey:
