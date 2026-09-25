@@ -12,6 +12,7 @@ import { navigationBlockingChecks } from '@joeblew999/remy-ui/showcase/navigatio
 import { apiChecks, reservationApiChecks } from '@joeblew999/remy-ui/api/checks';
 import { info } from '@joeblew999/remy-auth-contract';
 import { router } from '../src/api/router';
+import { registeredOrigins } from '../src/api/origins';
 import { docsI18nDir, docsLangs, docsPath, docsTable } from '../src/docs/table.js';
 import { deferredPlaceChecks } from '@joeblew999/remy-ui/showcase/deferred-place.checks';
 import { statusCardChecks } from '@joeblew999/remy-ui/showcase/status-card.checks';
@@ -35,7 +36,7 @@ fontChecks({ paths: sitePaths });
 entryChecks({ paths: everyPath, mode: 'redirect' });
 demoChecks();
 // The demo reservation and the status card are contract endpoints (@joeblew999/remy-auth-contract).
-apiChecks({ router, title: info.title });
+apiChecks({ router, title: info.title, origins: registeredOrigins });
 reservationApiChecks();
 codeSplittingChecks({ paths: [...sitePaths, '/docs'] });
 codeSplittingChecks({ paths: appPaths, home: '/app' });

@@ -247,6 +247,7 @@
   "live_service_label": "サービス",
   "live_release_label": "リリース",
   "live_status_note": "サーバーで表示したあと、このページを開いている間はブラウザが更新します。",
+  "live_status_note_browser": "ブラウザが別のサービスに問い合わせ、このページを開いている間は更新します。",
   "live_refresh": "今すぐ更新",
   "continue_in": "{language}で続ける",
   "language_hint": "このページは{language}でもご覧いただけます。",

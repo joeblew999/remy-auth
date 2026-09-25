@@ -17,8 +17,10 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
  * `router` is the app's implemented oRPC router (the one its /api route mounts). Every procedure
  * has a route, a policy and documented errors; the served document lists exactly those routes
  * with their error responses; the reference page points at it; unknown API paths are 404s.
+ * `origins` are the registered apps' origins the API answers across origins (apiHandlers'
+ * `origins`): each is allowed by name, on a simple call and on a preflight; any other origin is not.
  */
-export function apiChecks({ router, title }) {
+export function apiChecks({ router, title, origins = [] }) {
   test('every API procedure has a route under /api/, a policy, an output and documented errors', () => {
     expect(coverageProblems(router)).toEqual([]);
     // The rule itself catches each gap, so an empty list above means something.
@@ -60,6 +62,35 @@ export function apiChecks({ router, title }) {
     const missing = await request.get('/api/no-such-endpoint');
     expect(missing.status()).toBe(404);
     expect((await missing.json()).code).toBe('NOT_FOUND');
+  });
+
+  test('only the registered origins may call the API from their pages (CORS)', async ({ request }) => {
+    const calls = procedures(router).map(({ procedure }) => procedure['~orpc'].route);
+    const get = calls.find(route => route.method === 'GET');
+    const other = 'https://not-registered.example';
+    expect(origins, 'a registered origin is exact, never a wildcard').not.toContain('*');
+    for (const origin of [...origins, other]) {
+      const allowed = origin === other ? undefined : origin;
+      // A simple call, as a page's fetch sends it: the answer names the origin only when registered,
+      // and says it varies by Origin, so no cache hands one origin's answer to another.
+      if (get) {
+        const response = await request.get(get.path, { headers: { Origin: origin, 'Accept-Language': 'en' } });
+        expect(response.status(), `${origin} GET ${get.path}`).toBe(200);
+        expect(response.headers()['access-control-allow-origin'], `${origin} GET ${get.path}`).toBe(allowed);
+        if (origins.length) expect(response.headers().vary, `${origin} GET ${get.path}`).toMatch(/\bOrigin\b/i);
+      }
+      // The preflight a page sends before a JSON POST.
+      for (const route of calls.filter(route => route.method !== 'GET')) {
+        const preflight = await request.fetch(route.path, { method: 'OPTIONS', headers: {
+          Origin: origin, 'Access-Control-Request-Method': route.method, 'Access-Control-Request-Headers': 'content-type',
+        } });
+        expect(preflight.headers()['access-control-allow-origin'], `${origin} preflight ${route.method} ${route.path}`).toBe(allowed);
+        if (allowed) {
+          expect(preflight.status(), `${origin} preflight ${route.path}`).toBe(204);
+          expect(preflight.headers()['access-control-allow-methods'], `${origin} preflight ${route.path}`).toContain(route.method);
+        }
+      }
+    }
   });
 }
 

@@ -12,14 +12,21 @@ it. Why and how: [the contracts plan](../../.plans/openapi-contracts.md).
 
 The generated OpenAPI 3.1 document is served at `/api/openapi.json` and its reference at `/api/doc`.
 
-## Not published yet
+## Calling it from another app
 
-The package is `private` until its first release (the plan's work item 3). To publish it:
+remy-auth-app shows remy-auth's status this way: `contractClient(contract, { url: remyAuthOrigin })`
+and `createTanstackQueryUtils` from `@orpc/tanstack-query`, then the package's `StatusCard` with
+`orpc.status.queryOptions()`. A browser may call the API only from an origin remy-auth registered
+(`src/api/origins.ts`, CORS through `apiHandlers`' `origins`); ask for yours to be added there.
 
-1. Release `@joeblew999/remy-ui` first: the contract imports its reservation schemas, so raise the
-   peer range here to that release.
-2. Ship JavaScript: add a `build` step (`tsc` to `dist/` with declarations), point `exports` at
-   `dist/index.js` with `types`, and list `dist` in `files`. Consumers' bundlers and Playwright do
-   not transpile TypeScript inside `node_modules`.
-3. Remove `private`, then publish from `scripts/release.sh` beside the shared package, to GitHub
-   Packages (`publishConfig`), with the same tag.
+## Releases
+
+Published to GitHub Packages (`publishConfig`) by `scripts/release.sh` (and the tag's CI job) under
+the shared package's tag, whenever this version is not published yet: bump `version` here, and the
+root's pin, when the contract changes. A field changed or removed is a breaking change for every
+consumer: a new major (a new minor while 0.x).
+
+It ships TypeScript source, as `@joeblew999/remy-ui` does: consumers' Vite bundles it and their
+`tsc` checks it. A Playwright spec in a consumer must not import it (Playwright does not transpile
+TypeScript inside `node_modules`); the shared checks take plain values instead. The peer range names
+the first `@joeblew999/remy-ui` with the reservation shapes it imports (0.10.5).

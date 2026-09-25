@@ -4,6 +4,7 @@ import { OpenAPIGenerator } from '@orpc/openapi';
 import { OpenAPIHandler } from '@orpc/openapi/fetch';
 import { OpenAPIReferencePlugin } from '@orpc/openapi/plugins';
 import type { AnyRouter, Context, Router } from '@orpc/server';
+import { CORSPlugin } from '@orpc/server/plugins';
 import { ZodToJsonSchemaConverter } from '@orpc/zod/zod4';
 import { apiPrefix } from './coverage.js';
 
@@ -34,14 +35,19 @@ export function generateSpec(router: AnyRouter, info: OpenAPI.InfoObject): Promi
  * A Start server route's handlers for `router`, for a splat route at /api (src/routes/api.$.ts):
  * `server: { handlers: apiHandlers(router, ...) }`. `context` builds each request's oRPC context
  * from the request (the Worker's request ID, the asked language and so on). Unknown API paths
- * answer oRPC's own NOT_FOUND error body with 404.
+ * answer oRPC's own NOT_FOUND error body with 404. `origins` are the other apps' origins that may
+ * call this API from their pages (oRPC's CORSPlugin): exact origins, no wildcard; a browser on any
+ * other origin gets no Access-Control-Allow-Origin and so cannot read the answer. Empty by default.
  */
-export function apiHandlers<T extends Context>(router: Router<any, T>, { info, context }: {
+export function apiHandlers<T extends Context>(router: Router<any, T>, { info, context, origins = [] }: {
   info: OpenAPI.InfoObject;
   context: (request: Request) => T | Promise<T>;
+  origins?: readonly string[];
 }) {
+  if (origins.some(origin => origin === '*' || new URL(origin).origin !== origin)) throw new Error(`apiHandlers: origins are exact origins like https://app.example, got ${origins.join(', ')}`);
+  const cors = origins.length ? [new CORSPlugin<T>({ origin: [...origins], allowMethods: ['GET', 'HEAD', 'POST'] })] : [];
   const handler = new OpenAPIHandler(router, {
-    plugins: [new OpenAPIReferencePlugin({
+    plugins: [...cors, new OpenAPIReferencePlugin({
       ...specOptions,
       specGenerateOptions: { info },
       specPath,

@@ -251,6 +251,7 @@
   "live_service_label": "Servicio",
   "live_release_label": "Versión",
   "live_status_note": "Generado en el servidor y actualizado por tu navegador mientras esta página está abierta.",
+  "live_status_note_browser": "Tu navegador lo pide a otro servicio y lo actualiza mientras esta página está abierta.",
   "live_refresh": "Actualizar ahora",
   "continue_in": "Continuar en {language}",
   "language_hint": "Esta página también está disponible en {language}.",

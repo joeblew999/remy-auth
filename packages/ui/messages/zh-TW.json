@@ -247,6 +247,7 @@
   "live_service_label": "服務",
   "live_release_label": "版本",
   "live_status_note": "先在伺服器上呈現，之後在這個網頁開啟期間由你的瀏覽器更新。",
+  "live_status_note_browser": "由你的瀏覽器向另一個服務查詢，並在這個網頁開啟期間更新。",
   "live_refresh": "立即重新整理",
   "continue_in": "以{language}繼續",
   "language_hint": "這個網頁也提供{language}版本。",

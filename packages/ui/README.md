@@ -64,17 +64,19 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `problem` | The localized problem pages: `Problem`, `NotFound`, `ErrorPage`, `problemPages` (one spread line per page route) |
 | `preferred` | `usePreferred`, the root loader's `preferred` language, for page routes (the app's root loader returns it) |
 | `parts`, `parts/vite`, `parts/checks` | Parts ([plan](../../.plans/parts.md)): an app lists them in `src/parts.json`, one name per line. `remyParts()` in `vite.config.ts` (its `plugin` among the plugins, its `routes` as `tanstackStart({ router: { virtualRouteConfig } })`) mounts each listed part's routes beside `src/routes` and generates `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` in the test file runs each listed part's checks. Parts today: `time-zones` |
-| `showcase/*` | TanStack showcase pieces: search params and `choiceCards`, device place, leave guard, time zones |
+| `showcase/*` | TanStack showcase pieces: search params and `choiceCards`, device place, leave guard, time zones, the live status card (`StatusCard`: the app passes the query, its own client's or a `contractClient` on another app's origin) |
+| `invalidate` | `invalidateEverything(router, queryClient)`: every loader and query stale and reloaded (after logout or a role change; the status card's refresh) |
 | `samples` | The fixed values the pages render |
 | `checks`, `showcase/*.checks` | Shared Playwright checks: public pages, entry URLs (with the Chinese strategy), demo (native digits), formats (own calendar and digits, week rules, word segmentation), text (`textChecks`: 320 px, hyphenation, casing by language), fonts (`fontChecks`: the font that draws each language is the one `fonts.css` names for its script), zones, observability, Lighthouse and Core Web Vitals, and one per showcase piece; zones, observability, the Content Security Policy, Lighthouse and Core Web Vitals, and one per showcase |
 | `playwright` | `playwrightConfig()`, the shared Playwright configuration |
-| `api/server` | `apiHandlers` (oRPC's OpenAPIHandler as a Start server route's handlers, with the reference page at `/api/doc` and the generated document at `/api/openapi.json`), `generateSpec`, `specOptions` |
+| `api/server` | `apiHandlers` (oRPC's OpenAPIHandler as a Start server route's handlers, with the reference page at `/api/doc` and the generated document at `/api/openapi.json`; `origins`, the registered apps' exact origins allowed by oRPC's CORSPlugin, none by default), `generateSpec`, `specOptions` |
 | `api/client` | `contractClient` (a typed client for any contract: OpenAPILink with ResponseValidationPlugin, the page's language as Accept-Language), `isomorphicClient` (an app's own client: the router on the server, `contractClient` in the browser, through `createIsomorphicFn`) |
 | `api/coverage` | `coverageProblems` (every procedure has a route under `/api/`, a policy, an output and documented errors), `procedures`, `ApiMeta` |
-| `api/checks` | `apiChecks` (coverage, the served document and reference page), `reservationApiChecks` (the demo reservation's typed 400 in every locale, and a response that breaks the contract refused in the browser) |
+| `api/checks` | `apiChecks` (coverage, the served document and reference page, CORS for exactly the registered `origins`), `reservationApiChecks` (the demo reservation's typed 400 in every locale, and a response that breaks the contract refused in the browser) |
 
-`@tanstack/react-router`, `@tanstack/react-start`, `@playwright/test` and `lighthouse` are optional
-peers: the pages need the router, `api/client` needs Start, the checks need the other two.
+`@tanstack/react-router`, `@tanstack/react-start`, `@tanstack/react-query`, `@playwright/test` and
+`lighthouse` are optional peers: the pages need the router, `api/client` needs Start, the status
+card and `invalidate` need Query, the checks need the other two.
 
 ## Language
 

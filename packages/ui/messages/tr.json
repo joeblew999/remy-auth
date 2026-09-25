@@ -249,6 +249,7 @@
   "live_service_label": "Hizmet",
   "live_release_label": "Sürüm",
   "live_status_note": "Sunucuda oluşturulur, ardından bu sayfa açık kaldığı sürece tarayıcınız tarafından yenilenir.",
+  "live_status_note_browser": "Tarayıcınız bunu başka bir hizmetten ister ve bu sayfa açık kaldığı sürece yeniler.",
   "live_refresh": "Şimdi yenile",
   "continue_in": "{language} dilinde devam et",
   "language_hint": "Bu sayfa {language} dilinde de mevcut.",
