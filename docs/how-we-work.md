@@ -2,23 +2,28 @@
 
 [Back to the agent index](../AGENTS.md) · [Development principles](development.md) · [Developer tooling](tooling.md)
 
-These are the working habits the owner has asked for, for developers and AI agents alike.
+This document owns how people and agents work: the habits the owner has asked for, for developers
+and AI agents alike. What the code must be lives in [development principles](development.md).
 
 ## Where rules live
 
 - Write down how we work here, in the repository, not in an agent's private memory. Anyone
   opening the repository, person or agent, should find the same rules. Agent memory is only for
   things that concern one agent, never for how the project works.
-- Each rule has one home. Link to it instead of repeating it.
+- Each fact has one home, as [development principles](development.md#development-principles)
+  require; that applies to these rules too.
 
 ## Use the project's own tools first
 
+- Start with `mise run project:setup`; [developer tooling](tooling.md) says what it installs.
 - Run commands through the mise tasks, check the real page with the Chrome DevTools tools
   (`browser:*` tasks), and use the installed skills before reading upstream sources, searching
   `node_modules` or writing one-off scripts.
 - Look at the real page with the browser tools before writing a test for it.
 - Once the tools can answer a question, stop researching and use them.
-- Say how long a step will take before starting anything slower than a few seconds.
+- Say how long a step will take before starting anything slower than a few seconds. Task
+  descriptions (`mise tasks ls`) give each task's duration and what may run at the same time;
+  run post-deploy checks in the background and keep working.
 
 ## Choose tools by survey, not by first find
 
@@ -46,12 +51,27 @@ and write only what they do not provide.
   full width, so we are).
 - **Compose, do not restyle.** Use variants and semantic tokens; follow the installed shadcn skill's
   rules (Separator, Skeleton, Badge, Empty, Alert, Field instead of hand-made equivalents).
-- **Two kinds of page** ([paths](../packages/ui/src/paths.js)): site pages are for Google and work
-  without JavaScript, so they use only static shadcn parts; app pages live under `/app`, need
-  JavaScript and use the sidebar app shell. Checks keep them apart.
+- **Two kinds of page:** site pages for Google and app pages under `/app`, never mixed;
+  [paths.js](../packages/ui/src/paths.js) defines both.
 - **Adopt the TanStack library instead of our own code** (Form, Router's Zod adapter, Table, Devtools
   and so on), install its agent skills, then delete the code it replaces.
 - Before writing any UI code, ask: does shadcn, TanStack or Paraglide already do this? If yes, use it.
+
+## Language: Paraglide owns it
+
+Paraglide owns all language behaviour: which language a request gets, through its strategies
+`url`, `cookie`, `preferredLanguage` and `baseLocale` (set in
+[paraglide.mjs](../packages/ui/paraglide.mjs)), and the localized links, with TanStack Router
+carrying them. We do not write framework-neutral layers or our own language code; when Paraglide
+lacks something, use its options first and record the gap in the owning plan.
+
+## When the owner delegates decisions
+
+When the owner hands over decisions, for example to finish work unattended:
+
+- Decide, and record each decision with its reasons in the plan that owns it.
+- Keep every gate green; delegation never loosens a check.
+- Leave a full report: what was decided, what was done, what was checked and what was not.
 
 ## Gates before anything leaves the machine
 
@@ -59,6 +79,7 @@ and write only what they do not provide.
   or deploy. CI is slow; a red CI run costs far more than a local run.
 - Never pipe a gating command through `grep` or `tail` in a chain: the pipe hides its exit code.
   This once released a version whose checks had failed.
+- Before reporting work as done, run `mise run project:verify` and report its real result.
 
 ## Reporting to the owner
 
