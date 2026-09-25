@@ -48,6 +48,7 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `components/*`, `hooks/*`, `button` | shadcn components and hooks (`button` is also a short path) |
 | `paths` | `sitePaths`, `appPaths`, `allPaths`, `isAppPath` |
 | `pages` | `SiteShell` (alias `Shell`), `HomePage`, `FormatsContent`, `FormatsPage`, `Intro`, `ZoneBadge`, `SkipLink`, `Group`, `Row` |
+| `shell` | The site frame alone: `SiteShell` (alias `Shell`), `SiteNavLinks`, `Intro`, `ZoneBadge`, `SkipLink` (also exported by `pages`); import it where a page needs only the frame, so the home and formats pages stay out of that page's download |
 | `app-pages` | `AppShell`, `AppHomePage`, `AppFormatsPage`, `LocationPage`, `DemoPage` |
 | `language` | `LanguageSwitcher` (plain links, site pages), `LanguageMenu` (shadcn DropdownMenu, app pages), `LanguageHint` |
 | `messages`, `runtime` | Compiled Paraglide messages and runtime |

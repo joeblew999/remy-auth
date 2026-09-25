@@ -4,7 +4,7 @@ import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { Link } from '@tanstack/react-router';
 import type { Locale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
-import { SiteShell } from '@joeblew999/remy-ui/pages';
+import { SiteShell } from '@joeblew999/remy-ui/shell';
 import { Separator } from '@joeblew999/remy-ui/components/separator';
 import type { DocsPageData } from './source.server';
 import { docsComponents } from './content';

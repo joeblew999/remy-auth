@@ -2,7 +2,7 @@ import { useRouter, type ErrorComponentProps } from '@tanstack/react-router';
 import { getLocale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
 import { Button } from '@joeblew999/remy-ui/button';
-import { Shell } from '@joeblew999/remy-ui/pages';
+import { Shell } from '@joeblew999/remy-ui/shell';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@joeblew999/remy-ui/components/empty';
 import { buttonVariants } from '@joeblew999/remy-ui/components/button';
 

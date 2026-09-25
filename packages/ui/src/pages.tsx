@@ -1,95 +1,28 @@
-import { createContext, useContext } from 'react';
 import { Link } from '@tanstack/react-router';
-import { ArrowLeftIcon } from 'lucide-react';
 import { locales, getTextDirection as direction, type Locale } from './paraglide/runtime.js';
 import { m } from './paraglide/messages.js';
 import { localeName } from './locale';
 import { formatLocale, weekdayName, weekOrder, words, type LocaleInfo } from './locale-info';
 import { DeviceTime } from './client';
-import { LanguageHint, LanguageLinks, LanguageSwitcher } from './language';
-import { ModeToggle } from './theme';
-import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from './components/navigation-menu';
 import { samples } from './samples.js';
 import { Badge } from './components/badge';
-import { Button, buttonVariants } from './components/button';
+import { buttonVariants } from './components/button';
 import { Card, CardContent, CardHeader, CardTitle } from './components/card';
-import { Separator } from './components/separator';
 
 // The pages every Remy app built on this package shows, and that the shared checks test.
 // Apps keep their route modules (loaders, head, runtime wiring) and render these.
 // In-app links are TanStack Links to de-localized paths: the router's rewrite (localeRewrite in
 // ./tanstack) adds the page's locale, and they preload on intent. Language changes stay full
 // navigations through the plain anchors of LanguageSwitcher, LanguageLinks and LanguageHint.
+// The site frame lives in ./shell (re-exported here), so a page that needs only the frame
+// does not download these pages.
 
 export { sitePaths, appPaths, allPaths, isAppPath } from './paths.js';
 
-/** "Skip to content", the first thing in every frame, site or app. */
-export function SkipLink({ locale }: { locale: Locale }) {
-  return <a className="skip-link sr-only focus:not-sr-only focus:fixed focus:start-2 focus:top-2 focus:z-60 focus:bg-background focus:p-3" href="#main">{m.skip_link({}, { locale })}</a>;
-}
-
-/** The label every page shows, so anyone can see which kind of page it is (paths.js explains the two). */
-export function ZoneBadge({ locale, app }: { locale: Locale; app: boolean }) {
-  return <Badge variant="secondary" data-zone={app ? 'app' : 'site'}>{app ? m.zone_app({}, { locale }) : m.zone_site({}, { locale })}</Badge>;
-}
-
-/**
- * Links an app adds to the site header's navigation, after the shared ones: a function of the page's
- * de-localized path (so a link can mark itself active) returning NavigationMenuItems. remy-auth adds
- * "Docs" this way (its docs pages live in the app); an app that provides nothing gets the shared links only.
- */
-export const SiteNavLinks = createContext<((path: string) => React.ReactNode) | undefined>(undefined);
-
-/**
- * The frame of a site page: static shadcn components only (links styled as buttons, Badge,
- * Separator), so the page is complete without JavaScript. `preferred` is the language to offer.
- */
-export function SiteShell({ locale, path = '', preferred, children }: { locale: Locale; path?: string; preferred?: Locale; children: React.ReactNode }) {
-  const o = { locale };
-  const appLinks = useContext(SiteNavLinks);
-  return <div className="flex min-h-svh w-full flex-col px-4 md:px-8">
-    <SkipLink locale={locale} />
-    <LanguageHint locale={locale} path={path} preferred={preferred} />
-    <header className="site-header flex flex-wrap items-center gap-x-2 gap-y-1 py-3">
-      <Link className={buttonVariants({ variant: 'ghost', className: 'brand font-semibold' })} to="/" preload="intent">Remy</Link>
-      <NavigationMenu aria-label={m.nav_heading({}, o)} className="order-last max-w-none basis-full justify-start sm:order-none sm:basis-auto">
-        <NavigationMenuList className="flex-wrap justify-start">
-          <NavigationMenuItem>
-            <NavigationMenuLink active={path === '/formats'} render={<Link to="/formats" preload="intent" />}>{m.nav_formats({}, o)}</NavigationMenuLink>
-          </NavigationMenuItem>
-          {appLinks?.(path)}
-          <NavigationMenuItem>
-            <NavigationMenuLink href={repository}>GitHub</NavigationMenuLink>
-          </NavigationMenuItem>
-        </NavigationMenuList>
-      </NavigationMenu>
-      <div className="ms-auto flex items-center gap-1">
-        <LanguageSwitcher locale={locale} path={path} />
-        <ModeToggle locale={locale} />
-        <Link className={buttonVariants({ size: 'sm' })} to="/app" preload="intent">{m.open_app({}, o)}</Link>
-      </div>
-    </header>
-    <Separator />
-    <main id="main" className="flex-1 py-10"><div className="mb-6"><ZoneBadge locale={locale} app={false} /></div>{children}</main>
-    <Separator />
-    <footer className="py-4"><LanguageLinks locale={locale} path={path} /></footer>
-  </div>;
-}
-
-/** Where evaluators find the source. */
-const repository = 'https://github.com/joeblew999/remy-auth';
-
-/** The frame of a site page, also for not-found and error pages. App pages use AppShell from ./app-pages. */
-export const Shell = SiteShell;
-
-export function Intro({ locale, label, title, intro, back = true, backTo = '/' }: { locale: Locale; label?: string; title: string; intro: string; back?: boolean; backTo?: '/' | '/app' }) {
-  return <>
-    {back && <Link className="inline-flex items-center gap-1 text-sm text-muted-foreground" to={backTo} preload="intent"><ArrowLeftIcon aria-hidden="true" className="size-4 rtl:rotate-180" />{m.home_link({}, { locale })}</Link>}
-    {label && <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{label}</p>}
-    <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">{title}</h1>
-    <p className="max-w-lg text-lg leading-relaxed text-muted-foreground">{intro}</p>
-  </>;
-}
+export { SkipLink, ZoneBadge, SiteNavLinks, SiteShell, Shell, Intro } from './shell';
+export { Group, Row } from './rows';
+import { Shell, Intro } from './shell';
+import { Group, Row } from './rows';
 
 /** The home page; `children` go inside the page under its links, for example an app's live status. */
 export function HomePage({ locale, preferred, children }: { locale: Locale; preferred?: Locale; children?: React.ReactNode }) {
@@ -104,16 +37,6 @@ export function HomePage({ locale, preferred, children }: { locale: Locale; pref
       {children}
     </section>
   </Shell>;
-}
-
-/** A titled card of label/value rows on the formats page. */
-export function Group({ title, children }: { title: string; children: React.ReactNode }) {
-  return <Card><CardHeader><CardTitle>{title}</CardTitle></CardHeader>
-    <CardContent><dl className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-x-4 gap-y-3 text-sm">{children}</dl></CardContent></Card>;
-}
-/** One row; `sample` becomes data-sample, which the shared checks read. */
-export function Row({ sample, label, children, ...rest }: { sample: string; label: string; children: React.ReactNode } & Record<string, unknown>) {
-  return <><dt className="text-muted-foreground">{label}</dt><dd data-sample={sample} className="tabular-nums [overflow-wrap:anywhere]" {...rest}>{children}</dd></>;
 }
 
 /**

@@ -9,6 +9,9 @@ import { problemPages } from '../problem';
 
 // The app's home: the live status card (TanStack Query) inside the app shell.
 export const Route = createFileRoute('/app/')({
+  // The loader goes with the component into this route's own chunk (TanStack's codeSplitGroupings):
+  // it pulls in the API client and its contract (oRPC and Zod), which no other page's first load needs.
+  codeSplitGroupings: [['loader', 'component']],
   loader: statusCardLoader,
   head: () => pageHead({ path: '/app', title: locale => m.app_home_title({}, { locale }), description: locale => m.app_home_description({}, { locale }) }),
   component: AppHome,

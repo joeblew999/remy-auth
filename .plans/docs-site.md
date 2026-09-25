@@ -289,11 +289,41 @@ the same bytes and a long one fewer. The text still travels twice (as HTML and a
 hydration), as it did before (as HTML and as code).
 
 **What the owner feels as slow is the shell, not the docs:** `index-*` (React, Router, Start,
-347 KB) and the shared UI's `pages-*` (319 KB), plus app pieces the root pulls onto every page
-(`skeleton`, `api`, `schemas`, `reservation`, `deferred-place`, `createServerFn`, ≈ 216 KB) that a
-docs page never uses: about 900 KB of the 939 KB. "No js or very little" for docs pages means not
-hydrating them at all, which TanStack Start cannot do per route today without server components.
-Options for the owner: (1) trim what the root route imports so docs pages stop loading app code
-(no behaviour change, likely several hundred KB); (2) adopt Start's server components once stable;
-(3) serve docs pages as plain HTML with no client bundle (outside the TanStack app, e.g. a
-server route that renders the same tree to a string), giving up in-app navigation for them.
+347 KB) and the shared UI's `pages-*` (319 KB), plus app pieces the root pulled onto every page
+(≈ 216 KB) that a docs page never uses. The orchestrator chose option 1 below (trim what every
+page loads); done the same day, see [Trimmed first load](#trimmed-first-load-2026-09-25).
+
+### Trimmed first load (2026-09-25)
+
+Stock mechanisms only (TanStack Router's code splitting and moving imports to the modules that use
+them); no behaviour change, no check changed. What every page loaded, and why:
+
+- **TanStack keeps a route's `loader`, `validateSearch` and `search` options in the first load**
+  (critical); only components are split by default. `/app`'s loader (`statusCardLoader`) brought the
+  API client, its contract, oRPC and full Zod (≈ 120 KB) to every page: the route now sets
+  `codeSplitGroupings: [['loader', 'component']]` (TanStack's per-route option; the component needs
+  the same code, so no extra waterfall).
+- `/app/ask`'s `validateSearch` used full Zod (`src/ask.ts`): now Zod Mini, as the shared search
+  params already do; same schema, same results.
+- The formats routes' shared options came from `src/formats-extras.tsx`, which also renders the rows
+  (and `DeferredPlace`): they moved to `src/formats-route.ts`, so the rows go with the component.
+- The shared UI's `pages` module is both the site frame and the home and formats pages, and the root,
+  the problem pages and the docs imported the frame from it: the frame is now `@joeblew999/remy-ui/shell`
+  and the formats rows `rows.tsx` (both re-exported by `pages`, so remy-auth-app is unaffected), and
+  the showcase modules on the critical path import from them.
+
+Measured once each, local production build, Chromium, JavaScript bytes loaded:
+
+| Page | Before | After |
+| --- | --- | --- |
+| `/en/docs/how-we-work` | 16 files, 938,901 | 18 files, 762,456 (−19%) |
+| `/en` | 14 files, 891,380 | 17 files, 767,242 (−14%) |
+| `/en/app` | 16 files, 1,014,571 | 21 files, 977,276 (−4%) |
+
+What a docs page still loads: React DOM (203 KB) and Query core (26 KB) in `index-*`; the site
+frame's `shell-*` (257 KB: Base UI's navigation and dropdown menus with Floating UI, `cn`, the
+URLPattern polyfill and Paraglide's runtime and messages); Router core (`load-client-*`, 54 KB);
+Start's server-function client with seroval (36 KB); Zod Mini's core (51 KB), which the formats and
+answer pages' `validateSearch` keep in every first load. Going further means changing what the frame
+is built from (plain links instead of Base UI menus in the site header) or validating those search
+params without Zod: owner decisions, not trimming.

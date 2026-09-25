@@ -2,7 +2,8 @@ import { Link } from '@tanstack/react-router';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../components/breadcrumb';
 import type { Locale } from '../paraglide/runtime.js';
 import { m } from '../paraglide/messages.js';
-import { Shell, Group, Row } from '../pages';
+import { Shell } from '../shell';
+import { Group, Row } from '../rows';
 import { samples } from '../samples.js';
 import { formatLocale } from '../locale-info';
 

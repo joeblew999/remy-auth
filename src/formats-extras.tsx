@@ -1,11 +1,9 @@
-import { getLocale, type Locale } from '@joeblew999/remy-ui/locale';
-import { formatLocale, localeInfo, type LocaleInfo } from '@joeblew999/remy-ui/locale-info';
+import type { Locale } from '@joeblew999/remy-ui/locale';
+import { formatLocale, type LocaleInfo } from '@joeblew999/remy-ui/locale-info';
 import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { Group, Row, type FormatsExtras } from '@joeblew999/remy-ui/pages';
 import type { Place } from '@joeblew999/remy-ui/cloudflare';
-import { formatsSearchSchema } from '@joeblew999/remy-ui/showcase/search-params';
-import { getPlace } from './place';
 import { DeferredPlace } from './showcase/deferred-place';
 
 /**
@@ -50,16 +48,3 @@ export function formatsExtras({ locale, info, place }: { locale: Locale; info: L
     </>,
   };
 }
-
-/** The route options both formats routes share (site /formats and app /app/formats). */
-export const formatsRouteOptions = {
-  // ?currency, ?count and ?calendar, validated with defaults (each route strips the defaults from its URLs).
-  validateSearch: formatsSearchSchema,
-  // Cloudflare's request geolocation (the network's country, region, city and time zone) comes
-  // from a server function, so it is read in the Worker during SSR and client navigation alike.
-  // Deferred: returned unawaited, so the page streams and the location group follows (DeferredPlace).
-  loader: () => ({ info: localeInfo(getLocale()), place: getPlace() }),
-  // The loader reads no search param (so no loaderDeps), and its data stays fresh for five
-  // minutes: Back, Forward and the controls reuse it instead of calling the server function again.
-  staleTime: 5 * 60_000,
-};
