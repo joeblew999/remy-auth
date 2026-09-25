@@ -3,5 +3,8 @@
    (Arabic, Hebrew, Thai, Ge'ez, Devanagari, CJK) and resolve at once. A named family that is not
    loaded (Inter, ui-sans-serif, SFMono-Regular, Roboto, ...) makes a fresh Chrome renderer on
    macOS stall its first layout for seconds. publicPageChecks fails if any element uses a
-   non-generic family or the page declares a web font. */
+   non-generic family or the page declares a web font.
+   Decided 2026-09-25: no brand web font. None covers every script (Noto ships one font per
+   script, CJK in large subsets); Japanese and Chinese need different glyphs, which system fonts
+   pick from the page's lang; and every download costs first-visit time and risks layout shift. */
 @theme { --font-sans: system-ui, sans-serif; --font-mono: monospace; }
