@@ -57,9 +57,10 @@ and write only what they do not provide.
   and so on), install its agent skills, then delete the code it replaces.
 - Before writing any UI code, ask: does shadcn, TanStack or Paraglide already do this? If yes, use it.
 
-- Look at it: before calling UI work done, run `mise run browser:shots` (every page, desktop and
+- Look at it: before calling UI work done, screenshot the pages you changed with `mise run browser:shots` (desktop and
   phone, light and dark, English and Arabic) and look at the screenshots. Checks prove behaviour; only
-  the screenshots show layout, spacing, overflow and mixed-direction text (owner, 2026-09-26: "It's
+  the screenshots show layout, spacing, overflow and mixed-direction text; name the pages you changed
+  (`mise run browser:shots -- /formats --phone`), `--all` only for a sweep (owner, 2026-09-26: "It's
   really depressing how you can't see the look of the web site properly").
 
 ### Which TanStack library for what
