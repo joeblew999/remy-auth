@@ -57,7 +57,7 @@ export function withObservability<E extends ObservedEnv>(service: string, handle
         // Popups we open (sign-in providers) may keep their opener; no other window gets ours.
         out.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
         // HTTPS only, for five minutes while the rollout proves itself; raised later (.plans/gui-portal.md, item 7).
-        out.headers.set('Strict-Transport-Security', 'max-age=300');
+        out.headers.set('Strict-Transport-Security', 'max-age=31536000');
         writeLog({ ...base, event, level: level(out.status), route, status: out.status, outcome: outcome(out.status), ...(reasonCode ? { reasonCode } : {}) });
         return out;
       };

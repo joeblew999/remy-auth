@@ -153,6 +153,15 @@ When the owner hands over decisions, for example to finish work unattended:
   This once released a version whose checks had failed.
 - Report what was tested and what was not; never call untested work verified.
 
+## Check with mise tasks, not by hand
+
+Owner, 2026-09-26: "You need to get to the point that your checking uses mise and the underlying tool!"
+Every check runs through a mise task that wraps the real tool: the test tiers (`project:test:*`,
+Playwright), `project:test:live` after a deploy, `plans:check`, `i18n:check`, `browser:shots` to look.
+No `curl` loops, one-off scripts or ad-hoc greps to decide whether something works: they cannot be
+repeated, apps on the package do not get them, and nobody sees them later. A check that is missing becomes
+a shared task first, then it is used.
+
 ## Sharing one machine between agents
 
 The machine crashed on 2026-09-25 with about ten agents building and testing at once (load 188),

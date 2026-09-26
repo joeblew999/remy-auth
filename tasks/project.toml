@@ -8,6 +8,12 @@ dir = "{{config_root}}"
 env = { TEST_TARGET = "remote", TEST_BASE_URL = "{{ get_env(name='TEST_BASE_URL', default=env.DEPLOY_ORIGIN) }}" }
 run = "./node_modules/.bin/playwright test"
 
+["project:test:live"]
+description = "Tier 1 against the live site: the smoke checks (tests/smoke.spec.ts) at TEST_BASE_URL, default DEPLOY_ORIGIN (~5 s). cf:deploy runs it once the new version is live; use it instead of curl"
+dir = "{{config_root}}"
+env = { TEST_TARGET = "remote", TEST_BASE_URL = "{{ get_env(name='TEST_BASE_URL', default=env.DEPLOY_ORIGIN) }}" }
+run = "./node_modules/.bin/playwright test --project=ours tests/smoke.spec.ts"
+
 ["project:report"]
 description = "Open the HTML report from the last local project:test run"
 dir = "{{config_root}}"

@@ -26,6 +26,9 @@ export WRANGLER_OUTPUT_FILE_PATH="$output"
 "$(dirname "$0")/wait" "$DEPLOY_ORIGIN" "$output"
 echo "Live: $DEPLOY_ORIGIN"
 
+# The deploy proves itself with the tools, not by hand: the smoke checks against the live site.
+TEST_BASE_URL="$DEPLOY_ORIGIN" mise run project:test:live
+
 # The docs for AI answers go with the code: a project with a docs:publish task (remy-auth) publishes
 # them after every successful deploy; one without (remy-auth-app) skips this.
 if mise tasks info docs:publish >/dev/null 2>&1; then mise run docs:publish; fi

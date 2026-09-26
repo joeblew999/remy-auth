@@ -544,7 +544,8 @@ export function observabilityChecks({ service, paths }) {
       expect(response.headers()['permissions-policy'], path).toBe('geolocation=(self), camera=(), microphone=()');
       expect(response.headers()['content-security-policy'], path).toContain("frame-ancestors 'none'");
       expect(response.headers()['cross-origin-opener-policy'], path).toBe('same-origin-allow-popups');
-      expect(response.headers()['strict-transport-security'], path).toMatch(/^max-age=\d+$/);
+      // A year, after days of HTTPS only (2026-09-26); no includeSubDomains on a shared workers.dev domain.
+      expect(Number(/^max-age=(\d+)$/.exec(response.headers()['strict-transport-security'] ?? '')?.[1] ?? 0), path).toBeGreaterThanOrEqual(31536000);
       expect(seen.has(id), `${path} reused a request ID`).toBe(false);
       seen.add(id);
     }
