@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+#MISE description="LOCAL, offline: UI messages (Paraglide catalogs, I18N_INLANG) against English: missing catalogs and keys (jq), placeholders (i18n-check), keys whose English changed since the locale was last translated (git), plural categories (Intl.PluralRules). Exit 1 on any gap; --list prints one line per gap"
+#MISE dir="{{config_root}}"
+#MISE tools={"aqua:jqlang/jq"="1.8.2","npm:@lingual/i18n-check"="0.9.5"}
+set -euo pipefail
+# The app's inlang project: I18N_INLANG, else the one git knows (remy-auth: packages/ui/project.inlang).
+inlang=${I18N_INLANG:-$(git ls-files -- '*project.inlang/settings.json' | head -1 | xargs -r dirname)}
+settings="$inlang/settings.json"
+[ -n "$inlang" ] && [ -f "$settings" ] || { echo "Messages: no inlang project, nothing to check."; exit 0; }
+base=$(jq -r .baseLocale "$settings")
+pattern=$(jq -r '."plugin.inlang.messageFormat".pathPattern' "$settings")
+file() { local p="${pattern//\{locale\}/$1}"; echo "$(dirname "$inlang")/${p#./}"; }
+en=$(file "$base")
+report=$(
+  targets=()
+  for l in $(jq -r --arg b "$base" '.locales[] | select(. != $b)' "$settings"); do
+    f=$(file "$l"); [ -f "$f" ] || { echo "$l catalog $f"; continue; }
+    targets+=("$l=$f")
+    # Missing and extra keys, and keys whose English changed since this catalog's last commit (git: the commit is the mark).
+    jq -rn --arg l "$l" --slurpfile en "$en" --slurpfile t "$f" '$en[0] | keys_unsorted - ($t[0] | keys) | .[] | "\($l) missing \(.)"'
+    jq -rn --arg l "$l" --slurpfile en "$en" --slurpfile t "$f" '$t[0] | keys_unsorted - ($en[0] | keys) | .[] | "\($l) extra \(.)"'
+    c=$(git log -1 --format=%H -- "$f")
+    [ -z "$c" ] || git show "$c:$en" 2>/dev/null | jq -r --arg l "$l" --slurpfile en "$en" --slurpfile t "$f" \
+      '. as $old | $en[0] | to_entries[] | select($old[.key] != null and .value != $old[.key] and $t[0][.key] != null) | "\($l) stale \(.key)"'
+  done
+  # Placeholders the English has and a translation lost or invented; plural messages go to the plural check.
+  i18n-check -l "$(dirname "$en")" -s "$base" -f icu -r standard -o invalidKeys \
+    -i $(jq -r 'to_entries[] | select(.value | type == "array") | "\(.key).*"' "$en") 2>&1 \
+    | awk '/Found invalid keys/ { on = 1 } on && /^│/ { gsub(/│/, " "); if ($1 == "file") { f = $2; sub(/.*\//, "", f); sub(/\.json$/, "", f) } if ($1 == "key") print f, "placeholders", $2 }'
+  [ ${#targets[@]} -eq 0 ] || node "$(dirname "$0")/plurals.mjs" "$en" "${targets[@]}"
+)
+if [ -z "$report" ]; then echo "Messages: every catalog complete and current ($(jq '.locales | length' "$settings") locales)."; exit 0; fi
+if [ "${1:-}" = --list ]; then echo "$report"; else
+  echo "Messages: gaps against $en (mise run i18n:messages:check -- --list for every key):"
+  echo "$report" | awk '{ n[$1" "$2]++ } END { for (k in n) print "  " k ": " n[k] }' | sort
+fi
+exit 1

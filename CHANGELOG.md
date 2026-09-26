@@ -7,6 +7,12 @@ package follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- Translation tasks in two pipelines (`tasks/i18n/`): `i18n:messages:check` and `i18n:docs:check`
+  (offline, read-only; git, jq, `@lingual/i18n-check` 0.9.5, a plural-category check), `i18n:check` both
+  (a warning; strict with `I18N_STRICT=1`), and `i18n:messages:translate`, `i18n:docs:translate`,
+  `i18n:translate`: Claude Code 2.1.282 pinned in the task, with no tools, on main under a lock shared by
+  every worktree, committing what it translated. Replaces `i18n:status`, the old `i18n:translate` and the
+  provenance lines. Plural messages use `=*` for their fallback variant.
 - Mobile navigation (`.plans/mobile-navigation.md`): on phones (below `md`, 768 px) a bottom bar
   (`blocks/bottom-nav`, an owned block of stock shadcn parts: shadcn has none) with the core pages and
   More, which opens the sidebar as its sheet; on tablets and desktops the sidebar, now collapsing to

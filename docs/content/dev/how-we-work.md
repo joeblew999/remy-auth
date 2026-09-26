@@ -114,14 +114,23 @@ half-updated.
 
 - A feature agent writes English only: the English docs and the base catalog (`messages/en.json`).
   It never edits a translation (`<page>.<lang>.md` in `docs/content`) or another locale's catalog.
-- Translation is its own step, serialized, on `main` after the merges: one translation agent runs
-  `mise run i18n:status` (what is missing or stale), `mise run i18n:translate [locale]` (the exact
-  English diffs and missing keys), translates, then records each docs file it finished with
-  `mise run i18n:translate -- --mark <translated file>`.
+- Translation is its own step, on `main` after the merges: `mise run i18n:translate`. The Claude agent,
+  pinned in the task, translates exactly what `i18n:check` lists, and the task commits it; **the commit
+  is the mark** (git decides what is stale: a translation is stale when its English changed after the
+  translation's last commit). It refuses other branches, uncommitted English and a second run while one
+  holds the lock, which every worktree shares, so parallel agents cannot set off translations or race
+  on them.
+- The agent gets no tools: it is handed the English (and, for a stale page, the English diff and the
+  current translation) and returns text; the task writes the files it asked for and nothing else.
+- `i18n:check` only reads, offline, so it is safe anywhere, in any number of worktrees, and as a
+  `depends`. `i18n:translate` is never a `depends`.
 - Stale or missing is a warning while pumping (`project:check` prints it) and an error at release
   (`ui:release` runs `i18n:check` with `I18N_STRICT=1` first).
+- Commit only real translation changes to a translation file: any commit to it marks it current. A
+  structural change (a rename, a sweep) that touches translations is followed by
+  `mise run i18n:docs:translate -- <file>…`, which re-checks those files against the English in full.
 
-The layout and the provenance line are in the [tasks README](./tasks.md#translations).
+The layout and the tasks are in the [tasks README](./tasks.md#translations).
 
 ## Plans: few, short, closed
 

@@ -75,7 +75,7 @@ CLI passthrough tasks accept upstream flags directly, such as
 | `browser:*` | Chrome DevTools CLI, session lifecycle and MCP server |
 | `web:*` | Modern web guidance search and retrieval |
 | `docs:*` | The docs Worker (`docs/`): run it (`docs:dev`), build and check it (`docs:build`, `docs:check`), test it (`docs:test`, `docs:test:remote`), deploy it (`docs:preview`, `docs:deploy`), Ask AI's pages in AI Search (`docs:publish`), stop or resume answers (`docs:answers:off`, `docs:answers:on`), its logs and AI (`docs:observe`, `docs:ai-gateway`), the Fumadocs CLI (`docs:cli`), and bringing it into another app (`docs:init`) |
-| `i18n:*` | Translation status: what is missing or stale per locale (`i18n:status`, `--json` for agents), the warning or release gate (`i18n:check`), the work for the translation agent and recording it (`i18n:translate`, `--mark`); shared tasks, [one writer](./how-we-work.md#translations-one-writer) |
+| `i18n:*` | Translations, two pipelines: UI messages (Paraglide) and docs (Fumadocs). `i18n:check` (offline, read-only; a warning, or the release gate), `i18n:translate` (the pinned Claude agent, on main, committed); shared tasks, [one writer](./how-we-work.md#translations-one-writer), [how](./tasks.md#translations) |
 | `mcp:*` | Register, verify and inspect project MCP connections |
 | `codex:*` / `claude:*` | Start or resume an interactive agent session (shared tasks) |
 

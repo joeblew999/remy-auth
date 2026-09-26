@@ -129,7 +129,7 @@
       ],
       "match": {
         "countPlural=one": "{countText} برنامه",
-        "countPlural=other": "{countText} برنامه"
+        "countPlural=*": "{countText} برنامه"
       }
     }
   ],
@@ -187,7 +187,7 @@
         "ordinal"
       ],
       "match": {
-        "ordinal=other": "رتبهٔ {nText}"
+        "ordinal=*": "رتبهٔ {nText}"
       }
     }
   ],
@@ -219,7 +219,7 @@
       ],
       "match": {
         "countPlural=one": "{name} {countText} صندلی رزرو کرد.",
-        "countPlural=other": "{name} {countText} صندلی رزرو کرد."
+        "countPlural=*": "{name} {countText} صندلی رزرو کرد."
       }
     }
   ],

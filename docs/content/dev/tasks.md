@@ -111,29 +111,36 @@ One layout in every app, so the same `i18n:*` tasks work everywhere (the rule fo
 | Docs | `docs/content/<site>/<page>.md` or `.mdx` (Fumadocs' layout) | beside it: `<page>.<locale>.md` or `.mdx` |
 | UI catalogs | the base locale's catalog of each inlang project (`<dir>/project.inlang`) | each locale's catalog, by the project's own `pathPattern` (e.g. `messages/<locale>.json`) |
 
-- A translated docs file records, on the line under its frontmatter, the English version it was
-  translated from, as the English file's git blob sha (`git hash-object`): content-based, so every
-  branch agrees on it.
-  `i18n:translate -- --mark <file>` writes it; nobody types it.
+Two pipelines, one for each kind of text, the same pattern in both: detect offline with git and small
+tools, translate with the pinned Claude agent, commit.
 
-  ```md
-  <!-- translated-from: docs/content/dev/tooling.md @ 9b4c91affd910033e83bf7fb52e64b4d69fbdbc2 -->
-  ```
-
-- The docs folder is `I18N_DOCS_DIR` (default `content/docs`; remy-auth sets `docs/content`). Every
-  `.md`/`.mdx` without a language suffix is English; a locale takes part in the docs by having any
-  translated page. Which languages each site offers is the site's `i18n.json`.
-- The catalogs, locales and base locale come from inlang's own `settings.json`; inlang's CLI
-  (`lint`, `validate`) checks only the settings file, so key and placeholder parity is ours.
-- An app with no translated docs and no `project.inlang` of its own gets "nothing to translate" and
-  exit 0.
+- **UI messages** (Paraglide): the catalogs, locales and base locale come from inlang's own
+  `settings.json` (`I18N_INLANG`, else the one project git knows). Detected: missing catalogs and keys
+  (`jq`), lost or invented `{placeholders}` (`@lingual/i18n-check`), keys whose English changed since
+  the catalog's last commit (`git`, `jq`), plural categories the locale needs (`Intl.PluralRules`,
+  `tasks/i18n/messages/plurals.mjs`: no upstream tool checks them).
+- **Docs** (Fumadocs): the folder is `I18N_DOCS_DIR` (default `docs/content`); each site with an
+  `i18n.json` translates every English page into each of its languages. Detected: missing and stale
+  pages (`git`), orphans, and Fumadocs UI's own text (`ui/<lang>.json` against `ui/en.json`).
+- **The translator** is Claude Code headless (`claude -p`), pinned in the tasks, with no tools, no MCP
+  servers, skills or project settings, and structured output: a catalog's keys come back as JSON and
+  `jq` merges them in English key order; a page comes back whole. The prompts are
+  `tasks/i18n/prompts/`. One call per language (messages) or per page (docs), `I18N_JOBS` at a time.
+- Checks need no key, no network and full git history (a shallow clone is refused). Translating uses
+  the Claude login on the machine.
+- An app with no inlang project and no docs sites gets "nothing to check" and exit 0.
 
 | Task | Does |
 | --- | --- |
-| `i18n:status` | Per locale: docs missing, stale (English changed since the recorded sha), unmarked, orphaned, or marked current with other headings than English; catalog keys missing, extra, or with other `{placeholders}`. `--json` for agents |
-| `i18n:check` | The same; a WARNING and exit 0 while coding (`project:check` runs it), exit 1 with `I18N_STRICT=1` (`ui:release`) |
-| `i18n:translate [locale]` | The work: for each stale docs file `git diff <recorded>..<current>` of its English, whole files for missing ones, missing keys with their English values. No model calls |
-| `i18n:translate -- --mark <file>…` | Record the current English version in translated docs files |
+| `i18n:check` | Both checks in parallel; a WARNING and exit 0 while coding (`project:check` runs it), exit 1 with `I18N_STRICT=1` (`ui:release`) |
+| `i18n:messages:check` | The catalogs' gaps; `-- --list` one line per gap (`es missing nav_more`) |
+| `i18n:docs:check` | The docs' gaps; `-- --list` one line per gap (`es stale docs/content/dev/gui.es.md`) |
+| `i18n:translate` | On main: messages, then docs, one commit each |
+| `i18n:messages:translate` | The catalogs' gaps, one language per agent call |
+| `i18n:docs:translate [files]` | The docs' gaps, one page per agent call; named translation files are redone in full |
+
+Settings: `I18N_MODEL` (default `sonnet`), `I18N_JOBS` (4), `I18N_COMMIT=0` (leave the change
+uncommitted for review), `I18N_BRANCH` (`main`).
 
 ### Cloudflare tasks
 

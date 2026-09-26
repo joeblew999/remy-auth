@@ -128,7 +128,7 @@
         "countPlural"
       ],
       "match": {
-        "countPlural=other": "{countText} 個應用程式"
+        "countPlural=*": "{countText} 個應用程式"
       }
     }
   ],
@@ -186,7 +186,7 @@
         "ordinal"
       ],
       "match": {
-        "ordinal=other": "第 {nText} 名"
+        "ordinal=*": "第 {nText} 名"
       }
     }
   ],
@@ -217,7 +217,7 @@
         "countPlural"
       ],
       "match": {
-        "countPlural=other": "{name} 已預訂 {countText} 個座位。"
+        "countPlural=*": "{name} 已預訂 {countText} 個座位。"
       }
     }
   ],

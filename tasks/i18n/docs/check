@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+#MISE description="LOCAL, offline: docs translations (Fumadocs, I18N_DOCS_DIR) against English: per site (its i18n.json languages) each page's <page>.<lang>.md(x) missing or stale (its English changed since the translation's last commit, git), orphans; Fumadocs' own UI text (ui/<lang>.json) missing or stale keys. Exit 1 on any gap; --list prints one line per gap"
+#MISE dir="{{config_root}}"
+#MISE tools={"aqua:jqlang/jq"="1.8.2"}
+set -euo pipefail
+dir=${I18N_DOCS_DIR:-docs/content}
+sites=$(ls "$dir"/*/i18n.json 2>/dev/null || true)
+[ -n "$sites" ] || { echo "Docs: no sites with an i18n.json under $dir, nothing to check."; exit 0; }
+[ "$(git rev-parse --is-shallow-repository)" = false ] || { echo "Docs: needs full git history (a shallow clone cannot tell what is stale)."; exit 2; }
+# The commit is the mark: stale when the English differs from what it was at the translation's last commit.
+stale() { local c; c=$(git log -1 --format=%H -- "$2"); [ -z "$c" ] || ! git diff --quiet "$c" -- "$1"; }
+lang_re='\.[a-z]{2,3}(-[A-Za-z]{2,4})?\.mdx?$'
+report=$(
+  for s in $sites; do site=$(dirname "$s")
+    default=$(jq -r .defaultLanguage "$s")
+    for l in $(jq -r --arg d "$default" '.languages[] | select(. != $d)' "$s"); do
+      for e in $(git ls-files -co --exclude-standard -- "$site" | grep -E '\.mdx?$' | grep -Ev "$lang_re"); do
+        t="${e%.*}.$l.${e##*.}"
+        if [ ! -f "$t" ]; then echo "$l missing $t"; elif stale "$e" "$t"; then echo "$l stale $t"; fi
+      done
+      for t in $(git ls-files -co --exclude-standard -- "$site" | grep -E "\.$l\.mdx?$"); do
+        e="${t%.$l.*}.${t##*.}"; [ -f "$e" ] || echo "$l orphan $t"
+      done
+    done
+  done
+  # Fumadocs UI's own text (search, "On this page"...): ui/<lang>.json beside ui/en.json, for every docs language.
+  if [ -f "$dir/ui/en.json" ]; then
+    for l in $(jq -rs '[.[] as $s | $s.languages[] | select(. != $s.defaultLanguage)] | unique[]' $sites); do
+      t="$dir/ui/$l.json"
+      [ -f "$t" ] || { echo "$l missing $t"; continue; }
+      jq -rn --arg l "$l" --slurpfile en "$dir/ui/en.json" --slurpfile t "$t" '$en[0] | keys_unsorted - ($t[0] | keys) | .[] | "\($l) ui-missing \(.)"'
+      c=$(git log -1 --format=%H -- "$t")
+      [ -z "$c" ] || git show "$c:$dir/ui/en.json" 2>/dev/null | jq -r --arg l "$l" --slurpfile en "$dir/ui/en.json" \
+        '. as $old | $en[0] | to_entries[] | select($old[.key] != null and .value != $old[.key]) | "\($l) ui-stale \(.key)"'
+    done
+  fi
+)
+if [ -z "$report" ]; then echo "Docs: every translation complete and current."; exit 0; fi
+if [ "${1:-}" = --list ]; then echo "$report"; else
+  echo "Docs: gaps (mise run i18n:docs:check -- --list for every file):"
+  echo "$report" | awk '{ n[$1" "$2]++ } END { for (k in n) print "  " k ": " n[k] }' | sort
+fi
+exit 1

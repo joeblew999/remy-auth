@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-#MISE description="LOCAL, no model calls: print what to translate, for every locale or one (mise run i18n:translate -- es): the English diff since each stale docs file's recorded version, missing keys with their English values. After translating: mise run i18n:translate -- --mark <translated file>"
+#MISE description="LOCAL, the one writer: i18n:messages:translate, then i18n:docs:translate (each on main only, one run at a time across worktrees, one commit each). Never a depends"
 #MISE dir="{{config_root}}"
-# A shell wrapper so the module beside it loads as ESM wherever this directory is included from.
 set -euo pipefail
-exec node "$(dirname "$0")/i18n.mjs" translate "$@"
+mise run i18n:messages:translate
+mise run i18n:docs:translate

@@ -129,7 +129,7 @@
       ],
       "match": {
         "countPlural=one": "{countText} ऐप",
-        "countPlural=other": "{countText} ऐप"
+        "countPlural=*": "{countText} ऐप"
       }
     }
   ],
@@ -191,7 +191,7 @@
         "ordinal=two": "{nText}रा",
         "ordinal=few": "{nText}था",
         "ordinal=many": "{nText}ठा",
-        "ordinal=other": "{nText}वां"
+        "ordinal=*": "{nText}वां"
       }
     }
   ],
@@ -223,7 +223,7 @@
       ],
       "match": {
         "countPlural=one": "{name} ने {countText} सीट आरक्षित की।",
-        "countPlural=other": "{name} ने {countText} सीटें आरक्षित कीं।"
+        "countPlural=*": "{name} ने {countText} सीटें आरक्षित कीं।"
       }
     }
   ],

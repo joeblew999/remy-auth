@@ -1,8 +1,47 @@
 # Translations through upstream tools, the same in every app
 
-Status: analysed (tooling first) 2026-09-26; recommendation below. Folds in
-[issue #4](https://github.com/joeblew999/remy-auth/issues/4) (a translation-pipeline proposal, closed into
-this plan) and everything the owner asked about translations on 2026-09-25 and 26.
+Status: **built 2026-09-26** (steps 1–4 below; 5 waits for the release). The analysis further down is
+kept as the record of why; where the build differs, this section wins.
+
+## Built: two pipelines, one pattern (2026-09-26)
+
+Owner, 2026-09-26: "We have cleanly separated the two, Paraglide and docs (Fuma), so we will need to tool
+up around each's dedicated needs ... I don't want to use anything but the Claude agent ... it needs to be
+done so that mise, the tools and the call to Claude agents to do the translation are cleanly done ... we
+spoke about using mise depends but I don't know if that can be jigged up and not screw up when many
+agents are coding and causing retranslation to occur."
+
+| | UI messages (Paraglide) | Docs (Fumadocs) |
+| --- | --- | --- |
+| Source | inlang `settings.json` (found by git, or `I18N_INLANG`); `messages/en.json` | `I18N_DOCS_DIR` (`docs/content`): each site's `i18n.json`, pages without a language suffix; `ui/en.json` |
+| Detect (`:check`) | missing catalogs and keys (jq), placeholders (i18n-check, `-o invalidKeys`, plural messages ignored), keys whose English changed since the catalog's last commit (git, jq), plural categories (`plurals.mjs`, `Intl.PluralRules`) | missing and stale pages (git), orphans, Fumadocs UI text missing or stale keys (jq, git) |
+| Translate (`:translate`) | one agent call per language, the gap keys as JSON in, JSON out (`--json-schema`), jq merges in English key order | one call per page: missing gets the English, stale the English diff since the translation's commit plus the translation; named files are redone in full |
+| Prompt | `tasks/i18n/prompts/messages.md` | `tasks/i18n/prompts/docs.md` |
+
+**The answer on `depends` and many agents:** the checks only read, offline, so they are safe as a
+`depends` anywhere and in any number of worktrees (`project:check` runs `i18n:check`). Translating is
+never a `depends`: `i18n:translate` is run on purpose, on main, and `tasks/i18n/writer.sh` makes it
+safe: main only, a lock in git's common directory (one run across every worktree), the English must be
+committed, the translations clean. The agent (Claude Code 2.1.282, pinned in the task) gets **no tools**,
+no MCP servers, skills or settings, from a scratch directory: it returns text and the task writes only
+the files it asked for, then commits them. The commit is the mark. So a coding agent can never start a
+translation or race one; it only sees a warning.
+
+**Differences from the analysis:** the agent has no tools (the analysis gave it Read and Edit); results
+are structured output merged by jq, so formatting is deterministic; i18n-check checks placeholders only
+(jq finds missing keys, including plural messages i18n-check must ignore); `plurals.mjs` is a plain
+script in the check, not a `node:test`; `i18n:status` is gone (`-- --list`). The Playwright catalog test in
+`tests/gui.spec.ts` is deleted: the check replaces it, strict at release.
+
+**Measured:** 12 languages × 29 keys in 28 s; 16 Spanish pages and Fumadocs' UI text in 95 s (sonnet,
+4 at a time); about 1,000 tokens of context per call once MCP servers and skills are off (70,000 with them).
+
+**The switch:** git could not see three stale Spanish pages whose files had been moved (a move is a
+commit), so the first run named them (`i18n:docs:translate -- <files>`); the provenance lines went in the
+same commit. The same holds for any future move: redo the moved translations by name.
+
+**Left:** step 5 (remy-auth-app on the release: an app with nothing to translate passes); a native
+reader for am, fa, th and he (owner). Plural messages use `=*` (done).
 
 ## Layout changed since the analysis (2026-09-26)
 

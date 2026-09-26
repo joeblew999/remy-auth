@@ -23,8 +23,7 @@ Owner, 2026-09-26: "there is so much to be aligned and done in the right order. 
 manual translation until the docs and Paraglide stuff is solved, as it will slow us down." Structure first,
 then tools, then translating.
 
-0. **Translation frozen** (from 2026-09-26): no translation passes, by agents or by hand; stale
-   translations are a warning everywhere, the release included, until step 4.
+0. ~~**Translation frozen**~~ lifted 2026-09-26: the tooling landed (step 3) and the pass ran (step 4).
 1. **Finish what is in flight** (English only): the layout contract and `project:layout`; the Look fixes
    (below).
 2. **Structure, in parallel:**
@@ -35,16 +34,12 @@ then tools, then translating.
      own URL; search, `llms.txt`, `.md`, MCP (`docs:test:remote` checks it), Ask AI (Fumadocs' panel over AI Search),
      sitemap. Left: the Fumadocs UI's own strings per language (`defineI18nUI`, translation step 4), the
      shared docs part for consumers (after the merge), the full test run, the merge.
-   - b. **Paraglide plurals** ([plan](translation-pipeline.md)): `=other` becomes `=*` in the 13 catalogs
-     (compiles to an unconditional fallback, `compile-message.js:101`; no wording changes). The
-     plural-categories test is a check, so it goes in step 3.
-3. **Translation tooling** ([plan](translation-pipeline.md)): git, jq and i18n-check through shared mise
-   tasks, the plural-categories test, the `claude -p` writer step; delete `i18n.mjs` and its wrappers.
-   **Not** the provenance lines: removing them is a commit to every translation, which git would read as
-   "translated" and so hide what is stale.
-4. **Unfreeze:** one translation pass with the new tools (stale Spanish docs, missing catalog keys and
-   plural forms, Fumadocs UI's `docs/content/ui/es.json`); the same commit removes the provenance lines; the
-   release check back to strict.
+   - b. ~~**Paraglide plurals**~~ done 2026-09-26: `=*` in the 13 catalogs; the plural check is in step 3.
+3. ~~**Translation tooling**~~ built 2026-09-26 ([plan](translation-pipeline.md#built-two-pipelines-one-pattern-2026-09-26)):
+   `i18n:check` and `i18n:translate`, each split into messages (Paraglide) and docs (Fumadocs); the pinned
+   Claude agent, no tools, on main under a lock, committing.
+4. ~~**Unfreeze**~~ done 2026-09-26: 12 languages' missing messages, the Spanish docs (9 new, 6 updated),
+   Fumadocs' `ui/es.json`, provenance lines gone; `ui:release` strict again.
 5. **What conforming docs unlock** ([plan](docs-for-consumers.md)): `.md` pages, `llms.txt`, the copy
    menu; then docs for apps: a rules section in how-we-work, the `remy` skill (rules, evals) in the
    package, the `AGENTS.md` block pointing into `node_modules`.
@@ -90,7 +85,7 @@ Also queued (not in the order above): `git:tidy` (shared task for merged branche
   the site included in "Search generative AI features": Google's AI Mode, AI Overviews and the Gemini app
   see the docs only through the index, not MCP or llms.txt (docs/content/dev/ai-tools.md, "Gemini and Google").
 - More docs languages: add the language to the site's `docs/content/<site>/i18n.json` and translations
-  beside the pages (`<page>.<lang>.md`); `mise run i18n:status` lists what each language still needs.
+  beside the pages (`<page>.<lang>.md`); `mise run i18n:docs:check` lists what each language still needs.
 
 ## Parked
 

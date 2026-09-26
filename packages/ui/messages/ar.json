@@ -133,7 +133,7 @@
         "countPlural=two": "تطبيقان",
         "countPlural=few": "{countText} تطبيقات",
         "countPlural=many": "{countText} تطبيقًا",
-        "countPlural=other": "{countText} تطبيق"
+        "countPlural=*": "{countText} تطبيق"
       }
     }
   ],
@@ -191,7 +191,7 @@
         "ordinal"
       ],
       "match": {
-        "ordinal=other": "المرتبة {nText}"
+        "ordinal=*": "المرتبة {nText}"
       }
     }
   ],
@@ -227,7 +227,7 @@
         "countPlural=two": "حجز {name} مقعدين.",
         "countPlural=few": "حجز {name} {countText} مقاعد.",
         "countPlural=many": "حجز {name} {countText} مقعدًا.",
-        "countPlural=other": "حجز {name} {countText} مقعد."
+        "countPlural=*": "حجز {name} {countText} مقعد."
       }
     }
   ],

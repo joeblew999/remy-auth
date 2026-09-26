@@ -129,7 +129,7 @@
       ],
       "match": {
         "countPlural=one": "{countText} app",
-        "countPlural=other": "{countText} apps"
+        "countPlural=*": "{countText} apps"
       }
     }
   ],
@@ -190,7 +190,7 @@
         "ordinal=one": "{nText}st",
         "ordinal=two": "{nText}nd",
         "ordinal=few": "{nText}rd",
-        "ordinal=other": "{nText}th"
+        "ordinal=*": "{nText}th"
       }
     }
   ],
@@ -222,7 +222,7 @@
       ],
       "match": {
         "countPlural=one": "{name} reserved {countText} seat.",
-        "countPlural=other": "{name} reserved {countText} seats."
+        "countPlural=*": "{name} reserved {countText} seats."
       }
     }
   ],

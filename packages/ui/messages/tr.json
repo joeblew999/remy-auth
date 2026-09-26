@@ -129,7 +129,7 @@
       ],
       "match": {
         "countPlural=one": "{countText} uygulama",
-        "countPlural=other": "{countText} uygulama"
+        "countPlural=*": "{countText} uygulama"
       }
     }
   ],
@@ -187,7 +187,7 @@
         "ordinal"
       ],
       "match": {
-        "ordinal=other": "{nText}."
+        "ordinal=*": "{nText}."
       }
     }
   ],
@@ -219,7 +219,7 @@
       ],
       "match": {
         "countPlural=one": "{name}, {countText} kişilik yer ayırttı.",
-        "countPlural=other": "{name}, {countText} kişilik yer ayırttı."
+        "countPlural=*": "{name}, {countText} kişilik yer ayırttı."
       }
     }
   ],

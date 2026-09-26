@@ -130,7 +130,7 @@
       "match": {
         "countPlural=one": "{countText} aplicación",
         "countPlural=many": "{countText} aplicaciones",
-        "countPlural=other": "{countText} aplicaciones"
+        "countPlural=*": "{countText} aplicaciones"
       }
     }
   ],
@@ -188,7 +188,7 @@
         "ordinal"
       ],
       "match": {
-        "ordinal=other": "{nText}.º"
+        "ordinal=*": "{nText}.º"
       }
     }
   ],
@@ -221,7 +221,7 @@
       "match": {
         "countPlural=one": "{name} ha reservado {countText} asiento.",
         "countPlural=many": "{name} ha reservado {countText} asientos.",
-        "countPlural=other": "{name} ha reservado {countText} asientos."
+        "countPlural=*": "{name} ha reservado {countText} asientos."
       }
     }
   ],

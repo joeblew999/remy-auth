@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+#MISE description="LOCAL, the one writer (on main, one run at a time across worktrees): the pinned Claude agent translates the pages i18n:docs:check lists (missing: the English; stale: the English diff since the translation's last commit and the translation), one page per call in parallel (I18N_JOBS, 4), with no tools, and Fumadocs' UI text; one commit marks them current. Name translation files to redo them in full (mise run i18n:docs:translate -- docs/content/dev/gui.es.md). I18N_MODEL (sonnet), I18N_COMMIT=0 leaves the change for review"
+#MISE dir="{{config_root}}"
+#MISE tools={"aqua:jqlang/jq"="1.8.2","aqua:anthropics/claude-code"="2.1.282"}
+#MISE env={DISABLE_TELEMETRY="1",DISABLE_ERROR_REPORTING="1",CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC="1"}
+set -euo pipefail
+here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../writer.sh"
+dir=${I18N_DOCS_DIR:-docs/content}
+lang_re='\.([a-z]{2,3}(-[A-Za-z]{2,4})?)\.mdx?$'
+# The work: what the check lists, plus any translation files named to redo in full.
+list=$("$here/check" --list | grep -v ' orphan ') || true
+for t in "$@"; do [[ "$t" =~ $lang_re ]] || { echo "Not a translation file: $t" >&2; exit 2; }; list+=$'\n'"${BASH_REMATCH[1]} redo $t"; done
+list=$(echo "$list" | grep -v '^$' || true)
+[ -n "$list" ] || { echo "Docs: nothing to translate."; exit 0; }
+english=$(git ls-files -co --exclude-standard -- "$dir" | grep -E '\.mdx?$|/ui/en\.json$' | grep -Ev "$lang_re" || true)
+targets=$(echo "$list" | awk '$2 ~ /^(missing|stale|redo)$/ && $3 !~ /\.json$/ { print $3 } $2 ~ /^ui-/ || $3 ~ /\.json$/ { print "'"$dir"'/ui/" $1 ".json" }' | sort -u)
+writer_guard $english -- $targets
+
+schema='{"type":"object","properties":{"content":{"type":"string"}},"required":["content"],"additionalProperties":false}'
+page() {
+  local kind=$1 t=$2 l e
+  [[ "$t" =~ $lang_re ]]; l=${BASH_REMATCH[1]}; e="${t%.$l.*}.${t##*.}"
+  local site; site=$(basename "$(dirname "$e")")
+  {
+    echo "Language: $l ($(node -p "new Intl.DisplayNames(['en'],{type:'language'}).of('$l')")). Site: $site ($([ "$site" = users ] && echo "the product guide, for people using the app" || echo "developer docs"))."
+    case $kind in
+      missing) echo "Translate this English file into a new translation."; echo "<english>"; cat "$e"; echo "</english>" ;;
+      stale) echo "The English changed since the translation was last made. What changed in the English:"
+             echo "<diff>"; git diff "$(git log -1 --format=%H -- "$t")" -- "$e"; echo "</diff>"
+             echo "<english>"; cat "$e"; echo "</english>"; echo "<translation>"; cat "$t"; echo "</translation>" ;;
+      redo)  echo "Bring this translation fully in line with the current English: translate anything missing or changed, remove what the English no longer has, and keep sentences that are already right as they are."
+             echo "<english>"; cat "$e"; echo "</english>"; echo "<translation>"; cat "$t"; echo "</translation>" ;;
+    esac
+  } | agent "$here/../prompts/docs.md" "$schema" | jq -jr '.content' > "$t.new" && [ -s "$t.new" ] && mv "$t.new" "$t" && echo "  $kind $t" \
+    || { rm -f "$t.new"; echo "  $t: the agent failed"; return 1; }
+}
+ui() {
+  local l=$1 en="$dir/ui/en.json" t="$dir/ui/$1.json" keys
+  [ -f "$t" ] || echo '{}' > "$t"
+  keys=$(echo "$list" | awk -v l="$l" '$1 == l && $2 ~ /^ui-/ { print $3 }')
+  echo "$list" | grep -q "^$l missing $t\$" && keys=$(jq -r 'keys_unsorted[]' "$en")
+  jq -n --arg l "$l" --arg name "$(node -p "new Intl.DisplayNames(['en'],{type:'language'}).of('$l')")" --slurpfile en "$en" --arg keys "$keys" \
+     '{locale: $l, language: $name, plural: {}, entries: ($en[0] | with_entries(select(.key as $k | $keys | split("\n") | index($k))))}' \
+    | agent "$here/../prompts/messages.md" '{"type":"object","additionalProperties":{"type":"string"}}' > "$t.new" \
+    && jq --slurpfile en "$en" --slurpfile new "$t.new" '. as $t | reduce ($en[0] | keys_unsorted[]) as $k ({}; ($new[0][$k] // $t[$k]) as $v | if $v == null then . else .[$k] = $v end)' "$t" > "$t.merged" \
+    && mv "$t.merged" "$t" && rm "$t.new" && echo "  ui $t" || { rm -f "$t.new" "$t.merged"; echo "  $t: the agent failed"; return 1; }
+}
+export -f page ui agent; export list dir here lang_re schema
+units=$( { echo "$list" | awk '$2 ~ /^(missing|stale|redo)$/ && $3 !~ /\.json$/ { print "page " $2 " " $3 }'
+           echo "$list" | awk '$2 ~ /^ui-/ || $3 ~ /\.json$/ { print "ui " $1 }' | sort -u; } )
+echo "Docs: $(echo "$units" | wc -l | tr -d ' ') translations with ${I18N_MODEL:-sonnet} (${I18N_JOBS:-4} at a time)..."
+failed=0; echo "$units" | xargs -P "${I18N_JOBS:-4}" -L1 bash -c '"$@"' _ || failed=1
+changed=$( { git diff --name-only -- $targets; git ls-files --others --exclude-standard -- $targets; } | sort -u)
+if [ -n "$changed" ] && [ "${I18N_COMMIT:-1}" = 1 ]; then
+  git add -- $changed && git commit -q -m "i18n(docs): translate $(echo "$changed" | wc -l | tr -d ' ') files" -- $changed && echo "Committed: $(git log -1 --format='%h %s')"
+fi
+exit $failed

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-#MISE description="LOCAL, instant: i18n:status's summary; a WARNING while coding (exit 0), an error with I18N_STRICT=1 (ui:release sets it). project:check runs it"
+#MISE description="LOCAL, offline, read-only (safe as a depends, in any number of worktrees at once): i18n:messages:check and i18n:docs:check together. A WARNING while coding (exit 0); an error with I18N_STRICT=1 (ui:release sets it). project:check runs it"
 #MISE dir="{{config_root}}"
-# A shell wrapper so the module beside it loads as ESM wherever this directory is included from.
-set -euo pipefail
-exec node "$(dirname "$0")/i18n.mjs" check "$@"
+set -uo pipefail
+mise run -q i18n:messages:check ::: i18n:docs:check && exit 0
+[ -z "${I18N_STRICT:-}" ] || exit 1
+echo "WARNING: translations are incomplete or stale; on main, mise run i18n:translate fills them."

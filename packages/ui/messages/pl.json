@@ -131,7 +131,7 @@
         "countPlural=one": "{countText} aplikacja",
         "countPlural=few": "{countText} aplikacje",
         "countPlural=many": "{countText} aplikacji",
-        "countPlural=other": "{countText} aplikacji"
+        "countPlural=*": "{countText} aplikacji"
       }
     }
   ],
@@ -189,7 +189,7 @@
         "ordinal"
       ],
       "match": {
-        "ordinal=other": "{nText}."
+        "ordinal=*": "{nText}."
       }
     }
   ],
@@ -223,7 +223,7 @@
         "countPlural=one": "Rezerwacja dla {name}: {countText} miejsce.",
         "countPlural=few": "Rezerwacja dla {name}: {countText} miejsca.",
         "countPlural=many": "Rezerwacja dla {name}: {countText} miejsc.",
-        "countPlural=other": "Rezerwacja dla {name}: {countText} miejsca."
+        "countPlural=*": "Rezerwacja dla {name}: {countText} miejsca."
       }
     }
   ],

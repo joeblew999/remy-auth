@@ -128,7 +128,7 @@
         "countPlural"
       ],
       "match": {
-        "countPlural=other": "{countText} 個のアプリ"
+        "countPlural=*": "{countText} 個のアプリ"
       }
     }
   ],
@@ -186,7 +186,7 @@
         "ordinal"
       ],
       "match": {
-        "ordinal=other": "{nText} 番目"
+        "ordinal=*": "{nText} 番目"
       }
     }
   ],
@@ -217,7 +217,7 @@
         "countPlural"
       ],
       "match": {
-        "countPlural=other": "{name} さんが {countText} 席を予約しました。"
+        "countPlural=*": "{name} さんが {countText} 席を予約しました。"
       }
     }
   ],

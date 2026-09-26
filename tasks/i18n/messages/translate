@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+#MISE description="LOCAL, the one writer (on main, one run at a time across worktrees): the pinned Claude agent translates exactly the gaps i18n:messages:check lists, one language per call in parallel (I18N_JOBS, 4), with no tools; jq merges each result into English key order; one commit marks them current. I18N_MODEL (sonnet), I18N_COMMIT=0 leaves the change for review"
+#MISE dir="{{config_root}}"
+#MISE tools={"aqua:jqlang/jq"="1.8.2","npm:@lingual/i18n-check"="0.9.5","aqua:anthropics/claude-code"="2.1.282"}
+#MISE env={DISABLE_TELEMETRY="1",DISABLE_ERROR_REPORTING="1",CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC="1"}
+set -euo pipefail
+here=$(cd "$(dirname "$0")" && pwd)
+. "$here/../writer.sh"
+list=$("$here/check" --list) && { echo "Messages: nothing to translate."; exit 0; } || true
+inlang=${I18N_INLANG:-$(git ls-files -- '*project.inlang/settings.json' | head -1 | xargs -r dirname)}
+settings="$inlang/settings.json"
+base=$(jq -r .baseLocale "$settings"); pattern=$(jq -r '."plugin.inlang.messageFormat".pathPattern' "$settings")
+file() { local p="${pattern//\{locale\}/$1}"; echo "$(dirname "$inlang")/${p#./}"; }
+en=$(file "$base")
+locales=$(echo "$list" | awk '$2 != "extra" { print $1 }' | sort -u)
+targets=(); for l in $locales; do targets+=("$(file "$l")"); done
+writer_guard "$en" -- "${targets[@]}"
+
+work=$(mktemp -d)
+one() {
+  local l=$1 f; f=$(file "$l")
+  [ -f "$f" ] || echo '{}' > "$f"
+  local keys; keys=$(echo "$list" | awk -v l="$l" '$1 == l && $2 != "extra" && $2 != "catalog" { print $3 }' | sort -u)
+  [ "$(echo "$list" | awk -v l="$l" '$1 == l && $2 == "catalog"')" = "" ] || keys=$(jq -r 'keys_unsorted[]' "$en")
+  local plural; plural=$(node -e 'const l=process.argv[1],c=t=>[...new Set([...Array(1001).keys(),1.5].map(n=>new Intl.PluralRules(l,{type:t}).select(n)))];console.log(JSON.stringify({cardinal:c("cardinal"),ordinal:c("ordinal")}))' "$l")
+  jq -n --arg l "$l" --arg name "$(node -p "new Intl.DisplayNames(['en'],{type:'language'}).of('$l')")" --argjson plural "$plural" \
+     --slurpfile en "$en" --arg keys "$keys" \
+     '{locale: $l, language: $name, plural: $plural, entries: ($en[0] | with_entries(select(.key as $k | $keys | split("\n") | index($k))))}' \
+    | agent "$here/../prompts/messages.md" '{"type":"object","additionalProperties":{"anyOf":[{"type":"string"},{"type":"array"}]}}' > "$work/$l.json" \
+    || { echo "  $l: the agent failed"; return 1; }
+  # Every key asked for came back, or nothing is written.
+  local lacking; lacking=$(jq -rn --slurpfile got "$work/$l.json" --arg keys "$keys" '$keys | split("\n") - ($got[0] | keys) | .[]')
+  [ -z "$lacking" ] || { echo "  $l: the agent left out $lacking"; return 1; }
+  jq --slurpfile en "$en" --slurpfile new "$work/$l.json" \
+    '. as $t | reduce ($en[0] | keys_unsorted[]) as $k ({}; ($new[0][$k] // $t[$k]) as $v | if $v == null then . else .[$k] = $v end)' "$f" > "$work/$l.merged" \
+    && mv "$work/$l.merged" "$f" && echo "  $l: $(echo "$keys" | wc -l | tr -d ' ') messages"
+}
+export -f one file agent; export list en here work pattern inlang
+echo "Messages: translating $(echo $locales | wc -w | tr -d ' ') languages with ${I18N_MODEL:-sonnet} (${I18N_JOBS:-4} at a time)..."
+failed=0; echo "$locales" | xargs -P "${I18N_JOBS:-4}" -I{} bash -c 'one "$1"' _ {} || failed=1
+rm -rf "$work"
+# What the agent wrote must pass the offline checks before it counts: missing keys, placeholders, plurals.
+after=$("$here/check" --list | awk '$2 != "stale"') || true
+[ -z "$after" ] || { echo "Still wrong after translating:"; echo "$after"; failed=1; }
+changed=$(git diff --name-only -- "${targets[@]}")
+if [ -n "$changed" ] && [ "${I18N_COMMIT:-1}" = 1 ]; then
+  git add -- $changed && git commit -q -m "i18n(messages): translate $(echo $locales | tr ' ' ',')" -- $changed && echo "Committed: $(git log -1 --format='%h %s')"
+fi
+exit $failed

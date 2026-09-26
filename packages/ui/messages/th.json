@@ -128,7 +128,7 @@
         "countPlural"
       ],
       "match": {
-        "countPlural=other": "{countText} แอป"
+        "countPlural=*": "{countText} แอป"
       }
     }
   ],
@@ -186,7 +186,7 @@
         "ordinal"
       ],
       "match": {
-        "ordinal=other": "ลำดับที่ {nText}"
+        "ordinal=*": "ลำดับที่ {nText}"
       }
     }
   ],
@@ -217,7 +217,7 @@
         "countPlural"
       ],
       "match": {
-        "countPlural=other": "{name} จอง {countText} ที่นั่งแล้ว"
+        "countPlural=*": "{name} จอง {countText} ที่นั่งแล้ว"
       }
     }
   ],

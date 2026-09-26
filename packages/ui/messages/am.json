@@ -129,7 +129,7 @@
       ],
       "match": {
         "countPlural=one": "{countText} መተግበሪያ",
-        "countPlural=other": "{countText} መተግበሪያዎች"
+        "countPlural=*": "{countText} መተግበሪያዎች"
       }
     }
   ],
@@ -187,7 +187,7 @@
         "ordinal"
       ],
       "match": {
-        "ordinal=other": "{nText}ኛ"
+        "ordinal=*": "{nText}ኛ"
       }
     }
   ],
@@ -219,7 +219,7 @@
       ],
       "match": {
         "countPlural=one": "{name} {countText} መቀመጫ አስይዘዋል።",
-        "countPlural=other": "{name} {countText} መቀመጫዎችን አስይዘዋል።"
+        "countPlural=*": "{name} {countText} መቀመጫዎችን አስይዘዋል።"
       }
     }
   ],

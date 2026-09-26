@@ -130,7 +130,7 @@
       "match": {
         "countPlural=one": "אפליקציה אחת",
         "countPlural=two": "שתי אפליקציות",
-        "countPlural=other": "{countText} אפליקציות"
+        "countPlural=*": "{countText} אפליקציות"
       }
     }
   ],
@@ -188,7 +188,7 @@
         "ordinal"
       ],
       "match": {
-        "ordinal=other": "מקום {nText}"
+        "ordinal=*": "מקום {nText}"
       }
     }
   ],
@@ -221,7 +221,7 @@
       "match": {
         "countPlural=one": "נשמר מקום אחד עבור {name}.",
         "countPlural=two": "נשמרו שני מקומות עבור {name}.",
-        "countPlural=other": "נשמרו {countText} מקומות עבור {name}."
+        "countPlural=*": "נשמרו {countText} מקומות עבור {name}."
       }
     }
   ],

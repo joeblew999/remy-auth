@@ -67,41 +67,12 @@ async function formatsExtra(page: Page, locale: string) {
   }
 }
 
-// Checks that belong to this repository: the catalogs it owns, and server rendering itself.
+// Checks that belong to this repository: server rendering itself, in each catalog's language. The
+// catalogs' completeness, placeholders and plurals are i18n:messages:check (tasks/i18n).
 const settings = JSON.parse(readFileSync('packages/ui/project.inlang/settings.json', 'utf8'));
-const baseLocale: string = settings.baseLocale;
 const catalogs: Record<string, Record<string, any>> = Object.fromEntries(
   (settings.locales as string[]).map(locale => [locale, JSON.parse(readFileSync(`packages/ui/messages/${locale}.json`, 'utf8'))]));
 test.use({ timezoneId: 'Asia/Tokyo' });
-
-test('every catalog matches the base catalog and covers its plural categories', () => {
-  const base = catalogs[baseLocale];
-  for (const locale of settings.locales as string[]) {
-    const catalog = catalogs[locale];
-    expect(Object.keys(catalog).sort(), locale).toEqual(Object.keys(base).sort());
-    for (const [key, value] of Object.entries(base)) {
-      const other = catalog[key];
-      if (typeof value === 'string') {
-        expect(typeof other, `${locale}.${key}`).toBe('string');
-        expect(other.trim(), `${locale}.${key}`).not.toBe('');
-        expect(other.match(/\{\w+\}/g) ?? [], `${locale}.${key}`).toEqual(value.match(/\{\w+\}/g) ?? []);
-      } else {
-        expect(other[0].declarations, `${locale}.${key}`).toEqual(value[0].declarations);
-        expect(other[0].selectors ?? [], `${locale}.${key}`).toEqual(value[0].selectors ?? []);
-        for (const pattern of Object.values(other[0].match)) expect(String(pattern).trim(), `${locale}.${key}`).not.toBe('');
-      }
-    }
-    for (const [key, value] of Object.entries(catalog)) {
-      if (typeof value === 'string') continue;
-      const declaration = (value[0].declarations as string[]).find(line => /: plural\b/.test(line));
-      if (!declaration) continue;
-      const ordinal = /type=ordinal/.test(declaration);
-      const categories = Object.keys(value[0].match).map(match => match.split('=')[1]);
-      const rules = new Intl.PluralRules(locale, { type: ordinal ? 'ordinal' : 'cardinal' });
-      for (const n of ordinal ? samples.positions : samples.counts) expect(categories, `${locale}.${key} category for ${n}`).toContain(rules.select(n));
-    }
-  }
-});
 
 test('concurrent server renders retain their requested language and direction', async ({ request }) => {
   await Promise.all(Array.from({ length: 6 * locales.length }, async (_, index) => {
