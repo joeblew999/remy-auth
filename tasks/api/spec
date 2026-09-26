@@ -12,7 +12,10 @@ const origin = args.find(arg => !arg.startsWith('--')) || process.env.DEPLOY_ORI
 if (!origin) { console.error('api:spec: pass an origin or set DEPLOY_ORIGIN'); process.exit(1); }
 const specUrl = new URL('/api/openapi.json', origin);
 const response = await fetch(specUrl, { headers: { Accept: 'application/json' } });
-if (!response.ok) { console.error(`api:spec: ${specUrl.href} answered ${response.status}`); process.exit(1); }
+if (!response.ok) {
+  console.error(`api:spec: ${specUrl.href} answered ${response.status}${response.status === 404 ? ': this app serves no contract API at /api (an app mounts one with @joeblew999/remy-ui/api/server)' : ''}`);
+  process.exit(1);
+}
 const spec = await response.json();
 if (!/^3\.1\./.test(spec.openapi ?? '')) { console.error(`api:spec: ${specUrl.href} is not an OpenAPI 3.1 document`); process.exit(1); }
 

@@ -19,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './components/card';
 
 export { sitePaths, appPaths, allPaths, isAppPath } from './paths.js';
 
-export { SkipLink, ZoneBadge, SiteNavLinks, SiteShell, Shell, Intro } from './shell';
+export { SkipLink, ZoneBadge, SiteNavLinks, SourceLink, SiteShell, Shell, Intro } from './shell';
 export { Group, Row } from './rows';
 import { Shell, Intro } from './shell';
 import { Group, Row } from './rows';

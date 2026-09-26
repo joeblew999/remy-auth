@@ -24,8 +24,13 @@ manual translation until the docs and Paraglide stuff is solved, as it will slow
 then tools, then translating.
 
 0. ~~**Translation frozen**~~ lifted 2026-09-26: the tooling landed (step 3) and the pass ran (step 4).
-1. **Finish what is in flight** (English only): the layout contract and `project:layout`; the Look fixes
-   (below).
+1. **Finish what is in flight:** the Look fixes (below) and issue #5.
+   The layout contract (branch `project-layout`) is **not merged**, decided 2026-09-26: its core was a
+   271-line checker of our own (`tasks/layout/layout.mjs`) over a contract in `tasks/README.md`, which the
+   docs move removed; the owner's rule is no custom scripts, and a wrong layout already fails the app's
+   own gates (typecheck, build, tests). Its useful fixes are on main: the header's GitHub link is the
+   app's own (`SourceLink`), and `api:spec` explains a missing API. `APP_PAGES` was dropped: the app has no
+   pages beyond the package's since the docs moved. The branch can go with the others.
 2. **Structure, in parallel:**
    - a. ~~**Fumadocs fully**~~ merged and live 2026-09-26 ([plan](docs-for-consumers.md)): the docs Worker
      (`docs/`, https://remy-auth-docs.gedw99.workers.dev): product guide `/docs`, developer docs `/dev`, API
@@ -50,7 +55,7 @@ Also queued (not in the order above): `git:tidy` (shared task for merged branche
 **Branches and worktrees to remove (owner, 2026-09-26: agreed; the removal needs the owner's permission
 setting):** `fumadocs-trial` (squash-merged), `worktree-wf_0e57b9eb-956-1`, `-956-2` and
 `worktree-agent-ac2f2d97915e58832` (nothing unmerged), with their worktrees under `.claude/worktrees/`.
-Keep `project-layout` (step 1) and the uncommitted Look work in `.claude/worktrees/agent-aca0ff9fa382158ea`
+Also `project-layout` (step 1: not merged, its fixes ported). Keep the uncommitted Look work in `.claude/worktrees/agent-aca0ff9fa382158ea`
 (the Look list below) until they are folded in.
 
 ## Look (from `browser:shots`, 2026-09-26)

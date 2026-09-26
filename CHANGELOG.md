@@ -7,6 +7,9 @@ package follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- `shell`: `SourceLink`, a context for the site header's "GitHub" link. **An app sets its own
+  repository** (`<SourceLink value="https://github.com/you/app">`); without it the header shows no source
+  link instead of remy-auth's.
 - Translation tasks in two pipelines (`tasks/i18n/`): `i18n:messages:check` and `i18n:docs:check`
   (offline, read-only; git, jq, `@lingual/i18n-check` 0.9.5, a plural-category check), `i18n:check` both
   (a warning; strict with `I18N_STRICT=1`), and `i18n:messages:translate`, `i18n:docs:translate`,

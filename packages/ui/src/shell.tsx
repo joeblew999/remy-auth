@@ -40,12 +40,19 @@ export const SiteNavLinks = createContext<((path: string) => React.ReactNode) | 
 export const AppNavLinks = createContext<React.ReactNode>(undefined);
 
 /**
+ * Where evaluators find the app's source: the site header's "GitHub" link. Each app passes its own
+ * repository URL; an app that passes none shows no source link.
+ */
+export const SourceLink = createContext<string | undefined>(undefined);
+
+/**
  * The frame of a site page: static shadcn components only (links styled as buttons, Badge,
  * Separator), so the page is complete without JavaScript. `preferred` is the language to offer.
  */
 export function SiteShell({ locale, path = '', preferred, children }: { locale: Locale; path?: string; preferred?: Locale; children: React.ReactNode }) {
   const o = { locale };
   const appLinks = useContext(SiteNavLinks);
+  const source = useContext(SourceLink);
   return <div className="flex min-h-svh w-full flex-col px-4 md:px-8">
     <SkipLink locale={locale} />
     <LanguageHint locale={locale} path={path} preferred={preferred} />
@@ -57,9 +64,9 @@ export function SiteShell({ locale, path = '', preferred, children }: { locale: 
             <NavigationMenuLink active={path === '/formats'} render={<Link to="/formats" preload="intent" />}>{m.nav_formats({}, o)}</NavigationMenuLink>
           </NavigationMenuItem>
           {appLinks?.(path)}
-          <NavigationMenuItem>
-            <NavigationMenuLink href={repository}>GitHub</NavigationMenuLink>
-          </NavigationMenuItem>
+          {source && <NavigationMenuItem>
+            <NavigationMenuLink href={source}>GitHub</NavigationMenuLink>
+          </NavigationMenuItem>}
         </NavigationMenuList>
       </NavigationMenu>
       <div className="ms-auto flex items-center gap-1">
@@ -74,9 +81,6 @@ export function SiteShell({ locale, path = '', preferred, children }: { locale: 
     <footer className="py-4"><LanguageLinks locale={locale} path={path} /></footer>
   </div>;
 }
-
-/** Where evaluators find the source. */
-const repository = 'https://github.com/joeblew999/remy-auth';
 
 /** The frame of a site page, also for not-found and error pages. App pages use AppShell from ./app-pages. */
 export const Shell = SiteShell;
