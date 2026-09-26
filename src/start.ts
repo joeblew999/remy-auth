@@ -6,7 +6,7 @@ import { cspNonce, requestContext, serverFnLog } from './middleware';
 // for every server function call. See src/middleware.ts.
 export const startInstance = createStart(() => ({
   // The Worker's request ID as context.requestId, and a per-request CSP nonce as context.nonce
-  // with its report-only policy, for every server request.
+  // with its nonce policy (enforced or report-only: src/csp.ts), for every server request.
   requestMiddleware: [requestContext, cspNonce],
   // One log line per server function call, under that request ID.
   functionMiddleware: [serverFnLog],

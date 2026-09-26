@@ -22,6 +22,8 @@ export declare function serverAppChecks(options: AppCheckOptions & {
    * runs with partChecks() instead: seo-routes the sitemap, deferred-place the network place.
    */
   parts?: readonly PartName[];
+  /** Whether the app enforces its nonce CSP (default true) or sends it report-only: the app's own switch, passed to cspChecks. */
+  cspEnforced?: boolean;
 }): void;
 /** The shared checks of a fully prerendered app: zones, public pages, static entry pages, demo, formats, text, observability and the showcase rows without server functions. */
 export declare function prerenderedAppChecks(options: AppCheckOptions): void;

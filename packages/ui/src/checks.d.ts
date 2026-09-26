@@ -30,5 +30,5 @@ export declare function textChecks(options: { paths: string[] }): void;
 /** The fonts that draw each language's heading and intro are the ones fonts.css names for it (Chrome DevTools Protocol); a system font drawing the page's script fails naming the script; each Han language names its own font. */
 export declare function fontChecks(options: { paths: string[]; selectors?: string[] }): void;
 export declare function observabilityChecks(options: { service: string; paths: string[] }): void;
-/** A strict nonce CSP (report-only): every page's scripts carry the response's nonce, no page violates it, the report endpoint answers. */
-export declare function cspChecks(options: { paths: string[]; reportPath?: string }): void;
+/** A strict nonce CSP, enforced unless `enforce: false` (report-only): one nonce policy under that mode's header only, every page's scripts carry the response's nonce, no page violates it, enforced it blocks and reports a script without the nonce, the report endpoint answers. */
+export declare function cspChecks(options: { paths: string[]; reportPath?: string; enforce?: boolean }): void;

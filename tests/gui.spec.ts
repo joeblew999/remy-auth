@@ -7,6 +7,7 @@ import { serverAppChecks } from '@joeblew999/remy-ui/app-checks';
 import { localeInfo } from '../packages/ui/src/locale-info';
 import { sitePaths, appPaths } from '@joeblew999/remy-ui/paths';
 import { askPath, docsPaths, docsSearchPath, everyPath } from '../src/paths';
+import { cspEnforced } from '../src/csp';
 import { apiChecks, reservationApiChecks } from '@joeblew999/remy-ui/api/checks';
 import { info } from '@joeblew999/remy-auth-contract';
 import { router } from '../src/api/router';
@@ -29,6 +30,8 @@ serverAppChecks({
   ownSitePaths: [...docsPaths, docsSearchPath, askPath],
   oneLanguage,
   formats: { extra: formatsExtra },
+  // The middleware's own switch (src/csp.ts): the checks expect the header it sends.
+  cspEnforced,
 });
 // Every part listed in src/parts.json brings its own checks: the sitemap (seo-routes), the streamed
 // place and its failing navigation (deferred-place), the status card, the time-zone pages.

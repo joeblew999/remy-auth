@@ -6,6 +6,13 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- `checks`: `cspChecks({ enforce })`, default `true`: expects the nonce policy under
+  `Content-Security-Policy` (and none under `Content-Security-Policy-Report-Only`), or the reverse
+  with `enforce: false`; checks the not-found page's policy too; enforced, proves a script without
+  the nonce is blocked and reported. `serverAppChecks({ cspEnforced })` passes the app's switch.
+  An app still sending the policy report-only passes `cspEnforced: false`.
+
 ## [0.11.0] - 2026-09-25
 
 ### Added

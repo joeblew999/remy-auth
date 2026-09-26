@@ -559,20 +559,33 @@ export function observabilityChecks({ service, paths }) {
 }
 
 /**
- * A strict nonce-based Content Security Policy, report-only for now: every page's response names a
- * fresh nonce in its report-only policy, every script the server renders carries that nonce, and
- * the page loads and hydrates without one violation. Data blocks (application/ld+json) are not
- * scripts to CSP, and TanStack renders them without one. The report endpoint takes both report
- * formats and answers 204.
+ * A strict nonce-based Content Security Policy, enforced unless the app passes `enforce: false`
+ * (report-only): every page's response, and the not-found page's, names a fresh nonce in one policy under that mode's header
+ * and in none under the other, every script the server renders carries that nonce, and the page
+ * loads and hydrates without one violation. Enforced, a script without the nonce does not run and
+ * is reported. Data blocks (application/ld+json) are not scripts to CSP, and TanStack renders them
+ * without one. The report endpoint takes both report formats and answers 204, in either mode.
  */
-export function cspChecks({ paths, reportPath = '/csp-report' }) {
-  test("every script in a server-rendered page carries the response's CSP nonce, and the report-only policy names it", async ({ request }) => {
+export function cspChecks({ paths, reportPath = '/csp-report', enforce = true }) {
+  const header = enforce ? 'content-security-policy' : 'content-security-policy-report-only';
+  const other = enforce ? 'content-security-policy-report-only' : 'content-security-policy';
+  // The nonce policies a response sends under one header name, whether as repeated headers or one
+  // comma-joined value (withObservability appends its own frame-ancestors policy to the enforced header).
+  const noncePolicies = (response, name) => response.headersArray().filter(entry => entry.name.toLowerCase() === name)
+    .flatMap(entry => entry.value.split(',')).map(policy => policy.trim()).filter(policy => policy.includes("'nonce-"));
+
+  test(`every script in a server-rendered page carries the response's CSP nonce, and the ${enforce ? 'enforced' : 'report-only'} policy names it`, async ({ request }) => {
     const seen = new Set();
-    for (const locale of checkedLocales) for (const path of paths) {
+    // Every page, and the not-found page: its scripts carry the nonce too, so it needs the policy as much.
+    const pages = [...paths.map(path => ({ path, status: 200 })), { path: '/zz', status: 404 }];
+    for (const locale of checkedLocales) for (const { path, status } of pages) {
       const url = localizedPath(path, locale);
       const response = await request.get(url);
-      expect(response.status(), url).toBe(200);
-      const policy = response.headers()['content-security-policy-report-only'] ?? '';
+      expect(response.status(), url).toBe(status);
+      const named = noncePolicies(response, header);
+      expect(named, `${url}: one nonce policy under ${header}`).toHaveLength(1);
+      expect(noncePolicies(response, other), `${url}: no nonce policy under ${other}`).toEqual([]);
+      const policy = named[0];
       const nonce = policy.match(/'nonce-([A-Za-z0-9+/=]+)'/)?.[1];
       expect(nonce, `${url}: ${policy}`).toBeTruthy();
       expect(policy, url).toBe(`script-src 'nonce-${nonce}' 'strict-dynamic' 'report-sample'; object-src 'none'; base-uri 'none'; report-uri ${reportPath}; report-to csp`);
@@ -584,6 +597,23 @@ export function cspChecks({ paths, reportPath = '/csp-report' }) {
       expect(scripts.length, url).toBeGreaterThan(0);
       for (const tag of scripts) expect(tag, url).toContain(` nonce="${nonce}"`);
     }
+  });
+
+  if (enforce) test('the enforced policy blocks a script without the nonce, and reports it', async ({ page }) => {
+    const url = localizedPath(paths[0], checkedLocales[0]);
+    // The page as served, its headers untouched, with one parser-inserted inline script the server never renders.
+    await page.route(target => new URL(target).pathname === url, async route => {
+      const response = await route.fetch();
+      await route.fulfill({ response, body: (await response.text()).replace('</body>', '<script>window.__unNonced = true</script></body>') });
+    });
+    await page.addInitScript(() => {
+      window.__cspViolations = [];
+      document.addEventListener('securitypolicyviolation', event => window.__cspViolations.push(`${event.effectiveDirective} ${event.disposition}`));
+    });
+    await page.goto(url);
+    await hydrated(page.locator('body'));
+    expect(await page.evaluate(() => window.__unNonced ?? false), url).toBe(false);
+    expect(await page.evaluate(() => window.__cspViolations), url).toEqual(['script-src-elem enforce']);
   });
 
   // One test per language, as the other per-language checks: the work grows with the language count.
