@@ -1,8 +1,10 @@
 # Localisation that proves the hard parts
 
+Closed 2026-09-26: 13 languages and the hard localisation features live since 0.10.5; native-speaker review is the owner's, in now.md.
+
 Status: proposed 2026-09-25 under the owner's delegation; it builds on the
-[TanStack move](done/tanstack.md), on main since release 0.9.0. Owner: remy-auth. Executor/Reviewer roles as in
-[plans and roles](../docs/development.md#plans-and-roles).
+[TanStack move](tanstack.md), on main since release 0.9.0. Owner: remy-auth. Executor/Reviewer roles as in
+[plans and roles](../../docs/development.md#plans-and-roles).
 
 ## Why
 
@@ -58,7 +60,7 @@ Each item is shown on the formats or demo page and proven by a shared check.
    output with the browser's `Intl`, which catches ICU differences between workerd and Chrome for
    the new calendars.
 10. **Fonts.** Each new script gets its Noto font the way Arabic has one, loaded only on pages in
-    that language; [fonts.css](../packages/ui/src/fonts.css) says how. The hands-on pass takes one
+    that language; [fonts.css](../../packages/ui/src/fonts.css) says how. The hands-on pass takes one
     screenshot per language to catch missing glyphs.
 
 Name order (family name first in Japanese and Chinese) needs separate name fields in the shared
@@ -92,7 +94,7 @@ Rules for the regrouping:
 ## Translations
 
 The new catalogs are machine-made by the agent. They are marked unreviewed in the package
-[README](../packages/ui/README.md#language) and in [docs/gui.md](../docs/gui.md) until a native
+[README](../../packages/ui/README.md#language) and in [docs/gui.md](../../docs/gui.md) until a native
 speaker reviews them: not in the catalogs, because the message-format plugin reads every top-level
 key as a message and the catalog check requires every key set to equal the base (decided
 2026-09-25 under the owner's delegation). The checks prove structure, plural coverage and
@@ -124,7 +126,7 @@ formatting, not wording.
 
 Decided under the owner's delegation, with reasons:
 
-- **One formatting tag.** `formatLocale` in [locale-info.ts](../packages/ui/src/locale-info.ts)
+- **One formatting tag.** `formatLocale` in [locale-info.ts](../../packages/ui/src/locale-info.ts)
   names the calendar and digits from `getCalendars()[0]` and `getNumberingSystems()[0]`; every
   formatter on the pages uses it. Paraglide's compiled messages format with the plain locale (its
   registry takes no options), so the formats check compares those rows with the explicit tag: they
@@ -140,11 +142,11 @@ Decided under the owner's delegation, with reasons:
 - **Week rules** (first day, weekend, the week in order with the weekend marked) are shared rows
   now, not an app extra, from `getWeekInfo()` with no fallback.
 - **Casing, words, long words** are rows in the shared content (`istanbul`, the home title's
-  words, a German compound in `lang="de"`); [text.css](../packages/ui/src/text.css) holds
+  words, a German compound in `lang="de"`); [text.css](../../packages/ui/src/text.css) holds
   `hyphens: auto`, `overflow-wrap: break-word` and `word-break: auto-phrase` for Japanese headings.
   `textChecks` loads every site and app page in every language at 320 px, and proves the Turkish
   and Japanese rules now by switching the page's `lang` in place.
-- **Chinese matching** is the `custom-chinese` strategy in [matching.js](../packages/ui/src/matching.js),
+- **Chinese matching** is the `custom-chinese` strategy in [matching.js](../../packages/ui/src/matching.js),
   before `preferredLanguage`. Paraglide's server runs custom strategies before every other one, so
   the strategy steps aside when a strategy listed before it (URL, cookie) answers. The language
   hint uses the same matcher. The end-to-end zh-TW check is skipped only while zh-TW is not
@@ -157,8 +159,8 @@ A consumer (remy-auth-app) must import `text.css` and call `textChecks({ paths: 
 ## Work item 4 done (2026-09-25, branch l10n-features)
 
 The ten catalogs (written by five parallel agents, two languages each) are in
-[messages/](../packages/ui/messages/) and in Paraglide's `locales`, in the order of the table above,
-with their Noto fonts in [fonts.css](../packages/ui/src/fonts.css) (fontsource 5.3.0, pinned). Every
+[messages/](../../packages/ui/messages/) and in Paraglide's `locales`, in the order of the table above,
+with their Noto fonts in [fonts.css](../../packages/ui/src/fonts.css) (fontsource 5.3.0, pinned). Every
 check runs in all 13 languages, the zh-TW matching check end to end included; nothing is skipped.
 Found and fixed on the way, decided under the owner's delegation:
 

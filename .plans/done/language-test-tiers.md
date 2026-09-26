@@ -1,5 +1,7 @@
 # Language tests: when each language is checked
 
+Closed 2026-09-26: superseded by the test tiers 0-4 in docs/how-we-work.md (smoke, targeted, quick, full; deploys untested unless GATE).
+
 Status: built 2026-09-25 (cf:deploy and cf:preview run QUICK_LOCALES; project:verify and ui:release every language). Decided 2026-09-25 (owner: "We really don't need lang tests all the time"); to build.
 With 13 languages level 1 is 237 checks in about 1.6 minutes, and it grows with each language.
 

@@ -1,8 +1,10 @@
 # Shared auth service
 
-Status: proposed, 2026-09-24; refreshed 2026-09-25 for TanStack Start. Minimal GUI proof implemented; auth service implementation has not started. Builds on the [TanStack move](done/tanstack.md), on main since release 0.9.0.
+Parked 2026-09-26 (owner: "Not big feature stuff"): not started now; picked up as its own project.
+
+Status: proposed, 2026-09-24; refreshed 2026-09-25 for TanStack Start. Minimal GUI proof implemented; auth service implementation has not started. Builds on the [TanStack move](../done/tanstack.md), on main since release 0.9.0.
 Owner: remy-auth. First consumer: in-repo sample; first external consumer: remy-data.
-Executor/Reviewer roles as in [plans and roles](../docs/development.md#plans-and-roles). Do not
+Executor/Reviewer roles as in [plans and roles](../../docs/development.md#plans-and-roles). Do not
 begin a fleet rollout.
 
 ## Problem and outcome
@@ -31,7 +33,7 @@ Do not route every business operation through the auth Worker or put app data in
 
 ## GUI and reusable packages
 
-The [done GUI plan](done/gui.md) and the [portal plan](gui-portal.md) cover shared shadcn/Base UI components, Paraglide,
+The [done GUI plan](../done/gui.md) and the [portal plan](gui-portal.md) cover shared shadcn/Base UI components, Paraglide,
 public-page rendering and SEO, plus same-tab hosted authentication. SSR is not
 required for every screen or consuming application. Both the service GUI
 and consuming apps must exercise these packages through their public exports.
@@ -322,7 +324,7 @@ The contract, versioned and owned by remy-auth:
 - **Seed and sign-in:** one seed definition per service with stable IDs, used by dev startup,
   tests and explicit seeding of a deployment; a sign-in picker for seeded people on remy-auth's
   login screen, through a real Better Auth code sign-in, gated by the environment policy in
-  [development principles](../docs/development.md). Fixed from remy-sport's survey: no published
+  [development principles](../../docs/development.md). Fixed from remy-sport's survey: no published
   code outside local development, no account creation through a fixed code, authenticated seeding
   outside local development, and re-seeding that does not silently overwrite edited rows unless
   asked.
@@ -357,7 +359,7 @@ Do not treat these observations as a deployed-system compatibility test.
 ## Building it on TanStack Start
 
 Refreshed 2026-09-25: both apps and the shared package move to TanStack Start and Router
-([TanStack plan](done/tanstack.md)), so the service, its screens and the sample are built on it.
+([TanStack plan](../done/tanstack.md)), so the service, its screens and the sample are built on it.
 Sources: Better Auth's [TanStack Start integration](https://www.better-auth.com/docs/integrations/tanstack)
 and the installed skills `auth-server-primitives`, `auth-and-guards`, `server-functions`,
 `middleware`, `server-routes`, `execution-model` and `router-query`.
@@ -481,11 +483,11 @@ not a seed/provisioning command. No bootstrap credentials committed in manifests
 
 ## Definition of done
 
-The [done GUI plan](done/gui.md) defines additional acceptance for package reuse, localized
+The [done GUI plan](../done/gui.md) defines additional acceptance for package reuse, localized
 server-rendered content, accessibility and technical SEO.
 
 Cloudflare-native observability is required. Implement and verify the
-[observability plan](observability.md), including structured redacted logs,
+[observability plan](../observability.md), including structured redacted logs,
 correlated traces, platform/D1 metrics, durable security audit records, dashboards
 and tested alert/recovery delivery. Collection configuration alone is not completion.
 
@@ -529,7 +531,7 @@ creation and these documents do not authorize production provisioning.
 ## Agent skills for this slice
 
 Installed TanStack skills for this slice: `auth-server-primitives`, `auth-and-guards`,
-`server-functions`, `middleware`, `server-routes`, `execution-model`, `router-query`. Carried over from the [agent-skills plan](done/agent-skills.md): before choosing the adapter
+`server-functions`, `middleware`, `server-routes`, `execution-model`, `router-query`. Carried over from the [agent-skills plan](../done/agent-skills.md): before choosing the adapter
 (Kysely D1 dialect or Drizzle), `auth generate` and numbered D1 migrations via Wrangler, check
 whether the installed `create-auth`, `better-auth-best-practices`, `wrangler` and
 `workers-best-practices` skills cover them for the pinned versions; otherwise use
@@ -537,7 +539,7 @@ https://www.better-auth.com/llms.txt. Record the outcome in that plan's table.
 
 ## Observability for the auth service
 
-Moved from [the generic observability plan](observability.md), which covers Worker health,
+Moved from [the generic observability plan](../observability.md), which covers Worker health,
 tracing, the log contract, releases, availability and the generic alerts.
 
 | Area | Signals and implementation |

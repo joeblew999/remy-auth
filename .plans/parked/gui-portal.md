@@ -1,8 +1,10 @@
 # Hosted auth portal GUI and search follow-up
 
-Status: open, 2026-09-24. Split from the [done GUI plan](done/gui.md), which holds the
+Parked 2026-09-26 (owner: "Not big feature stuff"): not started now; picked up as its own project.
+
+Status: open, 2026-09-24. Split from the [done GUI plan](../done/gui.md), which holds the
 rendering strategy, package rules, internationalisation and SEO acceptance these items
-follow. Owner: remy-auth. Executor/Reviewer roles as in [plans and roles](../docs/development.md#plans-and-roles).
+follow. Owner: remy-auth. Executor/Reviewer roles as in [plans and roles](../../docs/development.md#plans-and-roles).
 
 ## Needs the auth service
 

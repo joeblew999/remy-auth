@@ -97,7 +97,7 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
   gated, run from its own `project:verify`; this repository's verification stays
   self-contained.
 - Contains no authentication yet; it becomes the protected sample when the auth slice
-  lands, as the [auth plan](../auth-service.md) describes.
+  lands, as the [auth plan](../parked/auth-service.md) describes.
 
 ## Work items, in order
 

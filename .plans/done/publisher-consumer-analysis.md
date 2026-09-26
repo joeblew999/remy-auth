@@ -1,6 +1,8 @@
 # Publisher and consumers: analysis
 
-Status: analysis for [publisher-consumer.md](publisher-consumer.md), 2026-09-25. Read only: no code
+Closed 2026-09-26: analysis used (package moves, drift fixes, new-consumer recipe, cf:preview fix); remainder in publisher-consumer.md.
+
+Status: analysis for [publisher-consumer.md](../publisher-consumer.md), 2026-09-25. Read only: no code
 changed, no test run, nothing on Cloudflare. Evidence is file paths in remy-auth (here) and in
 remy-auth-app (`../remy-auth-app/`, at `d62f804`, on `@joeblew999/remy-ui` 0.10.5 and
 `tasks?ref=v0.10.5`). remy-auth `main` is at `330c3b7` with `packages/ui/package.json` 0.10.6

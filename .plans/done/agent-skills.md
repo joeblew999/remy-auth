@@ -81,7 +81,7 @@ Update this file with a completed table, then open one commit per accepted sourc
 
 | Gap | Decision (added / docs only / rejected) | Source + commit or docs URL | Reason |
 | --- | --- | --- | --- |
-| Better Auth on D1 | moved to the [auth plan](../auth-service.md) | installed: `create-auth`, `better-auth-best-practices`, `wrangler`, `workers-best-practices`; docs https://www.better-auth.com/llms.txt | Only testable against the real adapter and D1 when the auth slice starts |
+| Better Auth on D1 | moved to the [auth plan](../parked/auth-service.md) | installed: `create-auth`, `better-auth-best-practices`, `wrangler`, `workers-best-practices`; docs https://www.better-auth.com/llms.txt | Only testable against the real adapter and D1 when the auth slice starts |
 | Paraglide JS 2.x | docs only | https://paraglidejs.com/llms.txt | opral repos ship no skills; the strategies, middleware and runtime were built from the docs and the generated runtime's README |
 | Playwright Test | `playwright-cli` sufficient | microsoft/playwright-cli (installed) plus `node_modules/@playwright/test` types | Projects, `webServer`, remote targets and the shared checks were written without gaps; microsoft/playwright has only contributor skills; no llms.txt |
 | Tailwind CSS 4 | docs only | https://tailwindcss.com/docs | No skills and no llms.txt; the shadcn skill covers the CSS-first setup the package uses |

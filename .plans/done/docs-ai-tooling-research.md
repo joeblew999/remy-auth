@@ -1,5 +1,7 @@
 # Docs AI answers: what's what, and tooling that is not reinvented
 
+Closed 2026-09-26: research used (route B, docs:questions, observability tasks, the gateway decisions).
+
 Status: research only, 2026-09-25. Nothing was changed, created or deleted on Cloudflare; no
 model, AI Search query or test was run. Sources: the pinned `cloudflare` skill (it routes to
 Cloudflare's docs, cited below), Wrangler 4.137.0 (`--help` and its bundled source), the

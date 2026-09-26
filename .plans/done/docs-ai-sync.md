@@ -1,5 +1,7 @@
 # AI answers where Cloudflare pulls the docs (route B)
 
+Closed 2026-09-26: route B live (AI Search remy-docs-pages reads the R2 bucket remy-docs; docs:publish after every deploy; per-language folder filter).
+
 Status: decided 2026-09-25, after route A (Fumadocs site search, no AI). Owner: "Can we have A and B."
 Earlier the same day: "It's just complexity unacceptable that a deploy of the docs take this long",
 "Most users though will want to ask from the site ... And stay in the site."

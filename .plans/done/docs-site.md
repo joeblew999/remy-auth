@@ -1,9 +1,11 @@
 # Docs on the site, with AI answers that cite the page
 
+Closed 2026-09-26: docs at /docs (server-rendered, Spanish translation), search at the top of every docs page and /docs/search, AI answers at /docs/ask from the R2-synced index; open follow-ups moved to now.md.
+
 Status: approved by the owner 2026-09-25 ("I approve all your recommendations", Workers AI ceiling
 $10 a month); D1 to D7 built on branch `docs-site` (see [Implementation](#implementation-2026-09-25));
 waiting for the Reviewer, then deploy, `docs:index` and the remote answer check.
-Owner: remy-auth. Executor/Reviewer roles as in [plans and roles](../docs/development.md#plans-and-roles).
+Owner: remy-auth. Executor/Reviewer roles as in [plans and roles](../../docs/development.md#plans-and-roles).
 Owner, 2026-09-25: "The site needs docs? What shadcn way is easy? Markdown based or something or
 tanstack. The docs are going to need AI answers in Cloudflare, so a person hitting the site can
 easily ask questions and get taken to the page with the answers. The docs are different from
@@ -50,7 +52,7 @@ Sources per score:
   its example hosts on Nitro, not Cloudflare. Its Cloudflare issues (#1950, #2508, #2800, #2875)
   are all closed. `fumadocs-ui` needs its own CSS preset (`fumadocs-ui/css/neutral.css`) and
   `RootProvider`, and its `DocsLayout` brings its own header: two headers, two sets of
-  components beside the ones shadcn's CLI writes (breaks [UI: shadcn and TanStack all the way](../docs/how-we-work.md#ui-shadcn-and-tanstack-all-the-way)).
+  components beside the ones shadcn's CLI writes (breaks [UI: shadcn and TanStack all the way](../../docs/how-we-work.md#ui-shadcn-and-tanstack-all-the-way)).
 - NoJS, Repo, Code, TSS/CF and Cost for the top two: the spike below. Maintenance: npm
   (`fumadocs-core` 16.15.14 and `fumadocs-mdx` 15.4.5 published 2026-09-24/25, frequent
   releases: pin exactly; `@content-collections/core` 0.15.3, 2026-09-21; `@tanstack/markdown`

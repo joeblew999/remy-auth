@@ -26,8 +26,8 @@ remy-auth publishes; remy-auth-app is the reference consumer and the proof.
    The consumer's `tests/gui.spec.ts` should be one line per shared check set (queue item 14).
 3. **More into the include.** Candidates: the build, preview, deploy and wait chain (already
    there), `project:upgrade-ui`, level-2 audits, the language tiers
-   ([language-test-tiers.md](language-test-tiers.md)), the docs tasks below, and the CI workflow
-   (a reusable GitHub workflow in remy-auth, called by consumers, [ci-node24.md](ci-node24.md)).
+   ([language-test-tiers.md](done/language-test-tiers.md)), the docs tasks below, and the CI workflow
+   (a reusable GitHub workflow in remy-auth, called by consumers, [ci-node24.md](done/ci-node24.md)).
 4. **Docs and AI answers for every consumer.** Today the docs engine lives in remy-auth's app code
    (`src/docs/`, `/docs` and `/app/ask` routes, `docs:index`). A consumer gets nothing. Move the
    reusable half into the package and tasks: the Fumadocs source over a consumer's own Markdown

@@ -1,5 +1,7 @@
 # Formats page: every area for the page's language, every choice from the system
 
+Closed 2026-09-26: built and live in 0.11.0 (locale-data, derived choices, formatsChecks over derived values).
+
 Status: implemented 2026-09-25 (requirements 1 to 6; see Decisions). Owner's words:
 "for each area it shows what each area is for the language you're in. The areas where you can try
 out other things must also give you all the options based on the languages in the system. This
@@ -8,7 +10,7 @@ must not be done in a hardcoded way."
 ## Requirements
 
 1. **Same shape in every area.** Each section (language, time, numbers, money, words, and fonts
-   when [fonts.md](fonts.md) lands) opens with what that area *is for the page's language*, then
+   when [fonts.md](../fonts.md) lands) opens with what that area *is for the page's language*, then
    the samples, then (where there is one) the try-it control. No area is missing its "for this
    language" row in any of the 13 languages.
 2. **The language's own values, derived, never listed.** Everything shown for the page's
@@ -36,7 +38,7 @@ must not be done in a hardcoded way."
 
 Read `packages/ui/src/pages.tsx` (FormatsContent), `showcase/search-params.tsx`, `locale-info.ts`,
 `samples.js`, `checks.js` (formatsChecks), [hard-localisation.md](hard-localisation.md) and
-[fonts.md](fonts.md). Deliver: an inventory of every area and control with what is derived and what
+[fonts.md](../fonts.md). Deliver: an inventory of every area and control with what is derived and what
 is hardcoded today, a survey for region data (currency), a design against requirements 1 to 6,
 and milestones with gates. Owner decisions only if a choice costs money or changes what Google sees.
 

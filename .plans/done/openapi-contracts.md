@@ -1,9 +1,11 @@
 # Contract-first APIs on TanStack: producing and consuming OpenAPI
 
+Closed 2026-09-26: items 2-6 built on oRPC 1.15.4 (contract 0.2.0 published with remy-ui 0.11.0); move to oRPC 2.0 when it ships is a future item.
+
 Status: decided 2026-09-25 under the owner's delegation, from a scored survey with scratch proofs
-(below). It builds on the [TanStack move](done/tanstack.md), on main since release 0.9.0. Owner:
-remy-auth. Executor/Reviewer roles as in [plans and roles](../docs/development.md#plans-and-roles). Tools were chosen by
-survey, as [how we work](../docs/how-we-work.md) requires.
+(below). It builds on the [TanStack move](tanstack.md), on main since release 0.9.0. Owner:
+remy-auth. Executor/Reviewer roles as in [plans and roles](../../docs/development.md#plans-and-roles). Tools were chosen by
+survey, as [how we work](../../docs/how-we-work.md) requires.
 
 ## Goal
 
@@ -88,13 +90,13 @@ Query, Zod 4, fetch on Workers, maturity, size)
 5. **Checks** in both apps: coverage, a schema-violating response rejected, invalid input giving
    the typed 400 in every locale.
 6. **Ship** with both levels, releases and both deploys, then a hands-on pass as in
-   [how we work](../docs/how-we-work.md#multi-agent-work).
+   [how we work](../../docs/how-we-work.md#multi-agent-work).
 
 ## Progress and decisions, 2026-09-25 (branch contract-api)
 
 Done in remy-auth, under the owner's delegation: item 2 (package `api/*` and `api:spec`), item 3
 without the release (the contract is `packages/contract/`, private; its
-[README](../packages/contract/README.md) says how to publish it), and item 5's checks for remy-auth
+[README](../../packages/contract/README.md) says how to publish it), and item 5's checks for remy-auth
 (`apiChecks`, `reservationApiChecks`, the status card's check on `/api/status`). Items 4 and 6: see
 the next section. Decisions, each with its reason:
 

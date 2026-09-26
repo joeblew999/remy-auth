@@ -1,5 +1,7 @@
 # Docs site and AI answers: swing back and review
 
+Closed 2026-09-26: the problems are fixed (see its status block); the open items (native review, more languages, header search box) are in now.md.
+
 Status: problems only, no analysis, 2026-09-25. The docs (`/docs`) and AI answers (`/app/ask`)
 went live on remy-auth to have something up; this lists what needs revisiting.
 
@@ -25,7 +27,7 @@ Open:
 - 1: native-speaker review of the ten new catalogs (owner).
 - 7: the build-boundary check's `request.cf` marker; moot since the docs text no longer ships as code.
 - 8: shadcn's `"use client"` differences (upstream, owner's call to report).
-- 9: docs and answers for other apps on the shared package ([publisher-consumer.md](publisher-consumer.md)).
+- 9: docs and answers for other apps on the shared package ([publisher-consumer.md](../publisher-consumer.md)).
 - 10: docs are English under 13 languages' addresses (design, owner). Translations would be one R2
   folder per language and Markdown per language in the repo.
 - Design: search box in the site header (shared with remy-auth-app); search ranking; the look of
@@ -54,14 +56,14 @@ Open:
    the browser as JavaScript; the docs were reworded instead of deciding the check's marker.
 8. Adding shadcn's `table` rewrote `"use client"` in `field`, `sheet` and `sidebar`.
 9. The docs engine lives in remy-auth's app code, so consumers get no docs or answers
-   ([publisher-consumer.md](publisher-consumer.md)).
+   ([publisher-consumer.md](../publisher-consumer.md)).
 10. Translation: only the page chrome (navigation, answer page) is Paraglide. The docs themselves
     are the repo's English Markdown, served under every language's URL with canonical to `/en`.
 11. Observability is thin: only failures are logged (`ask_failed`), with the error's name alone
     ("Error"), so a failure cannot be diagnosed. Nothing records answered, no-answer, rate-limited
     or too-long, the AI call's time, cache hits or citations; no alert on failures; AI Gateway's own
     logs and spend are not surfaced anywhere we look. Checked 2026-09-25: see
-    [observability.md](observability.md#ai-answers-docs-site-what-cloudflare-gives-what-we-have-checked-2026-09-25)
+    [observability.md](../observability.md#ai-answers-docs-site-what-cloudflare-gives-what-we-have-checked-2026-09-25)
     (spend limit likely not enforced on postpaid, gateway rate limit against Cloudflare's advice,
     questions stored in gateway logs).
 12. Going back to an answer page runs the question again: the page is a GET form (`?q=`), its loader

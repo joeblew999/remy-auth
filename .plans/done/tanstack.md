@@ -1,7 +1,7 @@
 # All in on TanStack: Start, Router and Query across both apps and the shared package
 
 Status: done, closed 2026-09-25 (see [Close-out](#close-out-2026-09-25)). Agreed by the owner 2026-09-25. Owner: remy-auth. Executor/Reviewer roles as in
-the [auth plan](../auth-service.md). Replaces React Router in remy-auth, remy-auth-app and
+the [auth plan](../parked/auth-service.md). Replaces React Router in remy-auth, remy-auth-app and
 `@joeblew999/remy-ui`, and goes all in (owner, 2026-09-25: "I want to see what it can really
 do"): every TanStack strength is used somewhere visible and proven by a check. Done in a branch
 in each repository; main keeps working until every gate passes.
@@ -139,7 +139,7 @@ On the Cloudflare preview `https://tanstack-remy-auth.gedw99.workers.dev`, phone
 
 Moved elsewhere: the formats page's speed (Google's simulated mobile LCP, live) is an item in
 [now](../now.md); regrouping the formats page shipped in 0.10.2; the auth slice continues in
-the [auth plan](../auth-service.md).
+the [auth plan](../parked/auth-service.md).
 
 ## Decisions
 

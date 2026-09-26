@@ -2,7 +2,7 @@
 
 Status: open, 2026-09-24. Generic: applies to every Worker built on the shared package and
 tasks (remy-auth now, remy-auth-app and later apps). The auth-specific signals, audit
-records and alerts moved to [the auth plan](auth-service.md#observability-for-the-auth-service).
+records and alerts moved to [the auth plan](parked/auth-service.md#observability-for-the-auth-service).
 Done 2026-09-24, in both apps: `@joeblew999/remy-ui/worker` (0.8.0) wraps each Worker with
 `X-Request-ID` on every response, one structured line per request following the log contract
 below (release from the version-metadata binding, route templates, never URLs or headers),

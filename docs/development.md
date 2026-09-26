@@ -2,7 +2,7 @@
 
 This document owns what the code must be. How people and agents work day to day lives in
 [how we work](how-we-work.md). What the auth service owns, and its storage direction, live in
-[the auth service plan](../.plans/auth-service.md).
+[the auth service plan](../.plans/parked/auth-service.md).
 
 ## Development principles
 
