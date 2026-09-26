@@ -27,6 +27,23 @@ checks it did).
 Owner: "Are you asking the right questions?" The first framing (which channel carries the docs) was too
 narrow. In order:
 
+0. **What does our stack already offer?** (Owner: "did you also ask about checking what our stack offers
+   too? Maybe fuma, and other parts of our current stack so we don't reinvent.") Check each, from its
+   current docs, before anything new; none of this is verified yet:
+
+   | In our stack | Might offer |
+   | --- | --- |
+   | Fumadocs | `llms.txt` / `llms-full.txt` generation, raw Markdown per page for LLMs, its AI integrations |
+   | mise | `mise generate task-docs` (Markdown from our tasks and usage specs), `mise tasks --json` |
+   | the `skills` installer (`skills:install`) | pinning our own repo as a skill source, as for Cloudflare, shadcn, TanStack |
+   | Cloudflare AI Search (runs our docs index) | a public endpoint, possibly an MCP endpoint, to ask the docs |
+   | shadcn | its registry distributing code and docs to other projects; its MCP server pattern |
+   | TanStack Start | server routes to serve `llms.txt` or raw docs from the site we run |
+   | oRPC | the API reference, already generated (`/api/doc`, `openapi.json`) |
+   | npm, GitHub, Claude Code | the package's `files` (docs in the package), releases, plugin/marketplace formats |
+
+   Whatever these cover is used as is; only the gaps are designed.
+
 1. **Should it be docs at all?** For every rule: can a tool enforce it (the layout contract, `plans:check`,
    `i18n:check`, the test tiers)? Rules that can be checked become checks and stop needing to travel;
    only what cannot be checked stays prose.
@@ -49,5 +66,5 @@ narrow. In order:
    ([translations](translation-pipeline.md)).
 10. **What each agent loads reliably, and when:** skills, `AGENTS.md` links, local files (Claude Code, Codex).
 
-Early lean, to test not assume (after questions 1 and 2 have shrunk what must travel): a skill for how agents work plus the docs in the package for the
+Early lean, to test not assume (after question 0 has found what the stack gives and questions 1 and 2 have shrunk what must travel): a skill for how agents work plus the docs in the package for the
 version-matched reference, and `llms.txt` because Fumadocs makes it cheap.

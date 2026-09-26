@@ -63,6 +63,9 @@ search), mise `sources`/`outputs` (`ui:generate` skips when unchanged).
 
 ## Questions the analysis must answer
 
+0. **What our stack already offers** first: Paraglide/inlang, Fumadocs i18n, mise `sources`/`outputs`,
+   Cloudflare Workers AI; only the gaps get new tools.
+
 1. **UI catalogs:** does the inlang ecosystem (current `@inlang/cli`, the inlang SDK, Paraglide, Fink,
    Sherlock, lint rules) now provide (a) machine translation of missing keys and (b) a completeness check
    (missing keys, placeholders)? Found 2026-09-26: `@inlang/cli` 3.3.8 has only `lint` and `validate` for
