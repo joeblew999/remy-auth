@@ -17,6 +17,9 @@ como para agentes de IA. Lo que el código debe ser vive en [principios de desar
 ## Usa primero las herramientas propias del proyecto [#use-the-projects-own-tools-first]
 
 - Empieza con `mise run project:setup`; [herramientas para desarrolladores](./tooling.md) explica qué instala.
+- Antes de hacer a mano cualquier paso (instalar, actualizar, publicar, desplegar, traducir), busca su tarea:
+  `mise tasks ls | grep <word>`, en el repositorio en el que estés; una app también tiene las tareas compartidas. El propietario,
+  el 2026-09-26, después de que una app se actualizara a mano saltándose `project:upgrade-ui`: «you know we do not reinvent wheels».
 - Ejecuta los comandos mediante las tareas de mise, comprueba la página real con las herramientas de Chrome DevTools
   (tareas `browser:*`), y usa las skills instaladas antes de leer fuentes externas, buscar en
   `node_modules` o escribir scripts puntuales.
