@@ -1,5 +1,5 @@
 {
-  "title": "Remy guide",
+  "title": "Remy product guide",
   "pages": [
     "index",
     "---Using Remy---",
@@ -7,6 +7,7 @@
     "app",
     "---Help---",
     "faq",
+    "ai-assistants",
     "whats-new"
   ]
 }

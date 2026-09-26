@@ -6,6 +6,8 @@ import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { createOpenAPIPage, type OpenAPIPageProps } from 'fumadocs-openapi/ui';
 import type { getReferencePage } from './reference';
 import { docsConfig } from '../../docs.config';
+import { sectionTabs } from '@/lib/sections';
+import { AiLinks } from '@/components/ai-links';
 
 // The API reference (/reference), as Fumadocs' OpenAPI example renders it: DocsLayout over the
 // reference's own page tree and fumadocs-openapi's page for each operation, in shadcn's colours.
@@ -18,13 +20,10 @@ export function ReferenceView({ page }: { page: NonNullable<Awaited<ReturnType<t
   return <RootProvider theme={{ storageKey: 'theme', attribute: 'class', defaultTheme: 'system', enableSystem: true, nonce }}
     search={{ options: { api: '/api/search/reference' } }}>
     <DocsLayout tree={pageTree}
-      tabs={[
-        { title: 'Guide', url: '/docs', description: 'Using the app' },
-        { title: 'Developers', url: '/dev', description: 'Building with it' },
-        { title: 'API reference', url: '/reference', description: 'Every endpoint' },
-      ]}
+      tabs={sectionTabs}
       tabMode="navbar" nav={{ title: docsConfig.product, url: '/', mode: 'top' }}
-      links={[{ text: 'Site', url: docsConfig.appUrl, external: true }, { text: 'App', url: `${docsConfig.appUrl}/app`, external: true }]}>
+      links={[{ text: 'Site', url: docsConfig.appUrl, external: true }, { text: 'App', url: `${docsConfig.appUrl}/app`, external: true }]}
+      sidebar={{ footer: <AiLinks section={'reference'} /> }}>
       <DocsPage toc={page.toc} full>
         <DocsTitle>{page.title}</DocsTitle>
         {page.description && <DocsDescription>{page.description}</DocsDescription>}

@@ -20,6 +20,8 @@ import { buttonVariants } from '@/components/ui/button';
 import { MessageCircleIcon } from 'lucide-react';
 import { docsUrl } from './table.js';
 import { docsConfig } from '../../docs.config';
+import { sectionTabs } from '@/lib/sections';
+import { AiLinks } from '@/components/ai-links';
 
 // Fumadocs UI's own interface text per language (docs/content/ui/<lang>.json; en.json is Fumadocs' defaults,
 // the source the translation tools compare against). A language without a file shows English.
@@ -94,13 +96,10 @@ export function DocsView({ page }: { page: DocsPageData }) {
       // Fumadocs' Notebook layout: the three docs sections as tabs in the top bar, with the App link, search,
       // language and theme beside them, the same on every docs page; the page list in the sidebar.
       tabMode="navbar"
-      tabs={[
-        { title: 'Guide', url: '/docs', description: 'Using the app' },
-        { title: 'Developers', url: '/dev', description: 'Building with it' },
-        { title: 'API reference', url: '/reference', description: 'Every endpoint' },
-      ]}
+      tabs={sectionTabs}
       nav={{ title: docsConfig.product, url: '/', mode: 'top' }}
-      links={[{ text: 'Site', url: docsConfig.appUrl, external: true }, { text: 'App', url: `${docsConfig.appUrl}/app`, external: true }]}>
+      links={[{ text: 'Site', url: docsConfig.appUrl, external: true }, { text: 'App', url: `${docsConfig.appUrl}/app`, external: true }]}
+      sidebar={{ footer: <AiLinks section={page.site} /> }}>
       {/* Inside the layout: the panel takes the table of contents' place in its grid while open. */}
       <AISearchPanel />
       <Suspense><Article page={page} /></Suspense>

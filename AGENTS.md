@@ -4,7 +4,8 @@ This file is an index. The rules live in the documents below; read them before
 changing anything, and follow them over your own defaults. Do not copy their content here.
 
 Live: the app https://remy-auth.gedw99.workers.dev; the developer docs https://remy-auth-docs.gedw99.workers.dev/dev
-(the guide `/docs`, the API reference `/reference`). The documents below are the English developer docs'
+(the product guide `/docs`, the API reference `/reference`; MCP servers `/api/mcp/dev`, `/api/mcp/reference`,
+`/api/mcp/docs`; everything for AI tools at `/llms.txt`). The documents below are the English developer docs'
 source, `docs/content/dev/*.md`: read those, not the translations beside them (`*.es.md`).
 
 1. [Development principles](docs/content/dev/development.md) — ownership, single source of truth,

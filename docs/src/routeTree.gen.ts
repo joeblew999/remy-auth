@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CspReportRouteImport } from './routes/csp-report'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as DevSplatRouteImport } from './routes/dev/$'
@@ -21,6 +22,8 @@ import { Route as DocsChar123Char125DotmdRouteImport } from './routes/docs/{$}[.
 import { Route as DocsChar123Char125DottxtRouteImport } from './routes/docs/{$}[.]txt'
 import { Route as OgSplatRouteImport } from './routes/og/$'
 import { Route as ReferenceSplatRouteImport } from './routes/reference/$'
+import { Route as ReferenceChar123Char125DotmdRouteImport } from './routes/reference/{$}[.]md'
+import { Route as ReferenceChar123Char125DottxtRouteImport } from './routes/reference/{$}[.]txt'
 import { Route as ApiChatSiteRouteImport } from './routes/api/chat.$site'
 import { Route as ApiMcpSiteRouteImport } from './routes/api/mcp.$site'
 import { Route as ApiSearchSiteRouteImport } from './routes/api/search.$site'
@@ -33,6 +36,11 @@ const IndexRoute = IndexRouteImport.update({
 const CspReportRoute = CspReportRouteImport.update({
   id: '/csp-report',
   path: '/csp-report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
@@ -86,6 +94,18 @@ const ReferenceSplatRoute = ReferenceSplatRouteImport.update({
   path: '/reference/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReferenceChar123Char125DotmdRoute =
+  ReferenceChar123Char125DotmdRouteImport.update({
+    id: '/reference/{$}.md',
+    path: '/reference/{$}.md',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ReferenceChar123Char125DottxtRoute =
+  ReferenceChar123Char125DottxtRouteImport.update({
+    id: '/reference/{$}.txt',
+    path: '/reference/{$}.txt',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiChatSiteRoute = ApiChatSiteRouteImport.update({
   id: '/api/chat/$site',
   path: '/api/chat/$site',
@@ -105,6 +125,7 @@ const ApiSearchSiteRoute = ApiSearchSiteRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/csp-report': typeof CspReportRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dev/$': typeof DevSplatRoute
@@ -115,6 +136,8 @@ export interface FileRoutesByFullPath {
   '/docs/{$}.txt': typeof DocsChar123Char125DottxtRoute
   '/og/$': typeof OgSplatRoute
   '/reference/$': typeof ReferenceSplatRoute
+  '/reference/{$}.md': typeof ReferenceChar123Char125DotmdRoute
+  '/reference/{$}.txt': typeof ReferenceChar123Char125DottxtRoute
   '/api/chat/$site': typeof ApiChatSiteRoute
   '/api/mcp/$site': typeof ApiMcpSiteRoute
   '/api/search/$site': typeof ApiSearchSiteRoute
@@ -122,6 +145,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/csp-report': typeof CspReportRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dev/$': typeof DevSplatRoute
@@ -132,6 +156,8 @@ export interface FileRoutesByTo {
   '/docs/{$}.txt': typeof DocsChar123Char125DottxtRoute
   '/og/$': typeof OgSplatRoute
   '/reference/$': typeof ReferenceSplatRoute
+  '/reference/{$}.md': typeof ReferenceChar123Char125DotmdRoute
+  '/reference/{$}.txt': typeof ReferenceChar123Char125DottxtRoute
   '/api/chat/$site': typeof ApiChatSiteRoute
   '/api/mcp/$site': typeof ApiMcpSiteRoute
   '/api/search/$site': typeof ApiSearchSiteRoute
@@ -140,6 +166,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/csp-report': typeof CspReportRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dev/$': typeof DevSplatRoute
@@ -150,6 +177,8 @@ export interface FileRoutesById {
   '/docs/{$}.txt': typeof DocsChar123Char125DottxtRoute
   '/og/$': typeof OgSplatRoute
   '/reference/$': typeof ReferenceSplatRoute
+  '/reference/{$}.md': typeof ReferenceChar123Char125DotmdRoute
+  '/reference/{$}.txt': typeof ReferenceChar123Char125DottxtRoute
   '/api/chat/$site': typeof ApiChatSiteRoute
   '/api/mcp/$site': typeof ApiMcpSiteRoute
   '/api/search/$site': typeof ApiSearchSiteRoute
@@ -159,6 +188,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/csp-report'
+    | '/llms.txt'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/dev/$'
@@ -169,6 +199,8 @@ export interface FileRouteTypes {
     | '/docs/{$}.txt'
     | '/og/$'
     | '/reference/$'
+    | '/reference/{$}.md'
+    | '/reference/{$}.txt'
     | '/api/chat/$site'
     | '/api/mcp/$site'
     | '/api/search/$site'
@@ -176,6 +208,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/csp-report'
+    | '/llms.txt'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/dev/$'
@@ -186,6 +219,8 @@ export interface FileRouteTypes {
     | '/docs/{$}.txt'
     | '/og/$'
     | '/reference/$'
+    | '/reference/{$}.md'
+    | '/reference/{$}.txt'
     | '/api/chat/$site'
     | '/api/mcp/$site'
     | '/api/search/$site'
@@ -193,6 +228,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/csp-report'
+    | '/llms.txt'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/dev/$'
@@ -203,6 +239,8 @@ export interface FileRouteTypes {
     | '/docs/{$}.txt'
     | '/og/$'
     | '/reference/$'
+    | '/reference/{$}.md'
+    | '/reference/{$}.txt'
     | '/api/chat/$site'
     | '/api/mcp/$site'
     | '/api/search/$site'
@@ -211,6 +249,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CspReportRoute: typeof CspReportRoute
+  LlmsDottxtRoute: typeof LlmsDottxtRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   DevSplatRoute: typeof DevSplatRoute
@@ -221,6 +260,8 @@ export interface RootRouteChildren {
   DocsChar123Char125DottxtRoute: typeof DocsChar123Char125DottxtRoute
   OgSplatRoute: typeof OgSplatRoute
   ReferenceSplatRoute: typeof ReferenceSplatRoute
+  ReferenceChar123Char125DotmdRoute: typeof ReferenceChar123Char125DotmdRoute
+  ReferenceChar123Char125DottxtRoute: typeof ReferenceChar123Char125DottxtRoute
   ApiChatSiteRoute: typeof ApiChatSiteRoute
   ApiMcpSiteRoute: typeof ApiMcpSiteRoute
   ApiSearchSiteRoute: typeof ApiSearchSiteRoute
@@ -240,6 +281,13 @@ declare module '@tanstack/react-router' {
       path: '/csp-report'
       fullPath: '/csp-report'
       preLoaderRoute: typeof CspReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/robots.txt': {
@@ -312,6 +360,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReferenceSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reference/{$}.md': {
+      id: '/reference/{$}.md'
+      path: '/reference/{$}.md'
+      fullPath: '/reference/{$}.md'
+      preLoaderRoute: typeof ReferenceChar123Char125DotmdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reference/{$}.txt': {
+      id: '/reference/{$}.txt'
+      path: '/reference/{$}.txt'
+      fullPath: '/reference/{$}.txt'
+      preLoaderRoute: typeof ReferenceChar123Char125DottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat/$site': {
       id: '/api/chat/$site'
       path: '/api/chat/$site'
@@ -339,6 +401,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CspReportRoute: CspReportRoute,
+  LlmsDottxtRoute: LlmsDottxtRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   DevSplatRoute: DevSplatRoute,
@@ -349,6 +412,8 @@ const rootRouteChildren: RootRouteChildren = {
   DocsChar123Char125DottxtRoute: DocsChar123Char125DottxtRoute,
   OgSplatRoute: OgSplatRoute,
   ReferenceSplatRoute: ReferenceSplatRoute,
+  ReferenceChar123Char125DotmdRoute: ReferenceChar123Char125DotmdRoute,
+  ReferenceChar123Char125DottxtRoute: ReferenceChar123Char125DottxtRoute,
   ApiChatSiteRoute: ApiChatSiteRoute,
   ApiMcpSiteRoute: ApiMcpSiteRoute,
   ApiSearchSiteRoute: ApiSearchSiteRoute,
