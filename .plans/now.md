@@ -41,6 +41,12 @@ then tools, then translating.
      - **Provenance moves under the frontmatter:** YAML must open the file, but `i18n.mjs` expects the
        `translated-from` line first (regex at line 29, write at 220); both change to "after the
        frontmatter", or all 8 Spanish docs read as unmarked until step 3 replaces them.
+     - **Our docs link check goes to Fumadocs' link checker** (`next-validate-link` 1.6.7, which Fumadocs
+       recommends): it checks the Markdown against the loader's pages and headings, in place of our own
+       Playwright crawl (`tests/docs.spec.ts:136`). Its peer `@react-router/dev` needs a scratch trial
+       first (**assumed** optional); if it fails, our check stays and the gap is recorded.
+     - No other new tool: `@fumadocs/cli` adds fumadocs-ui (we use shadcn); `fumadocs-openapi` and
+       `fumadocs-typescript` are for step 5 at the earliest.
      - The loader details (docsTable slugs and order, `hideLocale`, `renderName`) are in
        [the plan](docs-for-consumers.md#0-what-our-stack-already-offers).
    - b. **Paraglide plurals** ([plan](translation-pipeline.md)): `=other` becomes `=*` in the 13 catalogs
