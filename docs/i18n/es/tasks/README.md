@@ -150,3 +150,19 @@ través de mise: fuera de una tarea, el shim de Node de mise vuelve a aplicar `[
 
 Las credenciales vienen del login de Wrangler, o del llavero a través de fnox
 ([herramientas](../docs/tooling.md#secrets-fnox)).
+
+### Planes [#plans]
+
+La regla de los planes ([cómo trabajamos](../docs/how-we-work.md#plans-few-short-closed)) como tareas, igual en
+todos los proyectos: `.plans/now.md` es la única lista ordenada, `.plans/*.md` los pocos archivos de plan abiertos,
+`.plans/done/` y `.plans/parked/` el resto, `.plans/stability-log.md` opcional. Un proyecto sin
+`.plans/` pasa `plans:check` y no tiene nada que listar.
+
+| Tarea | Hace |
+| --- | --- |
+| `plans:status` | Los elementos abiertos de `now.md` por sección, los archivos de plan abiertos con su primera línea `Status:`/`Closed`/`Parked` y su último commit (STALE a los 14 días), los planes aparcados. `--json` para agentes |
+| `plans:check` | `now.md` existe, cada enlace relativo a un `.md` bajo `.plans/` resuelve, ningún `.md` fuera de `.plans/`, `done/` y `parked/`, cada archivo de plan abierto enlazado desde `now.md`. Instantánea, sin red; `project:check` la ejecuta primero |
+| `plans:close -- <plan> "<lo publicado>"` | Añade `Closed <hoy>: ...` bajo el título, lo mueve a `done/` (desde `.plans/` o `parked/`; `git mv` si está versionado), reapunta los enlaces relativos hacia él en `.plans/`, `docs/`, `tasks/`, `packages/*/README.md` y los `*.md` de la raíz, y sus propios enlaces desde la carpeta nueva, y tacha su elemento en `now.md` |
+| `plans:park -- <plan> "<por qué>"` | Lo mismo hacia `parked/` con `Parked <hoy>: ...` |
+
+`close` y `park` cambian archivos y preparan el movimiento, pero nunca hacen commit: lee `git diff` y luego haz commit.

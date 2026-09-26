@@ -63,9 +63,9 @@ env = { TEST_TARGET = "local" }
 run = "./node_modules/.bin/playwright test --project=ours"
 
 ["project:check"]
-description = "Tier 0 while coding: typecheck and build, no browser (~15 s), then i18n:check (missing or stale translations are a warning here). Code freely; run a test tier when something looks wrong (docs/how-we-work.md, test tiers)"
+description = "Tier 0 while coding: plans:check, typecheck and build, no browser (~15 s), then i18n:check (missing or stale translations are a warning here). Code freely; run a test tier when something looks wrong (docs/how-we-work.md, test tiers)"
 dir = "{{config_root}}"
-run = [{ task = "project:typecheck" }, "./node_modules/.bin/vite build", { task = "i18n:check" }]
+run = [{ task = "plans:check" }, { task = "project:typecheck" }, "./node_modules/.bin/vite build", { task = "i18n:check" }]
 
 ["project:test:smoke"]
 description = "Tier 1, smoke: build, then tests/smoke.spec.ts only: every page in en and ar answers with a heading, the home and a docs page hydrate without errors, search and ask respond (~15 s)"

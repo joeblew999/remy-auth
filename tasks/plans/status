@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="LOCAL, read only: open items in .plans/now.md, open plan files with their Status line and last commit (stale after 14 days), parked plans. --json for agents. Instant"
+#MISE dir="{{config_root}}"
+# A shell wrapper so the module beside it loads as ESM wherever this directory is included from.
+set -euo pipefail
+exec node "$(dirname "$0")/plans.mjs" status "$@"
