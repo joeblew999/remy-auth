@@ -153,14 +153,25 @@ When the owner hands over decisions, for example to finish work unattended:
   This once released a version whose checks had failed.
 - Report what was tested and what was not; never call untested work verified.
 
-## Check with mise tasks, not by hand
+## Manual work becomes mise tasks over real tools
 
 Owner, 2026-09-26: "You need to get to the point that your checking uses mise and the underlying tool!"
-Every check runs through a mise task that wraps the real tool: the test tiers (`project:test:*`,
-Playwright), `project:test:live` after a deploy, `plans:check`, `i18n:check`, `browser:shots` to look.
-No `curl` loops, one-off scripts or ad-hoc greps to decide whether something works: they cannot be
-repeated, apps on the package do not get them, and nobody sees them later. A check that is missing becomes
-a shared task first, then it is used.
+and "make sure you have something in docs about using your judgment about things that you do manually
+being turned into a mise task that uses a tool ... It's vital because all our repos will be using this."
+
+- Every check runs through a mise task that wraps the real tool: the test tiers (`project:test:*`,
+  Playwright), `project:test:live` after a deploy, `plans:check`, `i18n:check`, `browser:shots` to look.
+  No `curl` loops, one-off scripts or ad-hoc greps to decide whether something works: they cannot be
+  repeated, apps on the package do not get them, and nobody sees them later.
+- Use judgement on everything done by hand, not only checks: the second time you type the same commands
+  or reach for a throwaway script, it becomes a shared task (in `tasks/`, so every app gets it) that calls
+  the tool that does the job: Wrangler, Playwright, gh, npm, mise's own features.
+- No tool found? Do not write a script and move on. Add a line to `.plans/now.md` to survey for one
+  ([choose tools by survey](#choose-tools-by-survey-not-by-first-find)); if the search or the change is big,
+  write a plan in `.plans/` (or `.plans/parked/`) yourself. Agents create these lines and plans as they
+  meet such things; the owner does not have to ask.
+- Scripts are the last resort, kept small and next to the task that runs them; where several tasks share
+  logic, it moves toward one command-line tool ([parked: remy-cli](../.plans/parked/remy-cli.md)).
 
 ## Sharing one machine between agents
 
