@@ -63,7 +63,9 @@ Also `project-layout` (step 1: not merged, its fixes ported). Keep the uncommitt
 Fixed in the package and shared tasks the same day (release 0.13.0, then remy-auth-app moves to it):
 `AppProviders` (direction, theme, source link) and `themeChecks`; `project:check` builds before it
 type-checks; `clockRouteOptions` for the Clock route; the consumer checklist in the UI package docs
-(`AppProviders`, a route per path, `tests/smoke.spec.ts`, `.plans/now.md`, fnox for installs).
+(`AppProviders`, a route per path, `tests/smoke.spec.ts`, `.plans/now.md`, installs and upgrades
+through `project:setup` and `project:upgrade-ui`, which remy-auth-app's move to 0.12.0 should have used
+instead of being done by hand).
 
 ## Look (from `browser:shots`, 2026-09-26)
 

@@ -73,8 +73,9 @@ run = "./node_modules/.bin/playwright test --project=ours"
 ["project:check"]
 description = "Tier 0 while coding: plans:check, build and typecheck, no browser (~15 s), then i18n:check, and docs:check when the app has a docs Worker (docs/) (missing or stale translations are a warning here). Code freely; run a test tier when something looks wrong (docs/content/dev/how-we-work.md, test tiers)"
 dir = "{{config_root}}"
-# Build before typecheck: the build regenerates TanStack's route tree (src/routeTree.gen.ts), so a route
-# added since the last build type-checks instead of failing until someone builds by hand.
+# Build before typecheck: in a TanStack Start app the build is TanStack's route generator (Start's Vite
+# plugin writes src/routeTree.gen.ts, with Start's Register types). TanStack's router CLI (tsr generate)
+# writes the tree without that block, so the next build rewrites the file; tried and dropped 2026-09-26.
 run = [{ task = "plans:check" }, "./node_modules/.bin/vite build", { task = "project:typecheck" }, { task = "i18n:check" }, "[ ! -d docs ] || mise run docs:check"]
 
 ["project:test:smoke"]

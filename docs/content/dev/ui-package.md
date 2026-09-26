@@ -53,8 +53,9 @@ prerendered example):
 - **`tests/smoke.spec.ts`**, one `smokeChecks(...)` call: `project:test:smoke` and the check after every
   `cf:deploy` (`project:test:live`) run it, and fail with "No tests found" without it.
 - **`.plans/now.md`**, the one ordered list of open work (`plans:check`, in tier 0).
-- **fnox pinned in its `mise.toml`**, with `GITHUB_TOKEN` in the keychain, for installing from GitHub
-  Packages (below).
+- **Installs and upgrades through the shared tasks**, never by hand: `mise run project:setup` (install,
+  skills, MCP, verify) and `mise run project:upgrade-ui <version>` (the exact package version and the
+  tasks include at the same tag, then verify). Both take GitHub Packages' token from `gh auth token`.
 
 ## Exports
 
@@ -135,8 +136,8 @@ Consumers add to their `.npmrc`:
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
-and install with a token that has `read:packages`, kept in the keychain through fnox (pinned in the app's
-`[tools]`): `fnox set -p keychain GITHUB_TOKEN <token>` once, then `fnox exec -- npm install`. Released versions are in the
+and install through `mise run project:setup`, which takes a `read:packages` token from `gh auth token`
+(or `GITHUB_TOKEN` in the shell). Released versions are in the
 [changelog](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
 
 ## Writing a part
