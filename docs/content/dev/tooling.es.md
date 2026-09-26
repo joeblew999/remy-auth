@@ -13,8 +13,11 @@ mise run cf:cli -- --help
 mise run auth:info
 ```
 
-Node está fijado en `mise.toml`; la CLI de Better Auth (`auth`), Wrangler, Chrome DevTools y Modern Web Guidance están fijados en
-`package.json` y `package-lock.json`. `project:setup` ejecuta `npm ci`, instala los skills oficiales fijados
+Todas las herramientas llegan a través de mise, hasta el nivel del sistema operativo. Node y fnox están fijados en
+el `[tools]` de `mise.toml`; las tareas compartidas fijan las herramientas que ejecutan como `tools` a nivel de tarea, de modo que cada app que
+las incluye obtiene las mismas versiones sin una entrada propia: `gh` (`project:setup`, `project:upgrade-ui`,
+`ui:release`), `jq`, `@lingual/i18n-check` y Claude Code (`i18n:*`). La CLI de Better Auth (`auth`), Wrangler,
+Chrome DevTools y Modern Web Guidance están fijados en `package.json` y `package-lock.json`. `project:setup` ejecuta `npm ci`, instala los skills oficiales fijados
 para Codex y Claude, registra las herramientas MCP del proyecto y luego ejecuta `mise run project:verify`. Se detiene ante cualquier
 paso fallido. Los comandos usan los binarios locales y aceptan los argumentos de la CLI original
 después de `--`; no descargan una CLI diferente en tiempo de ejecución.
