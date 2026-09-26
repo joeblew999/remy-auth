@@ -1,4 +1,4 @@
-import { zoneChecks, publicPageChecks, entryChecks, demoChecks, formatsChecks, textChecks, fontChecks, observabilityChecks, cspChecks } from './checks.js';
+import { zoneChecks, publicPageChecks, entryChecks, demoChecks, appNavChecks, formatsChecks, textChecks, fontChecks, observabilityChecks, cspChecks } from './checks.js';
 import { sitePaths, appPaths, allPaths } from './paths.js';
 import { navigationBlockingChecks } from './showcase/navigation-blocking.checks.js';
 import { preloadChecks } from './showcase/preload.checks.js';
@@ -39,6 +39,7 @@ export function serverAppChecks({ service, ownSitePaths = [], ownAppPaths = [], 
   fontChecks({ paths: sitePaths });
   entryChecks({ paths: every, mode: 'redirect' });
   demoChecks();
+  appNavChecks();
   observabilityChecks({ service, paths: every });
   cspChecks({ paths: every, enforce: cspEnforced });
   searchParamsChecks();
@@ -58,6 +59,7 @@ export function prerenderedAppChecks({ service, ownSitePaths = [], ownAppPaths =
   publicPageChecks({ paths: sitePaths, prerendered: true });
   entryChecks({ paths: every, mode: 'static' });
   demoChecks();
+  appNavChecks();
   formatsChecks(formats);
   textChecks({ paths: every });
   observabilityChecks({ service, paths: every });

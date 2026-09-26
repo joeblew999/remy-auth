@@ -38,6 +38,9 @@ Every page is one of two kinds, listed in `paths` and never mixed:
 - **App pages** (`appPaths`, under `/app`) come from `app-pages`, framed by `AppShell` (shadcn's
   sidebar-16 block): they need JavaScript and `pageHead` marks them `noindex`. They have their own
   export so a site page never downloads the app shell.
+- **App navigation**: one list, `app-nav.tsx`. Tablets and desktops get the sidebar (collapsing to icons);
+  phones get the bottom bar (`blocks/bottom-nav`, stock shadcn parts, since shadcn has no bottom navigation)
+  with the core pages and More, which opens the sidebar. Why: [the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/mobile-navigation.md).
 
 ## Exports
 

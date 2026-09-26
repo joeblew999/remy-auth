@@ -16,10 +16,13 @@ import { Route as RobotsChar91DotChar93txtRouteImport } from './../packages/ui/s
 import { Route as SitemapChar91DotChar93xmlRouteImport } from './../packages/ui/src/parts/seo-routes/routes/sitemap[.]xml'
 import { Route as ApiDotsplatRouteImport } from './routes/api.$'
 import { Route as AppDotindexRouteImport } from './routes/app.index'
+import { Route as AppDotaccountRouteImport } from './routes/app.account'
 import { Route as AppDotaskRouteImport } from './routes/app.ask'
+import { Route as AppDotclockRouteImport } from './routes/app.clock'
 import { Route as AppDotdemoRouteImport } from './routes/app.demo'
 import { Route as AppDotformatsRouteImport } from './routes/app.formats'
 import { Route as AppDotlocationRouteImport } from './routes/app.location'
+import { Route as AppDotsettingsRouteImport } from './routes/app.settings'
 import { Route as DocsDotsplatRouteImport } from './routes/docs.$'
 import { Route as TimeZonesDotsplatRouteImport } from './../packages/ui/src/parts/time-zones/routes/time-zones.$'
 
@@ -60,9 +63,19 @@ const AppDotindexRoute = AppDotindexRouteImport.update({
   path: '/app/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppDotaccountRoute = AppDotaccountRouteImport.update({
+  id: '/app/account',
+  path: '/app/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppDotaskRoute = AppDotaskRouteImport.update({
   id: '/app/ask',
   path: '/app/ask',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppDotclockRoute = AppDotclockRouteImport.update({
+  id: '/app/clock',
+  path: '/app/clock',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppDotdemoRoute = AppDotdemoRouteImport.update({
@@ -78,6 +91,11 @@ const AppDotformatsRoute = AppDotformatsRouteImport.update({
 const AppDotlocationRoute = AppDotlocationRouteImport.update({
   id: '/app/location',
   path: '/app/location',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppDotsettingsRoute = AppDotsettingsRouteImport.update({
+  id: '/app/settings',
+  path: '/app/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocsDotsplatRoute = DocsDotsplatRouteImport.update({
@@ -98,10 +116,13 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsChar91DotChar93txtRoute
   '/sitemap.xml': typeof SitemapChar91DotChar93xmlRoute
   '/api/$': typeof ApiDotsplatRoute
+  '/app/account': typeof AppDotaccountRoute
   '/app/ask': typeof AppDotaskRoute
+  '/app/clock': typeof AppDotclockRoute
   '/app/demo': typeof AppDotdemoRoute
   '/app/formats': typeof AppDotformatsRoute
   '/app/location': typeof AppDotlocationRoute
+  '/app/settings': typeof AppDotsettingsRoute
   '/docs/$': typeof DocsDotsplatRoute
   '/time-zones/$': typeof TimeZonesDotsplatRoute
   '/app/': typeof AppDotindexRoute
@@ -113,10 +134,13 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsChar91DotChar93txtRoute
   '/sitemap.xml': typeof SitemapChar91DotChar93xmlRoute
   '/api/$': typeof ApiDotsplatRoute
+  '/app/account': typeof AppDotaccountRoute
   '/app/ask': typeof AppDotaskRoute
+  '/app/clock': typeof AppDotclockRoute
   '/app/demo': typeof AppDotdemoRoute
   '/app/formats': typeof AppDotformatsRoute
   '/app/location': typeof AppDotlocationRoute
+  '/app/settings': typeof AppDotsettingsRoute
   '/docs/$': typeof DocsDotsplatRoute
   '/time-zones/$': typeof TimeZonesDotsplatRoute
   '/app': typeof AppDotindexRoute
@@ -129,10 +153,13 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsChar91DotChar93txtRoute
   '/sitemap.xml': typeof SitemapChar91DotChar93xmlRoute
   '/api/$': typeof ApiDotsplatRoute
+  '/app/account': typeof AppDotaccountRoute
   '/app/ask': typeof AppDotaskRoute
+  '/app/clock': typeof AppDotclockRoute
   '/app/demo': typeof AppDotdemoRoute
   '/app/formats': typeof AppDotformatsRoute
   '/app/location': typeof AppDotlocationRoute
+  '/app/settings': typeof AppDotsettingsRoute
   '/docs/$': typeof DocsDotsplatRoute
   '/time-zones/$': typeof TimeZonesDotsplatRoute
   '/app/': typeof AppDotindexRoute
@@ -146,10 +173,13 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/api/$'
+    | '/app/account'
     | '/app/ask'
+    | '/app/clock'
     | '/app/demo'
     | '/app/formats'
     | '/app/location'
+    | '/app/settings'
     | '/docs/$'
     | '/time-zones/$'
     | '/app/'
@@ -161,10 +191,13 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/api/$'
+    | '/app/account'
     | '/app/ask'
+    | '/app/clock'
     | '/app/demo'
     | '/app/formats'
     | '/app/location'
+    | '/app/settings'
     | '/docs/$'
     | '/time-zones/$'
     | '/app'
@@ -176,10 +209,13 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/api/$'
+    | '/app/account'
     | '/app/ask'
+    | '/app/clock'
     | '/app/demo'
     | '/app/formats'
     | '/app/location'
+    | '/app/settings'
     | '/docs/$'
     | '/time-zones/$'
     | '/app/'
@@ -192,10 +228,13 @@ export interface RootRouteChildren {
   RobotsChar91DotChar93txtRoute: typeof RobotsChar91DotChar93txtRoute
   SitemapChar91DotChar93xmlRoute: typeof SitemapChar91DotChar93xmlRoute
   ApiDotsplatRoute: typeof ApiDotsplatRoute
+  AppDotaccountRoute: typeof AppDotaccountRoute
   AppDotaskRoute: typeof AppDotaskRoute
+  AppDotclockRoute: typeof AppDotclockRoute
   AppDotdemoRoute: typeof AppDotdemoRoute
   AppDotformatsRoute: typeof AppDotformatsRoute
   AppDotlocationRoute: typeof AppDotlocationRoute
+  AppDotsettingsRoute: typeof AppDotsettingsRoute
   DocsDotsplatRoute: typeof DocsDotsplatRoute
   TimeZonesDotsplatRoute: typeof TimeZonesDotsplatRoute
   AppDotindexRoute: typeof AppDotindexRoute
@@ -252,11 +291,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDotindexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/account': {
+      id: '/app/account'
+      path: '/app/account'
+      fullPath: '/app/account'
+      preLoaderRoute: typeof AppDotaccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/ask': {
       id: '/app/ask'
       path: '/app/ask'
       fullPath: '/app/ask'
       preLoaderRoute: typeof AppDotaskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/clock': {
+      id: '/app/clock'
+      path: '/app/clock'
+      fullPath: '/app/clock'
+      preLoaderRoute: typeof AppDotclockRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/demo': {
@@ -278,6 +331,13 @@ declare module '@tanstack/react-router' {
       path: '/app/location'
       fullPath: '/app/location'
       preLoaderRoute: typeof AppDotlocationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/app/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppDotsettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/docs/$': {
@@ -304,10 +364,13 @@ const rootRouteChildren: RootRouteChildren = {
   RobotsChar91DotChar93txtRoute: RobotsChar91DotChar93txtRoute,
   SitemapChar91DotChar93xmlRoute: SitemapChar91DotChar93xmlRoute,
   ApiDotsplatRoute: ApiDotsplatRoute,
+  AppDotaccountRoute: AppDotaccountRoute,
   AppDotaskRoute: AppDotaskRoute,
+  AppDotclockRoute: AppDotclockRoute,
   AppDotdemoRoute: AppDotdemoRoute,
   AppDotformatsRoute: AppDotformatsRoute,
   AppDotlocationRoute: AppDotlocationRoute,
+  AppDotsettingsRoute: AppDotsettingsRoute,
   DocsDotsplatRoute: DocsDotsplatRoute,
   TimeZonesDotsplatRoute: TimeZonesDotsplatRoute,
   AppDotindexRoute: AppDotindexRoute,

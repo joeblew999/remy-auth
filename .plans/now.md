@@ -50,6 +50,8 @@ then tools, then translating.
    package, the `AGENTS.md` block pointing into `node_modules`.
 6. **Release and adopt:** the shared UI released, remy-auth-app moved onto it, proving the translation
    tasks and docs in an app.
+   It adds the app's new pages, `/app/clock`, `/app/account` and `/app/settings`, with the phone's bottom
+   bar ([mobile navigation](mobile-navigation.md), built 2026-09-26).
 
 **Docs Ask AI is off** (owner, 2026-09-26) until 2a lands: `docs:answers:off` in production, `DOCS_ASK = "off"`
 in mise.toml (no docs:publish on deploy, the live answer check skipped). Turned back on at the end of 2a:

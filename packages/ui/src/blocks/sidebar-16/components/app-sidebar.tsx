@@ -1,18 +1,23 @@
 import { useContext } from 'react';
 import { Link } from '@tanstack/react-router';
-import { ArrowLeftIcon, CalendarDaysIcon, GalleryVerticalEndIcon, LayoutDashboardIcon, MapPinIcon, MousePointerClickIcon } from 'lucide-react';
+import { ArrowLeftIcon, GalleryVerticalEndIcon } from 'lucide-react';
+import { appNavItems } from '../../../app-nav';
 import { getTextDirection, type Locale } from '../../../paraglide/runtime.js';
 import { m } from '../../../paraglide/messages.js';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../../components/sidebar';
 import { NavMain } from './nav-main';
 import { AppNavLinks } from '../../../shell';
 
-/** sidebar-16's AppSidebar with Remy's data; it opens on the reading side (right for right-to-left languages). */
+/**
+ * sidebar-16's AppSidebar with Remy's data; it opens on the reading side (right for right-to-left languages).
+ * On tablets and desktops it collapses to icons (a rail, Material 3's medium widths); on phones it is the
+ * sheet the bottom bar's More opens (.plans/mobile-navigation.md).
+ */
 export function AppSidebar({ locale }: { locale: Locale }) {
   const o = { locale };
   const appLinks = useContext(AppNavLinks);
   return (
-    <Sidebar side={getTextDirection(locale) === 'rtl' ? 'right' : 'left'} className="top-(--header-height) h-[calc(100svh-var(--header-height))]!">
+    <Sidebar collapsible="icon" side={getTextDirection(locale) === 'rtl' ? 'right' : 'left'} className="top-(--header-height) h-[calc(100svh-var(--header-height))]!">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -28,12 +33,7 @@ export function AppSidebar({ locale }: { locale: Locale }) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain label={m.nav_heading({}, o)} items={[
-          { title: m.nav_home({}, o), to: '/app', icon: <LayoutDashboardIcon /> },
-          { title: m.nav_formats({}, o), to: '/app/formats', icon: <CalendarDaysIcon /> },
-          { title: m.nav_demo({}, o), to: '/app/demo', icon: <MousePointerClickIcon /> },
-          { title: m.nav_location({}, o), to: '/app/location', icon: <MapPinIcon /> },
-        ]} />
+        <NavMain label={m.nav_heading({}, o)} items={appNavItems(locale)} />
       </SidebarContent>
       {/* In the footer, which stays in view however short the screen (a phone in landscape). */}
       <SidebarFooter>

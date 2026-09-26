@@ -7,6 +7,16 @@ package follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- Mobile navigation (`.plans/mobile-navigation.md`): on phones (below `md`, 768 px) a bottom bar
+  (`blocks/bottom-nav`, an owned block of stock shadcn parts: shadcn has none) with the core pages and
+  More, which opens the sidebar as its sheet; on tablets and desktops the sidebar, now collapsing to
+  icons (`collapsible="icon"`). One list feeds both: `app-nav.tsx` (`appNavItems`, `matchesNav`).
+- App pages `ClockPage` (time now in chosen zones; the route keeps them), `SettingsPage` (language,
+  appearance, the device's zone and languages) and `AccountPage` (an empty state until sign-in);
+  `appPaths` gains `/app/clock`, `/app/account`, `/app/settings`, so an app on the package adds those
+  three routes when it updates. New catalog keys are English only while translation is frozen.
+- `checks`: `appNavChecks` (the phone bar, More, the desktop sidebar, the clock's zones), run by both
+  `serverAppChecks` and `prerenderedAppChecks`.
 - `checks`: `fontChecks` enforces a font byte budget: a first visit to each site page downloads at
   most `fontBudget` (300 KB, option `budget`) of fonts, in every language. Measured on a local
   production build: 28.7 KB (Latin) to 227.2 KB (`/ar/formats`) (`.plans/fonts.md`, step 1).

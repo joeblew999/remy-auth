@@ -275,6 +275,44 @@ export function entryChecks({ paths, mode }) {
 export const hydrated = locator => expect.poll(() => locator.evaluate(node => Object.keys(node).some(key => key.startsWith('__reactProps'))), { message: 'hydrated' }).toBe(true);
 
 /** The interactive demo: the counter, the localized reservation form, and a same-tab language switch. */
+/**
+ * The app's two navigations (.plans/mobile-navigation.md): on a phone the bottom bar holds the core pages
+ * and More opens the sidebar with every page; on a tablet or desktop the sidebar alone, no bar.
+ */
+export function appNavChecks() {
+  const o = { locale: baseLocale };
+  const bar = page => page.getByRole('navigation', { name: m.nav_bottom({}, o), exact: true });
+  test('on a phone the bottom bar holds the core pages, and More opens every page', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(localizedPath('/app', baseLocale));
+    await expect(bar(page).getByRole('link')).toHaveCount(4);
+    await hydrated(bar(page).getByRole('button', { name: m.nav_more({}, o), exact: true }));
+    await bar(page).getByRole('link', { name: m.nav_clock({}, o), exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(m.clock_title({}, o));
+    await expect(bar(page).getByRole('link', { name: m.nav_clock({}, o), exact: true })).toHaveAttribute('aria-current', 'page');
+    await bar(page).getByRole('button', { name: m.nav_more({}, o), exact: true }).click();
+    await page.getByRole('dialog').getByRole('link', { name: m.nav_settings({}, o), exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(m.settings_title({}, o));
+  });
+  test('on a desktop the sidebar has every page and there is no bottom bar', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(localizedPath('/app', baseLocale));
+    await expect(bar(page)).toBeHidden();
+    await expect(page.getByRole('link', { name: m.nav_settings({}, o), exact: true })).toBeVisible();
+  });
+  test('the clock adds a time zone to its address and names an unknown one', async ({ page }) => {
+    await page.goto(`${localizedPath('/app/clock', baseLocale)}?zones=Asia/Tokyo`);
+    const field = page.getByLabel(m.clock_add({}, o), { exact: true });
+    await hydrated(field);
+    await field.fill('america/new_york');
+    await page.getByRole('button', { name: m.clock_add_button({}, o), exact: true }).click();
+    await expect(page).toHaveURL(/zones=Asia%2FTokyo%2CAmerica%2FNew_York|zones=Asia\/Tokyo,America\/New_York/);
+    await field.fill('Mars/Olympus');
+    await page.getByRole('button', { name: m.clock_add_button({}, o), exact: true }).click();
+    await expect(page.locator('#clock-zone-error')).toHaveText(m.zone_not_found({ zone: 'Mars/Olympus' }, o));
+  });
+}
+
 export function demoChecks() {
   for (const locale of checkedLocales) {
     const o = { locale };
