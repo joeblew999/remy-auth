@@ -352,5 +352,29 @@ only, so it is not the main route.
    hand-written tables keep the grouping only.
 8. **Later, the owner's call:** the AI Search public MCP or the Fumadocs MCP route; agent evals.
 
+## How shadcn does it (apps/v4 at 98a1fe6, 2026-09-26)
+
+Owner: "Fumadocs. Did you see how shadcn does it? ... you're likely missing a few tricks!" shadcn's docs
+are headless Fumadocs + shadcn, as ours. What they do, and what it means here:
+
+| Trick | Theirs | For us |
+| --- | --- | --- |
+| `loader()` is the single source | `lib/source.ts`: `loader({ baseUrl, source: docs.toFumadocsSource() })`; nav, search, sitemap, prev/next all read it | **Adopt.** A loader built from `docsTable` (virtual source, `defineI18n` over `docs/i18n`) replaces `docsNav`, the hand-built search indexes, sitemap/paths lists |
+| Frontmatter `title` + `description` on every page | description is required (no description → 404); feeds meta, OG, LLM lists | **The conformance gap.** Add a YAML block to each docs file (repo Markdown stays the source); replaces `firstHeading()`, `describe()`; a check that every page has one |
+| `meta.json` navigation | per folder, `root`, groups, external links (`[llms.txt](/llms.txt)`) | `docsTable` stays our meta, emitted as virtual meta entries (our files span the repo) |
+| Per-page `.md` | `/docs/*.md` served as `text/markdown`, pre-rendered, `.mdx` redirects, redirects mirrored | **Adopt** with `postprocess.includeProcessedMarkdown` + `getText('processed')` (a Worker cannot read files): our link rewriting and provenance stripping apply first |
+| Components swapped for real code in the Markdown | `lib/llm.ts`: previews → real `tsx` source with user import paths; lists → linked bullets | Not needed today (our docs have no JSX); copy it if we ever embed previews |
+| `llms.txt` | hand-curated, grouped, one-line description per link; listed in the sidebar | **Generate** with Fumadocs `llms(source).index()` once loader + descriptions exist; `llms-full.txt` optional (they have none) |
+| Copy page / View as Markdown / Open in ChatGPT, Claude | `docs-copy-page.tsx`, stock shadcn DropdownMenu + Popover; open-in links are `?q=` prompts with the URL | **Adopt**, fetching `<url>.md` on click instead of shipping the text in every page |
+| Search | `createFromSource(source)` (Orama, server) in a shadcn Command menu | `createFromSource` replaces our `createI18nSearchAPI` code once the loader exists |
+| Skill with rules, evals, live context | `skills/shadcn/SKILL.md`: rules digest → `rules/*.md` (Incorrect/Correct pairs), `evals/evals.json`, `` !`npx shadcn info --json` `` live context | **Adopt** as the `remy` skill in the package: prose-only rules as a digest + rule files, evals, `` !`mise run …` `` context |
+| AGENTS.md block → docs in `node_modules` | Next's template: `<!-- BEGIN:nextjs-agent-rules -->` pointing to `node_modules/next/dist/docs/` (version-pinned) | **Adopt**: settles pinning; replaces the GitHub `main` links |
+| Registry `meta.links`, `/code/*` → raw GitHub, `shadcn docs <name>` | links per item to docs, examples, upstream `.md` | Only if we publish a registry; a `/code/:path` redirect is cheap |
+| MCP server | serves their registry | Not now |
+| Docs checks | none (prettier, eslint, tsc) | We are ahead: link, translation and layout checks |
+
+The repo Markdown stays the source; the one change to the files is the frontmatter. The rest is a loader,
+`includeProcessedMarkdown`, three routes (`.md`, `llms.txt`, search via `createFromSource`) and the copy menu.
+
 Early lean, to test not assume (after question 0 has found what the stack gives and questions 1 and 2 have shrunk what must travel): a skill for how agents work plus the docs in the package for the
 version-matched reference, and `llms.txt` because Fumadocs makes it cheap.
