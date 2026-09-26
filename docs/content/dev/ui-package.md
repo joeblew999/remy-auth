@@ -42,6 +42,20 @@ Every page is one of two kinds, listed in `paths` and never mixed:
   phones get the bottom bar (`blocks/bottom-nav`, stock shadcn parts, since shadcn has no bottom navigation)
   with the core pages and More, which opens the sidebar. Why: [the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/mobile-navigation.md).
 
+What every app on the package has, so the shared tasks and checks work in it (remy-auth-app is the
+prerendered example):
+
+- **Its root renders pages in `AppProviders`** (`providers`): reading direction, the theme (the header's
+  toggle and the Settings page need it) and the app's own source link. The shared `themeChecks` fail
+  without it.
+- **A route for every path in `appPaths` and `sitePaths`**, each a few lines over the shared page (the
+  Clock spreads `clockRouteOptions` from `clock-route`).
+- **`tests/smoke.spec.ts`**, one `smokeChecks(...)` call: `project:test:smoke` and the check after every
+  `cf:deploy` (`project:test:live`) run it, and fail with "No tests found" without it.
+- **`.plans/now.md`**, the one ordered list of open work (`plans:check`, in tier 0).
+- **fnox pinned in its `mise.toml`**, with `GITHUB_TOKEN` in the keychain, for installing from GitHub
+  Packages (below).
+
 ## Exports
 
 All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers.
@@ -54,7 +68,9 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `paths` | `sitePaths`, `appPaths`, `allPaths`, `isAppPath` |
 | `pages` | `SiteShell` (alias `Shell`), `HomePage`, `FormatsContent`, `FormatsPage`, `Intro`, `ZoneBadge`, `SkipLink`, `Group`, `Row` |
 | `shell` | The site frame alone: `SiteShell` (alias `Shell`), `SiteNavLinks`, `Intro`, `ZoneBadge`, `SkipLink` (also exported by `pages`); import it where a page needs only the frame, so the home and formats pages stay out of that page's download |
-| `app-pages` | `AppShell`, `AppHomePage`, `AppFormatsPage`, `LocationPage`, `DemoPage` |
+| `app-pages` | `AppShell`, `AppHomePage`, `AppFormatsPage`, `LocationPage`, `DemoPage`, `ClockPage`, `SettingsPage`, `AccountPage` |
+| `providers` | `AppProviders`: what an app's root renders its pages in (direction, theme, source link) |
+| `clock-route` | `clockRouteOptions`, `clockDefaults`, `clockZones`: the Clock route's search params, kept out of the page's code |
 | `language` | `LanguageSwitcher` (plain links, site pages), `LanguageMenu` (shadcn DropdownMenu, app pages), `LanguageHint` |
 | `messages`, `runtime` | Compiled Paraglide messages and runtime |
 | `locale` | Paraglide's `getLocale`, `setLocale`, `localizeHref`, `localizeUrl`, `deLocalizeHref`, `cookieName` and more, plus `direction` and `localeName` |
@@ -119,7 +135,8 @@ Consumers add to their `.npmrc`:
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
-and install with a token that has `read:packages`. Released versions are in the
+and install with a token that has `read:packages`, kept in the keychain through fnox (pinned in the app's
+`[tools]`): `fnox set -p keychain GITHUB_TOKEN <token>` once, then `fnox exec -- npm install`. Released versions are in the
 [changelog](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
 
 ## Writing a part

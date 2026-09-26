@@ -58,27 +58,12 @@ setting):** `fumadocs-trial` (squash-merged), `worktree-wf_0e57b9eb-956-1`, `-95
 Also `project-layout` (step 1: not merged, its fixes ported). Keep the uncommitted Look work in `.claude/worktrees/agent-aca0ff9fa382158ea`
 (the Look list below) until they are folded in.
 
-## Found moving remy-auth-app to 0.12.0 (2026-09-26): fix here, in the package and shared tasks
+## Found moving remy-auth-app to 0.12.0 (2026-09-26)
 
-Each was worked around in remy-auth-app; the real fix belongs here, so no app meets it again.
-
-1. **The theme toggle did nothing in remy-auth-app**: its root had no `ThemeProvider` (remy-auth's has).
-   The package should give apps one root wrapper (theme, direction, `SourceLink`) instead of each root
-   wiring providers by hand, and a shared check should choose Dark and expect `class="dark"`: nothing
-   caught this.
-2. **`project:check` type-checks before it builds**, but only the build regenerates TanStack's route tree,
-   so any new route fails the gate until someone builds by hand. Build first, or generate the tree with
-   TanStack's own generator before `tsc`.
-3. **The new app pages' routes are copy-paste in every app** (Clock's `validateSearch` and defaults, the
-   head, the component): the package should export their route options, as it does for formats
-   (`formatsRouteOptions`), so an app's route file is one line.
-4. **`plans:check` requires `.plans/now.md` in every app**: fine as a rule, but the consumer recipe should
-   say so (remy-auth-app had none).
-5. **remy-auth-app had no `tests/smoke.spec.ts`**, so `project:test:live` after every deploy found no tests
-   (it fails loudly, which is how this surfaced). The consumer recipe, or `docs:init`-style scaffolding,
-   should create it: one `smokeChecks(...)` line.
-6. **Installing in a consumer needs `GITHUB_TOKEN`** (GitHub Packages), and remy-auth-app's mise has no
-   fnox: the consumer recipe should pin fnox and run installs through it, as here.
+Fixed in the package and shared tasks the same day (release 0.13.0, then remy-auth-app moves to it):
+`AppProviders` (direction, theme, source link) and `themeChecks`; `project:check` builds before it
+type-checks; `clockRouteOptions` for the Clock route; the consumer checklist in the UI package docs
+(`AppProviders`, a route per path, `tests/smoke.spec.ts`, `.plans/now.md`, fnox for installs).
 
 ## Look (from `browser:shots`, 2026-09-26)
 

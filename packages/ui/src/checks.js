@@ -276,6 +276,22 @@ export const hydrated = locator => expect.poll(() => locator.evaluate(node => Ob
 
 /** The interactive demo: the counter, the localized reservation form, and a same-tab language switch. */
 /**
+ * The theme toggle works: choosing Dark in the site header darkens the page. It needs the app's root to
+ * render its pages in AppProviders (providers.tsx); without the theme provider the toggle did nothing.
+ */
+export function themeChecks() {
+  const o = { locale: baseLocale };
+  test('choosing Dark in the header darkens the page', async ({ page }) => {
+    await page.goto(localizedPath('', baseLocale));
+    const toggle = page.locator('.theme-toggle').first();
+    await hydrated(toggle);
+    await toggle.click();
+    await page.getByRole('menuitemradio', { name: m.theme_dark({}, o), exact: true }).click();
+    await expect(page.locator('html')).toHaveClass(/\bdark\b/);
+  });
+}
+
+/**
  * The app's two navigations (.plans/done/mobile-navigation.md): on a phone the bottom bar holds the core pages
  * and More opens the sidebar with every page; on a tablet or desktop the sidebar alone, no bar.
  */

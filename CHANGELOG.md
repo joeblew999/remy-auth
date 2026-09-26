@@ -6,6 +6,15 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `providers`: `AppProviders`, what an app's root renders its pages in (reading direction, theme, source
+  link), so no app misses one (remy-auth-app's theme toggle did nothing without the theme provider).
+- `checks`: `themeChecks` (choosing Dark darkens the page), in both app check sets.
+- `clock-route`: `clockRouteOptions`, `clockDefaults`, `clockZones` for an app's Clock route.
+
+### Changed
+- `project:check` builds before it type-checks, so a new route's generated route tree is current.
+
 ## [0.12.0] - 2026-09-26
 
 With `@joeblew999/remy-auth-contract` 0.2.1 (unchanged code; its peer range is now `>=0.12.0`, so a
