@@ -24,7 +24,7 @@ manual translation until the docs and Paraglide stuff is solved, as it will slow
 then tools, then translating.
 
 0. ~~**Translation frozen**~~ lifted 2026-09-26: the tooling landed (step 3) and the pass ran (step 4).
-1. **Finish what is in flight:** the Look fixes (below) and issue #5.
+1. **Finish what is in flight:** issue #5, one consistent formats page.
    The layout contract (branch `project-layout`) is **not merged**, decided 2026-09-26: its core was a
    271-line checker of our own (`tasks/layout/layout.mjs`) over a contract in `tasks/README.md`, which the
    docs move removed; the owner's rule is no custom scripts, and a wrong layout already fails the app's
@@ -60,16 +60,10 @@ Also `project-layout` (step 1: not merged, its fixes ported). Keep the uncommitt
 
 ## Look (from `browser:shots`, 2026-09-26)
 
-- The home page is a heading and two buttons above an empty screen: it needs its content.
-- The "Site page · works without JavaScript" / "App · needs JavaScript" badge shows on every page: a
-  developer label; move it out of the visitor's way.
-- Navigation hyphenates ("develop-ment"): hyphenation belongs to body text only. (Was seen in the app's old
-  docs; check the app's own navigation.)
-- Formats, "Available languages": Arabic and Persian names scramble the English list; isolate each name.
-- Formats on desktop uses a third of the width. With [issue #5](https://github.com/joeblew999/remy-auth/issues/5)
-  (one consistent formats page, every language shown).
-- Gone with the move to Fumadocs (the app no longer has docs pages or search): raw Markdown in search
-  results; repository links at the top of docs pages.
+Done 2026-09-26 (from the saved agent work, on main): the home page has its content (where to go, the
+product guide and developer docs, what every app shares); the zone label is a small line in the footer;
+hyphenation is for body text only; each language name in "Available languages" is isolated (`bdi`); the
+formats page's intro and "This language" share the first screen on desktop. Left: issue #5 (below).
 
 ## Watching
 

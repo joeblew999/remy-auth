@@ -406,6 +406,9 @@ export function formatsChecks({ extra } = {}) {
         'long-word': samples.longWord,
       };
       for (const [sample, text] of Object.entries(expected)) await expect(page.locator(`[data-sample="${sample}"]`), sample).toHaveText(text);
+      // Each language name is isolated in its own language, so right-to-left names do not reorder the list.
+      await expect(page.locator('[data-sample="languages"] bdi')).toHaveText(locales.map(endonym));
+      expect(await page.locator('[data-sample="languages"] bdi').evaluateAll(nodes => nodes.map(node => node.lang))).toEqual([...locales]);
       for (const count of samples.counts) await expect(page.locator(`[data-count="${count}"]`)).toHaveText(m.apps_count({ count }, o));
       for (const n of samples.positions) await expect(page.locator(`[data-position="${n}"]`)).toHaveText(m.position_value({ n }, o));
       // Counts and positions inside sentences use the language's own digits too, as the number rows do.
@@ -685,7 +688,8 @@ export function cspChecks({ paths, reportPath = '/csp-report', enforce = true })
 
 /**
  * Text in every language on every page (text.css): no page is wider than a 320 px screen, long
- * words hyphenate by the page's language (and break where there is no dictionary), capitals are
+ * words in body text hyphenate by the page's language while headings and navigation do not (and
+ * every long word breaks where there is no dictionary), capitals are
  * set in the page's language (so Turkish gets İ from i), and Japanese headings break between
  * phrases. The Turkish and Japanese rules are also proven on the existing languages by switching
  * the page's lang in place.
@@ -699,10 +703,15 @@ export function textChecks({ paths }) {
       await page.goto(url);
       await expect(page.getByRole('heading', { level: 1 }), url).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${url} overflows 320 px`).toBe(true);
+      // Body text hyphenates; headings and navigation keep whole words ("develop-ment" in a sidebar
+      // hurts); every long word still breaks instead of widening the page.
       expect(await page.evaluate(() => {
-        const style = getComputedStyle(document.querySelector('h1'));
-        return { lang: document.documentElement.lang, hyphens: style.hyphens, wrap: style.overflowWrap };
-      }), url).toEqual({ lang: locale, hyphens: 'auto', wrap: 'break-word' });
+        const style = selector => getComputedStyle(document.querySelector(selector));
+        return {
+          lang: document.documentElement.lang, wrap: style('h1').overflowWrap,
+          body: style('main p').hyphens, heading: style('h1').hyphens, nav: style('nav a').hyphens,
+        };
+      }), url).toEqual({ lang: locale, wrap: 'break-word', body: 'auto', heading: 'manual', nav: 'manual' });
       // Every element capitalised by CSS takes its casing rules from the page's language.
       expect(await page.evaluate(lang => [...document.querySelectorAll('body *')]
         .filter(node => getComputedStyle(node).textTransform === 'uppercase' && node.closest('[lang]')?.getAttribute('lang') !== lang)
@@ -710,6 +719,8 @@ export function textChecks({ paths }) {
       const casing = page.locator('[data-sample="casing"]');
       if (await casing.count()) {
         expect(await casing.innerText(), url).toBe(samples.casing.toLocaleUpperCase(locale));
+        // The long German word is body text: it hyphenates, by German rules (its own lang).
+        expect(await page.locator('[data-sample="long-word"] [lang="de"]').evaluate(node => getComputedStyle(node).hyphens), url).toBe('auto');
         const inTurkish = await page.evaluate(() => { document.documentElement.lang = 'tr'; return document.querySelector('[data-sample="casing"]').innerText; });
         expect(inTurkish, `${url} with lang=tr`).toBe(samples.casing.toLocaleUpperCase('tr'));
         const japanese = await page.evaluate(() => { document.documentElement.lang = 'ja'; return getComputedStyle(document.querySelector('h1')).wordBreak; });

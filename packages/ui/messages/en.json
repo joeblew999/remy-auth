@@ -360,5 +360,21 @@
   "account_description": "Signing in to Remy, once the auth service is ready.",
   "account_intro": "Your sign-in and your sessions will be here.",
   "account_empty_title": "You are not signed in",
-  "account_empty_description": "Signing in arrives with Remy's auth service. Until then the app stores nothing about you."
+  "account_empty_description": "Signing in arrives with Remy's auth service. Until then the app stores nothing about you.",
+  "home_pages_heading": "What you can open here",
+  "home_formats_open": "Open the formats page",
+  "home_app_title": "App pages",
+  "home_app_open": "Open the app pages",
+  "home_shared_heading": "What every Remy app shares",
+  "home_shared_intro": "Remy apps are built on one package, @joeblew999/remy-ui, so each starts from the same pieces.",
+  "home_shared_components_title": "Components and theme",
+  "home_shared_components_text": "Stock shadcn components and theme, the same in every app.",
+  "home_shared_languages_title": "Languages",
+  "home_shared_languages_text": "Paraglide message catalogs in {count} languages, and each language's own rules for dates, numbers, plurals and reading direction.",
+  "home_shared_pages_title": "Site pages and app pages",
+  "home_shared_pages_text": "Site pages work without JavaScript and are made for search engines; app pages live under /app and run in your browser.",
+  "home_shared_checks_title": "Shared checks",
+  "home_shared_checks_text": "The same browser checks run against every app built on the package.",
+  "home_guide_text": "For people using the app: what each page does, in your language.",
+  "home_developers_text": "For developers building Remy or an app on it, and its API reference."
 }

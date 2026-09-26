@@ -7,7 +7,8 @@ import { DeviceTime } from './client';
 import { samples } from './samples.js';
 import { Badge } from './components/badge';
 import { buttonVariants } from './components/button';
-import { Card, CardContent, CardHeader, CardTitle } from './components/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './components/card';
+import { LanguagesIcon, ListChecksIcon, PaletteIcon, PanelsTopLeftIcon } from 'lucide-react';
 
 // The pages every Remy app built on this package shows, and that the shared checks test.
 // Apps keep their route modules (loaders, head, runtime wiring) and render these.
@@ -24,18 +25,69 @@ export { Group, Row } from './rows';
 import { Shell, Intro } from './shell';
 import { Group, Row } from './rows';
 
-/** The home page; `children` go inside the page under its links, for example an app's live status. */
-export function HomePage({ locale, preferred, children }: { locale: Locale; preferred?: Locale; children?: React.ReactNode }) {
+/**
+ * A card on the home page that leads somewhere: what the place is, then a link to it. shadcn has no
+ * landing-page block, so this composes its Card the way dashboard-01's section cards do.
+ */
+export function HomeCard({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
+  return <Card className="h-full">
+    <CardHeader><CardTitle className="text-lg">{title}</CardTitle><CardDescription>{description}</CardDescription></CardHeader>
+    <CardFooter className="mt-auto">{children}</CardFooter>
+  </Card>;
+}
+
+/**
+ * The home page: what Remy is, where to go from here and what every Remy app shares, all from what
+ * the package really provides. `cards` are an app's own destinations beside the shared ones (remy-auth
+ * adds its docs); `children` go under the page's links, for example an app's live status.
+ */
+export function HomePage({ locale, preferred, cards, children }: { locale: Locale; preferred?: Locale; cards?: React.ReactNode; children?: React.ReactNode }) {
   const o = { locale };
+  const count = new Intl.NumberFormat(formatLocale(locale)).format(locales.length);
+  const shared = [
+    [PaletteIcon, m.home_shared_components_title({}, o), m.home_shared_components_text({}, o)],
+    [LanguagesIcon, m.home_shared_languages_title({}, o), m.home_shared_languages_text({ count }, o)],
+    [PanelsTopLeftIcon, m.home_shared_pages_title({}, o), m.home_shared_pages_text({}, o)],
+    [ListChecksIcon, m.home_shared_checks_title({}, o), m.home_shared_checks_text({}, o)],
+  ] as const;
   return <Shell locale={locale} preferred={preferred}>
-    <section className="flex flex-col gap-6">
-      <Intro locale={locale} back={false} label={m.public_label({}, o)} title={m.home_title({}, o)} intro={m.home_intro({}, o)} />
-      <div className="flex flex-wrap gap-3">
-        <Link className={buttonVariants({ size: 'lg' })} to="/app/demo" preload="intent">{m.demo_link({}, o)}</Link>
-        <Link className={buttonVariants({ size: 'lg', variant: 'outline' })} to="/formats" preload="intent">{m.formats_link({}, o)}</Link>
-      </div>
-      {children}
-    </section>
+    <div className="flex flex-col gap-16">
+      <section className="flex flex-col gap-6">
+        <Intro locale={locale} back={false} label={m.public_label({}, o)} title={m.home_title({}, o)} intro={m.home_intro({}, o)} />
+        <div className="flex flex-wrap gap-3">
+          <Link className={buttonVariants({ size: 'lg' })} to="/app/demo" preload="intent">{m.demo_link({}, o)}</Link>
+          <Link className={buttonVariants({ size: 'lg', variant: 'outline' })} to="/formats" preload="intent">{m.formats_link({}, o)}</Link>
+        </div>
+        {children}
+      </section>
+      <section aria-labelledby="home-pages" className="flex flex-col gap-4">
+        <h2 id="home-pages" className="text-2xl font-semibold tracking-tight">{m.home_pages_heading({}, o)}</h2>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <HomeCard title={m.formats_title({}, o)} description={m.formats_description({}, o)}>
+            <Link className={buttonVariants({ variant: 'outline' })} to="/formats" preload="intent">{m.home_formats_open({}, o)}</Link>
+          </HomeCard>
+          <HomeCard title={m.home_app_title({}, o)} description={m.app_home_description({}, o)}>
+            <Link className={buttonVariants({ variant: 'outline' })} to="/app" preload="intent">{m.home_app_open({}, o)}</Link>
+          </HomeCard>
+          {cards}
+        </div>
+      </section>
+      <section aria-labelledby="home-shared" className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <h2 id="home-shared" className="text-2xl font-semibold tracking-tight">{m.home_shared_heading({}, o)}</h2>
+          <p className="max-w-2xl text-muted-foreground">{m.home_shared_intro({}, o)}</p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {shared.map(([Icon, title, text]) => <Card key={title} className="h-full">
+            <CardHeader>
+              <Icon aria-hidden="true" className="size-5 text-muted-foreground" />
+              <CardTitle>{title}</CardTitle>
+              <CardDescription>{text}</CardDescription>
+            </CardHeader>
+          </Card>)}
+        </div>
+      </section>
+    </div>
   </Shell>;
 }
 
@@ -50,14 +102,17 @@ export type FormatsExtras = {
 /** The search-param controls, each shown in the section it changes (showcase/search-params: choiceCards). */
 export type FormatsControlCards = { calendar?: React.ReactNode; numbering?: React.ReactNode; currency?: React.ReactNode; count?: React.ReactNode };
 
-/** One section of the formats page: a heading, what it shows, then its cards, two per row on wide screens. */
-function FormatsSection({ id, title, note, children }: { id: string; title: string; note: string; children: React.ReactNode }) {
+/**
+ * One section of the formats page: a heading, what it shows, then its cards in a responsive grid (two
+ * per row on wide screens, three on wider ones); `single` keeps one column, for a section beside the intro.
+ */
+function FormatsSection({ id, title, note, single = false, children }: { id: string; title: string; note: string; single?: boolean; children: React.ReactNode }) {
   return <section id={id} aria-labelledby={`${id}-heading`} className="flex scroll-mt-20 flex-col gap-4">
     <div className="flex flex-col gap-1">
       <h2 id={`${id}-heading`} className="text-2xl font-semibold tracking-tight">{title}</h2>
       <p className="text-sm text-muted-foreground">{note}</p>
     </div>
-    <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">{children}</div>
+    <div className={single ? 'grid items-start gap-4' : 'grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3'}>{children}</div>
   </section>;
 }
 
@@ -81,23 +136,29 @@ export function FormatsContent({ locale, info, extras = {}, controls = {}, backT
     ['money', m.section_money({}, o)], ['words', m.section_words({}, o)],
   ] as const;
   return <div className="flex flex-col gap-10">
-    <div className="flex flex-col gap-6">
-      <Intro locale={locale} label={m.formats_label({}, o)} title={m.formats_title({}, o)} intro={m.formats_intro({}, o)} back={backTo === '/app'} backTo={backTo} />
-      <nav aria-label={m.sections_nav({}, o)} className="flex flex-wrap gap-2">
-        {sections.map(([id, title]) => <a key={id} className={buttonVariants({ variant: 'outline', size: 'sm' })} href={`#${id}`}>{title}</a>)}
-      </nav>
+    {/* On wide screens the intro and "This language" sit side by side, so the first screen is full. */}
+    <div className="grid items-start gap-10 lg:grid-cols-2">
+      <div className="flex flex-col gap-6">
+        <Intro locale={locale} label={m.formats_label({}, o)} title={m.formats_title({}, o)} intro={m.formats_intro({}, o)} back={backTo === '/app'} backTo={backTo} />
+        <nav aria-label={m.sections_nav({}, o)} className="flex flex-wrap gap-2">
+          {sections.map(([id, title]) => <a key={id} className={buttonVariants({ variant: 'outline', size: 'sm' })} href={`#${id}`}>{title}</a>)}
+        </nav>
+      </div>
+      <FormatsSection id="language" title={m.section_language({}, o)} note={m.section_language_note({}, o)} single>
+        <Group title={m.language_label({}, o)} data-own-area="language">
+          <Row sample="tag" label={m.language_tag({}, o)}><code>{locale}</code></Row>
+          <Row sample="name" label={m.language_name({}, o)}>{localeName(locale)}</Row>
+          <Row sample="direction" label={m.direction_label({}, o)} data-direction={dir}>{dir === 'rtl' ? m.direction_rtl({}, o) : m.direction_ltr({}, o)}</Row>
+          {/* Each name isolated (bdi, in its own language), so an Arabic or Persian name keeps its own
+              direction without reordering the commas and names around it. */}
+          <Row sample="languages" label={m.languages_available({}, o)}>{list.formatToParts(locales.map(value => localeName(value))).map((part, index) => part.type === 'element'
+            ? <bdi key={index} className="whitespace-nowrap" lang={locales.find(value => localeName(value) === part.value)}>{part.value}</bdi> : part.value)}</Row>
+          {/* Capitals come from CSS in the page's language (its lang), so Turkish gets İ from i. */}
+          <Row sample="casing-row" label={m.casing_label({}, o)}>{samples.casing} → <span className="uppercase" data-sample="casing">{samples.casing}</span></Row>
+          {extras.language}
+        </Group>
+      </FormatsSection>
     </div>
-    <FormatsSection id="language" title={m.section_language({}, o)} note={m.section_language_note({}, o)}>
-      <Group title={m.language_label({}, o)} data-own-area="language">
-        <Row sample="tag" label={m.language_tag({}, o)}><code>{locale}</code></Row>
-        <Row sample="name" label={m.language_name({}, o)}>{localeName(locale)}</Row>
-        <Row sample="direction" label={m.direction_label({}, o)} data-direction={dir}>{dir === 'rtl' ? m.direction_rtl({}, o) : m.direction_ltr({}, o)}</Row>
-        <Row sample="languages" label={m.languages_available({}, o)}>{list.format(locales.map(value => localeName(value)))}</Row>
-        {/* Capitals come from CSS in the page's language (its lang), so Turkish gets İ from i. */}
-        <Row sample="casing-row" label={m.casing_label({}, o)}>{samples.casing} → <span className="uppercase" data-sample="casing">{samples.casing}</span></Row>
-        {extras.language}
-      </Group>
-    </FormatsSection>
     <FormatsSection id="time" title={m.section_time({}, o)} note={m.section_time_note({}, o)}>
       <Group title={m.systems_heading({}, o)} data-own-area="time">
         <Row sample="calendar" label={m.calendar_label({}, o)}>{calendarName.of(info.calendar)}</Row>

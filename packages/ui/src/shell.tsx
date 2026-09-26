@@ -6,7 +6,6 @@ import { m } from './paraglide/messages.js';
 import { LanguageHint, LanguageLinks, LanguageSwitcher } from './language';
 import { ModeToggle } from './theme';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from './components/navigation-menu';
-import { Badge } from './components/badge';
 import { buttonVariants } from './components/button';
 import { Separator } from './components/separator';
 
@@ -20,9 +19,12 @@ export function SkipLink({ locale }: { locale: Locale }) {
   return <a className="skip-link sr-only focus:not-sr-only focus:fixed focus:start-2 focus:top-2 focus:z-60 focus:bg-background focus:p-3" href="#main">{m.skip_link({}, { locale })}</a>;
 }
 
-/** The label every page shows, so anyone can see which kind of page it is (paths.js explains the two). */
+/**
+ * Which kind of page this is (paths.js explains the two): a small, muted line at the foot of every
+ * page, out of the visitor's way, where anyone who wants to know can still read it.
+ */
 export function ZoneBadge({ locale, app }: { locale: Locale; app: boolean }) {
-  return <Badge variant="secondary" data-zone={app ? 'app' : 'site'}>{app ? m.zone_app({}, { locale }) : m.zone_site({}, { locale })}</Badge>;
+  return <p className="text-xs text-muted-foreground" data-zone={app ? 'app' : 'site'}>{app ? m.zone_app({}, { locale }) : m.zone_site({}, { locale })}</p>;
 }
 
 /**
@@ -46,7 +48,7 @@ export const AppNavLinks = createContext<React.ReactNode>(undefined);
 export const SourceLink = createContext<string | undefined>(undefined);
 
 /**
- * The frame of a site page: static shadcn components only (links styled as buttons, Badge,
+ * The frame of a site page: static shadcn components only (links styled as buttons,
  * Separator), so the page is complete without JavaScript. `preferred` is the language to offer.
  */
 export function SiteShell({ locale, path = '', preferred, children }: { locale: Locale; path?: string; preferred?: Locale; children: React.ReactNode }) {
@@ -76,9 +78,9 @@ export function SiteShell({ locale, path = '', preferred, children }: { locale: 
       </div>
     </header>
     <Separator />
-    <main id="main" className="flex-1 py-10"><div className="mb-6"><ZoneBadge locale={locale} app={false} /></div>{children}</main>
+    <main id="main" className="flex-1 py-10">{children}</main>
     <Separator />
-    <footer className="py-4"><LanguageLinks locale={locale} path={path} /></footer>
+    <footer className="flex flex-col gap-3 py-4"><LanguageLinks locale={locale} path={path} /><ZoneBadge locale={locale} app={false} /></footer>
   </div>;
 }
 

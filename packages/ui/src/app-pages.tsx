@@ -41,7 +41,8 @@ export function AppShell({ locale, path = '/app', preferred, children }: { local
           {/* Room below the content for the phone's bottom bar (4rem and the home indicator). */}
           <div className="flex flex-1 flex-col gap-4 p-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:p-8">
             <LanguageHint locale={locale} path={path} preferred={preferred} />
-            <main id="main" className="w-full flex-1"><div className="mb-6"><ZoneBadge locale={locale} app /></div>{children}</main>
+            <main id="main" className="w-full flex-1">{children}</main>
+            <footer><ZoneBadge locale={locale} app /></footer>
           </div>
         </SidebarInset>
       </div>

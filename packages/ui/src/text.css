@@ -2,12 +2,20 @@
    stays exactly what the shadcn CLI writes). The browser does the work from the page's `lang`,
    which every page carries on <html>; textChecks (checks.js) proves each rule on every page. */
 
-/* Long words (German compounds, for example) hyphenate by the language's own rules; where the
-   browser has no hyphenation dictionary, a word too long for its line still breaks instead of
-   widening the page. Both inherit, so they hold for every element. */
+/* A word too long for its line breaks instead of widening the page, everywhere (it inherits). */
 html {
-  hyphens: auto;
   overflow-wrap: break-word;
+}
+
+/* Body text (German compounds, for example) hyphenates by the language's own rules. Only body
+   text: a hyphen inside a heading, a navigation link, a label or a sidebar entry ("develop-ment")
+   hurts more than it helps, so those keep whole words and wrap between them. */
+:is(p, li, dd, td, blockquote, figcaption) {
+  hyphens: auto;
+}
+:is(h1, h2, h3, h4, h5, h6, nav, header, footer, dt, th, label, button),
+:is(h1, h2, h3, h4, h5, h6, nav, header, footer, dt, th, label, button) * {
+  hyphens: manual;
 }
 
 /* Japanese is written without spaces: headings break between phrases rather than inside a word
