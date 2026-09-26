@@ -14,22 +14,33 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
 5. ~~**Caching**~~ closed 2026-09-26 ([plan](done/caching.md)): don't cache HTML yet; assets immutable.
 6. ~~**Observability**~~ closed 2026-09-26 ([plan](done/observability.md)): built; the answer-failure alert rule is a dashboard step (owner only, below).
 
-## Next
+## Next, in this order
 
-- **Layout contract** (owner: "It's not just docs! It's everything ... a big change but it's worth it"): every path,
-  file and setting the shared tasks and package rely on, written once in tasks/README.md, checked by a
-  shared `project:layout` in tier 0, both apps brought to it. Inventory running; after the one-writer
-  translation tools (`i18n:*`, shared) land.
+Owner, 2026-09-26: "there is so much to be aligned and done in the right order. I want to not do any more
+manual translation until the docs and Paraglide stuff is solved, as it will slow us down." Structure first,
+then tools, then translating.
 
-- **Translations through upstream tools** ([plan](translation-pipeline.md), with issue #4): replace our
-  translation code and checks with upstream tools behind shared mise tasks, same in every app; analysis next.
+0. **Translation frozen** (from 2026-09-26): no translation passes, by agents or by hand; stale
+   translations are a warning everywhere, the release included, until step 4.
+1. **Finish what is in flight** (English only): the layout contract and `project:layout`; the Look fixes
+   (below).
+2. **Structure, in parallel:**
+   - a. **Docs conform to Fumadocs as shadcn does** ([plan](docs-for-consumers.md#how-shadcn-does-it-apps-v4-at-98a1fe6-2026-09-26)):
+     frontmatter `title` and `description` on the English docs, a `loader()` from `docsTable`, search via
+     `createFromSource`; deletes our hand-built titles, descriptions, navigation and search index.
+   - b. **Paraglide plurals** ([plan](translation-pipeline.md)): `=*` as the fallback in the catalogs and the
+     plural-categories test.
+3. **Translation tooling** ([plan](translation-pipeline.md)): git, jq and i18n-check through shared mise
+   tasks, the `claude -p` writer step; delete `i18n.mjs`, the provenance lines and their plugin.
+4. **Unfreeze:** one translation pass with the new tools (Spanish docs with frontmatter, missing catalog
+   keys); the release check back to strict.
+5. **What conforming docs unlock** ([plan](docs-for-consumers.md)): `.md` pages, `llms.txt`, the copy
+   menu; then docs for apps: a rules section in how-we-work, the `remy` skill (rules, evals) in the
+   package, the `AGENTS.md` block pointing into `node_modules`.
+6. **Release and adopt:** the shared UI released, remy-auth-app moved onto it, proving the translation
+   tasks and docs in an app.
 
-- **`git:tidy`** (shared task, from repeated manual cleanup): list local and GitHub branches fully merged
-  into `main` and their worktrees; remove the local ones; `--remote` deletes merged GitHub branches (owner
-  confirms). Until then: `shadcn-stock` and `tanstack` on GitHub are merged leftovers, safe to delete.
-
-- **Docs for apps** ([plan](docs-for-consumers.md)): how apps on the package get the docs and rules
-  (skill, in the package, llms.txt, MCP); today unpinned GitHub links; research to do.
+Also queued (not in the order above): `git:tidy` (shared task for merged branches and worktrees).
 
 ## Look (from `browser:shots`, 2026-09-26)
 

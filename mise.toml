@@ -132,7 +132,9 @@ dir = "{{config_root}}"
 # project:verify builds.
 run = [
   # First, so a release with missing or stale translations stops before the long checks.
-  "I18N_STRICT=1 mise run i18n:check",
+  # Translation freeze (owner, 2026-09-26): warning only until the translation tooling lands (now.md,
+  # step 4); then back to I18N_STRICT=1.
+  "mise run i18n:check",
   { task = "project:verify" },
   { task = "ui:verify" },
   { task = "project:test:google" },
