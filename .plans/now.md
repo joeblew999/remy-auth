@@ -45,9 +45,11 @@ then tools, then translating.
        recommends): it checks the Markdown against the loader's pages and headings, in place of our own
        Playwright crawl (`tests/docs.spec.ts:136`). Its peer `@react-router/dev` needs a scratch trial
        first (**assumed** optional); if it fails, our check stays and the gap is recorded.
-     - **`@fumadocs/cli` 1.7.0 writes our Fumadocs code** instead of us: `feature docs|search|llms|mcp`
-       know TanStack Start, i18n and prerender, and write the loader, the search route and the
-       `llms.txt`/`.md` routes. Run it in a scratch app, read what it writes, take that. Not its `add`
+     - **`@fumadocs/cli` 1.7.0 writes our Fumadocs code** instead of us, from a scratch app (its features
+       break each other when run in sequence, so never on our repo): `defineDocs` from `fumadocs-mdx/macro`
+       (no `source.config.ts`, so no root fix), the search route, `llms.txt` and `.md` routes. Language
+       routing stays Paraglide's. Trial results: [tool-up trial](docs-for-consumers.md#tool-up-trial-2026-09-26);
+       one doc converted on the local branch `fumadocs-trial`. Not its `add`
        and `customise` (fumadocs-ui; we use shadcn) nor `lint` (an ESLint/Biome/oxlint setup, not a docs
        check). `fumadocs-openapi` and `fumadocs-typescript`: step 5 at the earliest.
      - The loader details (docsTable slugs and order, `hideLocale`, `renderName`) are in

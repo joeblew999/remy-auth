@@ -378,3 +378,34 @@ The repo Markdown stays the source; the one change to the files is the frontmatt
 
 Early lean, to test not assume (after question 0 has found what the stack gives and questions 1 and 2 have shrunk what must travel): a skill for how agents work plus the docs in the package for the
 version-matched reference, and `llms.txt` because Fumadocs makes it cheap.
+
+## Tool-up trial (2026-09-26)
+
+Owner: "convert 1 doc and then tool up to see what works and does not work well ... don't miss any
+aspects". Two trials: `docs/gui.md` converted on the local branch `fumadocs-trial` (worktree
+`.claude/worktrees/fumadocs-trial`); a scratch app from `create-fumadocs-app` 16.2.9 `--template
+tanstack-start --search orama`, then every `@fumadocs/cli` 1.7.0 feature, one commit each, built and
+each route requested.
+
+| Aspect | Result | For us |
+| --- | --- | --- |
+| Frontmatter `title` in our pipeline | works: page title, nav | take |
+| The page's heading | lost: Fumadocs pages render `title` and `description` themselves, the body has no `#` | done on the branch: `view.tsx` renders both when a file has frontmatter |
+| Frontmatter `description` | ignored: our `describe()` guessed from the first paragraph | done on the branch: frontmatter first, guess as fallback |
+| On GitHub | the file opens with a metadata table instead of a heading (**assumed**, GitHub's rendering of YAML; not looked at) | accept; the site is where docs are read |
+| Declaring the docs | the template has **no `source.config.ts`**: `defineDocs` from `fumadocs-mdx/macro` in `src/lib/source.ts`, with `includeProcessedMarkdown` | take; the root-path bug goes with the file. The macro takes `files` patterns (types checked); our remark plugins on it **assumed** until tried |
+| Languages | `feature docs --i18n` uses the dot parser (`index.cn.mdx`), a `{-$lang}` route and `hideLocale` | take `defineI18n` with `parser: 'dir'` only; language routing stays Paraglide's (owner rule) |
+| Search | `createFromSource(source)` answers per locale (`?locale=cn`) | take; replaces our search API code |
+| `llms.txt`, `llms-full.txt` | work; **one file mixes every language** (a `# Docs` block each) | take; one file per language or English only is ours to set |
+| `.md` per page | works per language (`/cn/docs/index.md`); keeps `[#id]` and any JSX | take (our docs have no JSX) |
+| MCP (`feature mcp`) | works on Node: `list_pages`, `get_page`, `search` | later, owner's call; Workers **assumed** |
+| WebMCP | writes a 97-line component | later (experimental) |
+| OG images (`feature og`, takumi) | works: a 12 KB WebP per page | maybe later; Workers **assumed** |
+| Feedback | 520 lines of Fumadocs UI (base-ui) plus GitHub Discussions | no: not shadcn |
+| AI chat (`feature ai`) | 765 lines, OpenRouter | no: duplicates AI Search |
+| EPUB export | works behind a secret | no need seen |
+| `feature lint` | an oxlint/Biome/ESLint config for code, not docs | not a docs tool; a linter is its own survey |
+| `add`, `customise` | Fumadocs UI components | no: shadcn |
+| CLI composition | `feature docs --i18n` after the template leaves the old routes, so the **build breaks** (missing `gitConfig`); `feedback` and `ai` then patch the stale routes; **prerender fails** on `/en` | use the CLI in a scratch app as the reference and copy its files; never run it on our repo |
+| Hosting | the template builds with Nitro (Vercel preset); the routes are plain TanStack Start server routes | carry over to our Cloudflare Vite plugin; Nitro not needed |
+| Versions | the template pins `fumadocs-core` 16.15.14 and `fumadocs-mdx` 15.4.5, as we do | none |
