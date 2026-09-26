@@ -217,6 +217,10 @@ específicas de la máquina y están en gitignore; vuelve a ejecutar el registro
 ejecutable de mise. Los ajustes y servidores no relacionados se conservan. Los archivos existentes modificados
 reciben una copia de recuperación `.bak`; la serialización TOML puede normalizar el formato y los comentarios.
 
+El servidor usa el paquete de npm fijado, un perfil de Chrome headless aislado, y tiene
+desactivadas la telemetría de herramientas y las subidas a CrUX. El proceso MCP es independiente de la
+sesión `browser:start`/`browser:stop` de la CLI; el cliente del agente gestiona su ciclo de vida.
+
 Recarga el agente después del registro. Codex solo carga la configuración del proyecto en un
 proyecto de confianza. Claude puede mostrar **Pending approval** para un nuevo servidor MCP del proyecto;
 revísalo en la interfaz `/mcp` de Claude. El registro no evita la confianza del cliente ni los ajustes
@@ -277,7 +281,7 @@ para funciones más nuevas.
 
 ## Observabilidad de Cloudflare [#cloudflare-observability]
 
-[El plan de observabilidad](../../../../.plans/done/observability.md) cubre logs, trazas, métricas,
+[El plan de observabilidad](../.plans/done/observability.md) cubre logs, trazas, métricas,
 salud de D1, registros de auditoría de auth duraderos, correlación, dashboards y alertas.
 `wrangler.jsonc` habilita los logs/trazas y la redacción de query de URL para el Worker de la GUI.
 Una entrada del Worker de la GUI ahora emite IDs de solicitud, estado y tiempos sin registrar URLs,

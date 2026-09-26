@@ -5,13 +5,13 @@
 ```sh
 mise run project:dev       # http://127.0.0.1:5173/en
 mise run project:preview   # Production build on local Workers, port 4173
-mise run project:verify    # Tooling, types, build, browser tests and package check
+mise run project:check     # Tier 0: typecheck and build
 ```
 
 Google Chrome debe estar instalado. Todo se ejecuta localmente en el runtime de Workers;
 no se necesita ninguna cuenta de Cloudflare, base de datos ni credenciales de producción. Las pruebas
-de navegador son dueñas del puerto 4173 y se niegan a reutilizar un proceso no relacionado. Detén una preview manual
-antes de la verificación; el servidor de desarrollo en el 5173 puede seguir en ejecución.
+de navegador son dueñas de `PREVIEW_PORT` (por defecto 4173; cada agente define el suyo) y se niegan a reutilizar
+un proceso no relacionado. Detén una preview manual antes de un nivel de pruebas; el servidor de desarrollo en el 5173 puede seguir en ejecución.
 
 ## Un único scaffold para local y Cloudflare [#one-scaffold-for-local-and-cloudflare]
 
@@ -26,11 +26,10 @@ El desarrollo usa el mismo código fuente del Worker y el mismo runtime de Cloud
 | `project:dev` | Workers local, hot reload, puerto 5173 |
 | `project:build` | Build y ensayo (dry run) del deployment de Wrangler; sin subida |
 | `project:preview` | Build y luego sirve el artefacto de producción en el host local de Cloudflare en `PREVIEW_PORT` (4173) |
-| `project:test` | Nivel 1: build y luego ejecuta nuestras propias comprobaciones en el mismo host local (rápido) |
-| `project:test:quick` | Nivel 1 en solo unos pocos idiomas, para el ciclo de edición; no es una puerta de control |
-| `project:test:google` | Nivel 2: auditorías de Lighthouse y Core Web Vitals en local (lento; CI lo ejecuta en cada push) |
-| `cf:deploy` | Build y luego sube a la cuenta de Cloudflare autenticada |
-| `cf:preview` | Sube esta rama como preview junto a producción, y luego ejecuta el nivel 1 contra ella |
+| `project:check` … `project:verify` | Los niveles de pruebas, en el mismo host local ([regla](how-we-work.md#gates-before-anything-leaves-the-machine), [tareas](../tasks/README.md)) |
+| `project:test:google` / `project:test:cwv` | El nivel de Google: auditorías de Lighthouse en local; Core Web Vitals en un Worker de Cloudflare desechable |
+| `cf:deploy` | Build y luego sube a la cuenta de Cloudflare autenticada (sin pruebas salvo que `GATE` elija un nivel) |
+| `cf:preview` | Despliega este commit como un Worker desechable, ejecuta el nivel 1 contra él y lo elimina |
 | `project:test:remote` | Las mismas pruebas contra `TEST_BASE_URL`; sin servidor local ni deployment |
 | `project:report` / `project:report:remote` | Abre el informe HTML de la última ejecución local o remota, incluidos los informes de Lighthouse |
 
@@ -77,7 +76,7 @@ remy-auth añade sus propias páginas de sitio ([`src/paths.ts`](../src/paths.ts
 inglés, que renderizan el Markdown de este repositorio tal cual, y junto a ellos, en todos los idiomas, la
 búsqueda de docs `/docs/search` y `/docs/ask`, que responde preguntas a partir de los docs con enlaces a las
 páginas y secciones que usó (la antigua página de app `/app/ask` redirige ahí). El
-[plan del sitio de docs](../.plans/docs-site.md) y [el plan de respuestas](../.plans/docs-ai-sync.md) son sus dueños.
+[plan del sitio de docs](../.plans/done/docs-site.md) y [el plan de respuestas](../.plans/done/docs-ai-sync.md) son sus dueños.
 
 El selector de idioma sigue el tipo: las páginas de sitio usan `LanguageSwitcher`, enlaces simples que no necesitan
 JavaScript; las páginas de app usan `LanguageMenu`, el DropdownMenu de shadcn que llama a `setLocale` de Paraglide
@@ -85,7 +84,7 @@ JavaScript; las páginas de app usan `LanguageMenu`, el DropdownMenu de shadcn q
 
 ## Qué está implementado [#what-is-implemented]
 
-Cada página existe en cada locale (prefijos `/en`, `/es`, `/ar`); la tabla las nombra sin él.
+Cada página existe en cada locale (13 prefijos como `/en`, `/ar`, `/ja`; las páginas de docs solo en inglés); la tabla las nombra sin él.
 
 | Ruta | Tipo | Comportamiento |
 | --- | --- | --- |
@@ -93,13 +92,13 @@ Cada página existe en cada locale (prefijos `/en`, `/es`, `/ar`); la tabla las 
 | `/en` | Sitio | Home localizado con dirección, metadatos y enlaces alternativos |
 | `/en/formats` | Sitio | Las convenciones del locale en cinco secciones (este idioma, fechas y horas, números, dinero, palabras), cada control por search-param en la sección que cambia; las fechas incluyen el lugar del visitante a partir de la geolocalización de la petición de Cloudflare, transmitida en streaming tras `Await` y nunca almacenada, y la propia zona horaria del dispositivo. `?currency`, `?count` y `?calendar` son search params tipados y validados (los valores por defecto se omiten de las URLs, los valores inválidos redirigen a la URL canónica); los datos del loader se mantienen frescos durante cinco minutos. El contenido es `FormatsContent`, compartido con `/app/formats` |
 | `/en/time-zones/Asia/Tokyo` (cualquier nombre IANA) | Sitio | Subrecurso de la página de formatos: el nombre localizado de la zona, el offset y el instante de ejemplo ahí. Un nombre desconocido es un 404 localizado que lo nombra (`notFound()`); otra grafía de un nombre conocido responde 301. No está en el sitemap |
-| `/en/app` | App | Tarjeta de estado en vivo: TanStack Query sobre el `GET /api/status` del contrato (el propio router durante el SSR, HTTP en el navegador), renderizado en servidor, sondeado cada 10 s, con un refresco que invalida todos los loaders y queries a la vez (`src/invalidate.ts`) |
+| `/en/app` | App | Tarjeta de estado en vivo: TanStack Query sobre el `GET /api/status` del contrato (el propio router durante el SSR, HTTP en el navegador), renderizado en servidor, sondeado cada 10 s, con un refresco que invalida todos los loaders y queries a la vez (`invalidateEverything` en `@joeblew999/remy-ui/invalidate`); la tarjeta en sí es el `showcase/status-card` del paquete, que remy-auth-app también muestra, consultada entre orígenes (CORS para su origen registrado, `src/api/origins.ts`) |
 | `/en/app/formats` | App | El contenido de la página de formatos dentro del marco de app |
 | `/en/app/demo` | App | `ssr: false`. Contador y formulario de reserva validados en el navegador y de nuevo por el `POST /api/reservations` del contrato (una mutación de TanStack Query), que responde en el idioma de la página; las reglas incumplidas vuelven como su 400 tipado y se muestran como errores propios del formulario; salir con entradas sin guardar pregunta primero (`useBlocker`) |
 | `/en/app/location` | App | La ubicación de la petición según Cloudflare junto a la propia del dispositivo, que la API de Geolocation solo entrega después de que el visitante pulse su botón |
 | `/api/status`, `/api/reservations` | API | Endpoints del contrato ([@joeblew999/remy-auth-contract](../packages/contract/README.md)) servidos por oRPC tras una única ruta de servidor de Start (`src/routes/api.$.ts`, `src/api/`): entrada y salida validadas, errores tipados, el idioma a partir de Accept-Language (`routeStrategies` de Paraglide), sin locale en la URL |
 | `/api/openapi.json`, `/api/doc` | API | El documento OpenAPI 3.1 generado a partir del router en el propio proceso, y su página de referencia (la página Scalar de oRPC, con el script fijado a una versión) |
-| `/robots.txt`, `/sitemap.xml` | Rutas de servidor | `Cache-Control: public, max-age=3600`; los métodos distintos de GET y HEAD responden 405 con `Allow`; el sitemap enumera las páginas de sitio en cada locale con alternativas `hreflang` |
+| `/robots.txt`, `/sitemap.xml` | Rutas de servidor | `Cache-Control: public, max-age=3600, s-maxage=3600`; los métodos distintos de GET y HEAD responden 405 con `Allow`; el sitemap enumera las páginas de sitio en cada locale con alternativas `hreflang` |
 | Ruta o locale desconocidos | | HTTP 404 con la página de no encontrado localizada (una ruta desconocida sin localizar primero redirige al idioma del visitante, ya que el rewrite de TanStack la canonicaliza) |
 | El loader de una página falla | | La página de error localizada de esa ruta (500 cuando se renderiza en servidor) con un reintento que vuelve a ejecutar los loaders; toda ruta de página y la raíz configuran ambas páginas de problema (`src/problem.tsx`) |
 
@@ -107,7 +106,7 @@ Las páginas localizadas nunca redirigen. Cuando el idioma preferido del visitan
 
 TanStack Start se ejecuta a través del plugin de Vite de Cloudflare ([`vite.config.ts`](../vite.config.ts)). Todas las
 rutas se renderizan en servidor excepto la demo. Los enlaces dentro de la app precargan el código y los datos de su ruta
-según la intención (`intent`); los cambios de idioma en las páginas de sitio son navegaciones completas.
+según la intención; los cambios de idioma en las páginas de sitio son navegaciones completas.
 
 ## shadcn, de fábrica [#shadcn-stock]
 
@@ -120,11 +119,15 @@ tareas en [`mise.toml`](../mise.toml) son la única forma en que cambian:
 ```sh
 mise run ui:components     # Re-add every shadcn component (extend the list there to add one)
 mise run ui:theme          # Rewrite globals.css with shadcn's default theme
+mise run ui:blocks         # Diff each owned block against upstream, in place
 mise run ui:verify         # Re-run both and fail on any difference (runs before every release)
 mise run ui:pack           # Produce the package tarball locally
 ```
 
-Los bloques son copias propias, tal como shadcn pretende; el README de sidebar-16 explica qué se cambió.
+Los bloques son copias propias, tal como shadcn pretende; el README de sidebar-16 explica qué se cambió. El
+alias `components` del paquete (`@joeblew999/remy-ui/blocks`) es donde shadcn escribe los archivos propios de un
+bloque cuando se ejecuta desde el paquete (`shadcn add <block> -c packages/ui`): `blocks/<name>/components`.
+Así, `ui:blocks` los compara en su sitio y los cambios de upstream se fusionan a mano.
 
 Las fuentes viven en [`packages/ui/src/fonts.css`](../packages/ui/src/fonts.css), importado después de
 `globals.css` (ver [`src/styles.css`](../src/styles.css)); el archivo explica sus reglas. fontaine en
@@ -134,9 +137,10 @@ Las fuentes viven en [`packages/ui/src/fonts.css`](../packages/ui/src/fonts.css)
 ## Estructura y reutilización [#structure-and-reuse]
 
 - `src/routes/`: rutas de archivo de TanStack (loaders, `head`, renderizado por ruta) que renderizan las páginas del paquete, más las filas de formatos adicionales de esta app (`src/formats-extras.tsx`), y `robots.txt`, `sitemap.xml` y `csp-report` como rutas de servidor; `src/routeTree.gen.ts` lo genera el plugin del router durante el dev y el build, y se versiona.
-- `src/server.ts`: entrada del Worker a través del `localizedWorker` del paquete (IDs de petición, logs de estado estructurados, `/healthz`, el middleware de Paraglide, redirecciones de entrada). Start recibe la petición original, así que las funciones de servidor leen la geolocalización de Cloudflare a partir de las propiedades `cf` de la petición en un módulo exclusivo de servidor bajo la protección de imports de Start (`packages/ui/src/parts/deferred-place/place.server.ts`, the deferred-place part). El wrapper pasa su ID de petición hacia dentro como `X-Request-ID`; el middleware de petición de Start lo expone como `context.requestId`, y un middleware de función registra una línea `server_fn` por cada llamada (`src/middleware.ts`). Ahí mismo, un segundo middleware de petición genera el nonce de CSP por petición que `src/router.tsx` entrega a TanStack Router, y la ruta de servidor `src/routes/csp-report.ts` registra los reportes de la política ([cabeceras de seguridad](../.plans/gui-portal.md)). El nombre del servicio tiene un único hogar, `src/service.ts`.
-- `src/api/`: la implementación del contrato (`router.ts`, sin imports de Workers para que las comprobaciones puedan cargarlo en Node), el contexto de cada llamada (`context.server.ts`) y el cliente isomórfico con sus utilidades de TanStack Query (`client.ts`). El contrato es `packages/contract/`; el mecanismo compartido son las exportaciones `api/*` del paquete; [el plan de contratos](../.plans/openapi-contracts.md) es dueño del diseño.
+- `src/server.ts`: entrada del Worker a través del `localizedWorker` del paquete (IDs de petición, logs de estado estructurados, `/healthz`, el middleware de Paraglide, redirecciones de entrada). Start recibe la petición original, así que las funciones de servidor leen la geolocalización de Cloudflare a partir de las propiedades `cf` de la petición en un módulo exclusivo de servidor bajo la protección de imports de Start (`packages/ui/src/parts/deferred-place/place.server.ts`, la parte deferred-place). El wrapper pasa su ID de petición hacia dentro como `X-Request-ID`; el middleware de petición de Start lo expone como `context.requestId`, y un middleware de función registra una línea `server_fn` por cada llamada (`src/middleware.ts`). Ahí mismo, un segundo middleware de petición genera el nonce de CSP por petición que `src/router.tsx` entrega a TanStack Router, y la ruta de servidor `src/routes/csp-report.ts` registra los reportes de la política ([cabeceras de seguridad](../.plans/parked/gui-portal.md)). El nombre del servicio tiene un único hogar, `src/service.ts`.
+- `src/api/`: la implementación del contrato (`router.ts`, sin imports de Workers para que las comprobaciones puedan cargarlo en Node), el contexto de cada llamada (`context.server.ts`) y el cliente isomórfico con sus utilidades de TanStack Query (`client.ts`). El contrato es `packages/contract/`; el mecanismo compartido son las exportaciones `api/*` del paquete; [el plan de contratos](../.plans/done/openapi-contracts.md) es dueño del diseño.
 - `src/router.tsx`: un router y un cliente de TanStack Query nuevos por petición, con la integración SSR de Query. TanStack Devtools (paneles de Router y Query) se monta en `src/routes/__root.tsx` y su plugin de Vite `devtools()` lo elimina de las builds de producción; la comprobación de frontera de build demuestra que ni devtools ni código exclusivo de servidor llegan al navegador.
+- `src/parts.json`: las [partes](../.plans/done/parts.md) del paquete que usa esta app, un nombre por línea (hoy `time-zones`); `remyParts()` en `vite.config.ts` monta sus rutas y `partChecks()` en `tests/gui.spec.ts` ejecuta sus comprobaciones.
 - `packages/ui/`: todo lo que comparten ambas apps; su [README](../packages/ui/README.md) enumera las exportaciones.
 - `tests/`: las comprobaciones compartidas del paquete (`@joeblew999/remy-ui/checks`, `showcase/*.checks`) más las comprobaciones que solo posee este repositorio (catálogos, renderizados concurrentes en servidor, hidratación, sus filas de formatos adicionales); `lighthouse.spec.ts` y `performance.spec.ts` son de nivel 2.
 
@@ -153,26 +157,25 @@ las ejecuta sobre páginas renderizadas en servidor.
 
 ## Evidencia y límites [#evidence-and-limits]
 
-Las comprobaciones automatizadas cubren la paridad de catálogos y la cobertura de categorías plurales, el HTML de cada
-locale con JavaScript deshabilitado (idioma, dirección, metadatos, enlaces de
-endónimos), los valores de la página de formatos frente al propio Intl de Node por locale, las
-redirecciones de entrada y la elección recordada, la sugerencia de idioma, las peticiones de locale concurrentes, la hidratación sin errores de consola,
-el contenido exclusivo del cliente y las interacciones de botones, la validación localizada del formulario de demo
-y la confirmación de plurales, la navegación de idioma en la misma pestaña, el estado HTTP y el comportamiento
-del sitemap con cada URL listada autocanónica y enlazada de forma cruzada mediante `hreflang`,
-el espejado de derecha a izquierda, y el desbordamiento en pantallas estrechas en cada página. Lighthouse audita las páginas de sitio `/en`, `/es`, `/ar` y `/en/formats` (las páginas de app son noindex por diseño)
-en sus categorías de accesibilidad, SEO, buenas prácticas y navegación agéntica; la CLI fijada
-excluye Performance por diseño, así que el paquete `lighthouse` fijado de Google evalúa esa
-categoría en `/en` (móvil y escritorio) y `/en/formats`: una puntuación de Performance de al menos
-0.9 y Core Web Vitals de laboratorio dentro de los umbrales buenos de Google (LCP 2.5 s, CLS 0.1, TBT 200 ms). La misma suite se ejecuta en local y contra una URL desplegada.
-`project:verify` también comprueba los tipos, construye y ensaya (dry-run) el empaquetado de deployment del Worker. La CLI de Chrome DevTools está disponible para
-capturas manuales, interacciones y screenshots.
+Lo que cubren las comprobaciones son las propias comprobaciones: `tests/` y el
+`@joeblew999/remy-ui/checks` del paquete (el título de cada comprobación dice qué demuestra); los niveles que las ejecutan están en
+[cómo trabajamos](how-we-work.md#gates-before-anything-leaves-the-machine). En resumen: cada página en cada
+idioma sin JavaScript (idioma, dirección, metadatos, enlaces), catálogos y plurales, los valores de formatos
+frente a Intl, las redirecciones de entrada y la sugerencia de idioma, la hidratación, el formulario de demo y la API,
+los estados HTTP, el sitemap y `hreflang`, las cabeceras de seguridad y el nonce de CSP, las pantallas estrechas, y
+las páginas de docs, búsqueda y ask.
 
-El Worker conserva la configuración de logs/trazas y emite localmente logs de petición estructurados y redactados.
-Los logs alojados, las trazas y la indexación de Google necesitan un deployment posterior
-y validación externa. Las URLs canónicas actualmente usan el origin de la petición; elige
-el origin público de producción antes del deployment. Esta prueba no contiene servidor de Better Auth,
-credenciales, sesiones, base de datos D1, autorización ni SSO entre apps.
+El nivel de Google cubre solo las páginas de sitio (las páginas de app son noindex por diseño): Lighthouse audita `/en`
+(móvil y escritorio), `/es`, `/ar`, `/en/formats` y `/en/docs/gui`
+([`tests/lighthouse.spec.ts`](../tests/lighthouse.spec.ts)); Core Web Vitals, a partir del paquete
+`lighthouse` fijado de Google, evalúan `/en` (móvil y escritorio), `/en/formats` y `/en/docs/gui`
+([`tests/performance.spec.ts`](../tests/performance.spec.ts)) frente a los umbrales buenos de Google (LCP
+2.5 s, CLS 0.1, TBT 200 ms, Performance de al menos 0.9), en un Worker de Cloudflare desechable
+(`project:test:cwv`), no en localhost.
+
+Límites: todavía no hay servidor de Better Auth, credenciales, sesiones, base de datos D1, autorización ni SSO
+entre apps. El sitio se sirve desde su dirección de workers.dev (`DEPLOY_ORIGIN`); el origin público de producción y
+Search Console son decisiones del propietario ([now](../.plans/now.md)).
 
 Avisos de herramientas conocidos: Node puede imprimir el aviso experimental de localStorage de Chrome DevTools;
 npm informa de scripts de instalación upstream no aprobados; la comprobación de paquete aislado de Vite

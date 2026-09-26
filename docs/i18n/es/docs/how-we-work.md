@@ -57,6 +57,32 @@ perfeccionando, y escribimos solo lo que ellos no ofrecen.
   y demás), instala sus skills de agente y luego elimina el código que reemplaza.
 - Antes de escribir cualquier código de UI, pregunta: ¿shadcn, TanStack o Paraglide ya hacen esto? Si es así, úsalo.
 
+- Míralo: antes de dar por terminado un trabajo de UI, haz capturas de las páginas que cambiaste con `mise run browser:shots` (escritorio y
+  teléfono, claro y oscuro, inglés y árabe) y mira las capturas. Las comprobaciones demuestran el comportamiento; solo
+  las capturas muestran el layout, el espaciado, el desbordamiento y el texto de dirección mixta; nombra las páginas que cambiaste
+  (`mise run browser:shots -- /formats --phone`), y `--all` solo para un barrido completo (el propietario, el 2026-09-26: «Es
+  realmente deprimente que no podáis ver bien el aspecto del sitio web»).
+
+### Qué biblioteca de TanStack para qué [#which-tanstack-library-for-what]
+
+Comprobado contra [tanstack.com](https://tanstack.com) el 2026-09-26. Las bibliotecas beta y alfa cambian
+rápido: lee su documentación actual y las skills instaladas antes de usarlas, no la memoria de un agente.
+
+| Biblioteca | Estado aquí | Regla |
+| --- | --- | --- |
+| Start, Router, Query | En uso en todas partes | La app, sus páginas y toda la obtención de datos (con oRPC) |
+| Form | En uso: solo el formulario de reserva | Todo formulario la usa (inicio de sesión, registro, ajustes); nada de estado de formulario hecho a mano |
+| Pacer | En uso: búsqueda en vivo de la documentación | Cualquier debounce, throttle, límite de frecuencia o cola en el navegador |
+| Devtools | En uso en desarrollo | Mantener los paneles de Router, Query y Form en las únicas Devtools |
+| Table | Siguiente: con las pantallas de administración | Toda lista con ordenación, filtrado o paginación, mediante la tabla de datos de shadcn |
+| Virtual | Cuando una lista se alarga | Listas de cientos de filas, empezando por las zonas horarias |
+| DB (beta) | Todavía no | Solo si necesitamos uso sin conexión o sincronización en vivo; Query cubre las necesidades actuales |
+| AI (beta) | Todavía no | Candidata para `/docs/ask`; demostrarla primero en una rama |
+| Hotkeys (alfa) | Todavía no | Candidata para un atajo de búsqueda cuando salga de alfa |
+| Store (alfa), Charts | No se necesitan | Sin estado de cliente global de la app y todavía sin paneles de control |
+
+Pasar una biblioteca de «Todavía no» a en uso sigue [elige las herramientas mediante un estudio](#choose-tools-by-survey-not-by-first-find).
+
 ## Idioma: Paraglide es responsable [#language-paraglide-owns-it]
 
 Paraglide es responsable de todo el comportamiento de idioma: qué idioma recibe una petición, mediante sus estrategias
@@ -64,6 +90,15 @@ Paraglide es responsable de todo el comportamiento de idioma: qué idioma recibe
 [paraglide.mjs](../packages/ui/paraglide.mjs)), y los enlaces localizados, que TanStack Router
 transporta. No escribimos capas neutrales de framework ni código de idioma propio; cuando a Paraglide
 le falta algo, usa primero sus opciones y registra la carencia en el plan que lo posee.
+
+## Planes: pocos, cortos y cerrados [#plans-few-short-closed]
+
+El propietario, el 2026-09-26: «lo abrumador y frustrante que es tener tantos planes basura». El trabajo nuevo es
+una línea en `.plans/now.md`, en el orden en que se cierra. Solo se escribe un archivo de plan para trabajo lo bastante grande
+como para aparcarse o para durar semanas; las investigaciones, los análisis y las revisiones van en el plan al que sirven,
+no en un archivo propio. Un plan se cierra el día en que su trabajo se publica: una línea de cierre y luego `.plans/done/`. Las
+funcionalidades grandes esperan en `.plans/parked/`. Cerrar un plan no necesita un deploy ni una ejecución de pruebas propios: agrupa el
+código en un solo deploy y una sola ejecución completa al final.
 
 ## Cuando el propietario delega decisiones [#when-the-owner-delegates-decisions]
 
@@ -75,14 +110,25 @@ Cuando el propietario delega decisiones, por ejemplo para terminar el trabajo si
 
 ## Puertas de control antes de que algo salga de la máquina [#gates-before-anything-leaves-the-machine]
 
-- La puerta de control completa (`mise run project:verify`, todos los idiomas) es para los releases reales:
-  `ui:release` la ejecuta, y un release de tag o de paquete nunca sale sin ella. El propietario, el 2026-09-25: «Solo
+- La puerta de control completa (`mise run project:verify`, todos los idiomas) es para los releases reales: `ui:release`
+  la ejecuta, y un tag o un release de paquete nunca sale sin ella. El propietario, el 2026-09-25: «Solo
   hace falta para los releases reales, no podemos tardar una eternidad en desarrollo. Tenéis que empezar a usar
   mejor vuestro criterio sobre cuándo un deploy necesita una prueba de control».
-- Los deploys de desarrollo (`mise run cf:deploy`) no ejecutan pruebas. Evalúa cada caso: un cambio en la app o
-  en el código del paquete compartido que ejecutan los visitantes pasa primero por la puerta rápida (`GATE=1 mise run cf:deploy`,
-  inglés y árabe: izquierda a derecha y derecha a izquierda; el propietario: «Elegid solo 2»); el texto de documentación, los planes, las tareas y la configuración que no cambian lo que
-  reciben los visitantes se despliegan directamente. Indica cuál elegiste al informar.
+- Niveles de prueba (el propietario, el 2026-09-25: «haced grandes cantidades de código sin pruebas y luego pasad por otro nivel
+  si hay problemas»). Programa libremente con el nivel 0; sube solo cuando algo parezca ir mal o antes de que
+  algo salga de la máquina:
+
+  | Nivel | Comando | Qué | Tiempo |
+  | --- | --- | --- | --- |
+  | 0 | `mise run project:check` | comprobación de tipos y build | ~15 s |
+  | 1 | `mise run project:test:smoke` | cada página responde en en y ar; la página de inicio y la documentación se hidratan; la búsqueda y ask responden | ~15 s |
+  | 2 | `mise run project:test:only -- <words>` | solo las comprobaciones cuyo título coincide, en y ar | variable |
+  | 3 | `mise run project:test:quick` | todas las comprobaciones, en y ar | ~45 s |
+  | 4 | `mise run project:verify` | todo, todos los idiomas | releases |
+
+- Los deploys no ejecutan pruebas a menos que `GATE` elija un nivel: `GATE=smoke` para la mayoría de los cambios de código, `GATE=quick`
+  para cambios en el paquete compartido o transversales, `GATE=full` rara vez. El texto de documentación, los planes, las tareas y la configuración
+  se despliegan directamente. Indica qué nivel se ejecutó al informar.
 - Nunca encadenes un comando de puerta de control con `grep` o `tail` mediante una tubería: la tubería oculta su código de salida.
   Esto ya provocó una vez el release de una versión cuyas comprobaciones habían fallado.
 - Informa de qué se probó y qué no; nunca llames verificado a un trabajo no probado.
@@ -100,7 +146,7 @@ y las comprobaciones sensibles al tiempo ya fallaban mucho antes de eso. Por tan
   cuentan. Cuando se necesiten más, define `PLAYWRIGHT_WORKERS=2` para cada uno.
 - El nivel de Google (`project:test:google`, `project:test:cwv`) toma un bloqueo a nivel de máquina, de modo que una segunda
   ejecución espera en lugar de distorsionar la primera.
-- `GATE=1 mise run cf:deploy` ya ejecuta la puerta rápida por sí mismo; nunca encadenes un deploy después de una puerta con `;`.
+- `GATE=<tier> mise run cf:deploy` ejecuta el nivel por sí mismo; nunca encadenes un deploy después de una puerta con `;`.
 
 ## Informar al propietario [#reporting-to-the-owner]
 

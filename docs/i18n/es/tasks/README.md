@@ -2,16 +2,22 @@
 
 Un archivo por espacio de nombres de tarea (`skills`, `mcp`, `browser`, `web`, `codex`, `claude`, `project`,
 `cf`, `api`); las tareas de archivo viven en el directorio de su espacio de nombres (`mcp/`, `cf/`, `api/`, `project/`). remy-auth incluye este
-directorio localmente; cualquier otro proyecto lo incluye mediante una referencia de git fijada a un commit:
+directorio localmente; cualquier otro proyecto lo incluye mediante una referencia de git fijada a la tag de publicación
+que coincide con su versión de `@joeblew999/remy-ui`:
 
 ```toml
+min_version = "2026.9.12"   # the tasks rely on it; an include cannot set it
+
 [task_config]
-includes = ["git::https://github.com/joeblew999/remy-auth.git//tasks?ref=<commit>"]
+includes = ["git::https://github.com/joeblew999/remy-auth.git//tasks?ref=vX.Y.Z"]
 
 [env]
-PREVIEW_PORT = "4174"                                   # local host port for preview and tests
-PUBLIC_ORIGIN = "http://127.0.0.1:4174"                 # origin in prerendered links for local tests
-DEPLOY_ORIGIN = "https://your-app.your-subdomain.workers.dev"   # origin used by cf:deploy
+# Local host port for preview and tests, from the shell so each worktree or agent picks its own.
+PREVIEW_PORT = "{{ get_env(name='PREVIEW_PORT', default='4174') }}"
+# Origin in prerendered links for local tests; follows the port.
+PUBLIC_ORIGIN = "http://127.0.0.1:{{ env.PREVIEW_PORT }}"
+# Origin cf:deploy builds with.
+DEPLOY_ORIGIN = "https://your-app.your-subdomain.workers.dev"
 ```
 
 ### Un consumidor nuevo [#a-new-consumer]
@@ -22,11 +28,11 @@ copia ningún archivo a mano.
 
 1. Requisitos: mise >= 2026.9.12, `gh auth login` con un token que tenga `read:packages`, Google
    Chrome (lo usan las comprobaciones) y `wrangler login` antes del primer despliegue.
-2. `gh repo create <nombre> --private --template joeblew999/remy-auth-app --clone`, luego `cd <nombre>`.
+2. `gh repo create <name> --private --template joeblew999/remy-auth-app --clone`, luego `cd <name>`.
 3. Nombra la aplicación: `name` en `wrangler.jsonc` y `package.json`, el nombre del Worker de prerender en
    `vite.config.ts`, el nombre del servicio en `workers/app.ts`, `src/server.ts` y `tests/gui.spec.ts`
    (`grep -rn remy-auth-app --exclude-dir=node_modules .` los lista), y `DEPLOY_ORIGIN` en
-   `mise.toml` (`https://<nombre>.<tu-subdominio>.workers.dev`).
+   `mise.toml` (`https://<name>.<your-subdomain>.workers.dev`).
 4. `mise install`, luego `GITHUB_TOKEN=$(gh auth token) npm install` una vez para escribir el
    `package-lock.json` de la aplicación nueva (`project:setup` ejecuta `npm ci`, que lo necesita), luego
    `GITHUB_TOKEN=$(gh auth token) mise run project:setup` (npm ci, skills fijadas, registro MCP,
@@ -40,7 +46,7 @@ copia ningún archivo a mano.
 La plantilla ya trae `min_version`, las tres entradas de arriba, `preview_urls: false` y
 `observability.redact_query_string` en `wrangler.jsonc`, el `.npmrc` para GitHub Packages, el
 `.gitignore`, las comprobaciones en `tests/` y un archivo de Dependabot que mantiene al día las acciones
-fijadas por SHA. Pasa a una versión nueva con `mise run project:upgrade-ui -- <versión>` (paquete y
+fijadas por SHA. Pasa a una versión nueva con `mise run project:upgrade-ui -- <version>` (paquete y
 `ref` de las tareas a la vez). `ref=main` (`mise.dev.toml`) queda en caché y nunca se refresca solo:
 ejecuta con `MISE_TASK_REMOTE_NO_CACHE=true` cuando `main` avance.
 
@@ -61,9 +67,10 @@ mise usa el `includes` del archivo más específico en lugar del predeterminado 
 que `main` avance, refresca con `MISE_TASK_REMOTE_NO_CACHE=true`. Fija un SHA de commit solo mientras una rama
 está en pruebas antes de publicarla; vuelve a una tag al publicar.
 
-El proyecto que incluye estas tareas aporta los paquetes npm que las tareas ejecutan: `vite` con `@tanstack/react-start`,
-`wrangler`, `@playwright/test`, `chrome-devtools-mcp`, `modern-web-guidance`, `smol-toml`
-(y `@openai/codex` para las tareas de Codex). Una tarea definida en el propio `mise.toml` del proyecto
+El proyecto que incluye estas tareas aporta los paquetes npm que las tareas ejecutan; la lista completa es el
+`package.json` de remy-auth-app (`vite` con `@tanstack/react-start` y sus plugins, `wrangler`, `@playwright/test`,
+`lighthouse`, `chrome-devtools-mcp`, `modern-web-guidance`, `smol-toml`, y `@openai/codex` para
+las tareas de Codex). Una tarea definida en el propio `mise.toml` del proyecto
 sobrescribe la tarea incluida del mismo nombre; remy-auth sobrescribe `project:typecheck` y
 `project:verify` porque es el dueño del paquete compartido.
 
@@ -75,7 +82,7 @@ niveles y cuándo usar cada uno son una regla en
 | --- | --- |
 | 0 | `project:check` (comprobación de tipos y build, sin navegador) |
 | 1 | `project:test:smoke` (`tests/smoke.spec.ts`, construido sobre las comprobaciones `./smoke` del paquete) |
-| 2 | `project:test:only -- <palabras>` (las comprobaciones cuyo título coincide, en `QUICK_LOCALES`) |
+| 2 | `project:test:only -- <words>` (las comprobaciones cuyo título coincide, en `QUICK_LOCALES`) |
 | 3 | `project:test:quick` (todas las comprobaciones en `QUICK_LOCALES`, por defecto `en,ar`) |
 | 4 | `project:verify` (todo, en todos los idiomas; `ui:release` lo ejecuta) |
 

@@ -26,7 +26,7 @@ paquete sigue [Semantic Versioning](https://semver.org/).
   (LastResort), y su comprobación Han compara las fuentes que realmente dibujan el título de cada
   idioma en lugar de los nombres del CSS, así que el japonés y el chino tradicional dibujados por una
   misma fuente siguen fallando. Cualquier otra escritura sigue necesitando su fuente web.
-### Cambiado [#changed]
+### Cambiado [#changed-1]
 - `checks`: `cspChecks({ enforce })`, por defecto `true`: espera la política con nonce en
   `Content-Security-Policy` (y ninguna en `Content-Security-Policy-Report-Only`), o al revés con
   `enforce: false`; comprueba también la política de la página de no encontrado; aplicada, prueba
@@ -36,12 +36,60 @@ paquete sigue [Semantic Versioning](https://semver.org/).
 ## [0.11.0] - 2026-09-25 [#0110---2026-09-25]
 
 ### Añadido [#added-1]
+- Cambios que eliminan copias en los consumidores (`.plans/publisher-consumer-analysis.md`, D4, D8, D9, D12):
+  `./tailwind.css` (`globals.css`, `fonts.css`, `text.css` y el `@source` propio del paquete, así que una app
+  escribe una sola importación y su propio `@source "../src"`); `./prerender` (`prerenderPages({ notFoundPath })`,
+  la lista de páginas de una app prerrenderizada); `sitemapXml({ origin, paths, extra })`, `sitemapEntries`,
+  `robotsTxt(origin)`, `sitemapType` y `robotsType` de `seo`; `./app-checks` (`serverAppChecks`,
+  `prerenderedAppChecks`: el conjunto de comprobaciones compartidas en una llamada por tipo de app, con
+  las páginas propias de la app pasadas junto a las compartidas). remy-auth los usa; su CSS, su sitemap,
+  su robots.txt y sus comprobaciones registradas no cambian. Las importaciones por separado siguen funcionando.
+- `showcase/status-card`: la tarjeta de estado en vivo (`StatusCard`, `LiveStatus`, `statusRefreshMs`),
+  trasladada desde remy-auth para que remy-auth-app también la muestre. La app pasa la consulta: las
+  `queryOptions` de su propio cliente (renderizada en servidor), o un `contractClient` en el origen de
+  otra app con `serverRendered={false}` (consultada por el navegador, con su propia nota, mensaje
+  `live_status_note_browser`). Una respuesta que rompe el contrato, o ninguna, se muestra como error
+  (`data-status="error"`), nunca como datos.
+- `./invalidate`: `invalidateEverything(router, queryClient)`, trasladada desde remy-auth (recibía solo
+  el router y leía el QueryClient de su contexto). `@tanstack/react-query` es un nuevo peer opcional.
+- `api/server`: `apiHandlers` acepta `origins`, los orígenes exactos de las apps registradas a las que se
+  permite llamar a la API desde sus páginas (el CORSPlugin de oRPC; ninguno por defecto, un comodín se rechaza).
+- `api/checks`: `apiChecks({ origins })` comprueba CORS: cada origen registrado se permite en una llamada
+  simple y en una solicitud preflight, y cualquier otro origen no.
+- `showcase/status-card.checks`: `statusCardChecks({ origin, registered })` para un consumidor que consulta
+  el contrato de otra app entre orígenes (ningún estado en el HTML prerrenderizado, el otro Worker nombra
+  el origen de la página, nada consultado desde un origen no registrado), y para cada tarjeta sobre un
+  endpoint del contrato una comprobación de que una respuesta que rompe el contrato se muestra como error.
 - Partes (`.plans/parts.md`): `./parts` (`readParts`, `catalog`), `./parts/vite` (`remyParts()`: un
   plugin de Vite que genera `virtual:remy-parts` a partir del `src/parts.json` de la app, y la
   configuración de rutas que monta las rutas de cada parte listada mediante `virtualRouteConfig` y
   `physical()` de TanStack), `./parts/checks` (`partChecks()`). Primera parte: `time-zones` (la ruta
   `/time-zones/$` y sus comprobaciones), de modo que una app la añade o la quita con una línea. Nueva
   dependencia `@tanstack/virtual-file-routes`.
+- Partes, segunda pasada: tres partes más, cada una una línea en `src/parts.json`.
+  `deferred-place` (la ubicación de Cloudflare transmitida en streaming a las páginas de formatos y de
+  ubicación, su función de servidor `getPlace` y sus comprobaciones; enlaza una zona a `time-zones` solo
+  cuando esa parte está listada), `seo-routes` (`/robots.txt` y `/sitemap.xml`, con las páginas del sitio
+  del paquete, las de cada parte listada y las entradas propias de la app desde su `src/parts/seo-routes.ts`)
+  y `status-card` (la tarjeta de estado en vivo en la página de inicio de la app, con la consulta de estado
+  de la app desde su `src/parts/status-card.ts`).
+  El mecanismo gana módulos de entrada (`virtual:remy-parts/<part>/<entry>`, `undefined` para una parte no
+  listada), opciones de la app (`virtual:remy-parts/<part>/app`), rutas del sitio que añade una parte
+  (`sitePaths`) y `partSitePaths()`. Nuevas exportaciones `./parts/seo-routes/sitemap` y
+  `./parts/status-card/query` (tipos para las opciones de la app). Una única implementación de cada cosa:
+  la parte seo-routes construye sus rutas con `sitemapXml` y `robotsTxt` de `seo` (igual que una app
+  prerrenderizada escribe sus archivos), y la parte status-card es la tarjeta de `showcase/status-card`
+  con la consulta de la app.
+- `serverAppChecks({ parts })` tiene en cuenta las partes: lo que posee una parte listada se ejecuta con
+  `partChecks()` en su lugar, nunca dos veces (con `seo-routes`, ninguna prueba de sitemap en
+  `publicPageChecks`; la fila de ubicación del dispositivo espera la ubicación de Cloudflare solo con
+  `deferred-place`). `parts` toma por defecto el `src/parts.json` de la app, o ninguna si no lo hay;
+  `prerenderedAppChecks` no cambia. El archivo de pruebas de remy-auth es una llamada a `serverAppChecks`,
+  una llamada a `partChecks` y sus propias comprobaciones.
+- `sitemapChecks({ paths, oneLanguage })` (`checks`): la prueba del sitemap, separada de `publicPageChecks`,
+  que la ejecuta salvo que se le indique `sitemap: false` (entonces la ejecutan las comprobaciones de la
+  parte seo-routes). La comprobación del 404 con la que compartía prueba es ahora una prueba propia, aún
+  en `publicPageChecks`.
 - `./problem` (`Problem`, `NotFound`, `ErrorPage`, `problemPages`) y `./preferred` (`usePreferred`),
   trasladados desde remy-auth para que las rutas de las partes puedan usarlos. Nada cambia en las
   importaciones existentes.
@@ -76,7 +124,7 @@ paquete sigue [Semantic Versioning](https://semver.org/).
   respaldo con métricas ajustadas de la propia fuente de escritura; el respaldo de Geist queda al final.
   Sin nuevas precargas.
 
-### Cambiado [#changed-1]
+### Cambiado [#changed-2]
 - Página de formatos: cada sección empieza con lo que es para el idioma de la página
   (`data-own-area`): Dinero muestra la cantidad en la moneda del propio idioma (antes euros), Palabras
   lista las formas de plural del idioma. Cada control ofrece la unión sobre todos los idiomas, con los
@@ -100,7 +148,7 @@ paquete sigue [Semantic Versioning](https://semver.org/).
 - El componente `table` de shadcn (mediante `ui:components`), y mensajes para las páginas de
   documentación y de respuesta en todos los idiomas.
 
-### Cambiado [#changed-2]
+### Cambiado [#changed-3]
 - `publicPageChecks`: la comprobación de pantalla estrecha, fuentes y cabecera reflejada
   ejecuta una prueba por idioma, y las páginas de un único idioma una sola vez, en su propio idioma.
 
@@ -121,7 +169,7 @@ paquete sigue [Semantic Versioning](https://semver.org/).
 - Nivel de pruebas rápido (`project:test:quick`): un idioma por sistema de escritura
   (`QUICK_LOCALES`, por defecto en, ar, ja, th).
 
-### Cambiado [#changed-3]
+### Cambiado [#changed-4]
 - Las comprobaciones por idioma (páginas de la app excluidas de la búsqueda, violaciones de
   CSP durante la hidratación, texto) se ejecutan como una prueba por idioma, de modo que el tiempo
   por prueba no crece con el número de idiomas.
@@ -164,7 +212,7 @@ paquete sigue [Semantic Versioning](https://semver.org/).
 - Las `routeStrategies` de Paraglide mantienen `/api/*` fuera de la localización de URL:
   sin redirección, y el idioma proviene de Accept-Language, o si no, del idioma base.
 
-### Cambiado [#changed-4]
+### Cambiado [#changed-5]
 - Un único estilo de insignia de zona (secondary) en las páginas del sitio y de la app; las
   páginas de la app ya no lo repiten como etiqueta; las páginas del sitio no tienen enlaces de
   vuelta (navegan mediante la cabecera).
@@ -182,7 +230,7 @@ paquete sigue [Semantic Versioning](https://semver.org/).
   entrada de la función de servidor (`reservationInput`) y `reservationErrors` para los errores de
   campo de un servidor.
 
-### Cambiado [#changed-5]
+### Cambiado [#changed-6]
 - `showcase/search-params`: los parámetros de búsqueda de formatos se validan con un
   esquema de Zod 4, `formatsSearchSchema`, que TanStack Router toma directamente como
   `validateSearch` (Standard Schema, sin adaptador). Sustituye a la función `validateSearch`
@@ -198,7 +246,7 @@ paquete sigue [Semantic Versioning](https://semver.org/).
 
 ## [0.10.2] - 2026-09-25
 
-### Cambiado [#changed-6]
+### Cambiado [#changed-7]
 - Formatos en cinco secciones (este idioma, fechas y horas, números, dinero, palabras) con
   una lista de enlaces a ellas; cada control de parámetro de búsqueda se ubica en la sección que
   modifica. Los slots de `FormatsExtras` ahora son filas en grupos (`language`, `systems`,
@@ -221,7 +269,7 @@ paquete sigue [Semantic Versioning](https://semver.org/).
 - `zoneChecks`: en un teléfono en horizontal, el camino de vuelta al sitio permanece
   visible.
 
-### Cambiado [#changed-7]
+### Cambiado [#changed-8]
 - El «Volver al sitio» del sidebar de la app pasa a `SidebarFooter`, de modo que permanece
   visible en pantallas cortas.
 - `performanceChecks` evalúa la mediana de cinco ejecuciones (`computeMedianRun` de
@@ -233,7 +281,7 @@ paquete sigue [Semantic Versioning](https://semver.org/).
 Apuesta total por shadcn, y páginas del sitio separadas de las páginas de la app. Cambio
 disruptivo para los consumidores.
 
-### Cambiado [#changed-8]
+### Cambiado [#changed-9]
 - Disposición de monorepo de shadcn: el `components.json` de la app dirige `shadcn add`
   hacia este paquete; la hoja de estilos es `globals.css` (antes `styles.css`), exactamente lo
   que escribe la CLI de shadcn (estilo Nova por defecto, tema neutral, Geist), comprobado por
@@ -263,8 +311,8 @@ disruptivo para los consumidores.
   distancia entre ambas. `devicePlaceChecks`.
 - `cloudflare`: `Place` incluye `latitude` y `longitude` de Cloudflare cuando son
   válidas.
-- `worker`: toda respuesta envía `Permissions-Policy: geolocation=(self), camera=(),
-  microphone=()`, verificado por `observabilityChecks`.
+- `worker`: toda respuesta envía `Permissions-Policy: geolocation=(self), camera=(), microphone=()`,
+  verificado por `observabilityChecks`.
 
 ## [0.9.2] - 2026-09-25
 
@@ -278,7 +326,7 @@ disruptivo para los consumidores.
   `project:test:quick` puede ejecutar las comprobaciones sobre unos pocos idiomas
   representativos.
 
-### Cambiado [#changed-9]
+### Cambiado [#changed-10]
 - `statusCardChecks` salta el intervalo de actualización con el reloj de Playwright en
   lugar de esperarlo (de unos 10 s a menos de 1 s).
 
@@ -333,7 +381,7 @@ a las rutas de archivo de TanStack (véase remy-auth y remy-auth-app).
 - Claves de catálogo para los controles de parámetros de búsqueda, el aviso de salida de
   página, la tarjeta de estado en vivo, el botón de reintento y la página de zona horaria.
 
-### Cambiado [#changed-10]
+### Cambiado [#changed-11]
 - `pages`: los enlaces dentro de la app son `Link` de TanStack a rutas deslocalizadas con
   `preload="intent"`; el rewrite del router añade el idioma. Los cambios de idioma siguen siendo
   anclas simples (navegaciones completas).
@@ -382,7 +430,7 @@ a las rutas de archivo de TanStack (véase remy-auth y remy-auth-app).
 
 ## [0.6.0] - 2026-09-24
 
-### Cambiado [#changed-11]
+### Cambiado [#changed-12]
 - `playwrightConfig()` divide las comprobaciones en dos niveles: `ours` (las
   comprobaciones propias de la app, rápidas) y `google` más `google-cwv` (auditorías de
   Lighthouse y Core Web Vitals, lentas). El `project:test` compartido ejecuta el nivel 1;
@@ -401,7 +449,7 @@ a las rutas de archivo de TanStack (véase remy-auth y remy-auth-app).
   los tiempos, y Lighthouse mide una página que la comprobación ya ha calentado, ya que el
   escaneo en frío de fuentes de un navegador nuevo no es un coste de la página.
 
-### Cambiado [#changed-12]
+### Cambiado [#changed-13]
 - Todo componente en `src/components` se genera con la CLI de shadcn fijada, a partir del
   registro oficial `base-nova` (button, card, input, label, badge, alert, separator, field);
   `mise run ui:components` los regenera y el gate falla ante cualquier desviación. Exportados
@@ -448,7 +496,7 @@ a las rutas de archivo de TanStack (véase remy-auth y remy-auth-app).
 - `@joeblew999/remy-ui/runtime`: el runtime generado como JavaScript simple para
   configuraciones de build.
 
-### Cambiado [#changed-13]
+### Cambiado [#changed-14]
 - Las opciones del compilador viven en `packages/ui/paraglide.mjs`, compartidas por el
   plugin de Vite y `mise run ui:generate`. La cookie de elección recordada es
   `PARAGLIDE_LOCALE` de Paraglide.

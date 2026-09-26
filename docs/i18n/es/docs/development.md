@@ -2,7 +2,7 @@
 
 Este documento es el dueño de lo que el código debe ser. Cómo trabajan las personas y los agentes día a día vive en
 [cómo trabajamos](how-we-work.md). Lo que posee el servicio de autenticación, y su dirección de almacenamiento, viven en
-[el plan del servicio de autenticación](../.plans/auth-service.md).
+[el plan del servicio de autenticación](../.plans/parked/auth-service.md).
 
 ## Principios de desarrollo [#development-principles]
 
