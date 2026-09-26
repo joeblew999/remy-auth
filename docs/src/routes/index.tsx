@@ -15,7 +15,7 @@ export const Route = createFileRoute('/')({
 function Home() {
   const nonce = useRouter().options.ssr?.nonce;
   return <RootProvider theme={{ storageKey: 'theme', attribute: 'class', defaultTheme: 'system', enableSystem: true, nonce }} search={{ enabled: false }}>
-    <HomeLayout nav={{ title: docsConfig.product, url: '/' }} githubUrl={docsConfig.repository}>
+    <HomeLayout nav={{ title: docsConfig.product, url: '/' }}>
       <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-12">
         <h1 className="text-3xl font-semibold">{docsConfig.product}</h1>
         <Cards>

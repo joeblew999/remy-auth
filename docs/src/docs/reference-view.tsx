@@ -5,7 +5,6 @@ import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layo
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { createOpenAPIPage, type OpenAPIPageProps } from 'fumadocs-openapi/ui';
 import type { getReferencePage } from './reference';
-import { repository } from './table.js';
 import { docsConfig } from '../../docs.config';
 
 // The API reference (/reference), as Fumadocs' OpenAPI example renders it: DocsLayout over the
@@ -18,7 +17,7 @@ export function ReferenceView({ page }: { page: NonNullable<Awaited<ReturnType<t
   const nonce = useRouter().options.ssr?.nonce;
   return <RootProvider theme={{ storageKey: 'theme', attribute: 'class', defaultTheme: 'system', enableSystem: true, nonce }}
     search={{ options: { api: '/api/search/reference' } }}>
-    <DocsLayout tree={pageTree} nav={{ title: docsConfig.titles.reference, url: '/reference' }} githubUrl={repository}
+    <DocsLayout tree={pageTree} nav={{ title: docsConfig.titles.reference, url: '/reference' }}
       links={[{ text: 'Developers', url: '/dev' }, { text: 'Guide', url: '/docs' }]}>
       <DocsPage toc={page.toc} full>
         <DocsTitle>{page.title}</DocsTitle>

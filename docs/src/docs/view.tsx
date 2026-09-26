@@ -18,7 +18,7 @@ import { Mermaid } from '@/components/mermaid';
 import { AISearch, AISearchPanel, AISearchTrigger } from '@/components/ai/search';
 import { buttonVariants } from '@/components/ui/button';
 import { MessageCircleIcon } from 'lucide-react';
-import { docsUrl, repository } from './table.js';
+import { docsUrl } from './table.js';
 import { docsConfig } from '../../docs.config';
 
 // Fumadocs UI's own interface text per language (docs/content/ui/<lang>.json; en.json is Fumadocs' defaults,
@@ -93,7 +93,6 @@ export function DocsView({ page }: { page: DocsPageData }) {
     <DocsLayout
       tree={pageTree}
       nav={{ title: docsConfig.titles[page.site], url: docsUrl(page.site, '', page.lang) }}
-      githubUrl={repository}
       links={[
         { text: other.text, url: other.url },
         ...(page.site === 'dev' ? [{ text: 'API reference', url: '/reference' }] : []),
