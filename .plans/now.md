@@ -32,7 +32,7 @@ then tools, then translating.
      frontmatter `title` and `description` on the English docs **and, once, on the Spanish ones** (a structural
      move by the single writer, not a translation pass: the loader needs them), a `loader()` from `docsTable`
      over virtual files (`VirtualFile`/`StaticSource`, no symlinks), search via `createFromSource`, the
-     `source.config.ts` root fix (`import.meta.dirname`); deletes our hand-built titles, descriptions,
+     `source.config.ts` replaced by the macro (below); deletes our hand-built titles, descriptions,
      navigation and search index.
      Tooling, checked 2026-09-26:
      - **The check is Fumadocs' own schema:** `description` required and the `firstHeading` default
