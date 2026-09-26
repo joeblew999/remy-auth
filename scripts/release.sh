@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Publishes the shared UI from this machine; run through `mise run ui:release`, which runs level 1,
 # ui:verify and level 2 first, then the API contract when its version is new. Bump
-# packages/ui/package.json and the root's @joeblew999/remy-ui pin together, and write the CHANGELOG.md section, in a commit before releasing.
+# packages/ui/package.json and every workspace's @joeblew999/remy-ui pin together (the root's and docs/'s; the
+# contract's peer range too, before 1.0 a caret takes one minor), and write the CHANGELOG.md section, in a commit before releasing.
 set -euo pipefail
 
 version=$(node -p "require('./packages/ui/package.json').version")

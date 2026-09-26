@@ -6,6 +6,10 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-09-26
+
+With `@joeblew999/remy-auth-contract` 0.2.1 (unchanged code; its peer range is `^0.12.0`).
+
 ### Added
 - Formats page, one shape in every language (issue #5): every section two columns, so none ends with a
   hole; notes in their card's footer (`Group`'s `note`); each language offered its own digits too
