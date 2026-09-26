@@ -75,7 +75,10 @@ Each was worked around in remy-auth-app; the real fix belongs here, so no app me
    (`formatsRouteOptions`), so an app's route file is one line.
 4. **`plans:check` requires `.plans/now.md` in every app**: fine as a rule, but the consumer recipe should
    say so (remy-auth-app had none).
-5. **Installing in a consumer needs `GITHUB_TOKEN`** (GitHub Packages), and remy-auth-app's mise has no
+5. **remy-auth-app had no `tests/smoke.spec.ts`**, so `project:test:live` after every deploy found no tests
+   (it fails loudly, which is how this surfaced). The consumer recipe, or `docs:init`-style scaffolding,
+   should create it: one `smokeChecks(...)` line.
+6. **Installing in a consumer needs `GITHUB_TOKEN`** (GitHub Packages), and remy-auth-app's mise has no
    fnox: the consumer recipe should pin fnox and run installs through it, as here.
 
 ## Look (from `browser:shots`, 2026-09-26)
