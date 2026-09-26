@@ -28,6 +28,9 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
   into `main` and their worktrees; remove the local ones; `--remote` deletes merged GitHub branches (owner
   confirms). Until then: `shadcn-stock` and `tanstack` on GitHub are merged leftovers, safe to delete.
 
+- **Docs for apps** ([plan](docs-for-consumers.md)): how apps on the package get the docs and rules
+  (skill, in the package, llms.txt, MCP); today unpinned GitHub links; research to do.
+
 ## Look (from `browser:shots`, 2026-09-26)
 
 - The home page is a heading and two buttons above an empty screen: it needs its content.
