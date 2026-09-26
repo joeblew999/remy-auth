@@ -1,3 +1,4 @@
+<!-- translated-from: docs/gui.md @ 14f06abff0f49046b992f8d0e73fdc3ff28b1b1c -->
 # Prueba mínima de GUI [#minimal-gui-proof]
 
 [Volver al README](../README.md)

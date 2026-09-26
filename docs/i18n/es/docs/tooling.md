@@ -1,3 +1,4 @@
+<!-- translated-from: docs/tooling.md @ 9b4c91affd910033e83bf7fb52e64b4d69fbdbc2 -->
 # Referencia de herramientas de desarrollo [#developer-tooling-reference]
 
 [Volver al README](../README.md) · [Tareas de mise](../mise.toml)

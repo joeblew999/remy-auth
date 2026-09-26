@@ -1,3 +1,4 @@
+<!-- translated-from: tasks/README.md @ 83faea0ad29d6090a48bb1a61111fc4b7583c37a -->
 # Tareas compartidas de mise [#shared-mise-tasks]
 
 Un archivo por espacio de nombres de tarea (`skills`, `mcp`, `browser`, `web`, `codex`, `claude`, `project`,

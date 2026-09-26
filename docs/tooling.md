@@ -74,6 +74,7 @@ CLI passthrough tasks accept upstream flags directly, such as
 | `browser:*` | Chrome DevTools CLI, session lifecycle and MCP server |
 | `web:*` | Modern web guidance search and retrieval |
 | `docs:*` | The docs for AI answers at `/docs/ask`: publish them to R2 (`docs:publish`, also run by `cf:deploy`), check retrieval (`docs:questions`), stop or resume answers (`docs:answers:*`), run locally against the live index (`docs:dev`) |
+| `i18n:*` | Translation status: what is missing or stale per locale (`i18n:status`, `--json` for agents), the warning or release gate (`i18n:check`), the work for the translation agent and recording it (`i18n:translate`, `--mark`); shared tasks, [one writer](how-we-work.md#translations-one-writer) |
 | `mcp:*` | Register, verify and inspect project MCP connections |
 | `codex:*` / `claude:*` | Start or resume an interactive agent session (shared tasks) |
 

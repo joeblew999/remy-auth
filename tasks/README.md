@@ -1,7 +1,7 @@
 # Shared mise tasks
 
-One file per task namespace (`skills`, `mcp`, `browser`, `web`, `codex`, `claude`, `project`,
-`cf`, `api`); file tasks live in their namespace's directory (`mcp/`, `cf/`, `api/`, `project/`). remy-auth includes this
+One file per task namespace (`skills`, `mcp`, `browser`, `web`, `codex`, `claude`, `project`, `i18n`,
+`cf`, `api`); file tasks live in their namespace's directory (`mcp/`, `cf/`, `api/`, `project/`, `i18n/`). remy-auth includes this
 directory locally; any other project includes it by git reference pinned to the release tag that
 matches its `@joeblew999/remy-ui` version:
 
@@ -80,7 +80,7 @@ tiers and when to use each are a rule in
 
 | Tier | Task |
 | --- | --- |
-| 0 | `project:check` (typecheck and build, no browser) |
+| 0 | `project:check` (typecheck and build, no browser; then `i18n:check`, a warning) |
 | 1 | `project:test:smoke` (`tests/smoke.spec.ts`, built on the package's `./smoke` checks) |
 | 2 | `project:test:only -- <words>` (checks whose title matches, in `QUICK_LOCALES`) |
 | 3 | `project:test:quick` (every check in `QUICK_LOCALES`, default `en,ar`) |
@@ -97,6 +97,40 @@ suite again. Keep checks cheap rather than dropping them (Playwright's clock rat
 waits, one browser page per check, parallel workers). Checks loop over `checkedLocales` from
 `@joeblew999/remy-ui/checks`, which honours `CHECK_LOCALES`. Set `[settings] task.timings = true` in
 the including `mise.toml` so each tier prints per-task and total durations.
+
+### Translations
+
+One layout in every app, so the same `i18n:*` tasks work everywhere (the rule for who translates is
+[one writer](../docs/how-we-work.md#translations-one-writer)):
+
+| What | English | Translation |
+| --- | --- | --- |
+| Docs | wherever the app keeps the file | `docs/i18n/<locale>/<the English file's path>` |
+| UI catalogs | the base locale's catalog of each inlang project (`<dir>/project.inlang`) | each locale's catalog, by the project's own `pathPattern` (e.g. `messages/<locale>.json`) |
+
+- A translated docs file's first line records the English version it was translated from, as the
+  English file's git blob sha (`git hash-object`): content-based, so every branch agrees on it.
+  `i18n:translate -- --mark <file>` writes it; nobody types it.
+
+  ```md
+  <!-- translated-from: docs/tooling.md @ 9b4c91affd910033e83bf7fb52e64b4d69fbdbc2 -->
+  ```
+
+- The English docs list is `I18N_DOCS_TABLE`, an optional `[env]` input: a module exporting
+  `docsTable` (rows with `file`); remy-auth points it at `src/docs/table.js`. Without it the list is
+  the translations on disk (so a new English page is not reported missing). A locale takes part in the
+  docs by having a `docs/i18n/<locale>/` folder.
+- The catalogs, locales and base locale come from inlang's own `settings.json`; inlang's CLI
+  (`lint`, `validate`) checks only the settings file, so key and placeholder parity is ours.
+- An app with no `docs/i18n/` and no `project.inlang` of its own gets "nothing to translate" and
+  exit 0.
+
+| Task | Does |
+| --- | --- |
+| `i18n:status` | Per locale: docs missing, stale (English changed since the recorded sha), unmarked, orphaned, or marked current with other headings than English; catalog keys missing, extra, or with other `{placeholders}`. `--json` for agents |
+| `i18n:check` | The same; a WARNING and exit 0 while coding (`project:check` runs it), exit 1 with `I18N_STRICT=1` (`ui:release`) |
+| `i18n:translate [locale]` | The work: for each stale docs file `git diff <recorded>..<current>` of its English, whole files for missing ones, missing keys with their English values. No model calls |
+| `i18n:translate -- --mark <file>…` | Record the current English version in translated docs files |
 
 ### Cloudflare tasks
 

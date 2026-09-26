@@ -42,7 +42,8 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
 
 - A native-speaker review of the ten newer languages' catalogs and the Spanish docs.
 - The production origin (a custom domain) and Search Console.
-- More docs languages: drop files into `docs/i18n/<locale>/` (the plumbing is done).
+- More docs languages: drop files into `docs/i18n/<locale>/` (the plumbing is done; `mise run
+  i18n:status` lists what each language still needs).
 
 ## Parked
 

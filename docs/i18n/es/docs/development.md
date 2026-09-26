@@ -1,3 +1,4 @@
+<!-- translated-from: docs/development.md @ 31afb5364c64d14f5208e711b6cbdcac9ba52f16 -->
 # Arquitectura y principios de desarrollo [#architecture-and-development-principles]
 
 Este documento es el dueño de lo que el código debe ser. Cómo trabajan las personas y los agentes día a día vive en

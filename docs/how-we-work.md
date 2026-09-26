@@ -91,6 +91,23 @@ Paraglide owns all language behaviour: which language a request gets, through it
 carrying them. We do not write framework-neutral layers or our own language code; when Paraglide
 lacks something, use its options first and record the gap in the owning plan.
 
+## Translations: one writer
+
+English is the source; translations follow it, written by one writer at a time. Agents change these
+files all the time, so translating inside every feature branch collides and leaves languages
+half-updated.
+
+- A feature agent writes English only: the English docs and the base catalog (`messages/en.json`).
+  It never edits `docs/i18n/` or another locale's catalog.
+- Translation is its own step, serialized, on `main` after the merges: one translation agent runs
+  `mise run i18n:status` (what is missing or stale), `mise run i18n:translate [locale]` (the exact
+  English diffs and missing keys), translates, then records each docs file it finished with
+  `mise run i18n:translate -- --mark <translated file>`.
+- Stale or missing is a warning while pumping (`project:check` prints it) and an error at release
+  (`ui:release` runs `i18n:check` with `I18N_STRICT=1` first).
+
+The layout and the provenance line are in the [tasks README](../tasks/README.md#translations).
+
 ## Plans: few, short, closed
 
 Owner, 2026-09-26: "how overwhelming and frustrating it is to have so much garbage plans". New work is
@@ -120,7 +137,7 @@ When the owner hands over decisions, for example to finish work unattended:
 
   | Tier | Command | What | Time |
   | --- | --- | --- | --- |
-  | 0 | `mise run project:check` | typecheck and build | ~15 s |
+  | 0 | `mise run project:check` | typecheck and build; translation status as a warning | ~15 s |
   | 1 | `mise run project:test:smoke` | every page in en and ar answers; home and docs hydrate; search and ask respond | ~15 s |
   | 2 | `mise run project:test:only -- <words>` | only the checks whose title matches, en and ar | varies |
   | 3 | `mise run project:test:quick` | every check, en and ar | ~45 s |

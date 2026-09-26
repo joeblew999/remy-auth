@@ -1,3 +1,4 @@
+<!-- translated-from: packages/ui/README.md @ 71f5a0442cb401d981e0180e63af8f256972dafd -->
 # @joeblew999/remy-ui
 
 La interfaz que comparten todas las apps de Remy: componentes y tema de shadcn de fábrica, fuentes,

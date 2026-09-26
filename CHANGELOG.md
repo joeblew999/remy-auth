@@ -11,6 +11,12 @@ package follows [Semantic Versioning](https://semver.org/).
   most `fontBudget` (300 KB, option `budget`) of fonts, in every language. Measured on a local
   production build: 28.7 KB (Latin) to 227.2 KB (`/ar/formats`) (`.plans/fonts.md`, step 1).
   New exports `fontBudget` and `systemFontScripts`.
+- Shared tasks `i18n:status`, `i18n:check` and `i18n:translate` (`tasks/i18n/`): per locale, docs
+  translations missing or stale against the English version recorded in their first line
+  (`<!-- translated-from: <path> @ <blob sha> -->`), and catalog keys missing, extra or with other
+  placeholders than the base locale. `project:check` runs `i18n:check` as a warning; `ui:release` runs
+  it strict first. An app with nothing to translate gets "nothing to translate". Replaces remy-auth's
+  heading-only `docs:translations`.
 
 ### Changed
 - `fonts.css`: Japanese and Traditional Chinese draw with the system's font for their language
