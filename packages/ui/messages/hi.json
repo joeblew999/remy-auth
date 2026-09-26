@@ -361,5 +361,21 @@
   "account_description": "Remy में साइन इन, ऑथ सेवा तैयार होने पर।",
   "account_intro": "आपका साइन-इन और आपके सत्र यहाँ दिखेंगे।",
   "account_empty_title": "आप साइन इन नहीं हैं",
-  "account_empty_description": "साइन इन Remy की ऑथ सेवा के साथ आएगा। तब तक ऐप आपके बारे में कुछ भी सहेजता नहीं है।"
+  "account_empty_description": "साइन इन Remy की ऑथ सेवा के साथ आएगा। तब तक ऐप आपके बारे में कुछ भी सहेजता नहीं है।",
+  "home_pages_heading": "यहाँ आप क्या खोल सकते हैं",
+  "home_formats_open": "फ़ॉर्मैट पेज खोलें",
+  "home_app_title": "ऐप पेज",
+  "home_app_open": "ऐप पेज खोलें",
+  "home_shared_heading": "हर Remy ऐप में क्या साझा है",
+  "home_shared_intro": "Remy ऐप एक ही पैकेज, @joeblew999/remy-ui, पर बने हैं, इसलिए हर ऐप एक जैसे हिस्सों से शुरू होता है।",
+  "home_shared_components_title": "कॉम्पोनेंट और थीम",
+  "home_shared_components_text": "स्टॉक shadcn कॉम्पोनेंट और थीम, हर ऐप में एक जैसे।",
+  "home_shared_languages_title": "भाषाएँ",
+  "home_shared_languages_text": "{count} भाषाओं में Paraglide संदेश कैटलॉग, और तारीख़ों, संख्याओं, बहुवचन व पढ़ने की दिशा के लिए हर भाषा के अपने नियम।",
+  "home_shared_pages_title": "साइट पेज और ऐप पेज",
+  "home_shared_pages_text": "साइट पेज JavaScript के बिना काम करते हैं और सर्च इंजन के लिए बनाए गए हैं; ऐप पेज /app के अंतर्गत होते हैं और आपके ब्राउज़र में चलते हैं।",
+  "home_shared_checks_title": "साझा जाँचें",
+  "home_shared_checks_text": "इस पैकेज पर बने हर ऐप पर वही ब्राउज़र जाँचें चलती हैं।",
+  "home_guide_text": "ऐप इस्तेमाल करने वालों के लिए: हर पेज क्या करता है, आपकी भाषा में।",
+  "home_developers_text": "Remy या उस पर कोई ऐप बनाने वाले डेवलपर्स के लिए, और उसका API संदर्भ।"
 }

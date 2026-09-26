@@ -357,5 +357,21 @@
   "account_description": "Kimlik doğrulama hizmeti hazır olduğunda Remy'de oturum açma.",
   "account_intro": "Oturum açma bilgileriniz ve oturumlarınız burada olacak.",
   "account_empty_title": "Oturum açmadınız",
-  "account_empty_description": "Oturum açma, Remy'nin kimlik doğrulama hizmetiyle birlikte gelecek. O zamana kadar uygulama hakkınızda hiçbir şey saklamaz."
+  "account_empty_description": "Oturum açma, Remy'nin kimlik doğrulama hizmetiyle birlikte gelecek. O zamana kadar uygulama hakkınızda hiçbir şey saklamaz.",
+  "home_pages_heading": "Burada neleri açabilirsiniz",
+  "home_formats_open": "Biçimler sayfasını aç",
+  "home_app_title": "Uygulama sayfaları",
+  "home_app_open": "Uygulama sayfalarını aç",
+  "home_shared_heading": "Her Remy uygulamasının ortak yanları",
+  "home_shared_intro": "Remy uygulamaları tek bir paket olan @joeblew999/remy-ui üzerine kurulur, bu yüzden hepsi aynı parçalarla başlar.",
+  "home_shared_components_title": "Bileşenler ve tema",
+  "home_shared_components_text": "Hazır shadcn bileşenleri ve teması; her uygulamada aynıdır.",
+  "home_shared_languages_title": "Diller",
+  "home_shared_languages_text": "{count} dilde Paraglide mesaj kataloğu ve her dilin tarih, sayı, çoğul biçimleri ile okuma yönüne ilişkin kendi kuralları.",
+  "home_shared_pages_title": "Site sayfaları ve uygulama sayfaları",
+  "home_shared_pages_text": "Site sayfaları JavaScript olmadan çalışır ve arama motorları için hazırlanmıştır; uygulama sayfaları /app altında yer alır ve tarayıcınızda çalışır.",
+  "home_shared_checks_title": "Ortak denetimler",
+  "home_shared_checks_text": "Paket üzerine kurulu her uygulamada aynı tarayıcı denetimleri çalıştırılır.",
+  "home_guide_text": "Uygulamayı kullananlar için: her sayfanın ne işe yaradığı, kendi dilinizde.",
+  "home_developers_text": "Remy'yi veya onun üzerine bir uygulama geliştiren geliştiriciler ve API başvurusu için."
 }

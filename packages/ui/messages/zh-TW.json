@@ -355,5 +355,21 @@
   "account_description": "驗證服務就緒後，即可登入 Remy。",
   "account_intro": "您的登入資訊和工作階段將會顯示在這裡。",
   "account_empty_title": "您尚未登入",
-  "account_empty_description": "登入功能將隨 Remy 的驗證服務推出。在此之前，應用程式不會儲存任何關於您的資料。"
+  "account_empty_description": "登入功能將隨 Remy 的驗證服務推出。在此之前，應用程式不會儲存任何關於您的資料。",
+  "home_pages_heading": "在這裡你可以開啟什麼",
+  "home_formats_open": "開啟格式頁面",
+  "home_app_title": "應用程式頁面",
+  "home_app_open": "開啟應用程式頁面",
+  "home_shared_heading": "所有 Remy 應用程式共用的內容",
+  "home_shared_intro": "Remy 應用程式都建構在同一個套件 @joeblew999/remy-ui 之上，因此每個應用程式都從相同的元件開始。",
+  "home_shared_components_title": "元件與主題",
+  "home_shared_components_text": "原版 shadcn 元件與主題，在每個應用程式中都一致。",
+  "home_shared_languages_title": "語言",
+  "home_shared_languages_text": "提供 {count} 種語言的 Paraglide 訊息目錄，以及各語言自有的日期、數字、複數和閱讀方向規則。",
+  "home_shared_pages_title": "網站頁面與應用程式頁面",
+  "home_shared_pages_text": "網站頁面無需 JavaScript 即可運作，並針對搜尋引擎而設計；應用程式頁面位於 /app 之下，在瀏覽器中執行。",
+  "home_shared_checks_title": "共用檢查",
+  "home_shared_checks_text": "所有建構於此套件的應用程式，都會執行相同的瀏覽器檢查。",
+  "home_guide_text": "給應用程式使用者：以你的語言說明每個頁面的功能。",
+  "home_developers_text": "給開發 Remy 或在其上建構應用程式的開發者，並附有 API 參考文件。"
 }

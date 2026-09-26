@@ -357,5 +357,21 @@
   "account_description": "የማረጋገጫ አገልግሎቱ ሲዘጋጅ ወደ Remy መግባት።",
   "account_intro": "መግቢያዎ እና ክፍለ ጊዜዎችዎ እዚህ ይኖራሉ።",
   "account_empty_title": "አልገቡም",
-  "account_empty_description": "መግባት ከRemy የማረጋገጫ አገልግሎት ጋር ይመጣል። እስከዚያ ድረስ መተግበሪያው ስለ እርስዎ ምንም አያከማችም።"
+  "account_empty_description": "መግባት ከRemy የማረጋገጫ አገልግሎት ጋር ይመጣል። እስከዚያ ድረስ መተግበሪያው ስለ እርስዎ ምንም አያከማችም።",
+  "home_pages_heading": "እዚህ ምን መክፈት ይችላሉ",
+  "home_formats_open": "የቅርጸቶችን ገጽ ክፈት",
+  "home_app_title": "የመተግበሪያ ገጾች",
+  "home_app_open": "የመተግበሪያ ገጾችን ክፈት",
+  "home_shared_heading": "every Remy መተግበሪያ የሚጋራቸው",
+  "home_shared_intro": "የRemy መተግበሪያዎች በአንድ ጥቅል @joeblew999/remy-ui ላይ የተገነቡ ናቸው፤ ስለዚህ እያንዳንዳቸው ከተመሳሳይ አካላት ይጀምራሉ።",
+  "home_shared_components_title": "አካላት እና ገጽታ",
+  "home_shared_components_text": "መደበኛ የshadcn አካላት እና ገጽታ፤ በሁሉም መተግበሪያ ውስጥ ተመሳሳይ ናቸው።",
+  "home_shared_languages_title": "ቋንቋዎች",
+  "home_shared_languages_text": "በ{count} ቋንቋዎች የParaglide የመልእክት ካታሎጎች፤ እንዲሁም የእያንዳንዱ ቋንቋ የራሱ የቀን፣ የቁጥር፣ የብዙ ቁጥር እና የንባብ አቅጣጫ ደንቦች።",
+  "home_shared_pages_title": "የድር ጣቢያ ገጾች እና የመተግበሪያ ገጾች",
+  "home_shared_pages_text": "የድር ጣቢያ ገጾች ያለ JavaScript ይሰራሉ፤ ለፍለጋ ሞተሮችም የተሰሩ ናቸው። የመተግበሪያ ገጾች በ/app ስር ይገኛሉ እና በአሳሽዎ ውስጥ ይሰራሉ።",
+  "home_shared_checks_title": "የጋራ ፍተሻዎች",
+  "home_shared_checks_text": "በጥቅሉ ላይ በተገነባ በእያንዳንዱ መተግበሪያ ላይ ተመሳሳይ የአሳሽ ፍተሻዎች ይካሄዳሉ።",
+  "home_guide_text": "መተግበሪያውን ለሚጠቀሙ ሰዎች፦ እያንዳንዱ ገጽ ምን እንደሚሰራ፣ በቋንቋዎ።",
+  "home_developers_text": "Remyን ወይም በላዩ ላይ መተግበሪያ ለሚገነቡ ገንቢዎች፣ እና የኤፒአይ ማጣቀሻው።"
 }

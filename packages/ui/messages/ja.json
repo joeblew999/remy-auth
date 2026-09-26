@@ -355,5 +355,21 @@
   "account_description": "認証サービスの準備ができ次第、Remyにサインインできるようになります。",
   "account_intro": "サインインとセッションはここに表示されます。",
   "account_empty_title": "サインインしていません",
-  "account_empty_description": "サインインはRemyの認証サービスとともに提供されます。それまでは、アプリはあなたに関する情報を一切保存しません。"
+  "account_empty_description": "サインインはRemyの認証サービスとともに提供されます。それまでは、アプリはあなたに関する情報を一切保存しません。",
+  "home_pages_heading": "ここで開けるもの",
+  "home_formats_open": "フォーマットのページを開く",
+  "home_app_title": "アプリのページ",
+  "home_app_open": "アプリのページを開く",
+  "home_shared_heading": "すべての Remy アプリに共通するもの",
+  "home_shared_intro": "Remy のアプリは 1 つのパッケージ @joeblew999/remy-ui をベースに作られているため、どのアプリも同じ部品から始まります。",
+  "home_shared_components_title": "コンポーネントとテーマ",
+  "home_shared_components_text": "標準の shadcn コンポーネントとテーマを、すべてのアプリで共通して使用します。",
+  "home_shared_languages_title": "言語",
+  "home_shared_languages_text": "{count} 言語に対応した Paraglide のメッセージカタログと、日付・数値・複数形・文字の方向に関する各言語固有のルール。",
+  "home_shared_pages_title": "サイトページとアプリページ",
+  "home_shared_pages_text": "サイトページは JavaScript なしで動作し、検索エンジン向けに作られています。アプリページは /app 以下にあり、ブラウザ上で動作します。",
+  "home_shared_checks_title": "共通のチェック",
+  "home_shared_checks_text": "このパッケージで作られたすべてのアプリに対して、同じブラウザチェックが実行されます。",
+  "home_guide_text": "アプリを使う方へ：各ページの機能を、お使いの言語で説明します。",
+  "home_developers_text": "Remy やその上で動くアプリを開発する方へ：API リファレンスもあります。"
 }

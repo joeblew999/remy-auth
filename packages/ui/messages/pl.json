@@ -361,5 +361,21 @@
   "account_description": "Logowanie do Remy, gdy usługa uwierzytelniania będzie gotowa.",
   "account_intro": "Tutaj pojawią się Twoje logowanie i sesje.",
   "account_empty_title": "Nie jesteś zalogowany",
-  "account_empty_description": "Logowanie pojawi się wraz z usługą uwierzytelniania Remy. Do tego czasu aplikacja nie przechowuje żadnych danych o Tobie."
+  "account_empty_description": "Logowanie pojawi się wraz z usługą uwierzytelniania Remy. Do tego czasu aplikacja nie przechowuje żadnych danych o Tobie.",
+  "home_pages_heading": "Co możesz tu otworzyć",
+  "home_formats_open": "Otwórz stronę formatów",
+  "home_app_title": "Strony aplikacji",
+  "home_app_open": "Otwórz strony aplikacji",
+  "home_shared_heading": "Co łączy każdą aplikację Remy",
+  "home_shared_intro": "Aplikacje Remy powstają na jednym pakiecie, @joeblew999/remy-ui, więc każda zaczyna od tych samych elementów.",
+  "home_shared_components_title": "Komponenty i motyw",
+  "home_shared_components_text": "Standardowe komponenty i motyw shadcn, takie same w każdej aplikacji.",
+  "home_shared_languages_title": "Języki",
+  "home_shared_languages_text": "Katalogi komunikatów Paraglide w {count} językach oraz zasady każdego języka dotyczące dat, liczb, liczby mnogiej i kierunku czytania.",
+  "home_shared_pages_title": "Strony witryny i strony aplikacji",
+  "home_shared_pages_text": "Strony witryny działają bez JavaScriptu i są tworzone z myślą o wyszukiwarkach; strony aplikacji znajdują się pod /app i działają w przeglądarce.",
+  "home_shared_checks_title": "Wspólne testy",
+  "home_shared_checks_text": "Te same testy przeglądarkowe są uruchamiane dla każdej aplikacji opartej na pakiecie.",
+  "home_guide_text": "Dla osób korzystających z aplikacji: co robi każda strona, w Twoim języku.",
+  "home_developers_text": "Dla programistów tworzących Remy lub aplikację na jego bazie, wraz z dokumentacją API."
 }

@@ -365,5 +365,21 @@
   "account_description": "تسجيل الدخول إلى Remy، عندما تصبح خدمة المصادقة جاهزة.",
   "account_intro": "سيظهر هنا تسجيل دخولك وجلساتك.",
   "account_empty_title": "لم تسجّل الدخول",
-  "account_empty_description": "يأتي تسجيل الدخول مع خدمة المصادقة في Remy. وحتى ذلك الحين لا يخزّن التطبيق أي شيء عنك."
+  "account_empty_description": "يأتي تسجيل الدخول مع خدمة المصادقة في Remy. وحتى ذلك الحين لا يخزّن التطبيق أي شيء عنك.",
+  "home_pages_heading": "ما الذي يمكنك فتحه هنا",
+  "home_formats_open": "افتح صفحة الصيغ",
+  "home_app_title": "صفحات التطبيق",
+  "home_app_open": "افتح صفحات التطبيق",
+  "home_shared_heading": "ما تتشاركه كل تطبيقات Remy",
+  "home_shared_intro": "تُبنى تطبيقات Remy على حزمة واحدة هي @joeblew999/remy-ui، فيبدأ كل تطبيق من المكونات نفسها.",
+  "home_shared_components_title": "المكونات والسمة",
+  "home_shared_components_text": "مكونات shadcn وسمتها القياسية، نفسها في كل تطبيق.",
+  "home_shared_languages_title": "اللغات",
+  "home_shared_languages_text": "فهارس رسائل Paraglide بـ {count} لغة، مع قواعد كل لغة الخاصة بالتواريخ والأرقام وصيغ الجمع واتجاه القراءة.",
+  "home_shared_pages_title": "صفحات الموقع وصفحات التطبيق",
+  "home_shared_pages_text": "تعمل صفحات الموقع دون JavaScript وهي مصممة لمحركات البحث، أما صفحات التطبيق فتوجد ضمن /app وتعمل في متصفحك.",
+  "home_shared_checks_title": "الفحوصات المشتركة",
+  "home_shared_checks_text": "تُجرى فحوصات المتصفح نفسها على كل تطبيق مبني على الحزمة.",
+  "home_guide_text": "لمستخدمي التطبيق: وظيفة كل صفحة، بلغتك.",
+  "home_developers_text": "للمطورين الذين يبنون Remy أو تطبيقًا عليه، ومرجع واجهة برمجة التطبيقات."
 }

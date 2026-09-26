@@ -357,5 +357,21 @@
   "account_description": "Die Anmeldung bei Remy, sobald der Authentifizierungsdienst bereit ist.",
   "account_intro": "Hier findest du bald deine Anmeldung und deine Sitzungen.",
   "account_empty_title": "Du bist nicht angemeldet",
-  "account_empty_description": "Die Anmeldung kommt mit dem Authentifizierungsdienst von Remy. Bis dahin speichert die App nichts über dich."
+  "account_empty_description": "Die Anmeldung kommt mit dem Authentifizierungsdienst von Remy. Bis dahin speichert die App nichts über dich.",
+  "home_pages_heading": "Was du hier öffnen kannst",
+  "home_formats_open": "Formate-Seite öffnen",
+  "home_app_title": "App-Seiten",
+  "home_app_open": "App-Seiten öffnen",
+  "home_shared_heading": "Was alle Remy-Apps gemeinsam haben",
+  "home_shared_intro": "Remy-Apps basieren auf einem einzigen Paket, @joeblew999/remy-ui, sodass jede mit denselben Bausteinen startet.",
+  "home_shared_components_title": "Komponenten und Theme",
+  "home_shared_components_text": "Standardmäßige shadcn-Komponenten und Themes, in jeder App gleich.",
+  "home_shared_languages_title": "Sprachen",
+  "home_shared_languages_text": "Paraglide-Nachrichtenkataloge in {count} Sprachen sowie die jeweils eigenen Regeln jeder Sprache für Datum, Zahlen, Plurale und Leserichtung.",
+  "home_shared_pages_title": "Website-Seiten und App-Seiten",
+  "home_shared_pages_text": "Website-Seiten funktionieren ohne JavaScript und sind für Suchmaschinen gemacht; App-Seiten liegen unter /app und laufen in deinem Browser.",
+  "home_shared_checks_title": "Gemeinsame Prüfungen",
+  "home_shared_checks_text": "Dieselben Browser-Prüfungen laufen für jede App, die auf dem Paket basiert.",
+  "home_guide_text": "Für Nutzer der App: was jede Seite macht, in deiner Sprache.",
+  "home_developers_text": "Für Entwickler, die Remy oder eine App darauf bauen, samt API-Referenz."
 }

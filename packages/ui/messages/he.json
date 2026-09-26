@@ -359,5 +359,21 @@
   "account_description": "התחברות ל-Remy, כששירות האימות יהיה מוכן.",
   "account_intro": "ההתחברות וההפעלות שלך יופיעו כאן.",
   "account_empty_title": "לא התחברת",
-  "account_empty_description": "ההתחברות תגיע עם שירות האימות של Remy. עד אז האפליקציה לא שומרת עליך שום מידע."
+  "account_empty_description": "ההתחברות תגיע עם שירות האימות של Remy. עד אז האפליקציה לא שומרת עליך שום מידע.",
+  "home_pages_heading": "מה אפשר לפתוח כאן",
+  "home_formats_open": "פתיחת דף הפורמטים",
+  "home_app_title": "דפי האפליקציה",
+  "home_app_open": "פתיחת דפי האפליקציה",
+  "home_shared_heading": "מה משותף לכל אפליקציות Remy",
+  "home_shared_intro": "אפליקציות Remy בנויות על חבילה אחת, @joeblew999/remy-ui, ולכן כולן מתחילות מאותם רכיבים.",
+  "home_shared_components_title": "רכיבים וערכת עיצוב",
+  "home_shared_components_text": "רכיבי shadcn וערכת עיצוב סטנדרטיים, זהים בכל אפליקציה.",
+  "home_shared_languages_title": "שפות",
+  "home_shared_languages_text": "קטלוגי הודעות של Paraglide ב-{count} שפות, עם הכללים של כל שפה לתאריכים, מספרים, צורות רבים וכיוון קריאה.",
+  "home_shared_pages_title": "דפי אתר ודפי אפליקציה",
+  "home_shared_pages_text": "דפי האתר פועלים ללא JavaScript ומותאמים למנועי חיפוש; דפי האפליקציה נמצאים תחת /app ופועלים בדפדפן שלכם.",
+  "home_shared_checks_title": "בדיקות משותפות",
+  "home_shared_checks_text": "אותן בדיקות דפדפן רצות על כל אפליקציה הבנויה על החבילה.",
+  "home_guide_text": "למשתמשי האפליקציה: מה עושה כל דף, בשפה שלכם.",
+  "home_developers_text": "למפתחים שבונים את Remy או אפליקציה מעליו, וכן מסמכי ה-API."
 }
