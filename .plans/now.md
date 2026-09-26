@@ -46,10 +46,9 @@ then tools, then translating.
 5. **What conforming docs unlock** ([plan](docs-for-consumers.md)): `.md` pages, `llms.txt`, the copy
    menu; then docs for apps: a rules section in how-we-work, the `remy` skill (rules, evals) in the
    package, the `AGENTS.md` block pointing into `node_modules`.
-6. **Release and adopt:** the shared UI released, remy-auth-app moved onto it, proving the translation
-   tasks and docs in an app.
-   It adds the app's new pages, `/app/clock`, `/app/account` and `/app/settings`, with the phone's bottom
-   bar ([mobile navigation](mobile-navigation.md), built 2026-09-26).
+6. ~~**Release and adopt**~~ done 2026-09-26: `@joeblew999/remy-ui` 0.12.0 released; remy-auth-app on it
+   (https://remy-auth-app.gedw99.workers.dev), with the new pages and the phone's bottom bar. What it found
+   is the list below ("Found moving remy-auth-app to 0.12.0").
 
 Also queued (not in the order above): `git:tidy` (shared task for merged branches and worktrees).
 
