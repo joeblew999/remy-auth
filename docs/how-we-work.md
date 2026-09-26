@@ -57,6 +57,26 @@ and write only what they do not provide.
   and so on), install its agent skills, then delete the code it replaces.
 - Before writing any UI code, ask: does shadcn, TanStack or Paraglide already do this? If yes, use it.
 
+### Which TanStack library for what
+
+Checked against [tanstack.com](https://tanstack.com) on 2026-09-26. Beta and alpha libraries change
+fast: read their current docs and installed skills before using them, not an agent's memory.
+
+| Library | Status here | Rule |
+| --- | --- | --- |
+| Start, Router, Query | In use everywhere | The app, its pages and all data fetching (with oRPC) |
+| Form | In use: the reservation form only | Every form uses it (login, signup, settings); no hand-rolled form state |
+| Pacer | In use: docs live search | Any debounce, throttle, rate limit or queue in the browser |
+| Devtools | In use in development | Keep the Router, Query and Form panels in the one Devtools |
+| Table | Next: with the admin screens | Every list with sorting, filtering or paging, through shadcn's data table |
+| Virtual | When a list gets long | Lists of hundreds of rows, starting with the time zones |
+| DB (beta) | Not yet | Only if we need offline use or live sync; Query covers today's needs |
+| AI (beta) | Not yet | Candidate for `/docs/ask`; prove it on a branch first |
+| Hotkeys (alpha) | Not yet | Candidate for a search shortcut once it leaves alpha |
+| Store (alpha), Charts | Not needed | No app-wide client state and no dashboards yet |
+
+Moving a library from "Not yet" to in use follows [choose tools by survey](#choose-tools-by-survey-not-by-first-find).
+
 ## Language: Paraglide owns it
 
 Paraglide owns all language behaviour: which language a request gets, through its strategies
