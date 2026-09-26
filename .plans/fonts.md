@@ -1,7 +1,8 @@
 # Fonts per writing system (quick plan)
 
-Status: open, 2026-09-25. Built 2026-09-25: the stack fix (step 2) and `fontChecks` (step 3);
-steps 1, 4 and 5 remain (see "Done so far" below). Owner's question: "as we add more languages
+Status: open. Built 2026-09-25: the stack fix (step 2) and `fontChecks` (step 3). Measured and
+decided 2026-09-26: step 1 and the three decisions of step 5 (see "Step 1: measured" and
+"Decisions" below, delegated by the owner). Step 4 (fonts rows on the formats page) remains. Owner's question: "as we add more languages
 then fonts need to be downloaded? ... it's tempting to align the adding of a language with a font
 download but I doubt it's that simple ... Tempting to also show the fonts aspect in the formats gui
 control". Builds on [hard localisation](done/hard-localisation.md) item 10 and the fonts rule in
@@ -52,8 +53,8 @@ nothing (its script is covered) or needs one font for a new script, and a check 
    | Noto Sans TC | Hant | 105 | 4.2 MB |
    | Noto Sans JP | Jpan | 124 | 5.2 MB |
 
-   A CJK page downloads only the slices holding its characters; how many that is for `/ja` and
-   `/zh-TW/formats` is **assumed** (tens of slices, a few hundred KB) until measured.
+   A CJK page downloads only the slices holding its characters: measured 2026-09-26, 16 to 31
+   slices, 322 KB to 1,147 KB of Noto per page (step 1 below).
 6. **Workers limits are not the constraint.** 20,000 asset files per version on Free, 100,000 on
    Paid, 25 MiB per file ([Workers limits](https://developers.cloudflare.com/workers/platform/limits/#static-assets)).
    Today's build has 564 files, 496 of them woff2. Each new CJK font adds about 100 to 130 files.
@@ -132,9 +133,84 @@ the budget cannot hold CJK or the owner prefers native system looks; the check t
 font has glyphs" instead of `isCustomFont`. Prove B and A with scratch builds of `/ja/formats` and
 `/ar/formats` (bytes, LCP, CLS, screenshots) before deciding, as [how we work](../docs/how-we-work.md#choose-tools-by-survey-not-by-first-find) asks.
 
+## Step 1: measured (2026-09-26)
+
+How: a local production build (`vite build`, then `wrangler dev --local` on port 4320), Chromium
+from the pinned Playwright, a fresh browser context per page (cold cache, a first visit), waiting
+for network idle and `document.fonts.ready`. Bytes are what the browser received for every woff2
+file (CDP `Network.loadingFinished` before the change; resource timing's `encodedBodySize`, which is
+what the check reads, after; the two differ by the response headers, under 0.5 KB). Fonts drawing
+the heading and intro from CDP `CSS.getPlatformFontsForNode`. LCP and CLS from the page's own
+`PerformanceObserver`, desktop, unthrottled, local: for spotting regressions, not Core Web Vitals.
+
+| Locale | Script | `/` before | `/formats` before | `/` after | `/formats` after | Drawn by (after) |
+| --- | --- | --- | --- | --- | --- | --- |
+| en | Latn | 28.9 KB (1) | 28.9 KB (1) | 28.7 KB | 28.7 KB | Geist |
+| es | Latn | 28.9 KB (1) | 28.9 KB (1) | 28.7 KB | 28.7 KB | Geist |
+| pl | Latn | 45.2 KB (2) | 45.2 KB (2) | 44.8 KB | 44.8 KB | Geist (latin, latin-ext) |
+| tr | Latn | 45.2 KB (2) | 45.2 KB (2) | 44.8 KB | 44.8 KB | Geist (latin, latin-ext) |
+| de | Latn | 28.9 KB (1) | 28.9 KB (1) | 28.7 KB | 28.7 KB | Geist |
+| ar | Arab | 191.1 KB (2) | 227.9 KB (4) | 190.8 KB | 227.2 KB | Noto Sans Arabic, Geist |
+| fa | Arab | 191.1 KB (2) | 258.8 KB (5) | **73.9 KB** | **107.6 KB** | Vazirmatn, Geist |
+| he | Hebr | 41.0 KB (2) | 57.4 KB (3) | 40.7 KB | 56.8 KB | Noto Sans Hebrew, Geist |
+| th | Thai | 55.4 KB (2) | 55.4 KB (2) | 55.0 KB | 55.0 KB | Noto Sans Thai, Geist |
+| ja | Jpan | 351.0 KB (17) | 620.0 KB (32) | **28.7 KB** | **28.7 KB** | Hiragino Kaku Gothic ProN (system), Geist |
+| zh-TW | Hant | 948.8 KB (15) | 1175.6 KB (18) | **28.7 KB** | **28.7 KB** | PingFang TC (蘋方-繁, system), Geist |
+| hi | Deva | 147.4 KB (2) | 163.7 KB (3) | 147.1 KB | 163.2 KB | Noto Sans Devanagari, Geist |
+| am | Ethi | 222.7 KB (2) | 222.7 KB (2) | 222.4 KB | 222.4 KB | Noto Sans Ethiopic, Geist |
+
+(n) is the number of font files. Geist's Latin slice is 28.7 KB on every page; the rest is the
+script's font. Findings:
+
+- **Han is the only outlier.** Noto Sans TC's slices are about 70 KB each (JP's about 16 KB), so
+  zh-TW downloads 920 KB to 1,147 KB of Noto for one heading, an intro and the formats table. Every
+  other page stays at or under 259 KB.
+- **The Latin-slice cost (the open cost in "Done so far") is real on two pages:** `/ar/formats`
+  pulls Noto Sans Arabic's `symbols` (14.2 KB) and `math` (22.2 KB) slices, and `/fa/formats` pulled
+  its `latin` slice (30.9 KB), now Vazirmatn's `latin` (33.7 KB): characters on the formats page
+  Geist does not have. Under budget; left as is.
+- **System Han fonts keep the Han variants apart.** With no rule for ja and zh-TW, Chrome on macOS
+  draws ja with Hiragino Kaku Gothic ProN and zh-TW with PingFang TC (蘋方-繁), chosen by the page's
+  `lang`. Windows (Yu Gothic, Microsoft JhengHei) and Android (Noto Sans CJK) are **assumed** to do
+  the same; Linux without CJK fonts would show tofu (**assumed**), which the check calls out as
+  LastResort on macOS (**assumed**, not reproduced: no page shows a character without a font).
+- **LCP and CLS do not move.** Every page's LCP is 72 to 136 ms, CLS at most 0.087 (`/he`, before
+  and after), except `/ja/formats`: first paint at about 2.3 s with Noto Sans JP (2,296 to 2,432 ms,
+  4 runs) and the same with the system font (2,316 to 2,616 ms, 7 runs), so not the fonts. Its LCP
+  element is the long intro paragraph; `word-break: normal` instead of `auto-phrase` did not change
+  it (2,388 ms). Open, outside this plan: hard-localisation or the formats plan should find it.
+
+## Decisions (2026-09-26, delegated)
+
+1. **Font byte budget: 300 KB per site page, first visit, every language** (`fontBudget` in
+   `checks.js`, enforced by `fontChecks` per locale on `/` and `/formats`). The largest page after
+   the change is `/ar/formats` at 227.2 KB, so 300 KB leaves about a third of headroom for content;
+   the plan's earlier proposal (600 KB for CJK only) would have failed `/ja/formats` (620 KB) and
+   both zh-TW pages (949 KB, 1,176 KB) anyway, and a budget only for CJK leaves every other script
+   unguarded. Lowering it to 200 KB fails `/ar/formats` and both am pages (checked). Raise it only
+   with new numbers here.
+2. **Han (ja, zh-TW) moves to the system's fonts (survey approach A for Han only; B stays for every
+   other script).** Their web fonts cost 351 KB to 1,176 KB per page, over the budget by up to four
+   times, for glyphs every desktop and phone system already has; the system fonts keep each
+   language's glyph shapes (measured above) at 0 bytes, and move neither LCP nor CLS. `fontChecks`
+   now lets a system font draw a Han page (`systemFontScripts`), never tofu, and the Han check
+   compares the fonts that actually draw each language's heading (it compared the CSS names before),
+   so ja and zh-TW drawn by the same font still fails. Any other script, Korean and Greek included,
+   still needs its web font, so a new language still fails with its script named. Cost: the Han
+   look varies by platform, and the packages `@fontsource-variable/noto-sans-jp` and `-tc` are
+   removed (496 font files in the build down to 25). Revisit if a Linux audience matters.
+3. **Persian: Vazirmatn** (`@fontsource-variable/vazirmatn` 5.3.0, pinned exactly). Fontsource has no
+   Persian-specific Noto (`@fontsource-variable/noto-sans-persian` and `@fontsource/noto-sans-persian`
+   do not exist on npm; Noto covers Persian inside Noto Sans Arabic). Vazirmatn is designed for
+   Persian (SIL OFL, on Google Fonts and fontsource), its Arabic-script slice is 45 KB against Noto
+   Sans Arabic's 162 KB, and `/fa` falls from 191 KB to 74 KB, `/fa/formats` from 259 KB to 108 KB.
+   Arabic keeps Noto Sans Arabic. A native reader's review is still welcome; swapping back is one
+   line in fonts.css.
+
 ## Steps
 
-1. **Measure (spike, about 1 hour).** On a preview: per locale, fonts used
+1. **Measure (spike, about 1 hour).** Done 2026-09-26 on a local build, see "Step 1: measured".
+   On a preview: per locale, fonts used
    (`getPlatformFontsForNode`), bytes, LCP and CLS for `/xx/formats`; confirm findings 3, 8 and
    the `LastResort` tofu signal. Gate: numbers recorded here.
 2. **Fix the stacks.** Script font before Arial's fallback for non-Latin languages (or the
@@ -144,6 +220,7 @@ font has glyphs" instead of `isCustomFont`. Prove B and A with scratch builds of
    script named, passes on all 13.
 4. **Fonts rows on the formats page.** Gate: formats check asserts the server rows; no-JS check.
 5. **Owner decisions:** Persian face; CJK byte budget; A vs B if step 1 shows CJK too heavy.
+   Done 2026-09-26, see "Decisions".
 
 ## Done so far
 
@@ -159,7 +236,8 @@ the next full run (tier 4) covers the first.
   to Geist's ranges because fontaine 1.0 copies only weight, style and stretch onto fallback faces
   (read in `fontaine/dist`), so it cannot give them a `unicode-range`. Script fonts still load only
   on their language's pages; no preloads.
-- **Known cost, open:** every fontsource Noto package also carries Latin slices. While Geist is
+- **Known cost, measured 2026-09-26** (step 1: 30.9 KB on `/fa/formats`, 36.6 KB of symbols and
+  math on `/ar/formats`, none elsewhere): every fontsource Noto package also carries Latin slices. While Geist is
   still loading, Chrome may reach the script font's Latin slice for Latin characters (Geist wins once
   loaded). **Assumed** a few KB per non-Latin page; measure in step 1.
 - **`fontChecks`** (`checks.js`, called from `tests/gui.spec.ts` on the site pages): per language,

@@ -6,6 +6,26 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `checks`: `fontChecks` enforces a font byte budget: a first visit to each site page downloads at
+  most `fontBudget` (300 KB, option `budget`) of fonts, in every language. Measured on a local
+  production build: 28.7 KB (Latin) to 227.2 KB (`/ar/formats`) (`.plans/fonts.md`, step 1).
+  New exports `fontBudget` and `systemFontScripts`.
+
+### Changed
+- `fonts.css`: Japanese and Traditional Chinese draw with the system's font for their language
+  (Chrome picks it by the page's `lang`: Hiragino Kaku Gothic ProN and PingFang TC on macOS). Their
+  Noto web fonts cost 351 KB (`/ja`) to 1,176 KB (`/zh-TW/formats`) per first visit; now 0 bytes
+  beyond Geist. The dependencies `@fontsource-variable/noto-sans-jp` and `-tc` are removed, and the
+  build's font files drop from 496 to 25.
+- `fonts.css`: Persian draws with Vazirmatn (`@fontsource-variable/vazirmatn` 5.3.0, a
+  Persian-designed face; fontsource has no Persian Noto) instead of Noto Sans Arabic: `/fa` downloads
+  74 KB of fonts instead of 191 KB, `/fa/formats` 108 KB instead of 259 KB. Arabic keeps Noto Sans Arabic.
+- `checks`: `fontChecks` lets a system font draw a Han page, never tofu (LastResort), and its Han
+  check compares the fonts that actually draw each language's heading instead of the names in the
+  CSS, so Japanese and Traditional Chinese drawn by one font still fails. Every other script still
+  needs its web font.
+
 ## [0.11.0] - 2026-09-25
 
 ### Added
