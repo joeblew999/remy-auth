@@ -112,7 +112,9 @@ export function AISearchInputActions() {
 const StorageKeyInput = '__ai_search_input';
 export function AISearchInput(props: ComponentProps<'form'>) {
   const { status, sendMessage, stop } = useChatContext();
-  const [input, setInput] = useState(() => localStorage.getItem(StorageKeyInput) ?? '');
+  // Adapted: the draft is read once in the browser, so the server-rendered Ask page hydrates the same.
+  const [input, setInput] = useState('');
+  useEffect(() => setInput(localStorage.getItem(StorageKeyInput) ?? ''), []);
   const isLoading = status === 'streaming' || status === 'submitted';
   const onStart = (e?: SyntheticEvent) => {
     e?.preventDefault();
@@ -422,7 +424,7 @@ export function AISearchPanel() {
   );
 }
 
-export function AISearchPanelList({ className, style, ...props }: ComponentProps<'div'>) {
+export function AISearchPanelList({ className, style, empty = 'Start a new chat below.', ...props }: ComponentProps<'div'> & { empty?: string }) {
   const chat = useChatContext();
   const messages = chat.messages.filter((msg) => msg.role !== 'system');
 
@@ -439,7 +441,7 @@ export function AISearchPanelList({ className, style, ...props }: ComponentProps
       {messages.length === 0 ? (
         <div className="text-sm text-fd-muted-foreground/80 size-full flex flex-col items-center justify-center text-center gap-2">
           <MessageCircleIcon fill="currentColor" stroke="none" />
-          <p onClick={(e) => e.stopPropagation()}>Start a new chat below.</p>
+          <p onClick={(e) => e.stopPropagation()}>{empty}</p>
         </div>
       ) : (
         <div className="flex flex-col px-3 gap-4">

@@ -12,7 +12,7 @@ const icons = { docs: <BookOpen />, dev: <Code />, reference: <Braces /> };
 // The one URL into everything: the live app, the product guide, the developer docs, the API reference and
 // each one's llms.txt and MCP server for AI tools, as a Fumadocs home page (HomeLayout, Cards).
 export const Route = createFileRoute('/')({
-  head: () => ({ meta: [{ title: docsConfig.product }, { name: 'description', content: `${docsConfig.product}: the app, its product guide, its developer docs and its API reference, with llms.txt and an MCP server for each.` }] }),
+  head: ({ loaderData }) => ({ links: loaderData ? [{ rel: 'canonical', href: `${loaderData}/` }] : [], meta: [{ title: docsConfig.product }, { name: 'description', content: `${docsConfig.product}: the app, its product guide, its developer docs and its API reference, with llms.txt and an MCP server for each.` }] }),
   loader: () => docsOrigin(),
   component: Home,
 });

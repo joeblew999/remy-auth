@@ -42,7 +42,7 @@ for (const site of ['docs', 'dev']) {
 }
 
 // One test per page, so they run at the same time.
-for (const path of ['/docs/formats', '/dev/es/how-we-work', '/reference/reservations.create']) {
+for (const path of ['/docs/formats', '/dev/es/how-we-work', '/docs/ask', '/reference/reservations.create']) {
   test(`${path} hydrates with no errors and no Content-Security-Policy violations`, async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));

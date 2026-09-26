@@ -15,7 +15,9 @@ import { collections } from '../lib/collections';
 import type { DocsPageData } from './source.server';
 import { WebMCP } from '@/components/webmcp';
 import { Mermaid } from '@/components/mermaid';
-import { AISearch, AISearchPanel, AISearchTrigger } from '@/components/ai/search';
+import { AISearch, AISearchInput, AISearchInputActions, AISearchPanelList } from '@/components/ai/search';
+import { askUrl } from './page';
+import Link from 'fumadocs-core/link';
 import { buttonVariants } from '@/components/ui/button';
 import { MessageCircleIcon } from 'lucide-react';
 import { docsUrl } from './table.js';
@@ -71,7 +73,25 @@ function Article({ page }: { page: DocsPageData }) {
   </DocsPage>;
 }
 
-export function DocsView({ page }: { page: DocsPageData }) {
+/**
+ * The site's Ask AI page: the question at the top, held under the header as the answers grow below it,
+ * so it is always in view and above a phone's keyboard; the answers in the page's own scroll.
+ */
+function AskArticle({ page }: { page: DocsPageData }) {
+  return <DocsPage toc={[]} full>
+    <DocsTitle>Ask AI</DocsTitle>
+    <DocsDescription className="mb-0">Answers from the {docsConfig.titles[page.site]}, written by AI: check them against the pages they link.</DocsDescription>
+    <div className="sticky top-(--fd-header-height) z-10 -mx-1 bg-fd-background px-1 py-3">
+      <div className="rounded-xl border bg-fd-secondary text-fd-secondary-foreground shadow-sm has-focus-visible:shadow-md">
+        <AISearchInput />
+        <div className="flex items-center gap-1.5 p-1 empty:hidden"><AISearchInputActions /></div>
+      </div>
+    </div>
+    <AISearchPanelList className="overflow-visible" style={{ maskImage: 'none' }} empty="Ask a question above." />
+  </DocsPage>;
+}
+
+export function DocsView({ page }: { page: DocsPageData & { ask?: boolean } }) {
   const { pageTree } = useFumadocsLoader({ pageTree: page.pageTree });
   // next-themes' theme script needs the response's CSP nonce, as every script here does (src/router.tsx).
   const nonce = useRouter().options.ssr?.nonce;
@@ -86,11 +106,13 @@ export function DocsView({ page }: { page: DocsPageData }) {
     }}>
     {/* The docs as tools for agents in the browser (WebMCP, experimental): `docs:cli feature webmcp`. */}
     <WebMCP site={page.site} lang={page.lang} />
-    {/* Ask AI: Fumadocs' panel (`docs:cli feature ai`), answered by AI Search over this site's pages in this language. */}
+    {/* Ask AI: its own page (/<site>/<lang?>/ask), one normal page with one scroll, never an overlay: Fumadocs'
+        chat pieces (docs:cli feature ai) answered by AI Search over this site's pages in this language. The
+        chat stays mounted across the site's pages, so a conversation survives moving between them. */}
     <AISearch api={`/api/chat/${page.site}?lang=${page.lang}`}>
-    <AISearchTrigger position="float" className={`${buttonVariants({ variant: 'secondary' })} rounded-2xl text-fd-muted-foreground`}>
+    {!page.ask && <Link href={askUrl(page)} className={`${buttonVariants({ variant: 'secondary' })} fixed bottom-4 end-4 z-20 gap-2 rounded-2xl text-fd-muted-foreground shadow-lg`}>
       <MessageCircleIcon className="size-4.5" />Ask AI
-    </AISearchTrigger>
+    </Link>}
     <DocsLayout
       tree={pageTree}
       // Fumadocs' Notebook layout: the three docs sections as tabs in the top bar, with the App link, search,
@@ -100,9 +122,7 @@ export function DocsView({ page }: { page: DocsPageData }) {
       nav={{ title: docsConfig.product, url: '/', mode: 'top' }}
       links={[{ text: 'Site', url: docsConfig.appUrl, external: true }, { text: 'App', url: `${docsConfig.appUrl}/app`, external: true }]}
       sidebar={{ footer: <AiLinks section={page.site} /> }}>
-      {/* Inside the layout: the panel takes the table of contents' place in its grid while open. */}
-      <AISearchPanel />
-      <Suspense><Article page={page} /></Suspense>
+      {page.ask ? <AskArticle page={page} /> : <Suspense><Article page={page} /></Suspense>}
     </DocsLayout>
     </AISearch>
   </RootProvider>;

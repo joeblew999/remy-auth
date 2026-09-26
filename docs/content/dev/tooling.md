@@ -311,7 +311,7 @@ Two Cloudflare products sit behind the docs' Ask AI (the docs Worker), and they 
   it (`remy-docs`), and it logs each one with its cost, tokens and time (and the question). It holds
   no docs. Spend limits and rate limits live here; `docs:observe -- ai-usage` and `-- ai-check` read it.
 
-Local or remote: the docs pages, the Ask AI panel and all checks run locally; answering
+Local or remote: the docs pages, the Ask AI page and all checks run locally; answering
 exist only on Cloudflare (AI Search has no local version). Every `docs:*` and `cf:*` task says
 LOCAL or REMOTE (and PRODUCTION) in `mise tasks`.
 

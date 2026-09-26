@@ -6,5 +6,5 @@ import { DocsView } from '../../docs/view';
 export const Route = createFileRoute('/docs/$')({
   loader: async ({ params }) => (await loadDocsPage('docs', params._splat ?? '')) ?? (() => { throw notFound(); })(),
   head: ({ loaderData }) => docsHead(loaderData),
-  component: () => <DocsView page={Route.useLoaderData()} />,
+  component: () => <DocsView page={Route.useLoaderData()} />, // ask: the site's Ask AI page (docs/page.ts)
 });

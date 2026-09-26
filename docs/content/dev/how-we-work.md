@@ -92,7 +92,7 @@ fast: read their current docs and installed skills before using them, not an age
 | Table | Next: with the admin screens | Every list with sorting, filtering or paging, through shadcn's data table |
 | Virtual | When a list gets long | Lists of hundreds of rows, starting with the time zones |
 | DB (beta) | Not yet | Only if we need offline use or live sync; Query covers today's needs |
-| AI (beta) | Not used | The docs' Ask AI is Fumadocs' panel on the AI SDK ([docs in your AI tools](./ai-tools.md)) |
+| AI (beta) | Not used | The docs' Ask AI is its own page (`/docs/ask`, `/dev/ask`) built from Fumadocs' AI chat pieces on the AI SDK, not an overlay: one scroll, the question at the top ([docs in your AI tools](./ai-tools.md)) |
 | Hotkeys (alpha) | Not yet | Candidate for a search shortcut once it leaves alpha |
 | Store (alpha), Charts | Not needed | No app-wide client state and no dashboards yet |
 
