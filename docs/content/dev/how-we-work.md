@@ -120,9 +120,9 @@ half-updated.
 - Translation is its own step, on `main` after the merges: `mise run i18n:translate`. The Claude agent,
   pinned in the task, translates exactly what `i18n:check` lists, and the task commits it; **the commit
   is the mark** (git decides what is stale: a translation is stale when its English changed after the
-  translation's last commit). It refuses other branches, uncommitted English and a second run while one
-  holds the lock, which every worktree shares, so parallel agents cannot set off translations or race
-  on them.
+  translation's last commit). It refuses other branches, uncommitted English, uncommitted translations
+  and a second run while one holds the lock, which every worktree shares, so parallel agents cannot set
+  off translations or race on them.
 - The agent gets no tools: it is handed the English (and, for a stale page, the English diff and the
   current translation) and returns text; the task writes the files it asked for and nothing else.
 - `i18n:check` only reads, offline, so it is safe anywhere, in any number of worktrees, and as a
@@ -130,10 +130,12 @@ half-updated.
 - Stale or missing is a warning while pumping (`project:check` prints it) and an error at release
   (`ui:release` runs `i18n:check` with `I18N_STRICT=1` first).
 - Commit only real translation changes to a translation file: any commit to it marks it current. A
-  structural change (a rename, a sweep) that touches translations is followed by
+  structural change (a rename, a sweep) that touches docs translations is followed by
   `mise run i18n:docs:translate -- <file>…`, which re-checks those files against the English in full.
+  Catalogs have no such redo: change a catalog's structure (every locale's file) in the same commit as
+  `en.json`, so no changed English key is hidden.
 
-The layout and the tasks are in the [tasks README](./tasks.md#translations).
+The layout and the tasks are in [shared mise tasks](./tasks.md#translations).
 
 ## Plans: few, short, closed
 
