@@ -45,6 +45,20 @@ Cada página es de uno de dos tipos, listados en `paths`, y nunca se mezclan:
   los teléfonos obtienen la barra inferior (`blocks/bottom-nav`, piezas de shadcn de fábrica, ya que shadcn no tiene navegación inferior)
   con las páginas principales y Más, que abre la barra lateral. Por qué: [el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/mobile-navigation.md).
 
+Lo que tiene toda app basada en el paquete, para que las tareas y comprobaciones compartidas funcionen en ella
+(remy-auth-app es el ejemplo prerrenderizado):
+
+- **Su raíz renderiza las páginas dentro de `AppProviders`** (`providers`): dirección de lectura, el tema (el
+  interruptor de la cabecera y la página Ajustes lo necesitan) y el enlace al código fuente de la propia app. Las
+  `themeChecks` compartidas fallan sin él.
+- **Una ruta para cada path de `appPaths` y `sitePaths`**, cada una de pocas líneas sobre la página compartida (el
+  Reloj propaga `clockRouteOptions` desde `clock-route`).
+- **`tests/smoke.spec.ts`**, una sola llamada a `smokeChecks(...)`: `project:test:smoke` y la comprobación tras cada
+  `cf:deploy` (`project:test:live`) lo ejecutan, y fallan con «No tests found» si no existe.
+- **`.plans/now.md`**, la única lista ordenada del trabajo pendiente (`plans:check`, en el nivel 0).
+- **fnox fijado en su `mise.toml`**, con `GITHUB_TOKEN` en el llavero, para instalar desde GitHub
+  Packages (más abajo).
+
 ## Exportaciones [#exports]
 
 Todas bajo `@joeblew999/remy-ui/`, como TSX y CSS para consumidores de Vite y Tailwind.
@@ -57,7 +71,9 @@ Todas bajo `@joeblew999/remy-ui/`, como TSX y CSS para consumidores de Vite y Ta
 | `paths` | `sitePaths`, `appPaths`, `allPaths`, `isAppPath` |
 | `pages` | `SiteShell` (alias `Shell`), `HomePage`, `FormatsContent`, `FormatsPage`, `Intro`, `ZoneBadge`, `SkipLink`, `Group`, `Row` |
 | `shell` | Solo el marco del sitio: `SiteShell` (alias `Shell`), `SiteNavLinks`, `Intro`, `ZoneBadge`, `SkipLink` (también exportado por `pages`); impórtalo donde una página solo necesite el marco, para que las páginas de inicio y de formatos no formen parte de la descarga de esa página |
-| `app-pages` | `AppShell`, `AppHomePage`, `AppFormatsPage`, `LocationPage`, `DemoPage` |
+| `app-pages` | `AppShell`, `AppHomePage`, `AppFormatsPage`, `LocationPage`, `DemoPage`, `ClockPage`, `SettingsPage`, `AccountPage` |
+| `providers` | `AppProviders`: dentro de lo que la raíz de una app renderiza sus páginas (dirección, tema, enlace al código fuente) |
+| `clock-route` | `clockRouteOptions`, `clockDefaults`, `clockZones`: los parámetros de búsqueda de la ruta del Reloj, fuera del código de la página |
 | `language` | `LanguageSwitcher` (enlaces simples, páginas del sitio), `LanguageMenu` (DropdownMenu de shadcn, páginas de la app), `LanguageHint` |
 | `messages`, `runtime` | Mensajes y runtime compilados de Paraglide |
 | `locale` | `getLocale`, `setLocale`, `localizeHref`, `localizeUrl`, `deLocalizeHref`, `cookieName` de Paraglide y más, además de `direction` y `localeName` |
@@ -125,7 +141,8 @@ Los consumidores añaden esto a su `.npmrc`:
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
-e instalan con un token que tenga `read:packages`. Las versiones publicadas están en el
+e instalan con un token que tenga `read:packages`, guardado en el llavero mediante fnox (fijado en los
+`[tools]` de la app): `fnox set -p keychain GITHUB_TOKEN <token>` una vez, y después `fnox exec -- npm install`. Las versiones publicadas están en el
 [registro de cambios](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
 
 ## Escribir una parte [#writing-a-part]
