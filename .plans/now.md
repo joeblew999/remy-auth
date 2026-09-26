@@ -28,32 +28,11 @@ then tools, then translating.
 1. **Finish what is in flight** (English only): the layout contract and `project:layout`; the Look fixes
    (below).
 2. **Structure, in parallel:**
-   - a. **Docs conform to Fumadocs as shadcn does** ([plan](docs-for-consumers.md#how-shadcn-does-it-apps-v4-at-98a1fe6-2026-09-26)):
-     frontmatter `title` and `description` on the English docs **and, once, on the Spanish ones** (a structural
-     move by the single writer, not a translation pass: the loader needs them), a `loader()` from `docsTable`
-     over virtual files (`VirtualFile`/`StaticSource`, no symlinks), search via `createFromSource`, the
-     `source.config.ts` replaced by the macro (below); deletes our hand-built titles, descriptions,
-     navigation and search index.
-     Tooling, checked 2026-09-26:
-     - **The check is Fumadocs' own schema:** `description` required and the `firstHeading` default
-       dropped in `defineCollections` (`source.config.ts`), so `vite build` (tier 0) fails on a page
-       without them. No script of ours.
-     - **Provenance moves under the frontmatter:** YAML must open the file, but `i18n.mjs` expects the
-       `translated-from` line first (regex at line 29, write at 220); both change to "after the
-       frontmatter", or all 8 Spanish docs read as unmarked until step 3 replaces them.
-     - **Our docs link check goes to Fumadocs' link checker** (`next-validate-link` 1.6.7, which Fumadocs
-       recommends): it checks the Markdown against the loader's pages and headings, in place of our own
-       Playwright crawl (`tests/docs.spec.ts:136`). Its peer `@react-router/dev` needs a scratch trial
-       first (**assumed** optional); if it fails, our check stays and the gap is recorded.
-     - **`@fumadocs/cli` 1.7.0 writes our Fumadocs code** instead of us, from a scratch app (its features
-       break each other when run in sequence, so never on our repo): `defineDocs` from `fumadocs-mdx/macro`
-       (no `source.config.ts`, so no root fix), the search route, `llms.txt` and `.md` routes. Language
-       routing stays Paraglide's. Trial results: [tool-up trial](docs-for-consumers.md#tool-up-trial-2026-09-26);
-       one doc converted on the local branch `fumadocs-trial`. Not its `add`
-       and `customise` (fumadocs-ui; we use shadcn) nor `lint` (an ESLint/Biome/oxlint setup, not a docs
-       check). `fumadocs-openapi` and `fumadocs-typescript`: step 5 at the earliest.
-     - The loader details (docsTable slugs and order, `hideLocale`, `renderName`) are in
-       [the plan](docs-for-consumers.md#0-what-our-stack-already-offers).
+   - a. **Fumadocs fully** ([decision and small steps](docs-for-consumers.md#decision-fumadocs-fully-2026-09-26),
+     [trial](docs-for-consumers.md#tool-up-trial-2026-09-26)): the docs take the shape of Fumadocs' TanStack Start
+     template and CLI (`content/docs`, `meta.json`, frontmatter, the macro loader, stock rendering, its
+     search and `llms` routes); Paraglide keeps the URLs and shadcn the UI. Six small steps, one at a time
+     with the owner. The i18n tasks' provenance line must sit under the frontmatter until step 3 (below).
    - b. **Paraglide plurals** ([plan](translation-pipeline.md)): `=other` becomes `=*` in the 13 catalogs
      (compiles to an unconditional fallback, `compile-message.js:101`; no wording changes). The
      plural-categories test is a check, so it goes in step 3.

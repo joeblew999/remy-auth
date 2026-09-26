@@ -409,3 +409,39 @@ each route requested.
 | CLI composition | `feature docs --i18n` after the template leaves the old routes, so the **build breaks** (missing `gitConfig`); `feedback` and `ai` then patch the stale routes; **prerender fails** on `/en` | use the CLI in a scratch app as the reference and copy its files; never run it on our repo |
 | Hosting | the template builds with Nitro (Vercel preset); the routes are plain TanStack Start server routes | carry over to our Cloudflare Vite plugin; Nitro not needed |
 | Versions | the template pins `fumadocs-core` 16.15.14 and `fumadocs-mdx` 15.4.5, as we do | none |
+
+## Decision: Fumadocs fully (2026-09-26)
+
+Owner: "fuma docs is good and you can probably use it fully if you are more flexible about changing our
+system and what our system docs provide to the gui." So the docs take Fumadocs' shape (the
+`tanstack-start` template and `@fumadocs/cli` 1.7.0 output) and the GUI takes what the loader gives.
+Only two things stay ours, both owner rules: Paraglide owns the URLs (`/<locale>/docs/...`), and the
+UI is stock shadcn (no fumadocs-ui).
+
+| Today (ours) | Becomes (Fumadocs) |
+| --- | --- |
+| Docs read in place across the repo; `src/docs/table.js` lists them | `content/docs/*.md` plus `meta.json` (order, titles, groups); READMEs become short pointers to the site (GitHub and npm still need a README) |
+| `docs/i18n/<locale>/<path>` | the CLI's default `dot` layout: `gui.es.md` beside `gui.md` (a translation sits next to its English) |
+| `source.config.ts` and three plugins | `src/lib/source.ts` with `fumadocs-mdx/macro`, `src/lib/i18n.ts`, `src/lib/shared.ts`, `cli.json`: the CLI's own files |
+| Links rewritten by `remarkRepositoryLinks` | relative links between docs through `source.resolveHref`; links to other repo files written as full GitHub URLs |
+| The page as a data tree (`rehypeExportTree`) | the page's compiled Markdown, loaded per page, rendered with our shadcn components; the Core Web Vitals gate guards the cost |
+| First-heading titles, `describe()` | frontmatter `title` and `description`, required by the schema |
+| `docsNav`, `docsLangs`, English fallback by hand | `source.getPageTree(lang)`, `defineI18n({ fallbackLanguage: 'en' })`, the page's languages from the loader |
+| Our search API and hit shape | `createFromSource(source)` on the server (highlights built in); our TanStack Query box calls it |
+| `docs:publish` keys from the table | each page's `.md` (the `llms` output) keyed by its URL; citations resolve through `source.getPage` |
+| Nothing | `llms.txt` per language, `.md` per page, later MCP, from the CLI's routes |
+| `CHANGELOG.md` as a docs page | stays at the root for release tooling; `meta.json` links to it |
+
+Also moves: `AGENTS.md` links (to `content/docs/...`), the links check (Fumadocs' `next-validate-link` for
+internal links, ours kept for GitHub file links), the i18n tasks' paths (replaced in step 3 anyway).
+
+Small steps, one at a time with the owner, each ending with a build and `browser:shots` of one page:
+1. `src/lib/source.ts` (macro), `i18n.ts`, `shared.ts`, `cli.json` beside today's code; one page
+   (`gui`) served through the loader.
+2. Stock rendering for that page (compiled Markdown, shadcn components); measure its JavaScript.
+3. Move every doc into `content/docs` with frontmatter and `meta.json`; READMEs become pointers; the
+   Spanish files to the `dot` layout (a structural move, not translation: the freeze holds).
+4. Navigation, table of contents, languages and fallback from the loader; delete `table.js`,
+   `source.config.ts`, `source.server.ts` code it replaces.
+5. Search through `createFromSource`; delete our search API.
+6. The CLI's `llms.txt`, `.md` routes; `docs:publish` from them; link checks.
