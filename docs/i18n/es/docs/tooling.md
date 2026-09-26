@@ -277,7 +277,7 @@ para funciones más nuevas.
 
 ## Observabilidad de Cloudflare [#cloudflare-observability]
 
-[El plan de observabilidad](../.plans/observability.md) cubre logs, trazas, métricas,
+[El plan de observabilidad](../../../../.plans/done/observability.md) cubre logs, trazas, métricas,
 salud de D1, registros de auditoría de auth duraderos, correlación, dashboards y alertas.
 `wrangler.jsonc` habilita los logs/trazas y la redacción de query de URL para el Worker de la GUI.
 Una entrada del Worker de la GUI ahora emite IDs de solicitud, estado y tiempos sin registrar URLs,

@@ -1,8 +1,17 @@
 # Cloudflare observability (generic)
 
+Closed 2026-09-26. Built: the shared log contract (request IDs, `http_request`, `server_fn`, `ask` with
+outcome, model time and the real error), Workers Logs and traces on, query-string redaction, the two
+alert policies ("real-time issues", "alert rules firing and recovered"), and the read-only tasks
+`cf:events`, `cf:ai-usage`, `cf:ai-check`, `cf:ai-gateway`. Cloudflare has no API for Workers
+Observability alert rules, so the answer-failure rule is the owner's, in the dashboard (Workers &
+Pages → Observability → Alerts → Create): service `remy-auth`, filter `event = ask` and
+`outcome = failed`, count > 5 in 15 minutes; the existing policy delivers it. Not pursued: dashboards,
+Logpush, audit storage.
+
 Status: open, 2026-09-24. Generic: applies to every Worker built on the shared package and
 tasks (remy-auth now, remy-auth-app and later apps). The auth-specific signals, audit
-records and alerts moved to [the auth plan](parked/auth-service.md#observability-for-the-auth-service).
+records and alerts moved to [the auth plan](../parked/auth-service.md#observability-for-the-auth-service).
 Done 2026-09-24, in both apps: `@joeblew999/remy-ui/worker` (0.8.0) wraps each Worker with
 `X-Request-ID` on every response, one structured line per request following the log contract
 below (release from the version-metadata binding, route templates, never URLs or headers),

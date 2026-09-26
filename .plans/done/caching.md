@@ -105,7 +105,7 @@ Add `cache` to the line `withObservability` writes, taken from the inner respons
 `Cf-Cache-Status` (`HIT`, `MISS`, `EXPIRED`, `UPDATING`, `BYPASS`, or `none`); additive, so
 `schemaVersion` stays 1, and hits and misses filter in Workers Observability. Cloudflare's own "Cache Analytics in Workers
 Observability" is listed as coming soon, and the cache-keys page says hits show there already;
-**assumed** unclear until W1 looks. Owner: [observability plan](../observability.md).
+**assumed** unclear until W1 looks. Owner: [observability plan](observability.md).
 
 ## Checks (shared, level 1 locally and against the preview)
 
@@ -133,7 +133,7 @@ Observability" is listed as coming soon, and the cache-keys page says hits show 
 1. Workers Caching (all requests billed, assets included) or prerendered site pages (free
    assets, no log line on those pages)? W1 gives the numbers.
 2. A custom domain: no longer needed for caching; still needed for availability alerts
-   ([observability plan](../observability.md)). Now or later?
+   ([observability plan](observability.md)). Now or later?
 3. Site page freshness: `s-maxage` and stale-while-revalidate values (suggested 1 h and 1 day;
    a deploy clears everything anyway).
 4. Is it acceptable that site pages show the language hint and the place card only after

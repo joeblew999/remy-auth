@@ -10,17 +10,19 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
 1. **Fonts** ([plan](fonts.md)): measure font bytes per language and decide the per-page budget,
    Persian's face and CJK (building now); Core Web Vitals per script on a throwaway Worker; remy-auth-app
    calls `fontChecks` at its next package upgrade. Then close.
-2. **Content-Security-Policy enforced** ([observability](observability.md), security headers): the
+2. **Content-Security-Policy enforced** (security headers): the
    switch from report-only to enforcing (building now). No reports in 7 days of live traffic
    (2026-09-26) and every page hydrates with no violation in every language. Deploy enforcing, watch the
    reports a day, then close. HSTS max-age raised in the same step.
 3. ~~**Parts**~~ closed 2026-09-26 ([plan](done/parts.md)): "Writing a part" is in the package README.
 4. ~~**Publisher and consumers**~~ closed 2026-09-26 ([plan](done/publisher-consumer.md)): recipe, drift, package moves, consumer check set shipped; scripts reviewed, all kept.
 5. ~~**Caching**~~ closed 2026-09-26 ([plan](done/caching.md)): don't cache HTML yet; assets immutable.
-6. **Observability** ([plan](observability.md)): one alert on failing answers (`event = ask`,
-   `outcome = failed`) beside the two alert policies; then close.
+6. ~~**Observability**~~ closed 2026-09-26 ([plan](done/observability.md)): built; the answer-failure alert rule is a dashboard step (owner only, below).
 
 ## Owner only
+
+- One alert rule in the dashboard (no API for it): Workers & Pages → Observability → Alerts → Create,
+  service `remy-auth`, `event = ask` and `outcome = failed`, count > 5 in 15 minutes.
 
 - A native-speaker review of the ten newer languages' catalogs and the Spanish docs.
 - The production origin (a custom domain) and Search Console.

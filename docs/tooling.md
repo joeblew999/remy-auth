@@ -280,7 +280,7 @@ a search returns no matches, use `list` to browse guide IDs. Browser support def
 
 ## Cloudflare observability
 
-The [observability plan](../.plans/observability.md) covers logs, traces, metrics,
+The [observability plan](../.plans/done/observability.md) covers logs, traces, metrics,
 D1 health, durable auth audit records, correlation, dashboards and alerts.
 `wrangler.jsonc` enables logs/traces and URL query redaction for the GUI Worker.
 A GUI Worker entry now emits request IDs, status and timing without logging URLs,

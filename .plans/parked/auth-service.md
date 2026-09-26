@@ -487,7 +487,7 @@ The [done GUI plan](../done/gui.md) defines additional acceptance for package re
 server-rendered content, accessibility and technical SEO.
 
 Cloudflare-native observability is required. Implement and verify the
-[observability plan](../observability.md), including structured redacted logs,
+[observability plan](../done/observability.md), including structured redacted logs,
 correlated traces, platform/D1 metrics, durable security audit records, dashboards
 and tested alert/recovery delivery. Collection configuration alone is not completion.
 
@@ -539,7 +539,7 @@ https://www.better-auth.com/llms.txt. Record the outcome in that plan's table.
 
 ## Observability for the auth service
 
-Moved from [the generic observability plan](../observability.md), which covers Worker health,
+Moved from [the generic observability plan](../done/observability.md), which covers Worker health,
 tracing, the log contract, releases, availability and the generic alerts.
 
 | Area | Signals and implementation |
