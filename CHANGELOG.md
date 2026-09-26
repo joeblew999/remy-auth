@@ -7,6 +7,12 @@ package follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- Formats page, one shape in every language (issue #5): every section two columns, so none ends with a
+  hole; notes in their card's footer (`Group`'s `note`); each language offered its own digits too
+  (`ownValues().numberingSystems` adds the numbering systems written in its script: Thai, Devanagari,
+  Han, Arabic-Indic), so no language is Latin-only; sorting shows names in every script; `NameList`
+  isolates each name in a mixed-script list. **`FormatsExtras` changed:** `numbers` is rows in the
+  Numbers card, `money` is gone and `currencyNote` is the currency card's footer.
 - `shell`: `SourceLink`, a context for the site header's "GitHub" link. **An app sets its own
   repository** (`<SourceLink value="https://github.com/you/app">`); without it the header shows no source
   link instead of remy-auth's.

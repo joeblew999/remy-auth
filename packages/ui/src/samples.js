@@ -18,7 +18,8 @@ export const samples = {
   positions: [1, 2, 3, 4, 11, 22, 103],
   statuses: ['accepted', 'declined', 'pending'],
   guest: 'Alex',
-  names: ['Zoë', 'Émile', 'ñandú', 'Nadia', 'Ángel', 'zebra', 'أحمد'],
+  // One or more names in each script the languages use, so every language sorts some of its own.
+  names: ['Zoë', 'Émile', 'ñandú', 'Nadia', 'Ángel', 'zebra', 'أحمد', 'דוד', 'สมชาย', 'さくら', '李明', 'अनिल', 'አበበ'],
   // Uppercased by CSS in the page's language: Turkish gives İSTANBUL, every other language ISTANBUL.
   casing: 'istanbul',
   // A 63-letter German compound: with hyphens: auto and the page's language it must still fit 320 px.

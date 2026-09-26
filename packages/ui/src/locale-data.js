@@ -25,6 +25,23 @@ function pluralCounts(locale) {
   return [...found.values()].sort((a, b) => a - b);
 }
 
+/** Unicode's script for a CLDR script code: Japanese and both Chinese are written with Han digits. */
+const unicodeScript = script => ({ Jpan: 'Hani', Hans: 'Hani', Hant: 'Hani', Kore: 'Hang' })[script] ?? script;
+
+/**
+ * The digit systems written in a script: every numbering system the runtime formats with (Intl), whose
+ * digits are that script's (Unicode's Script_Extensions). CLDR's "native" digits, which Intl does not
+ * expose: Thai for th, Devanagari for hi, Han for ja and zh-TW, Arabic-Indic for ar. Scripts whose
+ * numerals are letters (Hebrew, Ethiopic) have none.
+ */
+function scriptDigits(script) {
+  const own = new RegExp(`^\\p{Script_Extensions=${unicodeScript(script)}}+$`, 'u');
+  return Intl.supportedValuesOf('numberingSystem').filter(system => {
+    const digits = new Intl.NumberFormat(`en-u-nu-${system}`, { useGrouping: false }).format(1234567890);
+    return digits !== '1234567890' && own.test(digits);
+  });
+}
+
 /** This language's own values: region, script, currency, calendars, digits and plural counts, its preferred first. */
 export function ownValues(locale) {
   if (!cache.has(locale)) {
@@ -34,7 +51,8 @@ export function ownValues(locale) {
       region, script,
       currency: countryToCurrency[region],
       calendars: tag.getCalendars(),
-      numberingSystems: tag.getNumberingSystems(),
+      // Its default digits first, then the other digits written in its script.
+      numberingSystems: [...new Set([...tag.getNumberingSystems(), ...scriptDigits(script)])],
       counts: pluralCounts(locale),
     });
   }

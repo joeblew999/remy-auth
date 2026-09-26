@@ -24,7 +24,8 @@ manual translation until the docs and Paraglide stuff is solved, as it will slow
 then tools, then translating.
 
 0. ~~**Translation frozen**~~ lifted 2026-09-26: the tooling landed (step 3) and the pass ran (step 4).
-1. **Finish what is in flight:** issue #5, one consistent formats page.
+1. ~~**Finish what is in flight**~~ done 2026-09-26: the Look fixes and issue #5 (the formats page one
+   shape in every language; the issue can be closed).
    The layout contract (branch `project-layout`) is **not merged**, decided 2026-09-26: its core was a
    271-line checker of our own (`tasks/layout/layout.mjs`) over a contract in `tasks/README.md`, which the
    docs move removed; the owner's rule is no custom scripts, and a wrong layout already fails the app's
@@ -63,7 +64,7 @@ Also `project-layout` (step 1: not merged, its fixes ported). Keep the uncommitt
 Done 2026-09-26 (from the saved agent work, on main): the home page has its content (where to go, the
 product guide and developer docs, what every app shares); the zone label is a small line in the footer;
 hyphenation is for body text only; each language name in "Available languages" is isolated (`bdi`); the
-formats page's intro and "This language" share the first screen on desktop. Left: issue #5 (below).
+formats page's intro and "This language" share the first screen on desktop; issue #5 done.
 
 ## Watching
 

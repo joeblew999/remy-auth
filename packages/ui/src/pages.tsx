@@ -21,9 +21,9 @@ import { LanguagesIcon, ListChecksIcon, PaletteIcon, PanelsTopLeftIcon } from 'l
 export { sitePaths, appPaths, allPaths, isAppPath } from './paths.js';
 
 export { SkipLink, ZoneBadge, SiteNavLinks, SourceLink, SiteShell, Shell, Intro } from './shell';
-export { Group, Row } from './rows';
+export { Group, Row, NameList } from './rows';
 import { Shell, Intro } from './shell';
-import { Group, Row } from './rows';
+import { Group, Row, NameList } from './rows';
 
 /**
  * A card on the home page that leads somewhere: what the place is, then a link to it. shadcn has no
@@ -97,14 +97,18 @@ export function HomePage({ locale, preferred, cards, children }: { locale: Local
  */
 export type FormatsExtras = {
   language?: React.ReactNode; systems?: React.ReactNode; dates?: React.ReactNode; currency?: React.ReactNode;
-  time?: React.ReactNode; numbers?: React.ReactNode; money?: React.ReactNode; words?: React.ReactNode;
+  time?: React.ReactNode; words?: React.ReactNode;
+  /** Rows added to the Numbers card. */
+  numbers?: React.ReactNode;
+  /** What the currency card's values rest on, in its footer. */
+  currencyNote?: React.ReactNode;
 };
 /** The search-param controls, each shown in the section it changes (showcase/search-params: choiceCards). */
 export type FormatsControlCards = { calendar?: React.ReactNode; numbering?: React.ReactNode; currency?: React.ReactNode; count?: React.ReactNode };
 
 /**
  * One section of the formats page: a heading, what it shows, then its cards in a responsive grid (two
- * per row on wide screens, three on wider ones); `single` keeps one column, for a section beside the intro.
+ * per row on wide screens, every section alike); `single` keeps one column, for a section beside the intro.
  */
 function FormatsSection({ id, title, note, single = false, children }: { id: string; title: string; note: string; single?: boolean; children: React.ReactNode }) {
   return <section id={id} aria-labelledby={`${id}-heading`} className="flex scroll-mt-20 flex-col gap-4">
@@ -112,7 +116,7 @@ function FormatsSection({ id, title, note, single = false, children }: { id: str
       <h2 id={`${id}-heading`} className="text-2xl font-semibold tracking-tight">{title}</h2>
       <p className="text-sm text-muted-foreground">{note}</p>
     </div>
-    <div className={single ? 'grid items-start gap-4' : 'grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3'}>{children}</div>
+    <div className={single ? 'grid items-start gap-4' : 'grid items-start gap-4 md:grid-cols-2'}>{children}</div>
   </section>;
 }
 
@@ -151,8 +155,7 @@ export function FormatsContent({ locale, info, extras = {}, controls = {}, backT
           <Row sample="direction" label={m.direction_label({}, o)} data-direction={dir}>{dir === 'rtl' ? m.direction_rtl({}, o) : m.direction_ltr({}, o)}</Row>
           {/* Each name isolated (bdi, in its own language), so an Arabic or Persian name keeps its own
               direction without reordering the commas and names around it. */}
-          <Row sample="languages" label={m.languages_available({}, o)}>{list.formatToParts(locales.map(value => localeName(value))).map((part, index) => part.type === 'element'
-            ? <bdi key={index} className="whitespace-nowrap" lang={locales.find(value => localeName(value) === part.value)}>{part.value}</bdi> : part.value)}</Row>
+          <Row sample="languages" label={m.languages_available({}, o)}><NameList locale={locale} names={locales.map(value => localeName(value))} langOf={name => locales.find(value => localeName(value) === name)} /></Row>
           {/* Capitals come from CSS in the page's language (its lang), so Turkish gets İ from i. */}
           <Row sample="casing-row" label={m.casing_label({}, o)}>{samples.casing} → <span className="uppercase" data-sample="casing">{samples.casing}</span></Row>
           {extras.language}
@@ -188,18 +191,17 @@ export function FormatsContent({ locale, info, extras = {}, controls = {}, backT
         <Row sample="decimal" label={m.decimal_label({}, o)}>{m.decimal_value({ value: samples.decimal }, o)}</Row>
         <Row sample="percent" label={m.percent_label({}, o)}>{m.percent_value({ value: samples.share }, o)}</Row>
         <Row sample="compact" label={m.compact_label({}, o)}>{m.compact_value({ value: samples.big }, o)}</Row>
+        {extras.numbers}
       </Group>
-      {extras.numbers}
       {controls.numbering}
     </FormatsSection>
     <FormatsSection id="money" title={m.section_money({}, o)} note={m.section_money_note({}, o)}>
-      <Group title={m.currency_heading({}, o)} data-own-area="money">
+      <Group title={m.currency_heading({}, o)} note={extras.currencyNote} data-own-area="money">
         {/* The currency of the language's region (Intl.Locale maximize, then country-to-currency). */}
         <Row sample="currency" label={currencyName.of(info.currency) ?? info.currency} data-value={info.currency}>{new Intl.NumberFormat(format, { style: 'currency', currency: info.currency }).format(samples.amount)}</Row>
         {extras.currency}
       </Group>
       {controls.currency}
-      {extras.money}
     </FormatsSection>
     <FormatsSection id="words" title={m.section_words({}, o)} note={m.section_words_note({}, o)}>
       <Card data-own-area="words"><CardHeader><CardTitle>{m.plural_heading({}, o)}</CardTitle></CardHeader>
