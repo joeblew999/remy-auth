@@ -99,14 +99,18 @@ Chinese, Hindi, Amharic, Polish, Turkish and German) is agent-authored and unrev
 ## Publishing
 
 The package is `@joeblew999/remy-ui` on GitHub Packages (the scope must equal the
-GitHub owner there). `mise run ui:release` does the whole release from this machine: it
-runs `project:verify` (every check, locally) and `ui:verify` (shadcn files unchanged), publishes with your `gh` token, tags
-`vX.Y.Z` from `packages/ui/package.json`, pushes, and creates the GitHub release from the
-matching CHANGELOG section, gated only on level 1 (our own checks, about 1½ minutes).
-CI (`.github/workflows/google.yml`) runs level 2, Google's Lighthouse audits and Core
-Web Vitals, on every push and tag, and releases a pushed tag itself unless the version is
-already published, so either route works. Bump the version and CHANGELOG
-first; the task refuses a dirty tree, a branch other than main, or an existing tag.
+GitHub owner there). `mise run ui:release` does the whole release from this machine, stopping at the
+first failure: translations complete and current (`i18n:check`, strict), every check of ours
+(`project:verify`), shadcn's files exactly as its CLI writes them (`ui:verify`), Google's Lighthouse audits,
+and Core Web Vitals measured cold on a throwaway Cloudflare Worker (`project:test:cwv`: the first visits
+after a deploy, which is what a slow page costs most). Then it tags `vX.Y.Z` from
+`packages/ui/package.json`, pushes, publishes with your `gh` token and creates the GitHub release from the
+matching CHANGELOG section. CI (`.github/workflows/google.yml`) repeats level 2 on the tag.
+
+Before releasing, one commit: the version in `packages/ui/package.json` (and in
+`packages/contract/package.json` when the contract changed) and the CHANGELOG section. No other file
+names a version: the workspaces depend on each other with `"*"` and the contract's peer range is
+open-ended. The task refuses a dirty tree, a branch other than main, or an existing tag.
 
 Consumers add to their `.npmrc`:
 

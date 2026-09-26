@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Publishes the shared UI from this machine; run through `mise run ui:release`, which runs level 1,
-# ui:verify and level 2 first, then the API contract when its version is new. Bump
-# packages/ui/package.json and every workspace's @joeblew999/remy-ui pin together (the root's and docs/'s; the
-# contract's peer range too, before 1.0 a caret takes one minor), and write the CHANGELOG.md section, in a commit before releasing.
+# ui:verify and level 2 first, then the API contract when its version is new. Before releasing, in one
+# commit: packages/ui/package.json's version (and packages/contract's when the contract changed) and the
+# CHANGELOG.md section. Nothing else: the workspaces depend on each other with "*" (npm links them) and
+# the contract's peer range is open-ended, so no other file names a version.
 set -euo pipefail
 
 version=$(node -p "require('./packages/ui/package.json').version")
@@ -28,7 +29,7 @@ NPM_CONFIG_USERCONFIG="$tmp/npmrc" npm publish --workspace @joeblew999/remy-ui -
 
 # remy-auth's API contract (packages/contract) goes out under the same tag when its version is new;
 # an unchanged contract keeps the version already published. Bump packages/contract/package.json
-# (and the root's pin) whenever the contract changes.
+# whenever the contract changes.
 contract=$(node -p "require('./packages/contract/package.json').version")
 if NPM_CONFIG_USERCONFIG="$tmp/npmrc" npm view "@joeblew999/remy-auth-contract@$contract" version --registry https://npm.pkg.github.com >/dev/null 2>&1; then
   echo "@joeblew999/remy-auth-contract@$contract is already published."

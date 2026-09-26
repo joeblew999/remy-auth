@@ -19,7 +19,7 @@
     ".": "./src/index.ts"
   },
   "peerDependencies": {
-    "@joeblew999/remy-ui": "^0.12.0"
+    "@joeblew999/remy-ui": ">=0.12.0"
   },
   "dependencies": {
     "@orpc/contract": "1.15.4",

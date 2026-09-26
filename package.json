@@ -34,8 +34,8 @@
     "wrangler": "4.137.0"
   },
   "dependencies": {
-    "@joeblew999/remy-auth-contract": "0.2.1",
-    "@joeblew999/remy-ui": "0.12.0",
+    "@joeblew999/remy-auth-contract": "*",
+    "@joeblew999/remy-ui": "*",
     "@orpc/client": "1.15.4",
     "@orpc/server": "1.15.4",
     "@orpc/tanstack-query": "1.15.4",

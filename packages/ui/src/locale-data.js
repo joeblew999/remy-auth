@@ -34,12 +34,16 @@ const unicodeScript = script => ({ Jpan: 'Hani', Hans: 'Hani', Hant: 'Hani', Kor
  * expose: Thai for th, Devanagari for hi, Han for ja and zh-TW, Arabic-Indic for ar. Scripts whose
  * numerals are letters (Hebrew, Ethiopic) have none.
  */
+let digitsBySystem;
 function scriptDigits(script) {
+  // Each numbering system's digits, formatted once per process (about a hundred formatters), then only
+  // tested against each script: building them per language cost the page 0.7 s on a phone (release
+  // 0.12.0's Core Web Vitals run).
+  digitsBySystem ??= Intl.supportedValuesOf('numberingSystem')
+    .map(system => [system, new Intl.NumberFormat(`en-u-nu-${system}`, { useGrouping: false }).format(1234567890)])
+    .filter(([, digits]) => digits !== '1234567890');
   const own = new RegExp(`^\\p{Script_Extensions=${unicodeScript(script)}}+$`, 'u');
-  return Intl.supportedValuesOf('numberingSystem').filter(system => {
-    const digits = new Intl.NumberFormat(`en-u-nu-${system}`, { useGrouping: false }).format(1234567890);
-    return digits !== '1234567890' && own.test(digits);
-  });
+  return digitsBySystem.filter(([, digits]) => own.test(digits)).map(([system]) => system);
 }
 
 /** This language's own values: region, script, currency, calendars, digits and plural counts, its preferred first. */
