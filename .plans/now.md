@@ -27,13 +27,10 @@ then tools, then translating.
 1. **Finish what is in flight** (English only): the layout contract and `project:layout`; the Look fixes
    (below).
 2. **Structure, in parallel:**
-   - a. **Fumadocs fully** ([plan](docs-for-consumers.md)): on the local branch `fumadocs-trial`, **not merged**
-     (owner: "don't merge to main yet"; squash-merge when it is, see the stability log). The docs are their
-     own Worker (`docs/`, `remy-auth-docs`, live at https://remy-auth-docs.gedw99.workers.dev from the
-     branch): users' docs `/docs`, developer docs `/dev`, API reference `/reference`, each language at its
-     own URL; search, `llms.txt`, `.md`, MCP (`docs:test:remote` checks it), Ask AI (Fumadocs' panel over AI Search),
-     sitemap. Left: the Fumadocs UI's own strings per language (`defineI18nUI`, translation step 4), the
-     shared docs part for consumers (after the merge), the full test run, the merge.
+   - a. ~~**Fumadocs fully**~~ merged and live 2026-09-26 ([plan](docs-for-consumers.md)): the docs Worker
+     (`docs/`, https://remy-auth-docs.gedw99.workers.dev): product guide `/docs`, developer docs `/dev`, API
+     reference `/reference`, each with search, `llms.txt`, `.md`, an MCP server and Ask AI; Fumadocs' UI text
+     per language. Left, in step 6: the shared docs part for consumers (the docs app's code in the package).
    - b. ~~**Paraglide plurals**~~ done 2026-09-26: `=*` in the 13 catalogs; the plural check is in step 3.
 3. ~~**Translation tooling**~~ built 2026-09-26 ([plan](translation-pipeline.md#built-two-pipelines-one-pattern-2026-09-26)):
    `i18n:check` and `i18n:translate`, each split into messages (Paraglide) and docs (Fumadocs); the pinned
@@ -48,23 +45,26 @@ then tools, then translating.
    It adds the app's new pages, `/app/clock`, `/app/account` and `/app/settings`, with the phone's bottom
    bar ([mobile navigation](mobile-navigation.md), built 2026-09-26).
 
-**Docs Ask AI is off** (owner, 2026-09-26) until 2a lands: `docs:answers:off` in production, `DOCS_ASK = "off"`
-in mise.toml (no docs:publish on deploy, the live answer check skipped). Turned back on at the end of 2a:
-switch `docs:publish` from the raw files (which now open with YAML) to the loader's processed
-Markdown, remove the line, `docs:publish`, `docs:answers:on`, then `cf:ai-check`.
-
 Also queued (not in the order above): `git:tidy` (shared task for merged branches and worktrees).
+
+**Branches and worktrees to remove (owner, 2026-09-26: agreed; the removal needs the owner's permission
+setting):** `fumadocs-trial` (squash-merged), `worktree-wf_0e57b9eb-956-1`, `-956-2` and
+`worktree-agent-ac2f2d97915e58832` (nothing unmerged), with their worktrees under `.claude/worktrees/`.
+Keep `project-layout` (step 1) and the uncommitted Look work in `.claude/worktrees/agent-aca0ff9fa382158ea`
+(the Look list below) until they are folded in.
 
 ## Look (from `browser:shots`, 2026-09-26)
 
 - The home page is a heading and two buttons above an empty screen: it needs its content.
 - The "Site page · works without JavaScript" / "App · needs JavaScript" badge shows on every page: a
   developer label; move it out of the visitor's way.
-- Docs sidebar and other navigation hyphenate ("develop-ment"): hyphenation belongs to body text only.
-- Search results show raw Markdown (backticks) and a heavy yellow highlight.
+- Navigation hyphenates ("develop-ment"): hyphenation belongs to body text only. (Was seen in the app's old
+  docs; check the app's own navigation.)
 - Formats, "Available languages": Arabic and Persian names scramble the English list; isolate each name.
-- Docs pages open with repository links ("Back to the README · Mise tasks") meant for GitHub.
-- Formats on desktop uses a third of the width.
+- Formats on desktop uses a third of the width. With [issue #5](https://github.com/joeblew999/remy-auth/issues/5)
+  (one consistent formats page, every language shown).
+- Gone with the move to Fumadocs (the app no longer has docs pages or search): raw Markdown in search
+  results; repository links at the top of docs pages.
 
 ## Watching
 
