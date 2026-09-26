@@ -43,7 +43,7 @@ Cada página es de uno de dos tipos, listados en `paths`, y nunca se mezclan:
   la app.
 - **Navegación de la app**: una sola lista, `app-nav.tsx`. Las tabletas y los ordenadores obtienen la barra lateral (que se contrae a iconos);
   los teléfonos obtienen la barra inferior (`blocks/bottom-nav`, piezas de shadcn de fábrica, ya que shadcn no tiene navegación inferior)
-  con las páginas principales y Más, que abre la barra lateral. Por qué: [el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/mobile-navigation.md).
+  con las páginas principales y Más, que abre la barra lateral. Por qué: [el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/mobile-navigation.md).
 
 ## Exportaciones [#exports]
 

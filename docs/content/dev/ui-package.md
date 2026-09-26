@@ -40,7 +40,7 @@ Every page is one of two kinds, listed in `paths` and never mixed:
   export so a site page never downloads the app shell.
 - **App navigation**: one list, `app-nav.tsx`. Tablets and desktops get the sidebar (collapsing to icons);
   phones get the bottom bar (`blocks/bottom-nav`, stock shadcn parts, since shadcn has no bottom navigation)
-  with the core pages and More, which opens the sidebar. Why: [the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/mobile-navigation.md).
+  with the core pages and More, which opens the sidebar. Why: [the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/mobile-navigation.md).
 
 ## Exports
 

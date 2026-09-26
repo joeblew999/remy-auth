@@ -6,7 +6,7 @@ import { m } from '../../paraglide/messages.js';
 import { useSidebar } from '../../components/sidebar';
 import { appNavItems, matchesNav } from '../../app-nav';
 
-// The phone's bottom bar (.plans/mobile-navigation.md). shadcn has no bottom navigation (issues #4398,
+// The phone's bottom bar (.plans/done/mobile-navigation.md). shadcn has no bottom navigation (issues #4398,
 // #8847), so this owned block is made of shadcn's own parts: the sidebar's state (More opens the sidebar
 // as its sheet, with every page), its colours and focus ring, and TanStack Links. Shown below shadcn's
 // mobile breakpoint (md, 768 px, the width useIsMobile uses to turn the sidebar into a sheet), by CSS, so

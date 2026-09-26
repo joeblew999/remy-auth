@@ -11,7 +11,7 @@ import { AppNavLinks } from '../../../shell';
 /**
  * sidebar-16's AppSidebar with Remy's data; it opens on the reading side (right for right-to-left languages).
  * On tablets and desktops it collapses to icons (a rail, Material 3's medium widths); on phones it is the
- * sheet the bottom bar's More opens (.plans/mobile-navigation.md).
+ * sheet the bottom bar's More opens (.plans/done/mobile-navigation.md).
  */
 export function AppSidebar({ locale }: { locale: Locale }) {
   const o = { locale };

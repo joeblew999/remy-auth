@@ -27,7 +27,7 @@ release changes one version number, not four).
   `i18n:translate`: Claude Code 2.1.282 pinned in the task, with no tools, on main under a lock shared by
   every worktree, committing what it translated. Replaces `i18n:status`, the old `i18n:translate` and the
   provenance lines. Plural messages use `=*` for their fallback variant.
-- Mobile navigation (`.plans/mobile-navigation.md`): on phones (below `md`, 768 px) a bottom bar
+- Mobile navigation (`.plans/done/mobile-navigation.md`): on phones (below `md`, 768 px) a bottom bar
   (`blocks/bottom-nav`, an owned block of stock shadcn parts: shadcn has none) with the core pages and
   More, which opens the sidebar as its sheet; on tablets and desktops the sidebar, now collapsing to
   icons (`collapsible="icon"`). One list feeds both: `app-nav.tsx` (`appNavItems`, `matchesNav`).

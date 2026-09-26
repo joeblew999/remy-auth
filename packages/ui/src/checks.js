@@ -276,7 +276,7 @@ export const hydrated = locator => expect.poll(() => locator.evaluate(node => Ob
 
 /** The interactive demo: the counter, the localized reservation form, and a same-tab language switch. */
 /**
- * The app's two navigations (.plans/mobile-navigation.md): on a phone the bottom bar holds the core pages
+ * The app's two navigations (.plans/done/mobile-navigation.md): on a phone the bottom bar holds the core pages
  * and More opens the sidebar with every page; on a tablet or desktop the sidebar alone, no bar.
  */
 export function appNavChecks() {

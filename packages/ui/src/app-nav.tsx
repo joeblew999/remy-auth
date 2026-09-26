@@ -2,7 +2,7 @@ import { CalendarDaysIcon, ClockIcon, LayoutDashboardIcon, MapPinIcon, MousePoin
 import type { Locale } from './paraglide/runtime.js';
 import { m } from './paraglide/messages.js';
 
-// The app's pages, once, for both of its navigations (.plans/mobile-navigation.md): the sidebar on tablets
+// The app's pages, once, for both of its navigations (.plans/done/mobile-navigation.md): the sidebar on tablets
 // and desktops lists them all; the bottom bar on phones shows the core ones and More, which opens the
 // sidebar. Material 3 and Apple: a bottom bar holds three to five top-level destinations.
 

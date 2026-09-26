@@ -1,9 +1,9 @@
 # Mobile navigation: a bottom bar on phones, the sidebar everywhere else
 
-Status: open, 2026-09-26. Owner: "find the best shadcn way for our app to have a bottom navigation for
+Status: closed 2026-09-26: released in 0.12.0, live in remy-auth and remy-auth-app. Owner: "find the best shadcn way for our app to have a bottom navigation for
 mobile ... I have no idea if we should retain the drawer for desktop users and use the bottom navigation
 for mobile users ... Our app needs some more pages too to help show the navigation working."
-Executor/Reviewer roles as in [plans and roles](../docs/content/dev/development.md#plans-and-roles).
+Executor/Reviewer roles as in [plans and roles](../../docs/content/dev/development.md#plans-and-roles).
 
 ## Words
 
@@ -67,7 +67,7 @@ Today: Overview, Formats, Demo (reservations), Location. Proposed:
 | --- | --- | --- |
 | Clock | Time now in chosen time zones (Intl), linking the site's time-zone pages | yes |
 | Settings | Language, theme, currency and number defaults (the preferences the app already keeps) | yes |
-| Account | Signed-in state and sessions; an honest empty state until the auth service ([parked](parked/auth-service.md)) | placeholder |
+| Account | Signed-in state and sessions; an honest empty state until the auth service ([parked](../parked/auth-service.md)) | placeholder |
 | Help | The product guide, Ask AI and the MCP servers for the app's users | yes (links) |
 
 Bar (proposed): **Overview, Formats, Clock, Account, More**. More: Demo, Location, Settings, Help, the
