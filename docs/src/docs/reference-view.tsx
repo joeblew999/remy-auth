@@ -17,7 +17,13 @@ export function ReferenceView({ page }: { page: NonNullable<Awaited<ReturnType<t
   const nonce = useRouter().options.ssr?.nonce;
   return <RootProvider theme={{ storageKey: 'theme', attribute: 'class', defaultTheme: 'system', enableSystem: true, nonce }}
     search={{ options: { api: '/api/search/reference' } }}>
-    <DocsLayout tree={pageTree} nav={{ title: docsConfig.titles.reference, url: '/' }}
+    <DocsLayout tree={pageTree}
+      tabs={[
+        { title: 'Guide', url: '/docs', description: 'Using the app' },
+        { title: 'Developers', url: '/dev', description: 'Building with it' },
+        { title: 'API reference', url: '/reference', description: 'Every endpoint' },
+      ]}
+      nav={{ title: docsConfig.titles.reference, url: '/' }}
       links={[{ text: 'Developers', url: '/dev' }, { text: 'Guide', url: '/docs' }, { text: 'App', url: docsConfig.appUrl, external: true }]}>
       <DocsPage toc={page.toc} full>
         <DocsTitle>{page.title}</DocsTitle>

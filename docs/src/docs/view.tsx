@@ -92,6 +92,12 @@ export function DocsView({ page }: { page: DocsPageData }) {
     </AISearchTrigger>
     <DocsLayout
       tree={pageTree}
+      // Fumadocs' section switcher at the top of the drawer: the three docs sections.
+      tabs={[
+        { title: 'Guide', url: '/docs', description: 'Using the app' },
+        { title: 'Developers', url: '/dev', description: 'Building with it' },
+        { title: 'API reference', url: '/reference', description: 'Every endpoint' },
+      ]}
       nav={{ title: docsConfig.titles[page.site], url: '/' }}
       links={[
         { text: other.text, url: other.url },

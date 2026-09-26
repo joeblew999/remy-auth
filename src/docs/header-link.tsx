@@ -4,9 +4,9 @@ import { NavigationMenuItem, NavigationMenuLink } from '@joeblew999/remy-ui/comp
 
 import { docsOrigin } from './origin';
 
-/** The site header's "Docs" link (SiteNavLinks in the shared package): the docs Worker's home, which leads to the guide, the developer docs and the API reference. */
+/** The site header's "Docs" link (SiteNavLinks in the shared package): the docs Worker's guide; its drawer switches to the developer docs and the API reference. */
 export function docsHeaderLink(locale: Locale) {
   return () => <NavigationMenuItem>
-    <NavigationMenuLink render={<a href={docsOrigin} />}>{m.nav_docs({}, { locale })}</NavigationMenuLink>
+    <NavigationMenuLink render={<a href={`${docsOrigin}/docs`} />}>{m.nav_docs({}, { locale })}</NavigationMenuLink>
   </NavigationMenuItem>;
 }
