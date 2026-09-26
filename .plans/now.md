@@ -14,6 +14,13 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
 5. ~~**Caching**~~ closed 2026-09-26 ([plan](done/caching.md)): don't cache HTML yet; assets immutable.
 6. ~~**Observability**~~ closed 2026-09-26 ([plan](done/observability.md)): built; the answer-failure alert rule is a dashboard step (owner only, below).
 
+## Next
+
+- **Layout contract** (owner: "It's not just docs! It's everything ... a big change but it's worth it"): every path,
+  file and setting the shared tasks and package rely on, written once in tasks/README.md, checked by a
+  shared `project:layout` in tier 0, both apps brought to it. Inventory running; after the one-writer
+  translation tools (`i18n:*`, shared) land.
+
 ## Look (from `browser:shots`, 2026-09-26)
 
 - The home page is a heading and two buttons above an empty screen: it needs its content.
