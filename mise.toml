@@ -23,6 +23,11 @@ PREVIEW_PORT = "{{ get_env(name='PREVIEW_PORT', default='4173') }}"
 DEPLOY_ORIGIN = "https://remy-auth.gedw99.workers.dev"
 # The shared i18n:* tasks' list of English docs: the docs table, the one list of the site's docs.
 I18N_DOCS_TABLE = "src/docs/table.js"
+# Docs Ask AI off (owner, 2026-09-26: off until the docs conform to Fumadocs, .plans/now.md step 2a,
+# which changes what docs:publish puts in AI Search). Production answers are stopped with
+# docs:answers:off; "off" here also stops cf:deploy publishing the docs and skips the live answer check.
+# Back on: remove this line, mise run docs:publish, then docs:answers:on.
+DOCS_ASK = "off"
 
 
 [tasks."auth:cli"]

@@ -50,6 +50,10 @@ then tools, then translating.
 6. **Release and adopt:** the shared UI released, remy-auth-app moved onto it, proving the translation
    tasks and docs in an app.
 
+**Docs Ask AI is off** (owner, 2026-09-26) until 2a lands: `docs:answers:off` in production, `DOCS_ASK = "off"`
+in mise.toml (no docs:publish on deploy, the live answer check skipped). Turned back on at the end of 2a:
+remove the line, `docs:publish`, `docs:answers:on`, then `cf:ai-check`.
+
 Also queued (not in the order above): `git:tidy` (shared task for merged branches and worktrees).
 
 ## Look (from `browser:shots`, 2026-09-26)

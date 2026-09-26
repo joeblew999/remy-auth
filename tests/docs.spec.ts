@@ -590,6 +590,7 @@ test.describe('answers', () => {
 
   test('a fixed question gets an answer whose every citation opens an existing docs page, or a heading on it', async ({ page, request }) => {
     test.skip(!remote, 'Answers come from the live AI Search index: checked against a deployed target (project:test:remote).');
+    test.skip(process.env.DOCS_ASK === 'off', 'Docs Ask AI is off (DOCS_ASK in mise.toml): production gives no answers.');
     const question = 'What must I run before pushing or releasing, and why not pipe it through grep?';
     await page.goto(`${localizedPath(askPath, 'es')}?q=${encodeURIComponent(question)}`);
     await expect(page.locator('[data-ask="answered"]')).toBeVisible();
