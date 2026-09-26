@@ -58,18 +58,10 @@ setting):** `fumadocs-trial` (squash-merged), `worktree-wf_0e57b9eb-956-1`, `-95
 Also `project-layout` (step 1: not merged, its fixes ported). Keep the uncommitted Look work in `.claude/worktrees/agent-aca0ff9fa382158ea`
 (the Look list below) until they are folded in.
 
-## Next: redo remy-auth-app the right way (owner, 2026-09-26: "you fucked and now it needs to be refactored")
+## ~~Redo remy-auth-app the right way~~ done 2026-09-26
 
-Its move to 0.12.0 was done by hand. In order:
-
-1. Release 0.13.0 from here (`mise run ui:release`): `AppProviders`, `themeChecks`, `clock-route`, `gh` pinned
-   in the shared tasks, `project:check` building first.
-2. In remy-auth-app, only through the shared tasks: `mise run project:upgrade-ui 0.13.0` (the exact version
-   and the tasks include at the tag, then verify). No hand-edited pins, no npm by hand.
-3. Replace the hand-made pieces with the package's: the root's `ThemeProvider` and `SourceLink` become
-   `AppProviders`; the Clock route spreads `clockRouteOptions`; check its layout against the consumer
-   checklist in the UI package docs (routes per path, `tests/smoke.spec.ts`, `.plans/now.md`).
-4. Its gates (`project:check`, `project:test`), then `cf:deploy`; the report starts with the live URL.
+0.13.0 released through `ui:release`; remy-auth-app moved with `mise run project:upgrade-ui 0.13.0`, its root on
+`AppProviders`, its Clock on `clockRouteOptions`; gates green (175), live at https://remy-auth-app.gedw99.workers.dev.
 
 ## Then: clean up the developer docs (owner, 2026-09-26: "a bit weird for a public and agent audience")
 
