@@ -63,7 +63,7 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `cloudflare` | `placeFromCloudflare` |
 | `problem` | The localized problem pages: `Problem`, `NotFound`, `ErrorPage`, `problemPages` (one spread line per page route) |
 | `preferred` | `usePreferred`, the root loader's `preferred` language, for page routes (the app's root loader returns it) |
-| `parts`, `parts/vite`, `parts/checks` | Parts ([plan](../../.plans/parts.md)): an app lists them in `src/parts.json`, one name per line. `remyParts()` in `vite.config.ts` (its `plugin` among the plugins, its `routes` as `tanstackStart({ router: { virtualRouteConfig } })`) mounts each listed part's routes beside `src/routes` and generates `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` in the test file runs each listed part's checks. Parts today: `time-zones` |
+| `parts`, `parts/vite`, `parts/checks` | Parts ([plan](../../.plans/done/parts.md)): an app lists them in `src/parts.json`, one name per line. `remyParts()` in `vite.config.ts` (its `plugin` among the plugins, its `routes` as `tanstackStart({ router: { virtualRouteConfig } })`) mounts each listed part's routes beside `src/routes` and generates `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` in the test file runs each listed part's checks. Parts today: `time-zones`, `deferred-place`, `seo-routes`, `status-card`; see [Writing a part](#writing-a-part) |
 | `showcase/*` | TanStack showcase pieces: search params and `choiceCards`, device place, leave guard, time zones, the live status card (`StatusCard`: the app passes the query, its own client's or a `contractClient` on another app's origin) |
 | `invalidate` | `invalidateEverything(router, queryClient)`: every loader and query stale and reloaded (after logout or a role change; the status card's refresh) |
 | `samples` | The fixed values the pages render |
@@ -111,3 +111,25 @@ Consumers add to their `.npmrc`:
 
 and install with a token that has `read:packages`. Released versions are in the
 [changelog](../../CHANGELOG.md).
+
+## Writing a part
+
+A part is a feature an app switches on or off with one line in its `src/parts.json`.
+
+1. **Folder:** `src/parts/<name>/` in this package, with any of:
+   - `routes/`: TanStack route files, mounted beside the app's own `src/routes` when the part is listed;
+   - entry modules (e.g. `ui.tsx`, `place.ts`) the app imports as `virtual:remy-parts/<name>/<entry>`:
+     the real exports when listed, `undefined` when not, so the app writes `{Card && <Card />}` or
+     `getPlace?.()` and nothing ships when the part is off. One module per entry keeps code splitting;
+   - `checks.js`: its Playwright checks, run by `partChecks()` only when listed.
+2. **Catalog:** add it to `catalog` in `src/parts/list.js`: `routes`, `requires` (parts that must be
+   listed too), `entries` (entry → export names), `app` (options the app supplies from its own
+   `src/parts/<name>.ts`, read as `virtual:remy-parts/<name>/app`) and `sitePaths` (site pages it adds,
+   for the sitemap and its checks).
+3. **Types:** declare its virtual modules in `src/parts/virtual.d.ts`.
+4. **Prove it:** `mise run project:check` passes with the part listed, with it removed, and with the list
+   empty (run a build once after editing `src/parts.json`, which regenerates the route tree).
+
+What stays a plain package module instead: code every app needs (observability), a hook an app must
+always call (leave-guard), or a shared page's own controls (search-params).
+

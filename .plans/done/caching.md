@@ -1,5 +1,7 @@
 # Caching (quick plan)
 
+Closed 2026-09-26: decided "don\'t cache HTML yet" (every page carries a per-response CSP nonce and request ID); hashed assets are immutable (public/_headers); robots.txt and sitemap.xml send cacheable headers for when Workers Caching is turned on. Hash-based CSP for cacheable site pages is not planned.
+
 Status: open, 2026-09-25; step 0 built (see "Decision 2026-09-25"), HTML caching not started. Owner's request: "a proper solution for
 caching. TanStack must have one?" Applies to both apps through the shared package and tasks.
 Checked 2026-09-25 against the TanStack skills, Start 1.168.58, Wrangler 4.137.0, TanStack's ISR
@@ -72,7 +74,7 @@ Both finalists get a small scratch build in W1 before anything is chosen (how-we
 | Kind | Cache-Control | Where set |
 | --- | --- | --- |
 | Site pages (`/:locale/...`) | `public, max-age=0, s-maxage=3600, stale-while-revalidate=86400` (**assumed** values), no `Vary` | Root route `headers()` in the shared package; `localizedWorker` keeps `no-store` as the default for everything else |
-| App pages (`/app/...`) | `private, no-store`, forever (auth follows; [auth plan](parked/auth-service.md) "never share a public cache") | Stays the `localizedWorker` default |
+| App pages (`/app/...`) | `private, no-store`, forever (auth follows; [auth plan](../parked/auth-service.md) "never share a public cache") | Stays the `localizedWorker` default |
 | Entry redirects (un-localized paths) | `private, no-store` (they depend on Accept-Language and the cookie) | `entryRedirect` |
 | `robots.txt`, `sitemap.xml` | `public, max-age=3600` as now, plus `s-maxage` | `packages/ui/src/parts/seo-routes/server-routes.ts` `crawlCache` |
 | `/healthz` | `no-store`; it must always reach the Worker | `withObservability` |
@@ -103,7 +105,7 @@ Add `cache` to the line `withObservability` writes, taken from the inner respons
 `Cf-Cache-Status` (`HIT`, `MISS`, `EXPIRED`, `UPDATING`, `BYPASS`, or `none`); additive, so
 `schemaVersion` stays 1, and hits and misses filter in Workers Observability. Cloudflare's own "Cache Analytics in Workers
 Observability" is listed as coming soon, and the cache-keys page says hits show there already;
-**assumed** unclear until W1 looks. Owner: [observability plan](observability.md).
+**assumed** unclear until W1 looks. Owner: [observability plan](../observability.md).
 
 ## Checks (shared, level 1 locally and against the preview)
 
@@ -131,7 +133,7 @@ Observability" is listed as coming soon, and the cache-keys page says hits show 
 1. Workers Caching (all requests billed, assets included) or prerendered site pages (free
    assets, no log line on those pages)? W1 gives the numbers.
 2. A custom domain: no longer needed for caching; still needed for availability alerts
-   ([observability plan](observability.md)). Now or later?
+   ([observability plan](../observability.md)). Now or later?
 3. Site page freshness: `s-maxage` and stale-while-revalidate values (suggested 1 h and 1 day;
    a deploy clears everything anyway).
 4. Is it acceptable that site pages show the language hint and the place card only after

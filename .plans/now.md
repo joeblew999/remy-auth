@@ -14,14 +14,11 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
    switch from report-only to enforcing (building now). No reports in 7 days of live traffic
    (2026-09-26) and every page hydrates with no violation in every language. Deploy enforcing, watch the
    reports a day, then close. HSTS max-age raised in the same step.
-3. **Parts** ([plan](parts.md)): write "how to write a part" in the package README; leave-guard,
-   search-params and observability stay package modules (decided, reasons in the plan). Then close.
+3. ~~**Parts**~~ closed 2026-09-26 ([plan](done/parts.md)): "Writing a part" is in the package README.
 4. **Publisher and consumers** ([plan](publisher-consumer.md)): the fewer-scripts review (each script:
    keep, or replace with a mise feature or upstream command); remy-auth-app runs the consumer contract
    set. Then close.
-5. **Caching** ([plan](caching.md)): close as decided ("don't cache HTML yet": every page carries a
-   per-response nonce and request ID); hashed assets are already immutable. Hash-based CSP for cacheable
-   site pages goes to parked if wanted later.
+5. ~~**Caching**~~ closed 2026-09-26 ([plan](done/caching.md)): don't cache HTML yet; assets immutable.
 6. **Observability** ([plan](observability.md)): one alert on failing answers (`event = ask`,
    `outcome = failed`) beside the two alert policies; then close.
 
