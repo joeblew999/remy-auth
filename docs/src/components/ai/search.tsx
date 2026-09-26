@@ -48,26 +48,21 @@ export function AISearchPanelHeader({ className, ...props }: ComponentProps<'div
       )}
       {...props}
     >
+      {/* Adapted: named like the button that opens it, and a Close button people can see and reach by keyboard. */}
       <div className="px-3 py-2 flex-1">
-        <p className="text-sm font-medium mb-2">AI Chat</p>
+        <p className="text-sm font-medium mb-1">Ask AI</p>
         <p className="text-xs text-fd-muted-foreground">
           AI can be inaccurate, please verify the answers.
         </p>
       </div>
 
       <button
-        aria-label="Close"
-        tabIndex={-1}
-        className={cn(
-          buttonVariants({
-            size: 'icon-sm',
-            variant: 'ghost',
-            className: 'text-fd-muted-foreground rounded-full',
-          }),
-        )}
+        type="button"
+        className={cn(buttonVariants({ variant: 'secondary', size: 'sm', className: 'm-2 gap-1' }))}
         onClick={() => setOpen(false)}
       >
-        <X />
+        <X className="size-4" />
+        Close
       </button>
     </div>
   );
@@ -401,7 +396,7 @@ export function AISearchPanel() {
         <div
           className={cn(
             'overflow-hidden z-30 bg-fd-card text-fd-card-foreground [--ai-chat-width:400px] 2xl:[--ai-chat-width:460px]',
-            'max-lg:fixed max-lg:inset-x-2 max-lg:inset-y-4 max-lg:border max-lg:rounded-2xl max-lg:shadow-xl',
+            'max-lg:fixed max-lg:inset-x-2 max-lg:top-4 max-lg:border max-lg:rounded-2xl max-lg:shadow-xl',
             'lg:sticky lg:top-0 lg:h-dvh lg:border-s lg:ms-auto lg:in-[#nd-docs-layout]:[grid-area:toc] lg:in-[#nd-notebook-layout]:row-span-full lg:in-[#nd-notebook-layout]:col-start-5',
             open
               ? 'animate-fd-dialog-in lg:animate-[ask-ai-open_200ms]'
@@ -411,7 +406,7 @@ export function AISearchPanel() {
             if (!open) flushSync(() => setActualOpen(false));
           }}
         >
-          <div className="flex flex-col size-full p-2 lg:p-3 lg:w-(--ai-chat-width)">
+          <div className="flex flex-col size-full p-2 max-lg:max-h-[80dvh] lg:p-3 lg:w-(--ai-chat-width)">
             <AISearchPanelHeader />
             <AISearchPanelList className="flex-1" />
             <div className="rounded-xl border bg-fd-secondary text-fd-secondary-foreground shadow-sm has-focus-visible:shadow-md">
