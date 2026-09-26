@@ -1,6 +1,6 @@
 ---
 title: "Docs in your AI tools"
-description: "Every MCP server and llms.txt here, who each is for, and how to add them to ChatGPT, Claude, Cursor, VS Code or Gemini CLI."
+description: "Every MCP server and llms.txt here, who each is for, how to add them to ChatGPT, Claude, Cursor, VS Code or Gemini, and how Google's AI Mode sees the docs."
 ---
 
 The docs have three parts, each for one audience, and each part has its own MCP server and llms files.
@@ -35,10 +35,27 @@ Each server's instructions say who it is for, so an assistant with all three pic
 | Claude Code | `claude mcp add --transport http remy-developer-docs https://remy-auth-docs.gedw99.workers.dev/api/mcp/dev` |
 | Cursor | `.cursor/mcp.json`: `{"mcpServers": {"remy-developer-docs": {"url": "https://remy-auth-docs.gedw99.workers.dev/api/mcp/dev"}}}` |
 | VS Code | `.vscode/mcp.json`: `{"servers": {"remy-developer-docs": {"type": "http", "url": "https://remy-auth-docs.gedw99.workers.dev/api/mcp/dev"}}}` |
-| Gemini CLI | `gemini mcp add --transport http remy-developer-docs https://remy-auth-docs.gedw99.workers.dev/api/mcp/dev` |
 
 Swap in another row's URL and name for the product guide or the API reference.
 `mise run docs:test:remote` lists every server's tools.
+
+## Gemini and Google
+
+Google's AI answers do not use MCP servers or llms.txt: Google says so
+([Search Central](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide)).
+
+| Where | How it sees these docs |
+| --- | --- |
+| Google AI Mode, AI Overviews | Google's search index: the HTML pages (`/sitemap.xml`), their titles, descriptions and text. A page must be indexed with a snippet, and the site included in "Search generative AI features" in Search Console. |
+| The Gemini app | The same Google Search grounding; it takes no MCP server of ours. |
+| Gemini CLI | An MCP server: `gemini mcp add --transport http remy-developer-docs https://remy-auth-docs.gedw99.workers.dev/api/mcp/dev` |
+| Gemini API (managed agents) | An MCP server: an `mcp_server` tool with the URL. |
+| Gemini Enterprise | An MCP server: an administrator adds it as a custom MCP connector (Streamable HTTP). |
+
+So for Google the pages themselves have to say who they are for, which is why every part is written for
+its audience ([Writing docs](./writing-docs.mdx#who-each-part-is-for)): each page's title ends with its
+part ("… | Remy product guide", "… | Remy developer docs", "… | Remy API reference"), and each part's home
+page opens by saying who it is for.
 
 ## Finding them
 

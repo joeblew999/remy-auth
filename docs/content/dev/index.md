@@ -1,7 +1,10 @@
 ---
-title: "Remy Auth"
-description: "Shared authentication for Remy apps: Better Auth on Cloudflare Workers, the shared remy-ui package, and where to start."
+title: "Developers: start here"
+description: "For developers building Remy or an app on it: shared authentication for Remy apps, Better Auth on Cloudflare Workers, the shared remy-ui package, and where to start."
 ---
+
+**For developers** building Remy, or an app on its shared UI package. Using the app? Read the
+[product guide](/docs). Calling the API? The [API reference](/reference).
 
 https://github.com/joeblew999/remy-auth
 

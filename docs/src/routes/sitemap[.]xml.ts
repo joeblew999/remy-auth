@@ -11,7 +11,7 @@ export const Route = createFileRoute('/sitemap.xml')({
     handlers: {
       GET: ({ request }) => {
         const origin = new URL(request.url).origin;
-        return new Response(sitemapXml({ origin, paths: [], extra: [...docsSitemap(origin), ...referenceUrls().map(url => ({ loc: `${origin}${url}`, alternates: [] }))] }), { headers: { 'Content-Type': sitemapType, 'Cache-Control': 'public, max-age=3600, s-maxage=3600' } });
+        return new Response(sitemapXml({ origin, paths: [], extra: [{ loc: `${origin}/`, alternates: [] }, ...docsSitemap(origin), ...referenceUrls().map(url => ({ loc: `${origin}${url}`, alternates: [] }))] }), { headers: { 'Content-Type': sitemapType, 'Cache-Control': 'public, max-age=3600, s-maxage=3600' } });
       },
     },
   },

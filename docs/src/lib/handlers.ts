@@ -3,6 +3,7 @@ import { registerSourceTools } from 'fumadocs-core/mcp';
 import { z } from 'zod';
 import { generateOGImage } from 'fumadocs-ui/og/takumi';
 import { reference, referenceSearch, sites } from './source';
+import { llmsSummary } from './sections';
 import type { SiteName } from './collections';
 import { docsConfig } from '../../docs.config';
 
@@ -20,18 +21,19 @@ export async function markdown(name: SiteName, splat = '') {
 }
 
 /** /<site>/<lang?>/llms.txt and llms-full.txt: the site's index and full text in one language. */
-export async function llmsText(name: SiteName, splat = '') {
+export async function llmsText(name: SiteName, splat = '', origin = '') {
   const site = sites[name];
   const { lang, slugs } = site.parse(splat.replace(/\.txt$/, ''));
-  if (slugs.join('/') === 'llms') return text(await site.llms.index(lang), 'text/plain');
+  // Fumadocs' index, with the part's audience under its title.
+  if (slugs.join('/') === 'llms') return text((await site.llms.index(lang)).replace(/^(# .*\n)/, `$1\n${llmsSummary(name, origin)}\n`), 'text/plain');
   if (slugs.join('/') === 'llms-full') return text(await site.llms.full(lang), 'text/plain');
   return new Response('Not found', { status: 404 });
 }
 
 /** /reference/llms.txt, llms-full.txt and /reference/<operation>.md: the API reference as text, from the spec. */
-export async function referenceText(splat = '') {
+export async function referenceText(splat = '', origin = '') {
   const name = splat.replace(/\.(txt|md)$/, '');
-  if (splat === 'llms.txt') return text(await referenceLlms.index(), 'text/plain');
+  if (splat === 'llms.txt') return text(`# ${docsConfig.titles.reference}\n\n${llmsSummary('reference', origin)}\n\n${await referenceLlms.index()}\n`, 'text/plain');
   if (splat === 'llms-full.txt') return text((await Promise.all(reference.getPages().map(referenceLlms.page))).join('\n'), 'text/plain');
   const page = splat.endsWith('.md') ? reference.getPage(name.split('/').filter(Boolean)) : undefined;
   return page ? text(await referenceLlms.page(page), 'text/markdown') : new Response('Not found', { status: 404 });

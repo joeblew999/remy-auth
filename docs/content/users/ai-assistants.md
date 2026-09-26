@@ -23,6 +23,11 @@ It only has this product guide. Building Remy, or calling its API, is in the
 
 Settings → **Connectors** → **Add custom connector** → paste the address above.
 
+## Gemini and Google
+
+Gemini and Google's AI Mode find this guide through Google Search, with nothing to set up. Gemini CLI
+can add the address above: `gemini mcp add --transport http remy-product-guide https://remy-auth-docs.gedw99.workers.dev/api/mcp/docs`.
+
 ## Any assistant, without setup
 
 Give it [`/docs/llms.txt`](https://remy-auth-docs.gedw99.workers.dev/docs/llms.txt) (every page with a line about it) or

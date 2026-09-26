@@ -32,6 +32,7 @@ export function docsHead(page: DocsPageData | undefined) {
     meta: [
       { title: `${page.title} | ${docsConfig.titles[page.site]}` },
       { name: 'description', content: page.description },
+      { property: 'og:site_name', content: docsConfig.titles[page.site] },
       { property: 'og:title', content: page.title },
       { property: 'og:description', content: page.description },
       { property: 'og:image', content: image },

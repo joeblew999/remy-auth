@@ -35,3 +35,10 @@ export const rootLlmsTxt = (origin: string) => [
     `- [MCP server ${section.mcpName}](${origin}${section.mcp})`, '',
   ]),
 ].join('\n');
+
+/** A part's llms.txt summary line (llmstxt.org's blockquote): who it is for, and where the other parts are. */
+export const llmsSummary = (key: Section['key'], origin: string) => {
+  const section = sections.find(entry => entry.key === key)!;
+  const others = sections.filter(entry => entry.key !== key).map(entry => `${entry.title}, ${entry.audience.replace(/^For/, 'for')}: ${origin}${entry.llms}`);
+  return `> ${section.audience}. Elsewhere: ${others.join('; ')}. Everything: ${origin}/llms.txt.`;
+};

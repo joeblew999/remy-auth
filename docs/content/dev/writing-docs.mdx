@@ -8,6 +8,22 @@ There are two docs sites, served by the docs Worker (the `docs/` app, apart from
 for the app's users at `/docs`, and these developer docs at `/dev`.
 Each has its own languages, search, `llms.txt` and Ask AI folder.
 
+## Who each part is for
+
+The docs have three parts, and each is written from one reader's side. Google's AI Mode, Gemini and every
+other assistant tell them apart only by what the pages say, so keep them apart:
+
+| Part | Reader | Writes about | Never |
+| --- | --- | --- | --- |
+| Product guide, `content/users/` (`/docs`) | someone using the app | what they see and do in the app | code, tools, the repository, deploys |
+| Developer docs, `content/dev/` (`/dev`) | a developer building Remy or an app on it | code, tasks, tools, rules | how to use the app, beyond a link to the guide |
+| API reference (`/reference`) | a developer calling the API | endpoints, generated from the contract | prose; it is generated |
+
+- A page that needs the other side links to it in one line ("Building it? The developer docs.").
+- Each part's home page opens by saying who it is for; its titles end with the part's name (`docs.config.ts`,
+  `titles`), and so do its `llms.txt` and MCP server ([Docs in your AI tools](./ai-tools.md)).
+- The parts, their readers, llms files and MCP servers are one list, `src/lib/sections.ts`.
+
 ## Layout
 
 <Files>
