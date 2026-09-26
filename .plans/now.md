@@ -82,11 +82,11 @@ Also queued (not in the order above): `git:tidy` (shared task for merged branche
 
 - A native-speaker review of the ten newer languages' catalogs and the Spanish docs.
 - The production origin (a custom domain) and Search Console. It also unlocks: AI Search crawling the
+  docs site itself (its website source needs a domain on this Cloudflare account, not workers.dev),
+  which deletes `docs:publish`, its script and the R2 bucket; and caching docs pages at the edge.
 - Search Console for the docs Worker (works on workers.dev with a URL-prefix property and an HTML tag), with
   the site included in "Search generative AI features": Google's AI Mode, AI Overviews and the Gemini app
   see the docs only through the index, not MCP or llms.txt (docs/content/dev/ai-tools.md, "Gemini and Google").
-  docs site itself (its website source needs a domain on this Cloudflare account, not workers.dev),
-  which deletes `docs:publish`, its script and the R2 bucket; and caching docs pages at the edge.
 - More docs languages: add the language to the site's `docs/content/<site>/i18n.json` and translations
   beside the pages (`<page>.<lang>.md`); `mise run i18n:status` lists what each language still needs.
 
