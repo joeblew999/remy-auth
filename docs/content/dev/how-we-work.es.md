@@ -106,7 +106,7 @@ actualizados a medias.
 - La traducción es un paso propio, en `main` después de los merges: `mise run i18n:translate`. El agente de Claude,
   fijado en la tarea, traduce exactamente lo que lista `i18n:check`, y la tarea lo confirma con un commit; **el commit
   es la marca** (git decide qué está desactualizado: una traducción está desactualizada cuando su inglés cambió después
-  del último commit de la traducción). Rechaza otras ramas, el inglés sin confirmar y una segunda ejecución mientras otra
+  del último commit de la traducción). Rechaza otras ramas, el inglés sin confirmar, las traducciones sin confirmar y una segunda ejecución mientras otra
   tiene el bloqueo, que comparten todos los worktrees, de modo que los agentes en paralelo no pueden lanzar traducciones
   ni competir por ellas.
 - El agente no recibe ninguna herramienta: se le entrega el inglés (y, para una página desactualizada, el diff del inglés y
@@ -116,10 +116,12 @@ actualizados a medias.
 - Lo desactualizado o lo que falta es un aviso mientras se programa (`project:check` lo muestra) y un error en el release
   (`ui:release` ejecuta primero `i18n:check` con `I18N_STRICT=1`).
 - Haz commit solo de cambios reales de traducción en un archivo de traducción: cualquier commit en él lo marca como
-  al día. Un cambio estructural (un renombrado, un barrido) que toque traducciones va seguido de
+  al día. Un cambio estructural (un renombrado, un barrido) que toque traducciones de la documentación va seguido de
   `mise run i18n:docs:translate -- <file>…`, que vuelve a comprobar esos archivos por completo contra el inglés.
+  Los catálogos no tienen tal repetición: cambia la estructura de un catálogo (el archivo de cada idioma) en el mismo commit que
+  `en.json`, para que no quede oculta ninguna clave en inglés que haya cambiado.
 
-La estructura y las tareas están en el [README de tasks](./tasks.md#translations).
+La estructura y las tareas están en las [tareas compartidas de mise](./tasks.md#translations).
 
 ## Planes: pocos, cortos y cerrados [#plans-few-short-closed]
 
