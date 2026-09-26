@@ -92,9 +92,10 @@ export function DocsView({ page }: { page: DocsPageData }) {
     </AISearchTrigger>
     <DocsLayout
       tree={pageTree}
-      nav={{ title: docsConfig.titles[page.site], url: docsUrl(page.site, '', page.lang) }}
+      nav={{ title: docsConfig.titles[page.site], url: '/' }}
       links={[
         { text: other.text, url: other.url },
+        { text: 'App', url: docsConfig.appUrl, external: true },
         ...(page.site === 'dev' ? [{ text: 'API reference', url: '/reference' }] : []),
       ]}>
       {/* Inside the layout: the panel takes the table of contents' place in its grid while open. */}
