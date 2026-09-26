@@ -10,7 +10,7 @@ must not be done in a hardcoded way."
 ## Requirements
 
 1. **Same shape in every area.** Each section (language, time, numbers, money, words, and fonts
-   when [fonts.md](../fonts.md) lands) opens with what that area *is for the page's language*, then
+   when [fonts.md](fonts.md) lands) opens with what that area *is for the page's language*, then
    the samples, then (where there is one) the try-it control. No area is missing its "for this
    language" row in any of the 13 languages.
 2. **The language's own values, derived, never listed.** Everything shown for the page's
@@ -38,7 +38,7 @@ must not be done in a hardcoded way."
 
 Read `packages/ui/src/pages.tsx` (FormatsContent), `showcase/search-params.tsx`, `locale-info.ts`,
 `samples.js`, `checks.js` (formatsChecks), [hard-localisation.md](hard-localisation.md) and
-[fonts.md](../fonts.md). Deliver: an inventory of every area and control with what is derived and what
+[fonts.md](fonts.md). Deliver: an inventory of every area and control with what is derived and what
 is hardcoded today, a survey for region data (currency), a design against requirements 1 to 6,
 and milestones with gates. Owner decisions only if a choice costs money or changes what Google sees.
 

@@ -1,12 +1,14 @@
 # Fonts per writing system (quick plan)
 
+Closed 2026-09-26: script fonts before Geist\'s fallback, `fontChecks` (the web font that draws each language, a 300 KB font budget per page), Japanese and Traditional Chinese on system fonts, Persian on Vazirmatn; 496 font files down to 25; live. Left as a line in now.md: font rows on the formats page (step 4).
+
 Status: open. Built 2026-09-25: the stack fix (step 2) and `fontChecks` (step 3). Measured and
 decided 2026-09-26: step 1 and the three decisions of step 5 (see "Step 1: measured" and
 "Decisions" below, delegated by the owner). Step 4 (fonts rows on the formats page) remains. Owner's question: "as we add more languages
 then fonts need to be downloaded? ... it's tempting to align the adding of a language with a font
 download but I doubt it's that simple ... Tempting to also show the fonts aspect in the formats gui
-control". Builds on [hard localisation](done/hard-localisation.md) item 10 and the fonts rule in
-[fonts.css](../packages/ui/src/fonts.css). Checked 2026-09-25 against the installed packages
+control". Builds on [hard localisation](hard-localisation.md) item 10 and the fonts rule in
+[fonts.css](../../packages/ui/src/fonts.css). Checked 2026-09-25 against the installed packages
 (fontsource 5.3.0, fontaine 1.0.0, the built `dist/`), MDN, CSS Fonts 4, the Chrome DevTools
 Protocol and Cloudflare's docs. Anything else is marked **assumed**.
 
@@ -131,7 +133,7 @@ correctness per script and Han language (3), cost to the visitor (2). Scores 0 t
 **Recommendation: B**, with finding 3 and 4 fixed and the check added. Runner-up **A**: switch if
 the budget cannot hold CJK or the owner prefers native system looks; the check then asserts "system
 font has glyphs" instead of `isCustomFont`. Prove B and A with scratch builds of `/ja/formats` and
-`/ar/formats` (bytes, LCP, CLS, screenshots) before deciding, as [how we work](../docs/how-we-work.md#choose-tools-by-survey-not-by-first-find) asks.
+`/ar/formats` (bytes, LCP, CLS, screenshots) before deciding, as [how we work](../../docs/how-we-work.md#choose-tools-by-survey-not-by-first-find) asks.
 
 ## Step 1: measured (2026-09-26)
 

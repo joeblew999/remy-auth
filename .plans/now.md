@@ -7,13 +7,8 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
 
 ## In order
 
-1. **Fonts** ([plan](fonts.md)): measure font bytes per language and decide the per-page budget,
-   Persian's face and CJK (building now); Core Web Vitals per script on a throwaway Worker; remy-auth-app
-   calls `fontChecks` at its next package upgrade. Then close.
-2. **Content-Security-Policy enforced** (security headers): the
-   switch from report-only to enforcing (building now). No reports in 7 days of live traffic
-   (2026-09-26) and every page hydrates with no violation in every language. Deploy enforcing, watch the
-   reports a day, then close. HSTS max-age raised in the same step.
+1. ~~**Fonts**~~ closed 2026-09-26 ([plan](done/fonts.md)). Left: font rows on the formats page (script, font drawing it, bytes).
+2. ~~**Content-Security-Policy enforced**~~ closed 2026-09-26: enforcing live, the 404 and error pages carry it too. Left: glance at `/csp-report` in the logs after a day; raise HSTS max-age.
 3. ~~**Parts**~~ closed 2026-09-26 ([plan](done/parts.md)): "Writing a part" is in the package README.
 4. ~~**Publisher and consumers**~~ closed 2026-09-26 ([plan](done/publisher-consumer.md)): recipe, drift, package moves, consumer check set shipped; scripts reviewed, all kept.
 5. ~~**Caching**~~ closed 2026-09-26 ([plan](done/caching.md)): don't cache HTML yet; assets immutable.
