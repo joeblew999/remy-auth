@@ -65,6 +65,15 @@ Paraglide owns all language behaviour: which language a request gets, through it
 carrying them. We do not write framework-neutral layers or our own language code; when Paraglide
 lacks something, use its options first and record the gap in the owning plan.
 
+## Plans: few, short, closed
+
+Owner, 2026-09-26: "how overwhelming and frustrating it is to have so much garbage plans". New work is
+one line in `.plans/now.md`, in the order it closes. A plan file is written only for work that is big
+enough to be parked or to run over weeks; research, analyses and reviews go into the plan they serve,
+not a file of their own. A plan closes the day its work ships: a closing line, then `.plans/done/`. Big
+features wait in `.plans/parked/`. Closing a plan needs no extra deploy or test run of its own: batch the
+code into one deploy and one full run at the end.
+
 ## When the owner delegates decisions
 
 When the owner hands over decisions, for example to finish work unattended:
