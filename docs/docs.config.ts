@@ -7,6 +7,8 @@ export const docsConfig = {
   titles: { docs: 'Remy', dev: 'Remy for developers', reference: 'Remy API reference' },
   /** The MCP servers' names, per site. */
   mcp: { docs: 'remy-docs', dev: 'remy-dev-docs' },
+  /** The live app this documents (the landing page links it). */
+  appUrl: 'https://remy-auth.gedw99.workers.dev',
   /** This Worker's service name in log lines and /healthz. */
   service: 'remy-auth-docs',
   /** Where the source lives: "Edit on GitHub" and links to files that are not docs pages. */

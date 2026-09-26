@@ -3,6 +3,9 @@
 This file is an index. The rules live in the documents below; read them before
 changing anything, and follow them over your own defaults. Do not copy their content here.
 
+Live: https://remy-auth-docs.gedw99.workers.dev links the app, the guide, the developer docs and the API
+reference. The docs' source is `docs/content/users` (guide) and `docs/content/dev` (developer docs).
+
 1. [Development principles](docs/content/dev/development.md) — ownership, single source of truth,
    test gates, generated code, owner decisions.
 2. [Developer tooling](docs/content/dev/tooling.md) — mise tasks, pinned tools and agent skills.

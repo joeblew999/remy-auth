@@ -400,7 +400,8 @@ export function formatsChecks({ extra } = {}) {
  * Performance by design. Every scored audit must pass, not only the category score; none is exempt.
  */
 export function lighthouseChecks({ pages }) {
-  const cli = (...args) => execFileSync('./node_modules/.bin/chrome-devtools', args,
+  // npx --no-install finds the pinned binary from any workspace (a docs app's bins are hoisted to the root).
+  const cli = (...args) => execFileSync('npx', ['--no-install', 'chrome-devtools', ...args],
     { encoding: 'utf8', env: { ...process.env, NODE_NO_WARNINGS: '1' }, timeout: 120_000 });
   test.describe('lighthouse', () => {
     test.describe.configure({ mode: 'serial', timeout: 120_000 });
