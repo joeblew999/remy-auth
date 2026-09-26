@@ -16,6 +16,9 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
 
 ## Next, in this order
 
+Checked against the code 2026-09-26 (owner: "for the love of god check the sub parts are good"): three
+fixes folded in below.
+
 Owner, 2026-09-26: "there is so much to be aligned and done in the right order. I want to not do any more
 manual translation until the docs and Paraglide stuff is solved, as it will slow us down." Structure first,
 then tools, then translating.
@@ -26,14 +29,21 @@ then tools, then translating.
    (below).
 2. **Structure, in parallel:**
    - a. **Docs conform to Fumadocs as shadcn does** ([plan](docs-for-consumers.md#how-shadcn-does-it-apps-v4-at-98a1fe6-2026-09-26)):
-     frontmatter `title` and `description` on the English docs, a `loader()` from `docsTable`, search via
-     `createFromSource`; deletes our hand-built titles, descriptions, navigation and search index.
-   - b. **Paraglide plurals** ([plan](translation-pipeline.md)): `=*` as the fallback in the catalogs and the
-     plural-categories test.
+     frontmatter `title` and `description` on the English docs **and, once, on the Spanish ones** (a structural
+     move by the single writer, not a translation pass: the loader needs them), a `loader()` from `docsTable`
+     over virtual files (`VirtualFile`/`StaticSource`, no symlinks), search via `createFromSource`, the
+     `source.config.ts` root fix (`import.meta.dirname`); deletes our hand-built titles, descriptions,
+     navigation and search index.
+   - b. **Paraglide plurals** ([plan](translation-pipeline.md)): `=other` becomes `=*` in the 13 catalogs
+     (compiles to an unconditional fallback, `compile-message.js:101`; no wording changes). The
+     plural-categories test is a check, so it goes in step 3.
 3. **Translation tooling** ([plan](translation-pipeline.md)): git, jq and i18n-check through shared mise
-   tasks, the `claude -p` writer step; delete `i18n.mjs`, the provenance lines and their plugin.
-4. **Unfreeze:** one translation pass with the new tools (Spanish docs with frontmatter, missing catalog
-   keys); the release check back to strict.
+   tasks, the plural-categories test, the `claude -p` writer step; delete `i18n.mjs` and its wrappers.
+   **Not** the provenance lines: removing them is a commit to every translation, which git would read as
+   "translated" and so hide what is stale.
+4. **Unfreeze:** one translation pass with the new tools (stale Spanish docs, missing catalog keys and
+   plural forms); the same commit removes the provenance lines and `remarkDropProvenance`; the release
+   check back to strict.
 5. **What conforming docs unlock** ([plan](docs-for-consumers.md)): `.md` pages, `llms.txt`, the copy
    menu; then docs for apps: a rules section in how-we-work, the `remy` skill (rules, evals) in the
    package, the `AGENTS.md` block pointing into `node_modules`.
