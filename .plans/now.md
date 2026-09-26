@@ -61,7 +61,7 @@ evidence. Each item's detail lives in the plan it links to. Git history holds th
 | 15 | Caching: spike Workers Caching against prerendered site pages on a preview, then build ([plan](caching.md)) | load to settle; decisions 1 to 4 in the plan (delegated: recommendation first) | cached site pages, private app pages |
 | 16 | ~~Docs section and AI answers~~ done 2026-09-25: /docs, /docs/search, /docs/ask; `docs:publish` after every `cf:deploy` ([plan](docs-ai-sync.md)) | | review later (22) |
 | 17 | ~~Language test tiers~~ done 2026-09-25, since replaced by tiers 0 to 4 and `GATE` (2162b7b, [rule](../docs/how-we-work.md#gates-before-anything-leaves-the-machine)) | | |
-| 18 | Fonts by writing system, font order fix, font check, fonts in the formats page ([plan](fonts.md)) | agent analysis; three owner decisions in the plan | |
+| 18 | Fonts by writing system, font order fix, font check, fonts in the formats page ([plan](fonts.md)) | measured and decided 2026-09-26 (300 KB budget, Han on system fonts, Vazirmatn for Persian); fonts rows on the formats page remain | |
 | 19 | Formats: every area for the page's language, every choice from the system's languages ([plan](formats-consistency.md)) | agent analysis | |
 | 20 | ~~GitHub Actions off Node.js 20~~ done 2026-09-25 ([plan](ci-node24.md)) | | |
 | 21 | Publisher and consumers checked: new-consumer recipe, drift, more in the include, docs and AI answers for every consumer, remy-auth-app CI (it has no workflow yet), fewer scripts ([plan](publisher-consumer.md)) | agent analysis | |

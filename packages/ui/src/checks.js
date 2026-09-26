@@ -660,15 +660,39 @@ const namedFonts = family => family.split(',').map(name => name.trim().replace(/
 const drawnBy = (font, name) => font.glyphCount > 0 && font.isCustomFont && [font.familyName, font.postScriptName].some(real => real && fontKey(real).startsWith(fontKey(name)));
 
 /**
+ * The scripts fonts.css leaves to the system's font on purpose: Han. Their web fonts measured 351 KB
+ * (/ja) to 1,176 KB (/zh-TW/formats) on a first visit, over fontBudget (.plans/fonts.md, step 1), and
+ * every desktop and phone system ships a Japanese and a Traditional Chinese font that Chrome picks
+ * by the page's lang. Any other script still needs its web font: a new Greek or Korean page fails.
+ */
+const hanScripts = ['Jpan', 'Hant', 'Hans'];
+export const systemFontScripts = hanScripts;
+/** macOS draws a character no font has with LastResort (a box): tofu, never a system font that passes. */
+const tofu = font => [font.familyName, font.postScriptName].some(name => name && fontKey(name).startsWith('lastresort'));
+// A system font passes only for a script fonts.css leaves to the system, and never as tofu.
+const drawnBySystem = (font, script) => font.glyphCount > 0 && !font.isCustomFont && systemFontScripts.includes(script) && !tofu(font);
+/**
+ * The most font bytes (resource timing's encodedBodySize) a first visit to one site page may
+ * download, in every language. Measured 2026-09-26 on a local production build: 28.7 KB (Latin) to
+ * 227.2 KB (/ar/formats); 300 KB leaves about a third of headroom and fails any Han web font
+ * (351 KB for /ja, 1,176 KB for /zh-TW/formats). Raise it only with new numbers in .plans/fonts.md.
+ */
+export const fontBudget = 300 * 1024;
+const kb = bytes => `${(bytes / 1024).toFixed(1)} KB`;
+const fontFile = /\.(woff2?|ttf|otf)$/;
+
+/**
  * The fonts that actually draw each page's text (fonts.css), read from Chrome with the DevTools
  * Protocol's CSS.getPlatformFontsForNode: the heading and intro in every language are drawn only
  * by the fonts fonts.css names for that language (Geist, then the script's font), and the script
- * font draws some of it. A system or fallback font drawing the text fails with the page's script
- * named (Intl.Locale's maximize().script), so a new language whose script has no font says which
- * font to add. Japanese and Traditional Chinese share Han code points with different glyph shapes,
- * so each Han language must name a font of its own.
+ * font draws some of it; a Han page (systemFontScripts) may be drawn by the system's font for its
+ * language, never by tofu. Any other system or fallback font drawing the text fails with the page's
+ * script named (Intl.Locale's maximize().script), so a new language whose script has no font says
+ * which font to add. Japanese and Traditional Chinese share Han code points with different glyph
+ * shapes, so each Han language must be drawn by a font of its own. A first visit to each page
+ * downloads at most `budget` bytes of fonts (fontBudget), in every language.
  */
-export function fontChecks({ paths, selectors = ['h1', 'h1 + p'] }) {
+export function fontChecks({ paths, selectors = ['h1', 'h1 + p'], budget = fontBudget }) {
   for (const locale of checkedLocales) test(`${locale}: the page's text is drawn by the fonts fonts.css names for its script`, async ({ page }) => {
     const script = new Intl.Locale(locale).maximize().script;
     const cdp = await page.context().newCDPSession(page);
@@ -688,8 +712,8 @@ export function fontChecks({ paths, selectors = ['h1', 'h1 + p'] }) {
           matched++;
           const named = namedFonts(await page.locator(selector).first().evaluate(node => getComputedStyle(node).fontFamily));
           const { fonts } = await cdp.send('CSS.getPlatformFontsForNode', { nodeId });
-          for (const font of fonts) if (font.glyphCount > 0 && !named.some(name => drawnBy(font, name)))
-            found.push(`${selector} drawn by ${font.familyName} (${font.glyphCount} glyphs${font.isCustomFont ? '' : ', system font'}), not by ${named.join(' or ')}: fonts.css needs the font for script ${script} in ${locale}'s stack, before any fallback`);
+          for (const font of fonts) if (font.glyphCount > 0 && !named.some(name => drawnBy(font, name)) && !drawnBySystem(font, script))
+            found.push(`${selector} drawn by ${font.familyName} (${font.glyphCount} glyphs${font.isCustomFont ? '' : ', system font'}${tofu(font) ? ', tofu' : ''}), not by ${named.join(' or ')}: fonts.css needs the font for script ${script} in ${locale}'s stack, before any fallback`);
           for (const name of named.slice(1)) if (!fonts.some(font => drawnBy(font, name)))
             found.push(`${selector}: ${name} is named for ${locale} (${script}) but draws nothing`);
         }
@@ -700,16 +724,43 @@ export function fontChecks({ paths, selectors = ['h1', 'h1 + p'] }) {
     }
   });
 
+  // A first visit: a fresh context per page, so nothing comes from the cache; every font file counted.
+  for (const locale of checkedLocales) test(`${locale}: a first visit to each page downloads at most ${kb(budget)} of fonts`, async ({ browser }) => {
+    for (const path of paths) {
+      const url = localizedPath(path, locale);
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      await page.goto(url, { waitUntil: 'networkidle' });
+      await page.evaluate(() => document.fonts.ready);
+      const files = (await page.evaluate(() => performance.getEntriesByType('resource')
+        .map(entry => ({ file: new URL(entry.name).pathname.split('/').pop(), bytes: entry.encodedBodySize }))))
+        .filter(({ file }) => fontFile.test(file));
+      await context.close();
+      const total = files.reduce((sum, { bytes }) => sum + bytes, 0);
+      expect(total, `${url} (${new Intl.Locale(locale).maximize().script}) downloads ${kb(total)} of fonts, over ${kb(budget)}: ${files.map(({ file, bytes }) => `${file} ${kb(bytes)}`).join(', ')}`).toBeLessThanOrEqual(budget);
+    }
+  });
+
   // Han: Japanese and Traditional Chinese draw the same code points with different glyphs, so each needs its own font.
-  const han = locales.filter(locale => ['Jpan', 'Hant', 'Hans'].includes(new Intl.Locale(locale).maximize().script));
-  if (han.length > 1 && checkedLocales.some(locale => han.includes(locale))) test(`${han.join(', ')}: each Han language names a font of its own`, async ({ page }) => {
+  const han = locales.filter(locale => hanScripts.includes(new Intl.Locale(locale).maximize().script));
+  if (han.length > 1 && checkedLocales.some(locale => han.includes(locale))) test(`${han.join(', ')}: each Han language is drawn by a font of its own`, async ({ page }) => {
+    const cdp = await page.context().newCDPSession(page);
     const fonts = {};
     for (const locale of han) {
       await page.goto(localizedPath(paths[0], locale));
-      fonts[locale] = namedFonts(await page.locator('h1').evaluate(node => getComputedStyle(node).fontFamily)).slice(1).join(', ');
+      await page.evaluate(() => document.fonts.ready);
+      const latin = namedFonts(await page.locator('h1').evaluate(node => getComputedStyle(node).fontFamily))[0];
+      await cdp.send('DOM.enable');
+      await cdp.send('CSS.enable');
+      const { root } = await cdp.send('DOM.getDocument');
+      const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector: 'h1' });
+      // The font drawing most of the heading besides the Latin one: the Han font, web or system.
+      const [most] = (await cdp.send('CSS.getPlatformFontsForNode', { nodeId })).fonts
+        .filter(font => font.glyphCount > 0 && !drawnBy(font, latin) && !tofu(font)).sort((a, b) => b.glyphCount - a.glyphCount);
+      fonts[locale] = most?.familyName ?? '';
     }
     for (const locale of han) {
-      expect(fonts[locale], `${locale} names no Han font in fonts.css`).not.toBe('');
+      expect(fonts[locale], `${locale}: no Han font draws the heading`).not.toBe('');
       expect(han.filter(other => other !== locale && fonts[other] === fonts[locale]), `${locale} shares ${fonts[locale]} with another Han language`).toEqual([]);
     }
   });
