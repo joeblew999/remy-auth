@@ -34,6 +34,15 @@ then tools, then translating.
      over virtual files (`VirtualFile`/`StaticSource`, no symlinks), search via `createFromSource`, the
      `source.config.ts` root fix (`import.meta.dirname`); deletes our hand-built titles, descriptions,
      navigation and search index.
+     Tooling, checked 2026-09-26:
+     - **The check is Fumadocs' own schema:** `description` required and the `firstHeading` default
+       dropped in `defineCollections` (`source.config.ts`), so `vite build` (tier 0) fails on a page
+       without them. No script of ours.
+     - **Provenance moves under the frontmatter:** YAML must open the file, but `i18n.mjs` expects the
+       `translated-from` line first (regex at line 29, write at 220); both change to "after the
+       frontmatter", or all 8 Spanish docs read as unmarked until step 3 replaces them.
+     - The loader details (docsTable slugs and order, `hideLocale`, `renderName`) are in
+       [the plan](docs-for-consumers.md#0-what-our-stack-already-offers).
    - b. **Paraglide plurals** ([plan](translation-pipeline.md)): `=other` becomes `=*` in the 13 catalogs
      (compiles to an unconditional fallback, `compile-message.js:101`; no wording changes). The
      plural-categories test is a check, so it goes in step 3.
@@ -52,7 +61,8 @@ then tools, then translating.
 
 **Docs Ask AI is off** (owner, 2026-09-26) until 2a lands: `docs:answers:off` in production, `DOCS_ASK = "off"`
 in mise.toml (no docs:publish on deploy, the live answer check skipped). Turned back on at the end of 2a:
-remove the line, `docs:publish`, `docs:answers:on`, then `cf:ai-check`.
+switch `docs:publish` from the raw files (which now open with YAML) to the loader's processed
+Markdown, remove the line, `docs:publish`, `docs:answers:on`, then `cf:ai-check`.
 
 Also queued (not in the order above): `git:tidy` (shared task for merged branches and worktrees).
 
