@@ -1,7 +1,7 @@
 import { useRouter } from '@tanstack/react-router';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/notebook/page';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { createOpenAPIPage, type OpenAPIPageProps } from 'fumadocs-openapi/ui';
 import type { getReferencePage } from './reference';
@@ -23,8 +23,8 @@ export function ReferenceView({ page }: { page: NonNullable<Awaited<ReturnType<t
         { title: 'Developers', url: '/dev', description: 'Building with it' },
         { title: 'API reference', url: '/reference', description: 'Every endpoint' },
       ]}
-      nav={{ title: docsConfig.titles.reference, url: '/' }}
-      links={[{ text: 'Developers', url: '/dev' }, { text: 'Guide', url: '/docs' }, { text: 'App', url: docsConfig.appUrl, external: true }]}>
+      tabMode="navbar" nav={{ title: docsConfig.product, url: '/', mode: 'top' }}
+      links={[{ text: 'App', url: docsConfig.appUrl, external: true }]}>
       <DocsPage toc={page.toc} full>
         <DocsTitle>{page.title}</DocsTitle>
         {page.description && <DocsDescription>{page.description}</DocsDescription>}

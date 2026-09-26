@@ -15,7 +15,10 @@ export const Route = createFileRoute('/')({
 function Home() {
   const nonce = useRouter().options.ssr?.nonce;
   return <RootProvider theme={{ storageKey: 'theme', attribute: 'class', defaultTheme: 'system', enableSystem: true, nonce }} search={{ enabled: false }}>
-    <HomeLayout nav={{ title: docsConfig.product, url: '/' }}>
+    <HomeLayout nav={{ title: docsConfig.product, url: '/' }} links={[
+      { text: 'Guide', url: '/docs' }, { text: 'Developers', url: '/dev' }, { text: 'API reference', url: '/reference' },
+      { text: 'App', url: docsConfig.appUrl, external: true },
+    ]}>
       <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-12">
         <h1 className="text-3xl font-semibold">{docsConfig.product}</h1>
         <Cards>

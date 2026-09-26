@@ -1,8 +1,8 @@
 import { Suspense, use } from 'react';
 import { useRouter } from '@tanstack/react-router';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { DocsBody, DocsDescription, DocsPage, DocsTitle, EditOnGitHub, MarkdownCopyButton, PageLastUpdate, ViewOptionsPopover } from 'fumadocs-ui/layouts/docs/page';
+import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle, EditOnGitHub, MarkdownCopyButton, PageLastUpdate, ViewOptionsPopover } from 'fumadocs-ui/layouts/notebook/page';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Step, Steps } from 'fumadocs-ui/components/steps';
@@ -73,7 +73,6 @@ export function DocsView({ page }: { page: DocsPageData }) {
   const { pageTree } = useFumadocsLoader({ pageTree: page.pageTree });
   // next-themes' theme script needs the response's CSP nonce, as every script here does (src/router.tsx).
   const nonce = useRouter().options.ssr?.nonce;
-  const other = page.site === 'dev' ? { text: 'Guide', url: '/docs' } : { text: 'Developers', url: '/dev' };
   return <RootProvider
     theme={{ storageKey: 'theme', attribute: 'class', defaultTheme: 'system', enableSystem: true, nonce }}
     search={{ options: { api: `/api/search/${page.site}` } }}
@@ -92,18 +91,16 @@ export function DocsView({ page }: { page: DocsPageData }) {
     </AISearchTrigger>
     <DocsLayout
       tree={pageTree}
-      // Fumadocs' section switcher at the top of the drawer: the three docs sections.
+      // Fumadocs' Notebook layout: the three docs sections as tabs in the top bar, with the App link, search,
+      // language and theme beside them, the same on every docs page; the page list in the sidebar.
+      tabMode="navbar"
       tabs={[
         { title: 'Guide', url: '/docs', description: 'Using the app' },
         { title: 'Developers', url: '/dev', description: 'Building with it' },
         { title: 'API reference', url: '/reference', description: 'Every endpoint' },
       ]}
-      nav={{ title: docsConfig.titles[page.site], url: '/' }}
-      links={[
-        { text: other.text, url: other.url },
-        { text: 'App', url: docsConfig.appUrl, external: true },
-        ...(page.site === 'dev' ? [{ text: 'API reference', url: '/reference' }] : []),
-      ]}>
+      nav={{ title: docsConfig.product, url: '/', mode: 'top' }}
+      links={[{ text: 'App', url: docsConfig.appUrl, external: true }]}>
       {/* Inside the layout: the panel takes the table of contents' place in its grid while open. */}
       <AISearchPanel />
       <Suspense><Article page={page} /></Suspense>
