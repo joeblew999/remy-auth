@@ -1,7 +1,7 @@
 ---
 title: "Cómo trabajamos"
+description: "Cómo trabajan aquí las personas y los agentes: primero las herramientas del proyecto, estudios antes de elegir herramientas, shadcn y TanStack, puertas de control, planes y traducciones."
 ---
-<!-- translated-from: docs/content/dev/how-we-work.md @ 7ee58a2c8e26e5f875751f303d9b0f50dbcdbcef -->
 
 Este documento es responsable de cómo trabajan las personas y los agentes: los hábitos que ha pedido el propietario, tanto para desarrolladores
 como para agentes de IA. Lo que el código debe ser vive en [principios de desarrollo](./development.md).
@@ -171,6 +171,12 @@ y las comprobaciones sensibles al tiempo ya fallaban mucho antes de eso. Por tan
 
 ## Informar al propietario [#reporting-to-the-owner]
 
+- **Después de cada deploy, el informe empieza con las URLs en producción de lo que se desplegó**, diga lo que diga además
+  (el propietario, el 2026-09-26: «Os sigo diciendo ... dadme la url cuando hagáis un deploy»): la app
+  <https://remy-auth.gedw99.workers.dev>, y para el Worker de la documentación su guía
+  <https://remy-auth-docs.gedw99.workers.dev/docs>, la documentación para desarrolladores
+  <https://remy-auth-docs.gedw99.workers.dev/dev> y la referencia de la API
+  <https://remy-auth-docs.gedw99.workers.dev/reference>. `cf:deploy` y `docs:deploy` las imprimen al final.
 - Todo informe sobre algo que el propietario pueda revisar incluye sus URLs: los sitios en producción, la preview
   (`mise run cf:preview` la imprime) y un enlace directo a cada página o funcionalidad tratada.
 - Indica qué se comprobó y qué no.

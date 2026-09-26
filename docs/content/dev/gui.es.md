@@ -1,7 +1,7 @@
 ---
 title: "Prueba mínima de GUI"
+description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
 ---
-<!-- translated-from: docs/content/dev/gui.md @ 14f06abff0f49046b992f8d0e73fdc3ff28b1b1c -->
 
 ```sh
 mise run project:dev       # http://127.0.0.1:5173/en
@@ -9,10 +9,12 @@ mise run project:preview   # Production build on local Workers, port 4173
 mise run project:check     # Tier 0: typecheck and build
 ```
 
+:::note
 Google Chrome debe estar instalado. Todo se ejecuta localmente en el runtime de Workers;
 no se necesita ninguna cuenta de Cloudflare, base de datos ni credenciales de producción. Las pruebas
 de navegador son dueñas de `PREVIEW_PORT` (por defecto 4173; cada agente define el suyo) y se niegan a reutilizar
 un proceso no relacionado. Detén una preview manual antes de un nivel de pruebas; el servidor de desarrollo en el 5173 puede seguir en ejecución.
+:::
 
 ## Un único scaffold para local y Cloudflare [#one-scaffold-for-local-and-cloudflare]
 
@@ -73,11 +75,10 @@ promete cada tipo; los dos nunca se mezclan.
   [`app-pages.tsx`](https://github.com/joeblew999/remy-auth/blob/main/packages/ui/src/app-pages.tsx), el bloque sidebar-16 de shadcn, gestionado en
   [`blocks/sidebar-16`](https://github.com/joeblew999/remy-auth/blob/main/packages/ui/src/blocks/sidebar-16/README.md).
 
-remy-auth añade sus propias páginas de sitio ([`src/paths.ts`](https://github.com/joeblew999/remy-auth/blob/main/src/paths.ts)): los docs en `/docs`, solo en
-inglés, que renderizan el Markdown de este repositorio tal cual, y junto a ellos, en todos los idiomas, la
-búsqueda de docs `/docs/search` y `/docs/ask`, que responde preguntas a partir de los docs con enlaces a las
-páginas y secciones que usó (la antigua página de app `/app/ask` redirige ahí). El
-[plan del sitio de docs](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/docs-site.md) y [el plan de respuestas](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/docs-ai-sync.md) son sus dueños.
+Los docs no son páginas de esta app: son el Worker de docs (`docs/`, Fumadocs), con la guía en `/docs`,
+estos docs para desarrolladores en `/dev` y la referencia de la API en `/reference`, cada uno con búsqueda y Ask AI
+([escribir docs](./writing-docs.mdx)). El encabezado de la app enlaza allí, y sus antiguas direcciones `/<locale>/docs/...`
+redirigen allí de forma permanente.
 
 El selector de idioma sigue el tipo: las páginas de sitio usan `LanguageSwitcher`, enlaces simples que no necesitan
 JavaScript; las páginas de app usan `LanguageMenu`, el DropdownMenu de shadcn que llama a `setLocale` de Paraglide
@@ -167,9 +168,9 @@ los estados HTTP, el sitemap y `hreflang`, las cabeceras de seguridad y el nonce
 las páginas de docs, búsqueda y ask.
 
 El nivel de Google cubre solo las páginas de sitio (las páginas de app son noindex por diseño): Lighthouse audita `/en`
-(móvil y escritorio), `/es`, `/ar`, `/en/formats` y `/en/docs/gui`
+(móvil y escritorio), `/es`, `/ar` y `/en/formats`
 ([`tests/lighthouse.spec.ts`](https://github.com/joeblew999/remy-auth/blob/main/tests/lighthouse.spec.ts)); Core Web Vitals, a partir del paquete
-`lighthouse` fijado de Google, evalúan `/en` (móvil y escritorio), `/en/formats` y `/en/docs/gui`
+`lighthouse` fijado de Google, evalúan `/en` (móvil y escritorio) y `/en/formats`
 ([`tests/performance.spec.ts`](https://github.com/joeblew999/remy-auth/blob/main/tests/performance.spec.ts)) frente a los umbrales buenos de Google (LCP
 2.5 s, CLS 0.1, TBT 200 ms, Performance de al menos 0.9), en un Worker de Cloudflare desechable
 (`project:test:cwv`), no en localhost.

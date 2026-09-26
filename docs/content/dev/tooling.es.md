@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
+description: "La referencia de herramientas de desarrollo: tareas de mise, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación."
 ---
-<!-- translated-from: docs/content/dev/tooling.md @ 44d6cbb9dc1d368b3f70f5a475e73d8e408fdc25 -->
 
 ## CLI para desarrolladores [#developer-cli]
 
@@ -74,7 +74,7 @@ Las tareas de passthrough de la CLI aceptan directamente los flags originales, c
 | `api:*` | El documento OpenAPI generado que sirve un Worker en ejecución (`api:spec`, `--urls` para sus operaciones; tarea compartida) |
 | `browser:*` | CLI de Chrome DevTools, ciclo de vida de la sesión y servidor MCP |
 | `web:*` | Búsqueda y recuperación de Modern Web Guidance |
-| `docs:*` | Los docs para las respuestas de IA en `/docs/ask`: publicarlos en R2 (`docs:publish`, también ejecutado por `cf:deploy`), comprobar la recuperación (`docs:questions`), detener o reanudar las respuestas (`docs:answers:*`), ejecutar localmente contra el índice en vivo (`docs:dev`) |
+| `docs:*` | El Worker de documentación (`docs/`): ejecutarlo (`docs:dev`), compilarlo y comprobarlo (`docs:build`, `docs:check`), probarlo (`docs:test`, `docs:test:remote`), desplegarlo (`docs:preview`, `docs:deploy`), las páginas de Ask AI en AI Search (`docs:publish`), detener o reanudar las respuestas (`docs:answers:off`, `docs:answers:on`), sus logs y la IA (`docs:observe`, `docs:ai-gateway`), la CLI de Fumadocs (`docs:cli`) y su incorporación a otra app (`docs:init`) |
 | `i18n:*` | Estado de las traducciones: qué falta o está desactualizado por idioma (`i18n:status`, `--json` para agentes), el aviso o la puerta de control del release (`i18n:check`), el trabajo para el agente de traducción y su registro (`i18n:translate`, `--mark`); tareas compartidas, [un solo redactor](./how-we-work.md#translations-one-writer) |
 | `mcp:*` | Registra, verifica e inspecciona las conexiones MCP del proyecto |
 | `codex:*` / `claude:*` | Inicia o reanuda una sesión interactiva de agente (tareas compartidas) |
@@ -300,32 +300,31 @@ de auditoría duradero, los dashboards y la entrega de alertas son trabajo pendi
 
 ### Las respuestas de la documentación en Cloudflare: AI Search y AI Gateway [#the-docs-answers-on-cloudflare-ai-search-and-ai-gateway]
 
-Dos productos de Cloudflare están detrás de `/docs/ask`, y es fácil confundirlos:
+Dos productos de Cloudflare están detrás de Ask AI de la documentación (el Worker de docs), y es fácil confundirlos:
 
 - **AI Search** es el índice (`remy-docs-pages`). Lee los docs directamente desde el bucket R2
-  `remy-docs` (un archivo Markdown por página de docs, sincronizado cada hora y cuando `docs:publish`
-  lo solicita), encuentra los pasajes que coinciden con una pregunta y le pide a un modelo de Workers AI
+  `remy-docs` (un archivo Markdown por página de docs e idioma, `<site>/<lang>/<page>.md`, sincronizado cada hora
+  y cuando `docs:publish` lo solicita), encuentra los pasajes que coinciden con una pregunta y le pide a un modelo de Workers AI
   que escriba la respuesta.
 - **R2** contiene los archivos que lee AI Search. `docs:publish` hace que el bucket contenga exactamente
   las páginas de docs: coloca cada una y elimina cualquier otra cosa, así que una página eliminada también
   deja de estar en las respuestas.
 - **AI Gateway** es el medidor delante del modelo. Cada llamada al modelo que hace AI Search pasa por
   él (`remy-docs`), y registra cada una con su costo, tokens y tiempo (y la pregunta). No contiene
-  docs. Los límites de gasto y de tasa viven aquí; `cf:ai-usage` y `cf:ai-check` los leen.
+  docs. Los límites de gasto y de tasa viven aquí; `docs:observe -- ai-usage` y `-- ai-check` lo leen.
 
-Local o remoto: las páginas de docs, la página de preguntas y todas las comprobaciones se ejecutan
-localmente; la búsqueda y las respuestas solo existen en Cloudflare (AI Search no tiene versión local).
+Local o remoto: las páginas de docs, el panel de Ask AI y todas las comprobaciones se ejecutan
+localmente; las respuestas solo existen en Cloudflare (AI Search no tiene versión local).
 Cada tarea `docs:*` y `cf:*` indica LOCAL o REMOTE (y PRODUCTION) en `mise tasks`.
 
 ```sh
-mise run docs:publish                      # REMOTE, PRODUCTION: bucket = docs pages, then sync (cf:deploy runs it)
-mise run docs:questions                    # REMOTE, search only: fixed questions find their pages
-mise run docs:dev                          # LOCAL app, answers from the live index: /en/docs/ask
+mise run docs:publish                      # REMOTE, PRODUCTION: bucket = docs pages, sync, fixed questions (docs:deploy runs it)
+CLOUDFLARE_ENV=ask mise run docs:dev       # LOCAL docs Worker, answers from the live index
 mise run docs:answers:off                  # REMOTE, PRODUCTION: emergency stop, seconds, no build
 mise run docs:answers:on                   # REMOTE, PRODUCTION: resume (confirms)
-mise run docs:answers:status               # REMOTE, read only
-mise run cf:ai-gateway                     # REMOTE: the gateway's settings
-mise run cf:ai-gateway -- rate-limit off   # REMOTE: change a setting (read back after); also logs on|off
+mise run docs:observe -- ai-check          # REMOTE, read only: AI Search, AI Gateway, answers paused or not
+mise run docs:ai-gateway                   # REMOTE: the gateway's settings
+mise run docs:ai-gateway -- rate-limit off # REMOTE: change a setting (read back after); also logs on|off
 ```
 
 Tokens: consulta [secretos](#secrets-fnox) más abajo.
@@ -352,19 +351,12 @@ otorgar acceso a AI Gateway ni a Workers Logs. Para eso, las tareas leen tokens 
 - `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID`: el token y la cuenta de Cloudflare compartidos, los
   mismos elementos del llavero en todos los repositorios de joeblew999. [`fnox.toml`](https://github.com/joeblew999/remy-auth/blob/main/fnox.toml) los
   nombra (los valores se quedan en el llavero de macOS, nunca en el archivo); `fnox` está fijado en
-  `mise.toml`. Ejecuta una tarea con ellos: `fnox exec -- mise run cf:ai-usage`. Guarda uno con
+  `mise.toml`. Ejecuta una tarea con ellos: `fnox exec -- mise run cf:ai-usage` (`docs:observe` y
+  `docs:ai-gateway` se ejecutan a través de fnox por sí mismos). Guarda uno con
   `fnox set -p keychain CLOUDFLARE_API_TOKEN <token>` (nunca omitas `-p keychain`: sin él el valor se
-  escribe en `fnox.toml` en texto plano). Cuando está definido, `CLOUDFLARE_API_TOKEN` se usa para todo.
-- `CLOUDFLARE_OBSERVE_TOKEN`, una alternativa más limitada: **AI Gateway Read** y **Workers Observability
-  Write** (el único permiso que acepta la API de consultas de Cloudflare, incluso para lectura), para
-  `cf:events`, `cf:ai-usage`, `cf:ai-check`.
-- `CLOUDFLARE_AI_EDIT_TOKEN`: **AI Gateway Edit**, solo para cambiar el gateway con `cf:ai-gateway`,
-  mantenido aparte porque también puede eliminarlo.
+  escribe en `fnox.toml` en texto plano). Lee Workers Logs y AI Gateway, así que necesita
+  **Workers Observability Read** y **AI Gateway Edit**; AI Search se lee con el login de Wrangler.
 
-Los dos últimos se crean en <https://dash.cloudflare.com/profile/api-tokens> y se guardan en el
-`mise.local.toml` ignorado por git:
-
-```toml
-[env]
-CLOUDFLARE_OBSERVE_TOKEN = "<token>"
-```
+Un solo token lo hace todo (el token `dev` en <https://dash.cloudflare.com/profile/api-tokens>): **AI Gateway
+Edit** (que incluye lectura) y **Workers Observability Read** son los que estas tareas necesitan; cambiar
+el gateway con `cf:ai-gateway` usa el mismo token, y cada cambio se lee de vuelta.

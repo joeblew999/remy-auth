@@ -1,7 +1,7 @@
 ---
 title: "@joeblew999/remy-ui"
+description: "La interfaz que comparten todas las apps de Remy: shadcn de fábrica, fuentes, catálogos de Paraglide, las páginas del sitio y de la app, el pegamento de TanStack Start y sus comprobaciones."
 ---
-<!-- translated-from: docs/content/dev/ui-package.md @ 45944d5169ed9df345472744f9321e4738886f32 -->
 
 La interfaz que comparten todas las apps de Remy: componentes y tema de shadcn de fábrica, fuentes,
 catálogos de Paraglide y ayudantes de locale, las páginas del sitio y de la app, el pegamento de
@@ -41,6 +41,9 @@ Cada página es de uno de dos tipos, listados en `paths`, y nunca se mezclan:
   `AppShell` (el bloque sidebar-16 de shadcn): necesitan JavaScript y `pageHead` las marca
   `noindex`. Tienen su propia exportación para que una página del sitio nunca descargue el shell de
   la app.
+- **Navegación de la app**: una sola lista, `app-nav.tsx`. Las tabletas y los ordenadores obtienen la barra lateral (que se contrae a iconos);
+  los teléfonos obtienen la barra inferior (`blocks/bottom-nav`, piezas de shadcn de fábrica, ya que shadcn no tiene navegación inferior)
+  con las páginas principales y Más, que abre la barra lateral. Por qué: [el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/mobile-navigation.md).
 
 ## Exportaciones [#exports]
 

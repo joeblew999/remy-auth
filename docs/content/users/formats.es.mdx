@@ -1,0 +1,37 @@
+---
+title: "Formatos"
+description: "Cómo cambian las fechas, los números, la moneda y la dirección del texto según el idioma que elijas."
+---
+
+La página de Formatos muestra un mismo conjunto de valores tal como los escribe tu idioma: fechas, horas, números,
+dinero y la dirección del texto.
+
+<Tabs items={['English', 'Español']}>
+  <Tab value="English">![The Formats page in English](/media/formats.png)</Tab>
+  <Tab value="Español">![La página de formatos en español](/media/formats-es.png)</Tab>
+</Tabs>
+
+## Un breve recorrido [#a-short-tour]
+
+<video src="/media/formats-tour.webm" controls muted playsInline preload="metadata" width="1280" height="900" className="rounded-lg border" />
+
+## Cambiar el idioma [#change-the-language]
+
+<Steps>
+<Step>
+### Abre el menú de idioma [#open-the-language-menu]
+
+Elige el botón de idioma en la barra superior.
+</Step>
+<Step>
+### Elige un idioma [#pick-a-language]
+
+La página se recarga en ese idioma, en la misma dirección con su código de idioma (`/es/formats`).
+</Step>
+<Step>
+### Vuelve a leer los valores [#read-the-values-again]
+
+Las fechas, los números y el dinero ahora siguen las reglas de ese idioma, tal como las define el
+[Unicode CLDR](https://cldr.unicode.org/).
+</Step>
+</Steps>

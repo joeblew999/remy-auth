@@ -1,7 +1,7 @@
 ---
 title: "Tareas compartidas de mise"
+description: "Las tareas compartidas de mise que toda app de Remy incluye mediante una referencia de git: un archivo por espacio de nombres y lo que hace cada tarea."
 ---
-<!-- translated-from: docs/content/dev/tasks.md @ 5dcbbab6ef90ed64088308e36191c0407f2cc14c -->
 
 Un archivo por espacio de nombres de tarea (`skills`, `mcp`, `browser`, `web`, `codex`, `claude`, `project`, `i18n`,
 `cf`, `api`); las tareas de archivo viven en el directorio de su espacio de nombres (`mcp/`, `cf/`, `api/`, `project/`, `i18n/`). remy-auth incluye este
@@ -108,24 +108,24 @@ Una misma estructura en cada app, para que las mismas tareas `i18n:*` funcionen 
 
 | Qué | Inglés | Traducción |
 | --- | --- | --- |
-| Docs | donde la app guarde el archivo | `docs/i18n/<locale>/<the English file's path>` |
+| Docs | `docs/content/<site>/<page>.md` o `.mdx` (estructura de Fumadocs) | a su lado: `<page>.<locale>.md` o `.mdx` |
 | Catálogos de UI | el catálogo del idioma base de cada proyecto inlang (`<dir>/project.inlang`) | el catálogo de cada idioma, según el `pathPattern` propio del proyecto (p. ej. `messages/<locale>.json`) |
 
-- La primera línea de un archivo de documentación traducido registra la versión en inglés de la que se tradujo, como el
-  blob sha de git del archivo en inglés (`git hash-object`): basado en el contenido, así que todas las ramas coinciden en él.
+- Un archivo de documentación traducido registra, en la línea bajo su frontmatter, la versión en inglés de la que se
+  tradujo, como el blob sha de git del archivo en inglés (`git hash-object`): basado en el contenido, así que todas
+  las ramas coinciden en él.
   `i18n:translate -- --mark <file>` lo escribe; nadie lo teclea.
 
   ```md
-  <!-- translated-from: docs/tooling.md @ 9b4c91affd910033e83bf7fb52e64b4d69fbdbc2 -->
+  <!-- translated-from: docs/content/dev/tooling.md @ 9b4c91affd910033e83bf7fb52e64b4d69fbdbc2 -->
   ```
 
-- La lista de documentación en inglés es `I18N_DOCS_TABLE`, una entrada opcional de `[env]`: un módulo que exporta
-  `docsTable` (filas con `file`); remy-auth la apunta a `src/docs/table.js`. Sin ella, la lista son
-  las traducciones en disco (así que una página nueva en inglés no se informa como faltante). Un idioma participa en la
-  documentación al tener una carpeta `docs/i18n/<locale>/`.
+- La carpeta de documentación es `I18N_DOCS_DIR` (por defecto `content/docs`; remy-auth usa `docs/content`). Todo
+  `.md`/`.mdx` sin sufijo de idioma es inglés; un idioma participa en la documentación al tener cualquier página
+  traducida. Los idiomas que ofrece cada sitio están en el `i18n.json` del sitio.
 - Los catálogos, los idiomas y el idioma base vienen del propio `settings.json` de inlang; la CLI de inlang
   (`lint`, `validate`) solo comprueba el archivo de ajustes, así que la paridad de claves y placeholders es nuestra.
-- Una app sin `docs/i18n/` ni `project.inlang` propios recibe "nothing to translate" y
+- Una app sin documentación traducida ni `project.inlang` propio recibe "nothing to translate" y
   sale con 0.
 
 | Tarea | Hace |
@@ -142,7 +142,7 @@ través de mise: fuera de una tarea, el shim de Node de mise vuelve a aplicar `[
 
 | Tarea | Hace |
 | --- | --- |
-| `cf:deploy` | Construye con `DEPLOY_ORIGIN`, sube, espera a la nueva versión (`cf:wait`) y luego `docs:publish` cuando el proyecto lo tiene. Sin pruebas salvo que `GATE=smoke\|quick\|full` elija un nivel |
+| `cf:deploy` | Construye con `DEPLOY_ORIGIN`, sube, espera a la nueva versión (`cf:wait`) y luego ejecuta su comprobación smoke en vivo. Sin pruebas salvo que `GATE=smoke\|quick\|full` elija un nivel |
 | `cf:preview` | Despliega este commit como un Worker desechable `<worker>-check-<commit>` (producción intacta), ejecuta el nivel 1 contra él y lo elimina; `KEEP_PREVIEW=1` lo conserva |
 | `cf:preview-delete` | Lista los Workers de comprobación, o elimina uno por nombre; nunca el Worker de producción |
 | `cf:urls` | Imprime las páginas y `/healthz` del origen de producción (o de uno dado), para informes |

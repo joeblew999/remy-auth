@@ -1,7 +1,6 @@
 ---
 title: "Arquitectura y principios de desarrollo"
 ---
-<!-- translated-from: docs/content/dev/development.md @ 3473bbfe9372adbcd9ad75aa9870f4c64deda29b -->
 
 Este documento es el dueño de lo que el código debe ser. Cómo trabajan las personas y los agentes día a día vive en
 [cómo trabajamos](./how-we-work.md). Lo que posee el servicio de autenticación, y su dirección de almacenamiento, viven en
