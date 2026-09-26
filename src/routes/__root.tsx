@@ -6,8 +6,8 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { getLocale, direction } from '@joeblew999/remy-ui/locale';
 import { ThemeProvider } from '@joeblew999/remy-ui/theme';
 import { DirectionProvider } from '@joeblew999/remy-ui/components/direction';
-import { SiteNavLinks } from '@joeblew999/remy-ui/shell';
-import { docsHeaderLink } from '../docs/header-link';
+import { AppNavLinks, SiteNavLinks } from '@joeblew999/remy-ui/shell';
+import { docsAppLink, docsHeaderLink } from '../docs/header-link';
 import { preferredLocale } from '../preferred';
 import { NotFound, ErrorPage } from '@joeblew999/remy-ui/problem';
 import '../styles.css';
@@ -37,7 +37,7 @@ function Document({ children }: { children: React.ReactNode }) {
     <head><HeadContent /></head>
     <body><DirectionProvider direction={direction(locale)}><ThemeProvider defaultTheme="system" storageKey="theme">
       {/* The site header's "Docs" link: the docs Worker (docs/). */}
-      <SiteNavLinks value={docsHeaderLink(locale)}>{children}</SiteNavLinks></ThemeProvider></DirectionProvider>
+      <SiteNavLinks value={docsHeaderLink(locale)}><AppNavLinks value={docsAppLink(locale)}>{children}</AppNavLinks></SiteNavLinks></ThemeProvider></DirectionProvider>
       <TanStackDevtools plugins={[
         { name: 'TanStack Router', render: <TanStackRouterDevtoolsPanel /> },
         { name: 'TanStack Query', render: <ReactQueryDevtoolsPanel /> },

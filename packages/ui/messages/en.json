@@ -306,6 +306,8 @@
   "word_count_label": "Number of words",
   "long_word_label": "A long German word",
   "nav_docs": "Docs",
+  "nav_developers": "Developers",
+  "nav_guide": "Guide",
   "docs_label": "Documentation",
   "docs_nav": "Documentation pages",
   "docs_toc": "On this page",

@@ -28,9 +28,16 @@ export function ZoneBadge({ locale, app }: { locale: Locale; app: boolean }) {
 /**
  * Links an app adds to the site header's navigation, after the shared ones: a function of the page's
  * de-localized path (so a link can mark itself active) returning NavigationMenuItems. remy-auth adds
- * "Docs" this way (its docs pages live in the app); an app that provides nothing gets the shared links only.
+ * its docs this way (the guide and the developer docs, on its docs Worker); an app that provides nothing
+ * gets the shared links only.
  */
 export const SiteNavLinks = createContext<((path: string) => React.ReactNode) | undefined>(undefined);
+
+/**
+ * Links an app adds to the app sidebar's footer, above "Back to the site": SidebarMenuItems, such as a
+ * link to the app's guide. An app that provides nothing gets "Back to the site" only.
+ */
+export const AppNavLinks = createContext<React.ReactNode>(undefined);
 
 /**
  * The frame of a site page: static shadcn components only (links styled as buttons, Badge,

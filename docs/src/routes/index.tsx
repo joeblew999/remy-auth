@@ -17,12 +17,13 @@ function Home() {
   return <RootProvider theme={{ storageKey: 'theme', attribute: 'class', defaultTheme: 'system', enableSystem: true, nonce }} search={{ enabled: false }}>
     <HomeLayout nav={{ title: docsConfig.product, url: '/' }} links={[
       { text: 'Guide', url: '/docs' }, { text: 'Developers', url: '/dev' }, { text: 'API reference', url: '/reference' },
-      { text: 'App', url: docsConfig.appUrl, external: true },
+      { text: 'Site', url: docsConfig.appUrl, external: true }, { text: 'App', url: `${docsConfig.appUrl}/app`, external: true },
     ]}>
       <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-12">
         <h1 className="text-3xl font-semibold">{docsConfig.product}</h1>
         <Cards>
-          <Card icon={<AppWindow />} title="The app" href={docsConfig.appUrl}>The live app, {docsConfig.appUrl.replace('https://', '')}.</Card>
+          <Card icon={<AppWindow />} title="The site" href={docsConfig.appUrl}>The live site, {docsConfig.appUrl.replace('https://', '')}.</Card>
+          <Card icon={<AppWindow />} title="The app" href={`${docsConfig.appUrl}/app`}>The app itself.</Card>
           <Card icon={<BookOpen />} title="Guide" href="/docs">For people using the app: languages, formats, questions.</Card>
           <Card icon={<Code />} title="Developer docs" href="/dev">Building with it: principles, tooling, the shared UI package, mise tasks.</Card>
           <Card icon={<Braces />} title="API reference" href="/reference">Every endpoint of the contract, with a playground.</Card>

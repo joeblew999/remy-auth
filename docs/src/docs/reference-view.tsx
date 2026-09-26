@@ -24,7 +24,7 @@ export function ReferenceView({ page }: { page: NonNullable<Awaited<ReturnType<t
         { title: 'API reference', url: '/reference', description: 'Every endpoint' },
       ]}
       tabMode="navbar" nav={{ title: docsConfig.product, url: '/', mode: 'top' }}
-      links={[{ text: 'App', url: docsConfig.appUrl, external: true }]}>
+      links={[{ text: 'Site', url: docsConfig.appUrl, external: true }, { text: 'App', url: `${docsConfig.appUrl}/app`, external: true }]}>
       <DocsPage toc={page.toc} full>
         <DocsTitle>{page.title}</DocsTitle>
         {page.description && <DocsDescription>{page.description}</DocsDescription>}

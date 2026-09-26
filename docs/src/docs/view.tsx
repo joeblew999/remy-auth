@@ -100,7 +100,7 @@ export function DocsView({ page }: { page: DocsPageData }) {
         { title: 'API reference', url: '/reference', description: 'Every endpoint' },
       ]}
       nav={{ title: docsConfig.product, url: '/', mode: 'top' }}
-      links={[{ text: 'App', url: docsConfig.appUrl, external: true }]}>
+      links={[{ text: 'Site', url: docsConfig.appUrl, external: true }, { text: 'App', url: `${docsConfig.appUrl}/app`, external: true }]}>
       {/* Inside the layout: the panel takes the table of contents' place in its grid while open. */}
       <AISearchPanel />
       <Suspense><Article page={page} /></Suspense>
