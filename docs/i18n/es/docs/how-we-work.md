@@ -99,6 +99,9 @@ como para aparcarse o para durar semanas; las investigaciones, los análisis y l
 no en un archivo propio. Un plan se cierra el día en que su trabajo se publica: una línea de cierre y luego `.plans/done/`. Las
 funcionalidades grandes esperan en `.plans/parked/`. Cerrar un plan no necesita un deploy ni una ejecución de pruebas propios: agrupa el
 código en un solo deploy y una sola ejecución completa al final.
+Las tareas compartidas `plans:*` hacen los movimientos: `plans:status` lista lo abierto, `plans:close` y `plans:park`
+añaden la línea, mueven el archivo y reapuntan cada enlace, y `plans:check` (en el nivel 0) mantiene `.plans/` en orden
+([tareas](../tasks/README.md#plans)).
 
 ## Cuando el propietario delega decisiones [#when-the-owner-delegates-decisions]
 

@@ -99,6 +99,9 @@ enough to be parked or to run over weeks; research, analyses and reviews go into
 not a file of their own. A plan closes the day its work ships: a closing line, then `.plans/done/`. Big
 features wait in `.plans/parked/`. Closing a plan needs no extra deploy or test run of its own: batch the
 code into one deploy and one full run at the end.
+The shared `plans:*` tasks do the moves: `plans:status` lists what is open, `plans:close` and `plans:park`
+add the line, move the file and repoint every link, and `plans:check` (in tier 0) keeps `.plans/` tidy
+([tasks](../tasks/README.md#plans)).
 
 ## When the owner delegates decisions
 

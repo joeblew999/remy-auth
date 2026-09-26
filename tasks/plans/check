@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="LOCAL: now.md exists, every relative .md link under .plans/ resolves, no stray plan folders, every open plan file linked from now.md. Instant, no network; project:check runs it. No .plans/: passes"
+#MISE dir="{{config_root}}"
+# A shell wrapper so the module beside it loads as ESM wherever this directory is included from.
+set -euo pipefail
+exec node "$(dirname "$0")/plans.mjs" check "$@"

@@ -115,3 +115,19 @@ mise: outside a task mise's Node shim reapplies `[env]` and would replace `PUBLI
 
 Credentials come from Wrangler's login, or from the keychain through fnox
 ([tooling](../docs/tooling.md#secrets-fnox)).
+
+### Plans
+
+The plans rule ([how we work](../docs/how-we-work.md#plans-few-short-closed)) as tasks, the same in
+every project: `.plans/now.md` is the one ordered list, `.plans/*.md` the few open plan files,
+`.plans/done/` and `.plans/parked/` the rest, `.plans/stability-log.md` optional. A project with no
+`.plans/` passes `plans:check` and has nothing to list.
+
+| Task | Does |
+| --- | --- |
+| `plans:status` | Open items in `now.md` by section, open plan files with their first `Status:`/`Closed`/`Parked` line and last commit (STALE after 14 days), parked plans. `--json` for agents |
+| `plans:check` | `now.md` exists, every relative `.md` link under `.plans/` resolves, no `.md` outside `.plans/`, `done/` and `parked/`, every open plan file linked from `now.md`. Instant, no network; `project:check` runs it first |
+| `plans:close -- <plan> "<what shipped>"` | Adds `Closed <today>: ...` under the title, moves it to `done/` (from `.plans/` or `parked/`; `git mv` when tracked), repoints relative links to it in `.plans/`, `docs/`, `tasks/`, `packages/*/README.md` and the root `*.md`, and its own links from the new folder, strikes its `now.md` item |
+| `plans:park -- <plan> "<why>"` | The same into `parked/` with `Parked <today>: ...` |
+
+`close` and `park` change files and stage the move but never commit: read `git diff`, then commit.
