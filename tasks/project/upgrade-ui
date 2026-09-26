@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #MISE description="Move an app to one shared release: install @joeblew999/remy-ui at <version> exactly, point mise.toml's tasks include at ref=v<version>, then run project:verify with the new tasks (~20 s plus project:verify; uses dist/ and PREVIEW_PORT, so not alongside a local level). GITHUB_TOKEN comes from the shell or else from `gh auth token`"
 #MISE dir="{{config_root}}"
+#MISE tools={"aqua:cli/cli"="2.101.0"}
 #MISE env={GITHUB_TOKEN="{% set token = get_env(name='GITHUB_TOKEN', default='') %}{% if token %}{{ token }}{% else %}{{ exec(command='gh auth token') }}{% endif %}"}
 #USAGE arg "<version>" help="Released version without the v, e.g. 0.10.3"
 # The package and the tasks are released together under one number (docs/content/dev/tasks.md), so both

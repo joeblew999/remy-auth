@@ -32,6 +32,8 @@ run = "./node_modules/.bin/playwright show-report playwright-report/remote"
 description = "Install dependencies, the shared skills and MCP registration, then verify (~1.5 min). GITHUB_TOKEN (read:packages, for the shared UI) comes from the shell or else from `gh auth token`"
 dir = "{{config_root}}"
 # Rendered only when the task runs; gh is asked only when the shell has no GITHUB_TOKEN.
+# gh pinned here, so every app has the same one for `gh auth token` (a task's tools are active in its env).
+tools = { "aqua:cli/cli" = "2.101.0" }
 env = { GITHUB_TOKEN = "{% set token = get_env(name='GITHUB_TOKEN', default='') %}{% if token %}{{ token }}{% else %}{{ exec(command='gh auth token') }}{% endif %}" }
 run = ["npm ci", { task = "skills:install" }, { task = "mcp:register" }, { task = "project:verify" }]
 

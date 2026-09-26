@@ -124,6 +124,8 @@ run = [
 [tasks."ui:release"]
 description = "Run level 1, ui:verify, level 2's audits locally and its Core Web Vitals on a Cloudflare preview (alias release), one after another (~5 min; uses dist/ and PREVIEW_PORT, so nothing else local at the same time), then publish the shared UI to GitHub Packages, tag, push and create the GitHub release; CI repeats level 2 on the tag"
 dir = "{{config_root}}"
+# gh publishes, tags and creates the release (scripts/release.sh): pinned, like every tool a task runs.
+tools = { "aqua:cli/cli" = "2.101.0" }
 # A run list, not depends: mise runs depends in parallel, and ui:verify rewrites files while
 # project:verify builds.
 run = [

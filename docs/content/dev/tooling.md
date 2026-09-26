@@ -13,8 +13,11 @@ mise run cf:cli -- --help
 mise run auth:info
 ```
 
-Node is pinned in `mise.toml`; Better Auth CLI (`auth`), Wrangler, Chrome DevTools and Modern Web Guidance are pinned in
-`package.json` and `package-lock.json`. `project:setup` runs `npm ci`, installs the pinned official
+Every tool comes through mise, down to the operating system's level. Node and fnox are pinned in
+`mise.toml`'s `[tools]`; the shared tasks pin the tools they run as task-level `tools`, so every app that
+includes them gets the same versions with no entry of its own: `gh` (`project:setup`, `project:upgrade-ui`,
+`ui:release`), `jq`, `@lingual/i18n-check` and Claude Code (`i18n:*`). Better Auth CLI (`auth`), Wrangler,
+Chrome DevTools and Modern Web Guidance are pinned in `package.json` and `package-lock.json`. `project:setup` runs `npm ci`, installs the pinned official
 skills for Codex and Claude, registers project MCP tooling, then runs `mise run project:verify`. It stops on any
 failed step. Commands use the local binaries and accept upstream CLI
 arguments after `--`; they do not download a different CLI at execution time.
