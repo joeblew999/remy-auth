@@ -29,7 +29,7 @@ const zones = ({ ownSitePaths, ownAppPaths }) => ({
  * own their checks: with seo-routes the sitemap is its; with deferred-place the network location
  * beside the device's is its to show, and this checks the device row expects it.
  */
-export function serverAppChecks({ service, ownSitePaths = [], ownAppPaths = [], oneLanguage, formats = {}, devicePath = '/app/location', parts }) {
+export function serverAppChecks({ service, ownSitePaths = [], ownAppPaths = [], oneLanguage, formats = {}, devicePath = '/app/location', parts, cspEnforced = true }) {
   const listed = listedParts(parts);
   const { sites, apps, every } = zones({ ownSitePaths, ownAppPaths });
   zoneChecks({ sitePaths: sites, appPaths: apps });
@@ -40,7 +40,7 @@ export function serverAppChecks({ service, ownSitePaths = [], ownAppPaths = [], 
   entryChecks({ paths: every, mode: 'redirect' });
   demoChecks();
   observabilityChecks({ service, paths: every });
-  cspChecks({ paths: every });
+  cspChecks({ paths: every, enforce: cspEnforced });
   searchParamsChecks();
   preloadChecks();
   navigationBlockingChecks();

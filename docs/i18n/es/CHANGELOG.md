@@ -26,6 +26,12 @@ paquete sigue [Semantic Versioning](https://semver.org/).
   (LastResort), y su comprobación Han compara las fuentes que realmente dibujan el título de cada
   idioma en lugar de los nombres del CSS, así que el japonés y el chino tradicional dibujados por una
   misma fuente siguen fallando. Cualquier otra escritura sigue necesitando su fuente web.
+### Cambiado [#changed]
+- `checks`: `cspChecks({ enforce })`, por defecto `true`: espera la política con nonce en
+  `Content-Security-Policy` (y ninguna en `Content-Security-Policy-Report-Only`), o al revés con
+  `enforce: false`; comprueba también la política de la página de no encontrado; aplicada, prueba
+  que un script sin el nonce se bloquea y se notifica. `serverAppChecks({ cspEnforced })` pasa el
+  interruptor de la app. Una app que aún envía la política solo como informe pasa `cspEnforced: false`.
 
 ## [0.11.0] - 2026-09-25 [#0110---2026-09-25]
 

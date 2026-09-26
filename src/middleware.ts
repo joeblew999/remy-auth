@@ -1,8 +1,9 @@
 import { createMiddleware } from '@tanstack/react-start';
-import { getResponseStatus, setResponseHeader } from '@tanstack/react-start/server';
+import { getResponseStatus } from '@tanstack/react-start/server';
 import { env } from 'cloudflare:workers';
 import { logContext, outcome, level, requestIdHeader, writeLog } from '@joeblew999/remy-ui/worker';
 import { service } from './service';
+import { cspEnforced, cspReportPath } from './csp';
 
 
 /**
@@ -13,21 +14,29 @@ import { service } from './service';
 export const requestContext = createMiddleware().server(({ request, next }) =>
   next({ context: { requestId: request.headers.get(requestIdHeader) ?? crypto.randomUUID() } }));
 
-/** Where browsers send Content Security Policy reports: the server route src/routes/csp-report.ts. */
-export const cspReportPath = '/csp-report';
-
 /**
  * Request middleware: a fresh nonce per request as `context.nonce`, which getRouter hands to
  * TanStack Router (`ssr.nonce`) so every script it renders carries it, and a strict nonce-based
- * Content Security Policy for that nonce, sent report-only while reports prove it breaks nothing
- * (.plans/gui-portal.md, item 7). Browsers report to cspReportPath under the name `csp`.
+ * Content Security Policy for that nonce: enforced, or report-only, by the one switch cspEnforced
+ * (src/csp.ts; .plans/gui-portal.md, item 7). Browsers report violations to cspReportPath under
+ * the name `csp` either way. withObservability appends its own `frame-ancestors 'none'` policy.
+ *
+ * The headers go on the response `next` returns, not through setResponseHeader: Start merges the
+ * latter only into successful responses, so the not-found and error pages (404, 500), whose
+ * scripts carry the nonce too, went out with no policy at all. A response whose headers are
+ * immutable (a redirect made with Response.redirect) runs no script and keeps its own.
  */
-export const cspNonce = createMiddleware().server(({ next }) => {
+export const cspNonce = createMiddleware().server(async ({ next }) => {
   const nonce = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))));
-  setResponseHeader('Reporting-Endpoints', `csp="${cspReportPath}"`);
-  setResponseHeader('Content-Security-Policy-Report-Only',
-    `script-src 'nonce-${nonce}' 'strict-dynamic' 'report-sample'; object-src 'none'; base-uri 'none'; report-uri ${cspReportPath}; report-to csp`);
-  return next({ context: { nonce } });
+  const result = await next({ context: { nonce } });
+  try {
+    result.response.headers.set('Reporting-Endpoints', `csp="${cspReportPath}"`);
+    result.response.headers.set(cspEnforced ? 'Content-Security-Policy' : 'Content-Security-Policy-Report-Only',
+      `script-src 'nonce-${nonce}' 'strict-dynamic' 'report-sample'; object-src 'none'; base-uri 'none'; report-uri ${cspReportPath}; report-to csp`);
+  } catch (error) {
+    if (!(error instanceof TypeError)) throw error;
+  }
+  return result;
 });
 
 /**

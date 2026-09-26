@@ -3,7 +3,7 @@ import { env } from 'cloudflare:workers';
 import { logContext, routeTemplate, writeLog } from '@joeblew999/remy-ui/worker';
 import { service } from '../service';
 
-// Where browsers send Content Security Policy reports (cspReportPath in src/middleware.ts): the
+// Where browsers send Content Security Policy reports (cspReportPath in src/csp.ts): the
 // Reporting API's batches (application/reports+json, `report-to`) and the older single report
 // (application/csp-report, `report-uri`). One `csp_report` line in the shared log contract per
 // violation: the directive, the disposition, the page's route template and what was blocked as a
