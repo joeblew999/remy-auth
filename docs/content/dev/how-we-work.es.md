@@ -78,7 +78,7 @@ rápido: lee su documentación actual y las skills instaladas antes de usarlas, 
 | Table | Siguiente: con las pantallas de administración | Toda lista con ordenación, filtrado o paginación, mediante la tabla de datos de shadcn |
 | Virtual | Cuando una lista se alarga | Listas de cientos de filas, empezando por las zonas horarias |
 | DB (beta) | Todavía no | Solo si necesitamos uso sin conexión o sincronización en vivo; Query cubre las necesidades actuales |
-| AI (beta) | Todavía no | Candidata para `/docs/ask`; demostrarla primero en una rama |
+| AI (beta) | No se usa | El Ask AI de la documentación es una página propia (`/docs/ask`, `/dev/ask`) construida con las piezas de chat de IA de Fumadocs sobre el AI SDK, no una superposición: un solo scroll, la pregunta arriba ([documentación en tus herramientas de IA](./ai-tools.md)) |
 | Hotkeys (alfa) | Todavía no | Candidata para un atajo de búsqueda cuando salga de alfa |
 | Store (alfa), Charts | No se necesitan | Sin estado de cliente global de la app y todavía sin paneles de control |
 

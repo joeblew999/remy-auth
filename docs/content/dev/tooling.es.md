@@ -313,7 +313,7 @@ Dos productos de Cloudflare están detrás de Ask AI de la documentación (el Wo
   él (`remy-docs`), y registra cada una con su costo, tokens y tiempo (y la pregunta). No contiene
   docs. Los límites de gasto y de tasa viven aquí; `docs:observe -- ai-usage` y `-- ai-check` lo leen.
 
-Local o remoto: las páginas de docs, el panel de Ask AI y todas las comprobaciones se ejecutan
+Local o remoto: las páginas de docs, la página de Ask AI y todas las comprobaciones se ejecutan
 localmente; las respuestas solo existen en Cloudflare (AI Search no tiene versión local).
 Cada tarea `docs:*` y `cf:*` indica LOCAL o REMOTE (y PRODUCTION) en `mise tasks`.
 
