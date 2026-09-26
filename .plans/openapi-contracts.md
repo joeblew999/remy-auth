@@ -1,6 +1,6 @@
 # Contract-first APIs on TanStack: producing and consuming OpenAPI
 
-Status: decided 2026-09-25 under the owner's delegation, from a scored survey with scratch proofs
+Status: decided 2026-09-25 (2.0 rechecked 2026-09-26) under the owner's delegation, from a scored survey with scratch proofs
 (below). It builds on the [TanStack move](done/tanstack.md), on main since release 0.9.0. Owner:
 remy-auth. Executor/Reviewer roles as in [plans and roles](../docs/development.md#plans-and-roles). Tools were chosen by
 survey, as [how we work](../docs/how-we-work.md) requires.
@@ -145,12 +145,55 @@ CORS must be live first), then in remy-auth-app merge `contract-status-card`, `n
 
 ## Risks
 
-1. oRPC 2.0 breaks the contract API and the wire format. If we start on a 2.0 beta, pin it exactly and move to 2.0.0 when released; if we start on 1.15, migrate server and clients together.
+1. oRPC 2.0 breaks the contract API and the wire format. We are on 1.15.4; migrate server and clients together when 2.0.0 is final. What the move touches here is listed in [oRPC 2.0 watch](#orpc-20-watch-2026-09-26) and tracked in #1.
 2. oRPC rests mostly on one maintainer. Switch trigger: 2.0 stalls in beta through 2027, or
    maintenance stops; the runner-up is Hono with a small response-validation middleware.
 3. oRPC's types need `skipLibCheck` (already on) or `@opentelemetry/api` installed.
 4. Worker bundle size and parsing cost are not measured yet: spike item 1.
 5. Kubb's TypeScript 7 fit is read from its package, not run: prove it before first use.
+
+## oRPC 2.0 watch (2026-09-26)
+
+Checked again on 2026-09-26 against [oRPC's v1 migration guide](https://orpc.dev/docs/migrations/from-v1)
+(updated 2026-09-25). The decision stands: stay on 1.15.4.
+
+**Why not yet.** 2.0 is still beta: v2.0.0-beta.40 on 2026-09-23, and beta.37 (2026-09-19) still
+removed APIs (adapter interceptors and plugins, built-in RegExp). A beta would mean chasing breaking
+changes weekly.
+
+**Move when:** 2.0.0 ships without `-beta`, or we need something only 2.0 has.
+
+**What 2.0 would give us.** One WebSocket adapter covering Cloudflare, and a WebSocket link that
+reconnects by itself; `@orpc/cloudflare` (Durable Object publisher, Cloudflare rate limiter);
+`@orpc/hibernation` as its own package; publisher, rate limit and Pino out of experimental; a batch
+plugin that handles streams and files; Timeout and compression plugins; OpenAPI 3.2. None of this is
+needed by the current contract (status and reservations); it matters once an app here holds a
+socket or rate-limits.
+
+**What the move touches in this repo** (found by reading the code on d14205f):
+
+| Where | 1.15.4 | 2.0 |
+| --- | --- | --- |
+| `packages/contract/src/index.ts` | `.route({ method, path, summary, tags })` on both procedures | `.meta(openapi({ ... }))` from `@orpc/openapi`, or the `.route` extension import |
+| `packages/contract/src/index.ts` | `INVALID_RESERVATION: { status: 400, ... }` | no `status` in errors; `errorStatusMap: { ...COMMON_ERROR_STATUS_MAP, INVALID_RESERVATION: 400 }` on the handler |
+| `packages/ui/src/api/server.ts` | `CORSPlugin({ origin: [...origins] })` | `CORSHandlerPlugin`; keep the explicit origins (2.0 defaults to `*`, our wildcard guard stays) |
+| `packages/ui/src/api/server.ts` | `OpenAPIReferencePlugin({ schemaConverters, specGenerateOptions: { info } })` | `OpenAPIReferenceHandlerPlugin({ provider, spec })`; generator takes `converters` and `base: { info }`; pass `version: '3.1.1'` to keep today's document, or accept 3.2 |
+| `packages/ui/src/api/server.ts` | `@orpc/zod/zod4` | `@orpc/zod` (Zod 4 only) |
+| `packages/ui/src/api/server.ts` | `missing.status` for the 404 answer | check whether `ORPCError` still carries `status` in 2.0; if not, use the status map |
+| `packages/ui/src/api/client.ts` | `@orpc/openapi-client/fetch`, `OpenAPILink(contract, { url })` | `@orpc/openapi/fetch`, `{ origin, url }` with `url` a path |
+| `packages/ui/src/api/client.ts` | `ResponseValidationPlugin` | `ResponseValidationLinkPlugin` (alias kept) |
+| `src/router.tsx` | SSR hydration serializer | `RPCJsonSerializer` in place of `StandardRPCJsonSerializer` if we pass one |
+| Wire format | v1 | v1 links cannot call a v2 server: release remy-auth, the contract and remy-auth-app together |
+
+Not affected today: no middleware (2.0 drops automatic dedupe, so middleware on both router and
+procedure runs twice; guard it when the relation engine becomes middleware), no GET on
+`RPCHandler`, no `safe()`, no Durable Iterator, no WebSockets.
+
+**Not adopted: `middleapi/standard-server`.** It is oRPC's request/response layer split into its
+own packages (`@standard-server/fetch`, `peer` for WebSocket and MessagePort). oRPC uses it under
+the hood; nothing here calls it directly. Revisit only if we build a transport oRPC does not cover.
+2.0 adds a `Standard-Server` header on binary bodies: CORS must allow and expose it next to
+`Content-Disposition` once we serve files cross-origin.
 
 ## Relation to other plans
 
