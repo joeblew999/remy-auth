@@ -22,3 +22,4 @@ run = "./node_modules/.bin/chrome-devtools start --isolated --headless --no-usag
 description = "Stop the Chrome DevTools CLI session"
 dir = "{{config_root}}"
 run = "./node_modules/.bin/chrome-devtools stop"
+

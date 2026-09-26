@@ -57,6 +57,11 @@ and write only what they do not provide.
   and so on), install its agent skills, then delete the code it replaces.
 - Before writing any UI code, ask: does shadcn, TanStack or Paraglide already do this? If yes, use it.
 
+- Look at it: before calling UI work done, run `mise run browser:shots` (every page, desktop and
+  phone, light and dark, English and Arabic) and look at the screenshots. Checks prove behaviour; only
+  the screenshots show layout, spacing, overflow and mixed-direction text (owner, 2026-09-26: "It's
+  really depressing how you can't see the look of the web site properly").
+
 ### Which TanStack library for what
 
 Checked against [tanstack.com](https://tanstack.com) on 2026-09-26. Beta and alpha libraries change

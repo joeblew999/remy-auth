@@ -19,6 +19,17 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
 5. ~~**Caching**~~ closed 2026-09-26 ([plan](done/caching.md)): don't cache HTML yet; assets immutable.
 6. ~~**Observability**~~ closed 2026-09-26 ([plan](done/observability.md)): built; the answer-failure alert rule is a dashboard step (owner only, below).
 
+## Look (from `browser:shots`, 2026-09-26)
+
+- The home page is a heading and two buttons above an empty screen: it needs its content.
+- The "Site page · works without JavaScript" / "App · needs JavaScript" badge shows on every page: a
+  developer label; move it out of the visitor's way.
+- Docs sidebar and other navigation hyphenate ("develop-ment"): hyphenation belongs to body text only.
+- Search results show raw Markdown (backticks) and a heavy yellow highlight.
+- Formats, "Available languages": Arabic and Persian names scramble the English list; isolate each name.
+- Docs pages open with repository links ("Back to the README · Mise tasks") meant for GitHub.
+- Formats on desktop uses a third of the width.
+
 ## Watching
 
 - oRPC 2.0: stay on 1.15.4 until 2.0.0 is final, then move server and clients together

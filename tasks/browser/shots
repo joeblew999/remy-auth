@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Screenshots of every site and app page (plus any paths given) at desktop and phone width, light and dark, in en and ar, into a folder (--out, default $TMPDIR/remy-shots) from --origin or DEPLOY_ORIGIN. For looking at the site as a visitor does; checks prove behaviour, these show the look (~1 min)"
+#MISE dir="{{config_root}}"
+# A shell wrapper so the module beside it loads as ESM wherever this directory is included from.
+set -euo pipefail
+exec node "$(dirname "$0")/shots.mjs" "$@"
