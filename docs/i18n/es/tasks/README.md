@@ -1,8 +1,8 @@
-<!-- translated-from: tasks/README.md @ 83faea0ad29d6090a48bb1a61111fc4b7583c37a -->
+<!-- translated-from: tasks/README.md @ feaed9889d973dff56919037ba1757d81be70825 -->
 # Tareas compartidas de mise [#shared-mise-tasks]
 
-Un archivo por espacio de nombres de tarea (`skills`, `mcp`, `browser`, `web`, `codex`, `claude`, `project`,
-`cf`, `api`); las tareas de archivo viven en el directorio de su espacio de nombres (`mcp/`, `cf/`, `api/`, `project/`). remy-auth incluye este
+Un archivo por espacio de nombres de tarea (`skills`, `mcp`, `browser`, `web`, `codex`, `claude`, `project`, `i18n`,
+`cf`, `api`); las tareas de archivo viven en el directorio de su espacio de nombres (`mcp/`, `cf/`, `api/`, `project/`, `i18n/`). remy-auth incluye este
 directorio localmente; cualquier otro proyecto lo incluye mediante una referencia de git fijada a la tag de publicación
 que coincide con su versión de `@joeblew999/remy-ui`:
 
@@ -81,7 +81,7 @@ niveles y cuándo usar cada uno son una regla en
 
 | Nivel | Tarea |
 | --- | --- |
-| 0 | `project:check` (comprobación de tipos y build, sin navegador) |
+| 0 | `project:check` (comprobación de tipos y build, sin navegador; después `i18n:check`, como aviso) |
 | 1 | `project:test:smoke` (`tests/smoke.spec.ts`, construido sobre las comprobaciones `./smoke` del paquete) |
 | 2 | `project:test:only -- <words>` (las comprobaciones cuyo título coincide, en `QUICK_LOCALES`) |
 | 3 | `project:test:quick` (todas las comprobaciones en `QUICK_LOCALES`, por defecto `en,ar`) |
@@ -98,6 +98,40 @@ de nuevo. Mantén las comprobaciones baratas en lugar de quitarlas (el reloj de 
 reales, una página de navegador por comprobación, workers en paralelo). Las comprobaciones recorren `checkedLocales` de
 `@joeblew999/remy-ui/checks`, que respeta `CHECK_LOCALES`. Define `[settings] task.timings = true` en el
 `mise.toml` que incluye, para que cada nivel imprima duraciones por tarea y totales.
+
+### Traducciones [#translations]
+
+Una misma estructura en cada app, para que las mismas tareas `i18n:*` funcionen en todas partes (la regla sobre quién traduce es
+[un solo redactor](../docs/how-we-work.md#translations-one-writer)):
+
+| Qué | Inglés | Traducción |
+| --- | --- | --- |
+| Docs | donde la app guarde el archivo | `docs/i18n/<locale>/<the English file's path>` |
+| Catálogos de UI | el catálogo del idioma base de cada proyecto inlang (`<dir>/project.inlang`) | el catálogo de cada idioma, según el `pathPattern` propio del proyecto (p. ej. `messages/<locale>.json`) |
+
+- La primera línea de un archivo de documentación traducido registra la versión en inglés de la que se tradujo, como el
+  blob sha de git del archivo en inglés (`git hash-object`): basado en el contenido, así que todas las ramas coinciden en él.
+  `i18n:translate -- --mark <file>` lo escribe; nadie lo teclea.
+
+  ```md
+  <!-- translated-from: docs/tooling.md @ 9b4c91affd910033e83bf7fb52e64b4d69fbdbc2 -->
+  ```
+
+- La lista de documentación en inglés es `I18N_DOCS_TABLE`, una entrada opcional de `[env]`: un módulo que exporta
+  `docsTable` (filas con `file`); remy-auth la apunta a `src/docs/table.js`. Sin ella, la lista son
+  las traducciones en disco (así que una página nueva en inglés no se informa como faltante). Un idioma participa en la
+  documentación al tener una carpeta `docs/i18n/<locale>/`.
+- Los catálogos, los idiomas y el idioma base vienen del propio `settings.json` de inlang; la CLI de inlang
+  (`lint`, `validate`) solo comprueba el archivo de ajustes, así que la paridad de claves y placeholders es nuestra.
+- Una app sin `docs/i18n/` ni `project.inlang` propios recibe "nothing to translate" y
+  sale con 0.
+
+| Tarea | Hace |
+| --- | --- |
+| `i18n:status` | Por idioma: documentación que falta, desactualizada (el inglés cambió desde el sha registrado), sin marcar, huérfana, o marcada como actual con otros encabezados que el inglés; claves de catálogo que faltan, sobran o tienen otros `{placeholders}`. `--json` para agentes |
+| `i18n:check` | Lo mismo; un WARNING y salida 0 mientras se programa (`project:check` lo ejecuta), salida 1 con `I18N_STRICT=1` (`ui:release`) |
+| `i18n:translate [locale]` | El trabajo: para cada archivo de documentación desactualizado, `git diff <recorded>..<current>` de su inglés, archivos completos para los que faltan, claves que faltan con sus valores en inglés. Sin llamadas a modelos |
+| `i18n:translate -- --mark <file>…` | Registra la versión actual en inglés en los archivos de documentación traducidos |
 
 ### Tareas de Cloudflare [#cloudflare-tasks]
 

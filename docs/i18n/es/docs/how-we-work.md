@@ -1,4 +1,4 @@
-<!-- translated-from: docs/how-we-work.md @ 11dbe64a1e2ba66c0592a75aa2f69e0f075cb611 -->
+<!-- translated-from: docs/how-we-work.md @ e32d0152e8a2639383b4004524c98d4d6f115edd -->
 # Cómo trabajamos [#how-we-work]
 
 [Volver al índice de agentes](../AGENTS.md) · [Principios de desarrollo](development.md) · [Herramientas para desarrolladores](tooling.md)
@@ -92,6 +92,23 @@ Paraglide es responsable de todo el comportamiento de idioma: qué idioma recibe
 transporta. No escribimos capas neutrales de framework ni código de idioma propio; cuando a Paraglide
 le falta algo, usa primero sus opciones y registra la carencia en el plan que lo posee.
 
+## Traducciones: un solo redactor [#translations-one-writer]
+
+El inglés es la fuente; las traducciones lo siguen, escritas por un solo redactor a la vez. Los agentes cambian estos
+archivos constantemente, así que traducir dentro de cada rama de funcionalidad provoca colisiones y deja los idiomas
+actualizados a medias.
+
+- Un agente de funcionalidad escribe solo en inglés: la documentación en inglés y el catálogo base (`messages/en.json`).
+  Nunca edita `docs/i18n/` ni el catálogo de otro idioma.
+- La traducción es un paso propio, serializado, en `main` después de los merges: un único agente de traducción ejecuta
+  `mise run i18n:status` (qué falta o está desactualizado), `mise run i18n:translate [locale]` (los diffs exactos del
+  inglés y las claves que faltan), traduce y luego registra cada archivo de documentación que termina con
+  `mise run i18n:translate -- --mark <translated file>`.
+- Lo desactualizado o lo que falta es un aviso mientras se programa (`project:check` lo muestra) y un error en el release
+  (`ui:release` ejecuta primero `i18n:check` con `I18N_STRICT=1`).
+
+La estructura y la línea de procedencia están en el [README de tasks](../tasks/README.md#translations).
+
 ## Planes: pocos, cortos y cerrados [#plans-few-short-closed]
 
 El propietario, el 2026-09-26: «lo abrumador y frustrante que es tener tantos planes basura». El trabajo nuevo es
@@ -121,7 +138,7 @@ Cuando el propietario delega decisiones, por ejemplo para terminar el trabajo si
 
   | Nivel | Comando | Qué | Tiempo |
   | --- | --- | --- | --- |
-  | 0 | `mise run project:check` | comprobación de tipos y build | ~15 s |
+  | 0 | `mise run project:check` | comprobación de tipos y build; estado de las traducciones como aviso | ~15 s |
   | 1 | `mise run project:test:smoke` | cada página responde en en y ar; la página de inicio y la documentación se hidratan; la búsqueda y ask responden | ~15 s |
   | 2 | `mise run project:test:only -- <words>` | solo las comprobaciones cuyo título coincide, en y ar | variable |
   | 3 | `mise run project:test:quick` | todas las comprobaciones, en y ar | ~45 s |

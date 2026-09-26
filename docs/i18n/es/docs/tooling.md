@@ -1,4 +1,4 @@
-<!-- translated-from: docs/tooling.md @ 9b4c91affd910033e83bf7fb52e64b4d69fbdbc2 -->
+<!-- translated-from: docs/tooling.md @ 4198868504743ce8bc449c01505f9bd13d17b862 -->
 # Referencia de herramientas de desarrollo [#developer-tooling-reference]
 
 [Volver al README](../README.md) · [Tareas de mise](../mise.toml)
@@ -75,6 +75,7 @@ Las tareas de passthrough de la CLI aceptan directamente los flags originales, c
 | `browser:*` | CLI de Chrome DevTools, ciclo de vida de la sesión y servidor MCP |
 | `web:*` | Búsqueda y recuperación de Modern Web Guidance |
 | `docs:*` | Los docs para las respuestas de IA en `/docs/ask`: publicarlos en R2 (`docs:publish`, también ejecutado por `cf:deploy`), comprobar la recuperación (`docs:questions`), detener o reanudar las respuestas (`docs:answers:*`), ejecutar localmente contra el índice en vivo (`docs:dev`) |
+| `i18n:*` | Estado de las traducciones: qué falta o está desactualizado por idioma (`i18n:status`, `--json` para agentes), el aviso o la puerta de control del release (`i18n:check`), el trabajo para el agente de traducción y su registro (`i18n:translate`, `--mark`); tareas compartidas, [un solo redactor](how-we-work.md#translations-one-writer) |
 | `mcp:*` | Registra, verifica e inspecciona las conexiones MCP del proyecto |
 | `codex:*` / `claude:*` | Inicia o reanuda una sesión interactiva de agente (tareas compartidas) |
 

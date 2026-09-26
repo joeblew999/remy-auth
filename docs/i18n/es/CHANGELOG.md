@@ -1,4 +1,4 @@
-<!-- translated-from: CHANGELOG.md @ d5c2d916f70f7cc9076532851b311f4391dc69e3 -->
+<!-- translated-from: CHANGELOG.md @ 78c75deec53551e628a92a2630fdf18bcadc032e -->
 # Registro de cambios [#changelog]
 
 Todos los cambios importantes del paquete de UI compartido `@joeblew999/remy-ui` se documentan aquí.
@@ -12,6 +12,12 @@ paquete sigue [Semantic Versioning](https://semver.org/).
   del sitio descarga como mucho `fontBudget` (300 KB, opción `budget`) de fuentes, en cada idioma.
   Medido en una compilación de producción local: de 28,7 KB (latino) a 227,2 KB (`/ar/formats`)
   (`.plans/fonts.md`, paso 1). Nuevas exportaciones `fontBudget` y `systemFontScripts`.
+- Tareas compartidas `i18n:status`, `i18n:check` e `i18n:translate` (`tasks/i18n/`): por idioma, las
+  traducciones de la documentación que faltan o están desactualizadas respecto a la versión en inglés registrada en su
+  primera línea (`<!-- translated-from: <path> @ <blob sha> -->`), y las claves de catálogo que faltan, sobran o tienen
+  otros placeholders que el idioma base. `project:check` ejecuta `i18n:check` como aviso; `ui:release` lo
+  ejecuta primero en modo estricto. Una app sin nada que traducir recibe "nothing to translate". Sustituye a
+  `docs:translations` de remy-auth, que solo comprobaba los encabezados.
 
 ### Cambiado [#changed]
 - `fonts.css`: el japonés y el chino tradicional se dibujan con la fuente del sistema para su idioma
