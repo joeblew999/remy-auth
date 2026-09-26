@@ -47,7 +47,7 @@ run = [
 ["docs:deploy"]
 description = "REMOTE, PRODUCTION: build and deploy the docs Worker to DOCS_ORIGIN (~1 min), then docs:publish"
 dir = "{{config_root}}/docs"
-run = [{ task = "docs:build" }, "../node_modules/.bin/wrangler deploy", { task = "docs:publish" }]
+run = [{ task = "docs:build" }, "../node_modules/.bin/wrangler deploy", { task = "docs:publish" }, "echo \"Live: $DOCS_ORIGIN/docs (guide), $DOCS_ORIGIN/dev (developer docs), $DOCS_ORIGIN/reference (API reference)\""]
 
 ["docs:publish"]
 description = "REMOTE, PRODUCTION: make Ask AI's R2 bucket hold exactly the pages the live docs Worker serves, start an AI Search sync, then check the fixed questions find their pages (docs/src/docs/questions.json) (~1 min)"
