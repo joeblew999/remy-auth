@@ -50,4 +50,4 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
 ## Parked
 
 [auth-service](parked/auth-service.md), [better-auth-ecosystem](parked/better-auth-ecosystem.md),
-[gui-portal](parked/gui-portal.md): big features, not now (owner: "Not big feature stuff").
+[gui-portal](parked/gui-portal.md), [remy-cli](parked/remy-cli.md) (one CLI instead of scripts): big, not now (owner: "Not big feature stuff").
