@@ -15,9 +15,7 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
    (2026-09-26) and every page hydrates with no violation in every language. Deploy enforcing, watch the
    reports a day, then close. HSTS max-age raised in the same step.
 3. ~~**Parts**~~ closed 2026-09-26 ([plan](done/parts.md)): "Writing a part" is in the package README.
-4. **Publisher and consumers** ([plan](publisher-consumer.md)): the fewer-scripts review (each script:
-   keep, or replace with a mise feature or upstream command); remy-auth-app runs the consumer contract
-   set. Then close.
+4. ~~**Publisher and consumers**~~ closed 2026-09-26 ([plan](done/publisher-consumer.md)): recipe, drift, package moves, consumer check set shipped; scripts reviewed, all kept.
 5. ~~**Caching**~~ closed 2026-09-26 ([plan](done/caching.md)): don't cache HTML yet; assets immutable.
 6. **Observability** ([plan](observability.md)): one alert on failing answers (`event = ask`,
    `outcome = failed`) beside the two alert policies; then close.

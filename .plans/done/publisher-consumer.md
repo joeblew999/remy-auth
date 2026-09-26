@@ -1,5 +1,7 @@
 # Publisher and consumers: check the approach after the big build-up
 
+Closed 2026-09-26: the new-consumer recipe (tasks/README.md), drift fixed and CI in remy-auth-app, package moves (tailwind.css, prerender, seo builders, app-checks) and the consumer contract set (`prerenderedAppChecks`) shipped in remy-ui 0.11.0 with both apps on it. Scripts reviewed ([analysis](publisher-consumer-analysis.md) §5): every script keeps a job no mise feature or upstream command does; the optional tidy-ups there (four wrappers, cwv log parsing, release via CI) are not pursued.
+
 Status: plan for an agent to analyse, then do; 2026-09-25. Owner: "our whole publisher / consumer
 approach relies on this". It may turn out that little needs doing; the point is to check.
 
@@ -26,8 +28,8 @@ remy-auth publishes; remy-auth-app is the reference consumer and the proof.
    The consumer's `tests/gui.spec.ts` should be one line per shared check set (queue item 14).
 3. **More into the include.** Candidates: the build, preview, deploy and wait chain (already
    there), `project:upgrade-ui`, level-2 audits, the language tiers
-   ([language-test-tiers.md](done/language-test-tiers.md)), the docs tasks below, and the CI workflow
-   (a reusable GitHub workflow in remy-auth, called by consumers, [ci-node24.md](done/ci-node24.md)).
+   ([language-test-tiers.md](language-test-tiers.md)), the docs tasks below, and the CI workflow
+   (a reusable GitHub workflow in remy-auth, called by consumers, [ci-node24.md](ci-node24.md)).
 4. **Docs and AI answers for every consumer.** Today the docs engine lives in remy-auth's app code
    (`src/docs/`, `/docs` and `/app/ask` routes, `docs:index`). A consumer gets nothing. Move the
    reusable half into the package and tasks: the Fumadocs source over a consumer's own Markdown
@@ -58,7 +60,7 @@ preview; remy-auth-app passes its gate and Core Web Vitals after any move; no ch
   live beside `checks.js`, not in it, because the showcase checks import `checks.js`. remy-auth uses
   them with the same CSS bytes, sitemap and robots output and the same 276 registered checks.
   remy-auth-app moves after the next release (it installs the package from GitHub Packages).
-- 2026-09-25, package moves meet parts (parts second pass, [parts.md](done/parts.md)): one design. The
+- 2026-09-25, package moves meet parts (parts second pass, [parts.md](parts.md)): one design. The
   seo-routes part's `/sitemap.xml` and `/robots.txt` are built with `seo`'s `sitemapXml`/`robotsTxt`
   (no second builder; a prerendered consumer writes its files with the same functions);
   the status-card part wraps `showcase/status-card`; `serverAppChecks` takes `parts` (default: the
@@ -69,7 +71,7 @@ preview; remy-auth-app passes its gate and Core Web Vitals after any move; no ch
   there is no `usage_name` there (the analysis's "drop it" would break the cleanup).
 
 - 2026-09-25, recipe and consumer drift (analysis action list items 2 and 4, D2, D3, D6, D15,
-  D16): the new-consumer recipe has **one home**, [tasks/README.md](../tasks/README.md#a-new-consumer)
+  D16): the new-consumer recipe has **one home**, [tasks/README.md](../../tasks/README.md#a-new-consumer)
   (docs/tooling.md already links there); it starts from remy-auth-app as a GitHub template repository
   (`gh repo create --template`), no scaffolding script of ours. remy-auth-app (branch
   `consumer-drift-recipe`) now has `min_version`, `PREVIEW_PORT` from the shell with `PUBLIC_ORIGIN`
