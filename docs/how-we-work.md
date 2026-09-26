@@ -173,6 +173,14 @@ being turned into a mise task that uses a tool ... It's vital because all our re
 - Scripts are the last resort, kept small and next to the task that runs them; where several tasks share
   logic, it moves toward one command-line tool ([parked: remy-cli](../.plans/parked/remy-cli.md)).
 
+## Branches: short-lived, deleted after merge
+
+- Work happens on branches in git worktrees (one per agent); they merge into `main` and are deleted, with
+  their worktree, right after the merge. Only `main` and release tags are pushed; a branch goes to GitHub
+  only for a pull request, and GitHub deletes it when the PR merges ("Automatically delete head
+  branches", on for every repo, 2026-09-26).
+- A leftover merged branch (local or on GitHub) is noise, not history: `main` and the tags hold it.
+
 ## Sharing one machine between agents
 
 The machine crashed on 2026-09-25 with about ten agents building and testing at once (load 188),

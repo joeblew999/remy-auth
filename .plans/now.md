@@ -24,6 +24,10 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
 - **Translations through upstream tools** ([plan](translation-pipeline.md), with issue #4): replace our
   translation code and checks with upstream tools behind shared mise tasks, same in every app; analysis next.
 
+- **`git:tidy`** (shared task, from repeated manual cleanup): list local and GitHub branches fully merged
+  into `main` and their worktrees; remove the local ones; `--remote` deletes merged GitHub branches (owner
+  confirms). Until then: `shadcn-stock` and `tanstack` on GitHub are merged leftovers, safe to delete.
+
 ## Look (from `browser:shots`, 2026-09-26)
 
 - The home page is a heading and two buttons above an empty screen: it needs its content.
