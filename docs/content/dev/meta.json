@@ -1,0 +1,16 @@
+{
+  "title": "Remy developer docs",
+  "pages": [
+    "index",
+    "development",
+    "how-we-work",
+    "tooling",
+    "gui",
+    "ui-package",
+    "tasks",
+    "writing-docs",
+    "ai-tools",
+    "[API reference](/reference)",
+    "changelog"
+  ]
+}

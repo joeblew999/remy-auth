@@ -3,7 +3,7 @@
 #MISE dir="{{config_root}}"
 #MISE env={GITHUB_TOKEN="{% set token = get_env(name='GITHUB_TOKEN', default='') %}{% if token %}{{ token }}{% else %}{{ exec(command='gh auth token') }}{% endif %}"}
 #USAGE arg "<version>" help="Released version without the v, e.g. 0.10.3"
-# The package and the tasks are released together under one number (tasks/README.md), so both
+# The package and the tasks are released together under one number (docs/content/dev/tasks.md), so both
 # move in one step. For an app that includes these tasks by git reference, not for remy-auth.
 set -euo pipefail
 version="${usage_version:?pass the version, e.g. mise run project:upgrade-ui 0.10.3}"

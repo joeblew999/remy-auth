@@ -1,0 +1,7 @@
+/* The shared package's stylesheet (shadcn's theme and the fonts), then Fumadocs UI in shadcn's colours (its
+   shadcn preset maps every --color-fd-* to the theme's variables) and its components, and the API reference's. */
+@import "@joeblew999/remy-ui/tailwind.css";
+@source "./";
+@import "fumadocs-ui/css/shadcn.css";
+@import "fumadocs-ui/css/preset.css";
+@import "fumadocs-openapi/css/preset.css";

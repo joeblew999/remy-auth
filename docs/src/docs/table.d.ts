@@ -1,0 +1,13 @@
+import type { SiteName } from '../lib/collections';
+export type DocsRow = { site: SiteName; base: string; slug: string };
+export type DocsSite = { dir: string; meta: { title?: string; pages: string[] }; defaultLanguage: string; languages: string[] };
+export declare const repository: string;
+export declare const branch: string;
+export declare const docsSites: Record<SiteName, DocsSite>;
+export declare const docsTable: DocsRow[];
+export declare const docsUrl: (site: SiteName, slug: string, lang?: string) => string;
+export declare const docsFile: (row: DocsRow, lang: string, exists: (file: string) => boolean) => string;
+export declare const docsLangs: (row: DocsRow, exists: (file: string) => boolean) => string[];
+export declare const docsObjectKey: (site: SiteName, slug: string, lang: string) => string;
+export declare const docsObjectForKey: (key: string) => { row: DocsRow; lang: string } | undefined;
+export declare const docsLangOfPath: (pathname: string) => { site: SiteName; lang: string } | undefined;

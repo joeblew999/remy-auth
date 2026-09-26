@@ -4,7 +4,7 @@ Parked 2026-09-26 (owner: "Not big feature stuff"): not started now; picked up a
 
 Status: proposed, 2026-09-24; refreshed 2026-09-25 for TanStack Start. Minimal GUI proof implemented; auth service implementation has not started. Builds on the [TanStack move](../done/tanstack.md), on main since release 0.9.0.
 Owner: remy-auth. First consumer: in-repo sample; first external consumer: remy-data.
-Executor/Reviewer roles as in [plans and roles](../../docs/development.md#plans-and-roles). Do not
+Executor/Reviewer roles as in [plans and roles](../../docs/content/dev/development.md#plans-and-roles). Do not
 begin a fleet rollout.
 
 ## Problem and outcome
@@ -324,7 +324,7 @@ The contract, versioned and owned by remy-auth:
 - **Seed and sign-in:** one seed definition per service with stable IDs, used by dev startup,
   tests and explicit seeding of a deployment; a sign-in picker for seeded people on remy-auth's
   login screen, through a real Better Auth code sign-in, gated by the environment policy in
-  [development principles](../../docs/development.md). Fixed from remy-sport's survey: no published
+  [development principles](../../docs/content/dev/development.md). Fixed from remy-sport's survey: no published
   code outside local development, no account creation through a fixed code, authenticated seeding
   outside local development, and re-seeding that does not silently overwrite edited rows unless
   asked.

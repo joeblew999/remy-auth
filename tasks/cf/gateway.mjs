@@ -2,18 +2,23 @@
 // its rate limit off or set one, turn its logs on or off. The gateway is found as observe.mjs finds it
 // (wrangler.jsonc's ai_search binding, then the instance's gateway). Every change is read back and
 // printed. Rate limiting "off" is null, as on a gateway created with it off (Cloudflare's default).
-// Credentials: CLOUDFLARE_AI_EDIT_TOKEN, an API token with "AI Gateway Edit" (it can also delete the
-// gateway, so keep it apart from the read-only CLOUDFLARE_OBSERVE_TOKEN), in the gitignored
-// mise.local.toml; Wrangler's login has no AI Gateway access. AI Search is read with Wrangler's login.
+// Credentials: the AI Gateway is read and changed with CLOUDFLARE_API_TOKEN (an API token with "AI Gateway
+// Edit", which includes reading), from fnox (the macOS keychain; run through `fnox exec --`); Wrangler's
+// login has no AI Gateway access. AI Search is read with Wrangler's login.
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 
-const wrangler = (...args) => execFileSync('./node_modules/.bin/wrangler', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
-const { unstable_readConfig } = await import(pathToFileURL(createRequire(`${process.cwd()}/package.json`).resolve('wrangler')).href);
+// Wrangler found as observe.mjs finds it (works from a workspace), run with its login: without
+// CLOUDFLARE_API_TOKEN, which it would use instead when fnox exec sets it.
+const requireHere = createRequire(`${process.cwd()}/package.json`);
+const wranglerPackage = requireHere.resolve('wrangler/package.json');
+const wranglerJs = new URL(requireHere(wranglerPackage).bin.wrangler, pathToFileURL(wranglerPackage)).pathname;
+const { CLOUDFLARE_API_TOKEN: edit, ...loginEnv } = process.env;
+const wrangler = (...args) => execFileSync(process.execPath, [wranglerJs, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], env: loginEnv });
+const { unstable_readConfig } = await import(pathToFileURL(requireHere.resolve('wrangler')).href);
 const config = unstable_readConfig({});
 const login = JSON.parse(wrangler('auth', 'token', '--json')).token;
-const edit = process.env.CLOUDFLARE_AI_EDIT_TOKEN;
 const account = process.env.CLOUDFLARE_ACCOUNT_ID || config.account_id || JSON.parse(wrangler('whoami', '--json')).accounts?.[0]?.id;
 
 async function api(method, path, token, body) {
@@ -21,7 +26,7 @@ async function api(method, path, token, body) {
   const json = await response.json();
   if (!json.success) {
     console.error(`${method} ${path}: ${response.status} ${JSON.stringify(json.errors)}`);
-    if (!edit) console.error('Set CLOUDFLARE_AI_EDIT_TOKEN (an API token with "AI Gateway Edit", from https://dash.cloudflare.com/profile/api-tokens) in the gitignored mise.local.toml.');
+    if (!edit) console.error('Run through fnox so CLOUDFLARE_API_TOKEN (with "AI Gateway Edit", https://dash.cloudflare.com/profile/api-tokens) is set: fnox exec -- mise run cf:ai-gateway.');
     process.exit(1);
   }
   return json.result;
@@ -42,9 +47,9 @@ const show = gateway => console.log([
 
 const [command, value] = process.argv.slice(2);
 if (!command || command === 'show') {
-  show(await api('GET', `/ai-gateway/gateways/${id}`, edit ?? process.env.CLOUDFLARE_OBSERVE_TOKEN ?? login));
+  show(await api('GET', `/ai-gateway/gateways/${id}`, edit ?? login));
 } else {
-  if (!edit) { console.error('Changing the gateway needs CLOUDFLARE_AI_EDIT_TOKEN ("AI Gateway Edit") in the gitignored mise.local.toml.'); process.exit(1); }
+  if (!edit) { console.error('Changing the gateway needs CLOUDFLARE_API_TOKEN ("AI Gateway Edit"): run through fnox exec --.'); process.exit(1); }
   const current = await api('GET', `/ai-gateway/gateways/${id}`, edit);
   // The update replaces the settings: send every current one, changed only where asked.
   const keys = ['authentication', 'byok_only', 'cache_invalidate_on_update', 'cache_ttl', 'collect_logs', 'dlp', 'guardrails', 'log_classification', 'log_management', 'log_management_strategy', 'logpush', 'logpush_public_key', 'otel', 'rate_limiting_interval', 'rate_limiting_limit', 'rate_limiting_technique', 'retry_backoff', 'retry_delay', 'retry_max_attempts', 'spend_limits', 'store_id', 'workers_ai_billing_mode', 'zdr'];

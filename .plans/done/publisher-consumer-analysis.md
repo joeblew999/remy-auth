@@ -22,8 +22,8 @@ remy-auth-app; nothing generates it today.
 | --- | --- | --- | --- |
 | 1 | Install mise >= 2026.9.12, `gh auth login` (token with `read:packages`), Google Chrome, `wrangler login` later for deploys | prerequisite | `mise.toml` `min_version`; `tasks/project.toml` `project:setup` env; `packages/ui/src/playwright.js` (`channel: 'chrome'`) |
 | 2 | `mise.toml`: `[tools] node`, `[settings] task.timings`, `[task_config] includes = ["git::…/remy-auth.git//tasks?ref=vX.Y.Z"]`, `[env] PREVIEW_PORT`, `PUBLIC_ORIGIN`, `DEPLOY_ORIGIN` | copy (22 lines) | `../remy-auth-app/mise.toml` |
-| 3 | Optional `mise.dev.toml` (`ref=main`), gitignored `mise.local.toml` (`../remy-auth/tasks`) | copy | `../remy-auth-app/mise.dev.toml`, `tasks/README.md` |
-| 4 | `.npmrc` with the GitHub Packages registry and `${GITHUB_TOKEN}` | copy (2 lines) | `../remy-auth-app/.npmrc`, `packages/ui/README.md` l.99 |
+| 3 | Optional `mise.dev.toml` (`ref=main`), gitignored `mise.local.toml` (`../remy-auth/tasks`) | copy | `../remy-auth-app/mise.dev.toml`, `docs/content/dev/tasks.md` |
+| 4 | `.npmrc` with the GitHub Packages registry and `${GITHUB_TOKEN}` | copy (2 lines) | `../remy-auth-app/.npmrc`, `docs/content/dev/ui-package.md` l.99 |
 | 5 | `package.json`: the package exact, its peers, and every binary the tasks call (vite, wrangler, @cloudflare/vite-plugin, @vitejs/plugin-react, @tailwindcss/vite, tailwindcss, fontaine, typescript, @types/*, @playwright/test, lighthouse, chrome-devtools-mcp, modern-web-guidance, smol-toml, lucide-react) | copy | `../remy-auth-app/package.json` (16 devDependencies) |
 | 6 | **First `npm install` by hand**: `project:setup` runs `npm ci`, which fails without a lockfile | hand step | `tasks/project.toml` `project:setup` |
 | 7 | `.gitignore` (node_modules, dist, reports, `.mcp.json`, `.codex/`, `.agents/skills/`, `.claude/skills/`, `worker-configuration.d.ts`, `mise.local.toml`) | copy | `../remy-auth-app/.gitignore` |
@@ -42,19 +42,19 @@ Skills and MCP arrive with no copying (steps 14): good. Everything else is copyi
 fix is not more docs but fewer files: make remy-auth-app a **GitHub template repository** and write
 the recipe as `gh repo create <name> --template joeblew999/remy-auth-app --clone`, then set the
 name once (D1), `npm install`, `mise run project:setup`, `mise run cf:deploy`. Upstream-owned (gh),
-no scaffolding script of ours. The recipe then goes into the consumer section of `docs/tooling.md`
-and `tasks/README.md`, replacing the partial lists there.
+no scaffolding script of ours. The recipe then goes into the consumer section of `docs/content/dev/tooling.md`
+and `docs/content/dev/tasks.md`, replacing the partial lists there.
 
 Stale consumer docs found on the way: `../remy-auth-app/README.md` says "English, Spanish and
 Arabic" (13 languages since 0.10.5), "pinned to a commit" (it is a tag), and names only three npm
-packages the tasks need (`tasks/README.md` names seven, the real list is step 5).
+packages the tasks need (`docs/content/dev/tasks.md` names seven, the real list is step 5).
 
 ## 2. Drift and duplication in remy-auth-app
 
 | # | Where | What | Verdict |
 | --- | --- | --- | --- |
 | D1 | `wrangler.jsonc` `name`, `vite.config.ts` `prerenderWorker.name`, `workers/app.ts`, `src/server.ts`, `tests/gui.spec.ts` `observabilityChecks({ service })`, `mise.toml` `DEPLOY_ORIGIN`, `package.json` `name` | The app name 7 times | **Move**: wrangler's `name` is the one source. The worker helpers and `observabilityChecks` default `service` to the Worker name (build-time define or `unstable_readConfig`, which `tasks/cf/preview` already uses); vite derives `<name>-prerender`. `DEPLOY_ORIGIN` stays an input |
-| D2 | `mise.toml` `PREVIEW_PORT = "4174"`, `PUBLIC_ORIGIN = "http://127.0.0.1:4174"` | Hard-coded; remy-auth reads the shell (`get_env`) so agents in worktrees pick ports (`docs/how-we-work.md` "Sharing one machine"). A changed port leaves `PUBLIC_ORIGIN` wrong | **Fix in the recipe**: `PREVIEW_PORT = "{{ get_env(name='PREVIEW_PORT', default='4174') }}"`, `PUBLIC_ORIGIN = "http://127.0.0.1:{{ env.PREVIEW_PORT }}"`; better, the tasks default `PUBLIC_ORIGIN` from `PREVIEW_PORT` so the consumer sets two inputs |
+| D2 | `mise.toml` `PREVIEW_PORT = "4174"`, `PUBLIC_ORIGIN = "http://127.0.0.1:4174"` | Hard-coded; remy-auth reads the shell (`get_env`) so agents in worktrees pick ports (`docs/content/dev/how-we-work.md` "Sharing one machine"). A changed port leaves `PUBLIC_ORIGIN` wrong | **Fix in the recipe**: `PREVIEW_PORT = "{{ get_env(name='PREVIEW_PORT', default='4174') }}"`, `PUBLIC_ORIGIN = "http://127.0.0.1:{{ env.PREVIEW_PORT }}"`; better, the tasks default `PUBLIC_ORIGIN` from `PREVIEW_PORT` so the consumer sets two inputs |
 | D3 | `mise.toml` | No `min_version`; remy-auth has `2026.9.12` and the tasks rely on it | **Recipe**: add it (an include cannot set it) |
 | D4 | `vite.config.ts` vs remy-auth `vite.config.ts` | Same `FontaineTransform` fallbacks, `tailwindcss()`, `inlineCss`, `viteReact()`, host `127.0.0.1`; the consumer adds Cloudflare's prerender Worker and the page list (every path x locale, per-locale `404.html`) | **Move** the page list into the package (`prerenderPages({ notFoundPath })` next to `allPaths` in `@joeblew999/remy-ui/paths`, pure data, 15 lines). Plugin order stays in each config: the two apps differ (SSR vs prerender) and the plugins are upstream's |
 | D5 | `playwright.config.ts` | One call to `playwrightConfig()`; remy-auth passes `wrangler dev --local` | **Own**: already shared |
@@ -99,7 +99,7 @@ Found while reading, most urgent first:
   `CHECK_LOCALES`). Missing: `project:test:languages` from `.plans/language-test-tiers.md`, whose
   text still says the quick tier is en, ar, ja, th while `tasks/project.toml` defaults to `en,ar`
   (owner: "just pick 2"); fix the plan text.
-- **`GATE` rule**: lives in `docs/how-we-work.md` (remy-auth) and the `cf:deploy` description;
+- **`GATE` rule**: lives in `docs/content/dev/how-we-work.md` (remy-auth) and the `cf:deploy` description;
   consumers see only the description. Fine: the consumer's `AGENTS.md` links `how-we-work.md`.
 - **Skills verification** (`scripts/verify-tooling.mjs`, the skills-lock part) runs only in
   remy-auth; consumers install skills but never verify them. Move it to an included
@@ -171,7 +171,7 @@ Net: 4 wrappers and the cwv log parsing go; two scripts move; no new scripts.
   `.github/workflows/google.yml` `version:`), and zero times in the consumer (D3). Keep the CI pin
   (reproducible), comment already points at `min_version`; add `min_version` to the recipe.
 - Include syntax: `git::https://github.com/joeblew999/remy-auth.git//tasks?ref=v0.10.5`; the most
-  specific config's `includes` replaces the default, per `tasks/README.md` (verified there with
+  specific config's `includes` replaces the default, per `docs/content/dev/tasks.md` (verified there with
   2026.9.12); `MISE_ENV=dev` confirmed to resolve a different task set today.
 - Caching: `~/Library/Caches/mise/remote-git-tasks-cache/<hash>/` holds a **full clone of the whole
   repository per ref** (23 clones, 95 MB on this machine), never pruned; a moving ref (`main`) is
@@ -190,7 +190,7 @@ Net: 4 wrappers and the cwv log parsing go; two scripts move; no new scripts.
 | 1 | Fix `cf:preview`'s `/en/docs` probe (use `/healthz` or the base-locale home) before tagging 0.10.6 | S | `tasks/cf/preview` |
 | 2 | Recipe fixes in the consumer: `min_version`, shell-read `PREVIEW_PORT`, `PUBLIC_ORIGIN` from it, `preview_urls: false`, `redact_query_string`, README refresh | S | `../remy-auth-app/mise.toml`, `wrangler.jsonc`, `README.md` |
 | 3 | App name once: package helpers and `observabilityChecks` default to wrangler's `name`; vite derives the prerender name | M | `packages/ui/src/worker.ts`, `tanstack.tsx`, `checks.js`; consumer |
-| 4 | Template repo + one recipe in `docs/tooling.md` and `tasks/README.md`; prove with a throwaway second consumer made from the recipe alone (the plan's gate) | M | GitHub setting on remy-auth-app; docs |
+| 4 | Template repo + one recipe in `docs/content/dev/tooling.md` and `docs/content/dev/tasks.md`; prove with a throwaway second consumer made from the recipe alone (the plan's gate) | M | GitHub setting on remy-auth-app; docs |
 | 5 | Shared check sets: `prerenderedAppChecks` (D12), immutable-assets and wrangler-observability checks (D6, D7) | M | `packages/ui/src/checks.js` |
 | 6 | Package moves: `prerenderPages` (D4), `tailwind.css` (D8), `sitemapXml`/`robotsTxt` (D9), `Problem` (D10) | M | `packages/ui/src/` |
 | 7 | Tasks: `project:after-deploy` hook, `skills:verify`, `project:tasks-refresh`, `cf:preview --cwv`, drop the 4 wrappers | S-M | `tasks/` |

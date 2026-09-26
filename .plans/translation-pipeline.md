@@ -4,6 +4,19 @@ Status: analysed (tooling first) 2026-09-26; recommendation below. Folds in
 [issue #4](https://github.com/joeblew999/remy-auth/issues/4) (a translation-pipeline proposal, closed into
 this plan) and everything the owner asked about translations on 2026-09-25 and 26.
 
+## Layout changed since the analysis (2026-09-26)
+
+The docs moved to Fumadocs' own layout (the docs Worker, [docs-for-consumers](docs-for-consumers.md)), so
+read the analysis below with these substitutions:
+
+| Analysis says | Now |
+| --- | --- |
+| `docs/i18n/<locale>/<repo path>` | beside the page: `docs/content/<site>/<page>.<lang>.md` or `.mdx` (`site` is `users` or `dev`) |
+| `I18N_DOCS_TABLE`, `src/docs/table.js` (the English list) | none: every page without a language suffix is English; `I18N_DOCS_DIR = "docs/content"` |
+| The site's locales | each site's own `docs/content/<site>/i18n.json` (`languages`), which the loader also reads: the list for `jq` |
+| `remarkDropProvenance`, `source.config.ts` | gone; the provenance line sits under the frontmatter and goes with the step-4 translation commit |
+| (not in the analysis) | Fumadocs UI's interface text: `docs/content/ui/<lang>.json`, `en.json` its defaults, compared by `i18n-check` like a catalog |
+
 ## Goal
 
 Translating the UI and the docs, and checking that translations are complete and current, is done by
@@ -52,7 +65,7 @@ search), mise `sources`/`outputs` (`ui:generate` skips when unchanged).
 - **Every app, same shape:** shared mise tasks and pinned tools, no global installs; the layout is part of
   the layout contract (`project:layout`); an app with nothing to translate passes cleanly.
 - **One writer:** feature agents write English only; translating is one serialized step on main after
-  merges (docs/how-we-work.md, "Translations: one writer"). Parallel agents must never race on
+  merges (docs/content/dev/how-we-work.md, "Translations: one writer"). Parallel agents must never race on
   translations.
 - **Formats kept intact:** Markdown structure (code blocks, links, heading ids with `[#english-id]`),
   Paraglide placeholders and plural variants.
@@ -248,8 +261,8 @@ no symlinks and no generated config.
 - `tasks/i18n/i18n.mjs` (244 lines) and the wrappers `check`, `status` and `translate` (18 lines).
 - The `<!-- translated-from: … -->` provenance line in the 13 files under `docs/i18n/es/`.
 - `remarkDropProvenance` and its `remarkPlugins` entry in `source.config.ts` (about 12 lines).
-- The `--mark` step, and its text in docs/how-we-work.md ("Translations: one writer") and
-  `tasks/README.md`. Committing the translation *is* the mark.
+- The `--mark` step, and its text in docs/content/dev/how-we-work.md ("Translations: one writer") and
+  `docs/content/dev/tasks.md`. Committing the translation *is* the mark.
 
 **What remains ours:**
 
@@ -360,7 +373,7 @@ These do not depend on the tool choice and are unchanged from the first analysis
      `remarkDropProvenance` and its `remarkPlugins` entry.
    - Switch plural messages from `=other` to `=*` and confirm they compile and render in ar, he, ja and pl.
    - Rewrite how-we-work "Translations: one writer" (the commit is the mark; `=*` for plurals) and
-     `tasks/README.md`.
+     `docs/content/dev/tasks.md`.
 3. **Prove the writer:** add `i18n:translate` with the pinned Claude Code and `tasks/i18n/translator.md`.
    Settle how the agent gets the English diff (the prompt, or read-only `Bash(git diff:*)`). Run it on main
    for an English docs edit and for a new plural message; confirm the check goes green, manual fixes

@@ -3,6 +3,8 @@
 //   mise run browser:shots -- /formats --phone --dark --locale ar  only the variants asked for
 //   mise run browser:shots -- --all                             every site and app page, desktop and
 //                                                               phone, light and dark, en and ar
+//   mise run browser:shots -- /formats --video                  a WebM of the page loading and scrolled
+//                                                               through (product docs, bug reports)
 // Width: --desktop (1280) and/or --phone (390), default desktop. Theme: --light and/or --dark, default
 // light. Language: --locale en,ar (default en). Origin: --origin, else DEPLOY_ORIGIN (the live app); a
 // local build works too. Prints each file's path, so it can be opened or read straight away.
@@ -37,6 +39,28 @@ const locales = all ? ['en', 'ar'] : (value('locale') ?? 'en').split(',');
 
 mkdirSync(out, { recursive: true });
 const browser = await chromium.launch();
+if (has('video')) {
+  // Playwright's own recording (recordVideo, its bundled ffmpeg): load the page, pause, scroll to the end
+  // in steps, pause; the file is the page's name with -<size>-<scheme>.webm.
+  const [size, width, height] = sizes[0];
+  for (const locale of locales) for (const path of pages) {
+    const context = await browser.newContext({ viewport: { width, height }, colorScheme: schemes[0], recordVideo: { dir: out, size: { width, height } } });
+    const page = await context.newPage();
+    await page.goto(`${origin}/${locale}${path === '' || path.startsWith('/') ? path : `/${path}`}`, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1500);
+    const total = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
+    for (let y = 0; y < total; y += Math.max(200, Math.round(total / 12))) { await page.evaluate(top => window.scrollTo({ top, behavior: 'smooth' }), y); await page.waitForTimeout(500); }
+    await page.waitForTimeout(1000);
+    const video = page.video();
+    await context.close();
+    const file = `${out}/${locale}${path.replaceAll('/', '_').replaceAll('?', '-') || '_home'}-${size}-${schemes[0]}.webm`;
+    await video.saveAs(file);
+    await video.delete();
+    console.log(file);
+  }
+  await browser.close();
+  process.exit(0);
+}
 for (const [size, width, height] of sizes) for (const scheme of schemes) {
   const page = await browser.newPage({ viewport: { width, height }, colorScheme: scheme });
   for (const locale of locales) for (const path of pages) {

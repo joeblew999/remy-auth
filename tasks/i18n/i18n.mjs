@@ -1,12 +1,12 @@
 // Translation status for any app that includes these tasks (mise i18n:status, i18n:check, i18n:translate).
 // English is the source; translations follow it. One layout, the same in every app:
 //
-//   docs      the English file where the app keeps it; its translation at docs/i18n/<locale>/<same path>,
-//             whose first line records the English version it was translated from:
+//   docs      Fumadocs' layout (content/docs, or I18N_DOCS_DIR): the English page <name>.md, its
+//             translation beside it, <name>.<locale>.md, whose line under the frontmatter records the
+//             English version it was translated from:
 //             <!-- translated-from: <English path> @ <git blob sha of the English file> -->
-//             The English list comes from I18N_DOCS_TABLE (a module exporting docsTable, rows with
-//             `file`) when the app sets it, else from the translations on disk. A locale takes part in
-//             the docs by having a docs/i18n/<locale>/ folder; without one its pages show in English.
+//             A locale takes part in the docs by having any translated page; its missing pages show in
+//             English (Fumadocs' fallbackLanguage).
 //   catalogs  every inlang project in the repository (<dir>/project.inlang/settings.json): its
 //             locales, base locale and the message-format plugin's pathPattern, read from inlang's
 //             own settings. Each locale's catalog must hold the base catalog's keys, no others, with
@@ -25,8 +25,13 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-const i18nDir = 'docs/i18n';
-const provenance = /^<!-- translated-from: (\S+) @ ([0-9a-f]{40,64}) -->\r?\n/;
+const docsDir = process.env.I18N_DOCS_DIR ?? 'content/docs';
+/** The frontmatter block, then the provenance line (groups: frontmatter, English path, sha). */
+const provenance = /^(---\r?\n[\s\S]*?\r?\n---\r?\n)?<!-- translated-from: (\S+) @ ([0-9a-f]{40,64}) -->\r?\n/;
+const frontmatter = /^---\r?\n[\s\S]*?\r?\n---\r?\n/;
+/** A translation's name: <name>.<locale>.md. */
+const translated = /^(.+)\.([a-z]{2,3}(?:-[A-Za-z]{2,4})?)\.(mdx?)$/;
+const translationOf = (file, locale) => file.replace(/\.(mdx?)$/, `.${locale}.$1`);
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
 const blobOf = (file, write = false) => git('hash-object', ...(write ? ['-w'] : []), '--', file).trim();
 const hasObject = sha => { try { git('cat-file', '-e', sha); return true; } catch { return false; } };
@@ -49,31 +54,28 @@ const walk = dir => readdirSync(dir, { recursive: true, withFileTypes: true })
   .map(entry => relative(dir, join(entry.parentPath, entry.name)).split('\\').join('/'));
 
 async function docsReport() {
-  const locales = existsSync(i18nDir) ? sorted(readdirSync(i18nDir, { withFileTypes: true }).filter(d => d.isDirectory()).map(d => d.name)) : [];
-  const table = process.env.I18N_DOCS_TABLE;
-  let english;
-  if (table) english = (await import(pathToFileURL(resolve(table)).href)).docsTable.map(row => row.file);
-  else english = sorted(new Set(locales.flatMap(locale => walk(join(i18nDir, locale)))));
-  const report = { source: table ?? 'the translations on disk', english, locales: {} };
+  const files = existsSync(docsDir) ? walk(docsDir).filter(file => /\.mdx?$/.test(file)).map(file => `${docsDir}/${file}`) : [];
+  const english = sorted(files.filter(file => !translated.test(file)));
+  const locales = sorted(new Set(files.flatMap(file => translated.exec(file)?.[2] ?? [])));
+  const report = { source: docsDir, english, locales: {} };
   if (!locales.length) return report;
-  const blobs = new Map(english.filter(file => existsSync(file)).map(file => [file, blobOf(file)]));
+  const blobs = new Map(english.map(file => [file, blobOf(file)]));
   for (const locale of locales) {
     const entry = report.locales[locale] = { current: [], missing: [], stale: [], unmarked: [], headings: [], orphans: [] };
-    const present = new Set(walk(join(i18nDir, locale)));
     for (const file of english) {
-      const translation = `${i18nDir}/${locale}/${file}`;
-      present.delete(file);
+      const translation = translationOf(file, locale);
       if (!existsSync(translation)) { entry.missing.push({ file, translation }); continue; }
       const text = readFileSync(translation, 'utf8');
       const mark = provenance.exec(text);
-      if (!mark || mark[1] !== file) { entry.unmarked.push({ file, translation }); continue; }
+      if (!mark || mark[2] !== file) { entry.unmarked.push({ file, translation }); continue; }
       const current = blobs.get(file);
-      if (mark[2] !== current) { entry.stale.push({ file, translation, recorded: mark[2], current }); continue; }
+      if (mark[3] !== current) { entry.stale.push({ file, translation, recorded: mark[3], current }); continue; }
       const want = levels(readFileSync(file, 'utf8')), have = levels(text);
       if (want.join() !== have.join()) entry.headings.push({ file, translation, english: want.length, translated: have.length });
       else entry.current.push(file);
     }
-    entry.orphans = sorted(present).map(file => ({ file, translation: `${i18nDir}/${locale}/${file}` }));
+    entry.orphans = files.filter(file => translated.exec(file)?.[2] === locale && !english.includes(`${translated.exec(file)[1]}.${translated.exec(file)[3]}`))
+      .map(translation => ({ file: `${translated.exec(translation)[1]}.${translated.exec(translation)[3]}`, translation }));
   }
   return report;
 }
@@ -143,7 +145,7 @@ function print({ docs, catalogs, problems, nothing }) {
   if (nothing) { console.log('Translations: nothing to translate (no docs/i18n/<locale>/ folders and no project.inlang catalogs).'); return; }
   const lines = [];
   if (Object.keys(docs.locales).length) {
-    lines.push(`Docs (${i18nDir}/<locale>/, ${docs.english.length} English files from ${docs.source}):`);
+    lines.push(`Docs (${docs.source}, <name>.<locale>.md beside <name>.md, ${docs.english.length} English files):`);
     for (const [locale, entry] of Object.entries(docs.locales)) {
       const parts = [`${entry.current.length} current`];
       for (const name of ['stale', 'missing', 'unmarked', 'headings', 'orphans']) if (entry[name].length) parts.push(`${entry[name].length} ${name}`);
@@ -154,7 +156,7 @@ function print({ docs, catalogs, problems, nothing }) {
       for (const item of entry.headings) lines.push(`         headings  ${item.translation}: ${item.translated} headings, ${item.file} has ${item.english}`);
       for (const item of entry.orphans) lines.push(`         orphan    ${item.translation} (no English ${item.file})`);
     }
-  } else lines.push(`Docs: no ${i18nDir}/<locale>/ folders.`);
+  } else lines.push(`Docs: no translated pages in ${docsDir}.`);
   if (!catalogs.length) lines.push('UI catalogs: no project.inlang in this repository.');
   for (const catalog of catalogs) {
     if (catalog.note) { lines.push(`UI catalogs (${catalog.project}): ${catalog.note}`); continue; }
@@ -208,16 +210,17 @@ function translate(result, only) {
 
 /** Record the current English version in each translated docs file: its first line. */
 function mark(files) {
-  if (!files.length) throw new Error('--mark needs the translated files, e.g. docs/i18n/es/README.md');
+  if (!files.length) throw new Error(`--mark needs the translated files, e.g. ${docsDir}/index.es.md`);
   for (const translation of files) {
-    const match = translation.split('\\').join('/').match(new RegExp(`^${i18nDir}/([^/]+)/(.+)$`));
-    if (!match) throw new Error(`${translation} is not under ${i18nDir}/<locale>/`);
-    const file = match[2];
+    const match = translated.exec(translation.split('\\').join('/'));
+    if (!match) throw new Error(`${translation} is not a translation (<name>.<locale>.md)`);
+    const file = `${match[1]}.${match[3]}`;
     if (!existsSync(file)) throw new Error(`${translation}: no English ${file}`);
     // -w keeps the English version in the object store, so a later diff from it works here.
     const sha = blobOf(file, true);
-    const text = readFileSync(translation, 'utf8').replace(provenance, '');
-    writeFileSync(translation, `<!-- translated-from: ${file} @ ${sha} -->\n${text}`);
+    const text = readFileSync(translation, 'utf8').replace(provenance, (_, front = '') => front);
+    const front = frontmatter.exec(text)?.[0] ?? '';
+    writeFileSync(translation, `${front}<!-- translated-from: ${file} @ ${sha} -->\n${text.slice(front.length)}`);
     console.log(`${translation}: translated from ${file} @ ${sha}`);
   }
 }

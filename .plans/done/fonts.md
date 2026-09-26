@@ -133,7 +133,7 @@ correctness per script and Han language (3), cost to the visitor (2). Scores 0 t
 **Recommendation: B**, with finding 3 and 4 fixed and the check added. Runner-up **A**: switch if
 the budget cannot hold CJK or the owner prefers native system looks; the check then asserts "system
 font has glyphs" instead of `isCustomFont`. Prove B and A with scratch builds of `/ja/formats` and
-`/ar/formats` (bytes, LCP, CLS, screenshots) before deciding, as [how we work](../../docs/how-we-work.md#choose-tools-by-survey-not-by-first-find) asks.
+`/ar/formats` (bytes, LCP, CLS, screenshots) before deciding, as [how we work](../../docs/content/dev/how-we-work.md#choose-tools-by-survey-not-by-first-find) asks.
 
 ## Step 1: measured (2026-09-26)
 

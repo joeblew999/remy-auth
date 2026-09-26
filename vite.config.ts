@@ -6,7 +6,6 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import viteReact from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { FontaineTransform } from 'fontaine';
-import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import { options as paraglide } from './packages/ui/paraglide.mjs';
 import { remyParts } from '@joeblew999/remy-ui/parts/vite';
 
@@ -26,8 +25,6 @@ export default defineConfig({
     devtools(),
     paraglideVitePlugin(paraglide),
     parts.plugin,
-    // Fumadocs MDX: compiles the docs table's Markdown in place (source.config.ts) into .source/; before Start's plugin.
-    fumadocsMdx(),
     cloudflare({ viteEnvironment: { name: 'ssr' } }),
     // Fallback faces sized to the web fonts (size-adjust and ascent/descent overrides, as Next.js
     // generates), so the swap to Geist keeps the layout and LCP; fonts.css lists them. Before Tailwind.

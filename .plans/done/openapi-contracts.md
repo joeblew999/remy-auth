@@ -4,8 +4,8 @@ Closed 2026-09-26: items 2-6 built on oRPC 1.15.4 (contract 0.2.0 published with
 
 Status: decided 2026-09-25 (2.0 rechecked 2026-09-26) under the owner's delegation, from a scored survey with scratch proofs
 (below). It builds on the [TanStack move](tanstack.md), on main since release 0.9.0. Owner:
-remy-auth. Executor/Reviewer roles as in [plans and roles](../../docs/development.md#plans-and-roles). Tools were chosen by
-survey, as [how we work](../../docs/how-we-work.md) requires.
+remy-auth. Executor/Reviewer roles as in [plans and roles](../../docs/content/dev/development.md#plans-and-roles). Tools were chosen by
+survey, as [how we work](../../docs/content/dev/how-we-work.md) requires.
 
 ## Goal
 
@@ -90,7 +90,7 @@ Query, Zod 4, fetch on Workers, maturity, size)
 5. **Checks** in both apps: coverage, a schema-violating response rejected, invalid input giving
    the typed 400 in every locale.
 6. **Ship** with both levels, releases and both deploys, then a hands-on pass as in
-   [how we work](../../docs/how-we-work.md#multi-agent-work).
+   [how we work](../../docs/content/dev/how-we-work.md#multi-agent-work).
 
 ## Progress and decisions, 2026-09-25 (branch contract-api)
 

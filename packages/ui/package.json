@@ -33,6 +33,8 @@
     "./theme": "./src/theme.tsx",
     "./client": "./src/client.tsx",
     "./tanstack": "./src/tanstack.tsx",
+    "./start": "./src/start.ts",
+    "./csp-report": "./src/csp-report.ts",
     "./cloudflare": "./src/cloudflare.ts",
     "./samples": "./src/samples.js",
     "./checks": "./src/checks.js",

@@ -28,11 +28,13 @@ then tools, then translating.
 1. **Finish what is in flight** (English only): the layout contract and `project:layout`; the Look fixes
    (below).
 2. **Structure, in parallel:**
-   - a. **Fumadocs fully** ([decision and small steps](docs-for-consumers.md#decision-fumadocs-fully-2026-09-26),
-     [trial](docs-for-consumers.md#tool-up-trial-2026-09-26)): the docs take the shape of Fumadocs' TanStack Start
-     template and CLI (`content/docs`, `meta.json`, frontmatter, the macro loader, stock rendering, its
-     search and `llms` routes); Paraglide keeps the URLs and shadcn the UI. Six small steps, one at a time
-     with the owner. The i18n tasks' provenance line must sit under the frontmatter until step 3 (below).
+   - a. **Fumadocs fully** ([plan](docs-for-consumers.md)): on the local branch `fumadocs-trial`, **not merged**
+     (owner: "don't merge to main yet"; squash-merge when it is, see the stability log). The docs are their
+     own Worker (`docs/`, `remy-auth-docs`, live at https://remy-auth-docs.gedw99.workers.dev from the
+     branch): users' docs `/docs`, developer docs `/dev`, API reference `/reference`, each language at its
+     own URL; search, `llms.txt`, `.md`, MCP (`docs:test:remote` checks it), Ask AI (Fumadocs' panel over AI Search),
+     sitemap. Left: the Fumadocs UI's own strings per language (`defineI18nUI`, translation step 4), the
+     shared docs part for consumers (after the merge), the full test run, the merge.
    - b. **Paraglide plurals** ([plan](translation-pipeline.md)): `=other` becomes `=*` in the 13 catalogs
      (compiles to an unconditional fallback, `compile-message.js:101`; no wording changes). The
      plural-categories test is a check, so it goes in step 3.
@@ -41,8 +43,8 @@ then tools, then translating.
    **Not** the provenance lines: removing them is a commit to every translation, which git would read as
    "translated" and so hide what is stale.
 4. **Unfreeze:** one translation pass with the new tools (stale Spanish docs, missing catalog keys and
-   plural forms); the same commit removes the provenance lines and `remarkDropProvenance`; the release
-   check back to strict.
+   plural forms, Fumadocs UI's `docs/content/ui/es.json`); the same commit removes the provenance lines; the
+   release check back to strict.
 5. **What conforming docs unlock** ([plan](docs-for-consumers.md)): `.md` pages, `llms.txt`, the copy
    menu; then docs for apps: a rules section in how-we-work, the `remy` skill (rules, evals) in the
    package, the `AGENTS.md` block pointing into `node_modules`.
@@ -74,13 +76,16 @@ Also queued (not in the order above): `git:tidy` (shared task for merged branche
 
 ## Owner only
 
+
 - One alert rule in the dashboard (no API for it): Workers & Pages → Observability → Alerts → Create,
   service `remy-auth`, `event = ask` and `outcome = failed`, count > 5 in 15 minutes.
 
 - A native-speaker review of the ten newer languages' catalogs and the Spanish docs.
-- The production origin (a custom domain) and Search Console.
-- More docs languages: drop files into `docs/i18n/<locale>/` (the plumbing is done; `mise run
-  i18n:status` lists what each language still needs).
+- The production origin (a custom domain) and Search Console. It also unlocks: AI Search crawling the
+  docs site itself (its website source needs a domain on this Cloudflare account, not workers.dev),
+  which deletes `docs:publish`, its script and the R2 bucket; and caching docs pages at the edge.
+- More docs languages: add the language to the site's `docs/content/<site>/i18n.json` and translations
+  beside the pages (`<page>.<lang>.md`); `mise run i18n:status` lists what each language still needs.
 
 ## Parked
 

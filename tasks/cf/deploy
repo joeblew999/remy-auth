@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-#MISE description="Build (no tests; GATE=smoke|quick|full runs that tier first; releases run the full gate) with DEPLOY_ORIGIN as the public origin, upload to the authenticated Cloudflare account and wait until production serves the new version (~1 min), then docs:publish when the project has it. Builds into dist/: not alongside a local level. Then run project:test:remote in the background and keep working"
+#MISE description="Build (no tests; GATE=smoke|quick|full runs that tier first; releases run the full gate) with DEPLOY_ORIGIN as the public origin, upload to the authenticated Cloudflare account and wait until production serves the new version (~1 min). Builds into dist/: not alongside a local level. Then run project:test:remote in the background and keep working"
 #MISE dir="{{config_root}}"
 set -euo pipefail
 : "${DEPLOY_ORIGIN:?cf:deploy needs DEPLOY_ORIGIN in [env]}"
 
 # Development deploys run no tests (owner, 2026-09-25: the gate is for real releases; ui:release runs
-# the full one). GATE picks a tier first, by the deployer's judgement (docs/how-we-work.md, test tiers):
+# the full one). GATE picks a tier first, by the deployer's judgement (docs/content/dev/how-we-work.md, test tiers):
 # smoke (every page answers, ~15 s), quick (every check in en and ar; also GATE=1) or full (every language).
 case "${GATE:-}" in
   "") ;;
@@ -29,6 +29,3 @@ echo "Live: $DEPLOY_ORIGIN"
 # The deploy proves itself with the tools, not by hand: the smoke checks against the live site.
 TEST_BASE_URL="$DEPLOY_ORIGIN" mise run project:test:live
 
-# The docs for AI answers go with the code: a project with a docs:publish task (remy-auth) publishes
-# them after every successful deploy; one without (remy-auth-app) skips this, and so does DOCS_ASK=off.
-if [ "${DOCS_ASK:-}" != off ] && mise tasks info docs:publish >/dev/null 2>&1; then mise run docs:publish; fi

@@ -12,7 +12,9 @@ run = "./node_modules/.bin/playwright test"
 description = "Tier 1 against the live site: the smoke checks (tests/smoke.spec.ts) at TEST_BASE_URL, default DEPLOY_ORIGIN (~5 s). cf:deploy runs it once the new version is live; use it instead of curl"
 dir = "{{config_root}}"
 env = { TEST_TARGET = "remote", TEST_BASE_URL = "{{ get_env(name='TEST_BASE_URL', default=env.DEPLOY_ORIGIN) }}" }
-run = "./node_modules/.bin/playwright test --project=ours tests/smoke.spec.ts"
+# By title, not by file: the shared checks are defined in the package's smoke.js, so a file filter
+# (tests/smoke.spec.ts) selected none of them and only the app's own in-file tests ran.
+run = "./node_modules/.bin/playwright test --project=ours --grep 'smoke [a-zA-Z-]+:'"
 
 ["project:report"]
 description = "Open the HTML report from the last local project:test run"
@@ -69,16 +71,18 @@ env = { TEST_TARGET = "local" }
 run = "./node_modules/.bin/playwright test --project=ours"
 
 ["project:check"]
-description = "Tier 0 while coding: plans:check, typecheck and build, no browser (~15 s), then i18n:check (missing or stale translations are a warning here). Code freely; run a test tier when something looks wrong (docs/how-we-work.md, test tiers)"
+description = "Tier 0 while coding: plans:check, typecheck and build, no browser (~15 s), then i18n:check, and docs:check when the app has a docs Worker (docs/) (missing or stale translations are a warning here). Code freely; run a test tier when something looks wrong (docs/content/dev/how-we-work.md, test tiers)"
 dir = "{{config_root}}"
-run = [{ task = "plans:check" }, { task = "project:typecheck" }, "./node_modules/.bin/vite build", { task = "i18n:check" }]
+run = [{ task = "plans:check" }, { task = "project:typecheck" }, "./node_modules/.bin/vite build", { task = "i18n:check" }, "[ ! -d docs ] || mise run docs:check"]
 
 ["project:test:smoke"]
-description = "Tier 1, smoke: build, then tests/smoke.spec.ts only: every page in en and ar answers with a heading, the home and a docs page hydrate without errors, search and ask respond (~15 s)"
+description = "Tier 1, smoke: build, then the smoke checks only (tests/smoke.spec.ts calls the package's smokeChecks): every page in en and ar answers with a heading, the pages named there hydrate without errors (~15 s)"
 dir = "{{config_root}}"
 depends = ["project:build"]
 env = { TEST_TARGET = "local" }
-run = "./node_modules/.bin/playwright test --project=ours tests/smoke.spec.ts"
+# By title, not by file: the shared checks are defined in the package's smoke.js, so a file filter
+# (tests/smoke.spec.ts) selected none of them and only the app's own in-file tests ran.
+run = "./node_modules/.bin/playwright test --project=ours --grep 'smoke [a-zA-Z-]+:'"
 
 ["project:test:only"]
 description = "Tier 2, targeted: build, then only the checks whose title matches the words given, in QUICK_LOCALES (en, ar), e.g. mise run project:test:only -- formats. For an area that looks broken"

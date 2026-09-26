@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Screenshot a page as a visitor sees it, for debugging: mise run browser:shots -- /docs/tooling (desktop, light, en); add --phone, --dark, --locale ar; --all for every page, both widths, both themes, en and ar. From --origin or DEPLOY_ORIGIN; prints the files"
+#MISE description="Screenshot a page as a visitor sees it, for debugging: mise run browser:shots -- /docs/tooling (desktop, light, en); add --phone, --dark, --locale ar; --all for every page, both widths, both themes, en and ar; --video records a WebM of the page scrolled through (product docs). From --origin or DEPLOY_ORIGIN; prints the files"
 #MISE dir="{{config_root}}"
 # A shell wrapper so the module beside it loads as ESM wherever this directory is included from.
 set -euo pipefail

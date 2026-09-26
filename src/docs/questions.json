@@ -1,8 +1,0 @@
-[
-  { "question": "Which mise task streams Worker logs?", "finds": "/en/docs/tooling#cloudflare-observability" },
-  { "question": "Which agent skills are pinned?", "finds": "/en/docs/tooling#agent-skills" },
-  { "question": "Which tools should I use before anything else?", "finds": "/en/docs/how-we-work#use-the-projects-own-tools-first" },
-  { "question": "How do we choose a new tool?", "finds": "/en/docs/how-we-work#choose-tools-by-survey-not-by-first-find" },
-  { "question": "What are the architecture and development principles?", "finds": "/en/docs/development#architecture-and-development-principles" },
-  { "question": "What are the everyday commands?", "finds": "/en/docs#everyday-commands" }
-]

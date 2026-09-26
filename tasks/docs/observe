@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="REMOTE, read only: the docs Worker's logs and Ask AI through the shared observe script: events [event] | ai-usage | ai-check (AI Search, AI Gateway, whether answers are paused). Through fnox"
+#MISE dir="{{config_root}}/docs"
+set -euo pipefail
+exec fnox exec -- node "$(dirname "$0")/../cf/observe.mjs" "$@"

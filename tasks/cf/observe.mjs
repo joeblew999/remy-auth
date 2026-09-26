@@ -3,22 +3,28 @@
 // Gateway logs, and the AI Search instance. Nothing is named here: the Worker and the AI Search
 // instance come from the including project's Wrangler configuration, and the gateway from the
 // instance. Read only: nothing is changed. Never prints a token.
-// Credentials: Wrangler's login reads AI Search, but its login cannot ask for AI Gateway or Workers
-// Logs access, so those two need CLOUDFLARE_OBSERVE_TOKEN: an API token with "AI Gateway Read" and
-// "Workers Observability Write" (the only permission the query API accepts, even to read), kept in
-// the gitignored mise.local.toml. CLOUDFLARE_API_TOKEN, when set, is used for everything.
+// Credentials: Wrangler's login reads AI Search (it has those scopes), but it cannot ask for AI Gateway
+// or Workers Logs access, so those two use CLOUDFLARE_API_TOKEN (with "AI Gateway Edit", which includes
+// reading, and "Workers Observability Read"), from fnox (the macOS keychain; run through `fnox exec --`).
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 
-const wranglerBin = './node_modules/.bin/wrangler';
-const wrangler = (...args) => execFileSync(wranglerBin, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
-// The including project's Wrangler (this file may live in mise's include cache, not beside node_modules).
-const { unstable_readConfig } = await import(pathToFileURL(createRequire(`${process.cwd()}/package.json`).resolve('wrangler')).href);
+// The including project's Wrangler, found by Node's own resolution from the working directory (this file
+// may live in mise's include cache, and in a workspace such as docs/ the binaries are hoisted to the root).
+const requireHere = createRequire(`${process.cwd()}/package.json`);
+const wranglerPackage = requireHere.resolve('wrangler/package.json');
+const wranglerJs = new URL(requireHere(wranglerPackage).bin.wrangler, pathToFileURL(wranglerPackage)).pathname;
+const { unstable_readConfig } = await import(pathToFileURL(requireHere.resolve('wrangler')).href);
 const config = unstable_readConfig({});
 
-const token = process.env.CLOUDFLARE_API_TOKEN || JSON.parse(wrangler('auth', 'token', '--json')).token;
-const observeToken = process.env.CLOUDFLARE_OBSERVE_TOKEN || process.env.CLOUDFLARE_API_TOKEN || token;
+// Wrangler with its login (AI Search, whoami): without CLOUDFLARE_API_TOKEN, which it would use instead
+// when fnox exec sets it.
+const { CLOUDFLARE_API_TOKEN: _apiToken, ...loginEnv } = process.env;
+const wrangler = (...args) => execFileSync(process.execPath, [wranglerJs, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], env: loginEnv });
+const login = (() => { try { return JSON.parse(wrangler('auth', 'token', '--json')).token; } catch { return undefined; } })();
+const token = login || process.env.CLOUDFLARE_API_TOKEN;
+const observeToken = process.env.CLOUDFLARE_API_TOKEN || token;
 const observed = path => path.startsWith('/ai-gateway/') || path.startsWith('/workers/observability/');
 const account = process.env.CLOUDFLARE_ACCOUNT_ID || config.account_id || JSON.parse(wrangler('whoami', '--json')).accounts?.[0]?.id;
 if (!token || !account) fail('No Cloudflare credentials: run `mise run cf:cli -- login`, or set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID.');
@@ -33,11 +39,9 @@ async function api(method, path, { query, body } = {}) {
   for (const [key, value] of Object.entries(query ?? {})) if (value !== undefined) url.searchParams.set(key, String(value));
   const response = await fetch(url, { method, headers: { Authorization: `Bearer ${observed(path) ? observeToken : token}`, ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body && JSON.stringify(body) });
   const json = await response.json();
-  if (!json.success && response.status === 403 && observed(path) && !process.env.CLOUDFLARE_OBSERVE_TOKEN) fail(`${method} ${path}: 403. Wrangler's login cannot read AI Gateway or Workers Logs.
-Create an API token at https://dash.cloudflare.com/profile/api-tokens with "AI Gateway Read" and
-"Workers Observability Write" for this account, then put it in the gitignored mise.local.toml:
-  [env]
-  CLOUDFLARE_OBSERVE_TOKEN = "<token>"`);
+  if (!json.success && response.status === 403 && observed(path) && !process.env.CLOUDFLARE_API_TOKEN) fail(`${method} ${path}: 403. Wrangler's login cannot read AI Gateway or Workers Logs: run through fnox so
+CLOUDFLARE_API_TOKEN is set (fnox exec -- mise run cf:events; the docs:* tasks already do). The token needs
+"AI Gateway Edit" and "Workers Observability Read": https://dash.cloudflare.com/profile/api-tokens`);
   if (!json.success) fail(`${method} ${path}: ${response.status} ${JSON.stringify(json.errors)}`);
   return json;
 }

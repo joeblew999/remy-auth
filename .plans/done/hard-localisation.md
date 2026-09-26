@@ -4,7 +4,7 @@ Closed 2026-09-26: 13 languages and the hard localisation features live since 0.
 
 Status: proposed 2026-09-25 under the owner's delegation; it builds on the
 [TanStack move](tanstack.md), on main since release 0.9.0. Owner: remy-auth. Executor/Reviewer roles as in
-[plans and roles](../../docs/development.md#plans-and-roles).
+[plans and roles](../../docs/content/dev/development.md#plans-and-roles).
 
 ## Why
 
@@ -94,7 +94,7 @@ Rules for the regrouping:
 ## Translations
 
 The new catalogs are machine-made by the agent. They are marked unreviewed in the package
-[README](../../packages/ui/README.md#language) and in [docs/gui.md](../../docs/gui.md) until a native
+[README](../../docs/content/dev/ui-package.md#language) and in [docs/content/dev/gui.md](../../docs/content/dev/gui.md) until a native
 speaker reviews them: not in the catalogs, because the message-format plugin reads every top-level
 key as a message and the catalog check requires every key set to equal the base (decided
 2026-09-25 under the owner's delegation). The checks prove structure, plural coverage and

@@ -1,4 +1,4 @@
-// The plans rule as tasks (docs/how-we-work.md, "Plans: few, short, closed"): plans:status, plans:check,
+// The plans rule as tasks (docs/content/dev/how-we-work.md, "Plans: few, short, closed"): plans:status, plans:check,
 // plans:close and plans:park. Works on the including project's .plans/ from its root (the current
 // directory): .plans/now.md is the one ordered list, .plans/*.md the few open plan files,
 // .plans/done/ and .plans/parked/ the closed and parked ones, .plans/stability-log.md optional.

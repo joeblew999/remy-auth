@@ -1,6 +1,6 @@
 # Language tests: when each language is checked
 
-Closed 2026-09-26: superseded by the test tiers 0-4 in docs/how-we-work.md (smoke, targeted, quick, full; deploys untested unless GATE).
+Closed 2026-09-26: superseded by the test tiers 0-4 in docs/content/dev/how-we-work.md (smoke, targeted, quick, full; deploys untested unless GATE).
 
 Status: built 2026-09-25 (cf:deploy and cf:preview run QUICK_LOCALES; project:verify and ui:release every language). Decided 2026-09-25 (owner: "We really don't need lang tests all the time"); to build.
 With 13 languages level 1 is 237 checks in about 1.6 minutes, and it grows with each language.
@@ -12,6 +12,6 @@ With 13 languages level 1 is 237 checks in about 1.6 minutes, and it grows with 
   run by hand and by the agent after any catalog, locale or font change. Nothing is published
   without every language passing, so no check is loosened; it only runs less often.
 - **Build:** the tasks set `CHECK_LOCALES` (already read by `checkedLocales`); the release task
-  sets it to every locale. Document the tiers in `docs/tooling.md`. Measure both times.
+  sets it to every locale. Document the tiers in `docs/content/dev/tooling.md`. Measure both times.
 - **Later:** CI runs every language nightly and on changes to `messages/`, `project.inlang` or
   `fonts.css`.

@@ -1,6 +1,6 @@
 # Publisher and consumers: check the approach after the big build-up
 
-Closed 2026-09-26: the new-consumer recipe (tasks/README.md), drift fixed and CI in remy-auth-app, package moves (tailwind.css, prerender, seo builders, app-checks) and the consumer contract set (`prerenderedAppChecks`) shipped in remy-ui 0.11.0 with both apps on it. Scripts reviewed ([analysis](publisher-consumer-analysis.md) §5): every script keeps a job no mise feature or upstream command does; the optional tidy-ups there (four wrappers, cwv log parsing, release via CI) are not pursued.
+Closed 2026-09-26: the new-consumer recipe (docs/content/dev/tasks.md), drift fixed and CI in remy-auth-app, package moves (tailwind.css, prerender, seo builders, app-checks) and the consumer contract set (`prerenderedAppChecks`) shipped in remy-ui 0.11.0 with both apps on it. Scripts reviewed ([analysis](publisher-consumer-analysis.md) §5): every script keeps a job no mise feature or upstream command does; the optional tidy-ups there (four wrappers, cwv log parsing, release via CI) are not pursued.
 
 Status: plan for an agent to analyse, then do; 2026-09-25. Owner: "our whole publisher / consumer
 approach relies on this". It may turn out that little needs doing; the point is to check.
@@ -21,7 +21,7 @@ remy-auth publishes; remy-auth-app is the reference consumer and the proof.
 1. **What a new consumer gets, end to end.** From an empty repo: `mise.toml` with the include,
    `npm install`, the tasks, skills, MCP, and a deploy. List every hand step and every file it had
    to copy. Measure against remy-auth-app, then write the steps into the consumer section of
-   `docs/tooling.md` (or the package README) as the one recipe.
+   `docs/content/dev/tooling.md` (or the package README) as the one recipe.
 2. **Drift.** Anything in remy-auth-app that duplicates or overrides the publisher (tasks,
    `vite.config.ts`, `playwright.config.ts`, `wrangler.jsonc`, `_headers`, CSS imports, check
    calls). Each is either moved into the package or tasks, or recorded as the consumer's own.
@@ -71,8 +71,8 @@ preview; remy-auth-app passes its gate and Core Web Vitals after any move; no ch
   there is no `usage_name` there (the analysis's "drop it" would break the cleanup).
 
 - 2026-09-25, recipe and consumer drift (analysis action list items 2 and 4, D2, D3, D6, D15,
-  D16): the new-consumer recipe has **one home**, [tasks/README.md](../../tasks/README.md#a-new-consumer)
-  (docs/tooling.md already links there); it starts from remy-auth-app as a GitHub template repository
+  D16): the new-consumer recipe has **one home**, [docs/content/dev/tasks.md](../../docs/content/dev/tasks.md#a-new-consumer)
+  (docs/content/dev/tooling.md already links there); it starts from remy-auth-app as a GitHub template repository
   (`gh repo create --template`), no scaffolding script of ours. remy-auth-app (branch
   `consumer-drift-recipe`) now has `min_version`, `PREVIEW_PORT` from the shell with `PUBLIC_ORIGIN`
   following it, `preview_urls: false`, `redact_query_string`, a `google.yml` workflow (types and

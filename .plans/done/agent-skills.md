@@ -72,7 +72,7 @@ For each gap, in order:
 
 ## Adding an accepted skill
 
-Follow [the steps in the tooling reference](../../docs/tooling.md#agent-skills). Afterwards
+Follow [the steps in the tooling reference](../../docs/content/dev/tooling.md#agent-skills). Afterwards
 `git status` must show only the intended additions.
 
 ## Deliverable

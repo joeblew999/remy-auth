@@ -4,7 +4,7 @@ Status: done 2026-09-24 for public pages: rendering strategy, the shared package
 `@joeblew999/remy-ui`, internationalisation, SEO checks, and vertical-slice steps 1, 4 and the
 public half of 5, proven in remy-auth (server-rendered) and remy-auth-app (prerendered).
 The open remainder, which needs the auth service or owner decisions, moved to
-[the portal plan](../parked/gui-portal.md). See [the runnable proof](../../docs/gui.md).
+[the portal plan](../parked/gui-portal.md). See [the runnable proof](../../docs/content/dev/gui.md).
 
 ## Evidence from existing Remy code
 

@@ -7,7 +7,7 @@ node = "26.10.0"
 fnox = "1.35.3"
 
 # Shared tasks live in tasks/, one file per namespace, so other projects can include the same
-# directory by git reference; see tasks/README.md.
+# directory by git reference; see docs/content/dev/tasks.md.
 # Every task prints its duration and the entry point prints the total, so slow steps show.
 [settings]
 task.timings = true
@@ -21,14 +21,12 @@ includes = ["tasks"]
 # A worktree or agent picks its own port from the shell: PREVIEW_PORT=4231 mise run project:verify.
 PREVIEW_PORT = "{{ get_env(name='PREVIEW_PORT', default='4173') }}"
 DEPLOY_ORIGIN = "https://remy-auth.gedw99.workers.dev"
-# The shared i18n:* tasks' list of English docs: the docs table, the one list of the site's docs.
-I18N_DOCS_TABLE = "src/docs/table.js"
-# Docs Ask AI off (owner, 2026-09-26: off until the docs conform to Fumadocs, .plans/now.md step 2a,
-# which changes what docs:publish puts in AI Search). Production answers are stopped with
-# docs:answers:off; "off" here also stops cf:deploy publishing the docs and skips the live answer check.
-# Back on: remove this line, mise run docs:publish, then docs:answers:on.
-DOCS_ASK = "off"
-
+# The docs Worker (docs/): its public origin, the app's "Docs" link to it (Vite reads VITE_*), and the
+# shared i18n tasks' docs folder (Fumadocs' layout, one folder per site).
+DOCS_ORIGIN = "https://remy-auth-docs.gedw99.workers.dev"
+VITE_DOCS_ORIGIN = "https://remy-auth-docs.gedw99.workers.dev"
+I18N_DOCS_DIR = "docs/content"
+DOCS_PREVIEW_PORT = "{{ get_env(name='DOCS_PREVIEW_PORT', default='4174') }}"
 
 [tasks."auth:cli"]
 description = "Run the pinned Better Auth CLI (pass --help for commands)"
@@ -64,13 +62,6 @@ run = [
   { task = "project:test" },
 ]
 
-[tasks."project:preview"]
-description = "Build, then serve the production artifact on Cloudflare's local host at PREVIEW_PORT, remote bindings off (overrides the shared default: the AI Search binding needs a login and costs model calls; /docs/ask then shows its \"no answer\" path)"
-dir = "{{config_root}}"
-depends = ["project:build"]
-raw = true
-run = "./node_modules/.bin/wrangler dev --local --ip 127.0.0.1 --port \"${PREVIEW_PORT:-4173}\""
-
 [tasks."auth:info"]
 description = "Show Better Auth setup diagnostics"
 raw_args = true
@@ -90,9 +81,9 @@ run = [
 ]
 
 [tasks."project:generate"]
-description = "Compile the shared catalogs and write Fumadocs MDX's docs entry files (.source/) before type checking (overrides the shared hook, which project:typecheck runs first)"
+description = "Compile the shared catalogs before type checking (overrides the shared hook, which project:typecheck runs first: this project owns the package)"
 dir = "{{config_root}}"
-run = [{ task = "ui:generate" }, "./node_modules/.bin/fumadocs-mdx"]
+run = [{ task = "ui:generate" }]
 
 [tasks."ui:pack"]
 description = "Compile and pack the shared UI for another Vite/Tailwind consumer"
@@ -105,7 +96,7 @@ run = [
 [tasks."ui:components"]
 description = "Regenerate every shadcn component from the registry into the shared package (run from the app, shadcn's monorepo layout; the only way those files change)"
 dir = "{{config_root}}"
-run = "./node_modules/.bin/shadcn add button card input label badge alert field separator direction skeleton empty sidebar breadcrumb collapsible dropdown-menu avatar sheet tooltip navigation-menu use-mobile table spinner --overwrite --yes"
+run = "./node_modules/.bin/shadcn add button card input label badge alert field separator direction skeleton empty sidebar breadcrumb collapsible dropdown-menu avatar sheet tooltip navigation-menu use-mobile table spinner tabs --overwrite --yes"
 
 [tasks."ui:blocks"]
 description = "Show what upstream shadcn changed in each owned block, in place (shadcn add --diff from the package, whose components alias puts blocks in packages/ui/src/blocks/<name>/components); merge by hand, never --overwrite (it drops Remy's data)"
@@ -153,42 +144,4 @@ dir = "{{config_root}}"
 sources = ["packages/ui/messages/*.json", "packages/ui/project.inlang/settings.json", "packages/ui/paraglide.mjs"]
 outputs = ["packages/ui/src/paraglide/**/*"]
 run = "node packages/ui/paraglide.mjs"
-
-
-[tasks."docs:dev"]
-description = "LOCAL app, REMOTE answers: run the app with hot reload on this machine, its answers from the production index remy-docs-pages (each question is a model call) (CLOUDFLARE_ENV=docs). Ask at /en/docs/ask; docs pages at /en/docs. Needs Cloudflare login"
-dir = "{{config_root}}"
-raw = true
-env = { CLOUDFLARE_ENV = "docs" }
-run = "./node_modules/.bin/vite dev"
-
-# Route B (.plans/docs-ai-sync.md): the docs as files in the R2 bucket remy-docs, one per page; AI
-# Search's R2 source syncs from it (new, changed and deleted files).
-[tasks."docs:publish"]
-description = "REMOTE, PRODUCTION: make the R2 bucket remy-docs hold exactly the docs pages (put each, delete any other file), then start an AI Search sync. Seconds"
-dir = "{{config_root}}"
-run = "node scripts/docs-publish.mjs"
-
-[tasks."docs:questions"]
-description = "REMOTE, search only (no answers, next to no cost): each fixed question (src/docs/questions.json) must find its docs page in the top three. Instance: remy-docs-pages (default)"
-dir = "{{config_root}}"
-run = "node scripts/docs-questions.mjs"
-
-# The emergency stop for answers: a Worker secret the answer code checks before any model call.
-# Takes effect in seconds (Wrangler deploys the secret as a new version, no build); the docs pages stay up.
-[tasks."docs:answers:off"]
-description = "REMOTE, PRODUCTION: stop all AI answers now (secret ASK_PAUSED; /docs/ask shows \"no answer\" and the docs). Seconds, no build"
-dir = "{{config_root}}"
-run = "printf 1 | ./node_modules/.bin/wrangler secret put ASK_PAUSED"
-
-[tasks."docs:answers:on"]
-description = "REMOTE, PRODUCTION: turn AI answers back on (delete the secret ASK_PAUSED; Wrangler asks you to confirm)"
-dir = "{{config_root}}"
-raw = true
-run = "./node_modules/.bin/wrangler secret delete ASK_PAUSED"
-
-[tasks."docs:answers:status"]
-description = "REMOTE, read only: say whether AI answers are on or stopped in production"
-dir = "{{config_root}}"
-run = "./node_modules/.bin/wrangler secret list --format json | grep -q '\"ASK_PAUSED\"' && echo 'Answers: STOPPED (mise run docs:answers:on to resume)' || echo 'Answers: on'"
 

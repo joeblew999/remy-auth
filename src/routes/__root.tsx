@@ -36,7 +36,7 @@ function Document({ children }: { children: React.ReactNode }) {
   return <html lang={locale} dir={direction(locale)} suppressHydrationWarning>
     <head><HeadContent /></head>
     <body><DirectionProvider direction={direction(locale)}><ThemeProvider defaultTheme="system" storageKey="theme">
-      {/* The site header's "Docs" link: the docs are this app's own (src/docs). */}
+      {/* The site header's "Docs" link: the docs Worker (docs/). */}
       <SiteNavLinks value={docsHeaderLink(locale)}>{children}</SiteNavLinks></ThemeProvider></DirectionProvider>
       <TanStackDevtools plugins={[
         { name: 'TanStack Router', render: <TanStackRouterDevtoolsPanel /> },

@@ -1,18 +1,17 @@
 import { test, expect, type Page } from '@playwright/test';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { locales } from '@joeblew999/remy-ui/runtime';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { checkedLocales, collectErrors, endonym, direction, localizedPath, formatTag } from '@joeblew999/remy-ui/checks';
 import { serverAppChecks } from '@joeblew999/remy-ui/app-checks';
 import { localeInfo } from '../packages/ui/src/locale-info';
 import { sitePaths, appPaths } from '@joeblew999/remy-ui/paths';
-import { askPath, docsPaths, docsSearchPath, everyPath } from '../src/paths';
+import { everyPath } from '../src/paths';
 import { cspEnforced } from '../src/csp';
 import { apiChecks, reservationApiChecks } from '@joeblew999/remy-ui/api/checks';
 import { info } from '@joeblew999/remy-auth-contract';
 import { router } from '../src/api/router';
 import { registeredOrigins } from '../src/api/origins';
-import { docsI18nDir, docsLangs, docsPath, docsTable } from '../src/docs/table.js';
 import { partChecks } from '@joeblew999/remy-ui/parts/checks';
 import { codeSplittingChecks } from '@joeblew999/remy-ui/showcase/code-splitting.checks';
 import { buildBoundaryChecks } from '@joeblew999/remy-ui/showcase/build-boundaries.checks';
@@ -21,14 +20,9 @@ import { buildBoundaryChecks } from '@joeblew999/remy-ui/showcase/build-boundari
 // server-rendered app (@joeblew999/remy-ui/app-checks), with this app's own pages beside the shared ones,
 // and one for the parts it lists in src/parts.json (partChecks), which serverAppChecks leaves to them.
 // Site pages (for Google) and app pages (for people using the app) never mix; see paths.js.
-// This app adds the docs (site pages in English and their translations, docs/i18n/), the docs search
-// and the answer page (site pages): src/paths.ts.
-const translations = Object.fromEntries(docsTable.map(row => [docsPath(row.slug), docsLangs(row, readdirSync(docsI18nDir), existsSync)]));
-const oneLanguage = { locale: 'en', paths: docsPaths, translations };
+// The docs are the docs Worker's (docs/, its own checks: docs/tests).
 serverAppChecks({
   service: 'remy-auth',
-  ownSitePaths: [...docsPaths, docsSearchPath, askPath],
-  oneLanguage,
   formats: { extra: formatsExtra },
   // The middleware's own switch (src/csp.ts): the checks expect the header it sends.
   cspEnforced,
@@ -36,13 +30,13 @@ serverAppChecks({
 // Every part listed in src/parts.json brings its own checks: the sitemap (seo-routes), the streamed
 // place and its failing navigation (deferred-place), the status card, the time-zone pages.
 partChecks({ options: {
-  'seo-routes': { paths: sitePaths, oneLanguage },
+  'seo-routes': { paths: sitePaths },
   'status-card': { service: 'remy-auth', path: '/app', endpoint: '/api/status' },
 } });
 // The demo reservation and the status card are contract endpoints (@joeblew999/remy-auth-contract).
 apiChecks({ router, title: info.title, origins: registeredOrigins });
 reservationApiChecks();
-codeSplittingChecks({ paths: [...sitePaths, '/docs'] });
+codeSplittingChecks({ paths: sitePaths });
 codeSplittingChecks({ paths: appPaths, home: '/app' });
 // The app mounts TanStack Devtools (src/routes/__root.tsx), whose shell must never ship either.
 buildBoundaryChecks({ paths: everyPath, markers: [
@@ -133,4 +127,14 @@ test('formats page hydrates in every language without errors and fills the devic
   }
   expect(errors).toEqual([]);
   expect(endonym('en')).toBe('English');
+});
+
+// The docs moved to the docs Worker: each old address answers a permanent redirect to its page there,
+// in the same language (src/routes/docs.$.tsx), so links and search engines follow.
+test('the old docs addresses redirect to the docs Worker, keeping the language', async ({ request }) => {
+  for (const [from, to] of [['/en/docs', '/dev'], ['/en/docs/gui', '/dev/gui'], ['/es/docs/how-we-work', '/dev/es/how-we-work']]) {
+    const response = await request.get(from!, { maxRedirects: 0 });
+    expect(response.status(), from).toBe(301);
+    expect(response.headers().location, from).toBe(`${process.env.DOCS_ORIGIN}${to}`);
+  }
 });

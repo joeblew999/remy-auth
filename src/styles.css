@@ -2,9 +2,3 @@
    package's own classes: tailwind.css), then where this app's classes live. */
 @import "@joeblew999/remy-ui/tailwind.css";
 @source "../src";
-
-/* Code blocks in the docs: Shiki writes both themes as CSS variables (source.config.ts), and this is
-   Shiki's documented rule for showing one of them (shiki.style/guide/dual-themes), following the
-   theme class the shared ThemeProvider puts on <html>. */
-.shiki, .shiki span { color: var(--shiki-light); background-color: var(--shiki-light-bg); }
-.dark .shiki, .dark .shiki span { color: var(--shiki-dark); background-color: var(--shiki-dark-bg); }

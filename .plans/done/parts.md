@@ -1,9 +1,9 @@
 # Parts: add or remove a piece of any Remy app in one line
 
-Closed 2026-09-26: the mechanism and four parts (time-zones, deferred-place, seo-routes, status-card) in remy-ui 0.11.0; leave-guard, search-params and observability stay package modules (reasons below); "Writing a part" is in packages/ui/README.md. remy-auth-app adopts parts when it wants them.
+Closed 2026-09-26: the mechanism and four parts (time-zones, deferred-place, seo-routes, status-card) in remy-ui 0.11.0; leave-guard, search-params and observability stay package modules (reasons below); "Writing a part" is in docs/content/dev/ui-package.md. remy-auth-app adopts parts when it wants them.
 
 Status: proposed 2026-09-25 under the owner's delegation. Owner: remy-auth. Executor/Reviewer roles
-as in [plans and roles](../../docs/development.md#plans-and-roles). Owner, 2026-09-25: parts of the GUI (some for operations,
+as in [plans and roles](../../docs/content/dev/development.md#plans-and-roles). Owner, 2026-09-25: parts of the GUI (some for operations,
 some for testing) will be wanted again and again; adding and removing them from any Remy app must
 be child's play.
 
@@ -176,7 +176,7 @@ package README (work item 5).
 2. **Convert** the parts in the table, one folder each, with their checks.
 3. **Both apps** list their parts; remy-auth-app lists only the ones prerendering allows.
 4. **A check** that removing a part from the list removes its routes, bundle code and checks.
-5. **Docs:** how to write a part, in the package README; the parts list in `docs/gui.md`.
+5. **Docs:** how to write a part, in the package README; the parts list in `docs/content/dev/gui.md`.
 
 ## Acceptance
 

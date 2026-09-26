@@ -1,0 +1,4 @@
+# Cloudflare Workers static assets: Vite names these files by their content hash, so they never
+# change; browsers may keep them for a year without asking again.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

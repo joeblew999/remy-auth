@@ -5,7 +5,7 @@ Closed 2026-09-26: docs at /docs (server-rendered, Spanish translation), search 
 Status: approved by the owner 2026-09-25 ("I approve all your recommendations", Workers AI ceiling
 $10 a month); D1 to D7 built on branch `docs-site` (see [Implementation](#implementation-2026-09-25));
 waiting for the Reviewer, then deploy, `docs:index` and the remote answer check.
-Owner: remy-auth. Executor/Reviewer roles as in [plans and roles](../../docs/development.md#plans-and-roles).
+Owner: remy-auth. Executor/Reviewer roles as in [plans and roles](../../docs/content/dev/development.md#plans-and-roles).
 Owner, 2026-09-25: "The site needs docs? What shadcn way is easy? Markdown based or something or
 tanstack. The docs are going to need AI answers in Cloudflare, so a person hitting the site can
 easily ask questions and get taken to the page with the answers. The docs are different from
@@ -52,7 +52,7 @@ Sources per score:
   its example hosts on Nitro, not Cloudflare. Its Cloudflare issues (#1950, #2508, #2800, #2875)
   are all closed. `fumadocs-ui` needs its own CSS preset (`fumadocs-ui/css/neutral.css`) and
   `RootProvider`, and its `DocsLayout` brings its own header: two headers, two sets of
-  components beside the ones shadcn's CLI writes (breaks [UI: shadcn and TanStack all the way](../../docs/how-we-work.md#ui-shadcn-and-tanstack-all-the-way)).
+  components beside the ones shadcn's CLI writes (breaks [UI: shadcn and TanStack all the way](../../docs/content/dev/how-we-work.md#ui-shadcn-and-tanstack-all-the-way)).
 - NoJS, Repo, Code, TSS/CF and Cost for the top two: the spike below. Maintenance: npm
   (`fumadocs-core` 16.15.14 and `fumadocs-mdx` 15.4.5 published 2026-09-24/25, frequent
   releases: pin exactly; `@content-collections/core` 0.15.3, 2026-09-21; `@tanstack/markdown`
@@ -103,8 +103,8 @@ cannot be tuned enough; it costs us chunking, embedding and retrieval code.
 
 - **fumadocs** (`fumadocs-core` 16.15.14, `fumadocs-mdx` 15.4.5, Vite plugin before Start's):
   seven repo files served at `/en/docs/...` inside `SiteShell`, a docs nav and an "On this page"
-  list as plain links. With scripts stripped, `docs/gui.md`, `docs/development.md` and
-  `tasks/README.md` (and README, tooling) have every heading with its id (7 of 7, 3 of 3, 2 of 2,
+  list as plain links. With scripts stripped, `docs/content/dev/gui.md`, `docs/content/dev/development.md` and
+  `docs/content/dev/tasks.md` (and README, tooling) have every heading with its id (7 of 7, 3 of 3, 2 of 2,
   6 of 6, 12 of 12), every table (2, 0, 2, 3, 2) and every code block, highlighted by Shiki; title
   from the file's first heading, self-canonical, no Suspense left pending. A screenshot shows the
   stock look. Relative links became `/docs/<slug>#hash` or GitHub links by a 20-line remark
@@ -117,7 +117,7 @@ cannot be tuned enough; it costs us chunking, embedding and retrieval code.
 - **Content Collections** 0.15.3 built the same pages as HTML strings (2.4 s content build);
   complete without JavaScript too.
 - **AI Search**: a disposable instance `remy-docs-spike` (deleted afterwards) with custom
-  metadata `url` and `title`; five sections of `docs/how-we-work.md` and `docs/development.md`
+  metadata `url` and `title`; five sections of `docs/content/dev/how-we-work.md` and `docs/content/dev/development.md`
   uploaded, one item per `##` heading. A local Worker with a remote `ai_search` binding asked
   "What must I run before pushing or releasing, and why not pipe it through grep?" and got a
   correct two-sentence answer citing `/en/docs/how-we-work#gates-before-anything-leaves-the-machine`
@@ -128,7 +128,7 @@ cannot be tuned enough; it costs us chunking, embedding and retrieval code.
 1. **Docs are site pages** at `/docs` and `/docs/<slug>`, listed in `paths.js` from one docs table,
    framed by `SiteShell` with a "Docs" link in its header. Reason: they are for Google and for
    anyone arriving from a search; the site header already exists.
-2. **Content:** `README.md`, `docs/*.md`, `packages/ui/README.md`, `tasks/README.md` and
+2. **Content:** `README.md`, `docs/*.md`, `docs/content/dev/ui-package.md`, `docs/content/dev/tasks.md` and
    `CHANGELOG.md`. Not `.plans/` (working notes that change hourly and hold open owner decisions),
    not `AGENTS.md` or `CLAUDE.md` (agent indexes). One table (file to slug) is the only list.
 3. **English only, canonical to `/en`.** Every locale has the page (the frame is localized by
@@ -226,7 +226,7 @@ needs prepaid credits (owner's call).
   login. It was **not run**: uploading to the production index was held back for the orchestrator,
   so the instance is empty until the first `docs:index` after deploy.
 - **Two docs lines reworded**: the compiled docs ship to the browser as JavaScript, so the app's
-  build-boundary marker for server code (`/\.cf\b/`, `request.cf`) matched prose in `docs/gui.md`
+  build-boundary marker for server code (`/\.cf\b/`, `request.cf`) matched prose in `docs/content/dev/gui.md`
   and `CHANGELOG.md`. The lines now say "the request's `cf` properties"; the marker is unchanged.
   Any future docs text naming `request.cf` will trip it again (owner's call whether to narrow it).
 
@@ -371,7 +371,7 @@ Decisions (delegated):
 - Query length: at most 100 characters (box and server).
 - Code blocks are not searched: Fumadocs' structured text leaves them out (as the answers index notes).
 - Ranking is Fumadocs' default (any word, tolerance 1, grouped by page); "Workers Logs" finds its
-  section in `docs/tooling.md` but not first. Tune through `search` options only if people complain.
+  section in `docs/content/dev/tooling.md` but not first. Tune through `search` options only if people complain.
 
 Cost: the client gets the route (4 KB) and the form (6 KB); the engine and index stay in the Worker
 (`source.server` server chunk grew to about 560 KB uncompressed, zbsearch and remark).
@@ -442,7 +442,7 @@ content folder per language; this app reads repository files in place through a 
 docs table keeps that job with one rule, and search uses Fumadocs' own i18n server.
 
 - **Files:** a translation lives at `docs/i18n/<locale>/<the English file's path>` (for example
-  `docs/i18n/es/docs/tooling.md`). `docsFile(row, locale, exists)` in `src/docs/table.js` is the one
+  `docs/content/dev/tooling.md`). `docsFile(row, locale, exists)` in `src/docs/table.js` is the one
   rule: the translation when it exists, else the English file (`exists` is the disk in Node, the
   pages Fumadocs compiled in the Worker). `source.config.ts` compiles every file under `docs/i18n/`
   whose path names a docs table file; a translation's relative links resolve from its English file's

@@ -1,0 +1,78 @@
+# The docs Worker's tasks (docs/, Fumadocs' TanStack Start template on Cloudflare), the same in every app
+# that has one (`docs:init` brings it in). [env] inputs: DOCS_ORIGIN, VITE_DOCS_ORIGIN, DOCS_PREVIEW_PORT,
+# I18N_DOCS_DIR. docs:observe and docs:ai-gateway are file tasks in docs/ (they find the shared scripts
+# beside them wherever this directory is included from).
+
+["docs:dev"]
+description = "LOCAL: the docs Worker with hot reload, http://127.0.0.1:5174/docs, /dev, /reference. With CLOUDFLARE_ENV=ask, Ask AI answers from the production index (each question is a model call)"
+dir = "{{config_root}}/docs"
+raw = true
+run = "../node_modules/.bin/vite dev"
+
+["docs:build"]
+description = "LOCAL: build the docs Worker (docs/dist) (~20 s)"
+dir = "{{config_root}}/docs"
+run = "../node_modules/.bin/vite build"
+
+["docs:check"]
+description = "LOCAL: the docs Worker's tier 0: binding types, typecheck, build (~30 s); project:check runs it"
+dir = "{{config_root}}/docs"
+run = ["../node_modules/.bin/wrangler types", "../node_modules/.bin/tsc -p .", { task = "docs:build" }]
+
+["docs:test"]
+description = "LOCAL: build, then the docs Worker's few checks (docs/tests) on Cloudflare's local runtime at DOCS_PREVIEW_PORT (~30 s)"
+dir = "{{config_root}}/docs"
+env = { PREVIEW_PORT = "{{ get_env(name='DOCS_PREVIEW_PORT', default='4174') }}" }
+run = [{ task = "docs:build" }, "../node_modules/.bin/playwright test --project=ours"]
+
+["docs:test:remote"]
+description = "REMOTE, read only: the docs checks, Google's Lighthouse audits and both MCP servers (the MCP Inspector) against DOCS_TEST_URL, default DOCS_ORIGIN (~1 min)"
+dir = "{{config_root}}/docs"
+env = { TEST_TARGET = "remote" }
+run = [
+  "TEST_BASE_URL=${DOCS_TEST_URL:-$DOCS_ORIGIN} ../node_modules/.bin/playwright test",
+  "npx -y @modelcontextprotocol/inspector@2.8.0 --cli ${DOCS_TEST_URL:-$DOCS_ORIGIN}/api/mcp/docs --transport http --method tools/list",
+  "npx -y @modelcontextprotocol/inspector@2.8.0 --cli ${DOCS_TEST_URL:-$DOCS_ORIGIN}/api/mcp/dev --transport http --method tools/list",
+]
+
+["docs:preview"]
+description = "REMOTE: deploy this build as the docs Worker's one preview, <name>-preview (overwritten each time, production untouched), answers paused; DOCS_TEST_URL=<its URL> mise run docs:test:remote checks it"
+dir = "{{config_root}}/docs"
+run = [
+  { task = "docs:build" },
+  "../node_modules/.bin/wrangler deploy --name $(node -p \"require('wrangler').unstable_readConfig({}).name\")-preview",
+  "printf 1 | ../node_modules/.bin/wrangler secret put ASK_PAUSED --name $(node -p \"require('wrangler').unstable_readConfig({}).name\")-preview",
+]
+
+["docs:deploy"]
+description = "REMOTE, PRODUCTION: build and deploy the docs Worker to DOCS_ORIGIN (~1 min), then docs:publish"
+dir = "{{config_root}}/docs"
+run = [{ task = "docs:build" }, "../node_modules/.bin/wrangler deploy", { task = "docs:publish" }]
+
+["docs:publish"]
+description = "REMOTE, PRODUCTION: make Ask AI's R2 bucket hold exactly the pages the live docs Worker serves, start an AI Search sync, then check the fixed questions find their pages (docs/src/docs/questions.json) (~1 min)"
+dir = "{{config_root}}"
+run = ["node docs/scripts/docs-publish.mjs", "node docs/scripts/docs-questions.mjs"]
+
+["docs:answers:off"]
+description = "REMOTE, PRODUCTION: stop Ask AI's answers now (the secret ASK_PAUSED; no model calls, the docs stay). Seconds, no build"
+dir = "{{config_root}}/docs"
+run = "printf 1 | ../node_modules/.bin/wrangler secret put ASK_PAUSED"
+
+["docs:answers:on"]
+description = "REMOTE, PRODUCTION: resume Ask AI's answers (delete the secret ASK_PAUSED; Wrangler asks you to confirm)"
+dir = "{{config_root}}/docs"
+raw = true
+run = "../node_modules/.bin/wrangler secret delete ASK_PAUSED"
+
+["docs:cli"]
+description = "The pinned Fumadocs CLI in the docs Worker (feature docs|search|llms|mcp|og|..., export; pass --help); what it writes is a change to review"
+raw_args = true
+dir = "{{config_root}}/docs"
+run = "node ../node_modules/@fumadocs/cli/dist/index.js"
+
+["docs:init"]
+description = "Bring the docs Worker into this app at a remy-auth tag (docs/; then edit docs.config.ts, wrangler.jsonc's names, src/lib/openapi.ts's contract and content/, and add \"docs\" to package.json workspaces). Refuses to overwrite an existing docs/"
+dir = "{{config_root}}"
+usage = 'arg "<ref>" help="The remy-auth tag to take the docs app from, e.g. v0.12.0 (match your @joeblew999/remy-ui version)"'
+run = "npx -y giget@3.3.1 gh:joeblew999/remy-auth/docs#${usage_ref} docs"

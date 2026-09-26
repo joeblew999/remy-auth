@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="REMOTE: show or change the AI Gateway in front of the docs Worker's Ask AI (as cf:ai-gateway): show | rate-limit off | rate-limit <requests>/<seconds> | logs on|off; changes are read back. Through fnox"
+#MISE dir="{{config_root}}/docs"
+set -euo pipefail
+exec fnox exec -- node "$(dirname "$0")/../cf/gateway.mjs" "$@"

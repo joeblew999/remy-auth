@@ -7,7 +7,7 @@ should be a skill from the docs? It's a whole research area in itself?"
 ## Today
 
 remy-auth-app's `AGENTS.md` links to remy-auth's docs on GitHub `main`
-(`https://github.com/joeblew999/remy-auth/blob/main/docs/how-we-work.md`, development, tooling). Two
+(`https://github.com/joeblew999/remy-auth/blob/main/docs/content/dev/how-we-work.md`, development, tooling). Two
 faults: **unpinned** (the app runs remy-ui 0.11.0 and tasks `ref=v0.11.0`, but its agents read today's
 `main`, so the rules can run ahead of its code) and **web-only** (an agent must fetch the pages; nothing
 checks it did).
@@ -131,7 +131,7 @@ English, 169 KB Spanish) and one `.md` per page. What the output needs:
 
 ### 1. Should it be docs at all? The rules audit
 
-89 distinct rules in how-we-work, development, tooling and `tasks/README.md`:
+89 distinct rules in how-we-work, development, tooling and `docs/content/dev/tasks.md`:
 **22 enforced, 31 checkable, 36 prose only.**
 
 - **Enforced, but not in apps.** `ui:verify` and `ui:release` are in the root `mise.toml`, and
@@ -196,7 +196,7 @@ English, 169 KB Spanish) and one `.md` per page. What the output needs:
 ### 2. Can the tools describe themselves?
 
 Yes, for tasks and the API. `mise generate task-docs` renders every task's description, dependencies,
-arguments and flags, included tasks too. The per-task "Does" rows in `tasks/README.md` become a
+arguments and flags, included tasks too. The per-task "Does" rows in `docs/content/dev/tasks.md` become a
 generated block; the hand-written part keeps only grouping, tiers and cross-links. Two gaps: it does not
 say which include a task came from, and `--style detailed` equals `simple` in 2026.9.12.
 `mise tasks --json` is the data for the lint. The API reference is already oRPC's `/api/doc`. Package
@@ -220,7 +220,7 @@ shared mise task:
 - the package skill's `references/`: the same `llms()` output via the Node loader, at pack time
 - the task reference: `mise generate task-docs`
 
-The prose-only list needs one home too: a "Rules" section in `docs/how-we-work.md` whose items link to
+The prose-only list needs one home too: a "Rules" section in `docs/content/dev/how-we-work.md` whose items link to
 the section that explains each. The skill's `SKILL.md` body and the app's `AGENTS.md` block are
 generated from that section. Nothing is hand-copied.
 
@@ -298,7 +298,7 @@ only, so it is not the main route.
    | Site pages | `docs/*.md` | Fumadocs | (exists) |
    | `llms.txt`, `llms-full.txt`, `/docs/<slug>.md` | `docs/*.md` | Fumadocs `llms()` in server routes, over a loader from `docsTable` | none; runtime |
    | Skill references | `docs/*.md` | Fumadocs `llms()` via the Node loader, links made relative | `docs:skill`, run by `ui:pack`/`ui:release` |
-   | `SKILL.md` body, `AGENTS.md` block | the "Rules" section of `docs/how-we-work.md` | the same script | `docs:skill` (publisher); `agents:rules` (apps, `--check` in tier 0) |
+   | `SKILL.md` body, `AGENTS.md` block | the "Rules" section of `docs/content/dev/how-we-work.md` | the same script | `docs:skill` (publisher); `agents:rules` (apps, `--check` in tier 0) |
    | Task reference | task descriptions and usage specs | `mise generate task-docs --inject` | `docs:tasks` (`--check` in tier 0) |
    | API reference | oRPC router | oRPC | (exists) |
 
@@ -335,7 +335,7 @@ only, so it is not the main route.
 1. **Checks:** `project:layout` and the `mise tasks --json` lint as shared tier-0 tasks; `forbidOnly` in
    the shared `playwrightConfig`; move the skill-pin, lockfile and regenerate-then-diff checks into
    `tasks/`. Prove in remy-auth-app.
-2. **Rules section:** write the 36 prose-only rules once as a "Rules" section in `docs/how-we-work.md`,
+2. **Rules section:** write the 36 prose-only rules once as a "Rules" section in `docs/content/dev/how-we-work.md`,
    each linking to its explanation; drop repeats elsewhere.
 3. **Loader:** a Fumadocs loader from `docsTable` (its slugs, order and translation rules), the
    `source.config.ts` root fix, `includeProcessedMarkdown`.
@@ -348,7 +348,7 @@ only, so it is not the main route.
    block; remy-auth-app's `AGENTS.md` loses its GitHub `main` links. Prove with Codex and Claude that
    the skill is listed and the block loads, then that an upgrade from one release to the next shows the
    rule change in the diff.
-7. **Task reference:** `docs:tasks` injects `mise generate task-docs` into `tasks/README.md`; the
+7. **Task reference:** `docs:tasks` injects `mise generate task-docs` into `docs/content/dev/tasks.md`; the
    hand-written tables keep the grouping only.
 8. **Later, the owner's call:** the AI Search public MCP or the Fumadocs MCP route; agent evals.
 
@@ -382,7 +382,7 @@ version-matched reference, and `llms.txt` because Fumadocs makes it cheap.
 ## Tool-up trial (2026-09-26)
 
 Owner: "convert 1 doc and then tool up to see what works and does not work well ... don't miss any
-aspects". Two trials: `docs/gui.md` converted on the local branch `fumadocs-trial` (worktree
+aspects". Two trials: `docs/content/dev/gui.md` converted on the local branch `fumadocs-trial` (worktree
 `.claude/worktrees/fumadocs-trial`); a scratch app from `create-fumadocs-app` 16.2.9 `--template
 tanstack-start --search orama`, then every `@fumadocs/cli` 1.7.0 feature, one commit each, built and
 each route requested.
@@ -445,3 +445,137 @@ Small steps, one at a time with the owner, each ending with a build and `browser
    `source.config.ts`, `source.server.ts` code it replaces.
 5. Search through `createFromSource`; delete our search API.
 6. The CLI's `llms.txt`, `.md` routes; `docs:publish` from them; link checks.
+
+## Branch `fumadocs-trial`: all in (2026-09-26)
+
+Owner: "Go all in on fuma docs and cli ... the system can be adapted so you can get the mise and cli
+aligned", "get as much out of it as you can", "once we are we can review". Preview (throwaway Worker,
+answers paused): https://remy-auth-check-fumadocs.gedw99.workers.dev/en/docs
+
+What it gives, each requested on the preview:
+
+| What | Where | How |
+| --- | --- | --- |
+| Docs from the loader | `/en/docs`, `/es/docs/how-we-work` | `content/docs` + `meta.json`, frontmatter, `fumadocs-mdx/macro`, one splat route |
+| Previous / next, last updated | every docs page | `findNeighbour`, `lastModified` (git) |
+| Page actions | every docs page | copy Markdown, view it, open in ChatGPT or Claude (shadcn dropdown) |
+| Social images | `/en/og/docs/gui/image.webp`, `og:image` on each page | `docs:cli feature og` (takumi) |
+| `llms.txt`, `llms-full.txt` per language | `/llms.txt`, `/es/llms.txt`, `/en/llms-full.txt` | `docs:cli feature llms` |
+| Markdown per page per language | `/en/docs/gui.md`, `/es/docs/tooling.md` | same |
+| Search API | `/api/search?query=mise&locale=es` | the template's route, one shared server |
+| MCP server | `POST /api/mcp`: `list_pages`, `get_page`, `search` | `docs:cli feature mcp` |
+| WebMCP (experimental) | docs pages, Chrome's `#enable-webmcp-testing` | `docs:cli feature webmcp`, adapted |
+| Callouts, code tabs, steps | `:::note` in `gui` | Fumadocs plugins, rendered as shadcn Alert and Tabs |
+| `docs:publish` from the site | R2 gets each page's `.md` | fetched from the live site after deploy |
+| i18n tasks on Fumadocs' layout | `mise run i18n:status` | `<name>.<locale>.md` beside `<name>.md` |
+| The CLI in mise | `mise run docs:cli -- feature ...` | pinned `@fumadocs/cli` 1.7.0 |
+
+For the review:
+1. **Worker size:** 2.71 MB gzip of which the OG renderer's WebAssembly is 1.6 MB (free plan limit 3 MB,
+   paid 10 MB). Option: prerender the images at build, keeping them out of the Worker.
+2. **Tests:** `tests/docs.spec.ts` and `tests/gui.spec.ts` still import the old table exports; level 1
+   stops at load. Next after the review.
+3. **Stock rendering** ships each page's compiled Markdown (gui: 142.5 KB, 23.6 KB gzip) where the old
+   page sent data; the Core Web Vitals gate will say whether it matters.
+4. **EPUB** cannot run in the Worker (`ejs` uses `new Function`); a build-time mise task or drop it.
+5. **Not wired yet:** Mermaid; the OpenAPI reference (`fumadocs-openapi`) and TypeScript type tables
+   (`fumadocs-typescript`) render with Fumadocs UI components, so they need shadcn mappings first.
+6. **`fumadocs-ui`** is installed only for the OG renderer (`fumadocs-ui/og/takumi`), no UI from it.
+7. **Frozen translation work** this creates: Spanish descriptions, the "Changelog" link title
+   (`meta.es.json`), seven new UI strings in twelve catalogs, and the provenance comment still showing in
+   Spanish `.md` output (removed in step 4).
+8. **Consumers:** the shared i18n tasks changed layout (`I18N_DOCS_TABLE` gone, `I18N_DOCS_DIR`
+   optional); remy-auth-app gets it on its next tasks ref.
+9. `llms.txt` links are site-relative (`/docs/gui`); outside tools may want absolute, localized URLs.
+10. Fixed on the way: the Look item "Docs pages open with repository links meant for GitHub".
+
+## Round 2: Fumadocs UI, two audiences, every feature (2026-09-26)
+
+Owner: "you can change our system to suit fumadocs too ... until you have adopted all features you will
+not really know ... it may reduce any custom code ... help me to decide with recommendations ... product
+docs read by users ... images or videos". Previews side by side (answers paused on both):
+- ours, shadcn-built docs UI: https://remy-auth-check-fumadocs.gedw99.workers.dev/en/docs/developers
+  (before the split into tabs: /en/docs/gui there)
+- Fumadocs UI in shadcn's colours: https://remy-auth-check-fumadocs-ui.gedw99.workers.dev/en/docs
+
+Adopted and seen working: Fumadocs UI (DocsLayout, DocsPage, search dialog, table of contents with
+scroll-spy, code copy, image zoom, page actions, edit on GitHub, last update); root folders as tabs
+(Guide, Developers) with Lucide icons and sections; a product guide with real screenshots, a recorded
+video (`browser:shots --video`), tabs, steps, cards, accordions; a Writing docs page with Files, Mermaid
+and a type table from our TypeScript; the changelog through `<include>`; everything from round 1.
+
+Custom code, lines without comments: stock from the CLI and template 270; the docs page on Fumadocs UI
+195 (our own shadcn docs UI was ~420); the old docs UI now left only for the search and answer pages
+103; search and Ask AI 386; `table.js` 38.
+
+Recommendations, each the owner's call where it touches a rule:
+1. **Fumadocs UI for the docs area, shadcn stays for the site and app.** Amend the rule to "shadcn for
+   the site and app; Fumadocs UI with its shadcn preset for docs". It halves our docs UI and every later
+   Fumadocs feature arrives by upgrade.
+2. **One docs layout for every repo:** `content/docs/guide` (product docs for the app's users) and
+   `content/docs/developers`, each a root folder; media in `media/` beside the pages.
+3. **Move the docs system into the shared package** as a part (source, routes, view), so a consumer adds
+   `content/docs` and gets the same docs. Next plan after this one.
+4. **Search:** Fumadocs UI's dialog replaces our live search box; keep `/docs/search` as the no-JavaScript
+   page inside DocsLayout; delete the old nav, content and page-action files.
+5. **Ask AI:** try `docs:cli feature ai` (Fumadocs' Ask AI panel) with its `/api/chat` backed by our AI
+   Search answers, instead of our own ask form and answer UI. A trial first.
+6. **Social images:** prerender them at build, or keep them dynamic only on the paid Workers plan: they
+   are 1.6 of the Worker's 3.1 MB gzip (limits: 3 MB free, 10 MB paid).
+7. **OpenAPI reference** (`fumadocs-openapi`, `openapi.staticSource()` in the loader): split the loader
+   into a server copy and a browser copy first, or the whole spec ships to every docs page.
+8. **`remark-llms`** for the `.md` and `llms.txt` output of `.mdx` pages, which now carry JSX and image
+   placeholders.
+9. **Drop EPUB** (cannot run in a Worker) and the CLI's `tree` (needs `tree`, not in the mise registry).
+10. **Then:** rewrite `tests/docs.spec.ts` and `tests/gui.spec.ts` for the new layout, run the full tier,
+    merge; the frozen translation work grows by the guide pages and the new strings.
+
+## Round 3: two sites, then their own Worker (2026-09-26)
+
+Owner: split docs into users (product) and dev, each with its own languages; docs leave Paraglide; OpenAPI;
+llms for both, so Google and Gemini get every language; "we could run docs on a different worker ...
+not so bound by the workers AI size limits". Decided and built on the branch:
+
+- **`docs/` is its own app and Worker (`remy-auth-docs`)**, Fumadocs' TanStack Start template on
+  Cloudflare's Vite plugin. The app Worker went from 5.2 to 0.6 MB gzip; the docs Worker is 4.9 of its own
+  10 MB. The app keeps a Docs link (VITE_DOCS_ORIGIN) and 301s its old /<locale>/docs/* to the docs Worker.
+- **Two sites:** users' docs at `/docs` (`docs/content/users`), developer docs at `/dev`
+  (`docs/content/dev`), each with its own `i18n.json` (languages), `meta.json` (navigation), loader,
+  search (`/api/search/<site>`), `llms.txt`/`llms-full.txt`/`.md` per language, MCP (`/api/mcp/<site>`) and
+  social images (`/og/<site>/...`). URLs: `/docs/es/formats`. No Paraglide in the docs Worker.
+- **For search engines and their AI answers:** `<html lang>` per page, canonical, hreflang for every
+  language a page has, `/sitemap.xml` with alternates, `/robots.txt`, descriptions (a translation without
+  one borrows the English until step 4), social images.
+- **API reference:** `/dev/api/...` from the oRPC contract alone (fumadocs-openapi): playground, examples in
+  seven languages, schemas.
+- **Shared, not copied:** the Start middleware (request ID, nonce CSP, server function log) and the CSP report
+  handler moved into `@joeblew999/remy-ui` (`./start`, `./csp-report`); both Workers use them.
+- **Tasks** (consolidated in round 4 to 14, shared in `tasks/`): `docs:dev`, `docs:build`, `docs:check`,
+  `docs:test`, `docs:test:remote`, `docs:preview`, `docs:deploy`, `docs:cli`, `docs:init`, `docs:publish` (both
+  sites, keys `<site>/<lang>/<page>.md`), `docs:answers:*` on the docs Worker.
+
+Next, in order:
+1. **Ask AI in the docs Worker** as Fumadocs' AI panel (`docs:cli feature ai`) backed by our AI Search
+   answers (`ask.server.ts` is already here), one per site; the app's old search and ask pages are gone.
+2. **Caching:** docs HTML changes only with a deploy, so cache it at the edge (or prerender it); the Worker
+   then answers search, MCP, social images and Ask AI only.
+3. **Tests:** move the docs checks into the docs app (its own Playwright project), drop the app's docs
+   tests, run the full tier on both Workers.
+4. **Merge and first deploy** of `remy-auth-docs` (a new production Worker), then `docs:publish` and Ask AI on.
+5. **The shared docs part:** the docs app's code into the package, so a consumer adds `docs/content` only.
+
+## Round 4: cleanup on the branch (2026-09-26)
+
+Owner: "you have shitloads to clean up. don't merge to main yet"; "I don't want a ton of complex scripts ...
+mise tasks one line calling tools"; "you hardly need any docs tests, that's why we embraced fuma". Done on
+the branch: build output untracked; unused dependencies removed; the app without AI Search or docs routes
+(old addresses 301 to the docs Worker); the docs Worker's few tests (SEO head, Ask AI's route, hydration);
+the shared smoke tier fixed; `docs:*` tasks one tool call each (MCP Inspector, wrangler, playwright, vite);
+observability through fnox with one API token; the API reference on its own URL; absolute URLs from the
+request (Lighthouse SEO 100); media by URL; Ask AI's no-answer marker; `docs.config.ts` for the product's
+specifics; Fumadocs UI text files per language. Production docs deployed from the branch.
+
+Next: **the shared docs part** (its own step): the `docs:*` tasks into `tasks/` so any app has them (the
+observability ones must read the docs app's Wrangler configuration wherever they are included from), and a
+`docs:init` that brings the docs app into an app at its pinned tag (content, `docs.config.ts`,
+`wrangler.jsonc` names and the contract import are the app's). Then remy-auth-app adopts it.
