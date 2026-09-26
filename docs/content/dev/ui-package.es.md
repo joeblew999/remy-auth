@@ -56,8 +56,9 @@ Lo que tiene toda app basada en el paquete, para que las tareas y comprobaciones
 - **`tests/smoke.spec.ts`**, una sola llamada a `smokeChecks(...)`: `project:test:smoke` y la comprobación tras cada
   `cf:deploy` (`project:test:live`) lo ejecutan, y fallan con «No tests found» si no existe.
 - **`.plans/now.md`**, la única lista ordenada del trabajo pendiente (`plans:check`, en el nivel 0).
-- **fnox fijado en su `mise.toml`**, con `GITHUB_TOKEN` en el llavero, para instalar desde GitHub
-  Packages (más abajo).
+- **Instalaciones y actualizaciones mediante las tareas compartidas**, nunca a mano: `mise run project:setup` (instalar,
+  skills, MCP, verificar) y `mise run project:upgrade-ui <version>` (la versión exacta del paquete y el include de
+  tareas en el mismo tag, y después verificar). Ambas toman el token de GitHub Packages de `gh auth token`.
 
 ## Exportaciones [#exports]
 
@@ -141,8 +142,8 @@ Los consumidores añaden esto a su `.npmrc`:
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
-e instalan con un token que tenga `read:packages`, guardado en el llavero mediante fnox (fijado en los
-`[tools]` de la app): `fnox set -p keychain GITHUB_TOKEN <token>` una vez, y después `fnox exec -- npm install`. Las versiones publicadas están en el
+e instalan mediante `mise run project:setup`, que toma un token con `read:packages` de `gh auth token`
+(o `GITHUB_TOKEN` en el shell). Las versiones publicadas están en el
 [registro de cambios](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
 
 ## Escribir una parte [#writing-a-part]
