@@ -17,6 +17,9 @@ and AI agents alike. What the code must be lives in [development principles](./d
 ## Use the project's own tools first
 
 - Start with `mise run project:setup`; [developer tooling](./tooling.md) says what it installs.
+- Before doing any step by hand (installing, upgrading, releasing, deploying, translating), find its task:
+  `mise tasks ls | grep <word>`, in whichever repository you are in; an app has the shared tasks too. Owner,
+  2026-09-26, after an app was upgraded by hand past `project:upgrade-ui`: "you know we do not reinvent wheels".
 - Run commands through the mise tasks, check the real page with the Chrome DevTools tools
   (`browser:*` tasks), and use the installed skills before reading upstream sources, searching
   `node_modules` or writing one-off scripts.
