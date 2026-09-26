@@ -21,8 +21,8 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
   shared `project:layout` in tier 0, both apps brought to it. Inventory running; after the one-writer
   translation tools (`i18n:*`, shared) land.
 
-- **Translation pipeline** ([plan](translation-pipeline.md), from issue #4): which tool does the
-  translating in the one-writer step, for every app; analysis to do later in the plan.
+- **Translations through upstream tools** ([plan](translation-pipeline.md), with issue #4): replace our
+  translation code and checks with upstream tools behind shared mise tasks, same in every app; analysis next.
 
 ## Look (from `browser:shots`, 2026-09-26)
 

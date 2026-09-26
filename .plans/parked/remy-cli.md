@@ -17,6 +17,9 @@ The 13 bash wrappers (`exec node "$(dirname "$0")/x.mjs"`) are not needed for ES
 cf/wait, cf/urls and api/spec already run as node file tasks. They exist because several tasks share
 one module and a TOML task cannot find a sibling file in mise's include cache; a CLI removes both.
 
+Translations: the i18n tasks are not to move into the CLI by default; [translation-pipeline](../translation-pipeline.md)
+looks for upstream tools that replace them first.
+
 ## End state
 
 The package ships `bin/remy.mjs`; every task in `tasks/` is a TOML one-liner with a `usage` spec (no bash,
