@@ -32,3 +32,5 @@ node_modules/
 
 # Local mise settings (a local tasks path). Secrets live in fnox (the keychain), not here.
 mise.local.toml
+/docs/test-results/
+/docs/playwright-report/
