@@ -6,6 +6,8 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-09-26
+
 ### Added
 - `providers`: `AppProviders`, what an app's root renders its pages in (reading direction, theme, source
   link), so no app misses one (remy-auth-app's theme toggle did nothing without the theme provider).

@@ -71,6 +71,11 @@ Its move to 0.12.0 was done by hand. In order:
    checklist in the UI package docs (routes per path, `tests/smoke.spec.ts`, `.plans/now.md`).
 4. Its gates (`project:check`, `project:test`), then `cf:deploy`; the report starts with the live URL.
 
+## Then: clean up the developer docs (owner, 2026-09-26: "a bit weird for a public and agent audience")
+
+Read every English page in `docs/content/dev/` as a newcomer and as an agent would: what it is, how to
+start, where the rules are; cut history, internal asides and owner quotes that do not help either reader.
+
 ## Found moving remy-auth-app to 0.12.0 (2026-09-26)
 
 Fixed in the package and shared tasks the same day (release 0.13.0, then remy-auth-app moves to it):
