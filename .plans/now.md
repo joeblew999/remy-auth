@@ -19,6 +19,11 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
 5. ~~**Caching**~~ closed 2026-09-26 ([plan](done/caching.md)): don't cache HTML yet; assets immutable.
 6. ~~**Observability**~~ closed 2026-09-26 ([plan](done/observability.md)): built; the answer-failure alert rule is a dashboard step (owner only, below).
 
+## Watching
+
+- oRPC 2.0: stay on 1.15.4 until 2.0.0 is final, then move server and clients together
+  ([watch](done/openapi-contracts.md#orpc-20-watch-2026-09-26), issue #1).
+
 ## Owner only
 
 - One alert rule in the dashboard (no API for it): Workers & Pages → Observability → Alerts → Create,
