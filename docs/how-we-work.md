@@ -36,6 +36,20 @@ Before a plan names a library or tool:
 
 Mark anything not checked as assumed.
 
+## Once a tool is chosen, take its shape
+
+Bend our system to the tool, not the tool to our system. Before building on a chosen framework:
+
+1. Scaffold its own template and run its own generators (CLI features) in a scratch app.
+2. Build it and request every route it makes; list what works and what does not.
+3. Change our layout, files and what our code hands the GUI to match, keeping only what an owner rule
+   requires (Paraglide's URLs, shadcn's UI).
+4. Delete whatever of ours the tool already does. A custom plugin or wrapper has to justify itself
+   against the stock way, not the other way round.
+
+Owner, 2026-09-26, after the Fumadocs docs were found half-custom: "It's funny how you don't realise
+until you're pushed!" ([the Fumadocs decision](../.plans/docs-for-consumers.md#decision-fumadocs-fully-2026-09-26)).
+
 ## UI: shadcn and TanStack all the way
 
 UI is hard and never done, so we take what shadcn and TanStack have spent years getting right,
