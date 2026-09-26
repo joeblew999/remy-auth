@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="LOCAL, instant: per locale, docs translations missing or stale (their English file changed since the recorded translated-from version) and UI catalog keys missing, extra or with other placeholders than English. --json for agents"
+#MISE dir="{{config_root}}"
+# A shell wrapper so the module beside it loads as ESM wherever this directory is included from.
+set -euo pipefail
+exec node "$(dirname "$0")/i18n.mjs" status "$@"

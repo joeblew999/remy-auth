@@ -1,3 +1,4 @@
+<!-- translated-from: docs/how-we-work.md @ 11dbe64a1e2ba66c0592a75aa2f69e0f075cb611 -->
 # Cómo trabajamos [#how-we-work]
 
 [Volver al índice de agentes](../AGENTS.md) · [Principios de desarrollo](development.md) · [Herramientas para desarrolladores](tooling.md)

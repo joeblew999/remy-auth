@@ -45,6 +45,17 @@ function remarkRepositoryLinks() {
 }
 
 /**
+ * A translation's first line records the English version it was translated from (the shared
+ * i18n:* tasks, tasks/README.md "Translations"): bookkeeping, not page content. Dropped before
+ * anything reads the tree, so it reaches neither the page, its search index nor its description.
+ */
+function remarkDropProvenance() {
+  return (tree: Root) => {
+    tree.children = tree.children.filter(node => !(node.type === 'html' && node.value.startsWith('<!-- translated-from:')));
+  };
+}
+
+/**
  * The page's finished HTML tree (after Shiki, heading ids and the link rewrite), exported as `tree`
  * (.plans/docs-site.md, "Server-rendered docs"). The server sends it with the page's loader data and
  * the page renders it with hast-util-to-jsx-runtime, as Fumadocs' own server-compiled Markdown does
@@ -79,7 +90,7 @@ export const docs = defineCollections({
 
 export default defineConfig({
   mdxOptions: {
-    remarkPlugins: plugins => [remarkRepositoryLinks, ...plugins],
+    remarkPlugins: plugins => [remarkDropProvenance, remarkRepositoryLinks, ...plugins],
     rehypePlugins: plugins => [...plugins, rehypeExportTree],
     // GitHub's own "default" themes: their comment colours keep 4.5:1 contrast on both backgrounds
     // (the older github-dark's comments do not), which Lighthouse's accessibility audit requires.

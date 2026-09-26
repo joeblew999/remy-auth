@@ -1,3 +1,4 @@
+<!-- translated-from: CHANGELOG.md @ d5c2d916f70f7cc9076532851b311f4391dc69e3 -->
 # Registro de cambios [#changelog]
 
 Todos los cambios importantes del paquete de UI compartido `@joeblew999/remy-ui` se documentan aquí.

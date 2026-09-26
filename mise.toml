@@ -21,6 +21,8 @@ includes = ["tasks"]
 # A worktree or agent picks its own port from the shell: PREVIEW_PORT=4231 mise run project:verify.
 PREVIEW_PORT = "{{ get_env(name='PREVIEW_PORT', default='4173') }}"
 DEPLOY_ORIGIN = "https://remy-auth.gedw99.workers.dev"
+# The shared i18n:* tasks' list of English docs: the docs table, the one list of the site's docs.
+I18N_DOCS_TABLE = "src/docs/table.js"
 
 
 [tasks."auth:cli"]
@@ -129,6 +131,8 @@ dir = "{{config_root}}"
 # A run list, not depends: mise runs depends in parallel, and ui:verify rewrites files while
 # project:verify builds.
 run = [
+  # First, so a release with missing or stale translations stops before the long checks.
+  "I18N_STRICT=1 mise run i18n:check",
   { task = "project:verify" },
   { task = "ui:verify" },
   { task = "project:test:google" },
@@ -137,8 +141,10 @@ run = [
 ]
 
 [tasks."ui:generate"]
-description = "Compile the shared locale catalogs"
+description = "Compile the shared locale catalogs (skipped when the catalogs and settings are older than the output)"
 dir = "{{config_root}}"
+sources = ["packages/ui/messages/*.json", "packages/ui/project.inlang/settings.json", "packages/ui/paraglide.mjs"]
+outputs = ["packages/ui/src/paraglide/**/*"]
 run = "node packages/ui/paraglide.mjs"
 
 
@@ -155,11 +161,6 @@ run = "./node_modules/.bin/vite dev"
 description = "REMOTE, PRODUCTION: make the R2 bucket remy-docs hold exactly the docs pages (put each, delete any other file), then start an AI Search sync. Seconds"
 dir = "{{config_root}}"
 run = "node scripts/docs-publish.mjs"
-
-[tasks."docs:translations"]
-description = "LOCAL: every translation in docs/i18n/ keeps its English file's headings (same number and levels), so an English edit cannot leave it behind unseen. Instant; project:check runs it"
-dir = "{{config_root}}"
-run = "node scripts/docs-translations.mjs"
 
 [tasks."docs:questions"]
 description = "REMOTE, search only (no answers, next to no cost): each fixed question (src/docs/questions.json) must find its docs page in the top three. Instance: remy-docs-pages (default)"
