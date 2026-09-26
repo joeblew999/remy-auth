@@ -104,15 +104,19 @@ polaco, turco y alemán) están escritos por un agente y sin revisar.
 ## Publicación [#publishing]
 
 El paquete es `@joeblew999/remy-ui` en GitHub Packages (ahí el scope debe coincidir con el
-propietario de GitHub). `mise run ui:release` hace toda la publicación desde esta máquina: ejecuta
-`project:verify` (todas las comprobaciones, en local) y `ui:verify` (los archivos de shadcn sin
-cambios), publica con tu token de `gh`, etiqueta `vX.Y.Z` a partir de `packages/ui/package.json`,
-hace push y crea el release de GitHub a partir de la sección correspondiente del CHANGELOG,
-condicionado solo al nivel 1 (nuestras propias comprobaciones, alrededor de 1½ minutos). CI
-(`.github/workflows/google.yml`) ejecuta el nivel 2, las auditorías Lighthouse de Google y Core Web
-Vitals, en cada push y tag, y publica un tag ya empujado por sí mismo salvo que la versión ya esté
-publicada, de modo que cualquiera de las dos rutas funciona. Primero incrementa la versión y el
-CHANGELOG; la tarea rechaza un árbol sucio, una rama distinta de main, o un tag ya existente.
+propietario de GitHub). `mise run ui:release` hace toda la publicación desde esta máquina y se
+detiene en el primer fallo: traducciones completas y al día (`i18n:check`, estricto), todas
+nuestras comprobaciones (`project:verify`), los archivos de shadcn exactamente como los escribe su CLI
+(`ui:verify`), las auditorías Lighthouse de Google y Core Web Vitals medidos en frío sobre un Worker de
+Cloudflare desechable (`project:test:cwv`: las primeras visitas tras un despliegue, que es donde una
+página lenta sale más cara). Después etiqueta `vX.Y.Z` a partir de `packages/ui/package.json`, hace
+push, publica con tu token de `gh` y crea el release de GitHub a partir de la sección correspondiente
+del CHANGELOG. CI (`.github/workflows/google.yml`) repite el nivel 2 sobre el tag.
+
+Antes de publicar, un solo commit: la versión en `packages/ui/package.json` (y en
+`packages/contract/package.json` cuando el contrato cambió) y la sección del CHANGELOG. Ningún otro
+archivo nombra una versión: los workspaces dependen unos de otros con `"*"` y el rango de peer del
+contrato es abierto. La tarea rechaza un árbol sucio, una rama distinta de main, o un tag ya existente.
 
 Los consumidores añaden esto a su `.npmrc`:
 
