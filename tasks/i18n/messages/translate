@@ -40,7 +40,8 @@ echo "Messages: translating $(echo $locales | wc -w | tr -d ' ') languages with 
 failed=0; echo "$locales" | xargs -P "${I18N_JOBS:-4}" -I{} bash -c 'one "$1"' _ {} || failed=1
 rm -rf "$work"
 # What the agent wrote must pass the offline checks before it counts: missing keys, placeholders, plurals.
-after=$("$here/check" --list | awk '$2 != "stale"') || true
+# (A clean check prints one success line and exits 0: then nothing is left.)
+after=$("$here/check" --list) && after= || after=$(echo "$after" | awk '$2 != "stale"')
 [ -z "$after" ] || { echo "Still wrong after translating:"; echo "$after"; failed=1; }
 changed=$(git diff --name-only -- "${targets[@]}")
 if [ -n "$changed" ] && [ "${I18N_COMMIT:-1}" = 1 ]; then
