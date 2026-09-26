@@ -100,14 +100,23 @@ actualizados a medias.
 
 - Un agente de funcionalidad escribe solo en inglés: la documentación en inglés y el catálogo base (`messages/en.json`).
   Nunca edita `docs/i18n/` ni el catálogo de otro idioma.
-- La traducción es un paso propio, serializado, en `main` después de los merges: un único agente de traducción ejecuta
-  `mise run i18n:status` (qué falta o está desactualizado), `mise run i18n:translate [locale]` (los diffs exactos del
-  inglés y las claves que faltan), traduce y luego registra cada archivo de documentación que termina con
-  `mise run i18n:translate -- --mark <translated file>`.
+- La traducción es un paso propio, en `main` después de los merges: `mise run i18n:translate`. El agente de Claude,
+  fijado en la tarea, traduce exactamente lo que lista `i18n:check`, y la tarea lo confirma con un commit; **el commit
+  es la marca** (git decide qué está desactualizado: una traducción está desactualizada cuando su inglés cambió después
+  del último commit de la traducción). Rechaza otras ramas, el inglés sin confirmar y una segunda ejecución mientras otra
+  tiene el bloqueo, que comparten todos los worktrees, de modo que los agentes en paralelo no pueden lanzar traducciones
+  ni competir por ellas.
+- El agente no recibe ninguna herramienta: se le entrega el inglés (y, para una página desactualizada, el diff del inglés y
+  la traducción actual) y devuelve texto; la tarea escribe los archivos que pidió y nada más.
+- `i18n:check` solo lee, sin conexión, así que es seguro en cualquier lugar, en cualquier número de worktrees, y como
+  `depends`. `i18n:translate` nunca es un `depends`.
 - Lo desactualizado o lo que falta es un aviso mientras se programa (`project:check` lo muestra) y un error en el release
   (`ui:release` ejecuta primero `i18n:check` con `I18N_STRICT=1`).
+- Haz commit solo de cambios reales de traducción en un archivo de traducción: cualquier commit en él lo marca como
+  al día. Un cambio estructural (un renombrado, un barrido) que toque traducciones va seguido de
+  `mise run i18n:docs:translate -- <file>…`, que vuelve a comprobar esos archivos por completo contra el inglés.
 
-La estructura y la línea de procedencia están en el [README de tasks](./tasks.md#translations).
+La estructura y las tareas están en el [README de tasks](./tasks.md#translations).
 
 ## Planes: pocos, cortos y cerrados [#plans-few-short-closed]
 

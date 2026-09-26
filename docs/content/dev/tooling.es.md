@@ -75,7 +75,7 @@ Las tareas de passthrough de la CLI aceptan directamente los flags originales, c
 | `browser:*` | CLI de Chrome DevTools, ciclo de vida de la sesión y servidor MCP |
 | `web:*` | Búsqueda y recuperación de Modern Web Guidance |
 | `docs:*` | El Worker de documentación (`docs/`): ejecutarlo (`docs:dev`), compilarlo y comprobarlo (`docs:build`, `docs:check`), probarlo (`docs:test`, `docs:test:remote`), desplegarlo (`docs:preview`, `docs:deploy`), las páginas de Ask AI en AI Search (`docs:publish`), detener o reanudar las respuestas (`docs:answers:off`, `docs:answers:on`), sus logs y la IA (`docs:observe`, `docs:ai-gateway`), la CLI de Fumadocs (`docs:cli`) y su incorporación a otra app (`docs:init`) |
-| `i18n:*` | Estado de las traducciones: qué falta o está desactualizado por idioma (`i18n:status`, `--json` para agentes), el aviso o la puerta de control del release (`i18n:check`), el trabajo para el agente de traducción y su registro (`i18n:translate`, `--mark`); tareas compartidas, [un solo redactor](./how-we-work.md#translations-one-writer) |
+| `i18n:*` | Traducciones, dos pipelines: mensajes de la interfaz (Paraglide) y documentación (Fumadocs). `i18n:check` (sin conexión, solo lectura; un aviso o la puerta de control del release), `i18n:translate` (el agente Claude fijado, en main, con commit); tareas compartidas, [un solo redactor](./how-we-work.md#translations-one-writer), [cómo](./tasks.md#translations) |
 | `mcp:*` | Registra, verifica e inspecciona las conexiones MCP del proyecto |
 | `codex:*` / `claude:*` | Inicia o reanuda una sesión interactiva de agente (tareas compartidas) |
 

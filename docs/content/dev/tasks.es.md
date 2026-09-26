@@ -111,29 +111,36 @@ Una misma estructura en cada app, para que las mismas tareas `i18n:*` funcionen 
 | Docs | `docs/content/<site>/<page>.md` o `.mdx` (estructura de Fumadocs) | a su lado: `<page>.<locale>.md` o `.mdx` |
 | Catálogos de UI | el catálogo del idioma base de cada proyecto inlang (`<dir>/project.inlang`) | el catálogo de cada idioma, según el `pathPattern` propio del proyecto (p. ej. `messages/<locale>.json`) |
 
-- Un archivo de documentación traducido registra, en la línea bajo su frontmatter, la versión en inglés de la que se
-  tradujo, como el blob sha de git del archivo en inglés (`git hash-object`): basado en el contenido, así que todas
-  las ramas coinciden en él.
-  `i18n:translate -- --mark <file>` lo escribe; nadie lo teclea.
+Dos flujos, uno para cada tipo de texto, con el mismo patrón en ambos: detectar sin conexión con git y pequeñas
+herramientas, traducir con el agente Claude fijado y hacer commit.
 
-  ```md
-  <!-- translated-from: docs/content/dev/tooling.md @ 9b4c91affd910033e83bf7fb52e64b4d69fbdbc2 -->
-  ```
-
-- La carpeta de documentación es `I18N_DOCS_DIR` (por defecto `content/docs`; remy-auth usa `docs/content`). Todo
-  `.md`/`.mdx` sin sufijo de idioma es inglés; un idioma participa en la documentación al tener cualquier página
-  traducida. Los idiomas que ofrece cada sitio están en el `i18n.json` del sitio.
-- Los catálogos, los idiomas y el idioma base vienen del propio `settings.json` de inlang; la CLI de inlang
-  (`lint`, `validate`) solo comprueba el archivo de ajustes, así que la paridad de claves y placeholders es nuestra.
-- Una app sin documentación traducida ni `project.inlang` propio recibe "nothing to translate" y
-  sale con 0.
+- **Mensajes de UI** (Paraglide): los catálogos, los idiomas y el idioma base vienen del propio
+  `settings.json` de inlang (`I18N_INLANG`, o si no, el único proyecto que git conoce). Se detectan: catálogos y claves
+  que faltan (`jq`), `{placeholders}` perdidos o inventados (`@lingual/i18n-check`), claves cuyo inglés cambió desde
+  el último commit del catálogo (`git`, `jq`), y las categorías de plural que necesita el idioma (`Intl.PluralRules`,
+  `tasks/i18n/messages/plurals.mjs`: ninguna herramienta externa las comprueba).
+- **Docs** (Fumadocs): la carpeta es `I18N_DOCS_DIR` (por defecto `docs/content`); cada sitio con un
+  `i18n.json` traduce cada página en inglés a cada uno de sus idiomas. Se detectan: páginas que faltan y
+  desactualizadas (`git`), huérfanas, y el propio texto de Fumadocs UI (`ui/<lang>.json` frente a `ui/en.json`).
+- **El traductor** es Claude Code en modo headless (`claude -p`), fijado en las tareas, sin herramientas, sin servidores
+  MCP, skills ni ajustes de proyecto, y con salida estructurada: las claves de un catálogo vuelven como JSON y
+  `jq` las combina en el orden de claves del inglés; una página vuelve completa. Los prompts están en
+  `tasks/i18n/prompts/`. Una llamada por idioma (mensajes) o por página (docs), `I18N_JOBS` a la vez.
+- Las comprobaciones no necesitan clave, ni red, pero sí el historial completo de git (un clon superficial se rechaza).
+  Traducir usa el login de Claude de la máquina.
+- Una app sin proyecto inlang ni sitios de documentación recibe "nothing to check" y sale con 0.
 
 | Tarea | Hace |
 | --- | --- |
-| `i18n:status` | Por idioma: documentación que falta, desactualizada (el inglés cambió desde el sha registrado), sin marcar, huérfana, o marcada como actual con otros encabezados que el inglés; claves de catálogo que faltan, sobran o tienen otros `{placeholders}`. `--json` para agentes |
-| `i18n:check` | Lo mismo; un WARNING y salida 0 mientras se programa (`project:check` lo ejecuta), salida 1 con `I18N_STRICT=1` (`ui:release`) |
-| `i18n:translate [locale]` | El trabajo: para cada archivo de documentación desactualizado, `git diff <recorded>..<current>` de su inglés, archivos completos para los que faltan, claves que faltan con sus valores en inglés. Sin llamadas a modelos |
-| `i18n:translate -- --mark <file>…` | Registra la versión actual en inglés en los archivos de documentación traducidos |
+| `i18n:check` | Ambas comprobaciones en paralelo; un WARNING y salida 0 mientras se programa (`project:check` la ejecuta), salida 1 con `I18N_STRICT=1` (`ui:release`) |
+| `i18n:messages:check` | Los huecos de los catálogos; `-- --list` una línea por hueco (`es missing nav_more`) |
+| `i18n:docs:check` | Los huecos de la documentación; `-- --list` una línea por hueco (`es stale docs/content/dev/gui.es.md`) |
+| `i18n:translate` | En main: mensajes y luego documentación, un commit para cada uno |
+| `i18n:messages:translate` | Los huecos de los catálogos, un idioma por llamada al agente |
+| `i18n:docs:translate [files]` | Los huecos de la documentación, una página por llamada al agente; los archivos de traducción indicados se rehacen por completo |
+
+Ajustes: `I18N_MODEL` (por defecto `sonnet`), `I18N_JOBS` (4), `I18N_COMMIT=0` (deja el cambio
+sin commit para revisarlo), `I18N_BRANCH` (`main`).
 
 ### Tareas de Cloudflare [#cloudflare-tasks]
 
