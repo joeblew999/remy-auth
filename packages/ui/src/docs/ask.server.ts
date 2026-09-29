@@ -37,16 +37,18 @@ export const answerQuestion = createServerOnlyFn(async (site: SiteName, q: strin
   const log = (outcome: string, fields: Record<string, unknown> = {}, level: 'info' | 'error' = 'info') =>
     writeLog({ ...logContext(service, env, request.headers.get(requestIdHeader) ?? '', 'GET'), event: 'ask', level, outcome, site, locale, ...fields });
   // Ask AI is the app's choice (docs.config.ts, `ask`); an app without it has no AI Search or rate-limit
-  // binding, so the bindings are optional here, whatever the app's generated Env says.
-  const bindings: { DOCS_SEARCH?: AiSearchInstance; ASK_LIMIT?: RateLimit } = env;
-  if (!docsConfig.ask || !bindings.DOCS_SEARCH || !bindings.ASK_LIMIT) { log('off'); return { status: 'no-answer' }; }
-  const { success } = await bindings.ASK_LIMIT.limit({ key: request.headers.get('CF-Connecting-IP') ?? 'unknown' });
+  // binding, so they are optional here, whatever the app's generated Env says.
+  // Read by name (an app without Ask AI declares neither), each typed where it is read.
+  const search: AiSearchInstance | undefined = Reflect.get(env, 'DOCS_SEARCH');
+  const limit: RateLimit | undefined = Reflect.get(env, 'ASK_LIMIT');
+  if (!docsConfig.ask || !search || !limit) { log('off'); return { status: 'no-answer' }; }
+  const { success } = await limit.limit({ key: request.headers.get('CF-Connecting-IP') ?? 'unknown' });
   if (!success) { log('rate-limited'); return { status: 'rate-limited' }; }
   if (question.length > askMaxLength) { log('too-long', { length: question.length }); return { status: 'too-long', length: question.length }; }
   // The emergency stop (mise docs:answers:off): the secret ASK_PAUSED set means no model call at all.
   if ((env as { ASK_PAUSED?: string }).ASK_PAUSED) { log('paused'); return { status: 'no-answer' }; }
   try {
-    const response = await bindings.DOCS_SEARCH.chatCompletions({
+    const response = await search.chatCompletions({
       model,
       max_tokens: 300,
       messages: [{ role: 'system', content: instructions }, { role: 'user', content: question }],

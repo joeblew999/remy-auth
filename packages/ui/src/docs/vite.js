@@ -5,12 +5,11 @@ import { cloudflare } from '@cloudflare/vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import viteReact from '@vitejs/plugin-react';
-import { defineConfig, type UserConfig } from 'vite';
+import { defineConfig,                 } from 'vite';
 import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import remarkDirective from 'remark-directive';
 import { remarkAutoTypeTable } from 'fumadocs-typescript';
 import { remarkDirectiveAdmonition, remarkMdxMermaid, remarkSteps } from 'fumadocs-core/mdx-plugins';
-import type { RemyDocsConfig } from './config';
 
 // An app's whole docs Worker from its docs.config.ts (.plans/thin-apps.md, group 2): its docs/vite.config.ts
 // is `export default remyDocs(docsConfig, { contract: '<its contract package>' })`. The Worker itself is this
@@ -25,9 +24,9 @@ import type { RemyDocsConfig } from './config';
 const packageDocs = fileURLToPath(new URL('.', import.meta.url));
 
 /** The Worker's Cloudflare configuration: its name, the assets, observability and, when the app has Ask AI, its bindings. */
-export function docsWorkerConfig(docsConfig: RemyDocsConfig, srcDirectory: string) {
+export function docsWorkerConfig(docsConfig, srcDirectory) {
   const { ask } = docsConfig;
-  const askBindings = (remote: boolean) => ask ? {
+  const askBindings = (remote) => ask ? {
     ai_search: [{ binding: 'DOCS_SEARCH', instance_name: ask.instance, ...(remote ? { remote: true } : {}) }],
     ratelimits: [{ name: 'ASK_LIMIT', namespace_id: ask.rateLimitNamespace, simple: { limit: 10, period: 60 } }],
   } : {};
@@ -56,15 +55,27 @@ export function docsWorkerConfig(docsConfig: RemyDocsConfig, srcDirectory: strin
  * The docs Worker's Vite configuration for the app whose docs/ it runs in. `contract`: the package of the
  * app's oRPC contract, which /reference documents; an app without an API leaves it out.
  */
-export function remyDocs(docsConfig: RemyDocsConfig, { contract = join(packageDocs, 'empty-contract.ts'), root = process.cwd() }: { contract?: string; root?: string } = {}): UserConfig {
+export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
+  // An app without an API has no reference: no /reference, tab, llms entry or MCP server (__REMY_DOCS_API__).
+  const api = Boolean(contract);
   const app = root.endsWith('/') ? root : `${root}/`;
   const srcDirectory = relative(root, packageDocs).replace(/\/$/, '');
   const generated = join(root, '.remy-docs');
   mkdirSync(generated, { recursive: true });
   writeFileSync(join(generated, 'collections.ts'), readFileSync(join(packageDocs, 'lib/collections.source.ts'), 'utf8'));
+  writeFileSync(join(generated, 'app.json'), `${JSON.stringify({ api })}\n`);
   writeFileSync(join(generated, 'wrangler.json'), `${JSON.stringify({ ...docsWorkerConfig(docsConfig, `../${srcDirectory}`), assets: { directory: '../dist/client' } }, null, 2)}\n`);
   return defineConfig({
     plugins: [
+      // Cloudflare's static-asset headers, the same for every app's docs: Vite names these files by their
+      // content hash, so they never change; browsers may keep them for a year without asking again.
+      {
+        name: 'remy-docs-headers',
+        generateBundle() {
+          if (this.environment?.name !== 'client') return;
+          this.emitFile({ type: 'asset', fileName: '_headers', source: '/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n' });
+        },
+      },
       // Fumadocs MDX compiles content/ for the collections (.remy-docs/collections.ts); before Start's plugin.
       // Beyond its defaults (GFM, heading ids, images, code and npm tabs): callouts (:::note), Mermaid
       // (```mermaid), type tables from TypeScript (<auto-type-table>) and steps. GitHub's "default" code
@@ -84,10 +95,11 @@ export function remyDocs(docsConfig: RemyDocsConfig, { contract = join(packageDo
     resolve: {
       alias: [
         // The app's own modules the Worker imports (app-modules.d.ts): its contract, and its docs/ files.
-        { find: /^@remy-docs-app\/contract$/, replacement: contract },
+        { find: /^@remy-docs-app\/contract$/, replacement: contract ?? join(packageDocs, 'empty-contract.ts') },
         { find: /^@remy-docs-app\//, replacement: app },
       ],
     },
+    define: { __REMY_DOCS_API__: JSON.stringify(api) },
     server: { host: '127.0.0.1', port: 5174, strictPort: true },
   });
 }

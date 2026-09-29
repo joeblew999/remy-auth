@@ -1,7 +1,7 @@
 {
   "//": "An app's docs/tsconfig.json is one line, extends @joeblew999/remy-ui/docs/tsconfig.json: ${configDir} is the app's docs/.",
   "include": ["./**/*", "${configDir}/*.ts", "${configDir}/.remy-docs/*.ts", "${configDir}/worker-configuration.d.ts"],
-  "exclude": ["./tests/**/*", "./scripts/**/*", "./template/**/*", "./playwright.config.ts"],
+  "exclude": ["./tests/**/*", "./scripts/**/*", "./template/**/*", "./playwright.config.js"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "types": ["vite/client", "node"],

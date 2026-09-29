@@ -1,9 +1,3 @@
-// What an app's docs say about the product they document: the one code file of an app's docs/
-// (docs/docs.config.ts, `export const docsConfig = defineDocsConfig({ ... })`), beside its content/.
-// The docs Worker (this package's src/docs) reads it through the preset's @remy-docs-app alias, and
-// remyDocs() (./vite.ts) builds the Worker's Cloudflare configuration from it, so an app has no
-// wrangler.jsonc for its docs.
-
 export type RemyDocsConfig = {
   /** The product: in titles, the navigation, social images, Ask AI's answers and the MCP servers' names. */
   product: string;
@@ -22,6 +16,11 @@ export type RemyDocsConfig = {
   repository: string;
   branch: string;
   /**
+   * The app's own pages on adding its docs to AI tools (llms.txt, the MCP servers), for app users and for
+   * developers: the "For AI tools" links. Without them, those links go to each part's llms.txt.
+   */
+  aiHelp?: { docs?: string; dev?: string };
+  /**
    * Ask AI, the app's choice: answers from its pages through Cloudflare AI Search. Leave it out and the
    * docs have no Ask AI page, button or bindings, and docs:publish has nothing to do. Its resources are
    * created by the owner (docs:provision prints what it would create).
@@ -39,4 +38,4 @@ export type RemyDocsConfig = {
 };
 
 /** Declares an app's docs settings with their type. */
-export const defineDocsConfig = (config: RemyDocsConfig) => config;
+export declare const defineDocsConfig: (config: RemyDocsConfig) => RemyDocsConfig;

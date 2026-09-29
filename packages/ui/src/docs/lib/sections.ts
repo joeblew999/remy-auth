@@ -5,12 +5,14 @@ import { docsConfig } from '@remy-docs-app/docs.config.ts';
  * developer docs and the API reference (developers). One list for the tabs, the landing page, each
  * section's "For AI tools" links and the root /llms.txt, so all of them say the same thing.
  */
+const help = (who: 'docs' | 'dev', key: string) => docsConfig.aiHelp?.[who] ?? `/${key}/llms.txt`;
 export const sections = ([
-  { key: 'docs', title: 'Product guide', audience: 'For people using the app', aiPage: '/docs/ai-assistants' },
-  { key: 'dev', title: 'Developer docs', audience: 'For developers building Remy or an app on it', aiPage: '/dev/ai-tools' },
-  { key: 'reference', title: 'API reference', audience: 'For developers calling the API', aiPage: '/dev/ai-tools' },
-] as const).map(section => ({
+  { key: 'docs', title: 'Product guide', audience: 'For people using the app' },
+  { key: 'dev', title: 'Developer docs', audience: `For developers building ${docsConfig.product}` },
+  { key: 'reference', title: 'API reference', audience: 'For developers calling the API' },
+] as const).filter(section => section.key !== 'reference' || __REMY_DOCS_API__).map(section => ({
   ...section,
+  aiPage: help(section.key === 'docs' ? 'docs' : 'dev', section.key),
   base: `/${section.key}`,
   llms: `/${section.key}/llms.txt`,
   llmsFull: `/${section.key}/llms-full.txt`,

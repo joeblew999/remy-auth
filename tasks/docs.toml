@@ -25,14 +25,14 @@ run = [{ task = "docs:build" }, "../node_modules/.bin/wrangler types -c .remy-do
 description = "LOCAL: build, then the docs Worker's few checks (docs/tests) on Cloudflare's local runtime at DOCS_PREVIEW_PORT (~30 s)"
 dir = "{{config_root}}/docs"
 env = { PREVIEW_PORT = "{{ get_env(name='DOCS_PREVIEW_PORT', default='4174') }}" }
-run = [{ task = "docs:build" }, "../node_modules/.bin/playwright test -c ../node_modules/@joeblew999/remy-ui/src/docs/playwright.config.ts --project=ours"]
+run = [{ task = "docs:build" }, "../node_modules/.bin/playwright test -c ../node_modules/@joeblew999/remy-ui/src/docs/playwright.config.js --project=ours"]
 
 ["docs:test:remote"]
 description = "REMOTE, read only: the docs checks, Google's Lighthouse audits and both MCP servers (the MCP Inspector) against DOCS_TEST_URL, default DOCS_ORIGIN (~1 min)"
 dir = "{{config_root}}/docs"
 env = { TEST_TARGET = "remote" }
 run = [
-  "TEST_BASE_URL=${DOCS_TEST_URL:-$DOCS_ORIGIN} ../node_modules/.bin/playwright test -c ../node_modules/@joeblew999/remy-ui/src/docs/playwright.config.ts",
+  "TEST_BASE_URL=${DOCS_TEST_URL:-$DOCS_ORIGIN} ../node_modules/.bin/playwright test -c ../node_modules/@joeblew999/remy-ui/src/docs/playwright.config.js",
   "npx -y @modelcontextprotocol/inspector@2.8.0 --cli ${DOCS_TEST_URL:-$DOCS_ORIGIN}/api/mcp/docs --transport http --method tools/list",
   "npx -y @modelcontextprotocol/inspector@2.8.0 --cli ${DOCS_TEST_URL:-$DOCS_ORIGIN}/api/mcp/dev --transport http --method tools/list",
   "npx -y @modelcontextprotocol/inspector@2.8.0 --cli ${DOCS_TEST_URL:-$DOCS_ORIGIN}/api/mcp/reference --transport http --method tools/list",

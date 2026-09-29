@@ -5,7 +5,8 @@ import { docsConfig } from '@remy-docs-app/docs.config.ts';
 
 // The API reference: /reference and /reference/<operation>, from the oRPC contract's spec.
 export const Route = createFileRoute('/reference/$')({
-  loader: async ({ params }) => (await getReferencePage({ data: params._splat ?? '' })) ?? (() => { throw notFound(); })(),
+  // An app without an API (remyDocs without `contract`) has no reference.
+  loader: async ({ params }) => (__REMY_DOCS_API__ && await getReferencePage({ data: params._splat ?? '' })) || (() => { throw notFound(); })(),
   head: ({ loaderData }) => (loaderData ? {
     meta: [{ title: `${loaderData.title} | ${docsConfig.titles.reference}` }, { name: 'description', content: loaderData.description }],
     links: [{ rel: 'canonical', href: `${loaderData.origin}${loaderData.url}` }],

@@ -35,7 +35,7 @@ function Home() {
         <section className="flex flex-col gap-3">
           <h2 className="flex items-center gap-2 text-xl font-semibold"><Bot className="size-5" />For AI tools</h2>
           <p className="text-fd-muted-foreground">Each part has its own <a className="underline" href="/llms.txt">llms.txt</a> and MCP server
-            (Streamable HTTP; add its URL to ChatGPT, Claude, Cursor, VS Code or Gemini CLI). How: <a className="underline" href="/docs/ai-assistants">for app users</a>, <a className="underline" href="/dev/ai-tools">for developers</a>.</p>
+            (Streamable HTTP; add its URL to ChatGPT, Claude, Cursor, VS Code or Gemini CLI). {docsConfig.aiHelp && <>How: {docsConfig.aiHelp.docs && <a className="underline" href={docsConfig.aiHelp.docs}>for app users</a>}{docsConfig.aiHelp.docs && docsConfig.aiHelp.dev && ', '}{docsConfig.aiHelp.dev && <a className="underline" href={docsConfig.aiHelp.dev}>for developers</a>}.</>}</p>
           <div className="overflow-x-auto"><table className="w-full text-sm">
             <thead><tr className="text-left"><th className="py-1 pe-4">Part</th><th className="py-1 pe-4">llms</th><th className="py-1">MCP server</th></tr></thead>
             <tbody>{sections.map(section => <tr key={section.key} className="border-t align-top">

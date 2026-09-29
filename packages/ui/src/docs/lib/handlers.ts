@@ -100,7 +100,7 @@ function mcpServer(name: McpName, origin: string) {
 }
 
 export type McpName = keyof typeof docsConfig.mcp;
-export const isMcpName = (value: string): value is McpName => value in docsConfig.mcp;
+export const isMcpName = (value: string): value is McpName => value in docsConfig.mcp && (value !== 'reference' || __REMY_DOCS_API__);
 
 /** /api/mcp/<docs|dev|reference>: that audience's MCP server (list_pages, get_page, search, fetch). */
 export const mcpHandler = (name: McpName, request: Request) =>
