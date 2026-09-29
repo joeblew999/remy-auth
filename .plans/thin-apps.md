@@ -204,17 +204,14 @@ Owner, 2026-09-29: "for the docs system remy-auth will really only need the mdx,
 other code or config files." remy-auth's `docs/` (61 code and config files beside 38 content files
 today) is the first consumer of the docs package.
 
-What stays in a repo's `docs/` (owner: "is this realistic though"): `content/` and about five small
-files the build tools read from the app: `docs.config.ts`, `package.json`, a one-line `vite.config.ts`
-(`export default remyDocs(config)`), a `tsconfig.json` extending the package's, and `wrangler.jsonc`
-unless Cloudflare's Vite plugin takes the Worker config from code (its `config` option beside
-`configPath`). The ~2,000 lines of our glue move without trouble.
+What stays in a repo's `docs/` (owner: "is this realistic though"; settled by phase 0, tests 1 to 3):
+`content/` and four small files the build tools read from the app: `docs.config.ts`, `package.json`,
+a one-line `vite.config.ts` (`export default remyDocs(docsConfig)`, which also gives the Cloudflare
+plugin the Worker config, so no `wrangler.jsonc`) and a one-line `tsconfig.json` extending the
+package's. The ~2,000 lines of our glue move without trouble.
 
-The one unknown is **routes**: TanStack Start builds its route tree from the app's `src/routes/`. The
-generator takes `routesDirectory` and `virtualRouteConfig` (`@tanstack/virtual-file-routes`: `rootRoute`,
-`route`, `physical`), paths relative to the routes directory; whether they may point into the package
-and still build, split and typecheck is what phase 0's test 1 settles (risk 6), with the `wrangler.jsonc`
-question.
+Routes were the one unknown; phase 0 settled them: TanStack Start's `srcDirectory` points at the
+package's `src/`, so a repo's docs hold no routes and no Worker code (verdicts above).
 
 - The Worker's routes, components, handlers, Ask AI, MCP, `llms.txt` and tests ship in a package
   (or the UI package) and take `docs.config.ts` and the contract as input.
@@ -329,15 +326,16 @@ Verdicts, 2026-09-29 (scratch: a copy of the docs Worker's `src/` as a real dire
   "needs to be run remotely" locally.
 - **1, routes: pass, better than expected.** No routes and no Worker code in the app: TanStack Start's
   `srcDirectory` points at the package's `src/` (router, start, server entry, routes); the route tree
-  is generated there. Build, preview and dev serve `/docs`, `/docs/es`, `/dev`, `/reference`,
-  `llms.txt`, `.md`, sitemap, robots, social images, MCP and search.
+  is generated there. The preview serves `/docs`, `/docs/es`, `/dev`, `/reference`, `llms.txt`,
+  `.md`, sitemap, robots, social images (at the URL pages link, `/og/docs/formats/image.webp`), MCP and
+  search; dev serves `/docs`, `/dev/how-we-work`, `/reference` and `llms.txt`.
 - **2, Fumadocs as a package: pass, with two changes.** (a) fumadocs-mdx's macro never compiles
   `node_modules` (its `include` cannot override that), so the preset writes the 10-line
   `collections.ts` into the app's generated, gitignored `.remy-docs/` at config time. (b) The ~15 imports
   from the Worker into the app (`docs.config.ts`, `content/**/i18n.json`, `meta.json`, `content/ui/*.json`)
   go through one alias, `@remy-docs-app/`, set by the preset for Vite and by the package's
   `tsconfig.json` for TypeScript with `${configDir}`, so the app's `tsconfig.json` is one `extends` line
-  and has no paths of its own; typecheck 0 errors. The package's own `@/` imports become relative.
+  and has no paths of its own; typecheck 0 errors (confirmed again by the reviewer). The package's own `@/` imports become relative.
   Content that points at Worker source (the "Writing docs" type table, `../../src/docs/source.server.ts`)
   moves to the package path; remy-auth's `CHANGELOG.md` include stays the app's.
 - **3, no `wrangler.jsonc`: pass.** The Cloudflare plugin's `config` option replaces the file: the build
@@ -351,7 +349,8 @@ So a repo's `docs/` is `content/` plus `docs.config.ts`, `package.json`, `vite.c
   `"@tanstack/query-core": "5.103.2"` the tree holds one copy, marked overridden (remy-video's "ignored"
   was most likely a stale lockfile). An app that lists only `@joeblew999/remy-ui` gets React and the
   package's own dependencies but not TanStack Router, Start or Query (the package marks them optional
-  peers) nor the toolchain (Vite, wrangler, Tailwind, Playwright, TypeScript: not declared at all). So
+  peers, like `@playwright/test` and `lighthouse`) nor the toolchain (Vite, wrangler, Tailwind,
+  TypeScript: not declared at all). So
   phase C ships the pins and overrides from the platform and makes `project:setup`/`project:upgrade-ui`
   apply them; no blocker.
 - **5, a second catalog: pass.** A second Paraglide project compiled on its own follows remy-ui's
@@ -364,7 +363,7 @@ So a repo's `docs/` is `content/` plus `docs.config.ts`, `package.json`, `vite.c
   `experimental_sync`.
 - **7, the scratch new app: pass, and it catches the real problems.** `ui:pack` → a new app installing
   the tarball (no GitHub token: the package needs only public npm) with the tasks included from the local
-  `tasks/` (55 tasks) → `project:check`: the build passes and the typecheck fails with exactly A6
+  `tasks/` (every shared task listed) → `project:check`: the build passes and the typecheck fails with exactly A6
   (`node_modules/@joeblew999/remy-ui/src/shell.tsx`: `"/formats"`, `"/app"` not assignable) and A5 (two
   `query-core` copies breaking `src/router.tsx`). The check sees remy-video's problems before any
   release.
@@ -378,7 +377,10 @@ Found on the way, for the phases:
 - A stray tracked file from an unexpanded shell variable, `docs/$S/ask-phone.png`, in remy-auth and in
   remy-video: removed in group 7.
 
-Phase 0: done 2026-09-29, nothing re-planned; every phase keeps its shape.
+Phase 0: done 2026-09-29; every phase keeps its shape, with group 2's floor down to four files and
+risk 10 covering both tsconfig mappings. Accepted by the reviewer agent (ACCEPT; its six non-blocking
+notes folded in above; its sixth: the docs spike linked remy-ui from the workspace, and test 7 covers
+the packed path).
 
 ## Out of scope
 
@@ -411,7 +413,7 @@ the phases below; none is left to care alone.
 | 7 | Clash with the queued developer-docs cleanup | None in fact: the docs system moves code, and content stays in each repo's `docs/content/`. The cleanup can run before, during or after |
 | 8 | Provisioning costs money and needs the owner | Provisioning tasks print what they would create and stop, unless run by the owner with an explicit flag. They are owner-only in now.md, like the alert rule |
 | 9 | remy-video drifts while it waits | remy-video is frozen: its now.md says it will be replaced and lists the real bits to copy. Its replacement comes after this plan; until then, product work goes into its real bits only |
-| 10 | remy-auth reaching past the exports without noticing: the workspace symlink and `docs/tsconfig.json`'s `../packages/ui/src/*` mapping let it import files no other repo can | The mapping goes in phase A. Rule 3 is then checked, not trusted: the scratch check in risk 2 installs the packed package, so an import that only works through the workspace fails there before release |
+| 10 | remy-auth reaching past the exports without noticing: the workspace symlink and the `@joeblew999/remy-ui/*` → `packages/ui/src/*` mappings in the root `tsconfig.json` and `docs/tsconfig.json` let it import files no other repo can | Both mappings go in phase A. Rule 3 is then checked, not trusted: the scratch check in risk 2 installs the packed package, so an import that only works through the workspace fails there before release |
 
 ## Phases
 
@@ -423,7 +425,7 @@ release. Then it merges to main and the next phase starts (working rules).
 
 - **0. Unknowns:** the tests above. Done 2026-09-29, all pass (verdicts above).
 - **A. Proof:** the layout inventory written into tasks.md, group 1 (providers and shell), and the
-  `docs/tsconfig.json` mapping removed (risk 10). The smallest change that proves the loop.
+  `@joeblew999/remy-ui/*` mappings removed from the root and docs `tsconfig.json` (risk 10). The smallest change that proves the loop.
 - **B. Docs system:** group 2, with provisioning owner-only (risk 8).
 - **C. The rest:** groups 3 to 7.
 - **D. Release, then `remy-auth-test` (stops for the owner):** everything below is prepared unattended;
