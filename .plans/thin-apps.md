@@ -347,6 +347,38 @@ Verdicts, 2026-09-29 (scratch: a copy of the docs Worker's `src/` as a real dire
 
 So a repo's `docs/` is `content/` plus `docs.config.ts`, `package.json`, `vite.config.ts`
 (`export default remyDocs(docsConfig)`) and `tsconfig.json` (one `extends`): four files, not five.
+- **4, one dependency set: direction settled, design in phase C.** npm's `overrides` works: with
+  `"@tanstack/query-core": "5.103.2"` the tree holds one copy, marked overridden (remy-video's "ignored"
+  was most likely a stale lockfile). An app that lists only `@joeblew999/remy-ui` gets React and the
+  package's own dependencies but not TanStack Router, Start or Query (the package marks them optional
+  peers) nor the toolchain (Vite, wrangler, Tailwind, Playwright, TypeScript: not declared at all). So
+  phase C ships the pins and overrides from the platform and makes `project:setup`/`project:upgrade-ui`
+  apply them; no blocker.
+- **5, a second catalog: pass.** A second Paraglide project compiled on its own follows remy-ui's
+  language with one call, `overwriteGetLocale(() => remyUi.getLocale())` (en, es, ar checked); it
+  delegates, so it holds on the server too. Phase C ships that call as a helper.
+- **6, the skill in the package: pass, simpler than planned.** The pinned `skills` 1.7.0 plain `add`
+  takes a folder in the installed package (`./node_modules/@joeblew999/remy-ui/skills --skill remy`):
+  Codex gets `.agents/skills/remy`, Claude a link in `.claude/skills/`, and `skills-lock.json` records the
+  local source and a content hash, so a new package version shows as a changed hash. No
+  `experimental_sync`.
+- **7, the scratch new app: pass, and it catches the real problems.** `ui:pack` → a new app installing
+  the tarball (no GitHub token: the package needs only public npm) with the tasks included from the local
+  `tasks/` (55 tasks) → `project:check`: the build passes and the typecheck fails with exactly A6
+  (`node_modules/@joeblew999/remy-ui/src/shell.tsx`: `"/formats"`, `"/app"` not assignable) and A5 (two
+  `query-core` copies breaking `src/router.tsx`). The check sees remy-video's problems before any
+  release.
+
+Found on the way, for the phases:
+
+- remy-auth's root `tsconfig.json` also maps `@joeblew999/remy-ui/*` to `./packages/ui/src/*`, not only
+  `docs/tsconfig.json`: phase A removes both (risk 10).
+- remy-auth already mounts package routes through TanStack's `virtualRouteConfig` (`remyParts`, the
+  parts): the same mechanism groups 1 and 2 build on.
+- A stray tracked file from an unexpanded shell variable, `docs/$S/ask-phone.png`, in remy-auth and in
+  remy-video: removed in group 7.
+
+Phase 0: done 2026-09-29, nothing re-planned; every phase keeps its shape.
 
 ## Out of scope
 
@@ -389,7 +421,7 @@ remy-auth using the new pieces only through their exports, its own copies delete
 check against remy-auth-app and a new app (risk 2) passing, and the reviewer agent's verdict. No
 release. Then it merges to main and the next phase starts (working rules).
 
-- **0. Unknowns:** the tests above.
+- **0. Unknowns:** the tests above. Done 2026-09-29, all pass (verdicts above).
 - **A. Proof:** the layout inventory written into tasks.md, group 1 (providers and shell), and the
   `docs/tsconfig.json` mapping removed (risk 10). The smallest change that proves the loop.
 - **B. Docs system:** group 2, with provisioning owner-only (risk 8).
