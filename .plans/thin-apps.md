@@ -32,6 +32,24 @@ A repo may also publish packages of its own, as remy-video does with `remy-video
 `remy-video-contract` (owner, 2026-09-29: supported). Being a package owner must cost no more
 boilerplate than being a consumer (group 6).
 
+One layout, different contents (owner, 2026-09-29: "all other Remy projects use the same file folder
+layout. BUT the code and content is of course different inside some of them"). Every repo, remy-auth
+included:
+
+| Path | Holds | Same in every repo? |
+| --- | --- | --- |
+| `mise.toml`, `package.json`, `wrangler.jsonc`, `vite.config.ts`, `tsconfig.json` | identity and the platform's include; a few lines each | same shape, different names |
+| `src/routes/` | the product's pages | different |
+| `src/api/` | the product's procedures | different, or absent |
+| `packages/contract/`, `packages/<name>/` | packages the repo publishes, if any (group 6) | optional |
+| `docs/docs.config.ts`, `docs/content/users/`, `docs/content/dev/` | the docs' identity and pages | different |
+| `.plans/`, `AGENTS.md` (with the generated rules block) | the repo's plans; the platform's rules | same shape |
+| `tasks/` | the platform itself | remy-auth only |
+
+The layout is kept by the tools, not by a checker of our own (the `project-layout` branch was not
+merged for that reason, now.md step 1): the shared tasks and the package read these paths, so a file
+elsewhere is simply not found. The blank app (group 7) is this layout with nothing in it.
+
 Rules for every fix in this plan:
 
 1. **Config, not copies.** A shared piece takes the app's routes, brand and content as input. A fork
