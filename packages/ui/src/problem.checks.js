@@ -1,11 +1,11 @@
 // Checks for the not-found and error pages, the time-zone sub-resource that throws notFound(),
-// and read-only server routes. Plain JavaScript, like ../checks.js. Call `problemChecks` once from
+// and read-only server routes. Plain JavaScript, like ./checks.js. Call `problemChecks` once from
 // a test file of a server-rendered app; every option is optional so an app passes what it has.
 import { test, expect } from '@playwright/test';
-import { locales } from '../paraglide/runtime.js';
-import { m } from '../paraglide/messages.js';
-import { samples } from '../samples.js';
-import { direction, localizedPath, checkedLocales } from '../checks.js';
+import { locales } from './paraglide/runtime.js';
+import { m } from './paraglide/messages.js';
+import { samples } from './samples.js';
+import { direction, localizedPath, checkedLocales } from './checks.js';
 
 const zoneName = (locale, zone, style) => new Intl.DateTimeFormat(locale, { timeZone: zone, timeZoneName: style })
   .formatToParts(samples.instant).find(part => part.type === 'timeZoneName')?.value ?? zone;

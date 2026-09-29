@@ -640,7 +640,7 @@ Everything here is ready; each step goes out only when the owner says so (workin
    phase A's config (`defineRemyApp` with the showcase lists and `sitePaths`, `app` and `preferred` into `AppProviders`),
    `package.json` down to the package and the contract, `prerenderPages({ notFoundPath, paths: allPaths })`,
    `sitemapXml({ origin, paths: sitePaths })`, and `prerenderedAppChecks({ service, sitePaths, appPaths,
-   home, showcase: {} })`; its `AGENTS.md` block from `agents:rules` replaces the dead links.
+   home })` with `showcaseChecks({ rendering: 'prerendered' })` (platform-structure fix 2); its `AGENTS.md` block from `agents:rules` replaces the dead links.
 
 ## Parked while running (working rules: recorded, skipped, reported at the end)
 

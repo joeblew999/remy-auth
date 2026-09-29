@@ -154,6 +154,26 @@ the fixture cannot take the tasks through mise's git cache. What differs there i
     `ui:version -- 0.14.0`.
   - The parked thin-apps item (the language list) is closed by this.
 
+- **Fix 1 in CI: passed 2026-09-29** ([run](https://github.com/joeblew999/remy-auth/actions/runs/36545147647)).
+  `project:test:consumers` ran the fixture on the runner, and `npm whoami` against GitHub Packages accepted the
+  Actions token (the reviewer's open question, before the first real tag).
+- **Fix 2 is staged.** It turned out more tangled than planned: three of the four parts (time-zones,
+  deferred-place, status-card) are showcase features built on showcase modules, and the platform's check sets
+  called showcase checks.
+  1. **The dependency direction: done 2026-09-29.** No platform check set calls a showcase check. The demo,
+     formats and app-navigation checks left `checks.js` for `showcase/showcase.checks.js`, whose
+     `showcaseChecks({ rendering, formats, devicePath, network })` an app showing the showcase calls itself.
+     `serverAppChecks` and `prerenderedAppChecks` lost `showcase`. `problem.checks` (the problem pages,
+     which the parts use) moved from `showcase/` to the platform's root. remy-auth runs the same 313 checks as
+     before, identical by name (the lists diffed).
+  2. **The move:** the showcase modules and the three showcase parts into `@joeblew999/remy-showcase` (a
+     workspace in remy-auth). The parts catalog (`parts/list.js`) is written inside the platform today, so it has
+     to take parts from another package: each package lists its own parts, and `remyParts()` reads the
+     catalogs of the packages the app names.
+  3. **The strings:** the showcase's keys (122 used only by showcase code, and the ones only remy-auth's
+     `src/` uses) move to the showcase's own catalog in the same commit as every language, following the
+     platform with `followLocale`.
+
 ## Open questions for the owner (answered above)
 
 1. **Where does the showcase go (fix 2)?** Options:

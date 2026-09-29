@@ -1,7 +1,7 @@
 // The seo-routes part's checks (moved with its code): the sitemap (sitemapChecks, over the package's
 // site pages, every listed part's and the app's own) and both routes as read-only server routes.
 import { sitemapChecks } from '../../checks.js';
-import { problemChecks } from '../../showcase/problem.checks.js';
+import { problemChecks } from '../../problem.checks.js';
 
 // The header the routes must send, stated here rather than imported, so a changed value fails the check.
 const crawlCache = 'public, max-age=3600, s-maxage=3600';

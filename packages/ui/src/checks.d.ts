@@ -2,6 +2,9 @@ import type { Locale } from './paraglide/runtime.js';
 import type { Locator, Page } from '@playwright/test';
 export declare const endonym: (locale: string) => string;
 export declare const direction: (locale: string) => 'ltr' | 'rtl';
+export declare const weekday: (locale: string, day: number, style?: 'long' | 'short' | 'narrow') => string;
+/** `value` written in a numbering system's digits. */
+export declare const digits: (value: number, numberingSystem: string) => string;
 export declare const localizedPath: (path: string, locale: string) => string;
 /** Every locale, or the subset in CHECK_LOCALES. */
 export declare const checkedLocales: readonly string[];
@@ -20,12 +23,9 @@ export declare function publicPageChecks(options: { paths: string[]; prerendered
 /** The sitemap lists `paths` in every locale and `oneLanguage`'s pages, self-canonical with hreflang alternates; robots.txt names it. */
 export declare function sitemapChecks(options: { paths: string[]; oneLanguage?: OneLanguage }): void;
 export declare function entryChecks(options: { paths: string[]; mode: 'redirect' | 'static' }): void;
-export declare function demoChecks(): void;
-export declare function appNavChecks(): void;
 export declare function themeChecks(): void;
 /** Site pages work without JavaScript and are indexable; app pages are noindex and out of the sitemap. */
 export declare function zoneChecks(options: { sitePaths: string[]; appPaths: string[] }): void;
-export declare function formatsChecks(options?: { extra?: (page: Page, locale: string) => Promise<void> }): void;
 export declare function lighthouseChecks(options: { pages: { path: string; device: 'mobile' | 'desktop' }[] }): void;
 export declare function performanceChecks(options: { pages: { path: string; device: 'mobile' | 'desktop' }[]; thresholds?: { score?: number; lcp?: number; cls?: number; tbt?: number }; runs?: number }): void;
 /** The locale with its own calendar and digits named explicitly (fa → fa-u-ca-persian-nu-arabext). */

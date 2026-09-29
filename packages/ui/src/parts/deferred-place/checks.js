@@ -6,7 +6,7 @@ import { m } from '../../paraglide/messages.js';
 import { checkedLocales, formatTag, localizedPath } from '../../checks.js';
 import { samples } from '../../samples.js';
 import { deferredPlaceChecks } from '../../showcase/deferred-place.checks.js';
-import { problemChecks } from '../../showcase/problem.checks.js';
+import { problemChecks } from '../../problem.checks.js';
 
 /** `path` is the de-localized page with the place; `from` a page linking to it through `link` (a message key). */
 export function deferredPlacePartChecks({ path = '/formats', from = '', link = 'formats_link', heading = 'formats_title' } = {}) {

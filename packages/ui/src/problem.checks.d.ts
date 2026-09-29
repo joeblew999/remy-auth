@@ -1,4 +1,4 @@
-import type { m } from '../paraglide/messages.js';
+import type { m } from './paraglide/messages.js';
 type MessageKey = keyof typeof m;
 export declare function problemChecks(options?: {
   timeZones?: { known: string; alias: string; unknown: string };

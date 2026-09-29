@@ -14,6 +14,7 @@ import { router } from '../src/api/router';
 import { registeredOrigins } from '../src/api/origins';
 import { partChecks } from '@joeblew999/remy-ui/parts/checks';
 import { codeSplittingChecks } from '@joeblew999/remy-ui/showcase/code-splitting.checks';
+import { showcaseChecks } from '@joeblew999/remy-ui/showcase/showcase.checks';
 import { buildBoundaryChecks } from '@joeblew999/remy-ui/showcase/build-boundaries.checks';
 
 // The shared checks cover what every app built on the package must satisfy: one call for a
@@ -27,9 +28,9 @@ serverAppChecks({
   appPaths,
   // This app's home page words and brand: its own content, checked exactly.
   home: { title: locale => m.home_title({}, { locale }), description: locale => m.home_description({}, { locale }), brand: 'Remy' },
-  // It shows remy-auth's showcase pages, so their checks run too.
-  showcase: { formats: { extra: formatsExtra } },
 });
+// It shows remy-auth's showcase pages, so their checks run too (the device place beside the network's: deferred-place).
+showcaseChecks({ formats: { extra: formatsExtra }, network: true });
 // Every part listed in src/parts.json brings its own checks: the sitemap (seo-routes), the streamed
 // place and its failing navigation (deferred-place), the status card, the time-zone pages.
 partChecks({ options: {
