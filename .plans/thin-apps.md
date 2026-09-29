@@ -476,6 +476,12 @@ AppProviders, ten page props gone) passes tier 0 including its prerender. Hands-
 `cf:preview`: only merges go out): desktop site header as before; phone, Arabic, `/ar/app/clock`:
 right-to-left frame, bottom bar from the config with Clock active, the language hint shown with no page
 passing `preferred`, More opens the sidebar on the reading side with the guide link; no console errors.
+Accepted by the reviewer agent (ACCEPT, six non-blocking notes, five fixed before the merge: stale
+docs naming `app-pages.tsx` for `AppShell`; nav keys from `link.to`, not an English label; the site
+header marks its active link with `navLink`'s match like the sidebar; the root reads
+`data?.preferred`; the breaking changes recorded in `CHANGELOG.md` `[Unreleased]` for phase D's
+release. The sixth: the scratch app is not a git repository, so its `i18n:check` warns; the claim was
+only typecheck and build.) Tier 0 and tier 3 81/81 again after the fixes.
 Cost: every page's entry chunk grows 1.6 KB gzip (the root now imports the app config with the app
 nav's icons and the clock's defaults); Lighthouse and Core Web Vitals in phase D's release gate judge it,
 and the app nav could move to the app frame alone if it matters.

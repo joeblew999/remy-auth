@@ -6,6 +6,24 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `app-config`: `defineRemyApp` (the app's brand, source, and site and app navigation, each link written
+  with TanStack's `linkOptions` so it is checked against the app's own routes), `NavItem`, `useRemyApp`,
+  `usePreferredLocale`. The shared frame names no route but `/`, so an app with other pages than
+  remy-auth's type-checks and shows only its own.
+- `app-shell`: `AppShell` alone, without the showcase pages.
+- `showcase/app-nav`: `showcaseSiteNav`, `showcaseAppNav`, the showcase's lists for apps that show it.
+
+### Changed (breaking)
+- `AppProviders` takes `app` (a `defineRemyApp` config) and `preferred` (the root loader's language) in
+  place of `repository`; every frame reads both, so pages no longer pass `preferred`.
+- `SourceLink`, `SiteNavLinks` and `AppNavLinks` are gone: the config's `repository`, `site.links` and
+  `app.links` replace them.
+- `./preferred` (`usePreferred`) is gone: the root passes `preferred` to `AppProviders`.
+- `Intro`'s and `FormatsContent`'s `backTo` is `'site' | 'app'` (the app's home comes from the config).
+- The sidebar and the phone's bottom bar list the config's `app.nav`, no longer remy-auth's pages; an app
+  showing them passes `showcaseAppNav`.
+
 ## [0.13.0] - 2026-09-26
 
 ### Added

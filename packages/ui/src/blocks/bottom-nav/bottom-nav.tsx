@@ -26,7 +26,7 @@ export function BottomNav({ locale }: { locale: Locale }) {
       {items.filter(item => item.core).map(item => {
         const { link, match } = navLink(item);
         const active = Boolean(matchRoute(match));
-        return <li key={item.label('en')}>
+        return <li key={String(link.to)}>
           <Link {...link} preload="intent" aria-current={active ? 'page' : undefined}
             className={cn(tab, active ? 'font-medium text-foreground' : 'text-muted-foreground')}>
             <span className={cn(pill, active && 'bg-accent text-accent-foreground')}>{item.icon}</span>

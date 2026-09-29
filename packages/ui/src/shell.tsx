@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router';
+import { Link, useMatchRoute } from '@tanstack/react-router';
 import { ArrowLeftIcon } from 'lucide-react';
 import type { Locale } from './paraglide/runtime.js';
 import { m } from './paraglide/messages.js';
@@ -37,6 +37,7 @@ export function SiteShell({ locale, path = '', preferred, children }: { locale: 
   const o = { locale };
   const app = useRemyApp();
   const offered = usePreferredLocale();
+  const matchRoute = useMatchRoute();
   return <div className="flex min-h-svh w-full flex-col px-4 md:px-8">
     <SkipLink locale={locale} />
     <LanguageHint locale={locale} path={path} preferred={preferred ?? offered} />
@@ -45,9 +46,9 @@ export function SiteShell({ locale, path = '', preferred, children }: { locale: 
       <NavigationMenu aria-label={m.nav_heading({}, o)} className="order-last max-w-none basis-full justify-start sm:order-none sm:basis-auto">
         <NavigationMenuList className="flex-wrap justify-start">
           {app.site?.nav?.map(item => {
-            const { link } = navLink(item);
-            return <NavigationMenuItem key={item.label('en')}>
-              <NavigationMenuLink active={path === item.link.to} render={<Link {...link} preload="intent" />}>{item.label(locale)}</NavigationMenuLink>
+            const { link, match } = navLink(item);
+            return <NavigationMenuItem key={String(link.to)}>
+              <NavigationMenuLink active={Boolean(matchRoute(match))} render={<Link {...link} preload="intent" />}>{item.label(locale)}</NavigationMenuLink>
             </NavigationMenuItem>;
           })}
           {app.site?.links?.(path, locale)}
@@ -69,7 +70,7 @@ export function SiteShell({ locale, path = '', preferred, children }: { locale: 
   </div>;
 }
 
-/** The frame of a site page, also for not-found and error pages. App pages use AppShell from ./app-pages. */
+/** The frame of a site page, also for not-found and error pages. App pages use AppShell from ./app-shell. */
 export const Shell = SiteShell;
 
 /** A page's heading block; its back link goes to the site's home, or with `backTo="app"` to the app's (defineRemyApp). */

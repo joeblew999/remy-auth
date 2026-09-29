@@ -31,7 +31,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
  */
 function Document({ children }: { children: React.ReactNode }) {
   const locale = getLocale();
-  const preferred = Route.useLoaderData({ select: data => data.preferred });
+  const preferred = Route.useLoaderData({ select: data => data?.preferred });
   return <html lang={locale} dir={direction(locale)} suppressHydrationWarning>
     <head><HeadContent /></head>
     <body><AppProviders locale={locale} app={remyApp} preferred={preferred}>{children}</AppProviders>

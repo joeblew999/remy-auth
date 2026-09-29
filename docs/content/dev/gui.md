@@ -72,7 +72,7 @@ each kind promises; the two are never mixed.
   shadcn parts.
 - **App pages** (`appPaths`, under `/app`) need JavaScript, carry `noindex` (added by `pageHead`)
   and stay out of the sitemap. Their frame is `AppShell` in
-  [`app-pages.tsx`](https://github.com/joeblew999/remy-auth/blob/main/packages/ui/src/app-pages.tsx), shadcn's sidebar-16 block owned in
+  [`app-shell.tsx`](https://github.com/joeblew999/remy-auth/blob/main/packages/ui/src/app-shell.tsx), shadcn's sidebar-16 block owned in
   [`blocks/sidebar-16`](https://github.com/joeblew999/remy-auth/blob/main/packages/ui/src/blocks/sidebar-16/README.md).
 
 The docs are not this app's pages: they are the docs Worker (`docs/`, Fumadocs), with the guide at `/docs`,

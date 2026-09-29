@@ -14,7 +14,7 @@ export function NavMain({ locale, label, items }: { locale: Locale; label: strin
           const { link, match } = navLink(item);
           const active = Boolean(matchRoute(match));
           const title = item.label(locale);
-          return <SidebarMenuItem key={item.label('en')}>
+          return <SidebarMenuItem key={String(link.to)}>
             <SidebarMenuButton tooltip={title} isActive={active} render={<Link {...link} preload="intent" aria-current={active ? 'page' : undefined} />}>
               {item.icon}
               <span>{title}</span>
