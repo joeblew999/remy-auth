@@ -36,19 +36,29 @@ One layout, different contents (owner, 2026-09-29: "all other Remy projects use 
 layout. BUT the code and content is of course different inside some of them"). Every repo, remy-auth
 included:
 
-| Path | Holds | Same in every repo? |
-| --- | --- | --- |
-| `mise.toml`, `package.json`, `wrangler.jsonc`, `vite.config.ts`, `tsconfig.json` | identity and the platform's include; a few lines each | same shape, different names |
-| `src/routes/` | the product's pages | different |
-| `src/api/` | the product's procedures | different, or absent |
-| `packages/contract/`, `packages/<name>/` | packages the repo publishes, if any (group 6) | optional |
-| `docs/docs.config.ts`, `docs/content/users/`, `docs/content/dev/` | the docs' identity and pages | different |
-| `.plans/`, `AGENTS.md` (with the generated rules block) | the repo's plans; the platform's rules | same shape |
-| `tasks/` | the platform itself | remy-auth only |
+The layout is the paths the shared tasks, their scripts and the package already expect (owner: "the mise
+tasks and tools expect certain paths too"). A first grep of `tasks/`, 2026-09-29:
 
-The layout is kept by the tools, not by a checker of our own (the `project-layout` branch was not
-merged for that reason, now.md step 1): the shared tasks and the package read these paths, so a file
-elsewhere is simply not found. The blank app (group 7) is this layout with nothing in it.
+| Path | Read by | Contents per repo |
+| --- | --- | --- |
+| `mise.toml` (the include, `[env]`), `package.json` (workspaces), `package-lock.json`, `wrangler.jsonc`, `vite.config.ts`, `playwright.config.ts`, `tsconfig.json`, `fnox.toml`, `skills-lock.json` | mise, npm, wrangler, vite, playwright, tsc, fnox, `skills:*` | same shape, different names |
+| `src/routes/`, `src/routeTree.gen.ts` (generated), `src/api/` | TanStack Start, `project:check` | the product's pages and procedures |
+| `tests/` (`smoke.spec.ts` named by the tasks) | `project:test:*` | the shared checks with the repo's config, plus its own |
+| `public/`, `dist/` (build output) | vite, wrangler, `cf:*` | favicon and headers; generated |
+| `docs/` (`wrangler.jsonc`, `tests/`, `dist/`), `docs/content/{users,dev,ui}/` with `i18n.json` and `meta.json` | `docs:*`, `i18n:docs:*` (`I18N_DOCS_DIR`) | the docs' identity and pages |
+| `project.inlang` (`I18N_INLANG`) | `i18n:messages:*` | the repo's own strings, if any |
+| `packages/<name>/` with `README.md` | `plans:*`, owner tasks (group 6) | packages the repo publishes, if any |
+| `.plans/` (`now.md`, `done/`, `parked/`) | `plans:*` | the repo's plans |
+| `AGENTS.md` (rules block), `.github/workflows/` | agents; GitHub | same shape |
+| `tasks/` | the include | remy-auth only: the platform itself |
+
+Phase A turns this grep into the full inventory (tasks, their scripts and the package's own path reads)
+and writes it once in [tasks.md](../docs/content/dev/tasks.md) as the layout; this table then points
+there. The layout is kept by the tools, not by a checker of our own (the `project-layout` branch was
+not merged for that reason, now.md step 1): a file elsewhere is simply not found. remy-auth and
+remy-video already match it; remy-auth-app does not yet (`workers/` for its prerender Worker, no
+`docs/`), which phase D settles with the open question on its future. The blank app (group 7) is this
+layout with nothing product-specific in it.
 
 Rules for every fix in this plan:
 
@@ -169,7 +179,7 @@ Removes: `packages/ui/src/shell.tsx` (204), `problem.tsx` (46), `app-pages.tsx` 
 - Context and `AppProviders` live in modules with no route imports.
 - The shell reads `preferred` itself, so no page can forget the language hint.
 - The blocks are exported or folded into `AppShell`; no consumer rebuilds the frame from primitives.
-- remy-auth's own pages become its config, the same way remy-video's are. The showcase pages
+- remy-auth's own pages become its config, the same way any repo's are. The showcase pages
   (formats, demo, clock, location, account, settings) stay package exports; remy-auth and remy-auth-app
   opt into them through that config, and an app that does not gets none of their links or types.
 
@@ -256,8 +266,24 @@ message when the preview port is taken, the contract coverage rule and TanStack'
 rule in the consumer docs: fold into whichever group touches the file; not steps of their own.
 
 The starting point for a new repo: a blank app (identity config, one home page, no showcase), not a
-copy of remy-auth-app. The scratch new app of risk 2 becomes it at the end of phase C, and the "A new
+copy of remy-auth-app. It is a template, and rule 2 still holds: it holds only files that are the repo's
+own from the first commit (identity, an empty home page and docs index, the layout's config files at a
+few lines each), nothing the platform must later reach. The scratch new app of risk 2 becomes it at the end of phase C, and the "A new
 consumer" recipe in tasks.md points to it; its rename step shrinks to the identity config.
+
+## Out of scope
+
+Settled 2026-09-29, to keep this plan to what it is for:
+
+- New capabilities. Parity is with what remy-auth has today; the auth service, Better Auth and the
+  portal stay [parked](parked/).
+- Tool swaps: Cloudflare's `cf` CLI, Flue and one `remy` CLI stay parked ([cf-cli](parked/cf-cli.md),
+  [flue](parked/flue.md), [remy-cli](parked/remy-cli.md)); this plan moves code, it does not change
+  tools.
+- Translation work and the developer-docs cleanup (content, not structure; risk 7).
+- Migrating remy-video (replaced in phase D) and moving other repos (remy-data, remy-sport, remy-nash,
+  remy-auth-app-layout) before phase D is done.
+- Running provisioning, which stays the owner's (risk 8).
 
 ## Risks, and what closes each (2026-09-29)
 
@@ -285,8 +311,8 @@ remy-auth using the new pieces only through their exports, its own copies delete
 check against remy-auth-app and a new app (risk 2) passing. No release. Then it stops for the owner's
 review.
 
-- **A. Proof (agreed):** group 1 (providers and shell), the `docs/tsconfig.json` mapping removed
-  (risk 10), and the docs routes test. The smallest change that proves the loop, plus the one unknown.
+- **A. Proof (agreed):** the layout inventory written into tasks.md, group 1 (providers and shell),
+  the `docs/tsconfig.json` mapping removed (risk 10), and the docs routes test. The smallest change that proves the loop, plus the one unknown.
 - **B. Docs system:** group 2, with provisioning owner-only (risk 8).
 - **C. The rest:** groups 3 to 7.
 - **D. Release, then a new video repo:** one `ui:release` (the full gate) carries the package and tasks
