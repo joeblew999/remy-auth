@@ -47,7 +47,7 @@ anywhere else is simply not found; no checker of its own keeps it.
 | `messages/`, `project.inlang/` | the app preset, `project:generate`, `i18n:messages:*` | the app's own strings, if any (compiled into `src/paraglide/`) |
 | `.plans/` (`now.md`, `done/`, `parked/`) | `plans:*` | the repo's plans |
 | `AGENTS.md`, `.github/workflows/` | agents; GitHub | the agents' index; CI |
-| `tasks/`, `template/` | the include; `giget` | remy-auth only: the shared tasks themselves, and the blank app a new repo starts from |
+| `tasks/`, `template/`, `fixtures/consumer/` | the include; `giget`; `template:test` | remy-auth only: the shared tasks themselves, the blank app a new repo starts from, and the consumer fixture that tests both as another repo gets them |
 
 ### A new consumer
 
@@ -142,10 +142,16 @@ tiers and when to use each are a rule in
 | 0 | `project:check` (typecheck and build, no browser; then `i18n:check`, a warning) |
 | 1 | `project:test:smoke` (`tests/smoke.spec.ts`, built on the package's `./smoke` checks) |
 | 2 | `project:test:only -- <words>` (checks whose title matches, in `QUICK_LOCALES`) |
-| 3 | `project:test:quick` (every check in `QUICK_LOCALES`, default `en,ar`) |
+| 3 | `project:test:quick` (every check in `QUICK_LOCALES`, default `en,ar`; then `project:test:consumers`) |
 | 4 | `project:verify` (everything, every language; `packages:release` runs it) |
 
-`project:test` is every check of ours in every language (inside `project:verify`). Google's level is
+`project:test` is every check of ours in every language (inside `project:verify`). Tiers 3 and 4 and CI end with
+`project:test:consumers`, the other repositories this one serves tested as they get it: nothing by default; in
+remy-auth, `template:test`, which builds the blank app and a package it owns from this commit's platform
+(the package from a tarball with a version of its own, the tasks from a copy outside any `node_modules`, the
+template's `.npmrc`) and runs install, skills (installed once per pinned list, then reused), tooling, tier 0, tier 3, the docs and a dry-run publish (~1.5 to 3 min, mostly the network).
+A change that would break another repository fails there, not in that repository. Tests are type-checked with
+the app (`tsconfig.json` includes `tests/`). Google's level is
 `project:test:google` (Lighthouse audits, local; CI on every push and tag) and `project:test:cwv`
 (Core Web Vitals on a throwaway Cloudflare Worker); `packages:release` runs both.
 

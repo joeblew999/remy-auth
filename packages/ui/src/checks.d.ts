@@ -1,3 +1,4 @@
+import type { Locale } from './paraglide/runtime.js';
 import type { Locator, Page } from '@playwright/test';
 export declare const endonym: (locale: string) => string;
 export declare const direction: (locale: string) => 'ltr' | 'rtl';
@@ -14,7 +15,7 @@ export declare function hydrated(locator: Locator): Promise<void>;
 export type OneLanguage = { locale: string; paths: string[]; translations?: Record<string, string[]> };
 /** `sitemap: false` leaves the sitemap to the seo-routes part's checks (sitemapChecks). */
 /** The home page's own words, checked exactly when an app passes them; without them, only that they are there. */
-export type HomeContent = { title?: (locale: string) => string; description?: (locale: string) => string; brand?: string };
+export type HomeContent = { title?: (locale: Locale) => string; description?: (locale: Locale) => string; brand?: string };
 export declare function publicPageChecks(options: { paths: string[]; prerendered?: boolean; oneLanguage?: OneLanguage; sitemap?: boolean; home?: HomeContent }): void;
 /** The sitemap lists `paths` in every locale and `oneLanguage`'s pages, self-canonical with hreflang alternates; robots.txt names it. */
 export declare function sitemapChecks(options: { paths: string[]; oneLanguage?: OneLanguage }): void;

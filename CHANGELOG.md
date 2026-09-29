@@ -38,6 +38,10 @@ package follows [Semantic Versioning](https://semver.org/).
   `project:refresh-tasks`.
 - CI: `.github/workflows/google.yml` is a reusable workflow; an app calls it at its tag, and
   `project:upgrade-ui` moves that tag with the package and the tasks.
+- `project:test:consumers`: a hook tiers 3 and 4 and CI run last, for the other repositories a repository
+  serves (remy-auth: `template:test`, the consumer fixture in `fixtures/consumer/`).
+- `packages:publish --dry-run`; `packages:publish` first checks that each registry accepts its token
+  (`npm whoami`) and stops on any answer but "not found", before anything is published.
 - `template/`: the blank app a new repository starts from (identity, one home page in every language,
   a docs index per site); `docs:init` takes `template/docs`.
 
@@ -56,6 +60,8 @@ package follows [Semantic Versioning](https://semver.org/).
   (`registeredApp`); `pageHead`'s titles and the home page's WebSite data use its `brand`, where they used 'Remy'.
 - `startMiddleware`'s `csp` is optional. The check sets' `ownSitePaths`, `ownAppPaths`, `formats` and
   `devicePath` options are gone (`sitePaths`, `appPaths`, `showcase`).
+- Tests are type-checked: an app's `tsconfig.json` includes `tests/` (the blank app's does). `HomeContent`'s
+  functions take a `Locale`.
 - `buildBoundaryChecks` checks a page's device time only with `deviceTimePath` (the showcase's `/formats`).
 - `project:verify` also runs `project:doctor` and `project:verify-tooling`; `project:generate` compiles
   the app's own catalog by default. A missing `src/parts.json` lists no parts.

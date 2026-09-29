@@ -37,6 +37,11 @@ tools = { "aqua:cli/cli" = "2.101.0" }
 env = { GITHUB_TOKEN = "{% set token = get_env(name='GITHUB_TOKEN', default='') %}{% if token %}{{ token }}{% else %}{{ exec(command='gh auth token') }}{% endif %}" }
 run = [{ task = "project:preconditions" }, "npm ci", { task = "skills:install" }, { task = "agents:rules" }, { task = "mcp:register" }, { task = "project:verify" }]
 
+["project:test:consumers"]
+description = "Hook for the other repositories this one serves, tested as they get it (tier 3 and CI run it last); none by default. remy-auth runs template:test, its consumer fixture. Instant"
+dir = "{{config_root}}"
+run = "true"
+
 ["project:release-checks"]
 description = "Hook for the checks a repository adds to its release (packages:release runs it after project:verify); none by default. Override it in the project's mise.toml (remy-auth runs ui:verify). Instant"
 dir = "{{config_root}}"
@@ -87,7 +92,7 @@ description = "Tier 4 with project:verify, releases: build, then every check of 
 dir = "{{config_root}}"
 depends = ["project:build"]
 env = { TEST_TARGET = "local" }
-run = "./node_modules/.bin/playwright test --project=ours"
+run = ["./node_modules/.bin/playwright test --project=ours", { task = "project:test:consumers" }]
 
 ["project:check"]
 description = "Tier 0 while coding: plans:check, build and typecheck, no browser (~15 s), then i18n:check, and docs:check when the app has a docs Worker (docs/) (missing or stale translations are a warning here). Code freely; run a test tier when something looks wrong (docs/content/dev/how-we-work.md, test tiers)"
@@ -118,7 +123,7 @@ description = "Tier 3, quick: build, then every check of ours in QUICK_LOCALES o
 dir = "{{config_root}}"
 depends = ["project:build"]
 env = { TEST_TARGET = "local", CHECK_LOCALES = "{{ env.QUICK_LOCALES | default(value='en,ar') }}" }
-run = "./node_modules/.bin/playwright test --project=ours"
+run = ["./node_modules/.bin/playwright test --project=ours", { task = "project:test:consumers" }]
 
 ["project:test:google"]
 description = "Level 2, audits: build, then run Google's Lighthouse audits (accessibility, best practices, SEO) locally (~40 s; CI runs this). Core Web Vitals are judged on a Cloudflare preview instead: project:test:cwv. Uses dist/, PREVIEW_PORT and the Chrome DevTools daemon: never alongside another local level or a remote level 2"

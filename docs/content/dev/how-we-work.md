@@ -172,7 +172,7 @@ When the owner hands over decisions, for example to finish work unattended:
   | 0 | `mise run project:check` | typecheck and build; translation status as a warning | ~15 s |
   | 1 | `mise run project:test:smoke` | every page in en and ar answers; home and docs hydrate; search and ask respond | ~15 s |
   | 2 | `mise run project:test:only -- <words>` | only the checks whose title matches, en and ar | varies |
-  | 3 | `mise run project:test:quick` | every check, en and ar | ~45 s |
+  | 3 | `mise run project:test:quick` | every check, en and ar; then the other repositories this one serves (remy-auth: the consumer fixture, ~1.5 to 3 min) | ~45 s (remy-auth ~2 to 4 min) |
   | 4 | `mise run project:verify` | everything, every language | releases |
 
 - Deploys run no tests unless `GATE` picks a tier: `GATE=smoke` for most code changes, `GATE=quick`

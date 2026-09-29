@@ -3,9 +3,12 @@
 #MISE dir="{{config_root}}"
 #MISE tools={"aqua:cli/cli"="2.101.0"}
 #USAGE flag "--release <tag>" help="The release tag, e.g. v0.14.0"
+#USAGE flag "--dry-run" help="Ask each registry and run npm publish --dry-run; publish nothing, create no release"
 set -euo pipefail
 here="$(dirname "$0")"
 tag="${usage_release:-}"
+dry=()
+[ "${usage_dry_run:-false}" = true ] && dry=(--dry-run)
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 
 if [ -n "$tag" ]; then
@@ -23,14 +26,22 @@ mise run project:generate
 while IFS=$'\t' read -r name version registry _; do
   host="${registry#https://}"; host="${host%/}"
   printf '//%s/:_authToken=%s\n' "$host" "$token" > "$tmp/npmrc"
-  if NPM_CONFIG_USERCONFIG="$tmp/npmrc" npm view "$name@$version" version --registry "$registry" >/dev/null 2>&1; then
+  # The token npm will publish with is accepted (a registry answers "not found" for a new name whatever the
+  # token, so only whoami shows a refused one, e.g. an app's .npmrc reading an unset ${GITHUB_TOKEN}).
+  NPM_CONFIG_USERCONFIG="$tmp/npmrc" npm whoami --registry "$registry" > /dev/null 2>&1 \
+    || { echo "packages:publish: $registry refuses the token npm would publish $name with (check the app's .npmrc)." >&2; exit 1; }
+  # Only "not found" means not published: any other answer (a refused token, a network error) stops here,
+  # before a publish that would fail the same way after the tag is pushed.
+  if NPM_CONFIG_USERCONFIG="$tmp/npmrc" npm view "$name@$version" version --registry "$registry" > "$tmp/view" 2>&1; then
     echo "$name@$version is already published."
+  elif grep -q "E404" "$tmp/view"; then
+    NPM_CONFIG_USERCONFIG="$tmp/npmrc" npm publish --workspace "$name" --ignore-scripts ${dry[@]+"${dry[@]}"}
   else
-    NPM_CONFIG_USERCONFIG="$tmp/npmrc" npm publish --workspace "$name" --ignore-scripts
+    echo "packages:publish: $registry did not answer for $name@$version:" >&2; cat "$tmp/view" >&2; exit 1
   fi
 done < <(node "$here/workspaces.mjs")
 
-if [ -n "$tag" ]; then
+if [ -n "$tag" ] && [ ${#dry[@]} -eq 0 ]; then
   if gh release view "$tag" >/dev/null 2>&1; then echo "$tag is already released."; exit 0; fi
   gh release create "$tag" --title "${RELEASE_TITLE:-$RELEASE_PACKAGE} ${tag#v}" --notes-file "$tmp/notes.md"
   echo "Released $tag."

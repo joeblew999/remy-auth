@@ -1,6 +1,7 @@
 # Platform structure: fix what makes every change to the shared platform so hard
 
-Status: proposed 2026-09-29, waiting for the owner's three decisions (end of this file). Owner: remy-auth.
+Status: agreed 2026-09-29; the owner delegated its decisions ("Stop asking me and use your brain"), recorded
+under "Decisions". Fix 1 and the tests half of fix 3 first. Owner: remy-auth.
 Executor/Reviewer roles as in [plans and roles](../docs/content/dev/development.md#plans-and-roles).
 
 Owner, 2026-09-29, after thin-apps phase C: "you are finding so many structural problems. I expect a plan
@@ -99,7 +100,45 @@ Thin-apps phase D (release 0.14.0, `remy-auth-test`) comes first. This plan star
 `remy-auth-test` is fix 5's canary. Fix 1 can start before phase D, since it changes only remy-auth's
 own gates.
 
-## Open questions for the owner
+## Decisions (the Executor's, owner delegated, 2026-09-29)
+
+1. **The showcase becomes a second package in remy-auth's workspace, `@joeblew999/remy-showcase`** (fix 2).
+   It keeps both answers to the open remy-auth-app question possible (a prerendered showcase needs the pages
+   from a package), and it makes remy-auth a repository that owns two packages, the case group 6 of
+   thin-apps built tasks for and nothing yet exercises.
+2. **remy-auth keeps the workspace symlink for its own app; the fixture closes the gap** (fix 1). A pack
+   per change would slow every edit to the package by a pack and an install; the fixture sees everything
+   the symlink hides, on every tier 3 and CI run. Revisit only if a problem the fixture should see gets past it.
+3. **remy-cli is unparked, scoped** (fix 4): the release and publish path first, since it is the one path
+   proved only by releasing; the rest by the parked plan's inventory after.
+
+Found while starting fix 1: mise (2026.9.15) has no `git::file://` include (it loads nothing, silently), so
+the fixture cannot take the tasks through mise's git cache. What differs there is where the files sit: no
+`node_modules` above them. The fixture takes a copy of `tasks/` in a temporary folder outside any
+`node_modules`, which is that same condition (the phase C `verify-tooling` problem shows under it).
+
+## Progress
+
+- **Fix 1: done 2026-09-29.** `template:test` is the consumer fixture (`fixtures/consumer/`: its README, `run.sh`, and
+  `files/`, new files only). It builds the blank app plus a contract package it owns and an API, with the package from a
+  tarball versioned `X.Y.Z-dev.<sha>`, the tasks from a copy outside any `node_modules`, and the template's `.npmrc`.
+  It runs install, skills (installed once per pinned list, then reused), `project:verify-tooling`, tier 0, tier 3,
+  `docs:test` and `packages:publish --dry-run` without `GITHUB_TOKEN`, as a release does. `project:test:consumers` (a
+  shared hook, no-op by default) runs it last in tiers 3 and 4 and in CI. Proved by undoing two fixes, each failing
+  the fixture:
+  - the token export: `packages:publish` now checks `npm whoami` first. A registry answers "not found" for a new name
+    whatever the token, so only `whoami` shows a refused one, and the first proof passed until that check was added;
+  - `verify-tooling`'s resolution from the app: `Cannot find package 'smol-toml'`. The old `template:test`, with
+    remy-auth's own `tasks/`, passed.
+
+  The rest of S1's row is covered by construction: no parts list, the route tree, devtools stripping, an app's own
+  catalog, the version substitution. It costs ~1.5 to 3 min in tier 3, mostly network. Found: mise has no
+  `git::file://` include (decision note above).
+- **Fix 3, first half: done 2026-09-29.** Tests are type-checked (`tsconfig.json` includes `tests/`, in remy-auth and
+  the blank app, whose tier 0 the fixture runs). It found one seam error at once: `HomeContent` took `string` where the
+  messages take a `Locale`. Left: the build-time modules in TypeScript with generated declarations (survey first).
+
+## Open questions for the owner (answered above)
 
 1. **Where does the showcase go (fix 2)?** Options:
    - into remy-auth's own `src/` (remy-auth is the only repo showing it once remy-auth-app is decided);

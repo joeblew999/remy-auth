@@ -1,0 +1,10 @@
+{
+  "name": "@joeblew999/remy-fixture-contract",
+  "version": "0.0.1",
+  "description": "The consumer fixture's API contract: never published (packages:publish --dry-run only)",
+  "type": "module",
+  "publishConfig": { "registry": "https://npm.pkg.github.com" },
+  "files": ["src"],
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": { "@joeblew999/remy-ui": "*" }
+}
