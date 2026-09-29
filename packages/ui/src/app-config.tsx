@@ -24,8 +24,10 @@ export type NavItem = {
 };
 
 export type RemyApp = {
-  /** The app's name: the site header's and the app frame's brand. */
+  /** The app's name: the site header's and the app frame's brand, page titles, the home page's structured data. */
   brand: string;
+  /** The Worker's service name: its log lines, /healthz and the CSP report endpoint's logs. */
+  service?: string;
   /** The app's source: the site header's "GitHub" link. None shows no link. */
   repository?: string;
   /**
@@ -50,8 +52,17 @@ export type RemyApp = {
   };
 };
 
-/** Declares the app's frame settings; the app passes them to AppProviders. Link options stay checked where they are written. */
-export const defineRemyApp = (app: RemyApp) => app;
+let registered: RemyApp | undefined;
+
+/**
+ * Declares the app's frame settings; the app passes them to AppProviders. Link options stay checked where
+ * they are written. Also registers them for what runs outside React (pageHead's titles, the shared CSP
+ * report route): the root route imports the app's config, so it is registered before any page's head runs.
+ */
+export const defineRemyApp = (app: RemyApp) => (registered = app);
+
+/** The app's settings as registered by defineRemyApp, if it has run. */
+export const registeredApp = () => registered;
 
 const RemyAppContext = createContext<RemyApp>({ brand: 'Remy' });
 const PreferredContext = createContext<Locale | undefined>(undefined);

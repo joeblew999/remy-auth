@@ -48,6 +48,7 @@
     "./providers": "./src/providers.tsx",
     "./app-config": "./src/app-config.tsx",
     "./app-shell": "./src/app-shell.tsx",
+    "./app/vite": "./src/app-vite.js",
     "./docs/vite": "./src/docs/vite.js",
     "./docs/config": "./src/docs/config.js",
     "./docs/tsconfig.json": "./src/docs/tsconfig.json",

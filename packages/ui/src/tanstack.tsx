@@ -6,6 +6,7 @@ import { preferredFromHeader, preferredFromNavigator } from './matching.js';
 import { alternates } from './seo';
 import { withObservability } from './worker';
 import { allPaths, isAppPath } from './paths.js';
+import { registeredApp } from './app-config';
 
 // TanStack Router and Start glue over Paraglide's official integration
 // (https://paraglidejs.com/tanstack-start). Plain functions only: nothing here needs the Start
@@ -94,13 +95,13 @@ type HeadOptions = {
  * The site home page, in every language, also names the site for search with schema.org's
  * WebSite (name and the site root), through TanStack's `script:ld+json` head entry.
  */
-export function pageHead({ path, title, description, locale = getLocale(), origin = getUrlOrigin(), brand = 'Remy' }: HeadOptions) {
+export function pageHead({ path, title, description, locale = getLocale(), origin = getUrlOrigin(), brand = registeredApp()?.brand }: HeadOptions) {
   const links = alternates(origin, path, locale);
   return {
-    meta: [{ title: `${title(locale)} | ${brand}` }, { name: 'description', content: description(locale) },
+    meta: [{ title: brand ? `${title(locale)} | ${brand}` : title(locale) }, { name: 'description', content: description(locale) },
       // App pages are for people using the app, not for search: kept out of the index (paths.js).
       ...(isAppPath(path) ? [{ name: 'robots', content: 'noindex' }] : []),
-      ...(path === '' ? [{ 'script:ld+json': { '@context': 'https://schema.org', '@type': 'WebSite', name: brand, url: `${origin}/` } }] : [])],
+      ...(path === '' && brand ? [{ 'script:ld+json': { '@context': 'https://schema.org', '@type': 'WebSite', name: brand, url: `${origin}/` } }] : [])],
     links: [
       { rel: 'canonical', href: links.canonical },
       ...links.alternates.map(link => ({ rel: 'alternate', hrefLang: link.hrefLang, href: link.href })),

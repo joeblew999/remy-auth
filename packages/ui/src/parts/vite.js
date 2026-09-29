@@ -34,6 +34,8 @@ export function remyParts({ root = process.cwd(), file, routesDirectory = 'src/r
   const routesDir = resolve(root, routesDirectory);
   const routes = rootRoute('__root.tsx', [
     physical('', '.'),
+    // The routes every app has from the package (app-routes: the CSP report endpoint), then the listed parts'.
+    physical('', relative(routesDir, join(here, '..', 'app-routes'))),
     ...names.filter(name => catalog[name].routes).map(name => physical('', relative(routesDir, join(here, name, 'routes')))),
   ]);
   const code = source => {

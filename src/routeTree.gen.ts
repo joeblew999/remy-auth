@@ -10,7 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CspReportRouteImport } from './routes/csp-report'
+import { Route as CspReportRouteImport } from './../packages/ui/src/app-routes/csp-report'
 import { Route as FormatsRouteImport } from './routes/formats'
 import { Route as RobotsChar91DotChar93txtRouteImport } from './../packages/ui/src/parts/seo-routes/routes/robots[.]txt'
 import { Route as SitemapChar91DotChar93xmlRouteImport } from './../packages/ui/src/parts/seo-routes/routes/sitemap[.]xml'
