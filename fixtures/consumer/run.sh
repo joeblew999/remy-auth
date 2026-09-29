@@ -20,6 +20,9 @@ cp -R tasks "$out/tasks"
 #    tasks' path, the contract workspace and the docs' API reference.
 cp -R template "$out/app" && cp -R fixtures/consumer/files/. "$out/app/"
 cd "$out/app"
+# remy-auth's own [env] (from the mise run that started this) is not the app's: without this the app's tasks
+# would read remy-auth's inlang project and release settings.
+unset I18N_INLANG RELEASE_PACKAGE RELEASE_TITLE
 npm pkg set "dependencies.@joeblew999/remy-ui=file:$ui" "dependencies.@joeblew999/remy-fixture-contract=*" "workspaces[1]=packages/*"
 sed -i.bak "s#git::https://github.com/joeblew999/remy-auth.git//tasks?ref=v[0-9.]*#$out/tasks#" mise.toml
 sed -i.bak "s#export default remyDocs(docsConfig);#export default remyDocs(docsConfig, { contract: '@joeblew999/remy-fixture-contract' });#" docs/vite.config.ts
@@ -35,17 +38,25 @@ export GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token)}"
 npm install --no-audit --no-fund --loglevel=error
 # The pinned skills are the same download for every repository, not part of what the fixture is for: install
 # them once per version of the pinned list and reuse them (~2 min of GitHub clones otherwise).
-skills="${TMPDIR:-/tmp}/remy-fixture-skills/$(shasum "$root/tasks/skills.toml" | cut -c1-12)"
+# The key covers the pinned list and the package's own remy skill, so a changed skill is installed again.
+key=$( (cat "$root/tasks/skills.toml"; find "$out/ui/skills" -type f -exec cat {} +) | shasum | cut -c1-12)
+skills="${TMPDIR:-/tmp}/remy-fixture-skills/$key"
 if [ -f "$skills/skills-lock.json" ]; then
   cp -R "$skills/." .
 else
   mise run skills:install > /dev/null
-  mkdir -p "$skills" && cp -R skills-lock.json .agents .claude "$skills/"
+  # Written aside, then moved into place: an interrupted or concurrent run never leaves half a cache.
+  mkdir -p "$skills.$$" && cp -R skills-lock.json .agents .claude "$skills.$$/" && mv "$skills.$$" "$skills" 2>/dev/null || rm -rf "$skills.$$"
 fi
 mise run project:verify-tooling
 mise run project:check
 PREVIEW_PORT=$((${PREVIEW_PORT:-4173} + 100)) mise run project:test:quick
 DOCS_PREVIEW_PORT=$((${DOCS_PREVIEW_PORT:-4174} + 100)) mise run docs:test
 # As a release runs it: no GITHUB_TOKEN in the environment (the task finds its own token).
-env -u GITHUB_TOKEN mise run packages:publish -- --dry-run
+# In CI the release job hands the token over as NODE_AUTH_TOKEN (google.yml); on a machine, gh's login.
+if [ -n "${CI:-}" ]; then
+  env -u GITHUB_TOKEN NODE_AUTH_TOKEN="$GITHUB_TOKEN" mise run packages:publish -- --dry-run
+else
+  env -u GITHUB_TOKEN mise run packages:publish -- --dry-run
+fi
 echo "template:test: the blank app and a package it owns install, build and pass on this commit's platform ($version)."

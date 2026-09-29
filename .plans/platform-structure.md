@@ -36,7 +36,9 @@ the rest.
     substitute a published copy;
   - the tasks through mise's git include from a local bare clone (`git::file://…`), so they run from
     mise's cache as they do elsewhere;
-  - the template's `.npmrc`, and a real GitHub Packages install when a token is present (CI has one).
+  - the template's `.npmrc`, which `packages:publish`'s token check and registry lookups go through. (An
+    install from GitHub Packages itself is not done: the fixture's package comes from a tarball, its contract
+    is a workspace.)
 - **The template grows the shape of a real app**: one site page, one app page and one procedure in a
   contract workspace, as phase C's scratch check had. It then also covers the API, the reference docs and
   package publishing (through `packages:publish --dry-run`, fix 4).
@@ -132,7 +134,10 @@ the fixture cannot take the tasks through mise's git cache. What differs there i
     remy-auth's own `tasks/`, passed.
 
   The rest of S1's row is covered by construction: no parts list, the route tree, devtools stripping, an app's own
-  catalog, the version substitution. It costs ~1.5 to 3 min in tier 3, mostly network. Found: mise has no
+  catalog, the version substitution. Acceptance's "each proved by reverting" is met for those two only. It costs
+  ~1.5 to 3 min in tier 3, mostly network. The fixture runs with remy-auth's own `[env]` unset. The first
+  review found that CI would fail at the dry-run publish (no token without `gh`'s login); the step now
+  passes the token as the release job does. Found: mise has no
   `git::file://` include (decision note above).
 - **Fix 3, first half: done 2026-09-29.** Tests are type-checked (`tsconfig.json` includes `tests/`, in remy-auth and
   the blank app, whose tier 0 the fixture runs). It found one seam error at once: `HomeContent` took `string` where the

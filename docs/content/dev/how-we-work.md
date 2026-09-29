@@ -176,7 +176,7 @@ When the owner hands over decisions, for example to finish work unattended:
   | 4 | `mise run project:verify` | everything, every language | releases |
 
 - Deploys run no tests unless `GATE` picks a tier: `GATE=smoke` for most code changes, `GATE=quick`
-  for shared-package or cross-cutting changes, `GATE=full` rarely. Docs text, plans, tasks and config
+  for shared-package or cross-cutting changes (in remy-auth it includes the consumer fixture, +1.5 to 3 min and the network), `GATE=full` rarely. Docs text, plans, tasks and config
   deploy straight away. Say which tier ran when reporting.
 - Never pipe a gating command through `grep` or `tail` in a chain: the pipe hides its exit code.
   This once released a version whose checks had failed.
