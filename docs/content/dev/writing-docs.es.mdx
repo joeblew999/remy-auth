@@ -112,8 +112,10 @@ y `<Tab>`, `<Steps>` y `<Step>`, `<Accordions>` y `<Accordion>`, `<Files>`, `<Fo
 
 ## La CLI de Fumadocs [#the-fumadocs-cli]
 
-`mise run docs:cli -- feature <name>` ejecuta la CLI de Fumadocs fijada; su `cli.json` asigna nuestras carpetas, y
-lo que escribe es un cambio que hay que revisar como cualquier otro.
+`mise run docs:cli -- feature <name>` (solo en remy-auth) ejecuta la CLI de Fumadocs fijada en el Worker
+compartido de documentación, `packages/ui/src/docs`; su `cli.json` asigna las carpetas de allí, y lo que
+escribe es un cambio en el paquete, revisado como cualquier otro. Las apps toman el Worker del paquete y
+nunca lo ejecutan.
 
 | Función | Lo que aportó a este sitio |
 | --- | --- |

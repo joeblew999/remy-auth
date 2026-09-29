@@ -69,15 +69,16 @@ Las tareas de passthrough de la CLI aceptan directamente los flags originales, c
 | Espacio de nombres | Propósito |
 | --- | --- |
 | `project:*` | Configuración, pipeline y verificación (valores predeterminados compartidos desde `tasks/project.toml`; `[env]` proporciona las entradas) y diagnóstico de herramientas |
-| `packages:*` | Comprueba y actualiza paquetes npm |
-| `ui:*` | Compila los catálogos compartidos (`ui:generate`), regenera los componentes y el tema de shadcn (`ui:components`, `ui:theme`), demuestra que no se han modificado (`ui:verify`), empaqueta y publica el paquete (`ui:pack`, `ui:release`) |
+| `packages:*` | Comprueba y actualiza paquetes npm; empaqueta, publica y sube los propios paquetes del repositorio ([tareas](./tasks.md#a-repository-that-publishes-packages)) |
+| `ui:*` | Compila los catálogos compartidos (`ui:generate`), regenera los componentes y el tema de shadcn (`ui:components`, `ui:theme`), demuestra que no se han modificado (`ui:verify`), publica el paquete y las tareas (`ui:release`, la `packages:release` compartida) |
 | `skills:*` | Instala, lista y elimina los skills oficiales fijados |
 | `auth:*` | CLI de Better Auth y diagnóstico |
 | `cf:*` | CLI de Cloudflare, logs en vivo, despliegue (`cf:deploy`), Workers de comprobación desechables (`cf:preview`, `cf:preview-delete`), logs almacenados y uso de IA (`cf:events`, `cf:ai-*`); tareas compartidas, listadas en el [README de tareas](./tasks.md#cloudflare-tasks) |
 | `api:*` | El documento OpenAPI generado que sirve un Worker en ejecución (`api:spec`, `--urls` para sus operaciones; tarea compartida) |
 | `browser:*` | CLI de Chrome DevTools, ciclo de vida de la sesión y servidor MCP |
 | `web:*` | Búsqueda y recuperación de Modern Web Guidance |
-| `docs:*` | El Worker de documentación (`docs/`): ejecutarlo (`docs:dev`), compilarlo y comprobarlo (`docs:build`, `docs:check`), probarlo (`docs:test`, `docs:test:remote`), desplegarlo (`docs:preview`, `docs:deploy`), las páginas de Ask AI en AI Search (`docs:publish`), detener o reanudar las respuestas (`docs:answers:off`, `docs:answers:on`), sus logs y la IA (`docs:observe`, `docs:ai-gateway`), la CLI de Fumadocs (`docs:cli`) y su incorporación a otra app (`docs:init`) |
+| `docs:*` | El Worker de documentación, de `@joeblew999/remy-ui` (`src/docs`), sobre el `docs/` de una app (`content/`, `docs.config.ts` y tres archivos de una línea): ejecutarlo (`docs:dev`), compilarlo y comprobarlo (`docs:build`, `docs:check`), probarlo (`docs:test`, `docs:test:remote`), desplegarlo (`docs:preview`, `docs:deploy`), las páginas de Ask AI en AI Search (`docs:publish`), detener o reanudar las respuestas (`docs:answers:off`, `docs:answers:on`), sus logs y la IA (`docs:observe`, `docs:ai-gateway`), lo que su Ask AI necesita en Cloudflare (`docs:provision`, solo imprime), y el inicio de la documentación de una app (`docs:init`). Solo remy-auth: la CLI de Fumadocs en el paquete (`docs:cli`) |
+| `agents:*` | `agents:rules`: el bloque marcado en el `AGENTS.md` de una app que dirige a sus agentes hacia las reglas de la plataforma, el skill `remy` del paquete instalado ([el skill `remy`](#the-remy-skill-the-platforms-rules-for-every-repos-agents)); `project:setup` y `project:upgrade-ui` la ejecutan |
 | `i18n:*` | Traducciones, dos pipelines: mensajes de la interfaz (Paraglide) y documentación (Fumadocs). `i18n:check` (sin conexión, solo lectura; un aviso o la puerta de control del release), `i18n:translate` (el agente Claude fijado, en main, con commit); tareas compartidas, [un solo redactor](./how-we-work.md#translations-one-writer), [cómo](./tasks.md#translations) |
 | `mcp:*` | Registra, verifica e inspecciona las conexiones MCP del proyecto |
 | `codex:*` / `claude:*` | Inicia o reanuda una sesión interactiva de agente (tareas compartidas) |
@@ -182,7 +183,19 @@ mise run skills:list
 
 Para reinstalar desde cero, ejecuta `mise run skills:remove` y luego `mise run skills:install`.
 
-Los skills viven en `.agents/skills/`; `.claude/skills/` enlaza a los mismos archivos.
+Skills viven en `.agents/skills/`; `.claude/skills/` enlaza a los mismos archivos.
+
+### El skill `remy`: las reglas de la plataforma para los agentes de cada repositorio [#the-remy-skill-the-platforms-rules-for-every-repos-agents]
+
+Además de los skills fijados, `skills:install` instala `remy` desde el paquete instalado
+(`./node_modules/@joeblew999/remy-ui/skills`, `remy_skill_path`), así que su versión es la del paquete. Se
+genera a partir de estos docs de desarrollo (cómo trabajamos, los principios, las herramientas, las tareas
+compartidas, el paquete de UI, cómo escribir docs, la GUI) mediante `ui:generate`, que ejecuta cada
+empaquetado y publicación (`packages/ui/skill.mjs`); los docs siguen siendo la única fuente. En una app,
+`mise run agents:rules` mantiene un bloque marcado en `AGENTS.md` que dirige a sus agentes hacia el skill y
+nombra la versión; `project:setup` y `project:upgrade-ui` la ejecutan, así que una actualización cambia las
+reglas que leen los agentes en el mismo paso. El propio `AGENTS.md` de remy-auth indexa los docs
+directamente.
 El instalador registra la procedencia en `skills-lock.json`. Volver a ejecutar la instalación
 restaura los skills seleccionados desde las fuentes fijadas; actualiza sus commits de fuente deliberadamente
 para adoptar cambios upstream. Solo se hace commit de `skills-lock.json`; los skills instalados y sus
@@ -305,7 +318,8 @@ de auditoría duradero, los dashboards y la entrega de alertas son trabajo pendi
 
 Dos productos de Cloudflare están detrás de Ask AI de la documentación (el Worker de docs), y es fácil confundirlos:
 
-- **AI Search** es el índice (`remy-docs-pages`). Lee los docs directamente desde el bucket R2
+- **AI Search** es el índice (`remy-docs-pages`, el de remy-auth; cada nombre aquí es el `ask` de
+  `docs.config.ts`). Lee los docs directamente desde el bucket R2
   `remy-docs` (un archivo Markdown por página de docs e idioma, `<site>/<lang>/<page>.md`, sincronizado cada hora
   y cuando `docs:publish` lo solicita), encuentra los pasajes que coinciden con una pregunta y le pide a un modelo de Workers AI
   que escriba la respuesta.
@@ -335,8 +349,14 @@ Tokens: consulta [secretos](#secrets-fnox) más abajo.
 Costos: la indexación son unos pocos embeddings (una reindexación completa, unos $0.0005); una búsqueda
 sin respuesta, casi nada; una respuesta entre $0.0001 y $0.0007, y $0 cuando la caché de AI Search ya la tiene.
 
+Ask AI es una decisión de cada app: el `ask` de `docs.config.ts` nombra su instancia de AI Search, su
+bucket R2, su AI Gateway y su espacio de nombres de límite de tasa, y la configuración de Cloudflare del
+Worker de docs se genera a partir de él (`docs/.remy-docs/wrangler.json`). Sin `ask`, la documentación no
+tiene página, botón ni bindings de Ask AI. `mise run docs:provision` imprime los comandos que crean los
+recursos de una app y no crea nada: eso cuesta dinero y es cosa del propietario.
+
 Historial almacenado y las respuestas de IA, de solo lectura, desde las propias APIs de Cloudflare. El
-Worker, su instancia de AI Search y el AI Gateway de esa instancia provienen de `wrangler.jsonc`, así que
+Worker, su instancia de AI Search y el AI Gateway de esa instancia provienen de su configuración de Wrangler, así que
 una app que lo incluya obtiene el suyo propio:
 
 ```sh

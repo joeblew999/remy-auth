@@ -23,41 +23,100 @@ PUBLIC_ORIGIN = "http://127.0.0.1:{{ env.PREVIEW_PORT }}"
 DEPLOY_ORIGIN = "https://your-app.your-subdomain.workers.dev"
 ```
 
+### La estructura [#the-layout]
+
+Todo repositorio de Remy, remy-auth incluido, tiene los mismos archivos en los mismos lugares; lo que hay
+dentro de los archivos del producto es diferente. La estructura son las rutas que leen las tareas
+compartidas, sus scripts y el paquete, así que un archivo en cualquier otro lugar simplemente no se
+encuentra; ninguna comprobación propia lo mantiene.
+
+| Ruta | Leído por | Contiene |
+| --- | --- | --- |
+| `mise.toml` | mise | `min_version`, las herramientas, el include de tareas, `[env]` (`DEPLOY_ORIGIN`, `PREVIEW_PORT`, orígenes de la documentación) |
+| `package.json`, `package-lock.json` | npm, `project:*`, `packages:*` (workspaces) | las dependencias de la app; `workspaces` cuando es dueña de paquetes |
+| `wrangler.jsonc` | wrangler, el plugin de Vite de Cloudflare, `cf:*` | el nombre del Worker, los bindings y los assets |
+| `vite.config.ts`, `tsconfig.json`, `playwright.config.ts` | Vite, `project:typecheck`, `project:test:*` | el build, los tipos y las comprobaciones de navegador |
+| `fnox.toml`, `skills-lock.json` | fnox, `skills:*` | los nombres de los secretos; las skills fijadas |
+| `src/routes/`, `src/routeTree.gen.ts` | TanStack Start (el árbol se genera) | las páginas del producto |
+| `src/parts.json` | el `remyParts()` del paquete | las partes compartidas que lista la app (ninguna sin el archivo; la app en blanco lista `seo-routes`) |
+| `src/api/` | la ruta `api.$` de la app | los procedimientos del producto, si tiene API |
+| `tests/` (`smoke.spec.ts` por nombre) | `project:test:*`, `project:test:live` | las comprobaciones compartidas con los ajustes de la app, y las propias |
+| `public/` | Vite | favicon, `_headers` |
+| `dist/` (`dist/client/assets`) | `cf:deploy`, las comprobaciones | resultado del build, nunca en commit |
+| `docs/` (`docs.config.ts`, `vite.config.ts`, `tsconfig.json`, `package.json`, `content/{users,dev,ui}/` con `i18n.json` y `meta.json`, `content/questions.json`; generados `.remy-docs/`, `dist/`) | `docs:*`, `i18n:docs:*` (`I18N_DOCS_DIR`) | la documentación de la app: su identidad y sus páginas; el Worker es del paquete |
+| `packages/<name>/` con `README.md` | `plans:*`, `packages:*` | los paquetes que publica el repositorio, si los hay |
+| `messages/`, `project.inlang/` | el preset de la app, `project:generate`, `i18n:messages:*` | las cadenas propias de la app, si las hay (compiladas en `src/paraglide/`) |
+| `.plans/` (`now.md`, `done/`, `parked/`) | `plans:*` | los planes del repositorio |
+| `AGENTS.md`, `.github/workflows/` | agentes; GitHub | el índice de los agentes; CI |
+| `tasks/`, `template/` | el include; `giget` | solo remy-auth: las propias tareas compartidas, y la app en blanco desde la que arranca un repositorio nuevo |
+
 ### Un consumidor nuevo [#a-new-consumer]
 
-La receta única. [remy-auth-app](https://github.com/joeblew999/remy-auth-app) es el consumidor de
-referencia y el punto de partida: convertido en repositorio plantilla de GitHub, una aplicación nueva no
-copia ningún archivo a mano.
+La receta única. Una app nueva arranca desde la app en blanco, [`template/`](https://github.com/joeblew999/remy-auth/tree/main/template)
+en remy-auth en la tag de la versión: la estructura de arriba con solo los archivos propios del repositorio
+dentro (sus nombres, una página de inicio en cada idioma, un índice de documentación por sitio, los
+archivos de configuración de la estructura con apenas unas líneas cada uno). Todo lo demás es el paquete y
+las tareas, que un solo cambio de versión actualiza.
 
 1. Requisitos: mise >= 2026.9.12, `gh auth login` con un token que tenga `read:packages`, Google
    Chrome (lo usan las comprobaciones) y `wrangler login` antes del primer despliegue.
-2. `gh repo create <name> --private --template joeblew999/remy-auth-app --clone`, luego `cd <name>`.
-3. Nombra la aplicación: `name` en `wrangler.jsonc` y `package.json`, el nombre del Worker de prerender en
-   `vite.config.ts`, el nombre del servicio en `workers/app.ts`, `src/server.ts` y `tests/gui.spec.ts`
-   (`grep -rn remy-auth-app --exclude-dir=node_modules .` los lista), y `DEPLOY_ORIGIN` en
-   `mise.toml` (`https://<name>.<your-subdomain>.workers.dev`).
-4. `mise install`, luego `GITHUB_TOKEN=$(gh auth token) npm install` una vez para escribir el
-   `package-lock.json` de la aplicación nueva (`project:setup` ejecuta `npm ci`, que lo necesita), luego
-   `GITHUB_TOKEN=$(gh auth token) mise run project:setup` (npm ci, skills fijadas, registro MCP,
-   `project:verify`).
-5. Haz commit de `package-lock.json`, `skills-lock.json` y `src/routeTree.gen.ts`.
-6. `mise run cf:deploy`.
-7. CI: el `.github/workflows/google.yml` de la plantilla ejecuta los tipos y las auditorías de Google en
-   cada push a `main`. Da al repositorio nuevo acceso de lectura en la configuración del paquete
-   `@joeblew999/remy-ui` ("Manage Actions access"), o `npm ci` falla allí.
+2. `npx -y giget@3.3.1 gh:joeblew999/remy-auth/template#vX.Y.Z <name>`, luego `cd <name>` y `git init`
+   (las tareas de i18n y de planes leen el historial de git; `project:setup` lo indica si falta).
+3. Nombra la aplicación: sustituye `my-app` y `My app` (`grep -rn -i "my.app" --exclude-dir=node_modules .`):
+   `package.json`, `wrangler.jsonc`, `src/service.ts`, los orígenes de `mise.toml`, `docs/docs.config.ts` (el
+   nombre y la fuente del producto, que también lee el marco de la app) y `messages/en.json`.
+4. `mise install`, luego `GITHUB_TOKEN=$(gh auth token) npm install` una vez para escribir `package-lock.json`,
+   luego `mise run project:setup` (npm ci, las skills fijadas y la skill `remy`, el bloque de reglas de
+   `AGENTS.md`, registro MCP, `project:verify`).
+5. Haz commit de todo, `package-lock.json`, `skills-lock.json` y `src/routeTree.gen.ts` incluidos. Las
+   cadenas de la app en blanco ya vienen traducidas; cuando el inglés cambie (`messages/en.json`, la
+   documentación), haz commit de ello y ejecuta `mise run i18n:translate`, que escribe y hace commit de los
+   demás idiomas.
+6. `mise run cf:deploy`, y `mise run docs:deploy` para la documentación.
+7. CI: `.github/workflows/google.yml` llama al flujo de trabajo compartido de remy-auth en la misma tag (los
+   tipos y las auditorías de Google en cada push a `main`). Da al repositorio nuevo acceso de lectura en la
+   configuración del paquete `@joeblew999/remy-ui` ("Manage Actions access"), o `npm ci` falla allí.
 
-La plantilla ya trae `min_version`, las tres entradas de arriba, `preview_urls: false` y
-`observability.redact_query_string` en `wrangler.jsonc`, el `.npmrc` para GitHub Packages, el
-`.gitignore`, las comprobaciones en `tests/` y un archivo de Dependabot que mantiene al día las acciones
-fijadas por SHA. Pasa a una versión nueva con `mise run project:upgrade-ui -- <version>` (paquete y
-`ref` de las tareas a la vez). `ref=main` (`mise.dev.toml`) queda en caché y nunca se refresca solo:
-ejecuta con `MISE_TASK_REMOTE_NO_CACHE=true` cuando `main` avance.
+Después, la app crece en sus propios archivos: páginas en `src/routes/` (una página junto a la ruta de un
+padre, como `videos.$videoId` al lado de `videos`, es `videos_.$videoId.tsx`: TanStack anida
+`videos.$videoId` dentro de `videos`, que entonces necesita un `<Outlet />`), sus enlaces en
+`src/remy-app.tsx`, cadenas en `messages/en.json` (`m` desde `src/paraglide/messages.js`), una API como
+paquete de contrato y `src/api/` (todo procedimiento que recibe entrada documenta un error, o `apiChecks`
+falla: la regla `api/coverage` del paquete), documentación en `docs/content/`. Pasa a una versión nueva con
+`mise run project:upgrade-ui -- <version>` (el paquete, el `ref` de las tareas y la tag del flujo de trabajo
+de CI, juntos). `ref=main` (`mise.dev.toml`) queda en caché y nunca se refresca solo: `mise run
+project:refresh-tasks` cuando `main` avance. Dos niveles locales a la vez comparten `PREVIEW_PORT` y el
+segundo falla al iniciar su servidor: dale a cada shell el suyo (`PREVIEW_PORT=4232 mise run …`).
+
+### Un repositorio que publica paquetes [#a-repository-that-publishes-packages]
+
+Un repositorio también puede publicar paquetes propios (un contrato, un paquete de UI), como hace
+remy-auth; eso no cuesta ninguna tarea propia. Sus paquetes son workspaces de npm (`packages/<name>/`,
+`workspaces` de `package.json`), y cada uno que no es `private` se publica mediante las tareas compartidas
+`packages:*`:
+
+| Tarea | Hace |
+| --- | --- |
+| `packages:check`, `packages:upgrade` | Versiones npm más nuevas de las dependencias propias del repositorio (raíz y workspaces; nunca sus propios paquetes ni `@joeblew999/remy-ui`), previsualizadas (`check`) o aplicadas, y luego `project:verify` (`upgrade`) |
+| `packages:pack` | Un tarball de cada paquete publicado, para que una app de prueba lo instale antes de cualquier release |
+| `packages:release` | Las puertas de control (traducciones en modo estricto, `project:verify`, `project:release-checks`, auditorías de Google, Core Web Vitals), y luego `packages:tag` |
+| `packages:tag` | Sobre un `main` limpio: etiqueta la versión de `RELEASE_PACKAGE`, hace push y luego `packages:publish --release` |
+| `packages:publish` | Publica cada paquete cuya versión es nueva en su registro; con `--release vX.Y.Z` también el release de GitHub a partir de `CHANGELOG.md` (`packages:notes`). El job de CI de la tag ejecuta la misma tarea |
+
+En el `[env]` de `mise.toml`: `RELEASE_PACKAGE` (el paquete cuya versión da nombre al release) y
+`RELEASE_TITLE`. El `exports` de un paquete nombra cada subruta que sus usuarios importan
+(`"./video": "./src/video.ts"`); cualquier otra cosa se rechaza en tiempo de build y en Playwright, cuyo
+mensaje nombra el archivo que importa, no el mapa de exports. Las cadenas propias de un paquete son su
+propio proyecto inlang, compilado por su build, cuyo runtime sigue el idioma de la plataforma con una sola
+llamada, `followLocale(runtime)` (`locale`); las tareas de i18n lo leen a través de `I18N_INLANG`. Las
+comprobaciones que el repositorio añade a un release van en `project:release-checks` (remy-auth:
+`template:check`, `ui:verify`).
 
 ### Elegir la versión: publicada, de desarrollo o local [#choosing-the-version-released-development-or-local]
 
-Las tareas y el paquete se publican juntos: `mise run ui:release` publica
-`@joeblew999/remy-ui` X.Y.Z y etiqueta ese mismo commit como `vX.Y.Z`. Por eso, quien consume el paquete fija ambos a
-un mismo número, y lo cambia en dos lugares a la vez:
+Las tareas y el paquete se publican juntos: el `mise run ui:release` de remy-auth (el `packages:release`
+compartido) publica `@joeblew999/remy-ui` X.Y.Z y etiqueta ese mismo commit como `vX.Y.Z`. Por eso, quien
+consume el paquete fija ambos a un mismo número, y `project:upgrade-ui` los cambia a la vez:
 
 | Quieres | Cómo | Dónde |
 | --- | --- | --- |
@@ -66,16 +125,19 @@ un mismo número, y lo cambia en dos lugares a la vez:
 | Tu propio checkout, editando las tareas | la ruta hermana `../remy-auth/tasks` | `mise.local.toml`, en gitignore |
 
 mise usa el `includes` del archivo más específico en lugar del predeterminado (verificado con mise
-2026.9.12), así que las sobrescrituras nunca se combinan con la versión publicada. Los includes remotos se cachean: después de
-que `main` avance, refresca con `MISE_TASK_REMOTE_NO_CACHE=true`. Fija un SHA de commit solo mientras una rama
-está en pruebas antes de publicarla; vuelve a una tag al publicar.
+2026.9.12), así que las sobrescrituras nunca se combinan con la versión publicada. Los includes remotos se
+cachean: después de que `main` avance, `mise run project:refresh-tasks`. Fija un SHA de commit solo
+mientras una rama está en pruebas antes de publicarla; vuelve a una tag al publicar.
 
-El proyecto que incluye estas tareas aporta los paquetes npm que las tareas ejecutan; la lista completa es el
-`package.json` de remy-auth-app (`vite` con `@tanstack/react-start` y sus plugins, `wrangler`, `@playwright/test`,
-`lighthouse`, `chrome-devtools-mcp`, `modern-web-guidance`, `smol-toml`, y `@openai/codex` para
-las tareas de Codex). Una tarea definida en el propio `mise.toml` del proyecto
-sobrescribe la tarea incluida del mismo nombre; remy-auth sobrescribe `project:typecheck` y
-`project:verify` porque es el dueño del paquete compartido.
+La plataforma aporta todos los paquetes npm que necesitan la app y las tareas, en una sola versión: son
+dependencias propias de `@joeblew999/remy-ui` (el framework, la cadena de herramientas, las herramientas de
+las comprobaciones), así que el `package.json` de una app nombra el paquete, sus propios paquetes y lo que
+su producto añada. `project:single-copies` (dentro de `project:check`) falla cuando un paquete que se
+rompe si se instala por duplicado (React, TanStack Router y Query, el stringifier de MDX; la lista
+`remy.singleCopy` del paquete) está presente: quita el pin propio de la app. Una tarea definida en el
+propio `mise.toml` del proyecto sobrescribe la tarea incluida del mismo nombre; los ganchos pensados para
+ello son `project:generate` (código generado antes de comprobar los tipos; por defecto, el catálogo propio
+de la app) y `project:release-checks`.
 
 Las pruebas se ejecutan en niveles, elegidos por costo y por lo que un cambio puede romper, nunca omitiendo comprobaciones. Los
 niveles y cuándo usar cada uno son una regla en
@@ -87,11 +149,11 @@ niveles y cuándo usar cada uno son una regla en
 | 1 | `project:test:smoke` (`tests/smoke.spec.ts`, construido sobre las comprobaciones `./smoke` del paquete) |
 | 2 | `project:test:only -- <words>` (las comprobaciones cuyo título coincide, en `QUICK_LOCALES`) |
 | 3 | `project:test:quick` (todas las comprobaciones en `QUICK_LOCALES`, por defecto `en,ar`) |
-| 4 | `project:verify` (todo, en todos los idiomas; `ui:release` lo ejecuta) |
+| 4 | `project:verify` (todo, en todos los idiomas; `packages:release` lo ejecuta) |
 
 `project:test` es cada una de nuestras comprobaciones en todos los idiomas (dentro de `project:verify`). El
 nivel de Google es `project:test:google` (auditorías de Lighthouse, local; CI en cada push y tag) y
-`project:test:cwv` (Core Web Vitals en un Worker de Cloudflare desechable); `ui:release` ejecuta ambas.
+`project:test:cwv` (Core Web Vitals en un Worker de Cloudflare desechable); `packages:release` ejecuta ambas.
 
 Dónde se ejecutan las comprobaciones: el comportamiento propio del paquete compartido se comprueba una vez, en remy-auth, antes de cada
 release. Una app construida sobre el paquete ejecuta un conjunto de contrato (sus páginas renderizan, las páginas de sitio y de app se mantienen
@@ -132,7 +194,7 @@ herramientas, traducir con el agente Claude fijado y hacer commit.
 
 | Tarea | Hace |
 | --- | --- |
-| `i18n:check` | Ambas comprobaciones en paralelo; un WARNING y salida 0 mientras se programa (`project:check` la ejecuta), salida 1 con `I18N_STRICT=1` (`ui:release`) |
+| `i18n:check` | Ambas comprobaciones en paralelo; un WARNING y salida 0 mientras se programa (`project:check` la ejecuta), salida 1 con `I18N_STRICT=1` (`packages:release`) |
 | `i18n:messages:check` | Los huecos de los catálogos; `-- --list` una línea por hueco (`es missing nav_more`) |
 | `i18n:docs:check` | Los huecos de la documentación; `-- --list` una línea por hueco (`es stale docs/content/dev/gui.es.md`) |
 | `i18n:translate` | En main: mensajes y luego documentación, un commit para cada uno |
