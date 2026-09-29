@@ -636,7 +636,7 @@ Everything here is ready; each step goes out only when the owner says so (workin
    its Workers. Its hand-written files, set against the evidence table, are the plan's acceptance.
 4. **remy-auth-app** waits for the owner's decision on its future (owner, 2026-09-29: "we will decide about
    remy-auth-app later"). Moving it is `project:upgrade-ui -- 0.14.0` plus what the scratch copy needed:
-   phase A's config (`defineRemyApp` with the showcase lists, `app` and `preferred` into `AppProviders`),
+   phase A's config (`defineRemyApp` with the showcase lists and `sitePaths`, `app` and `preferred` into `AppProviders`),
    `package.json` down to the package and the contract, `prerenderPages({ notFoundPath, paths: allPaths })`,
    `sitemapXml({ origin, paths: sitePaths })`, and `prerenderedAppChecks({ service, sitePaths, appPaths,
    home, showcase: {} })`; its `AGENTS.md` block from `agents:rules` replaces the dead links.

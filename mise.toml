@@ -116,7 +116,7 @@ ui=$(ls "$out"/joeblew999-remy-ui-*.tgz)
 node -e "const f='package.json',p=JSON.parse(require('fs').readFileSync(f));p.dependencies['@joeblew999/remy-ui']='file:$ui';require('fs').writeFileSync(f,JSON.stringify(p,null,2))"
 sed -i.bak "s#git::https://github.com/joeblew999/remy-auth.git//tasks?ref=v[0-9.]*#{{config_root}}/tasks#" mise.toml && rm mise.toml.bak
 mise trust -q .
-npm install --no-audit --no-fund --loglevel=error
+GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token)}" npm install --no-audit --no-fund --loglevel=error
 PREVIEW_PORT=$((PREVIEW_PORT + 100)) mise run project:test:quick
 DOCS_PREVIEW_PORT=$((DOCS_PREVIEW_PORT + 100)) mise run docs:test
 echo "template:test: the blank app installs, builds and passes its checks on this commit's packages."
