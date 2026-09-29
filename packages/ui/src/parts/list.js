@@ -1,7 +1,7 @@
 // The parts an app lists (.plans/parts.md): one name per line in the app's src/parts.json, read in
 // plain Node by the Vite config (routes and the virtual modules) and by Playwright (checks), so the
 // browser bundle, the Worker, the routes and the checks all follow the same list.
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 /**
@@ -30,6 +30,8 @@ export const partAppFile = name => `src/parts/${name}`;
 
 /** The app's parts, in list order; throws on an unknown name, a duplicate or a missing requirement. */
 export function readParts({ root = process.cwd(), file = partsFile } = {}) {
+  // No list is no parts: an app lists them only when it uses one.
+  if (!existsSync(resolve(root, file))) return [];
   const names = JSON.parse(readFileSync(resolve(root, file), 'utf8'));
   if (!Array.isArray(names)) throw new Error(`${file}: expected an array of part names`);
   const problems = [];

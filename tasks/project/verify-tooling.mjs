@@ -1,11 +1,16 @@
 import assert from 'node:assert/strict';
 import { readFile, realpath, lstat } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-import { parse } from 'smol-toml';
-import { unstable_readConfig } from 'wrangler';
+import { createRequire } from 'node:module';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
-// Only repo-specific invariants: npm, mise and Wrangler own their validation.
-process.chdir(fileURLToPath(new URL('../', import.meta.url)));
+// project:verify-tooling: the invariants every Remy app keeps that npm, mise and Wrangler do not check
+// themselves. Runs in the app (the task's dir); smol-toml and Wrangler resolve from the app's install,
+// since this file may sit in mise's cache of the shared tasks.
+const fromApp = createRequire(join(process.cwd(), 'package.json'));
+const load = async name => import(pathToFileURL(fromApp.resolve(name)).href);
+const { parse } = await load('smol-toml');
+const { unstable_readConfig } = await load('wrangler');
 const readJSON = async (path) => JSON.parse(await readFile(path, 'utf8'));
 
 try {
@@ -15,15 +20,23 @@ try {
     assert.deepEqual(lock.packages?.['']?.[section] ?? {}, manifest[section] ?? {},
       `${section}: package-lock.json differs from package.json; run npm install`);
   }
-  const ui = await readJSON('packages/ui/package.json');
-  for (const section of ['dependencies', 'peerDependencies']) {
-    assert.deepEqual(lock.packages?.['packages/ui']?.[section] ?? {}, ui[section] ?? {},
-      `Shared UI ${section}: lockfile differs from manifest`);
+  // Every workspace the lockfile knows (packages the repository owns, its docs app).
+  for (const [location, locked] of Object.entries(lock.packages ?? {})) {
+    if (!location || location.startsWith('node_modules/') || location.includes('/node_modules/')) continue;
+    const workspace = await readJSON(`${location}/package.json`).catch(() => undefined);
+    if (!workspace) continue;
+    for (const section of ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']) {
+      assert.deepEqual(locked?.[section] ?? {}, workspace[section] ?? {},
+        `${location} ${section}: package-lock.json differs from its package.json; run npm install`);
+    }
   }
-  console.log('Root and shared UI dependency declarations match the lockfile.');
+  console.log('Every package.json matches the lockfile.');
 
   // This upstream API is unstable; recheck it when upgrading Wrangler.
   const config = unstable_readConfig({ config: 'wrangler.jsonc' });
+  // Every uploaded version and alias would be public, old ones without the app's later fixes (cf:preview
+  // deploys a throwaway Worker instead).
+  assert.equal(config.preview_urls, false, 'wrangler.jsonc: preview_urls must be false');
   const observability = config.observability;
   assert.equal(observability?.enabled, true, 'Worker observability must be enabled');
   assert.equal(observability?.redact_query_string, true, 'Query-string redaction must be enabled');
@@ -36,8 +49,8 @@ try {
   assert.equal(observability.logs.invocation_logs, true, 'Invocation logs must be enabled');
   console.log('Wrangler parsed the configuration; observability requirements pass.');
 
-  // The skills:install task's *_skills_source vars in tasks/skills.toml are the single list of skill sources.
-  const vars = parse(await readFile('tasks/skills.toml', 'utf8'))['skills:install']?.vars ?? {};
+  // The skills:install task's *_skills_source vars in the shared skills.toml are the single list of skill sources.
+  const vars = parse(await readFile(new URL('../skills.toml', import.meta.url), 'utf8'))['skills:install']?.vars ?? {};
   const sources = Object.entries(vars).filter(([key]) => key.endsWith('_skills_source')).map(([, url]) => url);
   assert.ok(sources.length > 0, 'tasks/skills.toml defines no *_skills_source pins');
   const skills = (await readJSON('skills-lock.json')).skills;
@@ -45,7 +58,7 @@ try {
   for (const [name, skill] of Object.entries(skills)) {
     // The platform's own `remy` skill comes from the installed package, which its version pins.
     if (skill.sourceType === 'local' && skill.source === vars.remy_skill_path) continue;
-    assert.ok(pinned.has(skill.source), `${name}: installed from ${skill.source}, which mise.toml does not pin`);
+    assert.ok(pinned.has(skill.source), `${name}: installed from ${skill.source}, which the shared skills.toml does not pin`);
   }
   for (const sourceURL of sources) {
     const source = new URL(sourceURL);

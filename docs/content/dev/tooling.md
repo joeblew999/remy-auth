@@ -69,8 +69,8 @@ CLI passthrough tasks accept upstream flags directly, such as
 | Namespace | Purpose |
 | --- | --- |
 | `project:*` | Setup, pipeline and verification (shared defaults from `tasks/project.toml`; `[env]` supplies the inputs) and tool diagnostics |
-| `packages:*` | Check and upgrade npm packages |
-| `ui:*` | Compile the shared catalogs (`ui:generate`), regenerate the shadcn components and theme (`ui:components`, `ui:theme`), prove them untouched (`ui:verify`), pack and release the package (`ui:pack`, `ui:release`) |
+| `packages:*` | Check and upgrade npm packages; pack, release and publish the repository's own packages ([tasks](./tasks.md#a-repository-that-publishes-packages)) |
+| `ui:*` | Compile the shared catalogs (`ui:generate`), regenerate the shadcn components and theme (`ui:components`, `ui:theme`), prove them untouched (`ui:verify`), release the package and the tasks (`ui:release`, the shared `packages:release`) |
 | `skills:*` | Install, list and remove the pinned official skills |
 | `auth:*` | Better Auth CLI and diagnostics |
 | `cf:*` | Cloudflare CLI, live logs, deployment (`cf:deploy`), throwaway check Workers (`cf:preview`, `cf:preview-delete`), stored logs and AI usage (`cf:events`, `cf:ai-*`); shared tasks, listed in the [tasks README](./tasks.md#cloudflare-tasks) |

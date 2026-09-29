@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Preview the latest npm versions of this repository's own dependencies (the root's and every workspace's) without changing files (~10 s, needs the network). Its own workspaces and @joeblew999/remy-ui are left out: the platform moves with project:upgrade-ui"
+#MISE dir="{{config_root}}"
+set -euo pipefail
+source "$(dirname "$0")/ncu.sh"

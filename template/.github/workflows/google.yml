@@ -1,0 +1,18 @@
+# Google's audits on every push to main: remy-auth's shared workflow, at the tag of the tasks and package
+# (project:upgrade-ui moves it). Its release job runs only for tags, which an app that publishes no packages never makes.
+name: Google checks
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  google:
+    uses: joeblew999/remy-auth/.github/workflows/google.yml@v0.14.0
+    permissions:
+      contents: write
+      packages: write

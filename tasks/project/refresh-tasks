@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Fetch the included shared tasks again: mise caches a git include and never refreshes it on its own, so after ref=main moves (mise.dev.toml) or a tag is re-pointed, run this once (~5 s, needs the network)"
+#MISE dir="{{config_root}}"
+set -euo pipefail
+MISE_TASK_REMOTE_NO_CACHE=true mise tasks ls > /dev/null
+echo "project:refresh-tasks: the included tasks are fetched again."

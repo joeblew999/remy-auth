@@ -1,0 +1,11 @@
+{
+  "name": "my-app",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@joeblew999/remy-ui": "0.14.0"
+  },
+  "workspaces": [
+    "docs"
+  ]
+}

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#MISE description="Print CHANGELOG.md's section for a version; fails when it is missing or empty. The one notes check for both releases: packages:tag locally and the tag's CI job (packages:publish --release)"
+#MISE dir="{{config_root}}"
+#USAGE arg "<version>" help="The version without the v, e.g. 0.14.0"
+set -euo pipefail
+version="${usage_version:?pass the version}"
+notes="$(awk -v v="$version" 'index($0, "## [" v "]") == 1 {p=1; next} /^## \[/ {p=0} p' CHANGELOG.md 2>/dev/null || true)"
+if [ -z "$(printf '%s' "$notes" | tr -d '[:space:]')" ]; then
+  echo "CHANGELOG.md has no notes under \"## [$version]\"; write them before releasing." >&2
+  exit 1
+fi
+printf '%s\n' "$notes"

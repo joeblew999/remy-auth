@@ -78,11 +78,14 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `app-shell` | The app frame alone: `AppShell` (the sidebar, the phone's bottom bar), for an app's own app pages |
 | `app-config` | `defineRemyApp` and its types (`RemyApp`, `NavItem`): the app's name, source and navigation for every frame; `useRemyApp`, `usePreferredLocale` |
 | `app-pages` | remy-auth's showcase app pages: `AppHomePage`, `AppFormatsPage`, `LocationPage`, `DemoPage`, `ClockPage`, `SettingsPage`, `AccountPage` (and `AppShell` again) |
+| `root` | `remyRoot(app, { devtools })`: the root route's options (the document in the page's language and direction, `AppProviders`, the language to offer, the problem pages); `RemyRouterContext`, `preferredLocale`. An app's `__root.tsx` is `createRootRouteWithContext<RemyRouterContext>()(remyRoot(remyApp, { devtools: <TanStackDevtools … /> }))`: the devtools stay in the app's file, where TanStack's Vite plugin strips them from production builds |
+| `router` | `remyRouter(routeTree)`: the router every app makes (the locale rewrite, a QueryClient per request with Query's SSR integration, intent preloading, the CSP nonce) |
+| `app/vite` | `remyApp({ plugins, start, cloudflare, port })`: an app's whole `vite.config.ts` (TanStack Devtools, the parts, Cloudflare, Fontaine, Tailwind, Start, React; the app's own catalog when it has `project.inlang`) |
 | `providers` | `AppProviders`: what an app's root renders its pages in (direction, theme, the app's `defineRemyApp` config, the `preferred` language) |
 | `clock-route` | `clockRouteOptions`, `clockDefaults`, `clockZones`: the Clock route's search params, kept out of the page's code |
 | `language` | `LanguageSwitcher` (plain links, site pages), `LanguageMenu` (shadcn DropdownMenu, app pages), `LanguageHint` |
 | `messages`, `runtime` | Compiled Paraglide messages and runtime |
-| `locale` | Paraglide's `getLocale`, `setLocale`, `localizeHref`, `localizeUrl`, `deLocalizeHref`, `cookieName` and more, plus `direction` and `localeName` |
+| `locale` | Paraglide's `getLocale`, `setLocale`, `localizeHref`, `localizeUrl`, `deLocalizeHref`, `cookieName` and more, plus `direction`, `localeName` and `followLocale(runtime)` (a second catalog, the app's or a package's, in the platform's language) |
 | `locale-info` | Calendars, digits, clock and week conventions from Intl Locale Info; `formatLocale` (the tag every formatter uses, naming the language's own calendar and digits), `weekOrder`, `words` (Intl.Segmenter) |
 | `matching` | The `custom-chinese` Paraglide strategy (Traditional Chinese tags reach `zh-TW`), `matchChinese`, `preferredFromHeader`, `preferredFromNavigator` |
 | `reservation` | The demo reservation's Zod schema (seats typed in any script's digits), `asciiDigits` |
@@ -105,9 +108,11 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `api/coverage` | `coverageProblems` (every procedure has a route under `/api/`, a policy, an output and documented errors), `procedures`, `ApiMeta` |
 | `api/checks` | `apiChecks` (coverage, the served document and reference page, CORS for exactly the registered `origins`), `reservationApiChecks` (the demo reservation's typed 400 in every locale, and a response that breaks the contract refused in the browser) |
 
-`@tanstack/react-router`, `@tanstack/react-start`, `@tanstack/react-query`, `@playwright/test` and
-`lighthouse` are optional peers: the pages need the router, `api/client` needs Start, the status
-card and `invalidate` need Query, the checks need the other two.
+The package's dependencies are the platform's one dependency set, pinned exactly: the framework (React,
+TanStack Start, Router and Query), the toolchain (Vite, Wrangler, Tailwind, TypeScript) and the tools the
+shared tasks and checks run (Playwright, Lighthouse, the DevTools MCP server, npm-check-updates). An app
+names only the package; `remy.singleCopy` in its `package.json` lists those that break when installed twice,
+which `project:single-copies` checks ([tasks](./tasks.md#choosing-the-version-released-development-or-local)).
 
 ## Language
 

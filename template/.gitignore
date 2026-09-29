@@ -1,0 +1,17 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+.wrangler/
+worker-configuration.d.ts
+docs/.remy-docs/
+# Generated per machine by mise run mcp:register.
+.mcp.json
+.codex/
+# Installed by mise run skills:install from skills-lock.json.
+.agents/skills/
+.claude/skills/
+# A developer's own overrides, e.g. the shared tasks from a local remy-auth checkout.
+mise.local.toml
+src/paraglide/
+project.inlang/cache/

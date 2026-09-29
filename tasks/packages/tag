@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#MISE description="The release's last step, after packages:release's gates: on a clean main that is not behind origin, tag RELEASE_PACKAGE's version vX.Y.Z, push main and the tag, then packages:publish --release. Tag and push first: a failed push publishes nothing, and a failed publish is finished by the tag's CI job. Before it, in one commit: the versions in packages/*/package.json and CHANGELOG.md's section"
+#MISE dir="{{config_root}}"
+#MISE tools={"aqua:cli/cli"="2.101.0"}
+set -euo pipefail
+lead="${RELEASE_PACKAGE:?set RELEASE_PACKAGE in mise.toml [env]: the package whose version names the release}"
+version=$(node "$(dirname "$0")/workspaces.mjs" | awk -F'\t' -v n="$lead" '$1 == n {print $2}')
+[ -n "$version" ] || { echo "packages:tag: RELEASE_PACKAGE $lead is not a published workspace here." >&2; exit 1; }
+[ "$(git branch --show-current)" = main ] || { echo "Release from main."; exit 1; }
+[ -z "$(git status --porcelain)" ] || { echo "Commit everything before releasing."; exit 1; }
+git fetch -q --tags origin main
+git merge-base --is-ancestor origin/main HEAD || { echo "main is behind origin/main; pull and re-run the gates."; exit 1; }
+if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+  echo "v$version is already tagged; bump $lead's version."; exit 1
+fi
+mise run packages:notes -- "$version" > /dev/null
+git tag -a "v$version" -m "${RELEASE_TITLE:-$lead} $version"
+git push origin main
+git push origin "v$version"
+mise run packages:publish -- --release "v$version"

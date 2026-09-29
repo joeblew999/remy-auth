@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#MISE description="What project:setup needs before it can start, each with where to go: a git repository (the i18n and plans tasks read its history), package.json and package-lock.json (npm ci), wrangler.jsonc (Worker types). Instant"
+#MISE dir="{{config_root}}"
+set -euo pipefail
+recipe="docs/content/dev/tasks.md, \"A new consumer\" (https://remy-auth-docs.gedw99.workers.dev/dev/tasks#a-new-consumer)"
+problems=()
+git rev-parse --git-dir >/dev/null 2>&1 || problems+=("not a git repository: run git init (the i18n and plans tasks read git history)")
+[ -f package.json ] || problems+=("no package.json: start from the blank app ($recipe)")
+[ ! -f package.json ] || [ -f package-lock.json ] || problems+=("no package-lock.json: run npm install once and commit it (project:setup runs npm ci, which needs it)")
+[ -f wrangler.jsonc ] || problems+=("no wrangler.jsonc: the Worker's name and bindings; the blank app has one ($recipe)")
+if [ ${#problems[@]} -gt 0 ]; then
+  printf 'project:setup cannot start here:\n' >&2
+  printf '  - %s\n' "${problems[@]}" >&2
+  exit 1
+fi

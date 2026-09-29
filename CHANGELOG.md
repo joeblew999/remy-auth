@@ -21,8 +21,39 @@ package follows [Semantic Versioning](https://semver.org/).
 - `skills/remy`: the platform's rules as an agent skill, generated from the developer docs; the shared
   `skills:install` installs it, `agents:rules` points `AGENTS.md` at it.
 - `defineRemyApp`'s `docs`: the docs Worker's origin; the frame shows the Docs, Developers and Guide links.
+- `app/vite`: `remyApp()`, an app's whole `vite.config.ts` (TanStack Devtools, the parts, Cloudflare,
+  Fontaine, Tailwind, Start, React), compiling the app's own catalog when it has `project.inlang`.
+- `root` (`remyRoot`, `RemyRouterContext`, `preferredLocale`) and `router` (`remyRouter`): an app's
+  `__root.tsx` and `router.tsx` are one call each.
+- `locale`'s `followLocale(runtime)`: a second Paraglide catalog (an app's or a package's) in the
+  platform's language.
+- The CSP report route `/csp-report` is the package's, mounted beside every app's routes; `startMiddleware`
+  enforces the policy and reports there by default.
+- Zod's `jitless` is set once for every app (`AppProviders`) and the docs Worker.
+- Tasks: `packages:check`, `packages:upgrade`, `packages:pack`, `packages:release`, `packages:tag`,
+  `packages:publish`, `packages:notes` for any repository that publishes packages (its non-private
+  workspaces; `RELEASE_PACKAGE`, `RELEASE_TITLE`); `project:release-checks` (a hook), `project:doctor`,
+  `project:verify-tooling` (lockfile, `wrangler.jsonc`'s observability and `preview_urls: false`, skill
+  pins), `project:single-copies` (in `project:check`), `project:preconditions` (in `project:setup`),
+  `project:refresh-tasks`.
+- CI: `.github/workflows/google.yml` is a reusable workflow; an app calls it at its tag, and
+  `project:upgrade-ui` moves that tag with the package and the tasks.
+- `template/`: the blank app a new repository starts from (identity, one home page in every language,
+  a docs index per site); `docs:init` takes `template/docs`.
 
 ### Changed (breaking)
+- One dependency set: the framework, toolchain and the tools the shared tasks run are the package's exact
+  dependencies (no more optional peers); an app's `package.json` names `@joeblew999/remy-ui` and drops its
+  own pins of them, or `project:single-copies` fails.
+- No remy-auth page list is a default: `localizedWorker`'s `entryPaths`, `entryRedirect`, `sitemapXml`'s
+  `paths` and `prerenderPages`' `paths` are required; the sitemap lists `defineRemyApp`'s `sitePaths`.
+  `paths` is the showcase's list.
+- The shared check sets take the app's `sitePaths` and `appPaths`; the home page's words are checked only
+  when the app passes `home`, and the showcase's checks only with `showcase`.
+- An app's own `src/routes/csp-report.ts`, `src/csp.ts` and `src/preferred.ts` go (the package's route,
+  defaults and `root` replace them).
+- `project:verify` also runs `project:doctor` and `project:verify-tooling`; `project:generate` compiles
+  the app's own catalog by default. A missing `src/parts.json` lists no parts.
 - `AppProviders` takes `app` (a `defineRemyApp` config) and `preferred` (the root loader's language) in
   place of `repository`; every frame reads both, so pages no longer pass `preferred`.
 - `SourceLink`, `SiteNavLinks` and `AppNavLinks` are gone: the config's `repository`, `site.links` and

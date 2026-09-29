@@ -17,7 +17,7 @@ includes = ["tasks"]
 
 [env]
 # Inputs the shared pipeline tasks read; this project overrides only project:generate and
-# project:verify below, because it owns the shared package.
+# project:release-checks below, because it owns the shared package.
 # A worktree or agent picks its own port from the shell: PREVIEW_PORT=4231 mise run project:verify.
 PREVIEW_PORT = "{{ get_env(name='PREVIEW_PORT', default='4173') }}"
 DEPLOY_ORIGIN = "https://remy-auth.gedw99.workers.dev"
@@ -26,7 +26,12 @@ DEPLOY_ORIGIN = "https://remy-auth.gedw99.workers.dev"
 DOCS_ORIGIN = "https://remy-auth-docs.gedw99.workers.dev"
 VITE_DOCS_ORIGIN = "https://remy-auth-docs.gedw99.workers.dev"
 I18N_DOCS_DIR = "docs/content"
+# The shared catalogs' inlang project for the i18n:messages:* tasks (template/ holds a new app's own).
+I18N_INLANG = "packages/ui/project.inlang"
 DOCS_PREVIEW_PORT = "{{ get_env(name='DOCS_PREVIEW_PORT', default='4174') }}"
+# The packages:* tasks: the package whose version names a release (tag vX.Y.Z), and the release's title.
+RELEASE_PACKAGE = "@joeblew999/remy-ui"
+RELEASE_TITLE = "Shared UI"
 
 [tasks."auth:cli"]
 description = "Run the pinned Better Auth CLI (pass --help for commands)"
@@ -34,51 +39,11 @@ raw_args = true
 dir = "{{config_root}}"
 run = "./node_modules/.bin/auth"
 
-[tasks."packages:check"]
-description = "Preview latest npm package versions without changing files"
-dir = "{{config_root}}"
-run = "./node_modules/.bin/ncu --target latest --dep prod,dev,optional --workspaces --reject @joeblew999/remy-ui,@joeblew999/remy-auth-contract --removeRange"
-
-[tasks."packages:upgrade"]
-description = "Upgrade npm packages beyond existing pins, including majors, then verify tooling"
-dir = "{{config_root}}"
-run = [
-  "./node_modules/.bin/ncu --target latest --dep prod,dev,optional --workspaces --reject @joeblew999/remy-ui,@joeblew999/remy-auth-contract --removeRange --upgrade",
-  "npm install --prefer-online --strict-peer-deps",
-  { task = "project:verify" },
-]
-
-[tasks."project:verify"]
-description = "Verify tooling, GUI types, Worker build and browser tests (overrides the shared default)"
-dir = "{{config_root}}"
-run = [
-  "mise tasks validate",
-  "npm ls --depth=0",
-  "./node_modules/.bin/codex --version",
-  { task = "mcp:verify" },
-  { task = "project:doctor" },
-  "node scripts/verify-tooling.mjs",
-  { task = "project:typecheck" },
-  { task = "project:test" },
-]
-
 [tasks."auth:info"]
 description = "Show Better Auth setup diagnostics"
 raw_args = true
 dir = "{{config_root}}"
 run = "./node_modules/.bin/auth info"
-
-[tasks."project:doctor"]
-description = "Check installed CLI versions without contacting a Cloudflare account"
-dir = "{{config_root}}"
-run = [
-  "node --version",
-  "npm --version",
-  "./node_modules/.bin/auth --version",
-  "./node_modules/.bin/wrangler --version",
-  "./node_modules/.bin/chrome-devtools-mcp --version",
-  "./node_modules/.bin/modern-web-guidance --version",
-]
 
 [tasks."project:generate"]
 description = "Compile the shared catalogs before type checking (overrides the shared hook, which project:typecheck runs first: this project owns the package)"
@@ -90,14 +55,6 @@ description = "The pinned Fumadocs CLI in the shared docs Worker (packages/ui/sr
 raw_args = true
 dir = "{{config_root}}/packages/ui/src/docs"
 run = "node ../../../../node_modules/@fumadocs/cli/dist/index.js"
-
-[tasks."ui:pack"]
-description = "Compile and pack the shared UI for another Vite/Tailwind consumer"
-dir = "{{config_root}}"
-run = [
-  { task = "ui:generate" },
-  "npm pack --workspace @joeblew999/remy-ui",
-]
 
 [tasks."ui:components"]
 description = "Regenerate every shadcn component from the registry into the shared package (run from the app, shadcn's monorepo layout; the only way those files change)"
@@ -128,21 +85,24 @@ run = [
 ]
 
 [tasks."ui:release"]
-description = "Run level 1, ui:verify, level 2's audits locally and its Core Web Vitals on a Cloudflare preview (alias release), one after another (~5 min; uses dist/ and PREVIEW_PORT, so nothing else local at the same time), then publish the shared UI to GitHub Packages, tag, push and create the GitHub release; CI repeats level 2 on the tag"
+description = "Release the shared UI and the tasks together (alias release): the shared packages:release (every gate, then tag vX.Y.Z of @joeblew999/remy-ui, publish the package and the contract when new, create the GitHub release; ~5 min, nothing else local at the same time). Before it, in one commit: the versions and CHANGELOG.md's section"
+alias = "release"
 dir = "{{config_root}}"
-# gh publishes, tags and creates the release (scripts/release.sh): pinned, like every tool a task runs.
-tools = { "aqua:cli/cli" = "2.101.0" }
-# A run list, not depends: mise runs depends in parallel, and ui:verify rewrites files while
-# project:verify builds.
-run = [
-  # First, so a release with missing or stale translations stops before the long checks.
-  "I18N_STRICT=1 mise run i18n:check",
-  { task = "project:verify" },
-  { task = "ui:verify" },
-  { task = "project:test:google" },
-  { task = "project:test:cwv", args = ["release"] },
-  "bash scripts/release.sh",
-]
+run = [{ task = "packages:release" }]
+
+[tasks."project:release-checks"]
+description = "remy-auth's own release checks (overrides the shared hook, which packages:release runs after project:verify): the blank app pins this release (template:check), the shadcn files are exactly what the CLI writes (ui:verify)"
+dir = "{{config_root}}"
+run = [{ task = "template:check" }, { task = "ui:verify" }]
+
+[tasks."template:check"]
+description = "The blank app (template/, where a new repo starts) pins the version being released: @joeblew999/remy-ui in package.json, the tasks ref in mise.toml, the shared workflow's tag. Instant"
+dir = "{{config_root}}"
+run = '''
+v=$(node -p "require('./packages/ui/package.json').version")
+grep -q "tasks?ref=v$v\"" template/mise.toml && grep -q "\"@joeblew999/remy-ui\": \"$v\"" template/package.json && grep -q "google.yml@v$v$" template/.github/workflows/google.yml || { echo "template/ must pin $v: @joeblew999/remy-ui in package.json, ref=v$v in mise.toml, google.yml@v$v in .github/workflows/google.yml" >&2; exit 1; }
+echo "template/ pins $v."
+'''
 
 [tasks."ui:generate"]
 description = "Compile the shared locale catalogs and generate the remy agent skill from the developer docs (skipped when their sources are older than the output)"

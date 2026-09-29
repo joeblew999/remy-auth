@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#MISE description="Upgrade this repository's own npm dependencies beyond their pins, majors included (packages:check's list), install, then project:verify. In remy-auth this is how the platform's pins move (packages/ui/package.json)"
+#MISE dir="{{config_root}}"
+set -euo pipefail
+source "$(dirname "$0")/ncu.sh" --upgrade
+npm install --prefer-online --strict-peer-deps
+mise run project:verify

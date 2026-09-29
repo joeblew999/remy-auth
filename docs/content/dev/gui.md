@@ -123,7 +123,7 @@ mise run ui:components     # Re-add every shadcn component (extend the list ther
 mise run ui:theme          # Rewrite globals.css with shadcn's default theme
 mise run ui:blocks         # Diff each owned block against upstream, in place
 mise run ui:verify         # Re-run both and fail on any difference (runs before every release)
-mise run ui:pack           # Produce the package tarball locally
+mise run packages:pack     # Produce the package tarballs locally
 ```
 
 Blocks are owned copies, as shadcn intends; sidebar-16's README says what was changed. The

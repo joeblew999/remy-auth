@@ -12,7 +12,11 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import viteReact from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { FontaineTransform } from 'fontaine';
+import { paraglideVitePlugin } from '@inlang/paraglide-js';
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { remyParts } from './parts/vite.js';
+import { appCatalog } from './app-catalog.js';
 
 /**
  * The app's Vite configuration. `plugins`: the app's own, after TanStack Devtools (which must come first)
@@ -23,11 +27,15 @@ export function remyApp({ plugins = [], start = {}, cloudflare: cloudflareOption
   // The shared package's parts the app lists in src/parts.json (.plans/parts.md): their routes and the
   // package's own (the CSP report endpoint) mount beside src/routes, and `virtual:remy-parts` says which.
   const parts = remyParts({ root });
+  // The app's own strings, when it has them (project.inlang at its root): compiled into src/paraglide, whose
+  // runtime follows the platform's language (followLocale in the app's config).
+  const catalog = existsSync(resolve(root, appCatalog.project)) ? [paraglideVitePlugin(appCatalog)] : [];
   return defineConfig({
     plugins: [
       // TanStack Devtools: first, as its docs require; strips the devtools from production builds.
       devtools(),
       ...plugins,
+      ...catalog,
       parts.plugin,
       cloudflare({ viteEnvironment: { name: 'ssr' }, ...cloudflareOptions }),
       // Fallback faces sized to the web fonts (size-adjust and ascent/descent overrides), so the swap to

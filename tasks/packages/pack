@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#MISE description="Pack every package this repository publishes (its workspaces that are not private) into a tarball here, after project:generate, for a scratch app to install before any release (~10 s)"
+#MISE dir="{{config_root}}"
+set -euo pipefail
+mise run project:generate
+found=0
+while IFS=$'\t' read -r name version _ _; do
+  found=1
+  npm pack --workspace "$name"
+done < <(node "$(dirname "$0")/workspaces.mjs")
+[ "$found" = 1 ] || echo "packages:pack: this repository publishes no packages (no workspace that is not private)."

@@ -1,0 +1,10 @@
+# Keeps the pinned GitHub Actions current. remy-auth's shared workflow moves with the tasks and the package
+# (project:upgrade-ui), never on its own.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    ignore:
+      - dependency-name: joeblew999/remy-auth

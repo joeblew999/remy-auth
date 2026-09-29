@@ -74,4 +74,4 @@ run = ["node vite.config.ts > /dev/null", "../node_modules/.bin/wrangler secret 
 description = "Start this app's docs at a remy-auth tag: docs/ with docs.config.ts (the product's names), vite.config.ts (the API contract's package), tsconfig.json, package.json and an index page per site; then add \"docs\" to package.json workspaces. The Worker itself is @joeblew999/remy-ui's. Refuses to overwrite an existing docs/"
 dir = "{{config_root}}"
 usage = 'arg "<ref>" help="The remy-auth tag to take the docs app from, e.g. v0.12.0 (match your @joeblew999/remy-ui version)"'
-run = "npx -y giget@3.3.1 gh:joeblew999/remy-auth/packages/ui/src/docs/template#${usage_ref} docs"
+run = "npx -y giget@3.3.1 gh:joeblew999/remy-auth/template/docs#${usage_ref} docs"

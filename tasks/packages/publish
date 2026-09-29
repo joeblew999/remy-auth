@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+#MISE description="Publish each package this repository publishes whose version is not on its registry yet, after project:generate; with --release vX.Y.Z also check the tag is RELEASE_PACKAGE's version and create its GitHub release from CHANGELOG.md unless it exists. The token: NODE_AUTH_TOKEN (CI), else gh auth token. packages:tag runs it; so does the tag's CI job"
+#MISE dir="{{config_root}}"
+#MISE tools={"aqua:cli/cli"="2.101.0"}
+#USAGE flag "--release <tag>" help="The release tag, e.g. v0.14.0"
+set -euo pipefail
+here="$(dirname "$0")"
+tag="${usage_release:-}"
+tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
+
+if [ -n "$tag" ]; then
+  lead="${RELEASE_PACKAGE:?set RELEASE_PACKAGE in mise.toml [env]: the package whose version names the release}"
+  version=$(node "$here/workspaces.mjs" | awk -F'\t' -v n="$lead" '$1 == n {print $2}')
+  [ -n "$version" ] || { echo "packages:publish: RELEASE_PACKAGE $lead is not a published workspace here." >&2; exit 1; }
+  [ "$tag" = "v$version" ] || { echo "packages:publish: tag $tag is not $lead's version v$version." >&2; exit 1; }
+  mise run packages:notes -- "$version" > "$tmp/notes.md"
+fi
+
+token="${NODE_AUTH_TOKEN:-$(gh auth token)}"
+mise run project:generate
+while IFS=$'\t' read -r name version registry _; do
+  host="${registry#https://}"; host="${host%/}"
+  printf '//%s/:_authToken=%s\n' "$host" "$token" > "$tmp/npmrc"
+  if NPM_CONFIG_USERCONFIG="$tmp/npmrc" npm view "$name@$version" version --registry "$registry" >/dev/null 2>&1; then
+    echo "$name@$version is already published."
+  else
+    NPM_CONFIG_USERCONFIG="$tmp/npmrc" npm publish --workspace "$name" --ignore-scripts
+  fi
+done < <(node "$here/workspaces.mjs")
+
+if [ -n "$tag" ]; then
+  if gh release view "$tag" >/dev/null 2>&1; then echo "$tag is already released."; exit 0; fi
+  gh release create "$tag" --title "${RELEASE_TITLE:-$RELEASE_PACKAGE} ${tag#v}" --notes-file "$tmp/notes.md"
+  echo "Released $tag."
+fi
