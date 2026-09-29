@@ -279,21 +279,30 @@ own from the first commit (identity, an empty home page and docs index, the layo
 few lines each), nothing the platform must later reach. The scratch new app of risk 2 becomes it at the end of phase C, and the "A new
 consumer" recipe in tasks.md points to it; its rename step shrinks to the identity config.
 
-## Working rules for this plan
+## Working rules for this plan: unattended
 
-Decided 2026-09-29 as the Executor's defaults (owner asked what is needed "to de-risk as far as
-possible"); the owner can overrule any of them:
+Owner, 2026-09-29: "i want this all able to be done unattended !!! so ask me if you need to now".
+Decided with the owner the same day:
 
-- The work lives on a `thin-apps` branch in its own worktree; it merges to main only when the owner
-  accepts a phase. Main and the live sites stay untouched mid-phase.
-- Deploys: previews only (`cf:preview`) for the owner's review; production after acceptance.
-- Design details inside a phase: the Executor decides and records each decision and why in this plan;
-  the owner reviews them at the phase stop.
-- Dependency freeze for the plan's length: no `packages:upgrade`, oRPC stays on 1.15.4, so a failure is
-  ours and not a moving upstream.
-
-Still needed from the owner: no other agent or session works in remy-auth's main checkout while the plan
-runs; and permission to remove the stale worktrees now.md lists.
+- **Acceptance without the owner.** A phase is accepted when its gates, the scratch check and the
+  hands-on preview pass are green and a separate reviewer agent, reading only this plan and the phase's
+  diff, finds no blocking issue. The verdict is recorded here and the next phase starts. A failed phase 0
+  test: the Executor re-plans that phase, records why, and continues.
+- **What goes out without the owner:** merging an accepted phase to main, nothing else. A push to main
+  runs only the Google checks in CI (`.github/workflows/google.yml`; no deploy, releases are for tags).
+  Not without the owner: production deploys of remy-auth, `ui:release`, creating or deploying
+  `remy-auth-test`, and moving remy-auth-app. So phases 0 to C run unattended and phase D stops before
+  its first outward step, with everything prepared.
+- **Blockers** outside these decisions (a cost, an irreversible step, a real blocker): parked in this
+  plan and now.md, that part skipped, everything else finished, and the list sent to the owner as a
+  notification at the end.
+- **The checkout is the Executor's:** no other session works in remy-auth's main checkout during the
+  plan. The stale worktrees (`fumadocs-trial`, `project-layout`, `wf_0e57b9eb-956-1`, `-956-2`) are
+  removed after checking nothing in them is unmerged; `agent-aca0ff9fa382158ea` (the Look work) stays.
+- The work lives on a `thin-apps` branch in its own worktree; previews (`cf:preview`) are how the hands-on
+  pass sees it.
+- Design details inside a phase: the Executor decides and records each decision and why here.
+- Dependency freeze for the plan's length: no `packages:upgrade`, oRPC stays on 1.15.4.
 
 ## Phase 0: settle the unknowns first (scratch only, nothing on main)
 
@@ -333,10 +342,10 @@ the phases below; none is left to care alone.
 
 | # | Risk | What closes it |
 | --- | --- | --- |
-| 1 | Size: ten steps is "big feature stuff", the kind of plan that turned now.md into a mess | Phases, each with a stop. Only phase A is agreed now; B, C and D each need the owner's go after the previous phase's review. A phase that runs over is stopped and re-planned, not stretched |
+| 1 | Size: ten steps is "big feature stuff", the kind of plan that turned now.md into a mess | Phases, each with an acceptance (gates, scratch check, reviewer agent) before the next starts, and phase D stopping for the owner. A phase that runs over is stopped and re-planned, not stretched |
 | 2 | The wrong abstraction: config designed around remy-auth breaks the next app | Three users at every phase end: remy-auth, remy-auth-app and a new app. remy-auth-app shares remy-auth's routes and showcase pages, so it checks that nothing breaks, not that the design is general; the new app checks that. The package is packed locally (`ui:pack`, nothing published); a scratch copy of remy-auth-app moves onto it, and a scratch new app is built from nothing with it, holding only product code (one page and one procedure, the shape of `remy-auth-test`). Both take the tasks from the local `tasks/`, typecheck and build. No repo is changed; the scratch apps check the design, and the new one counts its own hand-written files. A shape that needs remy-auth-only escape hatches is changed before the phase ends |
 | 3 | Owning the wrapper: every Fumadocs or TanStack Start upgrade becomes ours, for every repo | The wrapper keeps Fumadocs' TanStack Start template's file layout and records the template version it follows; an upgrade is that template's diff applied once, in the package. Fumadocs and Start are pinned exactly in one place, and `packages:upgrade` in remy-auth is the only way they move |
-| 4 | Breaking the live sites | Other repos pin release tags, so a bad release reaches them only when they upgrade. remy-auth does not pin: it uses the package through the workspace (`"@joeblew999/remy-ui": "*"`, a symlink to `packages/ui`), so every change reaches it at once, before any release. That makes remy-auth the canary, and its guard is the deploy rule: its Workers deploy only after `mise run cf:preview` and the hands-on pass, `GATE=quick` for shared-package changes, never mid-phase from a half-moved state. Rollback is the previous Worker version (`wrangler rollback`) and, for other repos, the previous tag |
+| 4 | Breaking the live sites | No production deploy happens in this plan without the owner (working rules). Other repos pin release tags, so a bad release reaches them only when they upgrade. remy-auth does not pin: it uses the package through the workspace (`"@joeblew999/remy-ui": "*"`, a symlink to `packages/ui`), so every change reaches it at once, before any release. That makes remy-auth the canary, and its guard is the deploy rule: its Workers deploy only after `mise run cf:preview` and the hands-on pass, `GATE=quick` for shared-package changes, never mid-phase from a half-moved state. Rollback is the previous Worker version (`wrangler rollback`) and, for other repos, the previous tag |
 | 5 | Churn: a release and an upgrade per step, each able to break consumers | No releases while the plan runs (owner, 2026-09-29: "you dont have to do releases? you can code the shared system and refactor remy-auth as you go"). remy-auth runs the package's and `tasks/`'s current source through the workspace, so the shared system and remy-auth change together in the same commits. Other repos stay on their pinned 0.13.0 and meet the new shape once, in phase D. Checking against them needs no release either (risk 2) |
 | 6 | The docs routes test fails | It runs in phase A, before phase B is agreed, with a fixed decision rule: pass means no routes in a repo; fail means the fallback (one-line re-export files, generated by the platform, never edited) is written into the plan with its file count before phase B starts |
 | 7 | Clash with the queued developer-docs cleanup | None in fact: the docs system moves code, and content stays in each repo's `docs/content/`. The cleanup can run before, during or after |
@@ -348,9 +357,9 @@ the phases below; none is left to care alone.
 
 While coding: tier 0 (`project:check`, which runs `docs:check`), nothing slower. Each phase ends with
 remy-auth using the new pieces only through their exports, its own copies deleted, tier 3
-(`project:test:quick`, the tier for shared-package changes) and `docs:test` green, and the scratch
-check against remy-auth-app and a new app (risk 2) passing. No release. Then it stops for the owner's
-review.
+(`project:test:quick`, the tier for shared-package changes) and `docs:test` green, the scratch
+check against remy-auth-app and a new app (risk 2) passing, and the reviewer agent's verdict. No
+release. Then it merges to main and the next phase starts (working rules).
 
 - **0. Unknowns:** the tests above.
 - **A. Proof (agreed):** the layout inventory written into tasks.md, group 1 (providers and shell),
