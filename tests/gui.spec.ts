@@ -40,7 +40,7 @@ codeSplittingChecks({ paths: sitePaths });
 codeSplittingChecks({ paths: appPaths, home: '/app' });
 // The app mounts TanStack Devtools (src/routes/__root.tsx), whose shell must never ship either.
 buildBoundaryChecks({ paths: everyPath, markers: [
-  { name: 'request.cf', pattern: /\.cf\b/, source: 'packages/ui/src/parts/deferred-place/place.server.ts' },
+  { name: 'request.cf', pattern: /[\w$)\]]\.cf\b/, source: 'packages/ui/src/parts/deferred-place/place.server.ts' },
   { name: 'TanStack Devtools (the shell hosting the panels)', pattern: /tsd-(?:control|surface)\b/, source: { package: '@tanstack/devtools', from: '@tanstack/react-devtools' } },
 ] });
 // Rows only this server-rendered app has on the formats page: more Intl examples (Cloudflare's geolocation: the deferred-place part's checks).
