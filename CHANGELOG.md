@@ -12,7 +12,7 @@ package follows [Semantic Versioning](https://semver.org/).
   `usePreferredLocale`. The shared frame names no route but `/`, so an app with other pages than
   remy-auth's type-checks and shows only its own.
 - `app-shell`: `AppShell` alone, without the showcase pages.
-- `showcase/app-nav`: `showcaseSiteNav`, `showcaseAppNav`, the showcase's lists for apps that show it.
+- `@joeblew999/remy-showcase/app-nav`: `showcaseSiteNav`, `showcaseAppNav`, the showcase's lists for apps that show it.
 - `docs/*`: the docs Worker itself (Fumadocs on TanStack Start and Cloudflare): `docs/vite`'s
   `remyDocs(docsConfig, { contract })` builds an app's docs from its `docs/content/` and `docs.config.ts`,
   generating the Worker's Cloudflare configuration into `docs/.remy-docs/`; `docs/config`'s

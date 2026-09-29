@@ -105,7 +105,7 @@ echo "template/ pins $v."
 '''
 
 [tasks."ui:version"]
-description = "Set the next release's version everywhere it is written: @joeblew999/remy-ui's package.json and the blank app's three pins (its package, tasks ref and workflow tag); template:check proves them equal at release. Instant; commit with CHANGELOG.md's section"
+description = "Set the next release's version everywhere it is written: @joeblew999/remy-ui's package.json, the showcase's floor for it, and the blank app's three pins (its package, tasks ref and workflow tag); template:check proves them equal at release. Instant; commit with CHANGELOG.md's section"
 dir = "{{config_root}}"
 usage = 'arg "<version>" help="The next version without the v, e.g. 0.14.1"'
 run = '''
@@ -113,6 +113,8 @@ set -eu
 v="${usage_version}"
 echo "$v" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || { echo "ui:version: $v is not a version like 0.14.1" >&2; exit 1; }
 npm pkg set version="$v" --workspace @joeblew999/remy-ui > /dev/null
+# The showcase is written against this release's platform exports.
+npm pkg set "peerDependencies.@joeblew999/remy-ui=>=$v" --workspace @joeblew999/remy-showcase > /dev/null
 npm install --package-lock-only --no-audit --no-fund --loglevel=error
 (cd template && npm pkg set "dependencies.@joeblew999/remy-ui=$v")
 sed -i.bak -E "s#(tasks\?ref=v)[0-9]+\.[0-9]+\.[0-9]+#\1$v#" template/mise.toml
