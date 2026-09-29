@@ -100,8 +100,7 @@ Todas bajo `@joeblew999/remy-ui/`, como TSX y CSS para consumidores de Vite y Ta
 | `worker` | `withObservability` y los ayudantes de ID de solicitud |
 | `cloudflare` | `placeFromCloudflare` |
 | `problem` | Las páginas de problema localizadas: `Problem`, `NotFound`, `ErrorPage`, `problemPages` (una línea de propagación por cada ruta de página) |
-| `parts`, `parts/vite`, `parts/checks` | Partes ([plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md)): una app las lista en `src/parts.json`, un nombre por línea. `remyParts()` en `vite.config.ts` (su `plugin` entre los plugins, sus `routes` como `tanstackStart({ router: { virtualRouteConfig } })`) monta las rutas de cada parte listada junto a `src/routes` y genera `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` en el archivo de pruebas ejecuta las comprobaciones de cada parte listada. Partes actuales: `time-zones`, `deferred-place`, `seo-routes`, `status-card`; ver [Escribir una parte](#writing-a-part) |
-| `parts/time-zones/page`, `parts/deferred-place/device-place`, `parts/status-card/card` | Las piezas propias de las partes: la página de zona horaria, la ubicación del dispositivo, la tarjeta de estado en vivo (`StatusCard`: la app le pasa la consulta, la de su propio cliente o la de un `contractClient` en el origen de otra app) |
+| `parts`, `parts/vite`, `parts/checks` | Partes ([plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md)): una app las lista en `src/parts.json`, una por línea: las de la plataforma por nombre, las de otro paquete como `<package>/<name>`. `remyParts()` en `vite.config.ts` (su `plugin` entre los plugins, sus `routes` como `tanstackStart({ router: { virtualRouteConfig } })`) monta las rutas de cada parte listada junto a `src/routes` y genera `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` en el archivo de pruebas ejecuta las comprobaciones de cada parte listada. La parte de la plataforma es `seo-routes` (robots.txt y el sitemap); la demostración (showcase) ofrece `time-zones`, `deferred-place` y `status-card` (`@joeblew999/remy-showcase/<name>`); ver [Escribir una parte](#writing-a-part) |
 | `rows`, `zod-csp` | `Group`, `Row`, `NameList`: filas de etiqueta/valor; el interruptor jitless de Zod (lo importa AppProviders) |
 | `invalidate` | `invalidateEverything(router, queryClient)`: todos los loaders y consultas marcados como obsoletos y recargados (tras cerrar sesión o un cambio de rol; la actualización de la tarjeta de estado) |
 | `samples` | Los valores fijos que renderizan las páginas |
@@ -164,19 +163,27 @@ e instalan mediante `mise run project:setup`, que toma un token con `read:packag
 
 ## Escribir una parte [#writing-a-part]
 
-Una parte es una funcionalidad que una app activa o desactiva con una línea en su `src/parts.json`.
+Una parte es una funcionalidad que una app activa o desactiva con una línea en su `src/parts.json`. Las partes de la plataforma se
+listan por nombre (`"seo-routes"`); cualquier paquete puede ofrecer partes también, listadas como `"<package>/<name>"`
+(`"@joeblew999/remy-showcase/time-zones"`), y funcionan de la misma manera.
 
-1. **Carpeta:** `src/parts/<name>/` en este paquete, con cualquiera de estos:
+1. **Carpeta:** `src/parts/<name>/` en el paquete, con cualquiera de estos:
    - `routes/`: archivos de ruta de TanStack, montados junto a las `src/routes` propias de la app cuando la parte está listada;
    - módulos de entrada (p. ej. `ui.tsx`, `place.ts`) que la app importa como `virtual:remy-parts/<name>/<entry>`:
      las exportaciones reales cuando está listada, `undefined` cuando no, de modo que la app escribe `{Card && <Card />}` o
      `getPlace?.()` y no se envía nada cuando la parte está desactivada. Un módulo por entrada mantiene la división de código;
-   - `checks.js`: sus comprobaciones de Playwright, que `partChecks()` ejecuta solo cuando está listada.
-2. **Catálogo:** añádela a `catalog` en `src/parts/list.js`: `routes`, `requires` (partes que también deben
+   - `checks.js`, cuya exportación por defecto `(options, listed) => void` ejecuta sus comprobaciones de Playwright: `partChecks()` la
+     ejecuta solo cuando la parte está listada, con las `options[<name>]` propias de la app.
+2. **Catálogo:** las de la plataforma son `catalog` en `src/parts/list.js`; las de otro paquete son su
+   `src/parts/catalog.json`, exportado como `<package>/parts/catalog.json`, con la misma forma: `routes`, `requires` (partes que también deben
    estar listadas), `entries` (entrada → nombres de exportación), `app` (opciones que la app aporta desde su propio
    `src/parts/<name>.ts`, leído como `virtual:remy-parts/<name>/app`) y `sitePaths` (páginas del sitio que añade,
    para el sitemap y sus comprobaciones).
-3. **Tipos:** declara sus módulos virtuales en `src/parts/virtual.d.ts`.
+3. **Tipos:** declara sus módulos virtuales en el `src/parts/virtual.d.ts` propio del paquete (el de otro paquete referencia
+   el de la plataforma con `/// <reference types="@joeblew999/remy-ui/parts/virtual" />`). Una parte solo enlaza con
+   sus propias rutas, o con las páginas de la app mediante sus opciones `app` (la miga de pan de la parte time-zones toma
+   `parent`), nunca con una página que otra app pueda no tener: el fixture consumidor lista una parte de la demostración (showcase) y
+   la tipa sin las páginas de la demostración (showcase).
 4. **Demuéstralo:** `mise run project:check` pasa con la parte listada, sin ella y con la lista
    vacía (ejecuta un build una vez tras editar `src/parts.json`, lo que regenera el árbol de rutas).
 
