@@ -427,6 +427,7 @@ release. Then it merges to main and the next phase starts (working rules).
 - **0. Unknowns:** the tests above. Done 2026-09-29, all pass (verdicts above).
 - **A. Proof:** the layout inventory written into tasks.md, group 1 (providers and shell), and the
   `@joeblew999/remy-ui/*` mappings removed from the root and docs `tsconfig.json` (risk 10). The smallest change that proves the loop.
+  Done 2026-09-29 (verdict below).
 - **B. Docs system:** group 2, with provisioning owner-only (risk 8).
 - **C. The rest:** groups 3 to 7.
 - **D. Release, then `remy-auth-test` (stops for the owner):** everything below is prepared unattended;
@@ -439,6 +440,45 @@ release. Then it merges to main and the next phase starts (working rules).
   shared remote tier (`project:test:live`, the smoke checks against `DEPLOY_ORIGIN`) and `docs:test:remote`
   run against its Workers, which is the path every new repo takes. Release number 0.14.0 (breaking,
   under 1.0; the owner can call it 1.0.0 instead).
+
+## Phase A: done 2026-09-29
+
+Decisions (the Executor's, per the working rules):
+
+- **One app config, `defineRemyApp`** (`@joeblew999/remy-ui/app-config`): brand, repository, the site
+  header's nav and extra links, the app side's home, nav and extra links. Each link is written with
+  TanStack's `linkOptions({ to })` in the app, so it is checked against the app's own routes where it is
+  written (TanStack's own guidance for shared components); a `NavItem` keeps the link apart from its
+  `label`, `icon`, `core`, `exact`, because `linkOptions` rejects extra fields and `title` is the link's
+  HTML attribute. The frame spreads the options into `Link` and names no route but `/`.
+- `AppProviders` takes `app` and `preferred`; the frames read both from it. The ten page routes that
+  threaded `preferred={usePreferred()}` lost it, and the package's `usePreferred` went. The old
+  `SourceLink`, `SiteNavLinks`, `AppNavLinks` contexts went into the config.
+- `AppShell` lives in `app-shell` (the frame alone); `app-pages` keeps remy-auth's showcase pages. The
+  showcase's lists are `showcase/app-nav` (`showcaseSiteNav`, `showcaseAppNav`), which remy-auth and
+  remy-auth-app opt into. `Intro`'s back link is `backTo: 'site' | 'app'`.
+- The clock's nav link now passes `clockDefaults` as search: its route requires `zones`, which the old
+  loosely typed list hid; `stripSearchParams` keeps the URL `/app/clock`.
+- Both `@joeblew999/remy-ui/*` tsconfig mappings are gone; remy-auth resolves the package through its
+  exports like any repo.
+- The layout is in [tasks.md, "The layout"](../docs/content/dev/tasks.md).
+- Not in phase A: `paths.js`'s remy-auth page lists stay as runtime defaults (every app passes its own
+  today); group 5 takes them. The docs header and sidebar links (`src/docs/header-link.tsx`) stay
+  remy-auth's until group 2 makes them the platform's.
+
+Checks: tier 0 green; tier 3 81/81 (after one fix: the build-boundary marker for `request.cf`,
+`/\.cf\b/`, matched a minified spread `{...cf}` once the shell's names shifted; it now needs a member
+access, `/[\w$)\]]\.cf\b/`); `docs:test` 7/7. Scratch check (risk 2) from a local `npm pack`: a new app
+with its own routes (`/`, `/videos`, `/app`, `/app/videos`) and config typechecks and builds, and its
+pages show only its own brand, links and nav (phase 0's A6 errors are gone); a copy of remy-auth-app
+moved to the new shape (config with the showcase lists, `preferred` from its own hook into
+AppProviders, ten page props gone) passes tier 0 including its prerender. Hands-on (local preview, not
+`cf:preview`: only merges go out): desktop site header as before; phone, Arabic, `/ar/app/clock`:
+right-to-left frame, bottom bar from the config with Clock active, the language hint shown with no page
+passing `preferred`, More opens the sidebar on the reading side with the guide link; no console errors.
+Cost: every page's entry chunk grows 1.6 KB gzip (the root now imports the app config with the app
+nav's icons and the clock's defaults); Lighthouse and Core Web Vitals in phase D's release gate judge it,
+and the app nav could move to the app frame alone if it matters.
 
 ## Open questions for the owner
 
