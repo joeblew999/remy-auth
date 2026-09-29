@@ -80,8 +80,8 @@ Rules for every fix in this plan:
 ## Evidence: remy-video today
 
 Two field reports, drafted in remy-video:
-[remy-auth-feedback.md](../../remy-video/.plans/done/remy-auth-feedback.md) (16 items: tasks, packages,
-app) and [remy-auth-docs-feedback.md](../../remy-video/.plans/done/remy-auth-docs-feedback.md) (7 items:
+[remy-auth-feedback.md](https://github.com/joeblew999/remy-video/blob/main/.plans/done/remy-auth-feedback.md) (16 items: tasks, packages,
+app) and [remy-auth-docs-feedback.md](https://github.com/joeblew999/remy-video/blob/main/.plans/done/remy-auth-docs-feedback.md) (7 items:
 the docs Worker). They read as asks for docs and scaffolds; this plan reads them as places the
 platform leaks. Decided 2026-09-29 (owner delegated: "you decide"): closed against this plan, not
 posted as issues; the table below is their one home, so no fix is tracked twice.
@@ -132,7 +132,7 @@ the dead links (group 2).
 
 ### Every item in the two reports, and where this plan answers it
 
-App report (A, [remy-auth-feedback.md](../../remy-video/.plans/done/remy-auth-feedback.md)):
+App report (A, [remy-auth-feedback.md](https://github.com/joeblew999/remy-video/blob/main/.plans/done/remy-auth-feedback.md)):
 
 | Item | What remy-video hit | Answered by |
 | --- | --- | --- |
@@ -153,7 +153,7 @@ App report (A, [remy-auth-feedback.md](../../remy-video/.plans/done/remy-auth-fe
 | A15 | `tasks/README.md` does not name its source | done before this plan: it links `docs/content/dev/tasks.md` |
 | A16 | Export-map example, `Env` before `wrangler types`, coverage rule, task refresh, port clash | group 5 (`Env`), group 6 (export map of an owned package), group 7 (the rest) |
 
-Docs report (D, [remy-auth-docs-feedback.md](../../remy-video/.plans/done/remy-auth-docs-feedback.md)):
+Docs report (D, [remy-auth-docs-feedback.md](https://github.com/joeblew999/remy-video/blob/main/.plans/done/remy-auth-docs-feedback.md)):
 
 | Item | What remy-video hit | Answered by |
 | --- | --- | --- |
@@ -319,6 +319,34 @@ before that phase starts.
 | 5 | A second Paraglide catalog beside remy-ui's | group 6's strings | C |
 | 6 | `skills experimental_sync` with a skill shipped in the package | the agent channel | B |
 | 7 | A blank app from the locally packed package: install, typecheck, build | that the scratch check itself works | all |
+
+Verdicts, 2026-09-29 (scratch: a copy of the docs Worker's `src/` as a real directory in
+`node_modules/@joeblew999/remy-docs`, an app holding only `content/`, `docs.config.ts`, `vite.config.ts`,
+`tsconfig.json`, `package.json`):
+
+- **0, baseline: green.** Tier 3 81/81, `docs:test` 7/7 on main (`c6448d0`). Known and not ours: docs
+  dev logs React "reading 'useContext'" twice (seen on main's own docs Worker too), and Ask AI logs
+  "needs to be run remotely" locally.
+- **1, routes: pass, better than expected.** No routes and no Worker code in the app: TanStack Start's
+  `srcDirectory` points at the package's `src/` (router, start, server entry, routes); the route tree
+  is generated there. Build, preview and dev serve `/docs`, `/docs/es`, `/dev`, `/reference`,
+  `llms.txt`, `.md`, sitemap, robots, social images, MCP and search.
+- **2, Fumadocs as a package: pass, with two changes.** (a) fumadocs-mdx's macro never compiles
+  `node_modules` (its `include` cannot override that), so the preset writes the 10-line
+  `collections.ts` into the app's generated, gitignored `.remy-docs/` at config time. (b) The ~15 imports
+  from the Worker into the app (`docs.config.ts`, `content/**/i18n.json`, `meta.json`, `content/ui/*.json`)
+  go through one alias, `@remy-docs-app/`, set by the preset for Vite and by the package's
+  `tsconfig.json` for TypeScript with `${configDir}`, so the app's `tsconfig.json` is one `extends` line
+  and has no paths of its own; typecheck 0 errors. The package's own `@/` imports become relative.
+  Content that points at Worker source (the "Writing docs" type table, `../../src/docs/source.server.ts`)
+  moves to the package path; remy-auth's `CHANGELOG.md` include stays the app's.
+- **3, no `wrangler.jsonc`: pass.** The Cloudflare plugin's `config` option replaces the file: the build
+  emits `dist/server/wrangler.json` and `.wrangler/deploy/config.json`, and `wrangler deploy --dry-run`
+  reads it with its bindings. Other wrangler commands (types, tail, the `ask` environment) then take
+  `-c dist/server/wrangler.json` or the preset's config; phase B folds that into the shared tasks.
+
+So a repo's `docs/` is `content/` plus `docs.config.ts`, `package.json`, `vite.config.ts`
+(`export default remyDocs(docsConfig)`) and `tsconfig.json` (one `extends`): four files, not five.
 
 ## Out of scope
 
