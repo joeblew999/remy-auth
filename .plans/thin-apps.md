@@ -646,7 +646,8 @@ Everything here is ready; each step goes out only when the owner says so (workin
    mapping): `pages`, `app-pages`, `paths`, `clock-route`, `reservation`, `showcase/app-nav`,
    `showcase/search-params` and `showcase/navigation-blocking` to `@joeblew999/remy-showcase/*`;
    `showcase/status-card`, `showcase/device-place` and `showcase/time-zone` to
-   `@joeblew999/remy-ui/parts/status-card/card`, `parts/deferred-place/device-place`, `parts/time-zones/page`.
+   `@joeblew999/remy-showcase/parts/status-card/card`, `parts/deferred-place/device-place`,
+   `parts/time-zones/page`. It lists no parts, so nothing else changes.
 
 ## Parked while running (working rules: recorded, skipped, reported at the end)
 

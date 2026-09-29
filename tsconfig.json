@@ -10,6 +10,7 @@
   ],
   "exclude": [
     "packages/ui/src/parts/*/routes",
+    "packages/showcase/src/parts/*/routes",
     "packages/ui/src/docs"
   ],
   "compilerOptions": {

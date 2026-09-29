@@ -45,6 +45,10 @@ export function listedParts({ root = process.cwd(), file = partsFile } = {}) {
   const listed = {};
   const problems = [];
   for (const spec of specs) {
+    if (typeof spec !== 'string' || spec.split('/').length === 2 || (!spec.startsWith('@') && spec.includes('/')) || spec.split('/').length > 3) {
+      problems.push(`${JSON.stringify(spec)}: a part is the platform's name ("seo-routes") or "@<scope>/<package>/<name>"`);
+      continue;
+    }
     const scoped = spec.startsWith('@');
     const name = scoped ? spec.split('/').slice(2).join('/') : spec;
     let entry, dir;

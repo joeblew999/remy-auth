@@ -8,7 +8,7 @@ import { useTheme } from '@joeblew999/remy-ui/theme';
 import { UserIcon, XIcon } from 'lucide-react';
 import { Skeleton } from '@joeblew999/remy-ui/components/skeleton';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@joeblew999/remy-ui/components/empty';
-import { canonicalTimeZone, timeZoneName, timeZonePath } from './parts/time-zones/page';
+import { canonicalTimeZone, timeZoneName, timeZonePath } from './parts/time-zones/names';
 import { Button, buttonVariants } from '@joeblew999/remy-ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@joeblew999/remy-ui/components/card';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@joeblew999/remy-ui/components/field';
