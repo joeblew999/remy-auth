@@ -46,7 +46,9 @@ if [ -f "$skills/skills-lock.json" ]; then
 else
   mise run skills:install > /dev/null
   # Written aside, then moved into place: an interrupted or concurrent run never leaves half a cache.
-  mkdir -p "$skills.$$" && cp -R skills-lock.json .agents .claude "$skills.$$/" && mv "$skills.$$" "$skills" 2>/dev/null || rm -rf "$skills.$$"
+  mkdir -p "$skills.$$" && cp -R skills-lock.json .agents .claude "$skills.$$/"
+  # Another run may have written it meanwhile: mv would then move this copy inside that one.
+  if [ -e "$skills" ]; then rm -rf "$skills.$$"; else mv "$skills.$$" "$skills"; fi
 fi
 mise run project:verify-tooling
 mise run project:check

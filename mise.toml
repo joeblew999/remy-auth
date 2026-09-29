@@ -113,6 +113,7 @@ set -eu
 v="${usage_version}"
 echo "$v" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || { echo "ui:version: $v is not a version like 0.14.1" >&2; exit 1; }
 npm pkg set version="$v" --workspace @joeblew999/remy-ui > /dev/null
+npm install --package-lock-only --no-audit --no-fund --loglevel=error
 (cd template && npm pkg set "dependencies.@joeblew999/remy-ui=$v")
 sed -i.bak -E "s#(tasks\?ref=v)[0-9]+\.[0-9]+\.[0-9]+#\1$v#" template/mise.toml
 sed -i.bak -E "s#(google\.yml@v)[0-9]+\.[0-9]+\.[0-9]+#\1$v#" template/.github/workflows/google.yml
