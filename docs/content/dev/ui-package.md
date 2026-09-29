@@ -94,7 +94,7 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `worker` | `withObservability` and the request-ID helpers |
 | `cloudflare` | `placeFromCloudflare` |
 | `problem` | The localized problem pages: `Problem`, `NotFound`, `ErrorPage`, `problemPages` (one spread line per page route) |
-| `parts`, `parts/vite`, `parts/checks` | Parts ([plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md)): an app lists them in `src/parts.json`, one name per line. `remyParts()` in `vite.config.ts` (its `plugin` among the plugins, its `routes` as `tanstackStart({ router: { virtualRouteConfig } })`) mounts each listed part's routes beside `src/routes` and generates `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` in the test file runs each listed part's checks. Parts today: `time-zones`, `deferred-place`, `seo-routes`, `status-card`; see [Writing a part](#writing-a-part) |
+| `parts`, `parts/vite`, `parts/checks` | Parts ([plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md)): an app lists them in `src/parts.json`, one per line: the platform's by name, another package's as `<package>/<name>`. `remyParts()` in `vite.config.ts` (its `plugin` among the plugins, its `routes` as `tanstackStart({ router: { virtualRouteConfig } })`) mounts each listed part's routes beside `src/routes` and generates `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` in the test file runs each listed part's checks. The platform's part is `seo-routes` (robots.txt and the sitemap); the showcase offers `time-zones`, `deferred-place` and `status-card` (`@joeblew999/remy-showcase/<name>`); see [Writing a part](#writing-a-part) |
 | `parts/time-zones/page`, `parts/deferred-place/device-place`, `parts/status-card/card` | The parts' own pieces: the time-zone page, the device's place, the live status card (`StatusCard`: the app passes the query, its own client's or a `contractClient` on another app's origin) |
 | `rows`, `zod-csp` | `Group`, `Row`, `NameList`: label/value rows; Zod's jitless switch (AppProviders imports it) |
 | `invalidate` | `invalidateEverything(router, queryClient)`: every loader and query stale and reloaded (after logout or a role change; the status card's refresh) |
@@ -153,19 +153,27 @@ and install through `mise run project:setup`, which takes a `read:packages` toke
 
 ## Writing a part
 
-A part is a feature an app switches on or off with one line in its `src/parts.json`.
+A part is a feature an app switches on or off with one line in its `src/parts.json`. The platform's parts are
+listed by name (`"seo-routes"`); any package can offer parts too, listed as `"<package>/<name>"`
+(`"@joeblew999/remy-showcase/time-zones"`), and they work the same way.
 
-1. **Folder:** `src/parts/<name>/` in this package, with any of:
+1. **Folder:** `src/parts/<name>/` in the package, with any of:
    - `routes/`: TanStack route files, mounted beside the app's own `src/routes` when the part is listed;
    - entry modules (e.g. `ui.tsx`, `place.ts`) the app imports as `virtual:remy-parts/<name>/<entry>`:
      the real exports when listed, `undefined` when not, so the app writes `{Card && <Card />}` or
      `getPlace?.()` and nothing ships when the part is off. One module per entry keeps code splitting;
-   - `checks.js`: its Playwright checks, run by `partChecks()` only when listed.
-2. **Catalog:** add it to `catalog` in `src/parts/list.js`: `routes`, `requires` (parts that must be
+   - `checks.js`, whose default export `(options, listed) => void` runs its Playwright checks: `partChecks()` runs
+     it only when the part is listed, with the app's `options[<name>]`.
+2. **Catalog:** the platform's are `catalog` in `src/parts/list.js`; another package's are its
+   `src/parts/catalog.json`, exported as `<package>/parts/catalog.json`, in the same shape: `routes`, `requires` (parts that must be
    listed too), `entries` (entry → export names), `app` (options the app supplies from its own
    `src/parts/<name>.ts`, read as `virtual:remy-parts/<name>/app`) and `sitePaths` (site pages it adds,
    for the sitemap and its checks).
-3. **Types:** declare its virtual modules in `src/parts/virtual.d.ts`.
+3. **Types:** declare its virtual modules in the package's `src/parts/virtual.d.ts` (another package's references
+   the platform's with `/// <reference types="@joeblew999/remy-ui/parts/virtual" />`). A part links only to
+   its own routes, or to the app's pages through its `app` options (the time-zones part's breadcrumb takes
+   `parent`), never to a page another app may not have: the consumer fixture lists a showcase part and
+   type-checks it without the showcase's pages.
 4. **Prove it:** `mise run project:check` passes with the part listed, with it removed, and with the list
    empty (run a build once after editing `src/parts.json`, which regenerates the route tree).
 

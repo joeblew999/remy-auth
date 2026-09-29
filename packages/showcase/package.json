@@ -25,7 +25,13 @@
     "./paths": "./src/paths.js",
     "./navigation-blocking": "./src/navigation-blocking.tsx",
     "./search-params": "./src/search-params.tsx",
-    "./*.checks": "./src/*.checks.js"
+    "./*.checks": "./src/*.checks.js",
+    "./parts/catalog.json": "./src/parts/catalog.json",
+    "./parts/status-card/query": "./src/parts/status-card/query.ts",
+    "./parts/status-card/card": "./src/parts/status-card/card.tsx",
+    "./parts/status-card/card.checks": "./src/parts/status-card/card.checks.js",
+    "./parts/deferred-place/device-place": "./src/parts/deferred-place/device-place.tsx",
+    "./parts/time-zones/page": "./src/parts/time-zones/page.tsx"
   },
   "peerDependencies": {
     "@joeblew999/remy-ui": ">=0.13.0"

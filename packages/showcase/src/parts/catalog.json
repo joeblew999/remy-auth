@@ -1,0 +1,39 @@
+{
+  "time-zones": {
+    "routes": true,
+    "requires": [],
+    "entries": {},
+    "app": [
+      "parent"
+    ],
+    "sitePaths": []
+  },
+  "deferred-place": {
+    "routes": false,
+    "requires": [],
+    "entries": {
+      "place": [
+        "getPlace"
+      ],
+      "ui": [
+        "DeferredPlace"
+      ]
+    },
+    "app": [],
+    "sitePaths": []
+  },
+  "status-card": {
+    "routes": false,
+    "requires": [],
+    "entries": {
+      "ui": [
+        "StatusCard",
+        "statusCardLoader"
+      ]
+    },
+    "app": [
+      "statusQuery"
+    ],
+    "sitePaths": []
+  }
+}

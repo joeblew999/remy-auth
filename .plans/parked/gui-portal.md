@@ -48,7 +48,7 @@ follow. Owner: remy-auth. Executor/Reviewer roles as in [plans and roles](../../
      `report-to` because Firefox and Safari do not send Reporting API reports yet.
    - Found while proving it: Zod 4 probes for eval (`Function('')`) on app pages, a violation the
      earlier research missed. Fixed with Zod's documented `z.config({ jitless: true })` in
-     `packages/ui/src/reservation.ts`, not by loosening the policy.
+     `packages/showcase/src/reservation.ts`, not by loosening the policy.
    - `cspChecks` (every page): the policy names a fresh nonce per response, every executable
      script in the server's HTML carries it (data blocks such as `application/ld+json` are not
      scripts to CSP and TanStack renders them without one), no page violates the policy while

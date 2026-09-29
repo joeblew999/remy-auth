@@ -2,11 +2,11 @@
 // place (./place.checks.js), its rows matching Intl on the formats page without
 // JavaScript, and the localized error page when its server function fails during a client navigation.
 import { test, expect } from '@playwright/test';
-import { m } from '../../paraglide/messages.js';
-import { checkedLocales, formatTag, localizedPath } from '../../checks.js';
-import { samples } from '../../samples.js';
+import { m } from '@joeblew999/remy-ui/messages';
+import { checkedLocales, formatTag, localizedPath } from '@joeblew999/remy-ui/checks';
+import { samples } from '@joeblew999/remy-ui/samples';
 import { deferredPlaceChecks } from './place.checks.js';
-import { problemChecks } from '../../problem.checks.js';
+import { problemChecks } from '@joeblew999/remy-ui/problem.checks';
 
 /** `path` is the de-localized page with the place; `from` a page linking to it through `link` (a message key). */
 export function deferredPlacePartChecks({ path = '/formats', from = '', link = 'formats_link', heading = 'formats_title' } = {}) {
@@ -34,3 +34,6 @@ export function deferredPlacePartChecks({ path = '/formats', from = '', link = '
   // The page's loader calls the part's server function: failing it shows the localized error page.
   problemChecks({ failingNavigation: { from, link, fail: '**/_serverFn/**', heading } });
 }
+
+/** The part's checks, as partChecks() runs them. */
+export default options => deferredPlacePartChecks(options);

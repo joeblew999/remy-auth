@@ -1,12 +1,12 @@
 /// <reference path="../virtual.d.ts" />
 import { Await, Link } from '@tanstack/react-router';
-import type { Locale } from '../../locale';
-import type { Place } from '../../cloudflare';
-import { m } from '../../paraglide/messages.js';
-import { samples } from '../../samples.js';
-import { formatLocale } from '../../locale-info';
-import { Group, Row } from '../../rows';
-import { Skeleton as Placeholder } from '../../components/skeleton';
+import type { Locale } from '@joeblew999/remy-ui/locale';
+import type { Place } from '@joeblew999/remy-ui/cloudflare';
+import { m } from '@joeblew999/remy-ui/messages';
+import { samples } from '@joeblew999/remy-ui/samples';
+import { formatLocale } from '@joeblew999/remy-ui/locale-info';
+import { Group, Row } from '@joeblew999/remy-ui/rows';
+import { Skeleton as Placeholder } from '@joeblew999/remy-ui/components/skeleton';
 import { DevicePlace } from './device-place';
 import { timeZonePath } from '../time-zones/names';
 // The zone links to the time-zones part's page only when the app lists that part (src/parts.json).

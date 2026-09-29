@@ -1,6 +1,6 @@
 /// <reference path="../virtual.d.ts" />
 import type { QueryClient } from '@tanstack/react-query';
-import { getLocale } from '../../locale';
+import { getLocale } from '@joeblew999/remy-ui/locale';
 import { StatusCard as SharedStatusCard, statusRefreshMs } from './card';
 // The app's own status query (its src/parts/status-card.ts): the package does not know the app's API.
 import { statusQuery as appStatusQuery } from 'virtual:remy-parts/status-card/app';

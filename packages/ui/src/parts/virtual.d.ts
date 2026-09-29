@@ -10,28 +10,7 @@ declare module 'virtual:remy-parts' {
   export const sitePaths: readonly string[];
 }
 
-declare module 'virtual:remy-parts/deferred-place/place' {
-  /** Cloudflare's place of the request, as a server function; a loader returns it unawaited. */
-  export const getPlace: typeof import('./deferred-place/place').getPlace | undefined;
-}
-
-declare module 'virtual:remy-parts/deferred-place/ui' {
-  /** Cloudflare's place, streamed into the page (`place` from getPlace); `device` adds the device's own. */
-  export const DeferredPlace: typeof import('./deferred-place/ui').DeferredPlace | undefined;
-}
-
 declare module 'virtual:remy-parts/seo-routes/app' {
   /** The app's own sitemap entries beside the site pages (src/parts/seo-routes.ts), for example its docs. */
   export const sitemapEntries: import('./seo-routes/sitemap').SitemapEntries | undefined;
-}
-
-declare module 'virtual:remy-parts/status-card/ui' {
-  /** The live status card, and the loader of the route that shows it (fills the QueryClient for the server HTML). */
-  export const StatusCard: typeof import('./status-card/ui').StatusCard | undefined;
-  export const statusCardLoader: typeof import('./status-card/ui').statusCardLoader | undefined;
-}
-
-declare module 'virtual:remy-parts/status-card/app' {
-  /** The app's status query (src/parts/status-card.ts), for example `orpc.status.queryOptions()`. */
-  export const statusQuery: import('./status-card/query').StatusQuery | undefined;
 }

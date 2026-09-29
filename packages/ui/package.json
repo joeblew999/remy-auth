@@ -67,18 +67,14 @@
     "./parts/vite": "./src/parts/vite.js",
     "./parts/checks": "./src/parts/checks.js",
     "./parts/seo-routes/sitemap": "./src/parts/seo-routes/sitemap.ts",
-    "./parts/status-card/query": "./src/parts/status-card/query.ts",
     "./rows": "./src/rows.tsx",
     "./build-boundaries.checks": "./src/build-boundaries.checks.js",
     "./code-splitting.checks": "./src/code-splitting.checks.js",
-    "./parts/time-zones/page": "./src/parts/time-zones/page.tsx",
-    "./parts/time-zones/names": "./src/parts/time-zones/names.ts",
-    "./parts/deferred-place/device-place": "./src/parts/deferred-place/device-place.tsx",
-    "./parts/deferred-place/place.checks": "./src/parts/deferred-place/place.checks.js",
-    "./parts/deferred-place/server-functions.checks": "./src/parts/deferred-place/server-functions.checks.js",
-    "./parts/status-card/card": "./src/parts/status-card/card.tsx",
-    "./parts/status-card/card.checks": "./src/parts/status-card/card.checks.js",
-    "./zod-csp": "./src/zod-csp.ts"
+    "./zod-csp": "./src/zod-csp.ts",
+    "./parts/virtual": {
+      "types": "./src/parts/virtual.d.ts"
+    },
+    "./parts/list": "./src/parts/list.js"
   },
   "dependencies": {
     "@ai-sdk/react": "4.0.119",

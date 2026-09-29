@@ -1,6 +1,6 @@
-import type { Locale } from '../../paraglide/runtime.js';
-import { formatLocale } from '../../locale-info';
-import { samples } from '../../samples.js';
+import type { Locale } from '@joeblew999/remy-ui/runtime';
+import { formatLocale } from '@joeblew999/remy-ui/locale-info';
+import { samples } from '@joeblew999/remy-ui/samples';
 
 // A time zone's path, canonical name and localized name: plain functions, apart from the time-zone page
 // (./time-zone.tsx), so code that only names or links a zone (the deferred-place part) pulls in no page.

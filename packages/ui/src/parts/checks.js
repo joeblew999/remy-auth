@@ -1,24 +1,16 @@
-// Every listed part's checks, from one line in an app's test file: partChecks().
+// Every listed part's checks, from one line in an app's test file: partChecks(). Each part's folder has a
+// checks.js whose default export runs them (the platform's parts here, another package's in that package), loaded
+// for the app's own src/parts.json when this module loads, so partChecks() declares its tests at once.
 // Plain JavaScript, like ../checks.js; a part left out of src/parts.json leaves no check behind.
-import { partSitePaths, readParts } from './list.js';
-import { timeZonesChecks } from './time-zones/checks.js';
-import { deferredPlacePartChecks } from './deferred-place/checks.js';
-import { seoRoutesChecks } from './seo-routes/checks.js';
-import { statusCardChecks } from './status-card/card.checks.js';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { listedParts } from './list.js';
 
-const checks = {
-  'time-zones': timeZonesChecks,
-  'deferred-place': deferredPlacePartChecks,
-  // The sitemap also lists the site pages every listed part adds.
-  'seo-routes': (options, names) => seoRoutesChecks({ ...options, partPaths: partSitePaths(names) }),
-  'status-card': options => {
-    if (!options?.service) throw new Error("status-card checks need the Worker's name: partChecks({ options: { 'status-card': { service } } })");
-    statusCardChecks(options);
-  },
-};
+const listed = listedParts();
+const checks = Object.fromEntries(await Promise.all(Object.entries(listed).map(async ([name, part]) =>
+  [name, (await import(pathToFileURL(join(part.dir, 'checks.js')).href)).default])));
 
 /** `options` maps a part's name to its checks' options. */
-export function partChecks({ root, file, options = {} } = {}) {
-  const names = readParts({ root, file });
-  for (const name of names) checks[name](options[name], names);
+export function partChecks({ options = {} } = {}) {
+  for (const [name, run] of Object.entries(checks)) run(options[name], listed);
 }

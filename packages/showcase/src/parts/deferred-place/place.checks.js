@@ -2,8 +2,8 @@
 // place unawaited and the page renders it through <Await> with a pending skeleton. Plain
 // JavaScript, like ../checks.js.
 import { test, expect } from '@playwright/test';
-import { m } from '../../paraglide/messages.js';
-import { localizedPath, collectErrors } from '../../checks.js';
+import { m } from '@joeblew999/remy-ui/messages';
+import { localizedPath, collectErrors } from '@joeblew999/remy-ui/checks';
 
 const rows = ['country', 'place', 'cf-timezone', 'cf-local'];
 

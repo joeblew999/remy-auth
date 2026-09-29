@@ -180,11 +180,13 @@ the fixture cannot take the tasks through mise's git cache. What differs there i
      in `packages:release`, and in `packages:tag`) stops a release when a published package's files changed
      since the last tag without a new version; run now, it names exactly that case. The showcase is a peer of
      nothing but the platform; the docs' old export names (which also ship in the `remy` skill) are fixed.
-  2b. **Left: the three showcase parts.** time-zones and deferred-place still link to and default to the
-     showcase's `/formats` and `/app/demo`, and status-card shows remy-auth's API, so they belong to the
-     showcase. The parts catalog (`parts/list.js`) is written inside the platform, so it has to take parts from
-     another package first: each package lists its own parts, and `remyParts()` reads the catalogs of the
-     packages the app names.
+  2b. **The three showcase parts: done 2026-09-29.** A package offers parts in its own `parts/catalog.json`,
+     and an app lists them as `<package>/<name>`; each part's folder carries its checks (a default export).
+     time-zones, deferred-place and status-card moved into the showcase, and the platform keeps `seo-routes`.
+     The fixture now lists a showcase part from a tarball. It found two couplings at once, both fixed at the
+     cause: the time-zones breadcrumb linked to the showcase's `/formats` (now the app's `parent` option), and
+     the platform's `problemChecks` held the time-zones route's checks with remy-auth's brand in the title (now
+     the part's, brand-agnostic). remy-auth runs the same 313 checks.
   3. **The strings:** the showcase's keys (122 used only by showcase code, and the ones only remy-auth's
      `src/` uses) move to the showcase's own catalog in the same commit as every language, following the
      platform with `followLocale`.

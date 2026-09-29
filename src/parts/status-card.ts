@@ -1,4 +1,4 @@
-import type { StatusQuery } from '@joeblew999/remy-ui/parts/status-card/query';
+import type { StatusQuery } from '@joeblew999/remy-showcase/parts/status-card/query';
 import { orpc } from '../api/client';
 
 // This app's options for the status-card part (src/parts.json; .plans/parts.md): the query on its

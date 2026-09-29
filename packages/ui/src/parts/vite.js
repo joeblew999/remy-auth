@@ -6,7 +6,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { physical, rootRoute } from '@tanstack/virtual-file-routes';
-import { catalog, partAppFile, partSitePaths, readParts } from './list.js';
+import { listedParts, offeredPart, partAppFile, partSitePaths } from './list.js';
 
 const id = 'virtual:remy-parts';
 const here = dirname(fileURLToPath(import.meta.url));
@@ -30,27 +30,30 @@ const absent = names => names.map(name => `export const ${name} = undefined;\n`)
  *   (catalog `app`); `undefined` for each when the part is unlisted or the app has no such file.
  */
 export function remyParts({ root = process.cwd(), file, routesDirectory = 'src/routes' } = {}) {
-  const names = readParts({ root, file });
+  const listed = listedParts({ root, file });
+  const names = Object.keys(listed);
   const routesDir = resolve(root, routesDirectory);
   const routes = rootRoute('__root.tsx', [
     physical('', '.'),
     // The routes every app has from the package (app-routes: the CSP report endpoint), then the listed parts'.
     physical('', relative(routesDir, join(here, '..', 'app-routes'))),
-    ...names.filter(name => catalog[name].routes).map(name => physical('', relative(routesDir, join(here, name, 'routes')))),
+    ...names.filter(name => listed[name].routes).map(name => physical('', relative(routesDir, join(listed[name].dir, 'routes')))),
   ]);
   const code = source => {
-    if (source === id) return `export const parts = ${JSON.stringify(names)};\nexport const hasPart = name => parts.includes(name);\nexport const sitePaths = ${JSON.stringify(partSitePaths(names))};\n`;
+    if (source === id) return `export const parts = ${JSON.stringify(names)};\nexport const hasPart = name => parts.includes(name);\nexport const sitePaths = ${JSON.stringify(partSitePaths(listed))};\n`;
     const [part, entry, ...rest] = source.slice(id.length + 1).split('/');
-    const known = Object.hasOwn(catalog, part) && rest.length === 0 && (entry === 'app' || Object.hasOwn(catalog[part].entries, entry));
-    if (!known) throw new Error(`${source}: no such parts module (see @joeblew999/remy-ui/parts catalog)`);
-    const exports = entry === 'app' ? catalog[part].app : catalog[part].entries[entry];
+    // An unlisted part's modules are its catalog's export names, all undefined: the platform's catalog, or the
+    // one of the package the app lists it from. A part neither lists nor offers is an error, as before.
+    const known = listed[part] ?? offeredPart(part, { root });
+    if (!known || rest.length !== 0 || !(entry === 'app' || Object.hasOwn(known.entries, entry))) throw new Error(`${source}: no such parts module (see the parts catalogs)`);
+    const exports = entry === 'app' ? known.app : known.entries[entry];
     if (!names.includes(part)) return absent(exports);
     if (entry === 'app') {
       // The app's file may export only some of the options: read them from its namespace.
       const app = withExtension(resolve(root, partAppFile(part)));
       return app ? `import * as app from ${JSON.stringify(app)};\n${exports.map(name => `export const ${name} = app.${name};\n`).join('')}` : absent(exports);
     }
-    const module = withExtension(join(here, part, entry));
+    const module = withExtension(join(listed[part].dir, entry));
     if (!module) throw new Error(`${source}: the part's ${entry} module is missing`);
     return `export { ${exports.join(', ')} } from ${JSON.stringify(module)};\n`;
   };

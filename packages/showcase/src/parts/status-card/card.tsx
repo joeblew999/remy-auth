@@ -1,10 +1,10 @@
 import { useQuery, useQueryClient, type QueryKey, type UseQueryOptions } from '@tanstack/react-query';
 import { useRouter } from '@tanstack/react-router';
-import type { Locale } from '../../paraglide/runtime.js';
-import { m } from '../../paraglide/messages.js';
-import { Button } from '../../components/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/card';
-import { invalidateEverything } from '../../invalidate';
+import type { Locale } from '@joeblew999/remy-ui/runtime';
+import { m } from '@joeblew999/remy-ui/messages';
+import { Button } from '@joeblew999/remy-ui/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@joeblew999/remy-ui/components/card';
+import { invalidateEverything } from '@joeblew999/remy-ui/invalidate';
 
 // The live status card (TanStack Query with the router): a Worker's liveness as a contract
 // endpoint answers it (GET /api/status in @joeblew999/remy-auth-contract). The app owns the query,

@@ -16,12 +16,14 @@ platform only through the platform's exports, and nothing in the platform import
 | `search-params`, `navigation-blocking` | The formats page's search params and `choiceCards`; the demo's leave guard |
 | `showcase.checks` | `showcaseChecks({ rendering, formats, devicePath, network })`: every showcase check, which an app showing the showcase calls itself |
 | `reservation.checks` | `reservationApiChecks`: the demo reservation's typed 400 in every locale, and a response that breaks the contract refused in the browser |
+| `parts/catalog.json`, `parts/status-card/card`, `parts/status-card/query`, `parts/deferred-place/device-place`, `parts/time-zones/page` | Its parts' catalog, and their pieces an app or another page uses directly |
 | `tailwind.css` | Where the showcase's classes live: import it beside `@joeblew999/remy-ui/tailwind.css` |
 
 Its strings are still in the platform's catalog (`@joeblew999/remy-ui/messages`); they move to a catalog of
-the showcase's own in the plan's next stage. The time-zones, deferred-place and status-card parts are still
-the platform's too: they are listed in `src/parts.json` like any part, and move here once the parts catalog
-takes parts from another package.
+the showcase's own in the plan's next stage. It also offers three parts (`src/parts/catalog.json`): `time-zones`, `deferred-place` and `status-card`,
+listed in an app's `src/parts.json` as `@joeblew999/remy-showcase/<name>`. The time-zones part takes the
+page above a zone from the app's `src/parts/time-zones.ts` (`parent`, a `NavItem`); the status-card part its
+query from `src/parts/status-card.ts` (`statusQuery`).
 
 Published with the platform's release (`packages:publish` publishes each workspace that is not private).
 remy-auth's API contract imports its reservation schema from here.

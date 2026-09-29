@@ -1,6 +1,6 @@
 [
-  "time-zones",
-  "deferred-place",
+  "@joeblew999/remy-showcase/time-zones",
+  "@joeblew999/remy-showcase/deferred-place",
   "seo-routes",
-  "status-card"
+  "@joeblew999/remy-showcase/status-card"
 ]

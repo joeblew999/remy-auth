@@ -69,6 +69,12 @@ package follows [Semantic Versioning](https://semver.org/).
   pieces moved into their parts (`parts/time-zones/page`, `parts/deferred-place/device-place`,
   `parts/status-card/card`); `build-boundaries.checks` and `code-splitting.checks` are at the root; `rows`
   and `zod-csp` are exported.
+- Parts from other packages: an app lists another package's part as `<package>/<name>` in `src/parts.json`;
+  the package offers them in its `parts/catalog.json`, each part's folder with a `checks.js` whose default
+  export runs its checks. The showcase's parts (`time-zones`, `deferred-place`, `status-card`) moved there: list
+  them as `@joeblew999/remy-showcase/<name>`. The time-zones breadcrumb's middle link is the app's `parent`
+  option (`src/parts/time-zones.ts`). `problemChecks` lost `timeZones` (the part's own checks now);
+  `partChecks` lost `root` and `file`. The platform's own part is `seo-routes`.
 - The showcase's checks are one call an app showing the showcase makes itself, `showcaseChecks()`
   (`@joeblew999/remy-showcase/showcase.checks`, with `demoChecks`, `appNavChecks` and `formatsChecks` from
   `checks`); `serverAppChecks` and `prerenderedAppChecks` lost `showcase`. `problem.checks` is at the root.

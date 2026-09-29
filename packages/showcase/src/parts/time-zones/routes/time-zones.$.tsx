@@ -1,9 +1,9 @@
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router';
-import { getLocale } from '../../../locale';
-import { m } from '../../../paraglide/messages.js';
-import { pageHead } from '../../../tanstack';
+import { getLocale } from '@joeblew999/remy-ui/locale';
+import { m } from '@joeblew999/remy-ui/messages';
+import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { TimeZonePage, canonicalTimeZone, timeZoneName, timeZonePath } from '../page';
-import { ErrorPage, Problem } from '../../../problem';
+import { ErrorPage, Problem } from '@joeblew999/remy-ui/problem';
 
 // A sub-resource of the formats page: /es/time-zones/Asia/Tokyo. The splat holds the IANA name;
 // a name Intl does not know throws notFound() (a localized 404 naming it), and another spelling

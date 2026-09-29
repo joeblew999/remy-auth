@@ -1,11 +1,13 @@
+/// <reference path="../virtual.d.ts" />
 import { Link } from '@tanstack/react-router';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../../components/breadcrumb';
-import type { Locale } from '../../paraglide/runtime.js';
-import { m } from '../../paraglide/messages.js';
-import { Shell } from '../../shell';
-import { Group, Row } from '../../rows';
-import { samples } from '../../samples.js';
-import { formatLocale } from '../../locale-info';
+import { parent } from 'virtual:remy-parts/time-zones/app';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@joeblew999/remy-ui/components/breadcrumb';
+import type { Locale } from '@joeblew999/remy-ui/runtime';
+import { m } from '@joeblew999/remy-ui/messages';
+import { Shell } from '@joeblew999/remy-ui/shell';
+import { Group, Row } from '@joeblew999/remy-ui/rows';
+import { samples } from '@joeblew999/remy-ui/samples';
+import { formatLocale } from '@joeblew999/remy-ui/locale-info';
 import { canonicalTimeZone, timeZoneName, timeZonePath } from './names';
 
 export { canonicalTimeZone, timeZoneName, timeZonePath };
@@ -18,8 +20,11 @@ export function TimeZonePage({ locale, zone, preferred }: { locale: Locale; zone
         <BreadcrumbList>
           <BreadcrumbItem><BreadcrumbLink render={<Link to="/" preload="intent" />}>{m.home_link({}, o)}</BreadcrumbLink></BreadcrumbItem>
           <BreadcrumbSeparator/>
-          <BreadcrumbItem><BreadcrumbLink render={<Link to="/formats" preload="intent" />}>{m.nav_formats({}, o)}</BreadcrumbLink></BreadcrumbItem>
-          <BreadcrumbSeparator/>
+          {/* The app's page above a zone (src/parts/time-zones.ts `parent`), if it names one: remy-auth's formats page. */}
+          {parent && <>
+            <BreadcrumbItem><BreadcrumbLink render={<Link {...parent.link} preload="intent" />}>{parent.label(locale)}</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbSeparator/>
+          </>}
           <BreadcrumbItem><BreadcrumbPage>{timeZoneName(locale, zone, 'longGeneric')}</BreadcrumbPage></BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

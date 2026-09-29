@@ -24,7 +24,7 @@ import { Route as AppDotformatsRouteImport } from './routes/app.formats'
 import { Route as AppDotlocationRouteImport } from './routes/app.location'
 import { Route as AppDotsettingsRouteImport } from './routes/app.settings'
 import { Route as DocsDotsplatRouteImport } from './routes/docs.$'
-import { Route as TimeZonesDotsplatRouteImport } from './../packages/ui/src/parts/time-zones/routes/time-zones.$'
+import { Route as TimeZonesDotsplatRouteImport } from './../packages/showcase/src/parts/time-zones/routes/time-zones.$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',

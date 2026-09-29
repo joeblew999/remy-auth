@@ -5,13 +5,19 @@ root=$(pwd)
 out=$(mktemp -d); trap 'rm -rf "$out"' EXIT
 sha=$(git rev-parse --short HEAD)
 
-# 1. The package as npm serves it, with a version no registry has, so npm can never substitute a published
-#    copy for it (it did once: the scratch tarball was 0.13.0, the published version).
+# 1. The platform and the showcase as npm serves them, each with a version no registry has (build metadata, so
+#    the showcase's peer range still holds), so npm can never substitute a published copy (it did once: the
+#    scratch tarball was 0.13.0, the published version).
 mise run project:generate > /dev/null
-rsync -a --exclude node_modules packages/ui/ "$out/ui/"
-version="$(node -p "require('./packages/ui/package.json').version")-dev.$sha"
-(cd "$out/ui" && npm pkg set version="$version" && npm pack --silent --pack-destination "$out" > /dev/null)
-ui="$out/joeblew999-remy-ui-$version.tgz"
+pack() { # <folder> <name> -> the tarball's path
+  local v; v="$(node -p "require('./packages/$1/package.json').version")+dev.$sha"
+  rsync -a --exclude node_modules "packages/$1/" "$out/$1/"
+  (cd "$out/$1" && npm pkg set version="$v" && npm pack --silent --pack-destination "$out" > /dev/null)
+  echo "$out/$2-$v.tgz"
+}
+ui=$(pack ui joeblew999-remy-ui)
+showcase=$(pack showcase joeblew999-remy-showcase)
+version=$(basename "$ui" .tgz); version=${version#joeblew999-remy-ui-}
 
 # 2. The tasks where no node_modules is above them, as in mise's cache of a git include.
 cp -R tasks "$out/tasks"
@@ -23,7 +29,9 @@ cd "$out/app"
 # remy-auth's own [env] (from the mise run that started this) is not the app's: without this the app's tasks
 # would read remy-auth's inlang project and release settings.
 unset I18N_INLANG RELEASE_PACKAGE RELEASE_TITLE
-npm pkg set "dependencies.@joeblew999/remy-ui=file:$ui" "dependencies.@joeblew999/remy-fixture-contract=*" "workspaces[1]=packages/*"
+npm pkg set "dependencies.@joeblew999/remy-ui=file:$ui" "dependencies.@joeblew999/remy-showcase=file:$showcase" "dependencies.@joeblew999/remy-fixture-contract=*" "workspaces[1]=packages/*"
+# A part another package offers, listed by its package (its routes, modules and checks come from the tarball).
+node -e "const f='src/parts.json',p=require('./'+f);p.push('@joeblew999/remy-showcase/time-zones');require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')"
 sed -i.bak "s#git::https://github.com/joeblew999/remy-auth.git//tasks?ref=v[0-9.]*#$out/tasks#" mise.toml
 sed -i.bak "s#export default remyDocs(docsConfig);#export default remyDocs(docsConfig, { contract: '@joeblew999/remy-fixture-contract' });#" docs/vite.config.ts
 rm -f mise.toml.bak docs/vite.config.ts.bak
