@@ -1,5 +1,4 @@
 import { baseLocale, locales, localizeHref } from './paraglide/runtime.js';
-import { allPaths } from './paths.js';
 
 /**
  * The pages a fully prerendered app (TanStack Start's `prerender.pages`) writes at build time: every
@@ -9,7 +8,7 @@ import { allPaths } from './paths.js';
  * 404 status (not_found_handling "404-page"); /404.html, the base locale's, is the fallback.
  * Pure data: vite.config imports it.
  */
-export function prerenderPages({ notFoundPath, paths = allPaths, files = ['/robots.txt', '/sitemap.xml'] }) {
+export function prerenderPages({ notFoundPath, paths, files = ['/robots.txt', '/sitemap.xml'] }) {
   return [
     ...paths.map(path => ({ path: path || '/' })),
     ...locales.flatMap(locale => paths.map(path => ({ path: localizeHref(path || '/', { locale }) }))),

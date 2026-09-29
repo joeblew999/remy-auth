@@ -28,6 +28,8 @@ export type RemyApp = {
   brand: string;
   /** The Worker's service name: its log lines, /healthz and the CSP report endpoint's logs. */
   service?: string;
+  /** The app's site pages ('' is its home): what its sitemap lists (the seo-routes part). */
+  sitePaths?: readonly string[];
   /** The app's source: the site header's "GitHub" link. None shows no link. */
   repository?: string;
   /**

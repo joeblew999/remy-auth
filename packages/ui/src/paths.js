@@ -1,4 +1,8 @@
 /**
+ * The showcase's pages (remy-auth's own, which remy-auth-app shows too): nothing in the package defaults to
+ * them; every app passes its own pages (defineRemyApp's `sitePaths`, the Worker entry's `entryPaths`, the
+ * check sets' `sitePaths` and `appPaths`). `isAppPath` is every app's rule.
+ *
  * The two kinds of page, never mixed. Every path exists in every locale; '' is the site's home.
  *
  * Site pages are for Google and anyone arriving from a search: complete in the server's HTML without

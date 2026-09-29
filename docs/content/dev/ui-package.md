@@ -86,8 +86,8 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `locale-info` | Calendars, digits, clock and week conventions from Intl Locale Info; `formatLocale` (the tag every formatter uses, naming the language's own calendar and digits), `weekOrder`, `words` (Intl.Segmenter) |
 | `matching` | The `custom-chinese` Paraglide strategy (Traditional Chinese tags reach `zh-TW`), `matchChinese`, `preferredFromHeader`, `preferredFromNavigator` |
 | `reservation` | The demo reservation's Zod schema (seats typed in any script's digits), `asciiDigits` |
-| `seo` | Canonical and `hreflang` alternates; `sitemapXml({ origin, extra })` (every site page in every locale, then the app's own entries), `robotsTxt(origin)`, `sitemapType`, `robotsType` for the app's two server routes |
-| `prerender` | `prerenderPages({ notFoundPath })`: a prerendered app's TanStack Start `prerender.pages` (every page un-localized and per locale, robots.txt, sitemap.xml, each locale's 404.html) |
+| `seo` | Canonical and `hreflang` alternates; `sitemapXml({ origin, paths, extra })` (the app's site pages in every locale, then the app's own entries), `robotsTxt(origin)`, `sitemapType`, `robotsType` for the app's two server routes |
+| `prerender` | `prerenderPages({ notFoundPath, paths })`: a prerendered app's TanStack Start `prerender.pages` (every page un-localized and per locale, robots.txt, sitemap.xml, each locale's 404.html) |
 | `tanstack` | `localizedWorker` (Worker entry: observability, Paraglide's middleware and entry redirects around TanStack Start), `localeRewrite`, `pageHead`, `suggestedLocale`, `suggestedLocaleInBrowser` |
 | `client` | `useSuggestedLocale`, `DeviceTime` for prerendered apps |
 | `worker` | `withObservability` and the request-ID helpers |

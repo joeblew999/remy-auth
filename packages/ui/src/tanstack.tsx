@@ -5,7 +5,7 @@ import { deLocalizeUrl, localizeUrl, getLocale, getUrlOrigin, extractLocaleFromU
 import { preferredFromHeader, preferredFromNavigator } from './matching.js';
 import { alternates } from './seo';
 import { withObservability } from './worker';
-import { allPaths, isAppPath } from './paths.js';
+import { isAppPath } from './paths.js';
 import { registeredApp } from './app-config';
 
 // TanStack Router and Start glue over Paraglide's official integration
@@ -34,7 +34,7 @@ type StartFetch = (request: Request) => Response | Promise<Response>;
  * every other request type too, varying on Accept-Language and Cookie. HTML is never cached.
  */
 export function localizedWorker<E extends ObservedEnv>(service: string, start: { fetch: StartFetch },
-  { entryPaths = allPaths }: { entryPaths?: readonly string[] } = {}) {
+  { entryPaths }: { entryPaths: readonly string[] }) {
   return withObservability<E>(service, request => paraglideMiddleware(request, async () => {
     const entry = await entryRedirect(request, entryPaths);
     if (entry) return entry;
@@ -47,7 +47,7 @@ export function localizedWorker<E extends ObservedEnv>(service: string, start: {
 }
 
 /** A 302 to Paraglide's localized URL for an un-localized entry path, or undefined for anything else. */
-export async function entryRedirect(request: Request, entryPaths: readonly string[] = allPaths): Promise<Response | undefined> {
+export async function entryRedirect(request: Request, entryPaths: readonly string[]): Promise<Response | undefined> {
   if (request.method !== 'GET' && request.method !== 'HEAD') return undefined;
   const url = new URL(request.url);
   if (extractLocaleFromUrl(url) || !entryPaths.some(path => (path || '/') === url.pathname)) return undefined;
