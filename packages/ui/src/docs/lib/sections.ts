@@ -27,7 +27,7 @@ export const sectionTabs = sections.map(section => ({ title: section.title, url:
 /** /llms.txt (llmstxt.org): what is here, per audience, with each part's llms files and MCP server. */
 export const rootLlmsTxt = (origin: string) => [
   `# ${docsConfig.product}`, '',
-  `> ${docsConfig.product}'s docs: a product guide for people using the app, developer docs, and the API reference. Each part has its own llms.txt, llms-full.txt, Markdown pages (add .md to a page's URL) and MCP server (Streamable HTTP; tools list_pages, get_page, search, fetch).`, '',
+  `> ${docsConfig.product}'s docs: ${sections.map(section => `${section.title} (${section.audience.replace(/^For/, 'for')})`).join('; ')}. Each part has its own llms.txt, llms-full.txt, Markdown pages (add .md to a page's URL) and MCP server (Streamable HTTP; tools list_pages, get_page, search, fetch).`, '',
   `The app: ${docsConfig.appUrl}`, '',
   ...sections.flatMap(section => [
     `## ${section.title}`, '', `${section.audience}.`, '',
