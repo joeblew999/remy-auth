@@ -1,6 +1,6 @@
 import type { Locale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
-import { HomeCard } from '@joeblew999/remy-ui/pages';
+import { HomeCard } from '@joeblew999/remy-showcase/pages';
 import { buttonVariants } from '@joeblew999/remy-ui/components/button';
 import { docsOrigin } from './origin';
 

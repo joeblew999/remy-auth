@@ -4,7 +4,7 @@ import { partSitePaths, readParts } from './list.js';
 import { timeZonesChecks } from './time-zones/checks.js';
 import { deferredPlacePartChecks } from './deferred-place/checks.js';
 import { seoRoutesChecks } from './seo-routes/checks.js';
-import { statusCardChecks } from '../showcase/status-card.checks.js';
+import { statusCardChecks } from './status-card/card.checks.js';
 
 const checks = {
   'time-zones': timeZonesChecks,

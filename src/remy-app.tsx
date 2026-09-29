@@ -1,6 +1,6 @@
 import { linkOptions } from '@tanstack/react-router';
 import { defineRemyApp } from '@joeblew999/remy-ui/app-config';
-import { showcaseAppNav, showcaseSiteNav } from '@joeblew999/remy-ui/showcase/app-nav';
+import { showcaseAppNav, showcaseSiteNav } from '@joeblew999/remy-showcase/app-nav';
 import { docsConfig } from '../docs/docs.config';
 import { docsOrigin } from './docs/origin';
 import { service } from './service';

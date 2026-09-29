@@ -1,8 +1,7 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './components/card';
 
-// The formats page's label/value rows, in a module of their own: the showcase modules whose route
-// options run in every page's first load (search params, time zones) use them, and importing them
-// from ./pages would bring the whole home and formats pages along. ./pages re-exports them.
+// Label/value rows in a card, in a module of their own: pages whose route options run in every page's first
+// load (search params, time zones) use them without bringing a whole page along.
 
 /**
  * A titled card of label/value rows on the formats page; `note`, what the rows rest on, goes in the card's

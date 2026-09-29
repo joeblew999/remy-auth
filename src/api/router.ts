@@ -2,7 +2,7 @@ import { implement } from '@orpc/server';
 import { contract } from '@joeblew999/remy-auth-contract';
 import type { Locale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
-import { reservationErrors, reservationSchema } from '@joeblew999/remy-ui/reservation';
+import { reservationErrors, reservationSchema } from '@joeblew999/remy-showcase/reservation';
 import { service } from '../service';
 
 /**

@@ -1,6 +1,6 @@
 import { oc } from '@orpc/contract';
 import { z } from 'zod';
-import { reservationConfirmation, reservationFieldErrors, reservationInput } from '@joeblew999/remy-ui/reservation';
+import { reservationConfirmation, reservationFieldErrors, reservationInput } from '@joeblew999/remy-showcase/reservation';
 import type { ApiMeta } from '@joeblew999/remy-ui/api/coverage';
 import pkg from '../package.json' with { type: 'json' };
 

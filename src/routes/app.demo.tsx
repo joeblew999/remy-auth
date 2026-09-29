@@ -3,9 +3,9 @@ import { useMutation } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { getLocale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
-import { DemoPage } from '@joeblew999/remy-ui/app-pages';
+import { DemoPage } from '@joeblew999/remy-showcase/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
-import { useLeaveGuard } from '@joeblew999/remy-ui/showcase/navigation-blocking';
+import { useLeaveGuard } from '@joeblew999/remy-showcase/navigation-blocking';
 import { orpc } from '../api/client';
 import { problemPages } from '@joeblew999/remy-ui/problem';
 

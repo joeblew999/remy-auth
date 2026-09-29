@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@joeblew999/remy-auth-contract": "*",
+    "@joeblew999/remy-showcase": "*",
     "@joeblew999/remy-ui": "*"
   },
   "workspaces": [

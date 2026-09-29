@@ -1,0 +1,33 @@
+{
+  "name": "@joeblew999/remy-showcase",
+  "version": "0.1.0",
+  "description": "remy-auth's showcase pages on the Remy platform: the home and formats pages, the app pages (formats, clock, demo, location, settings, account), their navigation, the demo reservation and their checks. For the apps that show them; the platform (@joeblew999/remy-ui) knows nothing of it",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joeblew999/remy-auth.git",
+    "directory": "packages/showcase"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "exports": {
+    "./tailwind.css": "./src/tailwind.css",
+    "./pages": "./src/pages.tsx",
+    "./app-pages": "./src/app-pages.tsx",
+    "./app-nav": "./src/app-nav.tsx",
+    "./clock-route": "./src/clock-route.ts",
+    "./reservation": "./src/reservation.ts",
+    "./paths": "./src/paths.js",
+    "./navigation-blocking": "./src/navigation-blocking.tsx",
+    "./search-params": "./src/search-params.tsx",
+    "./*.checks": "./src/*.checks.js"
+  },
+  "dependencies": {
+    "@joeblew999/remy-ui": "*"
+  }
+}

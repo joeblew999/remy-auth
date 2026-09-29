@@ -1,8 +1,8 @@
 import { createFileRoute, stripSearchParams } from '@tanstack/react-router';
-import { choiceCards, searchDefaults } from '@joeblew999/remy-ui/showcase/search-params';
+import { choiceCards, searchDefaults } from '@joeblew999/remy-showcase/search-params';
 import { getLocale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
-import { AppFormatsPage } from '@joeblew999/remy-ui/app-pages';
+import { AppFormatsPage } from '@joeblew999/remy-showcase/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { formatsExtras } from '../formats-extras';
 import { formatsRouteOptions } from '../formats-route';

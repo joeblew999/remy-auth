@@ -4,8 +4,7 @@ import { partsFile, readParts } from './parts/list.js';
 
 // One call per kind of app for the checks every app on the package runs, over the app's own pages (its
 // `sitePaths` and `appPaths`: both zones, their entry URLs, text, fonts, observability, CSP, the theme), and
-// nothing of the showcase's: an app showing remy-auth's showcase pages calls showcaseChecks()
-// (`showcase/showcase.checks`) itself. The home page's words are the app's to check (`home`); the structure is every app's
+// nothing more: an app with pages of its own adds their checks. The home page's words are the app's to check (`home`); the structure is every app's
 // (.plans/thin-apps.md, group 4). Checks that are not in a set stay separate calls. Part-aware
 // (.plans/parts.md): what a listed part owns runs with partChecks() instead, never twice.
 

@@ -2,7 +2,7 @@ import { createFileRoute, notFound, redirect } from '@tanstack/react-router';
 import { getLocale } from '../../../locale';
 import { m } from '../../../paraglide/messages.js';
 import { pageHead } from '../../../tanstack';
-import { TimeZonePage, canonicalTimeZone, timeZoneName, timeZonePath } from '../../../showcase/time-zone';
+import { TimeZonePage, canonicalTimeZone, timeZoneName, timeZonePath } from '../page';
 import { ErrorPage, Problem } from '../../../problem';
 
 // A sub-resource of the formats page: /es/time-zones/Asia/Tokyo. The splat holds the IANA name;

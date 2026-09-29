@@ -1,0 +1,3 @@
+/* Where the showcase's own classes live, for Tailwind: an app showing the showcase imports this beside the
+   platform's @joeblew999/remy-ui/tailwind.css. Tailwind resolves @source relative to this file. */
+@source "./";

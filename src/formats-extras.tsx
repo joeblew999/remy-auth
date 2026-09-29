@@ -2,7 +2,7 @@ import type { Locale } from '@joeblew999/remy-ui/locale';
 import { formatLocale, type LocaleInfo } from '@joeblew999/remy-ui/locale-info';
 import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
-import { Group, Row, NameList, type FormatsExtras } from '@joeblew999/remy-ui/pages';
+import { Group, Row, NameList, type FormatsExtras } from '@joeblew999/remy-showcase/pages';
 import type { Place } from '@joeblew999/remy-ui/cloudflare';
 // The deferred-place part's group, or undefined when the app does not list it (src/parts.json).
 import { DeferredPlace } from 'virtual:remy-parts/deferred-place/ui';

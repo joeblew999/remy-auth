@@ -1,13 +1,13 @@
 import { ClientOnly, Link } from '@tanstack/react-router';
 import * as z from 'zod/mini';
-import type { Locale } from '../paraglide/runtime.js';
-import { m } from '../paraglide/messages.js';
-import { formatLocale, allChoices, choicesFor, choiceKinds, searchDefaults, maxCount, type ChoiceKind } from '../locale-info';
-import { samples } from '../samples.js';
-import { Badge } from '../components/badge';
-import { buttonVariants } from '../components/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/card';
-import { Row } from '../rows';
+import type { Locale } from '@joeblew999/remy-ui/runtime';
+import { m } from '@joeblew999/remy-ui/messages';
+import { formatLocale, allChoices, choicesFor, choiceKinds, searchDefaults, maxCount, type ChoiceKind } from '@joeblew999/remy-ui/locale-info';
+import { samples } from '@joeblew999/remy-ui/samples';
+import { Badge } from '@joeblew999/remy-ui/components/badge';
+import { buttonVariants } from '@joeblew999/remy-ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@joeblew999/remy-ui/components/card';
+import { Row } from '@joeblew999/remy-ui/rows';
 
 // Typed, validated search params on the formats page: /formats?currency=JPY&count=11&calendar=islamic&numbering=arabext.
 // The route wires `validateSearch` to a Zod 4 schema, which TanStack Router takes directly as a

@@ -1,13 +1,13 @@
 import { z } from 'zod';
-import type { Locale } from './paraglide/runtime.js';
-import { m } from './paraglide/messages.js';
+import type { Locale } from '@joeblew999/remy-ui/runtime';
+import { m } from '@joeblew999/remy-ui/messages';
 
 // The demo reservation's rules, in one Zod schema that the browser (DemoPage's TanStack Form
 // validator) and the server (the app's POST /api/reservations, through its contract) both check,
 // with errors in the page's language. The wire shapes below are what a contract declares.
 
 // Zod runs jitless under the nonce CSP (./zod-csp.ts), set before this schema is used.
-import './zod-csp';
+import '@joeblew999/remy-ui/zod-csp';
 
 /**
  * Every decimal digit the runtime can write (Intl's numbering systems: Persian ۰–۹, Arabic-Indic

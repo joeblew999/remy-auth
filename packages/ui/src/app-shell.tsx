@@ -7,8 +7,8 @@ import { BottomNav } from './blocks/bottom-nav/bottom-nav';
 import { SkipLink, ZoneBadge } from './shell';
 import { usePreferredLocale } from './app-config';
 
-// The app frame alone (paths.js: app pages need JavaScript), apart from remy-auth's showcase pages in
-// ./app-pages, so an app that uses the frame type-checks and downloads none of them. Its pages, brand and
+// The app frame alone (paths.js: app pages need JavaScript), with no pages of its own, so an app that uses
+// the frame type-checks and downloads only its own. Its pages, brand and
 // links are the app's (defineRemyApp, through AppProviders).
 
 /**

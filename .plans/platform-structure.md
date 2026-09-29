@@ -166,10 +166,19 @@ the fixture cannot take the tasks through mise's git cache. What differs there i
      `serverAppChecks` and `prerenderedAppChecks` lost `showcase`. `problem.checks` (the problem pages,
      which the parts use) moved from `showcase/` to the platform's root. remy-auth runs the same 313 checks as
      before, identical by name (the lists diffed).
-  2. **The move:** the showcase modules and the three showcase parts into `@joeblew999/remy-showcase` (a
-     workspace in remy-auth). The parts catalog (`parts/list.js`) is written inside the platform today, so it has
-     to take parts from another package: each package lists its own parts, and `remyParts()` reads the
-     catalogs of the packages the app names.
+  2. **The move: done 2026-09-29, except the parts.** `@joeblew999/remy-showcase` (`packages/showcase`, a
+     workspace remy-auth publishes with the platform) holds the showcase's pages, navigation, clock route, demo
+     reservation, search params, leave guard, page lists and checks, importing the platform only through its
+     exports; the platform imports nothing of it (checked). The pieces the parts are built on moved into their
+     parts. remy-auth runs the same 313 checks (the lists diffed), and the fixture's blank app, which installs
+     no showcase, passes. Done with a one-off move script (renames plus import rewriting); its three misses
+     (imports of a file that had itself moved, the `showcase/*` wildcard, `/// <reference>` paths) were found by
+     tier 0 and fixed.
+  2b. **Left: the three showcase parts.** time-zones and deferred-place still link to and default to the
+     showcase's `/formats` and `/app/demo`, and status-card shows remy-auth's API, so they belong to the
+     showcase. The parts catalog (`parts/list.js`) is written inside the platform, so it has to take parts from
+     another package first: each package lists its own parts, and `remyParts()` reads the catalogs of the
+     packages the app names.
   3. **The strings:** the showcase's keys (122 used only by showcase code, and the ones only remy-auth's
      `src/` uses) move to the showcase's own catalog in the same commit as every language, following the
      platform with `followLocale`.

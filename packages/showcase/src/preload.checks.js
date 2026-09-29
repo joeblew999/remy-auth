@@ -2,8 +2,8 @@
 // (the router's `defaultPreload: 'intent'`), and the formats route's `staleTime` lets Back and
 // Forward reuse its loader data. Plain JavaScript like ../checks.js.
 import { test, expect } from '@playwright/test';
-import { m } from '../paraglide/messages.js';
-import { localizedPath } from '../checks.js';
+import { m } from '@joeblew999/remy-ui/messages';
+import { localizedPath } from '@joeblew999/remy-ui/checks';
 
 const isServerFn = request => new URL(request.url()).pathname.startsWith('/_serverFn/');
 const isScript = request => request.resourceType() === 'script';

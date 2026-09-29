@@ -1,11 +1,11 @@
 // The deferred-place part's checks (moved with its code from remy-auth's test file): the streamed
-// place (../../showcase/deferred-place.checks.js), its rows matching Intl on the formats page without
+// place (./place.checks.js), its rows matching Intl on the formats page without
 // JavaScript, and the localized error page when its server function fails during a client navigation.
 import { test, expect } from '@playwright/test';
 import { m } from '../../paraglide/messages.js';
 import { checkedLocales, formatTag, localizedPath } from '../../checks.js';
 import { samples } from '../../samples.js';
-import { deferredPlaceChecks } from '../../showcase/deferred-place.checks.js';
+import { deferredPlaceChecks } from './place.checks.js';
 import { problemChecks } from '../../problem.checks.js';
 
 /** `path` is the de-localized page with the place; `from` a page linking to it through `link` (a message key). */

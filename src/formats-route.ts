@@ -1,6 +1,6 @@
 import { getLocale } from '@joeblew999/remy-ui/locale';
 import { localeInfo } from '@joeblew999/remy-ui/locale-info';
-import { formatsSearchSchema } from '@joeblew999/remy-ui/showcase/search-params';
+import { formatsSearchSchema } from '@joeblew999/remy-showcase/search-params';
 // The deferred-place part's server function, or undefined when the app does not list it (src/parts.json).
 import { getPlace } from 'virtual:remy-parts/deferred-place/place';
 

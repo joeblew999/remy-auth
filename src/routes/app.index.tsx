@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { getLocale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
-import { AppHomePage } from '@joeblew999/remy-ui/app-pages';
+import { AppHomePage } from '@joeblew999/remy-showcase/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
 // The status-card part, or undefined when the app does not list it (src/parts.json).
 import { StatusCard, statusCardLoader } from 'virtual:remy-parts/status-card/ui';

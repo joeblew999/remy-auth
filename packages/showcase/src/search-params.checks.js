@@ -1,11 +1,11 @@
 // Checks for the typed, validated search params on the formats page (./search-params.tsx).
 // Plain JavaScript like ../checks.js; Node's Intl is the oracle for the formatted text.
 import { test, expect } from '@playwright/test';
-import { locales } from '../paraglide/runtime.js';
-import { m } from '../paraglide/messages.js';
-import { samples } from '../samples.js';
-import { localizedPath, collectErrors, checkedLocales, formatTag } from '../checks.js';
-import { allChoices, choiceKinds, searchDefaults as defaults } from '../locale-data.js';
+import { locales } from '@joeblew999/remy-ui/runtime';
+import { m } from '@joeblew999/remy-ui/messages';
+import { samples } from '@joeblew999/remy-ui/samples';
+import { localizedPath, collectErrors, checkedLocales, formatTag } from '@joeblew999/remy-ui/checks';
+import { allChoices, choiceKinds, searchDefaults as defaults } from '@joeblew999/remy-ui/locale-data';
 
 // The defaults and choices come from the same derived module the page and its schema read
 // (../locale-data.js), so a new locale's calendar, digits, currency and plural forms need no edit here.

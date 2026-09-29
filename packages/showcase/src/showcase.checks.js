@@ -3,11 +3,11 @@
 // apps that show them (remy-auth, remy-auth-app). No platform check set calls them: an app showing the showcase
 // calls showcaseChecks() itself. Plain JavaScript, like ../checks.js.
 import { test, expect } from '@playwright/test';
-import { locales, baseLocale } from '../paraglide/runtime.js';
-import { m } from '../paraglide/messages.js';
-import { samples } from '../samples.js';
-import { ownValues, choicesFor, choiceKinds } from '../locale-data.js';
-import { checkedLocales, collectErrors, digits, direction, endonym, foreignDigits, formatTag, hydrated, localizedPath, weekday } from '../checks.js';
+import { locales, baseLocale } from '@joeblew999/remy-ui/runtime';
+import { m } from '@joeblew999/remy-ui/messages';
+import { samples } from '@joeblew999/remy-ui/samples';
+import { ownValues, choicesFor, choiceKinds } from '@joeblew999/remy-ui/locale-data';
+import { checkedLocales, collectErrors, digits, direction, endonym, foreignDigits, formatTag, hydrated, localizedPath, weekday } from '@joeblew999/remy-ui/checks';
 import { navigationBlockingChecks } from './navigation-blocking.checks.js';
 import { preloadChecks } from './preload.checks.js';
 import { searchParamsChecks } from './search-params.checks.js';

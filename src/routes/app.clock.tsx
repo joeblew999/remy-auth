@@ -1,10 +1,10 @@
 import { createFileRoute, stripSearchParams } from '@tanstack/react-router';
 import { getLocale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
-import { ClockPage } from '@joeblew999/remy-ui/app-pages';
+import { ClockPage } from '@joeblew999/remy-showcase/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { problemPages } from '@joeblew999/remy-ui/problem';
-import { clockDefaults, clockRouteOptions, clockZones } from '@joeblew999/remy-ui/clock-route';
+import { clockDefaults, clockRouteOptions, clockZones } from '@joeblew999/remy-showcase/clock-route';
 
 // The clock (the shared ClockPage and its route options): the chosen zones live in the address.
 export const Route = createFileRoute('/app/clock')({

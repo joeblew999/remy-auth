@@ -1,28 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useForm, useStore } from '@tanstack/react-form';
-import type { Locale } from './paraglide/runtime.js';
-import { m } from './paraglide/messages.js';
-import { LanguageMenu } from './language';
-import { useTheme } from './theme';
+import type { Locale } from '@joeblew999/remy-ui/runtime';
+import { m } from '@joeblew999/remy-ui/messages';
+import { LanguageMenu } from '@joeblew999/remy-ui/language';
+import { useTheme } from '@joeblew999/remy-ui/theme';
 import { UserIcon, XIcon } from 'lucide-react';
-import { Skeleton } from './components/skeleton';
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from './components/empty';
-import { canonicalTimeZone, timeZoneName, timeZonePath } from './showcase/time-zone';
-import { Button, buttonVariants } from './components/button';
-import { Card, CardContent, CardHeader, CardTitle } from './components/card';
-import { Field, FieldError, FieldGroup, FieldLabel } from './components/field';
-import { Input } from './components/input';
+import { Skeleton } from '@joeblew999/remy-ui/components/skeleton';
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@joeblew999/remy-ui/components/empty';
+import { canonicalTimeZone, timeZoneName, timeZonePath } from '@joeblew999/remy-ui/parts/time-zones/page';
+import { Button, buttonVariants } from '@joeblew999/remy-ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@joeblew999/remy-ui/components/card';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@joeblew999/remy-ui/components/field';
+import { Input } from '@joeblew999/remy-ui/components/input';
 import { FormatsContent, type FormatsControlCards, type FormatsExtras } from './pages';
-import { Intro } from './shell';
-import { AppShell } from './app-shell';
-import { formatLocale, type LocaleInfo } from './locale-info';
+import { Intro } from '@joeblew999/remy-ui/shell';
+import { AppShell } from '@joeblew999/remy-ui/app-shell';
+import { formatLocale, type LocaleInfo } from '@joeblew999/remy-ui/locale-info';
 import { reservationSchema, type Reservation, type ReservationDraft, type ReservationResult } from './reservation';
 
 // App pages (paths.js): they need JavaScript and use the app shell. Kept apart from ./pages, the
 // site pages, so a site page never downloads the app shell's code.
 
-export { AppShell } from './app-shell';
+export { AppShell } from '@joeblew999/remy-ui/app-shell';
 
 /** The app's home page: what the app side is, then whatever the app shows there (for example the live status). */
 export function AppHomePage({ locale, preferred, children }: { locale: Locale; preferred?: Locale; children?: React.ReactNode }) {

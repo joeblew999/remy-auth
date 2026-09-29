@@ -3,6 +3,7 @@
     "src/**/*",
     "tests/**/*",
     "packages/ui/src/**/*",
+    "packages/showcase/src/**/*",
     "packages/contract/src/**/*",
     "*.ts",
     "worker-configuration.d.ts"

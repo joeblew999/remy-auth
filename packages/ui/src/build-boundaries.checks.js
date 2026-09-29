@@ -6,10 +6,10 @@ import { test, expect } from '@playwright/test';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { locales } from '../paraglide/runtime.js';
-import { localizedPath, checkedLocales } from '../checks.js';
+import { locales } from './paraglide/runtime.js';
+import { localizedPath, checkedLocales } from './checks.js';
 
-const own = file => new URL(`../${file}`, import.meta.url);
+const own = file => new URL(`./${file}`, import.meta.url);
 
 /**
  * Code that must only ever run in the Worker. Each marker is a string that survives minification,

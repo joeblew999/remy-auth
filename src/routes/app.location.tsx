@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { getLocale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
-import { LocationPage } from '@joeblew999/remy-ui/app-pages';
+import { LocationPage } from '@joeblew999/remy-showcase/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
-import { DevicePlace } from '@joeblew999/remy-ui/showcase/device-place';
+import { DevicePlace } from '@joeblew999/remy-ui/parts/deferred-place/device-place';
 // The deferred-place part, or undefined when the app does not list it (src/parts.json).
 import { getPlace } from 'virtual:remy-parts/deferred-place/place';
 import { DeferredPlace } from 'virtual:remy-parts/deferred-place/ui';

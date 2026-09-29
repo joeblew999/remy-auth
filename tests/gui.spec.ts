@@ -6,16 +6,17 @@ import { checkedLocales, collectErrors, endonym, direction, localizedPath, forma
 import { serverAppChecks } from '@joeblew999/remy-ui/app-checks';
 import { localeInfo } from '@joeblew999/remy-ui/locale-info';
 import { m } from '@joeblew999/remy-ui/messages';
-import { sitePaths, appPaths } from '@joeblew999/remy-ui/paths';
+import { sitePaths, appPaths } from '@joeblew999/remy-showcase/paths';
 import { everyPath } from '../src/paths';
-import { apiChecks, reservationApiChecks } from '@joeblew999/remy-ui/api/checks';
+import { apiChecks } from '@joeblew999/remy-ui/api/checks';
+import { reservationApiChecks } from '@joeblew999/remy-showcase/reservation.checks';
 import { info } from '@joeblew999/remy-auth-contract';
 import { router } from '../src/api/router';
 import { registeredOrigins } from '../src/api/origins';
 import { partChecks } from '@joeblew999/remy-ui/parts/checks';
-import { codeSplittingChecks } from '@joeblew999/remy-ui/showcase/code-splitting.checks';
-import { showcaseChecks } from '@joeblew999/remy-ui/showcase/showcase.checks';
-import { buildBoundaryChecks } from '@joeblew999/remy-ui/showcase/build-boundaries.checks';
+import { codeSplittingChecks } from '@joeblew999/remy-ui/code-splitting.checks';
+import { showcaseChecks } from '@joeblew999/remy-showcase/showcase.checks';
+import { buildBoundaryChecks } from '@joeblew999/remy-ui/build-boundaries.checks';
 
 // The shared checks cover what every app built on the package must satisfy: one call for a
 // server-rendered app (@joeblew999/remy-ui/app-checks), with this app's own pages beside the shared ones,

@@ -5,10 +5,10 @@
 // (Seroval nodes: `{ p: { k: keys, v: values } }`, scalars `{ s }`); if TanStack changes it, these
 // checks fail rather than pass without testing anything.
 import { test, expect } from '@playwright/test';
-import { locales, cookieName } from '../paraglide/runtime.js';
-import { m } from '../paraglide/messages.js';
-import { samples } from '../samples.js';
-import { collectErrors, localizedPath, checkedLocales } from '../checks.js';
+import { locales, cookieName } from '../../paraglide/runtime.js';
+import { m } from '../../paraglide/messages.js';
+import { samples } from '../../samples.js';
+import { collectErrors, localizedPath, checkedLocales } from '../../checks.js';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const isServerFn = url => new URL(url).pathname.startsWith('/_serverFn/');

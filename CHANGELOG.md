@@ -63,6 +63,13 @@ package follows [Semantic Versioning](https://semver.org/).
   `devicePath` options are gone (`sitePaths`, `appPaths`, `showcase`).
 - Tests are type-checked: an app's `tsconfig.json` includes `tests/` (the blank app's does). `HomeContent`'s
   functions take a `Locale`.
+- remy-auth's showcase pages are a package of their own, `@joeblew999/remy-showcase` (its README): `pages`,
+  `app-pages`, `app-nav` (was `showcase/app-nav`), `clock-route`, `reservation`, `search-params`,
+  `navigation-blocking`, the showcase's `paths` lists and checks (`showcase.checks`, `reservation.checks`,
+  with `reservationApiChecks` from `api/checks`). The platform's `paths` keeps `isAppPath`. The parts' own
+  pieces moved into their parts (`parts/time-zones/page`, `parts/deferred-place/device-place`,
+  `parts/status-card/card`); `build-boundaries.checks` and `code-splitting.checks` are at the root; `rows`
+  and `zod-csp` are exported.
 - The showcase's checks are one call an app showing the showcase makes itself, `showcaseChecks()`
   (`showcase/showcase.checks`: `demoChecks`, `appNavChecks` and `formatsChecks` moved there from `checks`);
   `serverAppChecks` and `prerenderedAppChecks` lost `showcase`. `problem.checks` moved from `showcase/` to the root.

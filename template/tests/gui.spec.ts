@@ -1,6 +1,6 @@
 import { serverAppChecks } from '@joeblew999/remy-ui/app-checks';
 import { partChecks } from '@joeblew999/remy-ui/parts/checks';
-import { buildBoundaryChecks } from '@joeblew999/remy-ui/showcase/build-boundaries.checks';
+import { buildBoundaryChecks } from '@joeblew999/remy-ui/build-boundaries.checks';
 import { service } from '../src/service';
 import { sitePaths, appPaths } from '../src/paths';
 

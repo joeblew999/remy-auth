@@ -1,5 +1,5 @@
 import type { QueryFunction, QueryKey } from '@tanstack/react-query';
-import type { LiveStatus } from '../../showcase/status-card';
+import type { LiveStatus } from './card';
 
 /**
  * What an app's src/parts/status-card.ts exports as `statusQuery`: TanStack Query options for its

@@ -2,8 +2,8 @@
 // the button, shown in the page's language, refused politely without permission, and never sent
 // anywhere. Plain JavaScript, like ../checks.js.
 import { test, expect } from '@playwright/test';
-import { m } from '../paraglide/messages.js';
-import { localizedPath, collectErrors, hydrated, checkedLocales } from '../checks.js';
+import { m } from '@joeblew999/remy-ui/messages';
+import { localizedPath, collectErrors, hydrated, checkedLocales } from '@joeblew999/remy-ui/checks';
 
 const spot = { latitude: 13.7563, longitude: 100.5018, accuracy: 25 };
 const degrees = (locale, value) => new Intl.NumberFormat(locale, { style: 'unit', unit: 'degree', maximumFractionDigits: 4 }).format(value);

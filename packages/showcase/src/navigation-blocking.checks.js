@@ -2,10 +2,10 @@
 // before an in-app navigation, in the page's language; a made reservation no longer asks.
 // Plain JavaScript like ../checks.js.
 import { test, expect } from '@playwright/test';
-import { locales } from '../paraglide/runtime.js';
-import { m } from '../paraglide/messages.js';
-import { samples } from '../samples.js';
-import { localizedPath, collectErrors, hydrated, checkedLocales } from '../checks.js';
+import { locales } from '@joeblew999/remy-ui/runtime';
+import { m } from '@joeblew999/remy-ui/messages';
+import { samples } from '@joeblew999/remy-ui/samples';
+import { localizedPath, collectErrors, hydrated, checkedLocales } from '@joeblew999/remy-ui/checks';
 
 /** Answers each dialog from `answers` in turn (true accepts) and records its type and message. */
 function dialogs(page, answers) {

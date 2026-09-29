@@ -1,9 +1,9 @@
 import { linkOptions } from '@tanstack/react-router';
 import { CalendarDaysIcon, ClockIcon, LayoutDashboardIcon, MapPinIcon, MousePointerClickIcon, SettingsIcon, UserIcon } from 'lucide-react';
-import type { Locale } from '../paraglide/runtime.js';
-import { m } from '../paraglide/messages.js';
-import type { NavItem } from '../app-config';
-import { clockDefaults } from '../clock-route';
+import type { Locale } from '@joeblew999/remy-ui/runtime';
+import { m } from '@joeblew999/remy-ui/messages';
+import type { NavItem } from '@joeblew999/remy-ui/app-config';
+import { clockDefaults } from './clock-route';
 
 // The showcase's navigation (remy-auth's own pages: formats, and the app's clock, demo, location, account
 // and settings), for the apps that show them: remy-auth and remy-auth-app put these in defineRemyApp. An

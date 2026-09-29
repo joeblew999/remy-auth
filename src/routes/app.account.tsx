@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { getLocale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
-import { AccountPage } from '@joeblew999/remy-ui/app-pages';
+import { AccountPage } from '@joeblew999/remy-showcase/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { problemPages } from '@joeblew999/remy-ui/problem';
 

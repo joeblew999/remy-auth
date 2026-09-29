@@ -1,4 +1,5 @@
 /* The shared package's stylesheet (shadcn's, the fonts and text rules for every language, and the
    package's own classes: tailwind.css), then where this app's classes live. */
 @import "@joeblew999/remy-ui/tailwind.css";
+@import "@joeblew999/remy-showcase/tailwind.css";
 @source "../src";

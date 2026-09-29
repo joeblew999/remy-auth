@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useBlocker } from '@tanstack/react-router';
-import { getLocale, type Locale } from '../paraglide/runtime.js';
-import { m } from '../paraglide/messages.js';
+import { getLocale, type Locale } from '@joeblew999/remy-ui/runtime';
+import { m } from '@joeblew999/remy-ui/messages';
 
 /**
  * Warns before leaving a page that holds unsaved input, with TanStack Router's `useBlocker`.

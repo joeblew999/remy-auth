@@ -1,4 +1,4 @@
-import { allPaths, appPaths, sitePaths } from '@joeblew999/remy-ui/paths';
+import { allPaths, appPaths, sitePaths } from '@joeblew999/remy-showcase/paths';
 
 // This app's pages: the shared package's (paths.js owns the two kinds). The docs are the docs Worker's
 // (docs/), at its own origin (DOCS_ORIGIN).

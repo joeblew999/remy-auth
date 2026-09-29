@@ -5,8 +5,8 @@
 // invalidates every loader and query, refetches at once, and an answer that breaks the contract is
 // shown as an error, never as data. Plain JavaScript, like ../checks.js.
 import { test, expect } from '@playwright/test';
-import { m } from '../paraglide/messages.js';
-import { localizedPath, collectErrors, checkedLocales, hydrated } from '../checks.js';
+import { m } from '../../paraglide/messages.js';
+import { localizedPath, collectErrors, checkedLocales, hydrated } from '../../checks.js';
 
 /**
  * `path` is the de-localized page that mounts the card; `service` is the name the card must show

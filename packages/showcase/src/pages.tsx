@@ -1,13 +1,13 @@
 import { Link } from '@tanstack/react-router';
-import { locales, getTextDirection as direction, type Locale } from './paraglide/runtime.js';
-import { m } from './paraglide/messages.js';
-import { localeName } from './locale';
-import { formatLocale, weekdayName, weekOrder, words, type LocaleInfo } from './locale-info';
-import { DeviceTime } from './client';
-import { samples } from './samples.js';
-import { Badge } from './components/badge';
-import { buttonVariants } from './components/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './components/card';
+import { locales, getTextDirection as direction, type Locale } from '@joeblew999/remy-ui/runtime';
+import { m } from '@joeblew999/remy-ui/messages';
+import { localeName } from '@joeblew999/remy-ui/locale';
+import { formatLocale, weekdayName, weekOrder, words, type LocaleInfo } from '@joeblew999/remy-ui/locale-info';
+import { DeviceTime } from '@joeblew999/remy-ui/client';
+import { samples } from '@joeblew999/remy-ui/samples';
+import { Badge } from '@joeblew999/remy-ui/components/badge';
+import { buttonVariants } from '@joeblew999/remy-ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@joeblew999/remy-ui/components/card';
 import { LanguagesIcon, ListChecksIcon, PaletteIcon, PanelsTopLeftIcon } from 'lucide-react';
 
 // The pages every Remy app built on this package shows, and that the shared checks test.
@@ -18,12 +18,12 @@ import { LanguagesIcon, ListChecksIcon, PaletteIcon, PanelsTopLeftIcon } from 'l
 // The site frame lives in ./shell (re-exported here), so a page that needs only the frame
 // does not download these pages.
 
-export { sitePaths, appPaths, allPaths, isAppPath } from './paths.js';
+export { sitePaths, appPaths, allPaths } from './paths.js';
 
-export { SkipLink, ZoneBadge, SiteShell, Shell, Intro } from './shell';
-export { Group, Row, NameList } from './rows';
-import { Shell, Intro } from './shell';
-import { Group, Row, NameList } from './rows';
+export { SkipLink, ZoneBadge, SiteShell, Shell, Intro } from '@joeblew999/remy-ui/shell';
+export { Group, Row, NameList } from '@joeblew999/remy-ui/rows';
+import { Shell, Intro } from '@joeblew999/remy-ui/shell';
+import { Group, Row, NameList } from '@joeblew999/remy-ui/rows';
 
 /**
  * A card on the home page that leads somewhere: what the place is, then a link to it. shadcn has no
