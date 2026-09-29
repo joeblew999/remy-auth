@@ -10,8 +10,8 @@ afterwards. Executor/Reviewer roles as in
 Owner, 2026-09-29: "Remy-video and others are not meant to have to have so much boilerplate. the idea
 of that all our remy repos will get all the same things with as few a boilerplate as possible."
 
-remy-auth is the platform; every other Remy repo is a thin product on it. A repo holds only what
-makes it that product:
+The platform (the shared package and tasks) lives in remy-auth; every Remy repo, remy-auth included,
+is a thin product on it. A repo holds only what makes it that product:
 
 - identity: name, brand, origins, Worker and AI Search names;
 - its routes and pages, its API contract and procedures;
@@ -23,6 +23,12 @@ system, i18n wiring, CSP, dependency pins, CI, agent docs and skills.
 
 Owner, 2026-09-29: "all of the docs stuff should be part of this. Each repo then gets what remy-auth
 has." Parity is the bar: whatever remy-auth has, a new repo has by including the tasks and the package.
+Parity of capabilities, not pages (owner, 2026-09-29): every repo gets the same machinery; remy-auth's
+own pages (formats, clock, demo, location) stay remy-auth's product.
+
+A repo may also publish packages of its own, as remy-video does with `remy-video-ui` and
+`remy-video-contract` (owner, 2026-09-29: supported). Being a package owner must cost no more
+boilerplate than being a consumer (group 6).
 
 Rules for every fix in this plan:
 
@@ -94,7 +100,7 @@ Docs report (D, [remy-auth-docs-feedback.md](../../remy-video/.plans/remy-auth-d
 | D6 | `i18n:*` needs a git repository | group 7 (`project:setup` precondition) |
 | D7 | What worked | kept |
 
-## Groups, in order (biggest deletion first)
+## Groups, in order
 
 Each group names what it removes from remy-video and the report items it answers (A = app report,
 D = docs report).
@@ -184,7 +190,7 @@ Removes: remy-video's `checks.js` workarounds and the dropped narrow-screen, RTL
   remy-auth's home-page copy becomes remy-auth's own check.
 - Helpers a check author needs are exported subpaths; no deep imports.
 
-### 5. Shared runtime defaults (A11, A13, A16)
+### 5. Shared runtime defaults (A11, A16)
 
 - Zod's `jitless` set once in a shared module every schema imports, not in one demo file.
 - The `Env` types an app needs before its first `wrangler types`.
@@ -221,7 +227,6 @@ plan's acceptance.
 
 ## Open questions for the owner
 
-- Group order: shell first (biggest app-side fork) or docs Worker first (biggest line count)?
 - Post remy-video's two reports as issues on this repo for the record, or close them against this plan?
 - Which other repos follow remy-video (remy-data, remy-sport, remy-nash do not include the tasks yet;
   remy-auth-app-layout is on 0.11.0)?
