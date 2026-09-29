@@ -97,6 +97,12 @@ formats page's intro and "This language" share the first screen on desktop; issu
 - oRPC 2.0: stay on 1.15.4 until 2.0.0 is final, then move server and clients together
   ([watch](done/openapi-contracts.md#orpc-20-watch-2026-09-26), issue #1).
 
+## Next: platform structure (owner, 2026-09-29)
+
+[platform-structure](platform-structure.md): the five structural causes behind thin-apps' problems
+(remy-auth cannot see what another repo sees, one package doing two jobs, types stopping at the seams, shell
+task logic, facts in several places), and their fixes in order. Waits for the owner's three decisions.
+
 ## Owner only
 
 - Thin apps, phase D ([the plan](thin-apps.md#phase-d-prepared-2026-09-29-waiting-for-the-owner)): release 0.14.0
