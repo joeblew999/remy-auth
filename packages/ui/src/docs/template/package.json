@@ -1,0 +1,9 @@
+{
+  "name": "docs",
+  "private": true,
+  "type": "module",
+  "description": "This app's docs: content/ and docs.config.ts over @joeblew999/remy-ui's docs Worker.",
+  "dependencies": {
+    "@joeblew999/remy-ui": "*"
+  }
+}

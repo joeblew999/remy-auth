@@ -28,6 +28,11 @@ export type RemyApp = {
   brand: string;
   /** The app's source: the site header's "GitHub" link. None shows no link. */
   repository?: string;
+  /**
+   * Where the app's docs Worker answers (its own origin, e.g. from VITE_DOCS_ORIGIN): the site header's
+   * "Docs" and "Developers" links and the app sidebar's "Guide". None shows none.
+   */
+  docs?: string;
   site?: {
     /** The site header's navigation, after the brand. */
     nav?: readonly NavItem[];

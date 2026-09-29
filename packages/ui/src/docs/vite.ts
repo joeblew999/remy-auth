@@ -52,8 +52,11 @@ export function docsWorkerConfig(docsConfig: RemyDocsConfig, srcDirectory: strin
   };
 }
 
-/** The docs Worker's Vite configuration for the app whose docs/ it runs in. */
-export function remyDocs(docsConfig: RemyDocsConfig, { contract, root = process.cwd() }: { contract: string; root?: string }): UserConfig {
+/**
+ * The docs Worker's Vite configuration for the app whose docs/ it runs in. `contract`: the package of the
+ * app's oRPC contract, which /reference documents; an app without an API leaves it out.
+ */
+export function remyDocs(docsConfig: RemyDocsConfig, { contract = join(packageDocs, 'empty-contract.ts'), root = process.cwd() }: { contract?: string; root?: string } = {}): UserConfig {
   const app = root.endsWith('/') ? root : `${root}/`;
   const srcDirectory = relative(root, packageDocs).replace(/\/$/, '');
   const generated = join(root, '.remy-docs');

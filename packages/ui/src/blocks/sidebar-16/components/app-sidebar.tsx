@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { ArrowLeftIcon, GalleryVerticalEndIcon } from 'lucide-react';
+import { ArrowLeftIcon, BookOpenIcon, GalleryVerticalEndIcon } from 'lucide-react';
 import { getTextDirection, type Locale } from '../../../paraglide/runtime.js';
 import { m } from '../../../paraglide/messages.js';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../../components/sidebar';
@@ -36,6 +36,12 @@ export function AppSidebar({ locale }: { locale: Locale }) {
       {/* In the footer, which stays in view however short the screen (a phone in landscape). */}
       <SidebarFooter>
         <SidebarMenu>
+          {app.docs && <SidebarMenuItem>
+            <SidebarMenuButton render={<a href={`${app.docs}/docs`} />}>
+              <BookOpenIcon />
+              <span>{m.nav_guide({}, o)}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>}
           {app.app?.links?.(locale)}
           <SidebarMenuItem>
             <SidebarMenuButton render={<Link to="/" />}>

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Print what this app's Ask AI needs on Cloudflare (R2 bucket, AI Search instance, AI Gateway, rate-limit namespace), from docs.config.ts's `ask`, as the wrangler commands that create it. Creates nothing: that costs money and is the owner's"
+#MISE dir="{{config_root}}/docs"
+set -euo pipefail
+exec node "$(dirname "$0")/provision.mjs"

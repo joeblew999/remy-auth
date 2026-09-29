@@ -17,7 +17,8 @@ const wranglerJs = new URL(requireHere(wranglerPackage).bin.wrangler, pathToFile
 const { CLOUDFLARE_API_TOKEN: edit, ...loginEnv } = process.env;
 const wrangler = (...args) => execFileSync(process.execPath, [wranglerJs, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], env: loginEnv });
 const { unstable_readConfig } = await import(pathToFileURL(requireHere.resolve('wrangler')).href);
-const config = unstable_readConfig({});
+// The docs tasks name the docs Worker's generated configuration (REMY_WRANGLER_CONFIG); the app's own tasks read the nearest.
+const config = unstable_readConfig(process.env.REMY_WRANGLER_CONFIG ? { config: process.env.REMY_WRANGLER_CONFIG } : {});
 const login = JSON.parse(wrangler('auth', 'token', '--json')).token;
 const account = process.env.CLOUDFLARE_ACCOUNT_ID || config.account_id || JSON.parse(wrangler('whoami', '--json')).accounts?.[0]?.id;
 

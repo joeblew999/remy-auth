@@ -16,7 +16,8 @@ const requireHere = createRequire(`${process.cwd()}/package.json`);
 const wranglerPackage = requireHere.resolve('wrangler/package.json');
 const wranglerJs = new URL(requireHere(wranglerPackage).bin.wrangler, pathToFileURL(wranglerPackage)).pathname;
 const { unstable_readConfig } = await import(pathToFileURL(requireHere.resolve('wrangler')).href);
-const config = unstable_readConfig({});
+// The docs tasks name the docs Worker's generated configuration (REMY_WRANGLER_CONFIG); the app's own tasks read the nearest.
+const config = unstable_readConfig(process.env.REMY_WRANGLER_CONFIG ? { config: process.env.REMY_WRANGLER_CONFIG } : {});
 
 // Wrangler with its login (AI Search, whoami): without CLOUDFLARE_API_TOKEN, which it would use instead
 // when fnox exec sets it.

@@ -51,6 +51,10 @@ export function SiteShell({ locale, path = '', preferred, children }: { locale: 
               <NavigationMenuLink active={Boolean(matchRoute(match))} render={<Link {...link} preload="intent" />}>{item.label(locale)}</NavigationMenuLink>
             </NavigationMenuItem>;
           })}
+          {app.docs && <>
+            <NavigationMenuItem><NavigationMenuLink render={<a href={`${app.docs}/docs`} />}>{m.nav_docs({}, o)}</NavigationMenuLink></NavigationMenuItem>
+            <NavigationMenuItem><NavigationMenuLink render={<a href={`${app.docs}/dev`} />}>{m.nav_developers({}, o)}</NavigationMenuLink></NavigationMenuItem>
+          </>}
           {app.site?.links?.(path, locale)}
           {app.repository && <NavigationMenuItem>
             <NavigationMenuLink href={app.repository}>GitHub</NavigationMenuLink>
