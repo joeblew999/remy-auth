@@ -23,7 +23,7 @@ node_modules/
 /playwright-report/
 *.tsbuildinfo
 
-/remy-ui-*.tgz
+/*.tgz
 # Installed by mise run skills:install from skills-lock.json; not committed.
 .agents/skills/
 .claude/skills/

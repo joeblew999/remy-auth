@@ -8,4 +8,4 @@ if node "$here/workspaces.mjs" --has-workspaces; then
   reject="$(printf '%s,%s' "$reject" "$(node "$here/workspaces.mjs" --names)" | tr , '\n' | sort -u | paste -sd, -)"
   workspaces=(--workspaces --root)
 fi
-./node_modules/.bin/ncu --target latest --dep prod,dev,optional "${workspaces[@]}" --reject "$reject" --removeRange "$@"
+./node_modules/.bin/ncu --target latest --dep prod,dev,optional ${workspaces[@]+"${workspaces[@]}"} --reject "$reject" --removeRange "$@"

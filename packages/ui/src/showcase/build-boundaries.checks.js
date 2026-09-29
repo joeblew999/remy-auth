@@ -93,9 +93,10 @@ async function crawl(request, baseURL, pages) {
  * The browser never receives server-only code or devtools: crawls the scripts of every localized
  * public path and fails on any marker. `markers` adds app-specific ones (a `source` string is a
  * path relative to the app). `clientDir` is the build's client output, checked for completeness
- * when testing the local artifact.
+ * when testing the local artifact. `deviceTimePath`: a page showing the device's time (the showcase's
+ * /formats), checked to be rendered by the browser only; none for an app without one.
  */
-export function buildBoundaryChecks({ paths, markers = [], clientDir = 'dist/client' }) {
+export function buildBoundaryChecks({ paths, markers = [], clientDir = 'dist/client', deviceTimePath }) {
   test('the browser never downloads server-only code or devtools', async ({ request, baseURL }) => {
     const all = [...serverOnlyMarkers, ...devtoolsMarkers, ...markers];
     for (const { name, pattern, source } of all) expect(sourceText(source), `the "${name}" marker occurs in its source`).toMatch(pattern);
@@ -116,9 +117,9 @@ export function buildBoundaryChecks({ paths, markers = [], clientDir = 'dist/cli
 
   // The other direction: the device's own time is browser-only, so the server's HTML leaves it
   // empty and the browser fills it after hydration (the formats checks assert the filled value).
-  test('the device time is rendered by the browser only', async ({ request }) => {
+  if (deviceTimePath) test('the device time is rendered by the browser only', async ({ request }) => {
     for (const locale of checkedLocales) {
-      const path = localizedPath('/formats', locale);
+      const path = localizedPath(deviceTimePath, locale);
       const response = await request.get(path);
       expect(response.status(), path).toBe(200);
       expect(await response.text(), path).toMatch(/<span[^>]*data-sample="local"[^>]*><\/span>/);

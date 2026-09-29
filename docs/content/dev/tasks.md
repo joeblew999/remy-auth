@@ -93,7 +93,7 @@ costs no task of its own. Its packages are npm workspaces (`packages/<name>/`, `
 
 | Task | Does |
 | --- | --- |
-| `packages:check`, `packages:upgrade` | Newer npm versions of the repository's own dependencies (root and workspaces; never its own packages or `@joeblew999/remy-ui`), previewed or applied, then `project:verify` |
+| `packages:check`, `packages:upgrade` | Newer npm versions of the repository's own dependencies (root and workspaces; never its own packages or `@joeblew999/remy-ui`), previewed (`check`) or applied, then `project:verify` (`upgrade`) |
 | `packages:pack` | A tarball of each published package, for a scratch app to install before any release |
 | `packages:release` | The gates (translations strict, `project:verify`, `project:release-checks`, Google's audits, Core Web Vitals), then `packages:tag` |
 | `packages:tag` | On a clean `main`: tag `RELEASE_PACKAGE`'s version, push, then `packages:publish --release` |

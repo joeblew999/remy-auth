@@ -93,7 +93,7 @@ run = [{ task = "packages:release" }]
 [tasks."project:release-checks"]
 description = "remy-auth's own release checks (overrides the shared hook, which packages:release runs after project:verify): the blank app pins this release (template:check), the shadcn files are exactly what the CLI writes (ui:verify)"
 dir = "{{config_root}}"
-run = [{ task = "template:check" }, { task = "ui:verify" }]
+run = [{ task = "template:check" }, { task = "template:test" }, { task = "ui:verify" }]
 
 [tasks."template:check"]
 description = "The blank app (template/, where a new repo starts) pins the version being released: @joeblew999/remy-ui in package.json, the tasks ref in mise.toml, the shared workflow's tag. Instant"
@@ -102,6 +102,24 @@ run = '''
 v=$(node -p "require('./packages/ui/package.json').version")
 grep -q "tasks?ref=v$v\"" template/mise.toml && grep -q "\"@joeblew999/remy-ui\": \"$v\"" template/package.json && grep -q "google.yml@v$v$" template/.github/workflows/google.yml || { echo "template/ must pin $v: @joeblew999/remy-ui in package.json, ref=v$v in mise.toml, google.yml@v$v in .github/workflows/google.yml" >&2; exit 1; }
 echo "template/ pins $v."
+'''
+
+[tasks."template:test"]
+description = "The blank app as a new repository gets it: this commit's packages packed (packages:pack), template/ copied to a temporary folder with the local tasks, installed from the tarballs, then its tier 3 (project:test:quick) and docs:test (~2 min; uses PREVIEW_PORT and DOCS_PREVIEW_PORT + 100). packages:release runs it"
+dir = "{{config_root}}"
+run = '''
+set -eu
+out=$(mktemp -d); app="$out/app"; trap 'rm -rf "$out"' EXIT
+mise run packages:pack > /dev/null && mv ./*.tgz "$out/"
+cp -R template "$app" && cd "$app" && git init -q && git add -A && git -c user.name=remy -c user.email=remy@localhost commit -qm blank
+ui=$(ls "$out"/joeblew999-remy-ui-*.tgz)
+node -e "const f='package.json',p=JSON.parse(require('fs').readFileSync(f));p.dependencies['@joeblew999/remy-ui']='file:$ui';require('fs').writeFileSync(f,JSON.stringify(p,null,2))"
+sed -i.bak "s#git::https://github.com/joeblew999/remy-auth.git//tasks?ref=v[0-9.]*#{{config_root}}/tasks#" mise.toml && rm mise.toml.bak
+mise trust -q .
+npm install --no-audit --no-fund --loglevel=error
+PREVIEW_PORT=$((PREVIEW_PORT + 100)) mise run project:test:quick
+DOCS_PREVIEW_PORT=$((DOCS_PREVIEW_PORT + 100)) mise run docs:test
+echo "template:test: the blank app installs, builds and passes its checks on this commit's packages."
 '''
 
 [tasks."ui:generate"]

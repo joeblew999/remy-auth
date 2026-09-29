@@ -14,7 +14,7 @@ export const Route = createFileRoute('/sitemap.xml')({
     handlers: {
       GET: ({ request }) => {
         const origin = new URL(request.url).origin;
-        const xml = sitemapXml({ origin, paths: [...(registeredApp()?.sitePaths ?? ['']), ...partSitePaths], extra: sitemapEntries?.(origin) ?? [] });
+        const xml = sitemapXml({ origin, paths: [...(registeredApp()?.sitePaths ?? []), ...partSitePaths], extra: sitemapEntries?.(origin) ?? [] });
         return new Response(xml, { headers: { 'Content-Type': sitemapType, 'Cache-Control': crawlCache } });
       },
       ...readOnly,

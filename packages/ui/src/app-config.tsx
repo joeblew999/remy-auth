@@ -29,7 +29,7 @@ export type RemyApp = {
   /** The Worker's service name: its log lines, /healthz and the CSP report endpoint's logs. */
   service?: string;
   /** The app's site pages ('' is its home): what its sitemap lists (the seo-routes part). */
-  sitePaths?: readonly string[];
+  sitePaths: readonly string[];
   /** The app's source: the site header's "GitHub" link. None shows no link. */
   repository?: string;
   /**
@@ -66,7 +66,7 @@ export const defineRemyApp = (app: RemyApp) => (registered = app);
 /** The app's settings as registered by defineRemyApp, if it has run. */
 export const registeredApp = () => registered;
 
-const RemyAppContext = createContext<RemyApp>({ brand: 'Remy' });
+const RemyAppContext = createContext<RemyApp>({ brand: 'Remy', sitePaths: [''] });
 const PreferredContext = createContext<Locale | undefined>(undefined);
 
 export const RemyAppProvider = RemyAppContext.Provider;

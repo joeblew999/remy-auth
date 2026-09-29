@@ -17,6 +17,8 @@ if [ -n "$tag" ]; then
 fi
 
 token="${NODE_AUTH_TOKEN:-$(gh auth token)}"
+# An app's own .npmrc (the blank app's) reads ${GITHUB_TOKEN} and outranks the user config written below.
+export GITHUB_TOKEN="$token" NODE_AUTH_TOKEN="$token"
 mise run project:generate
 while IFS=$'\t' read -r name version registry _; do
   host="${registry#https://}"; host="${host%/}"

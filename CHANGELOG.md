@@ -52,6 +52,11 @@ package follows [Semantic Versioning](https://semver.org/).
   when the app passes `home`, and the showcase's checks only with `showcase`.
 - An app's own `src/routes/csp-report.ts`, `src/csp.ts` and `src/preferred.ts` go (the package's route,
   defaults and `root` replace them).
+- `defineRemyApp` takes `service` and `sitePaths` (required: the sitemap lists them) and registers the app
+  (`registeredApp`); `pageHead`'s titles and the home page's WebSite data use its `brand`, where they used 'Remy'.
+- `startMiddleware`'s `csp` is optional. The check sets' `ownSitePaths`, `ownAppPaths`, `formats` and
+  `devicePath` options are gone (`sitePaths`, `appPaths`, `showcase`).
+- `buildBoundaryChecks` checks a page's device time only with `deviceTimePath` (the showcase's `/formats`).
 - `project:verify` also runs `project:doctor` and `project:verify-tooling`; `project:generate` compiles
   the app's own catalog by default. A missing `src/parts.json` lists no parts.
 - `AppProviders` takes `app` (a `defineRemyApp` config) and `preferred` (the root loader's language) in

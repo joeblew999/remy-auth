@@ -4,6 +4,7 @@
 // them. The runtime decides nothing itself: the app calls followLocale(runtime) (locale.ts) once, so its
 // messages are in the language the platform chose for the request.
 import { compile } from '@inlang/paraglide-js';
+import { realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 export const appCatalog = {
@@ -14,4 +15,5 @@ export const appCatalog = {
   strategy: ['baseLocale'],
 };
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) await compile(appCatalog);
+// realpath: under a workspace or npm link, argv[1] is the symlinked path and import.meta.url the real one.
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) await compile(appCatalog);

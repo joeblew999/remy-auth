@@ -42,7 +42,7 @@ reservationApiChecks();
 codeSplittingChecks({ paths: sitePaths });
 codeSplittingChecks({ paths: appPaths, home: '/app' });
 // The app mounts TanStack Devtools (src/routes/__root.tsx), whose shell must never ship either.
-buildBoundaryChecks({ paths: everyPath, markers: [
+buildBoundaryChecks({ paths: everyPath, deviceTimePath: '/formats', markers: [
   { name: 'request.cf', pattern: /[\w$)\]]\.cf\b/, source: 'packages/ui/src/parts/deferred-place/place.server.ts' },
   { name: 'TanStack Devtools (the shell hosting the panels)', pattern: /tsd-(?:control|surface)\b/, source: { package: '@tanstack/devtools', from: '@tanstack/react-devtools' } },
 ] });
