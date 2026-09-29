@@ -80,6 +80,26 @@ The real bits, copied into the new repo in phase D (everything else is platform 
 - `docs/content/` (users and dev pages, English and Spanish), `docs.config.ts`'s values;
 - names and origins: `mise.toml`'s `[env]`, the `wrangler.jsonc` names, `fnox.toml`, `public/favicon.svg`.
 
+### remy-auth-app, checked 2026-09-29
+
+The other consumer (remy-ui and tasks 0.13.0) is already thin: about 800 hand-written lines, no docs
+Worker, no forks. But it proves less than it seems:
+
+- It is a second host of remy-auth's own showcase pages (formats, demo, clock, location, account,
+  settings), rendered from the package's `pages`, `app-pages` and `showcase/*` exports and prerendered.
+  Its routes are the ones the shell hardcodes, which is why it never met A6 to A8.
+- It is the starting point for every new repo ([tasks.md, "A new consumer"](../docs/content/dev/tasks.md):
+  `gh repo create --template joeblew999/remy-auth-app`, then rename in six files). A new repo therefore
+  starts with remy-auth's showcase pages and a rename checklist: remy-video began there.
+- Its `AGENTS.md` links remy-auth's `docs/development.md` and `docs/tooling.md` on GitHub `main`; both
+  404 since the docs moved to `docs/content/dev/`.
+
+What follows, folded into the groups below: the showcase pages stay package exports that remy-auth and
+remy-auth-app opt into, and the shell no longer assumes them (group 1); remy-auth-app does not test the
+abstraction, because it shares remy-auth's routes, so the scratch new app does (risk 2); a new repo
+starts from a blank app, not from the showcase (group 7, phase D); the `AGENTS.md` rules block replaces
+the dead links (group 2).
+
 ### Every item in the two reports, and where this plan answers it
 
 App report (A, [remy-auth-feedback.md](../../remy-video/.plans/done/remy-auth-feedback.md)):
@@ -131,7 +151,9 @@ Removes: `packages/ui/src/shell.tsx` (204), `problem.tsx` (46), `app-pages.tsx` 
 - Context and `AppProviders` live in modules with no route imports.
 - The shell reads `preferred` itself, so no page can forget the language hint.
 - The blocks are exported or folded into `AppShell`; no consumer rebuilds the frame from primitives.
-- remy-auth's own pages become its config, the same way remy-video's are.
+- remy-auth's own pages become its config, the same way remy-video's are. The showcase pages
+  (formats, demo, clock, location, account, settings) stay package exports; remy-auth and remy-auth-app
+  opt into them through that config, and an app that does not gets none of their links or types.
 
 ### 2. The whole docs system is shared (D1, D2, D4, D5)
 
@@ -215,6 +237,10 @@ Preconditions in `project:setup` (a `package.json`, a git repository), the task 
 message when the preview port is taken, the contract coverage rule and TanStack's `_` sibling-route
 rule in the consumer docs: fold into whichever group touches the file; not steps of their own.
 
+The starting point for a new repo: a blank app (identity config, one home page, no showcase), not a
+copy of remy-auth-app. The scratch new app of risk 2 becomes it at the end of phase C, and the "A new
+consumer" recipe in tasks.md points to it; its rename step shrinks to the identity config.
+
 ## Risks, and what closes each (2026-09-29)
 
 Owner: "I see risks !!" then "work out what to do to close the risks". Each risk has a fix built into
@@ -223,7 +249,7 @@ the phases below; none is left to care alone.
 | # | Risk | What closes it |
 | --- | --- | --- |
 | 1 | Size: ten steps is "big feature stuff", the kind of plan that turned now.md into a mess | Phases, each with a stop. Only phase A is agreed now; B, C and D each need the owner's go after the previous phase's review. A phase that runs over is stopped and re-planned, not stretched |
-| 2 | The wrong abstraction: config designed around remy-auth breaks the next app | Three users at every phase end: remy-auth, remy-auth-app and a new app. The package is packed locally (`ui:pack`, nothing published); a scratch copy of remy-auth-app moves onto it, and a scratch new app is built from nothing with it, holding only product code (a video library, from remy-video's real bits). Both take the tasks from the local `tasks/`, typecheck and build. No repo is changed; the scratch apps check the design, and the new one counts its own hand-written files. A shape that needs remy-auth-only escape hatches is changed before the phase ends |
+| 2 | The wrong abstraction: config designed around remy-auth breaks the next app | Three users at every phase end: remy-auth, remy-auth-app and a new app. remy-auth-app shares remy-auth's routes and showcase pages, so it checks that nothing breaks, not that the design is general; the new app checks that. The package is packed locally (`ui:pack`, nothing published); a scratch copy of remy-auth-app moves onto it, and a scratch new app is built from nothing with it, holding only product code (a video library, from remy-video's real bits). Both take the tasks from the local `tasks/`, typecheck and build. No repo is changed; the scratch apps check the design, and the new one counts its own hand-written files. A shape that needs remy-auth-only escape hatches is changed before the phase ends |
 | 3 | Owning the wrapper: every Fumadocs or TanStack Start upgrade becomes ours, for every repo | The wrapper keeps Fumadocs' TanStack Start template's file layout and records the template version it follows; an upgrade is that template's diff applied once, in the package. Fumadocs and Start are pinned exactly in one place, and `packages:upgrade` in remy-auth is the only way they move |
 | 4 | Breaking the live sites | Other repos pin release tags, so a bad release reaches them only when they upgrade. remy-auth does not pin: it uses the package through the workspace (`"@joeblew999/remy-ui": "*"`, a symlink to `packages/ui`), so every change reaches it at once, before any release. That makes remy-auth the canary, and its guard is the deploy rule: its Workers deploy only after `mise run cf:preview` and the hands-on pass, `GATE=quick` for shared-package changes, never mid-phase from a half-moved state. Rollback is the previous Worker version (`wrangler rollback`) and, for other repos, the previous tag |
 | 5 | Churn: a release and an upgrade per step, each able to break consumers | No releases while the plan runs (owner, 2026-09-29: "you dont have to do releases? you can code the shared system and refactor remy-auth as you go"). remy-auth runs the package's and `tasks/`'s current source through the workspace, so the shared system and remy-auth change together in the same commits. Other repos stay on their pinned 0.13.0 and meet the new shape once, in phase D. Checking against them needs no release either (risk 2) |
@@ -246,12 +272,14 @@ review.
 - **B. Docs system:** group 2, with provisioning owner-only (risk 8).
 - **C. The rest:** groups 3 to 7.
 - **D. Release, then a new video repo:** one `ui:release` (the full gate) carries the package and tasks
-  together; remy-auth-app moves with `project:upgrade-ui`. A new video repo is started on the release with
-  nothing copied from remy-video but the real bits listed above; its hand-written files, set against the
+  together; remy-auth-app moves with `project:upgrade-ui`. A new video repo is started on the release from the blank app
+  (group 7), with nothing copied from remy-video but the real bits listed above; its hand-written files, set against the
   evidence table, are the plan's acceptance. Then remy-video is archived.
 
 ## Open questions for the owner
 
+- remy-auth-app after phase D: keep it as the showcase of the prerendered mode (recommended; it stops
+  being the template), or retire it once the blank app exists?
 - The new video repo's name: take over `remy-video` (the old one archived under another name) or a new
   name?
 - Which other repos follow (remy-data, remy-sport, remy-nash do not include the tasks yet;
