@@ -66,9 +66,8 @@ Also `project-layout` (step 1: not merged, its fixes ported). Keep the uncommitt
 ## Agreed: thin apps (owner, 2026-09-29)
 
 [thin-apps](thin-apps.md): every Remy repo gets the platform with as little boilerplate as possible.
-Built and proved in remy-auth first, no release until the end; then a new video repo replaces remy-video
-(~3,700 hand-kept lines, a few hundred of them video), which is not migrated. In phases with a stop after
-each. Phase A (providers and shell, the docs routes test) is next.
+Built and proved in remy-auth first, no release until the end; then `remy-auth-test` proves it as a new repo. remy-video is not migrated; its replacement comes later.
+In phases with a stop after each. Phase 0 (scratch tests of the unknowns) is next.
 
 ## Then: clean up the developer docs (owner, 2026-09-26: "a bit weird for a public and agent audience")
 
