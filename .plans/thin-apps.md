@@ -526,6 +526,13 @@ Decisions (the Executor's):
 - `docs:cli` is remy-auth's own task now (it changes the package); `docs:init` copies
   `packages/ui/src/docs/template` at a tag.
 
+Accepted by the reviewer agent (ACCEPT, six non-blocking notes). Fixed before the merge: `docs:test:remote`
+writes `.remy-docs/` first and checks the reference MCP server only with an API; the emergency stop
+(`docs:answers:off`/`on`), `docs:observe` and `docs:ai-gateway` work on a fresh clone (they load
+`vite.config.ts` with Node, ~1 s, which writes `.remy-docs/`; its config import now carries `.ts`);
+`skills:install` no longer hides a failed `remy` install; stale "docs/tests" wording; the new repo's docs
+re-run on the last commit. Left: `skills-lock.json`'s `remy` hash changes whenever the developer docs
+do, which is the lock doing its job.
 Checks: tier 0 green; tier 3 81/81; remy-auth's `docs:check` green, `docs:test` 9/9 (7 before: the pages
 now come from the content). Scratch check (a local `npm pack`, no workspace): the new app's docs from the
 template, without Ask AI or an API, pass `docs:check` and `docs:test` (3/3); `skills:install` installs

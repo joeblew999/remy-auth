@@ -20,7 +20,7 @@ import { buildBoundaryChecks } from '@joeblew999/remy-ui/showcase/build-boundari
 // server-rendered app (@joeblew999/remy-ui/app-checks), with this app's own pages beside the shared ones,
 // and one for the parts it lists in src/parts.json (partChecks), which serverAppChecks leaves to them.
 // Site pages (for Google) and app pages (for people using the app) never mix; see paths.js.
-// The docs are the docs Worker's (docs/, its own checks: docs/tests).
+// The docs are the docs Worker's (docs/; its checks are the package's, docs:test).
 serverAppChecks({
   service: 'remy-auth',
   formats: { extra: formatsExtra },

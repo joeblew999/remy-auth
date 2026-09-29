@@ -1,7 +1,8 @@
 # The docs Worker's tasks, the same in every app. The Worker is @joeblew999/remy-ui's (src/docs: Fumadocs'
 # TanStack Start template on Cloudflare); an app's docs/ holds content/, docs.config.ts and three one-line
 # files (`docs:init` writes them). Its Cloudflare configuration is generated from docs.config.ts into
-# docs/.remy-docs/wrangler.json by the Vite preset, so every wrangler command here reads that (-c).
+# docs/.remy-docs/wrangler.json by the Vite preset, so every wrangler command here reads that (-c); a task
+# that runs without a build writes it first by loading the app's vite.config.ts (`node vite.config.ts`, ~1 s).
 # [env] inputs: DOCS_ORIGIN, VITE_DOCS_ORIGIN, DOCS_PREVIEW_PORT, I18N_DOCS_DIR. docs:observe and
 # docs:ai-gateway are file tasks in docs/ (tasks/docs/).
 
@@ -22,20 +23,21 @@ dir = "{{config_root}}/docs"
 run = [{ task = "docs:build" }, "../node_modules/.bin/wrangler types -c .remy-docs/wrangler.json", "../node_modules/.bin/tsc -p ."]
 
 ["docs:test"]
-description = "LOCAL: build, then the docs Worker's few checks (docs/tests) on Cloudflare's local runtime at DOCS_PREVIEW_PORT (~30 s)"
+description = "LOCAL: build, then the docs Worker's few checks (the package's src/docs/tests) on Cloudflare's local runtime at DOCS_PREVIEW_PORT (~30 s)"
 dir = "{{config_root}}/docs"
 env = { PREVIEW_PORT = "{{ get_env(name='DOCS_PREVIEW_PORT', default='4174') }}" }
 run = [{ task = "docs:build" }, "../node_modules/.bin/playwright test -c ../node_modules/@joeblew999/remy-ui/src/docs/playwright.config.js --project=ours"]
 
 ["docs:test:remote"]
-description = "REMOTE, read only: the docs checks, Google's Lighthouse audits and both MCP servers (the MCP Inspector) against DOCS_TEST_URL, default DOCS_ORIGIN (~1 min)"
+description = "REMOTE, read only: the docs checks, Google's Lighthouse audits and every MCP server the app has (the MCP Inspector) against DOCS_TEST_URL, default DOCS_ORIGIN (~1 min)"
 dir = "{{config_root}}/docs"
 env = { TEST_TARGET = "remote" }
 run = [
+  "node vite.config.ts > /dev/null",
   "TEST_BASE_URL=${DOCS_TEST_URL:-$DOCS_ORIGIN} ../node_modules/.bin/playwright test -c ../node_modules/@joeblew999/remy-ui/src/docs/playwright.config.js",
   "npx -y @modelcontextprotocol/inspector@2.8.0 --cli ${DOCS_TEST_URL:-$DOCS_ORIGIN}/api/mcp/docs --transport http --method tools/list",
   "npx -y @modelcontextprotocol/inspector@2.8.0 --cli ${DOCS_TEST_URL:-$DOCS_ORIGIN}/api/mcp/dev --transport http --method tools/list",
-  "npx -y @modelcontextprotocol/inspector@2.8.0 --cli ${DOCS_TEST_URL:-$DOCS_ORIGIN}/api/mcp/reference --transport http --method tools/list",
+  "if node -e \"process.exit(require('./.remy-docs/app.json').api ? 0 : 1)\"; then npx -y @modelcontextprotocol/inspector@2.8.0 --cli ${DOCS_TEST_URL:-$DOCS_ORIGIN}/api/mcp/reference --transport http --method tools/list; else echo 'No API: no reference MCP server.'; fi",
 ]
 
 ["docs:preview"]
@@ -60,13 +62,13 @@ run = ["node node_modules/@joeblew999/remy-ui/src/docs/scripts/docs-publish.mjs"
 ["docs:answers:off"]
 description = "REMOTE, PRODUCTION: stop Ask AI's answers now (the secret ASK_PAUSED; no model calls, the docs stay). Seconds, no build"
 dir = "{{config_root}}/docs"
-run = "printf 1 | ../node_modules/.bin/wrangler secret put ASK_PAUSED -c .remy-docs/wrangler.json"
+run = ["node vite.config.ts > /dev/null", "printf 1 | ../node_modules/.bin/wrangler secret put ASK_PAUSED -c .remy-docs/wrangler.json"]
 
 ["docs:answers:on"]
 description = "REMOTE, PRODUCTION: resume Ask AI's answers (delete the secret ASK_PAUSED; Wrangler asks you to confirm)"
 dir = "{{config_root}}/docs"
 raw = true
-run = "../node_modules/.bin/wrangler secret delete ASK_PAUSED -c .remy-docs/wrangler.json"
+run = ["node vite.config.ts > /dev/null", "../node_modules/.bin/wrangler secret delete ASK_PAUSED -c .remy-docs/wrangler.json"]
 
 ["docs:init"]
 description = "Start this app's docs at a remy-auth tag: docs/ with docs.config.ts (the product's names), vite.config.ts (the API contract's package), tsconfig.json, package.json and an index page per site; then add \"docs\" to package.json workspaces. The Worker itself is @joeblew999/remy-ui's. Refuses to overwrite an existing docs/"
