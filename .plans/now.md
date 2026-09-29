@@ -43,7 +43,7 @@ then tools, then translating.
    Claude agent, no tools, on main under a lock, committing.
 4. ~~**Unfreeze**~~ done 2026-09-26: 12 languages' missing messages, the Spanish docs (9 new, 6 updated),
    Fumadocs' `ui/es.json`, provenance lines gone; `ui:release` strict again.
-5. **What conforming docs unlock** ([plan](docs-for-consumers.md)): `.md` pages, `llms.txt`, the copy
+5. **What conforming docs unlock** (moved into [thin-apps](thin-apps.md), group 2; research in [docs-for-consumers](docs-for-consumers.md)): `.md` pages, `llms.txt`, the copy
    menu; then docs for apps: a rules section in how-we-work, the `remy` skill (rules, evals) in the
    package, the `AGENTS.md` block pointing into `node_modules`.
 6. ~~**Release and adopt**~~ done 2026-09-26: `@joeblew999/remy-ui` 0.12.0 released; remy-auth-app on it
@@ -62,6 +62,12 @@ Also `project-layout` (step 1: not merged, its fixes ported). Keep the uncommitt
 
 0.13.0 released through `ui:release`; remy-auth-app moved with `mise run project:upgrade-ui 0.13.0`, its root on
 `AppProviders`, its Clock on `clockRouteOptions`; gates green (175), live at https://remy-auth-app.gedw99.workers.dev.
+
+## Drafted: thin apps (owner, 2026-09-29)
+
+[thin-apps](thin-apps.md): every Remy repo gets the platform with as little boilerplate as possible;
+built and proved in remy-auth first (it uses each shared piece as a consumer would); remy-video
+(~3,700 hand-kept lines, a few hundred of them video) adopts once at the end. Awaiting the owner on order.
 
 ## Then: clean up the developer docs (owner, 2026-09-26: "a bit weird for a public and agent audience")
 
@@ -109,3 +115,7 @@ formats page's intro and "This language" share the first screen on desktop; issu
 
 [auth-service](parked/auth-service.md), [better-auth-ecosystem](parked/better-auth-ecosystem.md),
 [gui-portal](parked/gui-portal.md), [remy-cli](parked/remy-cli.md) (one CLI instead of scripts): big, not now (owner: "Not big feature stuff").
+
+[flue](parked/flue.md): a link to https://github.com/withastro/flue, to come back to.
+
+[cf-cli](parked/cf-cli.md): adopt Cloudflare's `cf` CLI (https://github.com/cloudflare/cf), to come back to.
