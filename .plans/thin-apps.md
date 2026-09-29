@@ -53,9 +53,10 @@ tasks and tools expect certain paths too"). A first grep of `tasks/`, 2026-09-29
 | `AGENTS.md` (rules block), `.github/workflows/` | agents; GitHub | same shape |
 | `tasks/` | the include | remy-auth only: the platform itself |
 
-Phase A turns this grep into the full inventory (tasks, their scripts and the package's own path reads)
-and writes it once in [tasks.md](../docs/content/dev/tasks.md) as the layout; this table then points
-there. The layout is kept by the tools, not by a checker of our own (the `project-layout` branch was
+Phase A turned this grep into the full inventory (tasks, their scripts and the package's own path
+reads, adding `src/parts.json` and `dist/client/assets`) and wrote it once in
+[tasks.md, "The layout"](../docs/content/dev/tasks.md), the one home; the table above is the first
+grep, kept as history. The layout is kept by the tools, not by a checker of our own (the `project-layout` branch was
 not merged for that reason, now.md step 1): a file elsewhere is simply not found. remy-auth and
 remy-video already match it; remy-auth-app does not yet (`workers/` for its prerender Worker, no
 `docs/`), which phase D settles with the open question on its future. The blank app (group 7) is this

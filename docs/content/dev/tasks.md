@@ -23,6 +23,32 @@ PUBLIC_ORIGIN = "http://127.0.0.1:{{ env.PREVIEW_PORT }}"
 DEPLOY_ORIGIN = "https://your-app.your-subdomain.workers.dev"
 ```
 
+### The layout
+
+Every Remy repo, remy-auth included, has the same files in the same places; what is inside the product's
+files differs. The layout is the paths the shared tasks, their scripts and the package read, so a file
+anywhere else is simply not found; no checker of its own keeps it.
+
+| Path | Read by | Holds |
+| --- | --- | --- |
+| `mise.toml` | mise | `min_version`, the tools, the tasks include, `[env]` (`DEPLOY_ORIGIN`, `PREVIEW_PORT`, docs origins) |
+| `package.json`, `package-lock.json` | npm, `project:*`, `packages:*` (workspaces) | the app's dependencies; `workspaces` when it owns packages |
+| `wrangler.jsonc` | wrangler, the Cloudflare Vite plugin, `cf:*` | the Worker's name, bindings and assets |
+| `vite.config.ts`, `tsconfig.json`, `playwright.config.ts` | Vite, `project:typecheck`, `project:test:*` | the build, types and browser checks |
+| `fnox.toml`, `skills-lock.json` | fnox, `skills:*` | secret names; the pinned skills |
+| `src/routes/`, `src/routeTree.gen.ts` | TanStack Start (the tree is generated) | the product's pages |
+| `src/parts.json` | the package's `remyParts()` | the shared parts the app lists, if any |
+| `src/api/` | the app's `api.$` route | the product's procedures, if it has an API |
+| `tests/` (`smoke.spec.ts` by name) | `project:test:*`, `project:test:live` | the shared checks with the app's settings, and its own |
+| `public/` | Vite | favicon, `_headers` |
+| `dist/` (`dist/client/assets`) | `cf:deploy`, the checks | build output, never committed |
+| `docs/` (`docs.config.ts`, `content/{users,dev,ui}/` with `i18n.json` and `meta.json`, `tests/`, `dist/`) | `docs:*`, `i18n:docs:*` (`I18N_DOCS_DIR`) | the docs Worker: its identity and pages |
+| `project.inlang` | `i18n:messages:*` (`I18N_INLANG`) | the app's own strings, if any |
+| `packages/<name>/` with `README.md` | `plans:*`, `packages:*`, `ui:*` | packages the repo publishes, if any |
+| `.plans/` (`now.md`, `done/`, `parked/`) | `plans:*` | the repo's plans |
+| `AGENTS.md`, `.github/workflows/` | agents; GitHub | the agents' index; CI |
+| `tasks/` | the include | remy-auth only: the shared tasks themselves |
+
 ### A new consumer
 
 The one recipe. [remy-auth-app](https://github.com/joeblew999/remy-auth-app) is the reference

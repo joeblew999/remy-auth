@@ -38,16 +38,22 @@ Every page is one of two kinds, listed in `paths` and never mixed:
 - **App pages** (`appPaths`, under `/app`) come from `app-pages`, framed by `AppShell` (shadcn's
   sidebar-16 block): they need JavaScript and `pageHead` marks them `noindex`. They have their own
   export so a site page never downloads the app shell.
-- **App navigation**: one list, `app-nav.tsx`. Tablets and desktops get the sidebar (collapsing to icons);
+- **App navigation**: the app's own list, in its `defineRemyApp` config (`app-config`); remy-auth's showcase
+  pages are one such list, `showcase/app-nav`. Tablets and desktops get the sidebar (collapsing to icons);
   phones get the bottom bar (`blocks/bottom-nav`, stock shadcn parts, since shadcn has no bottom navigation)
   with the core pages and More, which opens the sidebar. Why: [the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/mobile-navigation.md).
 
 What every app on the package has, so the shared tasks and checks work in it (remy-auth-app is the
 prerendered example):
 
-- **Its root renders pages in `AppProviders`** (`providers`): reading direction, the theme (the header's
-  toggle and the Settings page need it) and the app's own source link. The shared `themeChecks` fail
-  without it.
+- **Its frame settings, once, in `defineRemyApp`** (`app-config`): its name, source, the site header's and
+  the app sidebar's links (each written with TanStack's `linkOptions`, so it is checked against the app's
+  own routes where it is written). The shared frame names no route but `/`, so an app with other pages
+  than remy-auth's type-checks as it is.
+- **Its root renders pages in `AppProviders`** (`providers`), with that config and the root loader's
+  `preferred` language: reading direction, the theme (the header's toggle and the Settings page need it),
+  the frame settings and the language to offer, which every frame reads, so no page passes it. The shared
+  `themeChecks` fail without it.
 - **A route for every path in `appPaths` and `sitePaths`**, each a few lines over the shared page (the
   Clock spreads `clockRouteOptions` from `clock-route`).
 - **`tests/smoke.spec.ts`**, one `smokeChecks(...)` call: `project:test:smoke` and the check after every
@@ -68,9 +74,11 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `components/*`, `hooks/*`, `button` | shadcn components and hooks (`button` is also a short path) |
 | `paths` | `sitePaths`, `appPaths`, `allPaths`, `isAppPath` |
 | `pages` | `SiteShell` (alias `Shell`), `HomePage`, `FormatsContent`, `FormatsPage`, `Intro`, `ZoneBadge`, `SkipLink`, `Group`, `Row` |
-| `shell` | The site frame alone: `SiteShell` (alias `Shell`), `SiteNavLinks`, `Intro`, `ZoneBadge`, `SkipLink` (also exported by `pages`); import it where a page needs only the frame, so the home and formats pages stay out of that page's download |
-| `app-pages` | `AppShell`, `AppHomePage`, `AppFormatsPage`, `LocationPage`, `DemoPage`, `ClockPage`, `SettingsPage`, `AccountPage` |
-| `providers` | `AppProviders`: what an app's root renders its pages in (direction, theme, source link) |
+| `shell` | The site frame alone: `SiteShell` (alias `Shell`), `Intro`, `ZoneBadge`, `SkipLink` (also exported by `pages`); import it where a page needs only the frame, so the home and formats pages stay out of that page's download |
+| `app-shell` | The app frame alone: `AppShell` (the sidebar, the phone's bottom bar), for an app's own app pages |
+| `app-config` | `defineRemyApp` and its types (`RemyApp`, `NavItem`): the app's name, source and navigation for every frame; `useRemyApp`, `usePreferredLocale` |
+| `app-pages` | remy-auth's showcase app pages: `AppHomePage`, `AppFormatsPage`, `LocationPage`, `DemoPage`, `ClockPage`, `SettingsPage`, `AccountPage` (and `AppShell` again) |
+| `providers` | `AppProviders`: what an app's root renders its pages in (direction, theme, the app's `defineRemyApp` config, the `preferred` language) |
 | `clock-route` | `clockRouteOptions`, `clockDefaults`, `clockZones`: the Clock route's search params, kept out of the page's code |
 | `language` | `LanguageSwitcher` (plain links, site pages), `LanguageMenu` (shadcn DropdownMenu, app pages), `LanguageHint` |
 | `messages`, `runtime` | Compiled Paraglide messages and runtime |
@@ -85,9 +93,8 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `worker` | `withObservability` and the request-ID helpers |
 | `cloudflare` | `placeFromCloudflare` |
 | `problem` | The localized problem pages: `Problem`, `NotFound`, `ErrorPage`, `problemPages` (one spread line per page route) |
-| `preferred` | `usePreferred`, the root loader's `preferred` language, for page routes (the app's root loader returns it) |
 | `parts`, `parts/vite`, `parts/checks` | Parts ([plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md)): an app lists them in `src/parts.json`, one name per line. `remyParts()` in `vite.config.ts` (its `plugin` among the plugins, its `routes` as `tanstackStart({ router: { virtualRouteConfig } })`) mounts each listed part's routes beside `src/routes` and generates `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` in the test file runs each listed part's checks. Parts today: `time-zones`, `deferred-place`, `seo-routes`, `status-card`; see [Writing a part](#writing-a-part) |
-| `showcase/*` | TanStack showcase pieces: search params and `choiceCards`, device place, leave guard, time zones, the live status card (`StatusCard`: the app passes the query, its own client's or a `contractClient` on another app's origin) |
+| `showcase/*` | TanStack showcase pieces, and `showcase/app-nav` (the showcase's navigation lists, for the apps that show it): search params and `choiceCards`, device place, leave guard, time zones, the live status card (`StatusCard`: the app passes the query, its own client's or a `contractClient` on another app's origin) |
 | `invalidate` | `invalidateEverything(router, queryClient)`: every loader and query stale and reloaded (after logout or a role change; the status card's refresh) |
 | `samples` | The fixed values the pages render |
 | `checks`, `showcase/*.checks` | Shared Playwright checks: public pages, entry URLs (with the Chinese strategy), demo (native digits), formats (own calendar and digits, week rules, word segmentation), text (`textChecks`: 320 px, hyphenation, casing by language), fonts (`fontChecks`: the font that draws each language is the one `fonts.css` names for its script), zones, observability, Lighthouse and Core Web Vitals, and one per showcase piece; zones, observability, the Content Security Policy, Lighthouse and Core Web Vitals, and one per showcase |
