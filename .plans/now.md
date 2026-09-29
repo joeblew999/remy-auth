@@ -67,7 +67,7 @@ Also `project-layout` (step 1: not merged, its fixes ported). Keep the uncommitt
 
 [thin-apps](thin-apps.md): every Remy repo gets the platform with as little boilerplate as possible;
 built and proved in remy-auth first (it uses each shared piece as a consumer would); remy-video
-(~3,700 hand-kept lines, a few hundred of them video) adopts once at the end. Awaiting the owner on order.
+(~3,700 hand-kept lines, a few hundred of them video) adopts once at the end. In phases with a stop after each; risks and their fixes in the plan. Phase A (providers and shell, the docs routes test) is next.
 
 ## Then: clean up the developer docs (owner, 2026-09-26: "a bit weird for a public and agent audience")
 
