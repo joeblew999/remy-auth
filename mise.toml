@@ -85,6 +85,12 @@ description = "Compile the shared catalogs before type checking (overrides the s
 dir = "{{config_root}}"
 run = [{ task = "ui:generate" }]
 
+[tasks."docs:cli"]
+description = "The pinned Fumadocs CLI in the shared docs Worker (packages/ui/src/docs; feature docs|search|llms|mcp|og|..., export; pass --help); what it writes is a change to the package to review. remy-auth only: apps take the Worker from the package"
+raw_args = true
+dir = "{{config_root}}/packages/ui/src/docs"
+run = "node ../../../../node_modules/@fumadocs/cli/dist/index.js"
+
 [tasks."ui:pack"]
 description = "Compile and pack the shared UI for another Vite/Tailwind consumer"
 dir = "{{config_root}}"

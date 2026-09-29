@@ -1,0 +1,12 @@
+import type { DocsTable } from './table-core.js';
+export type { DocsRow, DocsSite, SiteName } from './table-core.js';
+export declare const repository: DocsTable['repository'];
+export declare const branch: DocsTable['branch'];
+export declare const docsSites: DocsTable['docsSites'];
+export declare const docsTable: DocsTable['docsTable'];
+export declare const docsUrl: DocsTable['docsUrl'];
+export declare const docsFile: DocsTable['docsFile'];
+export declare const docsLangs: DocsTable['docsLangs'];
+export declare const docsObjectKey: DocsTable['docsObjectKey'];
+export declare const docsObjectForKey: DocsTable['docsObjectForKey'];
+export declare const docsLangOfPath: DocsTable['docsLangOfPath'];

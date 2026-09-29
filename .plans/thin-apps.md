@@ -486,6 +486,18 @@ Cost: every page's entry chunk grows 1.6 KB gzip (the root now imports the app c
 nav's icons and the clock's defaults); Lighthouse and Core Web Vitals in phase D's release gate judge it,
 and the app nav could move to the app frame alone if it matters.
 
+## Parked while running (working rules: recorded, skipped, reported at the end)
+
+- **Docs `/dev` hydration mismatch (live, pre-existing).** https://remy-auth-docs.gedw99.workers.dev/dev
+  at desktop width logs React #418 in production (seen 2026-09-29 on the live site, before any thin-apps
+  change reached it). Cause, from the server HTML against the hydrated page: Fumadocs' notebook layout's
+  contents popover trigger (`fumadocs-ui/dist/layouts/notebook/page/slots/toc.js`,
+  `PageTOCPopoverTrigger`) shows the active heading (`items[selectedIdx].original.title`, "Where to look")
+  on the client during hydration and none on the server; it shows when a page's first heading is in view
+  at load. Found by phase B's docs checks, which now take their pages from the content; the hydration
+  check covers each site's first page and its translation, as before, not the index pages, until this is
+  fixed (upstream issue or a fix in the Worker's view).
+
 ## Open questions for the owner
 
 - remy-auth-app after phase D: keep it as the showcase of the prerendered mode (the default; it stops

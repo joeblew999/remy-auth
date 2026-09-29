@@ -1,6 +1,8 @@
-// Everything the docs Worker says about the product it documents: the one file an app changes when it
-// takes this docs app (with wrangler.jsonc's names, content/, and src/lib/openapi.ts's contract).
-export const docsConfig = {
+import { defineDocsConfig } from '@joeblew999/remy-ui/docs/config';
+
+// Everything the docs Worker says about the product it documents: with content/, the whole of this app's
+// docs (the Worker itself is @joeblew999/remy-ui's src/docs; vite.config.ts names the API contract).
+export const docsConfig = defineDocsConfig({
   /** The product: in titles, the navigation, social images, Ask AI's answers and the MCP servers' names. */
   product: 'Remy',
   /** Each site's title after the page's own (and in the navigation): users' docs, developer docs, the API reference. */
@@ -16,11 +18,11 @@ export const docsConfig = {
   },
   /** The live app this documents (the landing page links it). */
   appUrl: 'https://remy-auth.gedw99.workers.dev',
-  /** This Worker's service name in log lines and /healthz. */
+  /** This Worker's name: the Cloudflare Worker, its log lines and /healthz. */
   service: 'remy-auth-docs',
   /** Where the source lives: "Edit on GitHub" and links to files that are not docs pages. */
   repository: 'https://github.com/joeblew999/remy-auth',
   branch: 'main',
-  /** The R2 bucket Ask AI's AI Search instance reads (docs:publish); the instance itself is in wrangler.jsonc. */
-  bucket: 'remy-docs',
-} as const;
+  /** Ask AI: its AI Search instance, the R2 bucket it reads, its AI Gateway and its rate limit. */
+  ask: { instance: 'remy-docs-pages', bucket: 'remy-docs', gateway: 'remy-docs', rateLimitNamespace: '4281' },
+});
