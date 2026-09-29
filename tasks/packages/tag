@@ -14,6 +14,7 @@ if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
   echo "v$version is already tagged; bump $lead's version."; exit 1
 fi
 mise run packages:notes -- "$version" > /dev/null
+mise run packages:bumped
 git tag -a "v$version" -m "${RELEASE_TITLE:-$lead} $version"
 git push origin main
 git push origin "v$version"

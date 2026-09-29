@@ -640,7 +640,13 @@ Everything here is ready; each step goes out only when the owner says so (workin
    phase A's config (`defineRemyApp` with the showcase lists and `sitePaths`, `app` and `preferred` into `AppProviders`),
    `package.json` down to the package and the contract, `prerenderPages({ notFoundPath, paths: allPaths })`,
    `sitemapXml({ origin, paths: sitePaths })`, and `prerenderedAppChecks({ service, sitePaths, appPaths,
-   home })` with `showcaseChecks({ rendering: 'prerendered' })` (platform-structure fix 2); its `AGENTS.md` block from `agents:rules` replaces the dead links.
+   home })` with `showcaseChecks({ rendering: 'prerendered' })` (platform-structure fix 2); its `AGENTS.md` block from `agents:rules` replaces the dead links. Since platform-structure fix 2 also: `@joeblew999/remy-showcase` in its
+   `package.json` beside the platform and the contract 0.3.0, the showcase's Tailwind import beside the
+   platform's, the "Manage Actions access" grant on the showcase's package, and its imports moved (the CHANGELOG's
+   mapping): `pages`, `app-pages`, `paths`, `clock-route`, `reservation`, `showcase/app-nav`,
+   `showcase/search-params` and `showcase/navigation-blocking` to `@joeblew999/remy-showcase/*`;
+   `showcase/status-card`, `showcase/device-place` and `showcase/time-zone` to
+   `@joeblew999/remy-ui/parts/status-card/card`, `parts/deferred-place/device-place`, `parts/time-zones/page`.
 
 ## Parked while running (working rules: recorded, skipped, reported at the end)
 

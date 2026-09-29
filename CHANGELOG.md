@@ -52,9 +52,8 @@ package follows [Semantic Versioning](https://semver.org/).
   own pins of them, or `project:single-copies` fails.
 - No remy-auth page list is a default: `localizedWorker`'s `entryPaths`, `entryRedirect`, `sitemapXml`'s
   `paths` and `prerenderPages`' `paths` are required; the sitemap lists `defineRemyApp`'s `sitePaths`.
-  `paths` is the showcase's list.
 - The shared check sets take the app's `sitePaths` and `appPaths`; the home page's words are checked only
-  when the app passes `home`, and the showcase's checks only with `showcase`.
+  when the app passes `home`.
 - An app's own `src/routes/csp-report.ts`, `src/csp.ts` and `src/preferred.ts` go (the package's route,
   defaults and `root` replace them).
 - `defineRemyApp` takes `service` and `sitePaths` (required: the sitemap lists them) and registers the app
@@ -71,8 +70,12 @@ package follows [Semantic Versioning](https://semver.org/).
   `parts/status-card/card`); `build-boundaries.checks` and `code-splitting.checks` are at the root; `rows`
   and `zod-csp` are exported.
 - The showcase's checks are one call an app showing the showcase makes itself, `showcaseChecks()`
-  (`showcase/showcase.checks`: `demoChecks`, `appNavChecks` and `formatsChecks` moved there from `checks`);
-  `serverAppChecks` and `prerenderedAppChecks` lost `showcase`. `problem.checks` moved from `showcase/` to the root.
+  (`@joeblew999/remy-showcase/showcase.checks`, with `demoChecks`, `appNavChecks` and `formatsChecks` from
+  `checks`); `serverAppChecks` and `prerenderedAppChecks` lost `showcase`. `problem.checks` is at the root.
+- `@joeblew999/remy-auth-contract` 0.3.0 imports the reservation from `@joeblew999/remy-showcase` (peer:
+  remy-showcase 0.1.0 on); 0.2.1 needs remy-ui below 0.14.
+- `packages:bumped` (first in `packages:release`, and in `packages:tag`): a published package whose files
+  changed since the last release tag must have a new version, or the release stops.
 - `buildBoundaryChecks` checks a page's device time only with `deviceTimePath` (the showcase's `/formats`).
 - `project:verify` also runs `project:doctor` and `project:verify-tooling`; `project:generate` compiles
   the app's own catalog by default. A missing `src/parts.json` lists no parts.

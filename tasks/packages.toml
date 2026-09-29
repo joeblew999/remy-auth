@@ -2,7 +2,7 @@
 # and any other Remy repo alike (.plans/thin-apps.md, group 6). The workspace list in package.json drives
 # them (packages/workspaces.mjs); RELEASE_PACKAGE in mise.toml [env] names the package whose version tags a
 # release, and RELEASE_TITLE its title. A repository without such workspaces has nothing to pack or publish.
-# File tasks in packages/: check, upgrade, pack, notes, tag, publish.
+# File tasks in packages/: check, upgrade, pack, notes, bumped, tag, publish.
 
 ["packages:release"]
 description = "Release: the gates one after another (translations strict, project:verify, project:release-checks, Google's audits locally and Core Web Vitals on a Cloudflare preview; ~5 min, uses dist/ and PREVIEW_PORT, so nothing else local at the same time), then packages:tag (tag, push, publish, GitHub release). CI repeats the audits on the tag"
@@ -11,6 +11,8 @@ dir = "{{config_root}}"
 run = [
   # First, so a release with missing or stale translations stops before the long checks.
   "I18N_STRICT=1 mise run i18n:check",
+  # A changed package whose version is already published would be skipped, never shipped.
+  { task = "packages:bumped" },
   { task = "project:verify" },
   { task = "project:release-checks" },
   { task = "project:test:google" },

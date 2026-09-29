@@ -1,7 +1,7 @@
 // The showcase's checks (.plans/platform-structure.md, fix 2): what remy-auth's showcase pages must do (the demo,
 // the formats page, the app navigation, search params, preload, the leave guard, the device place), for the
 // apps that show them (remy-auth, remy-auth-app). No platform check set calls them: an app showing the showcase
-// calls showcaseChecks() itself. Plain JavaScript, like ../checks.js.
+// calls showcaseChecks() itself. Plain JavaScript, like the platform's checks.
 import { test, expect } from '@playwright/test';
 import { locales, baseLocale } from '@joeblew999/remy-ui/runtime';
 import { m } from '@joeblew999/remy-ui/messages';

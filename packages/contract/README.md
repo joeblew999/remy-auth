@@ -21,12 +21,14 @@ and `createTanstackQueryUtils` from `@orpc/tanstack-query`, then the package's `
 
 ## Releases
 
-Published to GitHub Packages (`publishConfig`) by `scripts/release.sh` (and the tag's CI job) under
-the shared package's tag, whenever this version is not published yet: bump `version` here, and the
-root's pin, when the contract changes. A field changed or removed is a breaking change for every
+Published to GitHub Packages (`publishConfig`) by `packages:publish` (in `packages:release`, and the tag's CI
+job) under the shared package's tag, whenever this version is not published yet: bump `version` here when the
+contract changes (`packages:bumped` fails the release otherwise). A field changed or removed is a breaking change for every
 consumer: a new major (a new minor while 0.x).
 
 It ships TypeScript source, as `@joeblew999/remy-ui` does: consumers' Vite bundles it and their
 `tsc` checks it. A Playwright spec in a consumer must not import it (Playwright does not transpile
-TypeScript inside `node_modules`); the shared checks take plain values instead. The peer range names
-the first `@joeblew999/remy-ui` with the reservation shapes it imports (0.10.5).
+TypeScript inside `node_modules`); the shared checks take plain values instead. The peer ranges name
+what it imports: the reservation shapes from `@joeblew999/remy-showcase` (0.1.0 on) and the API's
+coverage types from `@joeblew999/remy-ui` (0.12.0 on). 0.2.1 imports them from `@joeblew999/remy-ui/reservation`, which 0.14.0
+removed: it needs `@joeblew999/remy-ui` below 0.14.

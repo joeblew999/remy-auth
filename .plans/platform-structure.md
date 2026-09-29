@@ -174,6 +174,12 @@ the fixture cannot take the tasks through mise's git cache. What differs there i
      no showcase, passes. Done with a one-off move script (renames plus import rewriting); its three misses
      (imports of a file that had itself moved, the `showcase/*` wildcard, `/// <reference>` paths) were found by
      tier 0 and fixed.
+     The review found what S5 predicts: the contract changed (its reservation now comes from the showcase)
+     but kept version 0.2.1, which `packages:publish` would have skipped as published, leaving 0.2.1, whose
+     import 0.14.0 removes, as the only contract. Fixed: the contract is 0.3.0, and `packages:bumped` (first
+     in `packages:release`, and in `packages:tag`) stops a release when a published package's files changed
+     since the last tag without a new version; run now, it names exactly that case. The showcase is a peer of
+     nothing but the platform; the docs' old export names (which also ship in the `remy` skill) are fixed.
   2b. **Left: the three showcase parts.** time-zones and deferred-place still link to and default to the
      showcase's `/formats` and `/app/demo`, and status-card shows remy-auth's API, so they belong to the
      showcase. The parts catalog (`parts/list.js`) is written inside the platform, so it has to take parts from

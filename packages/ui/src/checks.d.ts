@@ -5,6 +5,8 @@ export declare const direction: (locale: string) => 'ltr' | 'rtl';
 export declare const weekday: (locale: string, day: number, style?: 'long' | 'short' | 'narrow') => string;
 /** `value` written in a numbering system's digits. */
 export declare const digits: (value: number, numberingSystem: string) => string;
+/** The decimal digits in `text` that are not the language's own. */
+export declare const foreignDigits: (text: string, locale: string) => string[];
 export declare const localizedPath: (path: string, locale: string) => string;
 /** Every locale, or the subset in CHECK_LOCALES. */
 export declare const checkedLocales: readonly string[];

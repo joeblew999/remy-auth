@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+#MISE description="Every package this repository publishes whose files changed since the last release tag has a new version: packages:publish skips a version already on the registry, so an unbumped change would never ship (~1 s). packages:release runs it first"
+#MISE dir="{{config_root}}"
+set -euo pipefail
+last=$(git describe --tags --abbrev=0 --match 'v[0-9]*' 2>/dev/null || true)
+[ -n "$last" ] || { echo "packages:bumped: no release tag yet, nothing to compare."; exit 0; }
+problems=()
+while IFS=$'\t' read -r name version _ location; do
+  # A package that did not exist at the last tag is new: its version is not published yet.
+  manifest=$(git show "$last:$location/package.json" 2>/dev/null) || continue
+  then=$(printf '%s' "$manifest" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.parse(s).version))")
+  if [ "$then" = "$version" ] && ! git diff --quiet "$last" -- "$location"; then
+    problems+=("$name is still $version, as at $last, but $location changed since: bump its version")
+  fi
+done < <(node "$(dirname "$0")/workspaces.mjs")
+if [ ${#problems[@]} -gt 0 ]; then printf 'packages:bumped: %s\n' "${problems[@]}" >&2; exit 1; fi
+echo "packages:bumped: every changed package has a new version since $last."

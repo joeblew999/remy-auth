@@ -27,7 +27,7 @@
     "./search-params": "./src/search-params.tsx",
     "./*.checks": "./src/*.checks.js"
   },
-  "dependencies": {
-    "@joeblew999/remy-ui": "*"
+  "peerDependencies": {
+    "@joeblew999/remy-ui": ">=0.13.0"
   }
 }
