@@ -48,7 +48,7 @@ encuentra; ninguna comprobación propia lo mantiene.
 | `messages/`, `project.inlang/` | el preset de la app, `project:generate`, `i18n:messages:*` | las cadenas propias de la app, si las hay (compiladas en `src/paraglide/`) |
 | `.plans/` (`now.md`, `done/`, `parked/`) | `plans:*` | los planes del repositorio |
 | `AGENTS.md`, `.github/workflows/` | agentes; GitHub | el índice de los agentes; CI |
-| `tasks/`, `template/` | el include; `giget` | solo remy-auth: las propias tareas compartidas, y la app en blanco desde la que arranca un repositorio nuevo |
+| `tasks/`, `template/`, `fixtures/consumer/` | el include; `giget`; `template:test` | solo remy-auth: las propias tareas compartidas, la app en blanco desde la que arranca un repositorio nuevo, y el fixture de consumidor que prueba ambos tal como los recibiría otro repositorio |
 
 ### Un consumidor nuevo [#a-new-consumer]
 
@@ -110,7 +110,8 @@ mensaje nombra el archivo que importa, no el mapa de exports. Las cadenas propia
 propio proyecto inlang, compilado por su build, cuyo runtime sigue el idioma de la plataforma con una sola
 llamada, `followLocale(runtime)` (`locale`); las tareas de i18n lo leen a través de `I18N_INLANG`. Las
 comprobaciones que el repositorio añade a un release van en `project:release-checks` (remy-auth:
-`template:check`, `ui:verify`).
+`template:check`, `ui:verify`). remy-auth fija la versión de un release con `mise run ui:version -- X.Y.Z`,
+que la escribe en todos los lugares donde aparece (el paquete y los tres pines de la app en blanco).
 
 ### Elegir la versión: publicada, de desarrollo o local [#choosing-the-version-released-development-or-local]
 
@@ -148,12 +149,20 @@ niveles y cuándo usar cada uno son una regla en
 | 0 | `project:check` (comprobación de tipos y build, sin navegador; después `i18n:check`, como aviso) |
 | 1 | `project:test:smoke` (`tests/smoke.spec.ts`, construido sobre las comprobaciones `./smoke` del paquete) |
 | 2 | `project:test:only -- <words>` (las comprobaciones cuyo título coincide, en `QUICK_LOCALES`) |
-| 3 | `project:test:quick` (todas las comprobaciones en `QUICK_LOCALES`, por defecto `en,ar`) |
+| 3 | `project:test:quick` (todas las comprobaciones en `QUICK_LOCALES`, por defecto `en,ar`; después `project:test:consumers`) |
 | 4 | `project:verify` (todo, en todos los idiomas; `packages:release` lo ejecuta) |
 
-`project:test` es cada una de nuestras comprobaciones en todos los idiomas (dentro de `project:verify`). El
-nivel de Google es `project:test:google` (auditorías de Lighthouse, local; CI en cada push y tag) y
-`project:test:cwv` (Core Web Vitals en un Worker de Cloudflare desechable); `packages:release` ejecuta ambas.
+`project:test` es cada una de nuestras comprobaciones en todos los idiomas (dentro de `project:verify`). Los
+niveles 3 y 4 y CI terminan con `project:test:consumers`, los demás repositorios a los que este sirve,
+probados tal como los reciben: nada por defecto; en remy-auth, `template:test`, que construye la app en
+blanco y un paquete propio a partir de la plataforma de este commit (el paquete desde un tarball con
+versión propia, las tareas desde una copia fuera de cualquier `node_modules`, el `.npmrc` de la plantilla)
+y ejecuta la instalación, las skills (instaladas una vez por lista fijada y luego reutilizadas), las
+herramientas, el nivel 0, el nivel 3, la documentación y una publicación de prueba (dry-run) (~1,5 a 3 min,
+sobre todo la red). Un cambio que rompería otro repositorio falla ahí, no en ese repositorio. Las pruebas
+se comprueban con tipos junto con la app (`tsconfig.json` incluye `tests/`). El nivel de Google es
+`project:test:google` (auditorías de Lighthouse, local; CI en cada push y tag) y `project:test:cwv`
+(Core Web Vitals en un Worker de Cloudflare desechable); `packages:release` ejecuta ambas.
 
 Dónde se ejecutan las comprobaciones: el comportamiento propio del paquete compartido se comprueba una vez, en remy-auth, antes de cada
 release. Una app construida sobre el paquete ejecuta un conjunto de contrato (sus páginas renderizan, las páginas de sitio y de app se mantienen
@@ -195,7 +204,7 @@ herramientas, traducir con el agente Claude fijado y hacer commit.
 | Tarea | Hace |
 | --- | --- |
 | `i18n:check` | Ambas comprobaciones en paralelo; un WARNING y salida 0 mientras se programa (`project:check` la ejecuta), salida 1 con `I18N_STRICT=1` (`packages:release`) |
-| `i18n:messages:check` | Los huecos de los catálogos; `-- --list` una línea por hueco (`es missing nav_more`) |
+| `i18n:messages:check` | Los huecos de los catálogos, y los idiomas que difieren de los de la plataforma (`de unlisted`); `-- --list` una línea por hueco (`es missing nav_more`) |
 | `i18n:docs:check` | Los huecos de la documentación; `-- --list` una línea por hueco (`es stale docs/content/dev/gui.es.md`) |
 | `i18n:translate` | En main: mensajes y luego documentación, un commit para cada uno |
 | `i18n:messages:translate` | Los huecos de los catálogos, un idioma por llamada al agente |

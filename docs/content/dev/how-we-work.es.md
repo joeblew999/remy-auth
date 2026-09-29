@@ -158,11 +158,11 @@ Cuando el propietario delega decisiones, por ejemplo para terminar el trabajo si
   | 0 | `mise run project:check` | comprobación de tipos y build; estado de las traducciones como aviso | ~15 s |
   | 1 | `mise run project:test:smoke` | cada página responde en en y ar; la página de inicio y la documentación se hidratan; la búsqueda y ask responden | ~15 s |
   | 2 | `mise run project:test:only -- <words>` | solo las comprobaciones cuyo título coincide, en y ar | variable |
-  | 3 | `mise run project:test:quick` | todas las comprobaciones, en y ar | ~45 s |
+  | 3 | `mise run project:test:quick` | todas las comprobaciones, en y ar; luego los demás repositorios a los que este da servicio (remy-auth: el fixture de consumidor, de ~1,5 a 3 min) | ~45 s (remy-auth ~2 a 4 min) |
   | 4 | `mise run project:verify` | todo, todos los idiomas | releases |
 
 - Los deploys no ejecutan pruebas a menos que `GATE` elija un nivel: `GATE=smoke` para la mayoría de los cambios de código, `GATE=quick`
-  para cambios en el paquete compartido o transversales, `GATE=full` rara vez. El texto de documentación, los planes, las tareas y la configuración
+  para cambios en el paquete compartido o transversales (en remy-auth incluye el fixture de consumidor, +1,5 a 3 min y la red), `GATE=full` rara vez. El texto de documentación, los planes, las tareas y la configuración
   se despliegan directamente. Indica qué nivel se ejecutó al informar.
 - Nunca encadenes un comando de puerta de control con `grep` o `tail` mediante una tubería: la tubería oculta su código de salida.
   Esto ya provocó una vez el release de una versión cuyas comprobaciones habían fallado.
