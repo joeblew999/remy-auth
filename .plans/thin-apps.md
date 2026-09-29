@@ -48,10 +48,11 @@ Rules for every fix in this plan:
 ## Evidence: remy-video today
 
 Two field reports, drafted in remy-video and not yet posted as issues:
-[remy-auth-feedback.md](../../remy-video/.plans/remy-auth-feedback.md) (16 items: tasks, packages,
-app) and [remy-auth-docs-feedback.md](../../remy-video/.plans/remy-auth-docs-feedback.md) (7 items:
+[remy-auth-feedback.md](../../remy-video/.plans/done/remy-auth-feedback.md) (16 items: tasks, packages,
+app) and [remy-auth-docs-feedback.md](../../remy-video/.plans/done/remy-auth-docs-feedback.md) (7 items:
 the docs Worker). They read as asks for docs and scaffolds; this plan reads them as places the
-platform leaks. They can be closed by this plan instead of being posted.
+platform leaks. Decided 2026-09-29 (owner delegated: "you decide"): closed against this plan, not
+posted as issues; the table below is their one home, so no fix is tracked twice.
 
 Hand-maintained lines outside docs content, lockfiles, media and generated route trees, 2026-09-29:
 
@@ -67,7 +68,7 @@ Roughly 3,700 lines, of which a few hundred are video. The target is the few hun
 
 ### Every item in the two reports, and where this plan answers it
 
-App report (A, [remy-auth-feedback.md](../../remy-video/.plans/remy-auth-feedback.md)):
+App report (A, [remy-auth-feedback.md](../../remy-video/.plans/done/remy-auth-feedback.md)):
 
 | Item | What remy-video hit | Answered by |
 | --- | --- | --- |
@@ -88,7 +89,7 @@ App report (A, [remy-auth-feedback.md](../../remy-video/.plans/remy-auth-feedbac
 | A15 | `tasks/README.md` does not name its source | done before this plan: it links `docs/content/dev/tasks.md` |
 | A16 | Export-map example, `Env` before `wrangler types`, coverage rule, task refresh, port clash | group 5 (`Env`), group 6 (export map of an owned package), group 7 (the rest) |
 
-Docs report (D, [remy-auth-docs-feedback.md](../../remy-video/.plans/remy-auth-docs-feedback.md)):
+Docs report (D, [remy-auth-docs-feedback.md](../../remy-video/.plans/done/remy-auth-docs-feedback.md)):
 
 | Item | What remy-video hit | Answered by |
 | --- | --- | --- |
@@ -227,6 +228,5 @@ plan's acceptance.
 
 ## Open questions for the owner
 
-- Post remy-video's two reports as issues on this repo for the record, or close them against this plan?
 - Which other repos follow remy-video (remy-data, remy-sport, remy-nash do not include the tasks yet;
   remy-auth-app-layout is on 0.11.0)?
