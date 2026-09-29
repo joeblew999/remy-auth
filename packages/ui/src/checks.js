@@ -59,7 +59,7 @@ export function collectErrors(page) {
  * `translations` names, per path, the languages such a page also has its own text in (English first):
  * the sitemap lists it in each of them, self-canonical, with those as alternates and x-default.
  */
-export function publicPageChecks({ paths, prerendered = false, oneLanguage = { locale: baseLocale, paths: [] }, sitemap = true }) {
+export function publicPageChecks({ paths, prerendered = false, oneLanguage = { locale: baseLocale, paths: [] }, sitemap = true, home }) {
   for (const locale of checkedLocales) {
     const o = { locale };
     test(`${locale}: home page is complete without JavaScript`, async ({ browser, baseURL }) => {
@@ -69,8 +69,12 @@ export function publicPageChecks({ paths, prerendered = false, oneLanguage = { l
       expect(response?.status()).toBe(200);
       await expect(page.locator('html')).toHaveAttribute('lang', locale);
       await expect(page.locator('html')).toHaveAttribute('dir', direction(locale));
-      await expect(page.getByRole('heading', { level: 1 })).toHaveText(m.home_title({}, o));
-      await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', m.home_description({}, o));
+      // The home page's heading and description: exactly the app's words when it passes them (`home`), else
+      // present and non-empty; the structure is every app's, the words are its own.
+      if (home?.title) await expect(page.getByRole('heading', { level: 1 })).toHaveText(home.title(locale));
+      else await expect(page.getByRole('heading', { level: 1 })).not.toBeEmpty();
+      if (home?.description) await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', home.description(locale));
+      else await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /\S/);
       await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `${baseURL}${localizedPath('', locale)}`);
       for (const other of locales) await expect(page.locator(`link[hreflang="${other}"]`)).toHaveAttribute('href', `${baseURL}${localizedPath('', other)}`);
       await expect(page.locator('link[hreflang="x-default"]')).toHaveAttribute('href', `${baseURL}/`);
@@ -79,7 +83,7 @@ export function publicPageChecks({ paths, prerendered = false, oneLanguage = { l
       // Structured data: the site home names the site (schema.org WebSite), once, in the server's HTML.
       const data = page.locator('script[type="application/ld+json"]');
       await expect(data).toHaveCount(1);
-      expect(JSON.parse(await data.textContent())).toEqual(website(baseURL));
+      expectWebsite(JSON.parse(await data.textContent()), baseURL, home?.brand);
       await context.close();
     });
 
@@ -89,7 +93,7 @@ export function publicPageChecks({ paths, prerendered = false, oneLanguage = { l
       await hydrated(page.locator('body'));
       const data = page.locator('script[type="application/ld+json"]');
       await expect(data).toHaveCount(1);
-      expect(JSON.parse(await data.textContent())).toEqual(website(baseURL));
+      expectWebsite(JSON.parse(await data.textContent()), baseURL, home?.brand);
     });
   }
 
@@ -160,8 +164,12 @@ export function sitemapChecks({ paths, oneLanguage = { locale: baseLocale, paths
   });
 }
 
-/** The schema.org WebSite the site home page carries: the brand and the site root. */
-const website = origin => ({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'Remy', url: `${origin}/` });
+/** The schema.org WebSite the site home page carries: the brand (the app's, when it passes one) and the site root. */
+const expectWebsite = (data, origin, brand) => {
+  expect(data).toMatchObject({ '@context': 'https://schema.org', '@type': 'WebSite', url: `${origin}/` });
+  if (brand) expect(data.name).toBe(brand);
+  else expect(data.name).toMatch(/\S/);
+};
 
 /**
  * URLs without a locale lead to the visitor's language, and a localized page offers the
@@ -581,7 +589,7 @@ export function zoneChecks({ sitePaths, appPaths }) {
     });
   }
 
-  test('on a phone in landscape the way back to the site stays in view', async ({ page }) => {
+  if (appPaths.length) test('on a phone in landscape the way back to the site stays in view', async ({ page }) => {
     await page.setViewportSize({ width: 844, height: 340 });
     for (const locale of checkedLocales) {
       await page.goto(localizedPath(appPaths[0], locale));

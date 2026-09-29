@@ -13,7 +13,9 @@ export declare function hydrated(locator: Locator): Promise<void>;
  */
 export type OneLanguage = { locale: string; paths: string[]; translations?: Record<string, string[]> };
 /** `sitemap: false` leaves the sitemap to the seo-routes part's checks (sitemapChecks). */
-export declare function publicPageChecks(options: { paths: string[]; prerendered?: boolean; oneLanguage?: OneLanguage; sitemap?: boolean }): void;
+/** The home page's own words, checked exactly when an app passes them; without them, only that they are there. */
+export type HomeContent = { title?: (locale: string) => string; description?: (locale: string) => string; brand?: string };
+export declare function publicPageChecks(options: { paths: string[]; prerendered?: boolean; oneLanguage?: OneLanguage; sitemap?: boolean; home?: HomeContent }): void;
 /** The sitemap lists `paths` in every locale and `oneLanguage`'s pages, self-canonical with hreflang alternates; robots.txt names it. */
 export declare function sitemapChecks(options: { paths: string[]; oneLanguage?: OneLanguage }): void;
 export declare function entryChecks(options: { paths: string[]; mode: 'redirect' | 'static' }): void;

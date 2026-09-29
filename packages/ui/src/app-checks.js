@@ -1,5 +1,4 @@
 import { zoneChecks, publicPageChecks, entryChecks, demoChecks, appNavChecks, themeChecks, formatsChecks, textChecks, fontChecks, observabilityChecks, cspChecks } from './checks.js';
-import { sitePaths, appPaths, allPaths } from './paths.js';
 import { navigationBlockingChecks } from './showcase/navigation-blocking.checks.js';
 import { preloadChecks } from './showcase/preload.checks.js';
 import { searchParamsChecks } from './showcase/search-params.checks.js';
@@ -7,66 +6,63 @@ import { devicePlaceChecks } from './showcase/device-place.checks.js';
 import { existsSync } from 'node:fs';
 import { partsFile, readParts } from './parts/list.js';
 
-// One call per kind of app for the checks every app on the package runs: the shared pages (paths.js)
-// in both zones, their entry URLs, text, observability and the showcase rows that app kind can show.
-// The app passes its own pages beside the shared ones (`ownSitePaths`, `ownAppPaths`: remy-auth's
-// docs) and keeps only the checks for what it adds. Checks that are not in a set stay separate calls.
-// Part-aware (.plans/parts.md): what a listed part owns runs with partChecks() instead, never twice.
+// One call per kind of app for the checks every app on the package runs, over the app's own pages (its
+// `sitePaths` and `appPaths`: both zones, their entry URLs, text, fonts, observability, CSP, the theme), and
+// the showcase's checks only for an app that shows remy-auth's showcase pages (`showcase`: remy-auth,
+// remy-auth-app). The home page's words are the app's to check (`home`); the structure is every app's
+// (.plans/thin-apps.md, group 4). Checks that are not in a set stay separate calls. Part-aware
+// (.plans/parts.md): what a listed part owns runs with partChecks() instead, never twice.
 
 /** The app's listed parts: `parts` when given, else its src/parts.json when it has one, else none. */
 const listedParts = parts => parts ?? (existsSync(partsFile) ? readParts() : []);
 
-const zones = ({ ownSitePaths, ownAppPaths }) => ({
-  sites: [...sitePaths, ...ownSitePaths],
-  apps: [...appPaths, ...ownAppPaths],
-  every: [...allPaths, ...ownSitePaths, ...ownAppPaths],
-});
-
 /**
  * A server-rendered app (TanStack Start rendering every request in the Worker): entry URLs redirect
- * to the visitor's language, every page carries the strict nonce CSP, fonts are checked per script,
- * and the showcase rows use server functions. Listed parts (`parts`, default the app's src/parts.json)
- * own their checks: with seo-routes the sitemap is its; with deferred-place the network location
- * beside the device's is its to show, and this checks the device row expects it.
+ * to the visitor's language, every page carries the strict nonce CSP, fonts are checked per script.
+ * Listed parts (`parts`, default the app's src/parts.json) own their checks: with seo-routes the sitemap is
+ * its; with deferred-place the network location beside the device's is its to show.
  */
-export function serverAppChecks({ service, ownSitePaths = [], ownAppPaths = [], oneLanguage, formats = {}, devicePath = '/app/location', parts, cspEnforced = true }) {
+export function serverAppChecks({ service, sitePaths, appPaths = [], home, oneLanguage, parts, cspEnforced = true, showcase }) {
   const listed = listedParts(parts);
-  const { sites, apps, every } = zones({ ownSitePaths, ownAppPaths });
-  zoneChecks({ sitePaths: sites, appPaths: apps });
-  publicPageChecks({ paths: sitePaths, oneLanguage, sitemap: !listed.includes('seo-routes') });
-  // Text in every language, and the font drawing each language: the shared pages.
-  textChecks({ paths: allPaths });
+  const every = [...sitePaths, ...appPaths];
+  zoneChecks({ sitePaths, appPaths });
+  publicPageChecks({ paths: sitePaths, oneLanguage, sitemap: !listed.includes('seo-routes'), home });
+  textChecks({ paths: every });
   fontChecks({ paths: sitePaths });
   entryChecks({ paths: every, mode: 'redirect' });
-  demoChecks();
-  appNavChecks();
   themeChecks();
   observabilityChecks({ service, paths: every });
   cspChecks({ paths: every, enforce: cspEnforced });
-  searchParamsChecks();
-  preloadChecks();
-  navigationBlockingChecks();
-  devicePlaceChecks({ path: devicePath, network: listed.includes('deferred-place') });
-  formatsChecks(formats);
+  if (showcase) {
+    demoChecks();
+    appNavChecks();
+    searchParamsChecks();
+    preloadChecks();
+    navigationBlockingChecks();
+    devicePlaceChecks({ path: showcase.devicePath ?? '/app/location', network: listed.includes('deferred-place') });
+    formatsChecks(showcase.formats ?? {});
+  }
 }
 
 /**
  * A fully prerendered app (every page written at build time, a thin Worker in front): entry pages
- * are static lists of every language, and the showcase rows work without server functions.
+ * are static lists of every language; the showcase rows work without server functions.
  */
-export function prerenderedAppChecks({ service, ownSitePaths = [], ownAppPaths = [], formats = {}, devicePath = '/app/location' }) {
-  const { sites, apps, every } = zones({ ownSitePaths, ownAppPaths });
-  zoneChecks({ sitePaths: sites, appPaths: apps });
-  publicPageChecks({ paths: sitePaths, prerendered: true });
+export function prerenderedAppChecks({ service, sitePaths, appPaths = [], home, showcase }) {
+  const every = [...sitePaths, ...appPaths];
+  zoneChecks({ sitePaths, appPaths });
+  publicPageChecks({ paths: sitePaths, prerendered: true, home });
   entryChecks({ paths: every, mode: 'static' });
-  demoChecks();
-  appNavChecks();
   themeChecks();
-  formatsChecks(formats);
-  textChecks({ paths: every });
   observabilityChecks({ service, paths: every });
-  navigationBlockingChecks();
-  preloadChecks({ serverFn: false });
-  searchParamsChecks({ serverRendered: false });
-  devicePlaceChecks({ path: devicePath });
+  textChecks({ paths: every });
+  if (showcase) {
+    demoChecks();
+    appNavChecks();
+    formatsChecks(showcase.formats ?? {});
+    navigationBlockingChecks();
+    preloadChecks({ serverFn: false });
+    searchParamsChecks({ serverRendered: false });
+    devicePlaceChecks({ path: showcase.devicePath ?? '/app/location' });
+  }
 }

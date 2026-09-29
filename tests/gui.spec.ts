@@ -4,7 +4,8 @@ import { locales } from '@joeblew999/remy-ui/runtime';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { checkedLocales, collectErrors, endonym, direction, localizedPath, formatTag } from '@joeblew999/remy-ui/checks';
 import { serverAppChecks } from '@joeblew999/remy-ui/app-checks';
-import { localeInfo } from '../packages/ui/src/locale-info';
+import { localeInfo } from '@joeblew999/remy-ui/locale-info';
+import { m } from '@joeblew999/remy-ui/messages';
 import { sitePaths, appPaths } from '@joeblew999/remy-ui/paths';
 import { everyPath } from '../src/paths';
 import { cspEnforced } from '../src/csp';
@@ -23,7 +24,12 @@ import { buildBoundaryChecks } from '@joeblew999/remy-ui/showcase/build-boundari
 // The docs are the docs Worker's (docs/; its checks are the package's, docs:test).
 serverAppChecks({
   service: 'remy-auth',
-  formats: { extra: formatsExtra },
+  sitePaths,
+  appPaths,
+  // This app's home page words and brand: its own content, checked exactly.
+  home: { title: locale => m.home_title({}, { locale }), description: locale => m.home_description({}, { locale }), brand: 'Remy' },
+  // It shows remy-auth's showcase pages, so their checks run too.
+  showcase: { formats: { extra: formatsExtra } },
   // The middleware's own switch (src/csp.ts): the checks expect the header it sends.
   cspEnforced,
 });
