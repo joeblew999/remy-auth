@@ -63,11 +63,12 @@ Also `project-layout` (step 1: not merged, its fixes ported). Keep the uncommitt
 0.13.0 released through `ui:release`; remy-auth-app moved with `mise run project:upgrade-ui 0.13.0`, its root on
 `AppProviders`, its Clock on `clockRouteOptions`; gates green (175), live at https://remy-auth-app.gedw99.workers.dev.
 
-## Drafted: thin apps (owner, 2026-09-29)
+## Agreed: thin apps (owner, 2026-09-29)
 
-[thin-apps](thin-apps.md): every Remy repo gets the platform with as little boilerplate as possible;
-built and proved in remy-auth first (it uses each shared piece as a consumer would); remy-video
-(~3,700 hand-kept lines, a few hundred of them video) adopts once at the end. In phases with a stop after each; risks and their fixes in the plan. Phase A (providers and shell, the docs routes test) is next.
+[thin-apps](thin-apps.md): every Remy repo gets the platform with as little boilerplate as possible.
+Built and proved in remy-auth first, no release until the end; then a new video repo replaces remy-video
+(~3,700 hand-kept lines, a few hundred of them video), which is not migrated. In phases with a stop after
+each. Phase A (providers and shell, the docs routes test) is next.
 
 ## Then: clean up the developer docs (owner, 2026-09-26: "a bit weird for a public and agent audience")
 

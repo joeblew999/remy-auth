@@ -1,8 +1,10 @@
 # Thin apps: every Remy repo gets the platform with as little boilerplate as possible
 
 Status: agreed 2026-09-29, phase A next. Owner: remy-auth. Built and proved in remy-auth first, with no
-release until phase D; remy-video (`../remy-video`, tasks and remy-ui 0.13.0) is the evidence and adopts
-at the end. Executor/Reviewer roles as in
+release until phase D; remy-video (`../remy-video`, tasks and remy-ui 0.13.0) is the evidence. It is
+not migrated (owner, 2026-09-29: "its so bad we will have to make a new one and then copy the real bits
+out of it later"): phase D starts a new video repo on the platform and copies remy-video's product
+code into it. Executor/Reviewer roles as in
 [plans and roles](../docs/content/dev/development.md#plans-and-roles).
 
 ## Intent
@@ -41,9 +43,10 @@ Rules for every fix in this plan:
    for all other repos. and we prove it here and not have to work on both remy-video and remy-auth at
    the same time." remy-auth consumes each shared piece exactly as another repo would (through the
    package's exports and config, no reaching into its sources), so remy-auth itself is the proof.
-   Other repos move afterwards, one `project:upgrade-ui` each.
+   Existing repos that are sound move afterwards, one `project:upgrade-ui` each (remy-auth-app);
+   remy-video is replaced instead.
 4. **Measured by deletion.** Each phase ends with remy-auth's own copies deleted and its gates green;
-   the scratch check (risk 2) shows what the same change removes from remy-video.
+   the scratch check (risk 2) shows how little a new repo needs.
 
 ## Evidence: remy-video today
 
@@ -64,7 +67,18 @@ Hand-maintained lines outside docs content, lockfiles, media and generated route
 | Root config (mise, package.json, vite, tsconfig, wrangler, playwright, release scripts, CI) | ~360 | 10 | origins, names, the package list |
 | Contract (`packages/contract`) | ~100 | 3 | all of it |
 
-Roughly 3,700 lines, of which a few hundred are video. The target is the few hundred.
+Roughly 3,700 lines, of which a few hundred are video. The target is the few hundred: the new video repo
+in phase D is measured against this table.
+
+The real bits, copied into the new repo in phase D (everything else is platform or goes):
+
+- `packages/ui/src/video.ts` (schemas and formatting) and the video pages in `pages.tsx`
+  (`VideoHomePage`, `LibraryPage`, `LibrarySkeleton`, `PlayerPage`, `HomeCard`, `formatDuration`);
+- `packages/contract/src/index.ts` and its README;
+- `src/api/router.ts` (the procedures) and the routes `videos.tsx`, `videos_.$videoId.tsx`,
+  `app.videos.tsx`, with the home and app home pages' video content;
+- `docs/content/` (users and dev pages, English and Spanish), `docs.config.ts`'s values;
+- names and origins: `mise.toml`'s `[env]`, the `wrangler.jsonc` names, `fnox.toml`, `public/favicon.svg`.
 
 ### Every item in the two reports, and where this plan answers it
 
@@ -103,8 +117,8 @@ Docs report (D, [remy-auth-docs-feedback.md](../../remy-video/.plans/done/remy-a
 
 ## Groups, in order
 
-Each group names what it removes from remy-video and the report items it answers (A = app report,
-D = docs report).
+Each group names what remy-video had to write that a new repo will not, and the report items it answers
+(A = app report, D = docs report).
 
 ### 1. App chrome takes the app's routes (A6, A7, A8, A14)
 
@@ -209,14 +223,14 @@ the phases below; none is left to care alone.
 | # | Risk | What closes it |
 | --- | --- | --- |
 | 1 | Size: ten steps is "big feature stuff", the kind of plan that turned now.md into a mess | Phases, each with a stop. Only phase A is agreed now; B, C and D each need the owner's go after the previous phase's review. A phase that runs over is stopped and re-planned, not stretched |
-| 2 | The wrong abstraction: config designed around remy-auth breaks the next app | Three users at every phase end: remy-auth, remy-auth-app and remy-video. The package is packed locally (`ui:pack`, nothing published) and installed into scratch copies of remy-auth-app and remy-video, with the tasks included from the local `tasks/`; both are moved onto the new shape there and typechecked and built. Their repos are not changed; the copies check the design. A shape that needs remy-auth-only escape hatches is changed before the phase ends |
+| 2 | The wrong abstraction: config designed around remy-auth breaks the next app | Three users at every phase end: remy-auth, remy-auth-app and a new app. The package is packed locally (`ui:pack`, nothing published); a scratch copy of remy-auth-app moves onto it, and a scratch new app is built from nothing with it, holding only product code (a video library, from remy-video's real bits). Both take the tasks from the local `tasks/`, typecheck and build. No repo is changed; the scratch apps check the design, and the new one counts its own hand-written files. A shape that needs remy-auth-only escape hatches is changed before the phase ends |
 | 3 | Owning the wrapper: every Fumadocs or TanStack Start upgrade becomes ours, for every repo | The wrapper keeps Fumadocs' TanStack Start template's file layout and records the template version it follows; an upgrade is that template's diff applied once, in the package. Fumadocs and Start are pinned exactly in one place, and `packages:upgrade` in remy-auth is the only way they move |
 | 4 | Breaking the live sites | Other repos pin release tags, so a bad release reaches them only when they upgrade. remy-auth does not pin: it uses the package through the workspace (`"@joeblew999/remy-ui": "*"`, a symlink to `packages/ui`), so every change reaches it at once, before any release. That makes remy-auth the canary, and its guard is the deploy rule: its Workers deploy only after `mise run cf:preview` and the hands-on pass, `GATE=quick` for shared-package changes, never mid-phase from a half-moved state. Rollback is the previous Worker version (`wrangler rollback`) and, for other repos, the previous tag |
 | 5 | Churn: a release and an upgrade per step, each able to break consumers | No releases while the plan runs (owner, 2026-09-29: "you dont have to do releases? you can code the shared system and refactor remy-auth as you go"). remy-auth runs the package's and `tasks/`'s current source through the workspace, so the shared system and remy-auth change together in the same commits. Other repos stay on their pinned 0.13.0 and meet the new shape once, in phase D. Checking against them needs no release either (risk 2) |
 | 6 | The docs routes test fails | It runs in phase A, before phase B is agreed, with a fixed decision rule: pass means no routes in a repo; fail means the fallback (one-line re-export files, generated by the platform, never edited) is written into the plan with its file count before phase B starts |
 | 7 | Clash with the queued developer-docs cleanup | None in fact: the docs system moves code, and content stays in each repo's `docs/content/`. The cleanup can run before, during or after |
 | 8 | Provisioning costs money and needs the owner | Provisioning tasks print what they would create and stop, unless run by the owner with an explicit flag. They are owner-only in now.md, like the alert rule |
-| 9 | remy-video drifts while it waits | remy-video's now.md gets a hold: product code only (videos, player, contract), no new platform-like code, until phase D. The same note applies to any new repo started before then |
+| 9 | remy-video drifts while it waits | remy-video is frozen: its now.md says it will be replaced and lists the real bits to copy. New product work waits for the new repo, or goes into remy-video's real bits only |
 | 10 | remy-auth reaching past the exports without noticing: the workspace symlink and `docs/tsconfig.json`'s `../packages/ui/src/*` mapping let it import files no other repo can | The mapping goes in phase A. Rule 3 is then checked, not trusted: the scratch check in risk 2 installs the packed package, so an import that only works through the workspace fails there before release |
 
 ## Phases
@@ -224,18 +238,21 @@ the phases below; none is left to care alone.
 While coding: tier 0 (`project:check`, which runs `docs:check`), nothing slower. Each phase ends with
 remy-auth using the new pieces only through their exports, its own copies deleted, tier 3
 (`project:test:quick`, the tier for shared-package changes) and `docs:test` green, and the scratch
-check against remy-auth-app and remy-video (risk 2) passing. No release. Then it stops for the owner's
+check against remy-auth-app and a new app (risk 2) passing. No release. Then it stops for the owner's
 review.
 
 - **A. Proof (agreed):** group 1 (providers and shell), the `docs/tsconfig.json` mapping removed
   (risk 10), and the docs routes test. The smallest change that proves the loop, plus the one unknown.
 - **B. Docs system:** group 2, with provisioning owner-only (risk 8).
 - **C. The rest:** groups 3 to 7.
-- **D. Release and adoption:** one `ui:release` (the full gate) carries the package and tasks together;
-  remy-auth-app and remy-video move with `project:upgrade-ui`, delete their copies, and remy-video's new
-  counts close the evidence table. That is the plan's acceptance.
+- **D. Release, then a new video repo:** one `ui:release` (the full gate) carries the package and tasks
+  together; remy-auth-app moves with `project:upgrade-ui`. A new video repo is started on the release with
+  nothing copied from remy-video but the real bits listed above; its hand-written files, set against the
+  evidence table, are the plan's acceptance. Then remy-video is archived.
 
 ## Open questions for the owner
 
-- Which other repos follow remy-video (remy-data, remy-sport, remy-nash do not include the tasks yet;
+- The new video repo's name: take over `remy-video` (the old one archived under another name) or a new
+  name?
+- Which other repos follow (remy-data, remy-sport, remy-nash do not include the tasks yet;
   remy-auth-app-layout is on 0.11.0)?
