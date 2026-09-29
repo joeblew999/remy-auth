@@ -601,7 +601,7 @@ strings are now translated); the missing route tree; the moved `verify-tooling` 
 mise's cache (it resolves them from the app now). Hands-on (local production builds): remy-auth `/formats`
 desktop, `/ar` and `/ar/app/clock` on a phone (right to left, the bottom bar with Clock active), the same as
 before; the blank app's `/en` desktop, `/ar` phone dark and `/ja` phone: its own name, links and words.
-Review: the reviewer agent first REJECTED on one blocking issue: `packages:publish`'s token lost to an app's
+Review: the reviewer agent ACCEPTED on its second pass. It first REJECTED on one blocking issue: `packages:publish`'s token lost to an app's
 own `.npmrc` (the blank app's reads `${GITHUB_TOKEN}`, unset during a release), so a template-born repo would
 tag and never publish. Fixed: the task exports `GITHUB_TOKEN` and `NODE_AUTH_TOKEN`, the CI step sets it;
 reproduced behind the template's `.npmrc` (401 before, the version after). Its non-blocking notes, fixed:
@@ -613,7 +613,8 @@ lists only the home page); the template now runs the devtools build-boundary che
 packages (tier 3 35/35, `docs:test` 3/3), not only its pins; docs and CHANGELOG gaps. Left as notes:
 the blank app's catalog is outside remy-auth's `i18n:check` (`template:test` runs its checks, not the
 strict translation check; with the parked locale-list item); `project:doctor` no longer prints
-remy-auth's `auth` version (`auth:info` does); `gh` through aqua in CI, first run at the tag. After the
+remy-auth's `auth` version (`auth:info` does); `gh` through aqua in CI, first run at the tag. `template:test` installs with `GITHUB_TOKEN` from
+`gh auth token`. After the
 fixes: tier 0 green, tier 3 81/81.
 Not checked: the reusable workflow and `packages:tag`/`packages:publish` against GitHub (only a tag runs
 them; phase D's release is their first run), `packages:upgrade` (dependency freeze).
