@@ -1,6 +1,6 @@
 # Thin apps: every Remy repo gets the platform with as little boilerplate as possible
 
-Status: agreed 2026-09-29, phase A next. Owner: remy-auth. Built and proved in remy-auth first, with no
+Status: agreed 2026-09-29; phases 0, A, B and C done 2026-09-29, phase D prepared and waiting for the owner. Owner: remy-auth. Built and proved in remy-auth first, with no
 release until phase D; remy-video (`../remy-video`, tasks and remy-ui 0.13.0) is the evidence. It is
 not migrated (owner, 2026-09-29: "its so bad we will have to make a new one and then copy the real bits
 out of it later"). Phase D proves the platform with a new repo, `remy-auth-test` (owner, 2026-09-29: "for
@@ -429,7 +429,7 @@ release. Then it merges to main and the next phase starts (working rules).
   `@joeblew999/remy-ui/*` mappings removed from the root and docs `tsconfig.json` (risk 10). The smallest change that proves the loop.
   Done 2026-09-29 (verdict below).
 - **B. Docs system:** group 2, with provisioning owner-only (risk 8). Done 2026-09-29 (verdict below).
-- **C. The rest:** groups 3 to 7.
+- **C. The rest:** groups 3 to 7. Done 2026-09-29 (verdict below).
 - **D. Release, then `remy-auth-test` (stops for the owner):** everything below is prepared unattended;
   each outward step waits for the owner (working rules). One `ui:release` (the full gate) carries the package and
   tasks together; remy-auth-app moves with `project:upgrade-ui`. `remy-auth-test` is created on the
@@ -544,6 +544,89 @@ site (tabs, contents, pictures, Copy Markdown, Ask AI), no console errors; the n
 phone with its own name, no Ask AI, no errors; its `/reference`, `/api/mcp/reference` and `/docs/ask`
 404, its `llms.txt`, search, sitemap and MCP answer.
 
+## Phase C: done 2026-09-29
+
+Decisions (the Executor's):
+
+- **One dependency set is the package's own dependencies** (group 3): the framework, the toolchain and the
+  tools the shared tasks run (Playwright, Lighthouse, the DevTools MCP server, Codex, npm-check-updates)
+  are `@joeblew999/remy-ui`'s exact dependencies, with no optional peers, so npm installs one version of
+  each for any app; `remy.singleCopy` names those that break when installed twice, and
+  `project:single-copies` (tier 0) fails on a second copy. Chosen over a manifest `project:upgrade-ui`
+  applies: nothing to apply, and phase 0 test 4 showed npm honours it. An app's `package.json` names the
+  package and its own packages.
+- **Checks split** (group 4): the shared sets take `sitePaths`/`appPaths`; the home page's words only with
+  `home`, the showcase's checks only with `showcase`.
+- **Shared runtime defaults** (group 5): `app/vite`'s `remyApp()` is a whole `vite.config.ts`; `root`'s
+  `remyRoot(app, { devtools })` and `router`'s `remyRouter(routeTree)` make `__root.tsx` and `router.tsx`
+  one call each; the CSP report route and the enforced policy are the package's defaults; Zod's `jitless`
+  is set once; no remy-auth page list is a default anywhere. TanStack Devtools stay in the app's root
+  file: its Vite plugin strips them only outside `node_modules` (read in its source; replaced by `null`
+  when passed as an option, so the build-boundary check still passes). `Env` before the first
+  `wrangler types` needed no shim: the blank app has `wrangler.jsonc`, and `project:typecheck` runs
+  `wrangler types` first.
+- **Package owners** (group 6): the `packages:*` tasks (check, upgrade, pack, release, tag, publish, notes)
+  are shared, driven by the non-private workspaces and `RELEASE_PACKAGE`/`RELEASE_TITLE`; remy-auth keeps
+  `ui:release` as a one-line alias and fills the new hook `project:release-checks` (`template:check`,
+  `ui:verify`). `scripts/release*.sh` went; `verify-tooling` is shared (every workspace against the
+  lockfile, `preview_urls: false`, skill pins) with `project:doctor`. CI: `google.yml` is a reusable
+  workflow; an app calls it at its tag, `project:upgrade-ui` moves that tag, and the release job is one
+  task, `packages:publish --release`, the same as the local release. A second catalog follows the
+  platform's language with `followLocale(runtime)`; an app's own catalog (`project.inlang`) is compiled
+  by the preset and by the shared `project:generate`.
+- **What stays small** (group 7): `project:setup` checks for a git repository, `package.json`,
+  `package-lock.json` and `wrangler.jsonc` first, each with where to go; `project:refresh-tasks`; the port,
+  coverage and `_` sibling-route notes in tasks.md; a missing `src/parts.json` lists no parts. The stray
+  `docs/$S/ask-phone.png` was already gone.
+- **The blank app is `template/` in remy-auth**, taken at the release tag with `giget` (as `docs:init`
+  already took the docs template, which moved into it as `template/docs`). Not a GitHub template
+  repository: creating one is an outward step, and a folder here is versioned with the tasks and package it
+  pins. Its home page's words are its own catalog in every language (translated by `i18n:messages:translate`),
+  because the shared font check rightly fails a page whose text is not in the page's language. It commits
+  its generated `src/routeTree.gen.ts`, as every app does, since `project:verify` typechecks before it builds.
+  `template:check` (in remy-auth's release checks) fails a release whose version the template does not pin.
+  It is 38 hand-written files, about 316 lines with the docs (64), against about 3,300 non-video lines in
+  remy-video (the evidence table).
+
+Checks: remy-auth tier 0 green; tier 3 81/81; `docs:test` 9/9. Scratch check from `packages:pack` (no
+workspace): the template copied untouched, `npm install` once, then the full `project:setup` (npm ci,
+skills, the `remy` skill, the rules block, MCP, `project:verify`): 134/134 in every language, with the
+doctor, tooling and types (after adding the route tree, which the first run was missing). The template
+plus one site page, one app page and one API procedure in a contract workspace (the shape of
+`remy-auth-test`): tier 0, tier 3 38/38 with the API checks, `docs:test` 4/4 with its reference, no
+devtools in the shipped scripts. A copy of remy-auth-app on the new shape: tier 0, tier 3 43/43; it needed
+four edits, which phase D applies (below). Found by the scratch checks and fixed: a missing
+`src/parts.json` failed the build; the blank page in English failed the Arabic font check (the template's
+strings are now translated); the missing route tree; the moved `verify-tooling` resolving its imports from
+mise's cache (it resolves them from the app now). Hands-on (local production builds): remy-auth `/formats`
+desktop, `/ar` and `/ar/app/clock` on a phone (right to left, the bottom bar with Clock active), the same as
+before; the blank app's `/en` desktop, `/ar` phone dark and `/ja` phone: its own name, links and words.
+Not checked: the reusable workflow and `packages:tag`/`packages:publish` against GitHub (only a tag runs
+them; phase D's release is their first run), `packages:upgrade` (dependency freeze).
+
+## Phase D: prepared 2026-09-29, waiting for the owner
+
+Everything here is ready; each step goes out only when the owner says so (working rules). In order:
+
+1. **Release 0.14.0.** The version commit is ready on the local branch `release-0.14.0` (not pushed):
+   `packages/ui` 0.14.0, `template/` pinned to 0.14.0 (package, tasks ref, workflow tag, so
+   `template:check` passes), `CHANGELOG.md`'s `[Unreleased]` as `[0.14.0]`. The contract is unchanged
+   (0.2.1, already published). Owner: merge it to main, then `mise run ui:release` (~5 min; the full gate,
+   then tag, push, publish and the GitHub release; the tag's CI job repeats Google's audits and is the first
+   run of the reusable workflow's release job).
+2. **Deploy remy-auth** (the app and its docs Worker, both on the new shape): `GATE=quick mise run cf:deploy`
+   and `mise run docs:deploy`, after `mise run cf:preview` and a hands-on pass.
+3. **Create `remy-auth-test`** from the blank app at v0.14.0 (tasks.md, "A new consumer"): public on
+   GitHub, the package's "Manage Actions access" granted to it, one page and one procedure added (as the
+   scratch check did), then `cf:deploy`, `docs:deploy`, `project:test:live` and `docs:test:remote` against
+   its Workers. Its hand-written files, set against the evidence table, are the plan's acceptance.
+4. **remy-auth-app** waits for the owner's decision on its future (owner, 2026-09-29: "we will decide about
+   remy-auth-app later"). Moving it is `project:upgrade-ui -- 0.14.0` plus what the scratch copy needed:
+   phase A's config (`defineRemyApp` with the showcase lists, `app` and `preferred` into `AppProviders`),
+   `package.json` down to the package and the contract, `prerenderPages({ notFoundPath, paths: allPaths })`,
+   `sitemapXml({ origin, paths: sitePaths })`, and `prerenderedAppChecks({ service, sitePaths, appPaths,
+   home, showcase: {} })`; its `AGENTS.md` block from `agents:rules` replaces the dead links.
+
 ## Parked while running (working rules: recorded, skipped, reported at the end)
 
 - **Docs `/dev` hydration mismatch (live, pre-existing).** https://remy-auth-docs.gedw99.workers.dev/dev
@@ -555,6 +638,11 @@ phone with its own name, no Ask AI, no errors; its `/reference`, `/api/mcp/refer
   at load. Found by phase B's docs checks, which now take their pages from the content; the hydration
   check covers each site's first page and its translation, as before, not the index pages, until this is
   fixed (upstream issue or a fix in the Worker's view).
+
+- **The app's catalog repeats the platform's language list.** `template/project.inlang/settings.json`
+  copies remy-ui's 13 locales; a language added to the platform needs adding there too, and nothing checks
+  it yet. A small shared check (the app's locales equal the package's) belongs in `i18n:messages:check`;
+  not done in phase C to keep the phase to its groups.
 
 ## Open questions for the owner
 

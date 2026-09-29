@@ -68,7 +68,8 @@ Also `project-layout` (step 1: not merged, its fixes ported). Keep the uncommitt
 [thin-apps](thin-apps.md): every Remy repo gets the platform with as little boilerplate as possible.
 Built and proved in remy-auth first, no release until the end; then `remy-auth-test` proves it as a new repo. remy-video is not migrated; its replacement comes later.
 Unattended through phase C (reviewer agent accepts each phase, merges to main only); phase D stops for the
-owner before the release. Phase 0 (scratch tests of the unknowns) is next.
+owner before the release. Phases 0, A, B and C done 2026-09-29; phase D is prepared (the plan's "Phase D")
+and waits for the owner (below).
 
 ## Then: clean up the developer docs (owner, 2026-09-26: "a bit weird for a public and agent audience")
 
@@ -98,6 +99,8 @@ formats page's intro and "This language" share the first screen on desktop; issu
 
 ## Owner only
 
+- Thin apps, phase D ([the plan](thin-apps.md#phase-d-prepared-2026-09-29-waiting-for-the-owner)): release 0.14.0
+  (branch `release-0.14.0`, then `ui:release`), deploy remy-auth, create `remy-auth-test`; remy-auth-app later.
 
 - One alert rule in the dashboard (no API for it): Workers & Pages → Observability → Alerts → Create,
   service `remy-auth`, `event = ask` and `outcome = failed`, count > 5 in 15 minutes.
