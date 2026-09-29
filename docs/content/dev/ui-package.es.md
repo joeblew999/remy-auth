@@ -33,18 +33,23 @@ y `text.css` en ese orden y declara el `@source` propio del paquete:
 `FontaineTransform.vite({ fallbacks: { 'Geist Variable': ['Arial'] } })` antes de Tailwind en la
 configuración de Vite (el [`vite.config.ts`](https://github.com/joeblew999/remy-auth/blob/main/vite.config.ts) de remy-auth es el ejemplo).
 
-Cada página es de uno de dos tipos, listados en `paths`, y nunca se mezclan:
+Cada página es de uno de dos tipos, y nunca se mezclan (`isAppPath` de `paths` es la regla; cada
+app lista las suyas):
 
-- **Páginas del sitio** (`sitePaths`) provienen de `pages`, enmarcadas por `SiteShell`: completas
-  sin JavaScript, indexadas, en el sitemap, evaluadas por Lighthouse y Core Web Vitals.
-- **Páginas de la app** (`appPaths`, bajo `/app`) provienen de `app-pages`, enmarcadas por
-  `AppShell` (el bloque sidebar-16 de shadcn): necesitan JavaScript y `pageHead` las marca
-  `noindex`. Tienen su propia exportación para que una página del sitio nunca descargue el shell de
-  la app.
-- **Navegación de la app**: la lista propia de la app, en su configuración `defineRemyApp` (`app-config`); las páginas
-  de demostración (showcase) de remy-auth son una de esas listas, `showcase/app-nav`. Las tabletas y los ordenadores obtienen la barra lateral (que se contrae a iconos);
-  los teléfonos obtienen la barra inferior (`blocks/bottom-nav`, piezas de shadcn de fábrica, ya que shadcn no tiene navegación inferior)
-  con las páginas principales y Más, que abre la barra lateral. Por qué: [el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/mobile-navigation.md).
+- **Páginas del sitio** (las `sitePaths` de la app), enmarcadas por `SiteShell`: completas sin
+  JavaScript, indexadas, en el sitemap, evaluadas por Lighthouse y Core Web Vitals.
+- **Páginas de la app** (sus `appPaths`, bajo `/app`), enmarcadas por `AppShell` (el bloque
+  sidebar-16 de shadcn): necesitan JavaScript y `pageHead` las marca `noindex`. `AppShell` tiene su
+  propia exportación para que una página del sitio nunca lo descargue.
+- **Navegación de la app**: la lista propia de la app, en su configuración `defineRemyApp` (`app-config`).
+
+Las páginas propias de remy-auth (las páginas de inicio y de formatos, los formatos, el reloj, la
+demo, la ubicación, los ajustes y la cuenta de la app, sus listas de navegación, la reserva de
+demostración y sus comprobaciones) no son de la plataforma: son `@joeblew999/remy-showcase`
+(`packages/showcase`, su README), para las apps que las muestran. Las tabletas y los ordenadores
+obtienen la barra lateral (que se contrae a iconos); los teléfonos obtienen la barra inferior
+(`blocks/bottom-nav`, piezas de shadcn de fábrica, ya que shadcn no tiene navegación inferior)
+con las páginas principales y Más, que abre la barra lateral. Por qué: [el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/mobile-navigation.md).
 
 Lo que tiene toda app basada en el paquete, para que las tareas y comprobaciones compartidas funcionen en ella
 (remy-auth-app es el ejemplo prerrenderizado):
@@ -58,7 +63,7 @@ Lo que tiene toda app basada en el paquete, para que las tareas y comprobaciones
   los ajustes de marco y el idioma a ofrecer, que lee cada marco, de modo que ninguna página lo pasa. Las
   `themeChecks` compartidas fallan sin él.
 - **Una ruta para cada path de `appPaths` y `sitePaths`**, cada una de pocas líneas sobre la página compartida (el
-  Reloj propaga `clockRouteOptions` desde `clock-route`).
+  Reloj de la demostración (showcase) propaga `clockRouteOptions` desde `@joeblew999/remy-showcase/clock-route`).
 - **`tests/smoke.spec.ts`**, una sola llamada a `smokeChecks(...)`: `project:test:smoke` y la comprobación tras cada
   `cf:deploy` (`project:test:live`) lo ejecutan, y fallan con «No tests found» si no existe.
 - **`.plans/now.md`**, la única lista ordenada del trabajo pendiente (`plans:check`, en el nivel 0).
@@ -75,23 +80,19 @@ Todas bajo `@joeblew999/remy-ui/`, como TSX y CSS para consumidores de Vite y Ta
 | `tailwind.css` | Las tres hojas de estilo de abajo en orden, más `@source` para las clases propias del paquete: una sola importación para una app |
 | `globals.css`, `fonts.css`, `text.css` | La hoja de estilo de shadcn tal como la escribe la CLI; las fuentes para cada idioma; cómo se corta el texto en cada idioma (guionización por `lang`, cortes de frase en japonés) |
 | `components/*`, `hooks/*`, `button` | Componentes y hooks de shadcn (`button` es también una ruta corta) |
-| `paths` | `sitePaths`, `appPaths`, `allPaths`, `isAppPath` |
-| `pages` | `SiteShell` (alias `Shell`), `HomePage`, `FormatsContent`, `FormatsPage`, `Intro`, `ZoneBadge`, `SkipLink`, `Group`, `Row` |
-| `shell` | Solo el marco del sitio: `SiteShell` (alias `Shell`), `Intro`, `ZoneBadge`, `SkipLink` (también exportado por `pages`); impórtalo donde una página solo necesite el marco, para que las páginas de inicio y de formatos no formen parte de la descarga de esa página |
+| `paths` | `isAppPath`: si una ruta sin localizar es una página de app |
+| `shell` | El marco del sitio: `SiteShell` (alias `Shell`), `Intro`, `ZoneBadge`, `SkipLink` |
 | `app-shell` | Solo el marco de la app: `AppShell` (la barra lateral, la barra inferior del teléfono), para las páginas de app propias de una app |
 | `app-config` | `defineRemyApp` y sus tipos (`RemyApp`, `NavItem`): el nombre, el código fuente y la navegación de la app para cada marco; `useRemyApp`, `usePreferredLocale` |
-| `app-pages` | Las páginas de app de demostración (showcase) de remy-auth: `AppHomePage`, `AppFormatsPage`, `LocationPage`, `DemoPage`, `ClockPage`, `SettingsPage`, `AccountPage` (y `AppShell` de nuevo) |
 | `root` | `remyRoot(app, { devtools })`: las opciones de la ruta raíz (el documento en el idioma y dirección de la página, `AppProviders`, el idioma a ofrecer, las páginas de problema); `RemyRouterContext`, `preferredLocale`. El `__root.tsx` de una app es `createRootRouteWithContext<RemyRouterContext>()(remyRoot(remyApp, { devtools: <TanStackDevtools … /> }))`: las devtools permanecen en el archivo de la app, donde el plugin de Vite de TanStack las elimina de los builds de producción |
 | `router` | `remyRouter(routeTree)`: el router que crea cada app (la reescritura de locale, un QueryClient por solicitud con la integración SSR de Query, precarga por intención, el nonce de CSP) |
 | `app/vite` | `remyApp({ plugins, start, cloudflare, port })`: el `vite.config.ts` completo de una app (TanStack Devtools, las partes, Cloudflare, Fontaine, Tailwind, Start, React; el catálogo propio de la app cuando tiene `project.inlang`) |
 | `providers` | `AppProviders`: dentro de lo que la raíz de una app renderiza sus páginas (dirección, tema, la configuración `defineRemyApp` de la app, el idioma `preferred`) |
-| `clock-route` | `clockRouteOptions`, `clockDefaults`, `clockZones`: los parámetros de búsqueda de la ruta del Reloj, fuera del código de la página |
 | `language` | `LanguageSwitcher` (enlaces simples, páginas del sitio), `LanguageMenu` (DropdownMenu de shadcn, páginas de la app), `LanguageHint` |
 | `messages`, `runtime` | Mensajes y runtime compilados de Paraglide |
 | `locale` | `getLocale`, `setLocale`, `localizeHref`, `localizeUrl`, `deLocalizeHref`, `cookieName` de Paraglide y más, además de `direction`, `localeName` y `followLocale(runtime)` (un segundo catálogo, el de la app o el de un paquete, en el idioma de la plataforma) |
 | `locale-info` | Calendarios, dígitos, reloj y convenciones de semana de Intl Locale Info; `formatLocale` (la etiqueta que usa cada formateador, que indica el calendario y los dígitos propios del idioma), `weekOrder`, `words` (Intl.Segmenter) |
 | `matching` | La estrategia `custom-chinese` de Paraglide (las etiquetas de chino tradicional llegan a `zh-TW`), `matchChinese`, `preferredFromHeader`, `preferredFromNavigator` |
-| `reservation` | El esquema Zod de la reserva de demostración (asientos escritos con los dígitos de cualquier escritura), `asciiDigits` |
 | `seo` | Canonical y alternativas `hreflang`; `sitemapXml({ origin, paths, extra })` (las páginas del sitio de la app en cada locale, y luego las entradas propias de la app), `robotsTxt(origin)`, `sitemapType`, `robotsType` para las dos rutas de servidor de la app |
 | `prerender` | `prerenderPages({ notFoundPath, paths })`: el `prerender.pages` de TanStack Start para una app prerrenderizada (cada página sin locale y por locale, robots.txt, sitemap.xml, el 404.html de cada locale) |
 | `tanstack` | `localizedWorker` (punto de entrada del Worker: observabilidad, el middleware de Paraglide y redirecciones de entrada alrededor de TanStack Start), `localeRewrite`, `pageHead`, `suggestedLocale`, `suggestedLocaleInBrowser` |
@@ -100,16 +101,17 @@ Todas bajo `@joeblew999/remy-ui/`, como TSX y CSS para consumidores de Vite y Ta
 | `cloudflare` | `placeFromCloudflare` |
 | `problem` | Las páginas de problema localizadas: `Problem`, `NotFound`, `ErrorPage`, `problemPages` (una línea de propagación por cada ruta de página) |
 | `parts`, `parts/vite`, `parts/checks` | Partes ([plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md)): una app las lista en `src/parts.json`, un nombre por línea. `remyParts()` en `vite.config.ts` (su `plugin` entre los plugins, sus `routes` como `tanstackStart({ router: { virtualRouteConfig } })`) monta las rutas de cada parte listada junto a `src/routes` y genera `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` en el archivo de pruebas ejecuta las comprobaciones de cada parte listada. Partes actuales: `time-zones`, `deferred-place`, `seo-routes`, `status-card`; ver [Escribir una parte](#writing-a-part) |
-| `showcase/*` | Piezas de demostración (showcase) de TanStack, y `showcase/app-nav` (las listas de navegación de la demostración, para las apps que la muestran): parámetros de búsqueda y `choiceCards`, ubicación del dispositivo, guardia de salida (leave guard), zonas horarias, la tarjeta de estado en vivo (`StatusCard`: la app le pasa la consulta, la de su propio cliente o la de un `contractClient` en el origen de otra app) |
+| `parts/time-zones/page`, `parts/deferred-place/device-place`, `parts/status-card/card` | Las piezas propias de las partes: la página de zona horaria, la ubicación del dispositivo, la tarjeta de estado en vivo (`StatusCard`: la app le pasa la consulta, la de su propio cliente o la de un `contractClient` en el origen de otra app) |
+| `rows`, `zod-csp` | `Group`, `Row`, `NameList`: filas de etiqueta/valor; el interruptor jitless de Zod (lo importa AppProviders) |
 | `invalidate` | `invalidateEverything(router, queryClient)`: todos los loaders y consultas marcados como obsoletos y recargados (tras cerrar sesión o un cambio de rol; la actualización de la tarjeta de estado) |
 | `samples` | Los valores fijos que renderizan las páginas |
-| `checks`, `showcase/*.checks` | Comprobaciones de Playwright compartidas: páginas públicas, URLs de entrada (con la estrategia china), demo (dígitos nativos), formatos (calendario y dígitos propios, reglas de semana, segmentación de palabras), texto (`textChecks`: 320 px, guionización, capitalización por idioma), fuentes (`fontChecks`: la fuente que dibuja cada idioma es la que `fonts.css` nombra para su escritura), zonas, observabilidad, Lighthouse y Core Web Vitals, y una por cada pieza de demostración; zonas, observabilidad, la Content Security Policy, Lighthouse y Core Web Vitals, y una por cada demostración |
-| `app-checks` | Una llamada por tipo de app para el conjunto de comprobaciones compartidas: `serverAppChecks({ service, ownSitePaths, oneLanguage, formats })` (renderizada en servidor: URLs de entrada con redirección, CSP, fuentes) y `prerenderedAppChecks({ service })` (páginas de entrada estáticas, filas de demostración sin funciones de servidor); la app solo añade comprobaciones para lo que ella añade |
+| `checks`, `problem.checks`, `build-boundaries.checks`, `code-splitting.checks` | Comprobaciones de Playwright compartidas: páginas públicas, URLs de entrada (con la estrategia china), texto (`textChecks`: 320 px, guionización, capitalización por idioma), fuentes (`fontChecks`: la fuente que dibuja cada idioma es la que `fonts.css` nombra para su escritura), zonas, observabilidad, Lighthouse y Core Web Vitals, las páginas de problema, lo que descarga el navegador (`buildBoundaryChecks`) y la división de código (`codeSplittingChecks`) |
+| `app-checks` | Una llamada por tipo de app para el conjunto de comprobaciones compartidas sobre las páginas propias de la app: `serverAppChecks({ service, sitePaths, appPaths, home, oneLanguage, cspEnforced })` (renderizada en servidor: URLs de entrada con redirección, CSP, fuentes) y `prerenderedAppChecks({ service, sitePaths, appPaths, home })` (páginas de entrada estáticas); la app solo añade comprobaciones para lo que ella añade. Una app que muestra las páginas de demostración (showcase) también llama a `showcaseChecks()` (`@joeblew999/remy-showcase/showcase.checks`); `problemChecks` es `problem.checks` |
 | `playwright` | `playwrightConfig()`, la configuración compartida de Playwright |
 | `api/server` | `apiHandlers` (el OpenAPIHandler de oRPC como los handlers de una ruta de servidor de Start, con la página de referencia en `/api/doc` y el documento generado en `/api/openapi.json`; `origins`, los orígenes exactos de las apps registradas que permite el CORSPlugin de oRPC, ninguno por defecto), `generateSpec`, `specOptions` |
 | `api/client` | `contractClient` (un cliente tipado para cualquier contrato: OpenAPILink con ResponseValidationPlugin, el idioma de la página como Accept-Language), `isomorphicClient` (el cliente propio de una app: el router en el servidor, `contractClient` en el navegador, mediante `createIsomorphicFn`) |
 | `api/coverage` | `coverageProblems` (cada procedimiento tiene una ruta bajo `/api/`, una política, una salida y errores documentados), `procedures`, `ApiMeta` |
-| `api/checks` | `apiChecks` (cobertura, el documento servido y la página de referencia, CORS exactamente para los `origins` registrados), `reservationApiChecks` (el 400 tipado de la reserva de demostración en cada locale, y una respuesta que rompe el contrato rechazada en el navegador) |
+| `api/checks` | `apiChecks` (cobertura, el documento servido y la página de referencia, CORS exactamente para los `origins` registrados) |
 
 Las dependencias del paquete son el único conjunto de dependencias de la plataforma, fijado con
 precisión: el framework (React, TanStack Start, Router y Query), la cadena de herramientas (Vite,
