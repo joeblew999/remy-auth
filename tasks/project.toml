@@ -78,7 +78,7 @@ dir = "{{config_root}}"
 # Build before typecheck: in a TanStack Start app the build is TanStack's route generator (Start's Vite
 # plugin writes src/routeTree.gen.ts, with Start's Register types). TanStack's router CLI (tsr generate)
 # writes the tree without that block, so the next build rewrites the file; tried and dropped 2026-09-26.
-run = [{ task = "plans:check" }, "./node_modules/.bin/vite build", { task = "project:typecheck" }, { task = "i18n:check" }, "[ ! -d docs ] || mise run docs:check"]
+run = [{ task = "plans:check" }, { task = "project:single-copies" }, "./node_modules/.bin/vite build", { task = "project:typecheck" }, { task = "i18n:check" }, "[ ! -d docs ] || mise run docs:check"]
 
 ["project:test:smoke"]
 description = "Tier 1, smoke: build, then the smoke checks only (tests/smoke.spec.ts calls the package's smokeChecks): every page in en and ar answers with a heading, the pages named there hydrate without errors (~15 s)"

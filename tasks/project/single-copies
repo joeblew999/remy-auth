@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Tier 0: the packages that break when installed twice (React, TanStack Router and Query, the MDX stringifier; @joeblew999/remy-ui's own list) have one version here; project:check runs it"
+#MISE dir="{{config_root}}"
+set -euo pipefail
+exec node "$(dirname "$0")/single-copies.mjs"
