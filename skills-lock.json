@@ -239,6 +239,11 @@
       "skillPath": "packages/react-start/skills/react-start/SKILL.md",
       "computedHash": "e508e5a82d7eb15cc7fcbf16763f6c270cd0be31bfb0d80d51eb2cbb43eacaca"
     },
+    "remy": {
+      "source": "./node_modules/@joeblew999/remy-ui/skills",
+      "sourceType": "local",
+      "computedHash": "a56e3ac2779de157c5a9ec832ab34fb27f5c097619127cbdf8a4af028616c4be"
+    },
     "router-core": {
       "source": "TanStack/router",
       "ref": "ddad69a4a4b18c19e3fcc510ac1e21f9dab883a7",

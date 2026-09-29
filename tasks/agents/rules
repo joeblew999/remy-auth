@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Write or refresh the marked block in AGENTS.md that points this repo's agents at the platform's rules (the remy skill from the installed @joeblew999/remy-ui, with its version); project:setup and project:upgrade-ui run it"
+#MISE dir="{{config_root}}"
+set -euo pipefail
+exec node "$(dirname "$0")/rules.mjs"

@@ -17,5 +17,8 @@ sed -E -i.bak "s#(remy-auth\.git//tasks\?ref=)v[0-9]+\.[0-9]+\.[0-9]+#\1v$versio
 rm mise.toml.bak
 grep -q "remy-auth.git//tasks?ref=v$version" mise.toml
 
-# A new mise process, so project:verify runs the tasks of the release just selected.
+# New mise processes, so the tasks of the release just selected run: its skills (the remy skill of this
+# version), the AGENTS.md block naming it, then project:verify.
+mise run skills:install
+mise run agents:rules
 mise run project:verify

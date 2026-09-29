@@ -42,7 +42,7 @@ anywhere else is simply not found; no checker of its own keeps it.
 | `tests/` (`smoke.spec.ts` by name) | `project:test:*`, `project:test:live` | the shared checks with the app's settings, and its own |
 | `public/` | Vite | favicon, `_headers` |
 | `dist/` (`dist/client/assets`) | `cf:deploy`, the checks | build output, never committed |
-| `docs/` (`docs.config.ts`, `content/{users,dev,ui}/` with `i18n.json` and `meta.json`, `tests/`, `dist/`) | `docs:*`, `i18n:docs:*` (`I18N_DOCS_DIR`) | the docs Worker: its identity and pages |
+| `docs/` (`docs.config.ts`, `vite.config.ts`, `tsconfig.json`, `package.json`, `content/{users,dev,ui}/` with `i18n.json` and `meta.json`, `content/questions.json`; generated `.remy-docs/`, `dist/`) | `docs:*`, `i18n:docs:*` (`I18N_DOCS_DIR`) | the app's docs: its identity and pages; the Worker is the package's |
 | `project.inlang` | `i18n:messages:*` (`I18N_INLANG`) | the app's own strings, if any |
 | `packages/<name>/` with `README.md` | `plans:*`, `packages:*`, `ui:*` | packages the repo publishes, if any |
 | `.plans/` (`now.md`, `done/`, `parked/`) | `plans:*` | the repo's plans |

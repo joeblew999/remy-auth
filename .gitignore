@@ -35,3 +35,4 @@ mise.local.toml
 /docs/test-results/
 /docs/playwright-report/
 /docs/.remy-docs/
+/packages/ui/skills/

@@ -145,9 +145,9 @@ run = [
 ]
 
 [tasks."ui:generate"]
-description = "Compile the shared locale catalogs (skipped when the catalogs and settings are older than the output)"
+description = "Compile the shared locale catalogs and generate the remy agent skill from the developer docs (skipped when their sources are older than the output)"
 dir = "{{config_root}}"
-sources = ["packages/ui/messages/*.json", "packages/ui/project.inlang/settings.json", "packages/ui/paraglide.mjs"]
-outputs = ["packages/ui/src/paraglide/**/*"]
-run = "node packages/ui/paraglide.mjs"
+sources = ["packages/ui/messages/*.json", "packages/ui/project.inlang/settings.json", "packages/ui/paraglide.mjs", "packages/ui/skill.mjs", "packages/ui/package.json", "docs/content/dev/*.md", "docs/content/dev/*.mdx"]
+outputs = ["packages/ui/src/paraglide/**/*", "packages/ui/skills/remy/**/*"]
+run = ["node packages/ui/paraglide.mjs", "node packages/ui/skill.mjs"]
 

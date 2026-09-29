@@ -77,7 +77,8 @@ CLI passthrough tasks accept upstream flags directly, such as
 | `api:*` | The generated OpenAPI document a running Worker serves (`api:spec`, `--urls` for its operations; shared task) |
 | `browser:*` | Chrome DevTools CLI, session lifecycle and MCP server |
 | `web:*` | Modern web guidance search and retrieval |
-| `docs:*` | The docs Worker (`docs/`): run it (`docs:dev`), build and check it (`docs:build`, `docs:check`), test it (`docs:test`, `docs:test:remote`), deploy it (`docs:preview`, `docs:deploy`), Ask AI's pages in AI Search (`docs:publish`), stop or resume answers (`docs:answers:off`, `docs:answers:on`), its logs and AI (`docs:observe`, `docs:ai-gateway`), the Fumadocs CLI (`docs:cli`), and bringing it into another app (`docs:init`) |
+| `docs:*` | The docs Worker, `@joeblew999/remy-ui`'s (`src/docs`), over an app's `docs/` (`content/`, `docs.config.ts` and three one-line files): run it (`docs:dev`), build and check it (`docs:build`, `docs:check`), test it (`docs:test`, `docs:test:remote`), deploy it (`docs:preview`, `docs:deploy`), Ask AI's pages in AI Search (`docs:publish`), stop or resume answers (`docs:answers:off`, `docs:answers:on`), its logs and AI (`docs:observe`, `docs:ai-gateway`), what its Ask AI needs on Cloudflare (`docs:provision`, prints only), and starting an app's docs (`docs:init`). remy-auth alone: the Fumadocs CLI in the package (`docs:cli`) |
+| `agents:*` | `agents:rules`: the marked block in an app's `AGENTS.md` pointing its agents at the platform's rules, the `remy` skill from the installed package ([the `remy` skill](#the-remy-skill-the-platforms-rules-for-every-repos-agents)); `project:setup` and `project:upgrade-ui` run it |
 | `i18n:*` | Translations, two pipelines: UI messages (Paraglide) and docs (Fumadocs). `i18n:check` (offline, read-only; a warning, or the release gate), `i18n:translate` (the pinned Claude agent, on main, committed); shared tasks, [one writer](./how-we-work.md#translations-one-writer), [how](./tasks.md#translations) |
 | `mcp:*` | Register, verify and inspect project MCP connections |
 | `codex:*` / `claude:*` | Start or resume an interactive agent session (shared tasks) |
@@ -183,6 +184,17 @@ mise run skills:list
 To reinstall from scratch, run `mise run skills:remove` then `mise run skills:install`.
 
 Skills live in `.agents/skills/`; `.claude/skills/` links to the same files.
+
+### The `remy` skill: the platform's rules for every repo's agents
+
+Beside the pinned skills, `skills:install` installs `remy` from the installed package
+(`./node_modules/@joeblew999/remy-ui/skills`, `remy_skill_path`), so its version is the package's. It is
+generated from these developer docs (how we work, the principles, tooling, the shared tasks, the UI
+package, writing docs, the GUI) by `ui:generate`, which every pack and release runs
+(`packages/ui/skill.mjs`); the docs stay the one source. In an app, `mise run agents:rules` keeps a marked
+block in `AGENTS.md` pointing its agents at the skill and naming the version; `project:setup` and
+`project:upgrade-ui` run it, so an upgrade changes the rules the agents read in the same step.
+remy-auth's own `AGENTS.md` indexes the docs themselves.
 The installer records provenance in `skills-lock.json`. Re-running installation
 restores the selected skills from the pinned sources; update their source commits deliberately to adopt upstream
 changes. Only `skills-lock.json` is committed; the installed skills and their Claude links are
@@ -304,8 +316,8 @@ storage, dashboards and alert delivery are open work in the observability plan.
 
 Two Cloudflare products sit behind the docs' Ask AI (the docs Worker), and they are easy to mix up:
 
-- **AI Search** is the index (`remy-docs-pages`). It reads the docs itself from the R2 bucket
-  `remy-docs` (one Markdown file per docs page and language, `<site>/<lang>/<page>.md`, synced hourly
+- **AI Search** is the index (`remy-docs-pages`, remy-auth's; every name here is `docs.config.ts`'s
+  `ask`). It reads the docs itself from the R2 bucket `remy-docs` (one Markdown file per docs page and language, `<site>/<lang>/<page>.md`, synced hourly
   and whenever `docs:publish` asks),
   finds the passages that match a question, and asks a Workers AI model to write the answer.
 - **R2** holds the files AI Search reads. `docs:publish` makes the bucket hold exactly the docs
@@ -333,8 +345,14 @@ Tokens: see [secrets](#secrets-fnox) below.
 Costs: indexing is a few embeddings (a full reindex about $0.0005); a search without an answer next to
 nothing; an answer about $0.0001 to $0.0007, and $0 when AI Search's cache has it.
 
+Ask AI is each app's choice: `docs.config.ts`'s `ask` names its AI Search instance, R2 bucket, AI Gateway
+and rate-limit namespace, and the docs Worker's Cloudflare configuration is generated from it
+(`docs/.remy-docs/wrangler.json`). Without `ask` the docs have no Ask AI page, button or bindings.
+`mise run docs:provision` prints the commands that create an app's resources and creates nothing:
+that costs money and is the owner's.
+
 Stored history and the AI answers, read only, from Cloudflare's own APIs. The Worker, its AI Search
-instance and that instance's AI Gateway come from `wrangler.jsonc`, so an including app gets its own:
+instance and that instance's AI Gateway come from its Wrangler configuration, so an including app gets its own:
 
 ```sh
 mise run cf:events                      # Workers Logs, last 24 h: counts by event and level, latest 10

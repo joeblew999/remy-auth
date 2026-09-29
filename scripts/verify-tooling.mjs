@@ -43,6 +43,8 @@ try {
   const skills = (await readJSON('skills-lock.json')).skills;
   const pinned = new Set(sources.map(url => new URL(url).pathname.split('/').slice(1, 3).join('/')));
   for (const [name, skill] of Object.entries(skills)) {
+    // The platform's own `remy` skill comes from the installed package, which its version pins.
+    if (skill.sourceType === 'local' && skill.source === vars.remy_skill_path) continue;
     assert.ok(pinned.has(skill.source), `${name}: installed from ${skill.source}, which mise.toml does not pin`);
   }
   for (const sourceURL of sources) {
