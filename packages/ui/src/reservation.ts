@@ -6,10 +6,8 @@ import { m } from './paraglide/messages.js';
 // validator) and the server (the app's POST /api/reservations, through its contract) both check,
 // with errors in the page's language. The wire shapes below are what a contract declares.
 
-// Zod's documented switch for pages whose Content Security Policy forbids eval: without it, Zod
-// probes for eval with `Function('')` on the first object parse, which the nonce CSP reports as a
-// violation (and would block once enforced, with the same jitless result).
-z.config({ jitless: true });
+// Zod runs jitless under the nonce CSP (./zod-csp.ts), set before this schema is used.
+import './zod-csp';
 
 /**
  * Every decimal digit the runtime can write (Intl's numbering systems: Persian ۰–۹, Arabic-Indic

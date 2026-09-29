@@ -2,6 +2,8 @@ import { DirectionProvider } from './components/direction';
 import { ThemeProvider } from './theme';
 import { PreferredProvider, RemyAppProvider, type RemyApp } from './app-config';
 import { direction, type Locale } from './locale';
+// Zod without eval, for every app's schemas under the nonce CSP.
+import './zod-csp';
 
 /**
  * Everything an app's document needs around its pages, in one place so no app misses one: the page's
