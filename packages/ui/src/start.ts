@@ -63,7 +63,11 @@ export const serverFnLog = (service: string) => createMiddleware({ type: 'functi
   });
 
 /** A Worker's Start middleware: pass the result's two lists to createStart. */
-export const startMiddleware = ({ service, csp }: { service: string; csp: { enforced: boolean; reportPath: string } }) => ({
+/**
+ * The Start middleware every app runs. `csp` defaults to what every app has: the policy enforced, reports to
+ * the package's own /csp-report route (app-routes); an app passes its own to report only or report elsewhere.
+ */
+export const startMiddleware = ({ service, csp = { enforced: true, reportPath: '/csp-report' } }: { service: string; csp?: { enforced: boolean; reportPath: string } }) => ({
   // Tuples, so Start infers each request's context (requestId, nonce) from them exactly.
   requestMiddleware: [requestContext, cspNonce(csp)] as const,
   functionMiddleware: [serverFnLog(service)] as const,

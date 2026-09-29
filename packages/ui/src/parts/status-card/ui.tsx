@@ -1,3 +1,4 @@
+/// <reference path="../virtual.d.ts" />
 import type { QueryClient } from '@tanstack/react-query';
 import { getLocale } from '../../locale';
 import { StatusCard as SharedStatusCard, statusRefreshMs } from '../../showcase/status-card';

@@ -1,3 +1,4 @@
+/// <reference path="../virtual.d.ts" />
 import { Await, Link } from '@tanstack/react-router';
 import type { Locale } from '../../locale';
 import type { Place } from '../../cloudflare';
@@ -7,7 +8,7 @@ import { formatLocale } from '../../locale-info';
 import { Group, Row } from '../../rows';
 import { Skeleton as Placeholder } from '../../components/skeleton';
 import { DevicePlace } from '../../showcase/device-place';
-import { timeZonePath } from '../../showcase/time-zone';
+import { timeZonePath } from '../../showcase/time-zone-names';
 // The zone links to the time-zones part's page only when the app lists that part (src/parts.json).
 // By its path (the part's own timeZonePath), not a typed route: this part does not require that one,
 // so its code type-checks, and removing time-zones stays one line, whether or not the route exists.

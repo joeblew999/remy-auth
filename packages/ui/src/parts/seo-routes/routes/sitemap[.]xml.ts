@@ -1,3 +1,4 @@
+/// <reference path="../../virtual.d.ts" />
 import { createFileRoute } from '@tanstack/react-router';
 import { sitePaths as partSitePaths } from 'virtual:remy-parts';
 import { sitemapEntries } from 'virtual:remy-parts/seo-routes/app';

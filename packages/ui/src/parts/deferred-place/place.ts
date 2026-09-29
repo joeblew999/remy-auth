@@ -1,3 +1,4 @@
+/// <reference path="../virtual.d.ts" />
 import { createServerFn } from '@tanstack/react-start';
 import { requestPlace } from './place.server';
 
