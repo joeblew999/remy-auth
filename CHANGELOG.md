@@ -13,6 +13,14 @@ package follows [Semantic Versioning](https://semver.org/).
   remy-auth's type-checks and shows only its own.
 - `app-shell`: `AppShell` alone, without the showcase pages.
 - `showcase/app-nav`: `showcaseSiteNav`, `showcaseAppNav`, the showcase's lists for apps that show it.
+- `docs/*`: the docs Worker itself (Fumadocs on TanStack Start and Cloudflare): `docs/vite`'s
+  `remyDocs(docsConfig, { contract })` builds an app's docs from its `docs/content/` and `docs.config.ts`,
+  generating the Worker's Cloudflare configuration into `docs/.remy-docs/`; `docs/config`'s
+  `defineDocsConfig`; `docs/tsconfig.json` for an app's one-line `docs/tsconfig.json`. Ask AI is opt-in
+  (`ask` in `docs.config.ts`); an app without an API (`contract`) has no reference.
+- `skills/remy`: the platform's rules as an agent skill, generated from the developer docs; the shared
+  `skills:install` installs it, `agents:rules` points `AGENTS.md` at it.
+- `defineRemyApp`'s `docs`: the docs Worker's origin; the frame shows the Docs, Developers and Guide links.
 
 ### Changed (breaking)
 - `AppProviders` takes `app` (a `defineRemyApp` config) and `preferred` (the root loader's language) in
@@ -23,6 +31,10 @@ package follows [Semantic Versioning](https://semver.org/).
 - `Intro`'s and `FormatsContent`'s `backTo` is `'site' | 'app'` (the app's home comes from the config).
 - The sidebar and the phone's bottom bar list the config's `app.nav`, no longer remy-auth's pages; an app
   showing them passes `showcaseAppNav`.
+- An app's docs/ is `content/`, `docs.config.ts` and three one-line files (`docs:init` writes them); its
+  `wrangler.jsonc`, `src/`, `scripts/`, `tests/` and `playwright.config.ts` go. The shared docs tasks read
+  `docs/.remy-docs/wrangler.json`; `docs:publish` and the questions check read `docs/content/questions.json`.
+- `mdast-util-to-markdown` is pinned at 2.1.2: 2.1.3 overflows the stack on bold text in Fumadocs' build.
 
 ## [0.13.0] - 2026-09-26
 

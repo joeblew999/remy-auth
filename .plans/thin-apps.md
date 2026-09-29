@@ -428,7 +428,7 @@ release. Then it merges to main and the next phase starts (working rules).
 - **A. Proof:** the layout inventory written into tasks.md, group 1 (providers and shell), and the
   `@joeblew999/remy-ui/*` mappings removed from the root and docs `tsconfig.json` (risk 10). The smallest change that proves the loop.
   Done 2026-09-29 (verdict below).
-- **B. Docs system:** group 2, with provisioning owner-only (risk 8).
+- **B. Docs system:** group 2, with provisioning owner-only (risk 8). Done 2026-09-29 (verdict below).
 - **C. The rest:** groups 3 to 7.
 - **D. Release, then `remy-auth-test` (stops for the owner):** everything below is prepared unattended;
   each outward step waits for the owner (working rules). One `ui:release` (the full gate) carries the package and
@@ -485,6 +485,57 @@ only typecheck and build.) Tier 0 and tier 3 81/81 again after the fixes.
 Cost: every page's entry chunk grows 1.6 KB gzip (the root now imports the app config with the app
 nav's icons and the clock's defaults); Lighthouse and Core Web Vitals in phase D's release gate judge it,
 and the app nav could move to the app frame alone if it matters.
+
+## Phase B: done 2026-09-29
+
+Decisions (the Executor's):
+
+- **The docs Worker lives in `@joeblew999/remy-ui`** (`src/docs`), not a second package: one version,
+  one `project:upgrade-ui`, and every repo has docs anyway. Its runtime dependencies (Fumadocs, the AI
+  SDK, MCP, mermaid and the rest) are the package's; an app's `docs/package.json` names only the package.
+- **An app's `docs/`** is `content/`, `docs.config.ts` (the product's names; `defineDocsConfig`) and three
+  one-line files: `vite.config.ts` (`remyDocs(docsConfig, { contract })`), `tsconfig.json` (extends the
+  package's; `${configDir}` maps `@remy-docs-app/*`), `package.json`. remy-auth's went from 61 files
+  outside `content/` and `public/` to those 4 (46 lines); a new repo's are 4 files, 34 lines.
+- **Generated into `docs/.remy-docs/`** (gitignored) by the preset: `collections.ts` (fumadocs-mdx's macro
+  never compiles `node_modules`), `wrangler.json` (the Worker's configuration from `docs.config.ts`; every
+  wrangler command reads it, the built one `dist/server/wrangler.json` for dev and deploy), `app.json`
+  (whether the app has an API, for the checks). `_headers` is emitted into the build.
+- **The Worker reaches the app through one alias**, `@remy-docs-app/`: `docs.config.ts`, the content's JSON
+  and the contract (a Vite alias to the package the app names; declared in `app-modules.d.ts`). The docs
+  table is a pure core (`table-core.js`) fed by Vite (`table.js`) or by the file system for the Node
+  scripts (`scripts/app-table.mjs`).
+- **Ask AI is opt-in**: `docs.config.ts`'s `ask` names the AI Search instance, bucket, gateway and
+  rate-limit namespace; without it there is no Ask AI page, button, bindings or publishing. The Worker
+  reads the two bindings by name (`Reflect.get`), since an app without Ask AI declares neither.
+  `docs:provision` prints the creating commands and creates nothing.
+- **No API, no reference**: remyDocs without `contract` sets `__REMY_DOCS_API__` false: no `/reference`,
+  tab, llms entry or MCP server. The "For AI tools" help pages are `docs.config.ts`'s `aiHelp`, else each
+  part's `llms.txt`.
+- **Checks from the app's content**: `docs.spec.js` and `lighthouse.spec.js` take their pages from
+  `meta.json` and the preset's `app.json`; the Ask AI checks run only with `ask`.
+- **Build-time modules ship as JavaScript** (`docs/vite.js`, `docs/config.js`, the tests, the Playwright
+  config) with `.d.ts` beside them, as `parts/vite.js` and `prerender.js` already did: Node strips no
+  types under `node_modules`, which only a new repo meets (remy-auth's package is a workspace).
+- **The frame's docs links** (Docs, Developers, the sidebar's Guide) come from `defineRemyApp`'s `docs`
+  origin; remy-auth's hand-written ones went (its old-address redirects and home cards stay its own).
+- **The `remy` skill** is generated from the developer docs into the package (`packages/ui/skill.mjs`, run
+  by `ui:generate`, so every pack and release has its version's rules); `skills:install` adds it from
+  `node_modules` (a local source the tooling check allows); `agents:rules` keeps the `AGENTS.md` block,
+  run by `project:setup` and `project:upgrade-ui`. remy-auth's own `AGENTS.md` indexes the docs.
+- `docs:cli` is remy-auth's own task now (it changes the package); `docs:init` copies
+  `packages/ui/src/docs/template` at a tag.
+
+Checks: tier 0 green; tier 3 81/81; remy-auth's `docs:check` green, `docs:test` 9/9 (7 before: the pages
+now come from the content). Scratch check (a local `npm pack`, no workspace): the new app's docs from the
+template, without Ask AI or an API, pass `docs:check` and `docs:test` (3/3); `skills:install` installs
+`remy` for both agents and `agents:rules` writes, then keeps, the block. The check found five things only a
+new repo meets, all fixed: TypeScript under `node_modules` (above), `mdast-util-to-markdown` 2.1.3 (D3;
+pinned at 2.1.2 in the package), the optional bindings' types, a 404 for the missing favicon, and the
+empty reference. Hands-on (local, built Workers): remy-auth's `/docs/formats` on a desktop as the live
+site (tabs, contents, pictures, Copy Markdown, Ask AI), no console errors; the new repo's `/docs` on a
+phone with its own name, no Ask AI, no errors; its `/reference`, `/api/mcp/reference` and `/docs/ask`
+404, its `llms.txt`, search, sitemap and MCP answer.
 
 ## Parked while running (working rules: recorded, skipped, reported at the end)
 
