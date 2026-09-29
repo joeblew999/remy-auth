@@ -3,7 +3,6 @@ import { getLocale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
 import { SettingsPage } from '@joeblew999/remy-ui/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
-import { usePreferred } from '@joeblew999/remy-ui/preferred';
 import { problemPages } from '@joeblew999/remy-ui/problem';
 
 // The app's settings page (the shared SettingsPage): language, appearance, and what the device tells the app.
@@ -14,5 +13,5 @@ export const Route = createFileRoute('/app/settings')({
 });
 
 function Settings() {
-  return <SettingsPage locale={getLocale()} preferred={usePreferred()} />;
+  return <SettingsPage locale={getLocale()} />;
 }

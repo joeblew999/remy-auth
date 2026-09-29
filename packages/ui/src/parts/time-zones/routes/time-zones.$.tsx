@@ -4,7 +4,6 @@ import { m } from '../../../paraglide/messages.js';
 import { pageHead } from '../../../tanstack';
 import { TimeZonePage, canonicalTimeZone, timeZoneName, timeZonePath } from '../../../showcase/time-zone';
 import { ErrorPage, Problem } from '../../../problem';
-import { usePreferred } from '../../../preferred';
 
 // A sub-resource of the formats page: /es/time-zones/Asia/Tokyo. The splat holds the IANA name;
 // a name Intl does not know throws notFound() (a localized 404 naming it), and another spelling
@@ -28,7 +27,7 @@ export const Route = createFileRoute('/time-zones/$')({
 
 function TimeZone() {
   const { zone } = Route.useLoaderData();
-  return <TimeZonePage locale={getLocale()} zone={zone} preferred={usePreferred()} />;
+  return <TimeZonePage locale={getLocale()} zone={zone} />;
 }
 
 // Loader data is not available here; the params always are.

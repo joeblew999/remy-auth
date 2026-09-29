@@ -31,9 +31,6 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ],
-      "@joeblew999/remy-ui/*": [
-        "./packages/ui/src/*"
       ]
     }
   }

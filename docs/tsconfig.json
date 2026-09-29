@@ -13,8 +13,7 @@
     "skipLibCheck": true,
     "noEmit": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@joeblew999/remy-ui/*": ["../packages/ui/src/*"]
+      "@/*": ["./src/*"]
     }
   }
 }

@@ -20,7 +20,7 @@ import { LanguagesIcon, ListChecksIcon, PaletteIcon, PanelsTopLeftIcon } from 'l
 
 export { sitePaths, appPaths, allPaths, isAppPath } from './paths.js';
 
-export { SkipLink, ZoneBadge, SiteNavLinks, SourceLink, SiteShell, Shell, Intro } from './shell';
+export { SkipLink, ZoneBadge, SiteShell, Shell, Intro } from './shell';
 export { Group, Row, NameList } from './rows';
 import { Shell, Intro } from './shell';
 import { Group, Row, NameList } from './rows';
@@ -126,7 +126,7 @@ function FormatsSection({ id, title, note, single = false, children }: { id: str
  * money and words. Every section opens with what it is for the page's language (the card marked
  * data-own-area, all derived from the locale), then its samples, then its control where it has one.
  */
-export function FormatsContent({ locale, info, extras = {}, controls = {}, backTo = '/' }: { locale: Locale; info: LocaleInfo; extras?: FormatsExtras; controls?: FormatsControlCards; backTo?: '/' | '/app' }) {
+export function FormatsContent({ locale, info, extras = {}, controls = {}, backTo = 'site' }: { locale: Locale; info: LocaleInfo; extras?: FormatsExtras; controls?: FormatsControlCards; backTo?: 'site' | 'app' }) {
   const o = { locale };
   const dir = direction(locale);
   const format = formatLocale(locale);
@@ -143,7 +143,7 @@ export function FormatsContent({ locale, info, extras = {}, controls = {}, backT
     {/* On wide screens the intro and "This language" sit side by side, so the first screen is full. */}
     <div className="grid items-start gap-10 lg:grid-cols-2">
       <div className="flex flex-col gap-6">
-        <Intro locale={locale} label={m.formats_label({}, o)} title={m.formats_title({}, o)} intro={m.formats_intro({}, o)} back={backTo === '/app'} backTo={backTo} />
+        <Intro locale={locale} label={m.formats_label({}, o)} title={m.formats_title({}, o)} intro={m.formats_intro({}, o)} back={backTo === 'app'} backTo={backTo} />
         <nav aria-label={m.sections_nav({}, o)} className="flex flex-wrap gap-2">
           {sections.map(([id, title]) => <a key={id} className={buttonVariants({ variant: 'outline', size: 'sm' })} href={`#${id}`}>{title}</a>)}
         </nav>

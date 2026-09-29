@@ -3,7 +3,6 @@ import { getLocale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
 import { AppHomePage } from '@joeblew999/remy-ui/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
-import { usePreferred } from '@joeblew999/remy-ui/preferred';
 // The status-card part, or undefined when the app does not list it (src/parts.json).
 import { StatusCard, statusCardLoader } from 'virtual:remy-parts/status-card/ui';
 import { problemPages } from '@joeblew999/remy-ui/problem';
@@ -20,5 +19,5 @@ export const Route = createFileRoute('/app/')({
 });
 
 function AppHome() {
-  return <AppHomePage locale={getLocale()} preferred={usePreferred()}>{StatusCard && <StatusCard />}</AppHomePage>;
+  return <AppHomePage locale={getLocale()}>{StatusCard && <StatusCard />}</AppHomePage>;
 }

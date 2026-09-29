@@ -1,4 +1,3 @@
-import { createContext, useContext } from 'react';
 import { Link } from '@tanstack/react-router';
 import { ArrowLeftIcon } from 'lucide-react';
 import type { Locale } from './paraglide/runtime.js';
@@ -8,6 +7,7 @@ import { ModeToggle } from './theme';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from './components/navigation-menu';
 import { buttonVariants } from './components/button';
 import { Separator } from './components/separator';
+import { navLink, usePreferredLocale, useRemyApp } from './app-config';
 
 // The frame every site page shares (header, language links, footer) and the pieces app pages reuse,
 // apart from the pages themselves (./pages): a page that only needs the frame, such as an app's docs
@@ -28,53 +28,38 @@ export function ZoneBadge({ locale, app }: { locale: Locale; app: boolean }) {
 }
 
 /**
- * Links an app adds to the site header's navigation, after the shared ones: a function of the page's
- * de-localized path (so a link can mark itself active) returning NavigationMenuItems. remy-auth adds
- * its docs this way (the guide and the developer docs, on its docs Worker); an app that provides nothing
- * gets the shared links only.
- */
-export const SiteNavLinks = createContext<((path: string) => React.ReactNode) | undefined>(undefined);
-
-/**
- * Links an app adds to the app sidebar's footer, above "Back to the site": SidebarMenuItems, such as a
- * link to the app's guide. An app that provides nothing gets "Back to the site" only.
- */
-export const AppNavLinks = createContext<React.ReactNode>(undefined);
-
-/**
- * Where evaluators find the app's source: the site header's "GitHub" link. Each app passes its own
- * repository URL; an app that passes none shows no source link.
- */
-export const SourceLink = createContext<string | undefined>(undefined);
-
-/**
  * The frame of a site page: static shadcn components only (links styled as buttons,
- * Separator), so the page is complete without JavaScript. `preferred` is the language to offer.
+ * Separator), so the page is complete without JavaScript. Its brand, navigation, source link and
+ * "Open app" are the app's (defineRemyApp, through AppProviders); `preferred`, the language to offer,
+ * comes from AppProviders too unless a page passes its own.
  */
 export function SiteShell({ locale, path = '', preferred, children }: { locale: Locale; path?: string; preferred?: Locale; children: React.ReactNode }) {
   const o = { locale };
-  const appLinks = useContext(SiteNavLinks);
-  const source = useContext(SourceLink);
+  const app = useRemyApp();
+  const offered = usePreferredLocale();
   return <div className="flex min-h-svh w-full flex-col px-4 md:px-8">
     <SkipLink locale={locale} />
-    <LanguageHint locale={locale} path={path} preferred={preferred} />
+    <LanguageHint locale={locale} path={path} preferred={preferred ?? offered} />
     <header className="site-header flex flex-wrap items-center gap-x-2 gap-y-1 py-3">
-      <Link className={buttonVariants({ variant: 'ghost', className: 'brand font-semibold' })} to="/" preload="intent">Remy</Link>
+      <Link className={buttonVariants({ variant: 'ghost', className: 'brand font-semibold' })} to="/" preload="intent">{app.brand}</Link>
       <NavigationMenu aria-label={m.nav_heading({}, o)} className="order-last max-w-none basis-full justify-start sm:order-none sm:basis-auto">
         <NavigationMenuList className="flex-wrap justify-start">
-          <NavigationMenuItem>
-            <NavigationMenuLink active={path === '/formats'} render={<Link to="/formats" preload="intent" />}>{m.nav_formats({}, o)}</NavigationMenuLink>
-          </NavigationMenuItem>
-          {appLinks?.(path)}
-          {source && <NavigationMenuItem>
-            <NavigationMenuLink href={source}>GitHub</NavigationMenuLink>
+          {app.site?.nav?.map(item => {
+            const { link } = navLink(item);
+            return <NavigationMenuItem key={item.label('en')}>
+              <NavigationMenuLink active={path === item.link.to} render={<Link {...link} preload="intent" />}>{item.label(locale)}</NavigationMenuLink>
+            </NavigationMenuItem>;
+          })}
+          {app.site?.links?.(path, locale)}
+          {app.repository && <NavigationMenuItem>
+            <NavigationMenuLink href={app.repository}>GitHub</NavigationMenuLink>
           </NavigationMenuItem>}
         </NavigationMenuList>
       </NavigationMenu>
       <div className="ms-auto flex items-center gap-1">
         <LanguageSwitcher locale={locale} path={path} />
         <ModeToggle locale={locale} />
-        <Link className={buttonVariants({ size: 'sm' })} to="/app" preload="intent">{m.open_app({}, o)}</Link>
+        {app.app && <Link className={buttonVariants({ size: 'sm' })} {...app.app.home} preload="intent">{m.open_app({}, o)}</Link>}
       </div>
     </header>
     <Separator />
@@ -87,9 +72,15 @@ export function SiteShell({ locale, path = '', preferred, children }: { locale: 
 /** The frame of a site page, also for not-found and error pages. App pages use AppShell from ./app-pages. */
 export const Shell = SiteShell;
 
-export function Intro({ locale, label, title, intro, back = true, backTo = '/' }: { locale: Locale; label?: string; title: string; intro: string; back?: boolean; backTo?: '/' | '/app' }) {
+/** A page's heading block; its back link goes to the site's home, or with `backTo="app"` to the app's (defineRemyApp). */
+export function Intro({ locale, label, title, intro, back = true, backTo = 'site' }: { locale: Locale; label?: string; title: string; intro: string; back?: boolean; backTo?: 'site' | 'app' }) {
+  const home = useRemyApp().app?.home;
+  const className = 'inline-flex items-center gap-1 text-sm text-muted-foreground';
+  const content = <><ArrowLeftIcon aria-hidden="true" className="size-4 rtl:rotate-180" />{m.home_link({}, { locale })}</>;
   return <>
-    {back && <Link className="inline-flex items-center gap-1 text-sm text-muted-foreground" to={backTo} preload="intent"><ArrowLeftIcon aria-hidden="true" className="size-4 rtl:rotate-180" />{m.home_link({}, { locale })}</Link>}
+    {back && (backTo === 'app' && home
+      ? <Link className={className} {...home} preload="intent">{content}</Link>
+      : <Link className={className} to="/" preload="intent">{content}</Link>)}
     {label && <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{label}</p>}
     <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">{title}</h1>
     <p className="max-w-lg text-lg leading-relaxed text-muted-foreground">{intro}</p>

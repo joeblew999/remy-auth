@@ -6,7 +6,6 @@ import { FormatsPage } from '@joeblew999/remy-ui/pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { formatsExtras } from '../formats-extras';
 import { formatsRouteOptions } from '../formats-route';
-import { usePreferred } from '@joeblew999/remy-ui/preferred';
 import { problemPages } from '@joeblew999/remy-ui/problem';
 
 // The formats site page: complete without JavaScript, for Google.
@@ -21,6 +20,6 @@ export const Route = createFileRoute('/formats')({
 function Formats() {
   const { info, place } = Route.useLoaderData();
   const locale = getLocale();
-  return <FormatsPage locale={locale} info={info} preferred={usePreferred()}
+  return <FormatsPage locale={locale} info={info}
     extras={formatsExtras({ locale, info, place })} controls={choiceCards({ locale, search: Route.useSearch(), to: '/formats' })} />;
 }

@@ -8,10 +8,12 @@ import { Separator } from '../../../components/separator';
 import { useSidebar } from '../../../components/sidebar';
 import { LanguageMenu } from '../../../language';
 import { ModeToggle } from '../../../theme';
+import { useRemyApp } from '../../../app-config';
 
 /** sidebar-16's SiteHeader: the sidebar toggle (tablets and desktops; on phones the bottom bar's More opens it), the breadcrumb with the app's name, and the language menu where the block has its search form. */
 export function SiteHeader({ locale, path }: { locale: Locale; path: string }) {
   const { toggleSidebar } = useSidebar();
+  const app = useRemyApp();
   return (
     <header className="site-header sticky top-0 z-50 flex w-full items-center border-b bg-background">
       <div className="flex h-(--header-height) w-full items-center gap-2 px-4">
@@ -22,7 +24,7 @@ export function SiteHeader({ locale, path }: { locale: Locale; path: string }) {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink className="brand" render={<Link to="/app" preload="intent" />}>Remy</BreadcrumbLink>
+              <BreadcrumbLink className="brand" render={app.app ? <Link {...app.app.home} preload="intent" /> : <Link to="/" preload="intent" />}>{app.brand}</BreadcrumbLink>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

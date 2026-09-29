@@ -3,7 +3,6 @@ import { getLocale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
 import { ClockPage } from '@joeblew999/remy-ui/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
-import { usePreferred } from '@joeblew999/remy-ui/preferred';
 import { problemPages } from '@joeblew999/remy-ui/problem';
 import { clockDefaults, clockRouteOptions, clockZones } from '@joeblew999/remy-ui/clock-route';
 
@@ -19,6 +18,6 @@ export const Route = createFileRoute('/app/clock')({
 function Clock() {
   const navigate = Route.useNavigate();
   const zones = clockZones(Route.useSearch());
-  return <ClockPage locale={getLocale()} preferred={usePreferred()} zones={zones}
+  return <ClockPage locale={getLocale()} zones={zones}
     onZonesChange={next => navigate({ search: { zones: next.join(',') }, replace: true })} />;
 }

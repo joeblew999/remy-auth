@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { useForm, useStore } from '@tanstack/react-form';
 import type { Locale } from './paraglide/runtime.js';
 import { m } from './paraglide/messages.js';
-import { LanguageHint, LanguageMenu } from './language';
+import { LanguageMenu } from './language';
 import { useTheme } from './theme';
 import { UserIcon, XIcon } from 'lucide-react';
 import { Skeleton } from './components/skeleton';
@@ -13,43 +13,16 @@ import { Button, buttonVariants } from './components/button';
 import { Card, CardContent, CardHeader, CardTitle } from './components/card';
 import { Field, FieldError, FieldGroup, FieldLabel } from './components/field';
 import { Input } from './components/input';
-import { SidebarInset, SidebarProvider } from './components/sidebar';
-import { AppSidebar } from './blocks/sidebar-16/components/app-sidebar';
-import { SiteHeader } from './blocks/sidebar-16/components/site-header';
-import { BottomNav } from './blocks/bottom-nav/bottom-nav';
 import { FormatsContent, type FormatsControlCards, type FormatsExtras } from './pages';
-import { Intro, SkipLink, ZoneBadge } from './shell';
+import { Intro } from './shell';
+import { AppShell } from './app-shell';
 import { formatLocale, type LocaleInfo } from './locale-info';
 import { reservationSchema, type Reservation, type ReservationDraft, type ReservationResult } from './reservation';
 
 // App pages (paths.js): they need JavaScript and use the app shell. Kept apart from ./pages, the
 // site pages, so a site page never downloads the app shell's code.
 
-/**
- * The frame of an app page: shadcn's sidebar-16 block (blocks/sidebar-16), a sticky site header
- * with the sidebar toggle, then the sidebar with the app's pages; on phones the bottom bar instead
- * (blocks/bottom-nav). Needs JavaScript.
- */
-export function AppShell({ locale, path = '/app', preferred, children }: { locale: Locale; path?: string; preferred?: Locale; children: React.ReactNode }) {
-  return <div className="[--header-height:calc(--spacing(14))]">
-    <SkipLink locale={locale} />
-    <SidebarProvider className="flex flex-col">
-      <SiteHeader locale={locale} path={path} />
-      <div className="flex flex-1">
-        <AppSidebar locale={locale} />
-        <SidebarInset>
-          {/* Room below the content for the phone's bottom bar (4rem and the home indicator). */}
-          <div className="flex flex-1 flex-col gap-4 p-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:p-8">
-            <LanguageHint locale={locale} path={path} preferred={preferred} />
-            <main id="main" className="w-full flex-1">{children}</main>
-            <footer><ZoneBadge locale={locale} app /></footer>
-          </div>
-        </SidebarInset>
-      </div>
-      <BottomNav locale={locale} />
-    </SidebarProvider>
-  </div>;
-}
+export { AppShell } from './app-shell';
 
 /** The app's home page: what the app side is, then whatever the app shows there (for example the live status). */
 export function AppHomePage({ locale, preferred, children }: { locale: Locale; preferred?: Locale; children?: React.ReactNode }) {
@@ -71,7 +44,7 @@ export function LocationPage({ locale, preferred, children }: { locale: Locale; 
   const o = { locale };
   return <AppShell locale={locale} path="/app/location" preferred={preferred}>
     <section className="flex flex-col gap-6">
-      <Intro locale={locale} title={m.location_title({}, o)} intro={m.location_intro({}, o)} backTo="/app" />
+      <Intro locale={locale} title={m.location_title({}, o)} intro={m.location_intro({}, o)} backTo="app" />
       {children}
     </section>
   </AppShell>;
@@ -79,7 +52,7 @@ export function LocationPage({ locale, preferred, children }: { locale: Locale; 
 
 /** The formats page inside the app: the same content as the site page, in the app frame. */
 export function AppFormatsPage({ locale, info, preferred, extras = {}, controls = {} }: { locale: Locale; info: LocaleInfo; preferred?: Locale; extras?: FormatsExtras; controls?: FormatsControlCards }) {
-  return <AppShell locale={locale} path="/app/formats" preferred={preferred}><FormatsContent locale={locale} info={info} extras={extras} controls={controls} backTo="/app" /></AppShell>;
+  return <AppShell locale={locale} path="/app/formats" preferred={preferred}><FormatsContent locale={locale} info={info} extras={extras} controls={controls} backTo="app" /></AppShell>;
 }
 
 /** The demo form's starting values: no name, two seats, written in the language's own digits. */
@@ -144,7 +117,7 @@ export function DemoPage({ locale, preferred, onReserve, onDirtyChange }: {
   }, []);
   return <AppShell locale={locale} path="/app/demo" preferred={preferred}>
     <section className="flex flex-col gap-6">
-      <Intro locale={locale} label={m.demo_label({}, o)} title={m.demo_title({}, o)} intro={m.demo_description({}, o)} backTo="/app" />
+      <Intro locale={locale} label={m.demo_label({}, o)} title={m.demo_title({}, o)} intro={m.demo_description({}, o)} backTo="app" />
       <Card>
         <CardHeader><CardTitle>{m.count_label({}, o)}</CardTitle></CardHeader>
         <CardContent className="flex flex-col gap-4">
@@ -241,7 +214,7 @@ export function ClockPage({ locale, preferred, zones, onZonesChange }: { locale:
   </Card>;
   return <AppShell locale={locale} path="/app/clock" preferred={preferred}>
     <section className="flex flex-col gap-6">
-      <Intro locale={locale} title={m.clock_title({}, o)} intro={m.clock_intro({}, o)} backTo="/app" />
+      <Intro locale={locale} title={m.clock_title({}, o)} intro={m.clock_intro({}, o)} backTo="app" />
       <div className="flex flex-col gap-3">
         {here && row(here, m.clock_here({}, o))}
         {zones.filter(zone => zone !== here).map(zone => row(zone, undefined, true))}
@@ -276,7 +249,7 @@ export function SettingsPage({ locale, preferred }: { locale: Locale; preferred?
   const themes = [['light', m.theme_light({}, o)], ['dark', m.theme_dark({}, o)], ['system', m.theme_system({}, o)]] as const;
   return <AppShell locale={locale} path="/app/settings" preferred={preferred}>
     <section className="flex flex-col gap-6">
-      <Intro locale={locale} title={m.settings_title({}, o)} intro={m.settings_intro({}, o)} backTo="/app" />
+      <Intro locale={locale} title={m.settings_title({}, o)} intro={m.settings_intro({}, o)} backTo="app" />
       <Card>
         <CardHeader><CardTitle>{m.settings_language({}, o)}</CardTitle></CardHeader>
         <CardContent className="flex flex-wrap items-center justify-between gap-3">
@@ -310,7 +283,7 @@ export function AccountPage({ locale, preferred }: { locale: Locale; preferred?:
   const o = { locale };
   return <AppShell locale={locale} path="/app/account" preferred={preferred}>
     <section className="flex flex-col gap-6">
-      <Intro locale={locale} title={m.account_title({}, o)} intro={m.account_intro({}, o)} backTo="/app" />
+      <Intro locale={locale} title={m.account_title({}, o)} intro={m.account_intro({}, o)} backTo="app" />
       <Empty className="border">
         <EmptyHeader>
           <EmptyMedia variant="icon"><UserIcon /></EmptyMedia>

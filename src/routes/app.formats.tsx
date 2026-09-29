@@ -6,7 +6,6 @@ import { AppFormatsPage } from '@joeblew999/remy-ui/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { formatsExtras } from '../formats-extras';
 import { formatsRouteOptions } from '../formats-route';
-import { usePreferred } from '@joeblew999/remy-ui/preferred';
 import { problemPages } from '@joeblew999/remy-ui/problem';
 
 // The formats page inside the app: the same content and rows as the site page, in the app frame.
@@ -21,6 +20,6 @@ export const Route = createFileRoute('/app/formats')({
 function Formats() {
   const { info, place } = Route.useLoaderData();
   const locale = getLocale();
-  return <AppFormatsPage locale={locale} info={info} preferred={usePreferred()}
+  return <AppFormatsPage locale={locale} info={info}
     extras={formatsExtras({ locale, info, place })} controls={choiceCards({ locale, search: Route.useSearch(), to: '/app/formats' })} />;
 }

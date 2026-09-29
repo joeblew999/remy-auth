@@ -5,9 +5,7 @@ import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { getLocale, direction } from '@joeblew999/remy-ui/locale';
 import { AppProviders } from '@joeblew999/remy-ui/providers';
-import { AppNavLinks, SiteNavLinks } from '@joeblew999/remy-ui/shell';
-import { docsConfig } from '../../docs/docs.config';
-import { docsAppLink, docsHeaderLink } from '../docs/header-link';
+import { remyApp } from '../remy-app';
 import { preferredLocale } from '../preferred';
 import { NotFound, ErrorPage } from '@joeblew999/remy-ui/problem';
 import '../styles.css';
@@ -33,11 +31,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
  */
 function Document({ children }: { children: React.ReactNode }) {
   const locale = getLocale();
+  const preferred = Route.useLoaderData({ select: data => data.preferred });
   return <html lang={locale} dir={direction(locale)} suppressHydrationWarning>
     <head><HeadContent /></head>
-    <body><AppProviders locale={locale} repository={docsConfig.repository}>
-      {/* The site header's docs links and the app sidebar's guide link: the docs Worker (docs/). */}
-      <SiteNavLinks value={docsHeaderLink(locale)}><AppNavLinks value={docsAppLink(locale)}>{children}</AppNavLinks></SiteNavLinks></AppProviders>
+    <body><AppProviders locale={locale} app={remyApp} preferred={preferred}>{children}</AppProviders>
       <TanStackDevtools plugins={[
         { name: 'TanStack Router', render: <TanStackRouterDevtoolsPanel /> },
         { name: 'TanStack Query', render: <ReactQueryDevtoolsPanel /> },

@@ -7,9 +7,9 @@ import { HomeCard } from '@joeblew999/remy-ui/pages';
 import { buttonVariants } from '@joeblew999/remy-ui/components/button';
 import { docsOrigin } from './origin';
 
-/** The site header's docs links (SiteNavLinks in the shared package): the guide and the developer docs, on the docs Worker. */
-export function docsHeaderLink(locale: Locale) {
-  return () => <>
+/** The site header's docs links (defineRemyApp's `site.links`): the guide and the developer docs, on the docs Worker. */
+export function docsHeaderLink(_path: string, locale: Locale) {
+  return <>
     <NavigationMenuItem>
       <NavigationMenuLink render={<a href={`${docsOrigin}/docs`} />}>{m.nav_docs({}, { locale })}</NavigationMenuLink>
     </NavigationMenuItem>
@@ -19,7 +19,7 @@ export function docsHeaderLink(locale: Locale) {
   </>;
 }
 
-/** The app sidebar's guide link (AppNavLinks in the shared package): help for people using the app. */
+/** The app sidebar's guide link (defineRemyApp's `app.links`): help for people using the app. */
 export function docsAppLink(locale: Locale) {
   return <SidebarMenuItem>
     <SidebarMenuButton render={<a href={`${docsOrigin}/docs`} />}>

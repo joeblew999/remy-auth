@@ -6,7 +6,6 @@ import { m } from '@joeblew999/remy-ui/messages';
 import { DemoPage } from '@joeblew999/remy-ui/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
 import { useLeaveGuard } from '@joeblew999/remy-ui/showcase/navigation-blocking';
-import { usePreferred } from '@joeblew999/remy-ui/preferred';
 import { orpc } from '../api/client';
 import { problemPages } from '@joeblew999/remy-ui/problem';
 
@@ -27,5 +26,5 @@ function Demo() {
     if (isDefinedError(error) && error.code === 'INVALID_RESERVATION') return { errors: error.data };
     throw error;
   });
-  return <DemoPage locale={getLocale()} preferred={usePreferred()} onReserve={reserve} onDirtyChange={useLeaveGuard()} />;
+  return <DemoPage locale={getLocale()} onReserve={reserve} onDirtyChange={useLeaveGuard()} />;
 }

@@ -3,7 +3,6 @@ import { getLocale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
 import { LocationPage } from '@joeblew999/remy-ui/app-pages';
 import { pageHead } from '@joeblew999/remy-ui/tanstack';
-import { usePreferred } from '@joeblew999/remy-ui/preferred';
 import { DevicePlace } from '@joeblew999/remy-ui/showcase/device-place';
 // The deferred-place part, or undefined when the app does not list it (src/parts.json).
 import { getPlace } from 'virtual:remy-parts/deferred-place/place';
@@ -22,7 +21,7 @@ export const Route = createFileRoute('/app/location')({
 function Location() {
   const { place } = Route.useLoaderData();
   const locale = getLocale();
-  return <LocationPage locale={locale} preferred={usePreferred()}>
+  return <LocationPage locale={locale}>
     {DeferredPlace && place ? <DeferredPlace locale={locale} place={place} device /> : <DevicePlace locale={locale} />}
   </LocationPage>;
 }
