@@ -8,7 +8,6 @@ import { localeInfo } from '@joeblew999/remy-ui/locale-info';
 import { m } from '@joeblew999/remy-ui/messages';
 import { sitePaths, appPaths } from '@joeblew999/remy-ui/paths';
 import { everyPath } from '../src/paths';
-import { cspEnforced } from '../src/csp';
 import { apiChecks, reservationApiChecks } from '@joeblew999/remy-ui/api/checks';
 import { info } from '@joeblew999/remy-auth-contract';
 import { router } from '../src/api/router';
@@ -30,8 +29,6 @@ serverAppChecks({
   home: { title: locale => m.home_title({}, { locale }), description: locale => m.home_description({}, { locale }), brand: 'Remy' },
   // It shows remy-auth's showcase pages, so their checks run too.
   showcase: { formats: { extra: formatsExtra } },
-  // The middleware's own switch (src/csp.ts): the checks expect the header it sends.
-  cspEnforced,
 });
 // Every part listed in src/parts.json brings its own checks: the sitemap (seo-routes), the streamed
 // place and its failing navigation (deferred-place), the status card, the time-zone pages.

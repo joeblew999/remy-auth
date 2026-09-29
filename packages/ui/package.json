@@ -46,6 +46,8 @@
     "./pages": "./src/pages.tsx",
     "./shell": "./src/shell.tsx",
     "./providers": "./src/providers.tsx",
+    "./root": "./src/root.tsx",
+    "./router": "./src/router.tsx",
     "./app-config": "./src/app-config.tsx",
     "./app-shell": "./src/app-shell.tsx",
     "./app/vite": "./src/app-vite.js",

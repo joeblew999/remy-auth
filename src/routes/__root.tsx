@@ -1,44 +1,18 @@
-import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from '@tanstack/react-router';
-import type { QueryClient } from '@tanstack/react-query';
+import { createRootRouteWithContext } from '@tanstack/react-router';
 import { TanStackDevtools } from '@tanstack/react-devtools';
 import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
-import { getLocale, direction } from '@joeblew999/remy-ui/locale';
-import { AppProviders } from '@joeblew999/remy-ui/providers';
+import { remyRoot, type RemyRouterContext } from '@joeblew999/remy-ui/root';
 import { remyApp } from '../remy-app';
-import { preferredLocale } from '../preferred';
-import { NotFound, ErrorPage } from '@joeblew999/remy-ui/problem';
 import '../styles.css';
 
-// Router context: the per-request QueryClient from getRouter (src/router.tsx).
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  // The language worth offering on this page, if any (see preferred.ts); cheap, so it reruns on every navigation.
-  loader: () => ({ preferred: preferredLocale() }),
-  head: () => ({
-    meta: [{ charSet: 'utf-8' }, { name: 'viewport', content: 'width=device-width, initial-scale=1' }],
-    links: [{ rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
-  }),
-  shellComponent: Document,
-  component: Outlet,
-  notFoundComponent: NotFound,
-  errorComponent: ErrorPage,
-});
-
-/**
- * The document: Paraglide's locale for this request (server) or URL (browser) sets language and direction.
- * TanStack Devtools (Router and Query panels) mount here in development; the devtools() Vite plugin
- * strips them from production builds, which build-boundaries.checks.js proves on every served script.
- */
-function Document({ children }: { children: React.ReactNode }) {
-  const locale = getLocale();
-  const preferred = Route.useLoaderData({ select: data => data?.preferred });
-  return <html lang={locale} dir={direction(locale)} suppressHydrationWarning>
-    <head><HeadContent /></head>
-    <body><AppProviders locale={locale} app={remyApp} preferred={preferred}>{children}</AppProviders>
-      <TanStackDevtools plugins={[
-        { name: 'TanStack Router', render: <TanStackRouterDevtoolsPanel /> },
-        { name: 'TanStack Query', render: <ReactQueryDevtoolsPanel /> },
-      ]} />
-      <Scripts /></body>
-  </html>;
-}
+// The shared root (@joeblew999/remy-ui/root): the document in the page's language and direction, AppProviders
+// with this app's config, the language worth offering, the problem pages. TanStack Devtools (Router and Query
+// panels) stay here: the devtools() Vite plugin strips them from production builds only in the app's own
+// files, which build-boundaries.checks.js proves on every served script.
+export const Route = createRootRouteWithContext<RemyRouterContext>()(remyRoot(remyApp, {
+  devtools: <TanStackDevtools plugins={[
+    { name: 'TanStack Router', render: <TanStackRouterDevtoolsPanel /> },
+    { name: 'TanStack Query', render: <ReactQueryDevtoolsPanel /> },
+  ]} />,
+}));

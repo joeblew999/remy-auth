@@ -15,7 +15,7 @@ const OpenAPIPage = createOpenAPIPage();
 
 export function ReferenceView({ page }: { page: NonNullable<Awaited<ReturnType<typeof getReferencePage>>> }) {
   const { pageTree } = useFumadocsLoader({ pageTree: page.pageTree });
-  // next-themes' theme script needs the response's CSP nonce, as every script here does (src/router.tsx).
+  // next-themes' theme script needs the response's CSP nonce, as every script here does (the router's ssr.nonce).
   const nonce = useRouter().options.ssr?.nonce;
   return <RootProvider theme={{ storageKey: 'theme', attribute: 'class', defaultTheme: 'system', enableSystem: true, nonce }}
     search={{ options: { api: '/api/search/reference' } }}>
