@@ -361,10 +361,15 @@ review.
   tasks together; remy-auth-app moves with `project:upgrade-ui`. `remy-auth-test` is created on the
   release from the blank app (group 7), with the layout, the docs (Ask AI opt-in, not switched on) and
   its gates green; its hand-written files, set against the evidence table, are the plan's acceptance.
+  Public on GitHub and deployed live (owner, 2026-09-29: "public on github is fine. live is fine. you can
+  decide IF you can really test it or not"). Decided: live, because it can really be tested there: the
+  shared remote tier (`project:test:live`, the smoke checks against `DEPLOY_ORIGIN`) and `docs:test:remote`
+  run against its Workers, which is the path every new repo takes. Release number 0.14.0 (breaking,
+  under 1.0; the owner can call it 1.0.0 instead).
 
 ## Open questions for the owner
 
-- remy-auth-app after phase D: keep it as the showcase of the prerendered mode (recommended; it stops
+- remy-auth-app after phase D: keep it as the showcase of the prerendered mode (the default; it stops
   being the template), or retire it once the blank app exists?
 - Which other repos follow (remy-data, remy-sport, remy-nash do not include the tasks yet;
   remy-auth-app-layout is on 0.11.0)?
