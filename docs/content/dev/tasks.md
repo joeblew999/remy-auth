@@ -105,7 +105,8 @@ anything else is refused at build time and in Playwright, whose message names th
 export map. A package's own strings are its own inlang project, compiled by its build, whose runtime
 follows the platform's language with one call, `followLocale(runtime)` (`locale`); the i18n tasks read it
 through `I18N_INLANG`. Checks the repository adds to a release go in `project:release-checks` (remy-auth:
-`template:check`, `ui:verify`).
+`template:check`, `ui:verify`). remy-auth sets a release's version with `mise run ui:version -- X.Y.Z`, which
+writes it everywhere it appears (the package and the blank app's three pins).
 
 ### Choosing the version: released, development or local
 
@@ -195,7 +196,7 @@ tools, translate with the pinned Claude agent, commit.
 | Task | Does |
 | --- | --- |
 | `i18n:check` | Both checks in parallel; a WARNING and exit 0 while coding (`project:check` runs it), exit 1 with `I18N_STRICT=1` (`packages:release`) |
-| `i18n:messages:check` | The catalogs' gaps; `-- --list` one line per gap (`es missing nav_more`) |
+| `i18n:messages:check` | The catalogs' gaps, and languages that differ from the platform's (`de unlisted`); `-- --list` one line per gap (`es missing nav_more`) |
 | `i18n:docs:check` | The docs' gaps; `-- --list` one line per gap (`es stale docs/content/dev/gui.es.md`) |
 | `i18n:translate` | On main: messages, then docs, one commit each |
 | `i18n:messages:translate` | The catalogs' gaps, one language per agent call |

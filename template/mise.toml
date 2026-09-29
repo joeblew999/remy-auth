@@ -11,7 +11,7 @@ task.timings = true
 # Every task is remy-auth's, at the tag that matches @joeblew999/remy-ui in package.json;
 # mise run project:upgrade-ui -- <version> moves both (and the CI workflow's tag).
 [task_config]
-includes = ["git::https://github.com/joeblew999/remy-auth.git//tasks?ref=v0.14.0"]
+includes = ["git::https://github.com/joeblew999/remy-auth.git//tasks?ref=v0.13.0"]
 
 [env]
 # A worktree or agent picks its own port from the shell: PREVIEW_PORT=4232 mise run project:test:quick.

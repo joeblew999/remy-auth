@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="LOCAL, offline: UI messages (Paraglide catalogs, I18N_INLANG) against English: missing catalogs and keys (jq), placeholders (i18n-check), keys whose English changed since the locale was last translated (git), plural categories (Intl.PluralRules). Exit 1 on any gap; --list prints one line per gap"
+#MISE description="LOCAL, offline: UI messages (Paraglide catalogs, I18N_INLANG) against English: missing catalogs and keys (jq), placeholders (i18n-check), keys whose English changed since the locale was last translated (git), plural categories (Intl.PluralRules), the same languages as the platform. Exit 1 on any gap; --list prints one line per gap"
 #MISE dir="{{config_root}}"
 #MISE tools={"aqua:jqlang/jq"="1.8.2","npm:@lingual/i18n-check"="0.9.5"}
 set -euo pipefail
@@ -28,6 +28,14 @@ report=$(
     -i $(jq -r 'to_entries[] | select(.value | type == "array") | "\(.key).*"' "$en") 2>&1 \
     | awk '/Found invalid keys/ { on = 1 } on && /^│/ { gsub(/│/, " "); if ($1 == "file") { f = $2; sub(/.*\//, "", f); sub(/\.json$/, "", f) } if ($1 == "key") print f, "placeholders", $2 }'
   [ ${#targets[@]} -eq 0 ] || node "$(dirname "$0")/plurals.mjs" "$en" "${targets[@]}"
+  # The app's languages are the platform's: every page is served in each language @joeblew999/remy-ui routes,
+  # so a catalog must list exactly those (the platform's list has one home, its compiled runtime).
+  runtime=node_modules/@joeblew999/remy-ui/src/paraglide/runtime.js
+  if [ -f "$runtime" ]; then
+    platform=$(node --input-type=module -e "const { locales } = await import('./$runtime'); console.log(locales.join('\n'))")
+    comm -23 <(echo "$platform" | sort) <(jq -r '.locales[]' "$settings" | sort) | sed 's/$/ unlisted (the platform serves it)/'
+    comm -13 <(echo "$platform" | sort) <(jq -r '.locales[]' "$settings" | sort) | sed 's/$/ unserved (the platform does not serve it)/'
+  fi
 )
 if [ -z "$report" ]; then echo "Messages: every catalog complete and current ($(jq '.locales | length' "$settings") locales)."; exit 0; fi
 if [ "${1:-}" = --list ]; then echo "$report"; else

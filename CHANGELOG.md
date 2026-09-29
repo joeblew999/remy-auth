@@ -38,6 +38,7 @@ package follows [Semantic Versioning](https://semver.org/).
   `project:refresh-tasks`.
 - CI: `.github/workflows/google.yml` is a reusable workflow; an app calls it at its tag, and
   `project:upgrade-ui` moves that tag with the package and the tasks.
+- `i18n:messages:check` fails when an app's catalog lists other languages than the platform serves.
 - `project:test:consumers`: a hook tiers 3 and 4 and CI run last, for the other repositories a repository
   serves (remy-auth: `template:test`, the consumer fixture in `fixtures/consumer/`).
 - `packages:publish --dry-run`; `packages:publish` first checks that each registry accepts its token

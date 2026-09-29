@@ -654,7 +654,8 @@ Everything here is ready; each step goes out only when the owner says so (workin
   check covers each site's first page and its translation, as before, not the index pages, until this is
   fixed (upstream issue or a fix in the Worker's view).
 
-- **The app's catalog repeats the platform's language list.** `template/project.inlang/settings.json`
+- **The app's catalog repeats the platform's language list.** Closed 2026-09-29 by platform-structure fix 5
+  (`i18n:messages:check` compares them). `template/project.inlang/settings.json`
   copies remy-ui's 13 locales; a language added to the platform needs adding there too, and nothing checks
   it yet. A small shared check (the app's locales equal the package's) belongs in `i18n:messages:check`;
   not done in phase C to keep the phase to its groups.

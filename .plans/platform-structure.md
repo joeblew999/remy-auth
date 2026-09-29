@@ -138,6 +138,17 @@ the fixture cannot take the tasks through mise's git cache. What differs there i
   the blank app, whose tier 0 the fixture runs). It found one seam error at once: `HomeContent` took `string` where the
   messages take a `Locale`. Left: the build-time modules in TypeScript with generated declarations (survey first).
 
+- **Fix 5, the copied facts: done 2026-09-29.**
+  - The languages: `i18n:messages:check` fails when an app's catalog lists other languages than the platform
+    serves (the platform's list has one home, its compiled runtime). Tried on a copy with German dropped and
+    French added: both reported.
+  - The version: `ui:version -- X.Y.Z` writes the package's version and the blank app's three pins together, so
+    the template always pins the package's version (0.13.0 on main again, not the unreleased 0.14.0), and
+    `template:check` holds on every commit.
+  - Left: small releases and other repos hearing about them (a survey), and `release-0.14.0` remade with
+    `ui:version -- 0.14.0`.
+  - The parked thin-apps item (the language list) is closed by this.
+
 ## Open questions for the owner (answered above)
 
 1. **Where does the showcase go (fix 2)?** Options:
