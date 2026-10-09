@@ -1,0 +1,6 @@
+#!/usr/bin/env node
+//MISE description="STEP 0 of the flow, for each piece of work and each agent: a worktree of its own on a branch of its own from main (.claude/worktrees/<name>), installed, with its own ports (mise.local.toml) and the flow's guard. Work there with dev:change and dev:land; dev:done removes it when landed. The flow is tasks/dev/flow.ts"
+//MISE dir="{{config_root}}"
+//USAGE arg "<name>" help="The work's name: lowercase letters, digits, dashes; also the branch"
+// The logic is start.ts beside this file: TypeScript, type-checked by project:check.
+import './start.ts';

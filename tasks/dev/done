@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+//MISE description="The last step for a worktree dev:start made: once its branch is landed, remove the worktree and the branch. Refuses while anything is uncommitted or not on main. The flow is tasks/dev/flow.ts"
+//MISE dir="{{config_root}}"
+// The logic is done.ts beside this file: TypeScript, type-checked by project:check.
+import './done.ts';

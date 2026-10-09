@@ -12,6 +12,17 @@ const read = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8'
 const task = (name: string, cwd = '.') => spawnSync('mise', ['run', name], { cwd, stdio: 'inherit', env: { ...process.env, REMY_FLOW: 'land' } }).status === 0;
 
 const here = where();
+// Among many agents main moves under every branch. What is landed is the branch with main in it, so
+// main comes in first (a merge; a conflict stops here with the files named), and the check runs on that.
+if (!here.onMain) {
+  execFileSync('git', ['fetch', '-q', 'origin', 'main']);
+  if (read('rev-list', '--count', `${here.branch}..origin/main`) !== '0') {
+    if (!here.clean) { git('add', '-A'); git('commit', '-q', '-m', message); }
+    const merged = spawnSync('git', ['merge', '-q', 'origin/main', '-m', `Merge main into ${here.branch}`], { stdio: 'inherit' });
+    if (merged.status !== 0) { console.error(`dev:land: main does not merge cleanly into ${here.branch}; resolve the files git names, commit, then land again`); process.exit(1); }
+    here.clean = true;
+  }
+}
 for (const name of steps.land.tasks) run(name, 'land');
 if (!here.clean) { git('add', '-A'); git('commit', '-q', '-m', message); }
 else console.log('dev:land: nothing new to commit; landing what is committed.');
@@ -19,9 +30,10 @@ else console.log('dev:land: nothing new to commit; landing what is committed.');
 // The checkout main lives in: this one on main, the main worktree from a branch worktree.
 const root = here.onMain ? '.' : read('rev-parse', '--path-format=absolute', '--git-common-dir').replace(/\/\.git$/, '');
 if (!here.onMain) {
-  // A branch lands by a fast-forward: it is on top of main, or it is not landed (merge main first).
+  // A branch lands by a fast-forward: with main merged in above, it is on top of main.
+  execFileSync('git', ['-C', root, 'merge', '-q', '--ff-only', 'origin/main']);
   const result = spawnSync('git', ['-C', root, 'merge', '--ff-only', here.branch], { stdio: 'inherit' });
-  if (result.status !== 0) { console.error(`dev:land: ${here.branch} is not on top of main; merge main into it, then land again`); process.exit(1); }
+  if (result.status !== 0) { console.error(`dev:land: ${here.branch} is not on top of main (another landing came between); land again`); process.exit(1); }
 }
 git('-C', root, 'push', 'origin', 'main');
 const landed = read('-C', root, 'rev-parse', 'main');

@@ -179,10 +179,12 @@ every app does, from the shared tasks; `project:setup` installs the guard.
 
 | Step | Command | What runs | Time |
 | --- | --- | --- | --- |
+| Before a piece of work | `mise run dev:start -- <name>` | a worktree of its own from main, installed, its own ports, the guard | ~1 min |
 | After every change | `mise run dev:change` | the check (`project:check`): plans, types with the tasks' own, the plain-function checks (`tests/**/*.unit.spec.ts`), translation status; a build only when a route file changed, the docs only when docs changed | ~6 s |
 | The change leaves the machine | `mise run dev:land -- "<what changed>"` | the check, commit, fast-forward main, push, deploy staging. GitHub then runs every language, Google's audits and the consumer fixture in parallel, while you keep coding (`gh run list`) | ~1 min, mostly the deploy |
 | Production | `mise run dev:promote` | `cf:deploy` and the docs Worker, from a pushed main, no gate: staging and GitHub already ran the checks | ~1 min |
 | A release | `mise run dev:release` | `packages:release`: every check, every language, locally, on purpose, then the tag | ~5 min |
+| When landed | `mise run dev:done` | the worktree and branch go | seconds |
 
 - One area that looks wrong: `mise run project:test:only -- <words>` (the browser checks whose title
   matches, en and ar, ~30 s). It is the only browser run a step does not own.
@@ -243,9 +245,9 @@ The machine crashed on 2026-09-25 with about ten agents building and testing at 
 and timing-sensitive checks failed well before that. So:
 
 - An agent builds and tests only in its own git worktree, never in the main checkout: builds write
-  `dist/`, and two builds in one checkout delete each other's files.
-- Each agent sets its own `PREVIEW_PORT` from the shell (the repo's `mise.toml` reads it; never 4190,
-  which browsers block).
+  `dist/`, and two builds in one checkout delete each other's files. `dev:start` makes the worktree.
+- Each worktree has its own `PREVIEW_PORT` and `DOCS_PREVIEW_PORT` (`dev:start` writes them to
+  `mise.local.toml`, never 4190, which browsers block).
 - At most three agents run tests at the same time; research, writing and scratch spikes do not
   count. When more are needed, set `PLAYWRIGHT_WORKERS=2` for each.
 - Google's level (`project:test:google`, `project:test:cwv`) takes a machine-wide lock, so a second
@@ -266,18 +268,29 @@ and timing-sensitive checks failed well before that. So:
 - What is live is asked, not remembered: `mise run cf:versions` prints what each deployment is running
   and how far that is from your checkout. Say it from there, not from what you last deployed.
 
-## Multi-agent work
+## Many agents, one flow
 
-When work splits into independent parts and the owner has asked for multi-agent orchestration,
-use this shape:
+Owner, 2026-10-09: "formalise the way we workflow the dev work in many agents to use the new dev
+flow". Each piece of work, whoever does it, is one worktree through the same four commands; main is
+the only integrator, and GitHub checks every landing. Nothing here is done by hand.
 
-1. **Spike first.** One agent proves the risky points and stops if it finds a blocker.
-2. **One agent per part.** Each works in its own git worktree and uses its own port, so parts
-   never collide.
-3. **Each part proves itself.** Every part ships with its own shared check.
-4. **One integrator.** It merges the parts into the working branch and runs level 1 and level 2.
-   Nothing reaches `main` unless both pass.
-5. **Hands-on pass.** Passing checks is not the end. Deploy a preview with `mise run cf:preview`
-   and use each piece in a real Chrome, throttled to a mid-range phone, with a performance trace and screenshots.
-   Write down how it feels: the wait before content, layout shifts, flashes, and anything
-   annoying. Fix what feels bad before merging, even when its checks pass.
+| | Command | What it does |
+| --- | --- | --- |
+| Start | `mise run dev:start -- <name>` | a worktree on branch `<name>` from main (`.claude/worktrees/<name>`), installed, with ports of its own (`mise.local.toml`) and the flow's guard |
+| Code | `mise run dev:change` | the check, in seconds, after every change |
+| Land | `mise run dev:land -- "<what changed>"` | main merged in first (a conflict stops with the files named), the check, commit, fast-forward main, push, translate when stale, staging. GitHub runs the heavy checks; a red run comments on the commit |
+| Finish | `mise run dev:done` | the landed worktree and branch go; refuses while anything is unlanded |
+| Production | `mise run dev:promote` | from main, only a commit GitHub passed |
+
+- **Split by independence.** An orchestrator splits work into parts that touch different files, and
+  starts one agent per part with `dev:start`. A part that needs another's result waits for that
+  landing; it does not share a worktree.
+- **Spike first when the risk is unknown**: one agent proves the risky point and lands or stops.
+- **Every part proves itself**: it lands with its own check in `tests/`, in the plain-function tier
+  when it can be one, in the browser when only a browser shows it.
+- **Landings serialise themselves.** Two agents landing at once: the second's `dev:land` sees main
+  moved, merges it in, checks again and lands. The translation step is one writer across worktrees.
+- **Hands-on pass before production.** Passing checks is not the end: use the piece on staging in a
+  real browser, on a phone's width, and fix what feels bad. Then `dev:promote`.
+- **An agent never waits in the foreground** on `dev:land`, `dev:promote` or a GitHub run; it starts
+  them in the background and acts on the result. Only `dev:change` is waited for.

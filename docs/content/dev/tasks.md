@@ -141,6 +141,7 @@ The development flow is code, `tasks/dev/flow.ts`, with three commands and a gua
 
 | Step | Task |
 | --- | --- |
+| A piece of work | `dev:start -- <name>` (a worktree of its own from main, `npm ci`, ports in `mise.local.toml`, `dev:guard`); `dev:done` removes it once landed |
 | Every change | `dev:change` (`project:check`: plans, `project:routes` when a route file changed, types with `project:typecheck-tasks`, `project:test:unit`, `i18n:check` as a warning, `project:check:docs` when docs changed) |
 | Leaves the machine | `dev:land -- "<message>"` (the check, commit, main, push, translate when stale, `cf:staging`; GitHub then runs `project:test`, `project:test:google` and `project:test:consumers` in parallel, and a red run comments on the commit. The same three locally, on purpose: `REMY_FLOW=hand mise run <task>`) |
 | Production | `dev:promote` (refuses a commit GitHub has not passed; then `cf:deploy`, `docs:deploy`, `cf:versions`) |

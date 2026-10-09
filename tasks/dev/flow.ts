@@ -7,7 +7,7 @@
 // project:check, so a wrong step fails before it runs.
 import { execFileSync, spawnSync } from 'node:child_process';
 
-/** The steps of development, in the order they happen. */
+/** The steps of development, in the order they happen (dev:start and dev:done bracket them for a worktree). */
 export type Step = 'change' | 'land' | 'promote' | 'release';
 
 /**
@@ -78,7 +78,7 @@ export function run(task: string, step: Step | 'hand', args: string[] = []): voi
 }
 
 /** Where the work is: the branch, whether it is main, whether the tree is clean. */
-export function where() {
+export function where(): { branch: string; onMain: boolean; clean: boolean } {
   const branch = git('branch', '--show-current');
   return { branch, onMain: branch === 'main', clean: git('status', '--porcelain') === '' };
 }
