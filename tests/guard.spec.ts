@@ -21,7 +21,10 @@ type Major = {
   withoutVocabulary: string[];
 };
 
-const version = (folder: string): string => JSON.parse(readFileSync(`${folder}/package.json`, 'utf8')).version;
+// Read with a fallback: Playwright loads every spec file whatever is selected, so a missing fixture
+// (mise run ui:guard-fixture; project:prepare and dev:start run it) fails the guard's own tests below,
+// never a smoke run against a deployment.
+const version = (folder: string): string => { try { return JSON.parse(readFileSync(`${folder}/package.json`, 'utf8')).version; } catch { return `? (${folder} is not installed: mise run ui:guard-fixture)`; } };
 const installed = { v1: version('tests/guard/v1/node_modules/@orpc/server'), v2: version('node_modules/@orpc/server') };
 let results: Record<'v1' | 'v2', Major>;
 

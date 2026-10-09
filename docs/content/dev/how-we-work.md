@@ -276,7 +276,7 @@ the only integrator, and GitHub checks every landing. Nothing here is done by ha
 
 | | Command | What it does |
 | --- | --- | --- |
-| Start | `mise run dev:start -- <name>` | a worktree on branch `<name>` from main (`.claude/worktrees/<name>`), installed, with ports of its own (`mise.local.toml`) and the flow's guard |
+| Start | `mise run dev:start -- <name>` | a worktree on branch `<name>` from main (`.claude/worktrees/<name>`), installed (`npm ci`, `project:prepare`), with ports of its own (`mise.local.toml`) and the flow's guard. Claude Code's own worktrees live at the same place and are only a folder: inside one, `mise run dev:start` with no name prepares it the same way |
 | Code | `mise run dev:change` | the check, in seconds, after every change |
 | Land | `mise run dev:land -- "<what changed>"` | main merged in first (a conflict stops with the files named), the check, commit, fast-forward main, push, translate when stale, staging. GitHub runs the heavy checks; a red run comments on the commit |
 | Finish | `mise run dev:done` | the landed worktree and branch go; refuses while anything is unlanded |
