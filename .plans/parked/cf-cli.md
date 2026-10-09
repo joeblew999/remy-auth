@@ -7,4 +7,4 @@ nothing evaluated yet.
 - Launch post: https://blog.cloudflare.com/cloudflare-cf-cli-launch/
 
 Where it would land when picked up: the shared `cf:*` tasks (`tasks/cf.toml`, `tasks/cf/`), today on
-wrangler and scripts of our own; see also [remy-cli](remy-cli.md) (one CLI instead of scripts).
+wrangler and scripts of our own; see also [tooling-in-typescript](../tooling-in-typescript.md) (one CLI instead of scripts).

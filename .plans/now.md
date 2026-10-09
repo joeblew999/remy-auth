@@ -99,6 +99,20 @@ formats page's intro and "This language" share the first screen on desktop; issu
   break; `packages:upgrade` and the gates say), and move remy-auth-app with the next release
   ([what the move touched](done/openapi-contracts.md#orpc-20-watch-2026-09-26), issue #1).
 
+## Checking took 95% of the time (owner, 2026-10-09, issue #10)
+
+Fixed the same day, for every app through the shared tasks: `project:check` is the check, in seconds
+(plans, types, the plain-function tier `tests/**/*.unit.spec.ts`, translation status; a build or the
+docs only when their inputs changed). The heavy checks (every language, Google's audits, the consumer
+fixture) run on GitHub after every push, in parallel; each still runs locally on purpose, and
+`project:verify` at a release. The rule: [how we work](../docs/content/dev/how-we-work.md#gates-before-anything-leaves-the-machine).
+
+## The tooling in TypeScript (owner, 2026-10-09, issue #9)
+
+[tooling-in-typescript](tooling-in-typescript.md): the task layer is TypeScript, checked by
+`project:check` wherever the tasks are (a consumer's include cache too). The deploy's two scripts are
+converted; the rest follow in the order a wrong one costs most.
+
 ## What is deployed, and whose name it carries (owner, 2026-10-09)
 
 [product-identity](product-identity.md): the build stamp every Worker answers with at `/healthz`, the
@@ -156,7 +170,7 @@ task logic, facts in several places), and their fixes in order. Waits for the ow
 ## Parked
 
 [better-auth-ecosystem](parked/better-auth-ecosystem.md),
-[gui-portal](parked/gui-portal.md), [remy-cli](parked/remy-cli.md) (one CLI instead of scripts): big, not now (owner: "Not big feature stuff").
+[gui-portal](parked/gui-portal.md): big, not now (owner: "Not big feature stuff").
 
 [flue](parked/flue.md): a link to https://github.com/withastro/flue, to come back to.
 

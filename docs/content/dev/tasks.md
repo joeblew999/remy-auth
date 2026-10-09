@@ -142,7 +142,7 @@ change, the heavy checks on GitHub after every push. The tasks:
 
 | When | Task |
 | --- | --- |
-| Every change | `project:check` (plans, `project:routes` when a route file changed, types, `project:test:unit`, `i18n:check` as a warning, `project:check:docs` when docs changed) |
+| Every change | `project:check` (plans, `project:routes` when a route file changed, types, including the shared tasks' own TypeScript (`project:typecheck-tasks`: `tasks/**/*.ts` are run by Node as they are and checked by `tsc` wherever the tasks are), `project:test:unit`, `i18n:check` as a warning, `project:check:docs` when docs changed) |
 | One area | `project:test:only -- <words>` (the browser checks whose title matches, en and ar) |
 | On purpose | `project:test:quick` (every browser check, en and ar) |
 | GitHub, after a push | `project:test` (every language), `project:test:google`, `project:test:consumers`, in parallel |

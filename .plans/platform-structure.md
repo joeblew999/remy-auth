@@ -66,7 +66,7 @@ the rest.
 
 ### 4. Task logic in one tested program (S4)
 
-- Unpark [remy-cli](parked/remy-cli.md): one `remy` binary in the package. Every task becomes a one-line
+- Unpark [tooling-in-typescript](tooling-in-typescript.md): one `remy` binary in the package. Every task becomes a one-line
   TOML `run` with a usage spec, calling it. No bash beyond one-liners, no sibling-file lookups, and the
   same Node on the Mac and in CI.
 - The CLI has its own unit tests (`node:test`) run in tier 0, and a `--dry-run` for every outward step

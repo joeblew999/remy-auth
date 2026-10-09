@@ -7,10 +7,14 @@ import { unstable_readConfig } from 'wrangler';
 
 const environment = process.env.CLOUDFLARE_ENV || undefined;
 const config = unstable_readConfig({ env: environment });
-const missing = [
-  ...(config.d1_databases ?? []).filter(db => !db.database_id).map(db => `D1 database ${db.binding} (${db.database_name ?? 'unnamed'}) has no database_id`),
-  ...(config.kv_namespaces ?? []).filter(kv => !kv.id).map(kv => `KV namespace ${kv.binding} has no id`),
-  ...(config.r2_buckets ?? []).filter(bucket => !bucket.bucket_name).map(bucket => `R2 bucket ${bucket.binding} has no bucket_name`),
+type Binding = { binding: string };
+type D1 = Binding & { database_name?: string; database_id?: string };
+type KV = Binding & { id?: string };
+type R2 = Binding & { bucket_name?: string };
+const missing: string[] = [
+  ...((config.d1_databases ?? []) as D1[]).filter(db => !db.database_id).map(db => `D1 database ${db.binding} (${db.database_name ?? 'unnamed'}) has no database_id`),
+  ...((config.kv_namespaces ?? []) as KV[]).filter(kv => !kv.id).map(kv => `KV namespace ${kv.binding} has no id`),
+  ...((config.r2_buckets ?? []) as R2[]).filter(bucket => !bucket.bucket_name).map(bucket => `R2 bucket ${bucket.binding} has no bucket_name`),
 ];
 if (missing.length) {
   console.error(`Not deploying${environment ? ` ${environment}` : ''}: Wrangler would create these by itself.\n${missing.map(line => `  ${line}`).join('\n')}\nCreate each on the owner's request and put its id in the Wrangler configuration (remy-auth: mise run auth:provision prints the steps).`);

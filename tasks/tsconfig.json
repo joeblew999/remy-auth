@@ -1,0 +1,19 @@
+{
+  "//": "The shared tasks' TypeScript (tasks/**/*.ts): Node runs each file as it is (no build), and tsc checks them all here. project:typecheck runs it from the app that includes the tasks, so a task that no longer compiles fails the check instead of the deploy.",
+  "include": ["./**/*.ts"],
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  }
+}

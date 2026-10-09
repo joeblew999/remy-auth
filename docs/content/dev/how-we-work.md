@@ -215,8 +215,10 @@ being turned into a mise task that uses a tool ... It's vital because all our re
   ([choose tools by survey](#choose-tools-by-survey-not-by-first-find)); if the search or the change is big,
   write a plan in `.plans/` (or `.plans/parked/`) yourself. Agents create these lines and plans as they
   meet such things; the owner does not have to ask.
-- Scripts are the last resort, kept small and next to the task that runs them; where several tasks share
-  logic, it moves toward one command-line tool ([parked: remy-cli](https://github.com/joeblew999/remy-auth/blob/main/.plans/parked/remy-cli.md)).
+- A task that is more than one line of a tool is a TypeScript file task (`tasks/<namespace>/<name>.ts`;
+  Node runs it as it is, `project:check` type-checks it wherever the tasks are, a consumer's include
+  cache included), never bash logic or untyped JavaScript: what the compiler cannot see, an agent
+  misses (owner, issue #9). Where several tasks share logic, it moves toward one command-line tool ([parked: remy-cli](https://github.com/joeblew999/remy-auth/blob/main/.plans/tooling-in-typescript.md)).
 
 ## Branches: short-lived, deleted after merge
 

@@ -135,7 +135,7 @@ search), mise `sources`/`outputs` (`ui:generate` skips when unchanged).
    sync, or AI Search crawling the site once there is a domain)?
 6. **Concurrency:** confirm the result keeps translations single-writer across worktrees and merges.
 7. **What moves where:** anything that must stay code goes into the parked
-   [remy CLI](parked/remy-cli.md), not into loose scripts.
+   [remy CLI](tooling-in-typescript.md), not into loose scripts.
 
 ## Analysis, tooling first (2026-09-26)
 
@@ -307,7 +307,7 @@ no symlinks and no generated config.
 
 - About 10 lines of shell over git and 6 over i18n-check and jq, inside the TOML.
 - The 20-line plural test, `tasks/i18n/plurals.test.mjs`. It is a `node:test` in the test gate, not a
-  loose script, and moves into the [remy CLI](parked/remy-cli.md) when that exists.
+  loose script, and moves into the [remy CLI](tooling-in-typescript.md) when that exists.
 - `tasks/i18n/translator.md`, a prompt, which is prose.
 - `i18n.mjs`'s heading-count check is dropped with no replacement; heading structure is left to review.
 

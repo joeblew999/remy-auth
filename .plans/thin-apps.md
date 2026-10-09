@@ -390,7 +390,7 @@ Settled 2026-09-29, to keep this plan to what it is for:
 - New capabilities. Parity is with what remy-auth has today; the auth service, Better Auth and the
   portal stay [parked](parked/).
 - Tool swaps: Cloudflare's `cf` CLI, Flue and one `remy` CLI stay parked ([cf-cli](parked/cf-cli.md),
-  [flue](parked/flue.md), [remy-cli](parked/remy-cli.md)); this plan moves code, it does not change
+  [flue](parked/flue.md), [tooling-in-typescript](tooling-in-typescript.md)); this plan moves code, it does not change
   tools.
 - Translation work and the developer-docs cleanup (content, not structure; risk 7).
 - Migrating remy-video (replaced in phase D) and moving other repos (remy-data, remy-sport, remy-nash,

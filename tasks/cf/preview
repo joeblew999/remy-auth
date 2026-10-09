@@ -25,11 +25,11 @@ remove() { "$(dirname "$0")/preview-delete" "$name"; }
 export PUBLIC_ORIGIN="$origin"
 ./node_modules/.bin/vite build
 # Nothing is created by a deploy: every binding of the built configuration names a resource that exists.
-node "$(dirname "$0")/provisioned.mjs"
+node "$(dirname "$0")/provisioned.ts"
 output="$(mktemp)"
 export WRANGLER_OUTPUT_FILE_PATH="$output"
 ./node_modules/.bin/wrangler deploy --name "$name"
-"$(dirname "$0")/wait" "$origin" "$output"
+node "$(dirname "$0")/wait.ts" "$origin" "$output"
 rm -f "$output"
 # A brand-new workers.dev name answers 404 from some places for a while: wait for ten answers in a row.
 ok=0
