@@ -95,7 +95,7 @@ formats page's intro and "This language" share the first screen on desktop; issu
 ## Watching
 
 - oRPC 2.0: on the beta since 2026-10-09 (owner: "oRPC 2.0 beta"), pinned at 2.0.0-beta.42 in the
-  [auth slice](auth-service.md#the-move-to-orpc-20-beta), uncommitted. Follow the betas to 2.0.0 (each can
+  [auth slice](auth-service.md#the-move-to-orpc-20-beta), on branch `auth-proof`. Follow the betas to 2.0.0 (each can
   break; `packages:upgrade` and the gates say), and move remy-auth-app with the next release
   ([what the move touched](done/openapi-contracts.md#orpc-20-watch-2026-09-26), issue #1).
 
@@ -103,11 +103,11 @@ formats page's intro and "This language" share the first screen on desktop; issu
 
 [auth-service](auth-service.md): opened for its first real slice. Slice 1 (Better Auth in the Worker on
 D1, sign-in by emailed code, the account page, the shared guard and its checks on oRPC 1 and 2, and the
-move to the oRPC 2.0 beta) is built on branch `auth-proof`, uncommitted, waiting for the owner to say
-commit. The owner delegated its design decisions on 2026-10-09; they are recorded in the plan. Then, in
-order: the app-trust comparison (OAuth tokens verified locally, or a service binding), and the relation
-engine lifted from remy-sport. Owner only: say when to commit, and when to provision the deployment
-(`mise run auth:provision` prints the steps; `cf:deploy` refuses until the database exists).
+move to the oRPC 2.0 beta) is committed on branch `auth-proof`, not merged or pushed, and its database
+and secret are provisioned (owner, 2026-10-09: "commit and provision"). The owner delegated its design
+decisions the same day; they are recorded in the plan. Then, in order: the app-trust comparison (OAuth
+tokens verified locally, or a service binding), and the relation engine lifted from remy-sport. Owner
+only: say when to merge to main and when to deploy.
 
 ## Next: platform structure (owner, 2026-09-29)
 

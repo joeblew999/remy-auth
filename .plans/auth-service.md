@@ -6,7 +6,7 @@ Parked 2026-09-26 (owner: "Not big feature stuff"): not started now; picked up a
 
 Purpose (owner, 2026-10-09): "remy-auth is meant to support betterauth working well with tanstack and orpc". Decisions follow from it: each of the three is used the way its own documentation says.
 
-Status: [slice 1](#slice-1-sign-in-the-account-page-and-the-guard-2026-10-09) is built on branch `auth-proof` (a worktree), on the oRPC 2.0 beta, uncommitted, waiting for the owner to say commit; nothing is deployed. The next two slices are the app-trust comparison and the relation engine ([next](#next-slices)). The rest of milestone 1 has not started. Builds on the [TanStack move](done/tanstack.md), on main since release 0.9.0.
+Status: [slice 1](#slice-1-sign-in-the-account-page-and-the-guard-2026-10-09) is committed on branch `auth-proof` (a worktree), on the oRPC 2.0 beta, not merged or pushed. Its database and secret are [provisioned](#provisioned-for-the-deployment-2026-10-09); the slice is not deployed. The next two slices are the app-trust comparison and the relation engine ([next](#next-slices)). The rest of milestone 1 has not started. Builds on the [TanStack move](done/tanstack.md), on main since release 0.9.0.
 Owner: remy-auth. First consumer: in-repo sample; first external consumer: remy-data.
 Executor/Reviewer roles as in [plans and roles](../docs/content/dev/development.md#plans-and-roles). Do not
 begin a fleet rollout.
@@ -63,9 +63,9 @@ Three findings changed the design while building:
 
 ### Not run: assumed
 
-- **Anything deployed.** No D1 database, secret or Worker was created. On a deployment: the `__Secure-`
-  cookie prefix on HTTPS, `CF-Connecting-IP` as the only address source, sessions across two Worker
-  instances, and D1 latency are all assumed.
+- **The slice on a deployment.** The database and the secret exist, but this code has not been
+  deployed. There, the `__Secure-` cookie prefix on HTTPS, `CF-Connecting-IP` as the only address
+  source, sessions across two Worker instances, and D1 latency are all assumed.
 - **Mail delivery.** Outside the local environment sending a code throws, and the account page offers
   no form there. Cloudflare Email Service waits for the production domain.
 - **`tanstackStartCookies()`'s cookie forwarding.** It is installed and last. Sign-in and sign-out go
@@ -73,8 +73,8 @@ Three findings changed the design while building:
   `auth.api` call sets one (a session refresh after `updateAge`, a day), which no check reaches.
 - **The account page's empty state where no code can be delivered.** The check for it runs against a
   deployment only (`tests/auth.spec.ts`), and nothing is deployed.
-- **`cf:deploy` refusing an unprovisioned binding.** The precondition was run alone and refused; a
-  whole `cf:deploy` was not run, because that is a deploy.
+- **`cf:deploy` refusing an unprovisioned binding.** The precondition was run alone: it refused
+  before the database existed and passes now. A whole `cf:deploy` was not run, because that is a deploy.
 - **Organizations, platform roles, JWT and JWKS, the OAuth provider, MCP, passkeys:** not installed.
 - **The translations** of the 19 new English messages (the translation step runs on main).
 
@@ -99,7 +99,7 @@ decide". Each is decided by the purpose at the top, and can be reopened.
 7. **A deploy creates nothing.** Wrangler 4.137 would create the D1 database by itself on the next
    deploy (its provisioning flags default to on; read in its source). `cf:deploy` and `cf:preview` now
    refuse a binding with no resource behind it, and `mise run auth:provision` prints the three steps.
-   Provisioning stays the owner's.
+   Provisioning stays the owner's ([done](#provisioned-for-the-deployment-2026-10-09) on their word).
 8. **Better Auth's base URL is the request's origin**, one instance per origin. Pinning the issuer per
    environment (decision 4) comes with the OAuth slice, which needs it.
 9. **Policies are oRPC metadata** (`policy('public' | 'session')`, `personal(...)`). `apiChecks` is
@@ -143,18 +143,22 @@ The checks also name an address of their own in `CF-Connecting-IP`, so Better Au
 apply per check instead of to `127.0.0.1` as a whole. Only a local Worker believes that header; on a
 deployment Cloudflare sets it. No Worker code serves the checks.
 
-### Before this reaches a deployment (owner)
+### Provisioned for the deployment (2026-10-09)
 
-Nothing here can reach production by accident: `cf:deploy` refuses until the database exists. When the
-owner says so, `mise run auth:provision` prints the steps:
+The owner said "commit and provision". The slice is commit `469e6aa` on `auth-proof`, and the three
+steps `mise run auth:provision` prints were run on the owner's Cloudflare account:
 
-- Create the D1 database and put its `database_id` in `wrangler.jsonc`.
-- Apply `migrations/` to it (`wrangler d1 migrations apply DB --remote`).
-- Set the `BETTER_AUTH_SECRET` Worker secret (`wrangler.jsonc` names it as required).
+- The D1 database `remy-auth` exists (region APAC); its `database_id` is in `wrangler.jsonc`.
+- `migrations/` is applied to it: Better Auth's five tables and `local_mail`, all empty.
+- The `BETTER_AUTH_SECRET` Worker secret is set on `remy-auth`. Its value was generated and piped in
+  unseen, so nobody holds it; replacing it signs everyone out.
 
-After that a deployment answers `/api/me` and keeps the account page's empty state; signing in there
-waits for mail delivery (Cloudflare Email Service, which needs the production domain). Not solved yet:
-`cf:preview`'s throwaway Workers would bind the same database as production once it has an id.
+Setting a secret makes Cloudflare roll out the Worker's current code again with it; the live smoke
+checks passed afterwards (`project:test:live`). The slice itself is not deployed: `cf:deploy` would
+now be allowed, and stays the owner's to ask for. Once deployed, `/api/me` answers and the account
+page keeps its empty state; signing in there waits for mail delivery (Cloudflare Email Service, which
+needs the production domain). Not solved yet: `cf:preview`'s throwaway Workers bind this same
+database.
 
 ## Requirements for the shared guard, from remy-sport (2026-10-09)
 
