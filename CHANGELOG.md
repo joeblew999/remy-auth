@@ -6,6 +6,8 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-10-09
+
 ### Added
 - Which version is deployed (remy-sport's build stamp, for every app). `build/vite`: `remyBuild()`, in
   `remyApp()` and `remyDocs()` already, works out a stamp per build from the sources (the app's package,

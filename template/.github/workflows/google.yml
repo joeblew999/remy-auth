@@ -7,13 +7,14 @@ on:
   push:
     branches: [main]
     tags: ['v*']
+  pull_request:
   workflow_dispatch:
 
 permissions: {}
 
 jobs:
   checks:
-    uses: joeblew999/remy-auth/.github/workflows/google.yml@v0.13.0
+    uses: joeblew999/remy-auth/.github/workflows/google.yml@v0.14.0
     permissions:
       contents: write
       packages: write

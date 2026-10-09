@@ -1,6 +1,6 @@
 {
   "name": "@joeblew999/remy-ui",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "description": "Remy shared UI: shadcn/Base UI controls, theme, Paraglide catalogs and locale helpers for server- and client-rendered apps",
   "type": "module",
   "repository": {
@@ -55,7 +55,9 @@
     "./mail": "./src/mail.ts",
     "./build": "./src/build.ts",
     "./build/vite": "./src/build-vite.js",
-    "./build/virtual": { "types": "./src/build-virtual.d.ts" },
+    "./build/virtual": {
+      "types": "./src/build-virtual.d.ts"
+    },
     "./versions": "./src/versions.tsx",
     "./versions.checks": "./src/versions.checks.js",
     "./build.checks": "./src/build.checks.js",

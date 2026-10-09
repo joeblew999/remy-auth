@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-#MISE description="The invariants every app keeps that npm, mise and Wrangler do not check themselves: every package.json matches the lockfile, wrangler.jsonc's observability and preview_urls: false, the installed skills are the pinned ones with their Claude links (~2 s); project:verify runs it"
-#MISE dir="{{config_root}}"
-set -euo pipefail
-exec node "$(dirname "$0")/verify-tooling.mjs"
+#!/usr/bin/env node
+//MISE description="The invariants every app keeps that npm, mise and Wrangler do not check themselves: every package.json matches the lockfile, wrangler.jsonc's observability and preview_urls: false, the workflows name only tasks that exist, the installed skills are the pinned ones with their Claude links (~2 s); project:verify runs it"
+//MISE dir="{{config_root}}"
+// The logic is verify-tooling.ts beside this file: TypeScript, type-checked by project:check.
+import './verify-tooling.ts';

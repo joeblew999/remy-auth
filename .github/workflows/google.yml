@@ -1,4 +1,4 @@
-# The heavy checks, on GitHub after every push to main and on every version tag, in parallel, while
+# The heavy checks, on GitHub after every push to main, on every pull request and on every version tag, in parallel, while
 # the developer keeps coding; then the release for tags. Locally the check is project:check (seconds);
 # each of these can still be run on purpose (mise run project:test, project:test:google,
 # project:test:consumers). Every Remy repo runs this same workflow (.plans/thin-apps.md, group 6):
@@ -23,6 +23,8 @@ on:
   push:
     branches: [main]
     tags: ['v*']
+  # A pull request too, so Dependabot's (the pinned actions, .github/dependabot.yml) arrives checked.
+  pull_request:
   workflow_dispatch:
   workflow_call:
 
@@ -80,6 +82,20 @@ jobs:
           path: playwright-report/local
           retention-days: 14
           if-no-files-found: ignore
+
+  # A red run reaches the person who pushed without anybody polling: a comment on the commit, which
+  # GitHub sends to its author, naming the run. dev:promote refuses a commit whose run is not green.
+  report:
+    if: failure()
+    needs: checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BODY: "The checks failed on this commit: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} (which job, and its first failing check, are in the run). Locally, on purpose: REMY_FLOW=hand mise run <that job's task>. dev:promote refuses this commit until a run is green."
+        run: gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/comments" -f body="$BODY" > /dev/null
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')

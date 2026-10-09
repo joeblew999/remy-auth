@@ -31,7 +31,8 @@ then tools, then translating.
    docs move removed; the owner's rule is no custom scripts, and a wrong layout already fails the app's
    own gates (typecheck, build, tests). Its useful fixes are on main: the header's GitHub link is the
    app's own (`SourceLink`), and `api:spec` explains a missing API. `APP_PAGES` was dropped: the app has no
-   pages beyond the package's since the docs moved. The branch can go with the others.
+   pages beyond the package's since the docs moved. The branch went 2026-10-09, with `fumadocs-trial` and
+   the old `release-0.14.0`.
 2. **Structure, in parallel:**
    - a. ~~**Fumadocs fully**~~ merged and live 2026-09-26 ([plan](docs-for-consumers.md)): the docs Worker
      (`docs/`, https://remy-auth-docs.gedw99.workers.dev): product guide `/docs`, developer docs `/dev`, API
@@ -110,8 +111,8 @@ fixture) run on GitHub after every push, in parallel; each still runs locally on
 ## The tooling in TypeScript (owner, 2026-10-09, issue #9)
 
 [tooling-in-typescript](tooling-in-typescript.md): the task layer is TypeScript, checked by
-`project:check` wherever the tasks are (a consumer's include cache too). The deploy's two scripts are
-converted; the rest follow in the order a wrong one costs most.
+`project:check` wherever the tasks are (a consumer's include cache too). The flow, the deploy's two
+scripts and the tooling invariants are converted; the rest follow in the order a wrong one costs most.
 
 ## What is deployed, and whose name it carries (owner, 2026-10-09)
 
@@ -152,8 +153,10 @@ task logic, facts in several places), and their fixes in order. Waits for the ow
 
 ## Owner only
 
-- Thin apps, phase D ([the plan](thin-apps.md#phase-d-prepared-2026-09-29-waiting-for-the-owner)): release 0.14.0
-  (branch `release-0.14.0`, then `ui:release`), deploy remy-auth, create `remy-auth-test`; remy-auth-app later.
+- Release 0.14.0 (thin apps phase D and everything since: auth, relations, staging, the flow): prepared on
+  main 2026-10-09 (`ui:version 0.14.0`, the CHANGELOG section). One command: `mise run dev:release` (every
+  check, every language, Google, Core Web Vitals on a preview, then the tag and publish, ~6 min). Then
+  consumers move with `project:upgrade-ui -- 0.14.0`; create `remy-auth-test`; remy-auth-app later.
 
 - One alert rule in the dashboard (no API for it): Workers & Pages → Observability → Alerts → Create,
   service `remy-auth`, `event = ask` and `outcome = failed`, count > 5 in 15 minutes.

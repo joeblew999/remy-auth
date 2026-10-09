@@ -34,6 +34,6 @@
     "./parts/time-zones/page": "./src/parts/time-zones/page.tsx"
   },
   "peerDependencies": {
-    "@joeblew999/remy-ui": ">=0.13.0"
+    "@joeblew999/remy-ui": ">=0.14.0"
   }
 }

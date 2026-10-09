@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-//MISE description="STEP 3 of the flow, on purpose: deploy what is on main to production (cf:deploy, no gate: staging and GitHub already ran the checks), then the docs Worker when the app has one. Refuses when main is not pushed or the tree is dirty; the flow is tasks/dev/flow.ts"
+//MISE description="STEP 3 of the flow, on purpose: deploy what is on main to production (cf:deploy), then the docs Worker when the app has one. Refuses when main is not pushed, the tree is dirty, or GitHub's checks on that commit are not green (still running, or failed); the flow is tasks/dev/flow.ts"
 //MISE dir="{{config_root}}"
 // The logic is promote.ts beside this file: TypeScript, type-checked by project:check. Node strips
 // types only from a .ts file, so a file task without an extension is this one line.

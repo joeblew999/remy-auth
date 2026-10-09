@@ -198,8 +198,12 @@ every app does, from the shared tasks; `project:setup` installs the guard.
   when the harness says it finished. Starting it in the background and then polling it in the
   foreground is the same fault (owner, 2026-10-09: "You just did it again for 2 long running
   things"). Only `dev:change` (seconds) is run and waited for.
-- A red GitHub run is the next thing to fix: `mise run <the failed task>` reproduces it locally, on
-  purpose. Report what was tested and what was not; never call untested work verified.
+- **GitHub's answer comes to you.** A red run comments on the commit (GitHub tells its author), naming
+  the run; `dev:change` starts by saying what the last run on main did; `dev:promote` refuses a commit
+  whose run is not green or not finished. To reproduce a red job: `REMY_FLOW=hand mise run <its task>`,
+  the same task GitHub ran, since the workflow holds no logic of its own (`project:verify-tooling`
+  checks every task a workflow names exists). Report what was tested and what was not; never call
+  untested work verified.
 - Never pipe a gating command through `grep` or `tail` in a chain: the pipe hides its exit code.
   This once released a version whose checks had failed.
 

@@ -142,8 +142,8 @@ The development flow is code, `tasks/dev/flow.ts`, with three commands and a gua
 | Step | Task |
 | --- | --- |
 | Every change | `dev:change` (`project:check`: plans, `project:routes` when a route file changed, types with `project:typecheck-tasks`, `project:test:unit`, `i18n:check` as a warning, `project:check:docs` when docs changed) |
-| Leaves the machine | `dev:land -- "<message>"` (the check, commit, main, push, `cf:staging`; GitHub runs `project:test`, `project:test:google`, `project:test:consumers`) |
-| Production | `dev:promote` (`cf:deploy`, `docs:deploy`, `cf:versions`) |
+| Leaves the machine | `dev:land -- "<message>"` (the check, commit, main, push, translate when stale, `cf:staging`; GitHub then runs `project:test`, `project:test:google` and `project:test:consumers` in parallel, and a red run comments on the commit. The same three locally, on purpose: `REMY_FLOW=hand mise run <task>`) |
+| Production | `dev:promote` (refuses a commit GitHub has not passed; then `cf:deploy`, `docs:deploy`, `cf:versions`) |
 | A release | `dev:release` (`packages:release`, which runs `project:verify`) |
 | One area | `project:test:only -- <words>` |
 | The guard | `dev:guard` registers it (`project:setup` does); `dev:guard -- --check` verifies it (`project:verify` does) |

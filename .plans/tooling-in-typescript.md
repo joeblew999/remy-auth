@@ -12,10 +12,10 @@ safe"). The same day: "The fucking thing is going to be used on all apps, includ
   `project:typecheck-tasks`, a file task that knows its own folder, checks it with the app's `tsc`: in
   this repository, and in a consumer from mise's cache of the include. `project:typecheck` runs it, so
   `project:check` (every change, ~6 s) fails on a task that no longer compiles instead of the deploy.
-- Converted first: what every deploy depends on, `cf/wait.ts` and `cf/provisioned.ts`.
+- Converted first: what every deploy depends on, `cf/wait.ts` and `cf/provisioned.ts`; the flow itself (`dev/*.ts`); `project/verify-tooling.ts`.
 - What stays to convert, in the order a wrong one costs most: `cf/versions`, `cf/urls`, `api/spec`
   (node scripts, rename and type), then the `.mjs` modules behind bash wrappers (`plans/plans.mjs`,
-  `cf/observe.mjs`, `project/verify-tooling.mjs`, `browser/shots.mjs`, `cf/gateway.mjs`,
+  `cf/observe.mjs`, `browser/shots.mjs`, `cf/gateway.mjs`,
   `mcp/register.mjs`, `agents/rules.mjs`, `packages/workspaces.mjs`, `project/single-copies.mjs`,
   `docs/provision.mjs`): each becomes a `.ts` file task of its own, and its wrapper goes.
 - The bash that stays is glue around one tool (`cf/deploy`, `cf/preview`, `packages/*`): it is where

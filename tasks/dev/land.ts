@@ -24,7 +24,8 @@ if (!here.onMain) {
   if (result.status !== 0) { console.error(`dev:land: ${here.branch} is not on top of main; merge main into it, then land again`); process.exit(1); }
 }
 git('-C', root, 'push', 'origin', 'main');
-console.log(`dev:land: main is ${read('-C', root, 'rev-parse', '--short', 'main')} and pushed; GitHub runs every language, Google's audits and the consumer fixture (gh run list --limit 1).`);
+const landed = read('-C', root, 'rev-parse', 'main');
+console.log(`dev:land: main is ${landed.slice(0, 7)} and pushed; GitHub runs every language, Google's audits and the consumer fixture: gh run list --commit ${landed.slice(0, 7)}. A red run comments on the commit; dev:promote refuses one that is not green.`);
 
 // Translation: only when something is stale or missing (strict check: exit 1 says so), so a second
 // land after a green one costs nothing here.

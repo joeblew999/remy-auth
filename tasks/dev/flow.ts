@@ -49,6 +49,24 @@ export const heavy: Record<string, string> = {
 
 const git = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 
+/** A GitHub run of the checks workflow, as `gh run list` reports it. */
+export type Run = { status: string; conclusion: string | null; url: string; headSha: string };
+
+/**
+ * GitHub's run for `commit` (or the newest on main): what the heavy checks said. `undefined` when
+ * gh cannot answer (not installed, not signed in, offline), `null` when GitHub has no run for it.
+ */
+export function latestRun(commit?: string): Run | null | undefined {
+  const select = commit ? ['--commit', commit] : ['--branch', 'main'];
+  const result = spawnSync('gh', ['run', 'list', ...select, '--limit', '1', '--json', 'status,conclusion,url,headSha'], { encoding: 'utf8', timeout: 15_000 });
+  if (result.status !== 0) return undefined;
+  const [run] = JSON.parse(result.stdout || '[]') as Run[];
+  return run ?? null;
+}
+
+/** One line a person reads: what GitHub said about a commit. */
+export const describeRun = (run: Run) => `${run.status === 'completed' ? (run.conclusion ?? 'unknown') : 'still running'} on ${run.headSha.slice(0, 7)}: ${run.url}`;
+
 /**
  * Runs a mise task in the foreground as part of `step`; the step stops at the first failure.
  * REMY_FLOW is what dev:allowed (the gate in every heavy task) looks for: a heavy task runs when a
