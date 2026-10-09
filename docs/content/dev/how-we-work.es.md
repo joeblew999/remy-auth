@@ -40,6 +40,20 @@ Antes de que un plan nombre una biblioteca o herramienta:
 
 Marca como supuesto cualquier cosa no verificada.
 
+## Una vez elegida una herramienta, adopta su forma [#once-a-tool-is-chosen-take-its-shape]
+
+Doblamos nuestro sistema hacia la herramienta, no la herramienta hacia nuestro sistema. Antes de construir sobre un framework elegido:
+
+1. Genera su propia plantilla y ejecuta sus propios generadores (funciones de la CLI) en una app de pruebas.
+2. Constrúyela y solicita cada ruta que ofrece; enumera qué funciona y qué no.
+3. Cambia nuestro layout, nuestros archivos y lo que nuestro código le pasa a la GUI para que coincida, conservando solo lo que exige una regla del propietario
+   (las URLs de Paraglide, la UI de shadcn).
+4. Elimina todo lo nuestro que la herramienta ya haga. Un plugin o un wrapper propio tiene que justificarse
+   frente a la forma estándar, no al revés.
+
+El propietario, el 2026-09-26, después de descubrir que la documentación de Fumadocs estaba medio personalizada: «Es
+curioso cómo no te das cuenta hasta que te ves obligado a hacerlo» ([la decisión de Fumadocs](https://github.com/joeblew999/remy-auth/blob/main/.plans/docs-for-consumers.md#decision-fumadocs-fully-2026-09-26)).
+
 ## UI: shadcn y TanStack en todo momento [#ui-shadcn-and-tanstack-all-the-way]
 
 La UI es difícil y nunca está terminada, así que aprovechamos lo que shadcn y TanStack llevan años
@@ -86,6 +100,16 @@ rápido: lee su documentación actual y las skills instaladas antes de usarlas, 
 | Store (alfa), Charts | No se necesitan | Sin estado de cliente global de la app y todavía sin paneles de control |
 
 Pasar una biblioteca de «Todavía no» a en uso sigue [elige las herramientas mediante un estudio](#choose-tools-by-survey-not-by-first-find).
+
+## La documentación y la demo avanzan con el código [#the-docs-and-the-demo-move-with-the-code]
+
+remy-auth es la base sobre la que se construye cualquier otro repositorio de Remy, y su documentación para desarrolladores es lo que leen sus agentes y
+desarrolladores (a través de la skill `remy`, generada a partir de estas páginas). Así que una funcionalidad está terminada cuando
+se cumplen cuatro cosas: está en el paquete para todas las apps, la propia app de remy-auth la usa donde cualquiera
+puede ver que funciona, una comprobación falla cuando se omite, y la página que la describe se actualiza en el
+mismo cambio. El propietario, el 2026-10-09: «Al hacer que Remy-auth reutilice todas sus funcionalidades en su propia demo, resulta
+fácil incorporar a IAs y desarrolladores ... la documentación es parte de lo que recibe cualquier otro agente y desarrollador en otros repositorios».
+Una página que describe lo que el código ya no hace es un bug; corrígela donde la encuentres.
 
 ## Idioma: Paraglide es responsable [#language-paraglide-owns-it]
 
@@ -210,4 +234,3 @@ usa esta forma:
    y usa cada pieza en un Chrome real, limitado a un teléfono gama media, con una traza de rendimiento y capturas de pantalla.
    Anota cómo se siente: la espera antes del contenido, los saltos de layout, los destellos y cualquier cosa
    molesta. Corrige lo que se sienta mal antes de fusionar, incluso cuando sus comprobaciones pasen.
-</content>

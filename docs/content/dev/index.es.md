@@ -9,11 +9,14 @@ description: "Para desarrolladores que construyen Remy o una app sobre él: aute
 https://github.com/joeblew999/remy-auth
 
 Autenticación compartida para las apps de Remy, usando **Better Auth en Cloudflare Workers**
-con **D1** como el almacén de identidad y sesiones planeado.
+con **D1** como el almacén de identidad y sesiones, y permisos basados en relaciones que toda app
+obtiene del paquete compartido ([inicio de sesión y permisos](./auth.md)).
 
-**Estado:** la base de la GUI está en producción en Cloudflare en dos apps construidas sobre TanStack Start, en
-inglés, español y árabe, a partir del paquete compartido `@joeblew999/remy-ui`. La autenticación y el almacenamiento
-en D1 todavía están planeados; el trabajo abierto está listado en [.plans/now.md](https://github.com/joeblew999/remy-auth/blob/main/.plans/now.md).
+**Estado:** la base de la GUI está en producción en Cloudflare en dos apps construidas sobre TanStack Start,
+a partir del paquete compartido `@joeblew999/remy-ui`. remy-auth inicia sesión a las personas con un código
+enviado por correo, protege su API mediante políticas, y decide quién puede hacer qué mediante relaciones,
+mostrado en su propia demo de notas. Cómo otra app sabe quién ha iniciado sesión es la siguiente pieza;
+el trabajo abierto está listado en [.plans/now.md](https://github.com/joeblew999/remy-auth/blob/main/.plans/now.md).
 
 ## Dónde mirar [#where-to-look]
 

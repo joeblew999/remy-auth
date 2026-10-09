@@ -1,5 +1,6 @@
 ---
 title: "Arquitectura y principios de desarrollo"
+description: "Lo que el código debe ser: propiedad, una única fuente de verdad, gates de pruebas, código generado y decisiones del dueño."
 ---
 
 Este documento es el dueño de lo que el código debe ser. Cómo trabajan las personas y los agentes día a día vive en
@@ -37,9 +38,9 @@ Este documento es el dueño de lo que el código debe ser. Cómo trabajan las pe
   dueño. Pregunta; no elijas, a menos que el dueño las haya delegado
   ([cómo trabajamos](./how-we-work.md#when-the-owner-delegates-decisions)). Desplegar, aprovisionar y abrir issues upstream
   también esperan la solicitud explícita del dueño.
-- No mockees Better Auth, D1 ni el runtime de Workers. Las conveniencias de desarrollo (una ruta de seed,
-  un selector de inicio de sesión para personas creadas mediante seed, un código de inicio de sesión fijo) solo se permiten detrás de una
-  única tabla de políticas por entorno cuyo valor por defecto, y cuyo valor para cualquier entorno desconocido, es
+- No mockees Better Auth, D1 ni el runtime de Workers. Las conveniencias de desarrollo (personas creadas mediante seed,
+  un selector de inicio de sesión para ellas, un código de inicio de sesión fijo, correo capturado) solo se permiten detrás de una
+  única tabla de políticas por entorno ([de remy-auth](./auth.md#environments-one-table)) cuyo valor por defecto, y cuyo valor para cualquier entorno desconocido, es
   producción con todo desactivado; nunca crean sesiones fuera de Better Auth, nunca existen
   en producción, requieren autenticación fuera del desarrollo local, y están listadas en el
   plan que las posee. Ninguna otra ruta, flag o bypass solo para pruebas.

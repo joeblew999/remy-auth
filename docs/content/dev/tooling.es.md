@@ -31,7 +31,7 @@ opciones en `src/auth/options.ts`. Sus tareas son propias de remy-auth, en `mise
 
 ```sh
 mise run auth:generate -- <name>        # LOCAL: lo que las opciones necesitan más allá de migrations/, como la siguiente migración numerada
-mise run auth:migrate                   # LOCAL: aplica migrations/ a la D1 local de Wrangler
+mise run auth:migrate                   # LOCAL: aplica migrations/ y migrations-demo/ a las bases de datos D1 locales de Wrangler
 mise run auth:local                     # LOCAL: escribe .dev.vars cuando falta (ENVIRONMENT=local, un BETTER_AUTH_SECRET aleatorio)
 mise run auth:mail -- you@example.com   # LOCAL: los códigos de inicio de sesión capturados para una dirección, desde el Worker en ejecución
 mise run auth:provision                 # Imprime lo que necesita el inicio de sesión desplegado en Cloudflare; no crea nada
@@ -43,13 +43,14 @@ de modo que dev, preview y los niveles de prueba arrancan con el esquema actual 
 `auth:generate` ejecuta la CLI fijada a través de `src/auth/cli.ts`, que compara las opciones con una base
 de datos SQLite desechable construida a partir de `migrations/`, así que solo escribe lo que aún no está
 ahí; cambia las opciones y luego genera, nunca edites a mano las tablas de Better Auth. Para iniciar
-sesión localmente: `mise run project:dev`, abre `/en/app/account`, introduce una dirección y luego lee
-su código con `auth:mail`. No se envía ningún correo localmente: en su lugar, el entorno local escribe
-cada código en su propia D1 (la política de entorno está en `src/auth/environment.ts`; cualquier otro
-entorno es producción, donde eso está desactivado). La base de datos desplegada, sus migraciones y el
-secreto de Worker `BETTER_AUTH_SECRET` solo se crean a petición del propietario: `auth:provision` imprime
-los pasos, y hasta que la base de datos exista, `cf:deploy` se niega a desplegar, porque de otro modo
-Wrangler la crearía por sí misma.
+sesión localmente: `mise run project:dev`, abre `/en/app/account` y pulsa sobre una de las personas
+de ejemplo, o introduce cualquier dirección y lee su código con `auth:mail`. No se envía ningún correo
+localmente: el entorno local lo guarda en el buzón de salida del Worker en su lugar (la tabla de
+entornos en `src/auth/environment.ts`, [explicado](./auth.md#environments-one-table); cualquier otro
+entorno es producción, donde el correo se envía a través de Cloudflare Email Service). La base de datos
+desplegada, sus migraciones y el secreto de Worker `BETTER_AUTH_SECRET` solo se crean a petición del
+propietario: `auth:provision` imprime los pasos, y hasta que la base de datos exista, `cf:deploy` se
+niega a desplegar, porque de otro modo Wrangler la crearía por sí misma.
 
 Estas son herramientas para desarrolladores/operadores. El inicio de sesión de la CLI de Remy para usuarios finales y las llamadas
 delegadas a la API siguen siendo parte del hito del servicio. Ambas apps están en vivo en Cloudflare; `cf:deploy` sube a
@@ -405,3 +406,4 @@ Un solo token lo hace todo (el token `dev` en <https://dash.cloudflare.com/profi
 Edit** (que incluye lectura) y **Workers Observability Read** son los que estas tareas necesitan; cambiar
 el gateway con `cf:ai-gateway` usa el mismo token, y cada cambio se lee de vuelta.
 </content>
+</invoke>
