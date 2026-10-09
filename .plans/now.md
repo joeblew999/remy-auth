@@ -115,9 +115,9 @@ converted; the rest follow in the order a wrong one costs most.
 
 ## What is deployed, and whose name it carries (owner, 2026-10-09)
 
-[product-identity](product-identity.md): the build stamp every Worker answers with at `/healthz`, the
+[product-identity](done/product-identity.md): the build stamp every Worker answers with at `/healthz`, the
 `BuildStamp` and `Versions` components, `cf:versions`, and the product's name as one value every message
-takes. On main and live since 2026-10-09; closes when `project:test:remote` is green against production.
+takes. On main and live since 2026-10-09; GitHub's full run is green on it (run 37904724918), and production, staging and the docs Worker all answer `409356c`. Closes with the plan's move to done.
 
 ## Auth service (owner, 2026-10-09)
 

@@ -193,6 +193,11 @@ every app does, from the shared tasks; `project:setup` installs the guard.
   terminal: that is a decision; an agent running one unasked is the fault the guard exists for.
 - A rule that can be a function belongs in `tests/**/*.unit.spec.ts` (no build, no Worker, no
   browser), so it runs on every check for free. The browser is for what only a browser shows.
+- **An agent never waits on a long-running step.** `dev:land`, `dev:promote`, `dev:release`, a
+  translation, a remote suite: start it in the background, keep working or answer the owner, and act
+  when the harness says it finished. Starting it in the background and then polling it in the
+  foreground is the same fault (owner, 2026-10-09: "You just did it again for 2 long running
+  things"). Only `dev:change` (seconds) is run and waited for.
 - A red GitHub run is the next thing to fix: `mise run <the failed task>` reproduces it locally, on
   purpose. Report what was tested and what was not; never call untested work verified.
 - Never pipe a gating command through `grep` or `tail` in a chain: the pipe hides its exit code.

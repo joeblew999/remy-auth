@@ -1,8 +1,10 @@
 # What is deployed, and whose name it carries
 
-Status: on main and live since 2026-10-09 (the owner: "Get into main and deploy then!"): the app and the docs Worker both answer commit `e3d8bb3` to `mise run cf:versions`. Left before it closes: `project:test:remote` green against production.
+Closed 2026-10-09: The build stamp every Worker answers at /healthz, BuildStamp and Versions, cf:versions, and the product's name as one value every message takes; live on production, staging and the docs Worker at 409356c, GitHub green
 
-Two requests from the owner on 2026-10-09, while slices 2 and 3 of [the auth plan](auth-service.md)
+Status: done 2026-10-09. On main and live (the owner: "Get into main and deploy then!"); GitHub's every-language, Google and consumer jobs are green on `409356c`, which production, staging and the docs Worker all answer to `mise run cf:versions`.
+
+Two requests from the owner on 2026-10-09, while slices 2 and 3 of [the auth plan](../auth-service.md)
 went live:
 
 1. "There is another global thing in the Remy-sport repo you should adopt ... it shows the version of
@@ -14,7 +16,7 @@ went live:
    way and show it off in Remy's own demo."
 
 Both are about what a deployment says it is. How they work, for developers and agents of every Remy
-repo: [the GUI page](../docs/content/dev/gui.md#which-version-is-deployed).
+repo: [the GUI page](../../docs/content/dev/gui.md#which-version-is-deployed).
 
 ## What was built
 
