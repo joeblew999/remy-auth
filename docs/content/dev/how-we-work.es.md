@@ -211,7 +211,7 @@ y las comprobaciones sensibles al tiempo ya fallaban mucho antes de eso. Por tan
 
 - **Después de cada deploy, el informe empieza con las URLs en producción de lo que se desplegó**, diga lo que diga además
   (el propietario, el 2026-09-26: «Os sigo diciendo ... dadme la url cuando hagáis un deploy»): la app
-  <https://remy-auth.gedw99.workers.dev>, y para el Worker de la documentación su guía
+  <https://remy-auth.gedw99.workers.dev>, su staging <https://remy-auth-staging.gedw99.workers.dev>, y para el Worker de la documentación su guía
   <https://remy-auth-docs.gedw99.workers.dev/docs>, la documentación para desarrolladores
   <https://remy-auth-docs.gedw99.workers.dev/dev> y la referencia de la API
   <https://remy-auth-docs.gedw99.workers.dev/reference>. `cf:deploy` y `docs:deploy` las imprimen al final.

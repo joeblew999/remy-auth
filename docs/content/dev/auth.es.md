@@ -104,24 +104,42 @@ llamadas del lado del servidor. Una solicitud sin cookie de sesión es nadie sin
 Auth o a la base de datos. Cómo otro Worker se entera de quién ha iniciado sesión en remy-auth
 todavía no está construido.
 
+## Dos formas de iniciar sesión [#two-ways-to-sign-in]
+
+La forma normal está en todas partes: una dirección, y después el código de seis cifras que se envía
+por correo a esa dirección. La forma automática está junto a ella donde el entorno lo permite: las
+personas sembradas, listadas en el formulario de inicio de sesión con lo que cada una tiene, a un
+clic cada una, sin bandeja de entrada. Local y staging tienen ambas; producción solo tiene la forma
+normal. Las dos son el propio inicio de sesión de Better Auth: se pide un código y se canjea, y solo
+Better Auth crea una sesión.
+
 ## Entornos: una sola tabla [#environments-one-table]
 
 Lo que un entorno puede hacer que producción no puede es una sola tabla, y cualquier cosa no
 declarada o desconocida es producción (`environments()` de `@joeblew999/remy-ui/environment`; diseño
 de remy-sport). La tabla de remy-auth, `src/auth/environment.ts`:
 
-| Capacidad | `local` | `production` |
-| --- | --- | --- |
-| `capturesMail`: el correo se guarda en la bandeja de salida del Worker, se lee en `/dev/mail`, en lugar de enviarse | sí | no: se envía mediante Cloudflare Email Service |
-| `seededSignIn`: las personas sembradas existen, y el formulario de inicio de sesión las ofrece (`/dev/people`) | sí | no |
-| `signInCode`: una persona sembrada inicia sesión con el código publicado `424242`; nadie más puede | derivado | ninguno: cada código es aleatorio |
-| `offersAdminSignIn`: también se ofrece el administrador sembrado | sí | no |
+| Capacidad | `local` | `staging` | `production` |
+| --- | --- | --- | --- |
+| `capturesMail`: el correo se guarda en la bandeja de salida del Worker, se lee en `/dev/mail`, en lugar de enviarse | sí | no: se envía, que es lo que una ejecución local no puede mostrar | no: se envía |
+| `seededSignIn`: las personas sembradas existen, y el formulario de inicio de sesión las ofrece (`/dev/people`) | sí | sí | no |
+| `signInCode`: una persona sembrada inicia sesión con el código publicado `424242`; nadie más puede | derivado | derivado | ninguno: cada código es aleatorio |
+| `offersAdminSignIn`: también se ofrece el administrador sembrado | sí | no: un despliegue nunca publica una vía de entrada como uno | no |
 
-Así, localmente, un checkout recién hecho tiene personas con roles y sus propias relaciones, a un
-clic de distancia, y no se envía correo. La semilla es `src/auth/seed.ts` (IDs estables, direcciones
+Así, un checkout recién hecho tiene personas con roles y sus propias relaciones, a un clic de
+distancia, y no envía correo; staging tiene las mismas personas en un despliegue real, y envía por
+correo su código a una dirección real. La semilla es `src/auth/seed.ts` (IDs estables, direcciones
 `.test`) y, para la demo de notas, `src/notes/seed.ts`, que nombra esos IDs: eso es todo lo que la
-semilla de una app sabe jamás sobre una persona. Nada de esto crea una sesión fuera de Better Auth, y
-nada de ello existe en un despliegue.
+semilla de una app sabe jamás sobre una persona. Nada de esto crea una sesión fuera de Better Auth.
+
+Staging es su propio Worker, con sus propias bases de datos y secreto (`env.staging` en
+`wrangler.jsonc`, desplegado con `mise run cf:staging`), de modo que nada de lo que se hace allí toca
+los datos de producción. Contiene fixtures y lo que escriben los visitantes. Nunca copies los datos
+de producción en él: quien lo encuentre puede iniciar sesión como una persona sembrada.
+
+Un Worker dice en `/healthz` cuál es su entorno, de modo que nada lo adivina a partir de un hostname:
+las comprobaciones se lo preguntan y esperan exactamente lo que la tabla da para ese entorno
+(`permitted`, `tests/people.ts`).
 
 ## Correo [#mail]
 
@@ -129,8 +147,11 @@ nada de ello existe en un despliegue.
 `send_email` del Worker (Cloudflare Email Service), desde una dirección en un dominio que la cuenta
 tiene habilitado para Email Sending, o guarda el mensaje en la bandeja de salida donde el entorno
 captura el correo. Un correo siempre tiene una parte en texto plano; un envío rechazado dice para
-quién era y por qué. El correo del código de inicio de sesión se escribe en el idioma del lector y en
-[el nombre del producto](./gui.md#the-products-name), con el código y sin enlace.
+quién era y por qué. Un mensaje a una dirección a la que ningún correo puede llegar (`unreachable`:
+`.test`, `.example`, `example.com` y similares, que es lo que es la dirección de una persona
+sembrada) nunca se envía: solo podría rebotar. El correo del código de inicio de sesión se escribe en
+el idioma del lector y en [el nombre del producto](./gui.md#the-products-name), con el código y sin
+enlace.
 
 ## Qué comprueba cada pieza [#what-each-piece-is-checked-by]
 

@@ -226,7 +226,8 @@ través de mise: fuera de una tarea, el shim de Node de mise vuelve a aplicar `[
 | `cf:preview` | Despliega este commit como un Worker desechable `<worker>-check-<commit>` (producción intacta), ejecuta el nivel 1 contra él y lo elimina; `KEEP_PREVIEW=1` lo conserva |
 | `cf:preview-delete` | Lista los Workers de comprobación, o elimina uno por nombre; nunca el Worker de producción |
 | `cf:urls` | Imprime las páginas y `/healthz` del origen de producción (o de uno dado), para informes |
-| `cf:versions` | Pregunta a cada despliegue (`DEPLOY_ORIGIN` y `DOCS_ORIGIN`, o los orígenes dados) qué está ejecutando: servicio, entorno, commit, cuán lejos está eso de este checkout, cuándo se desplegó. [Se pregunta, nunca se recuerda](./gui.md#which-version-is-deployed) |
+| `cf:staging` | `cf:deploy` para el entorno de staging: construye con `CLOUDFLARE_ENV=staging` (`env.staging` en la configuración de Wrangler) y sube su propio Worker en `STAGING_ORIGIN`; producción queda intacta. Lo que staging permite más allá de producción está en la [tabla de entornos](./auth.md#environments-one-table) de la app |
+| `cf:versions` | Pregunta a cada despliegue (`DEPLOY_ORIGIN`, `STAGING_ORIGIN` y `DOCS_ORIGIN`, o los orígenes dados) qué está ejecutando: servicio, entorno, commit, cuán lejos está eso de este checkout, cuándo se desplegó. [Se pregunta, nunca se recuerda](./gui.md#which-version-is-deployed) |
 | `project:test:remote` | El nivel 1 contra `TEST_BASE_URL` |
 | `cf:events`, `cf:ai-usage`, `cf:ai-check`, `cf:ai-gateway` | Workers Logs almacenados, uso de AI Gateway, comprobación de la configuración de IA, los ajustes del gateway ([herramientas](./tooling.md#the-docs-answers-on-cloudflare-ai-search-and-ai-gateway)) |
 | `project:upgrade-ui` | Mueve una app a una misma publicación compartida: versión del paquete y `ref` de las tareas juntos, y luego `project:verify` |

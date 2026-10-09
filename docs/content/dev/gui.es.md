@@ -31,7 +31,8 @@ El desarrollo usa el mismo código fuente del Worker y el mismo runtime de Cloud
 | `project:preview` | Build y luego sirve el artefacto de producción en el host local de Cloudflare en `PREVIEW_PORT` (4173) |
 | `project:check` … `project:verify` | Los niveles de pruebas, en el mismo host local ([regla](./how-we-work.md#gates-before-anything-leaves-the-machine), [tareas](./tasks.md)) |
 | `project:test:google` / `project:test:cwv` | El nivel de Google: auditorías de Lighthouse en local; Core Web Vitals en un Worker de Cloudflare desechable |
-| `cf:deploy` | Build y luego sube a la cuenta de Cloudflare autenticada (sin pruebas salvo que `GATE` elija un nivel) |
+| `cf:deploy` | Build y luego sube producción a la cuenta de Cloudflare autenticada (sin pruebas salvo que `GATE` elija un nivel) |
+| `cf:staging` | Lo mismo para el entorno de staging: su propio Worker (`STAGING_ORIGIN`) y sus propios recursos |
 | `cf:preview` | Despliega este commit como un Worker desechable, ejecuta el nivel 1 contra él y lo elimina |
 | `project:test:remote` | Las mismas pruebas contra `TEST_BASE_URL`; sin servidor local ni deployment |
 | `project:report` / `project:report:remote` | Abre el informe HTML de la última ejecución local o remota, incluidos los informes de Lighthouse |
@@ -42,25 +43,28 @@ Tras desplegar deliberadamente a la cuenta prevista, ejecuta:
 TEST_BASE_URL=https://your-worker.your-subdomain.workers.dev mise run project:test:remote
 ```
 
-La URL debe ser un origin, sin path ni query. Las pruebas actuales leen rutas
-públicas y manipulan solo el contador del navegador. Las pruebas de inicio de sesión (`tests/auth.spec.ts`)
-leen sus códigos de la captura de correo local, así que solo se ejecutan contra el destino local;
-contra un deployment comprueban que la captura no existe. La tarea de pruebas remotas también
-puede apuntar a una preview local ya en ejecución para comprobar la ruta del servidor externo.
+La URL debe ser un origin, sin path ni query (`STAGING_ORIGIN` para staging). Las comprobaciones que
+necesitan una persona nueva leen su código de la captura de correo local, así que solo se ejecutan contra
+el destino local. El resto le preguntan al Worker qué entorno es (`/healthz`) y esperan lo que
+[la tabla](./auth.md#environments-one-table) les dé: contra staging las personas precargadas están presentes
+y una pulsación inicia sesión como una de ellas; contra producción nada de eso existe. La tarea de pruebas
+remotas también puede apuntar a una preview local ya en ejecución para comprobar la ruta del servidor externo.
 
 Las tareas del pipeline son los valores por defecto compartidos de `tasks/project.toml`, controlados por las
 entradas `[env]` de este proyecto (`PREVIEW_PORT`, `DEPLOY_ORIGIN`); este repositorio solo sobrescribe
 `project:typecheck` y `project:verify` porque es dueño del paquete. La configuración de Playwright
 es el `playwrightConfig()` del paquete.
 
-Actualmente existe una única configuración de Worker y ningún entorno de staging con nombre.
-Si se añaden entornos, selecciónalos con `CLOUDFLARE_ENV` en tiempo de build,
-tal como exige la [integración de Cloudflare con Vite](https://developers.cloudflare.com/workers/vite-plugin/reference/cloudflare-environments/).
-Mantén la implementación compartida; varía solo los identificadores de recursos, los secretos y demás
-valores de entorno. Los bindings que Wrangler no hereda deben declararse para
-cada entorno con nombre. No dupliques la aplicación ni uses bindings remotos para
-el desarrollo local habitual. Los secretos locales permanecen en `.dev.vars`, que está ignorado; los secretos
-desplegados se gestionan a través de Cloudflare. Los datos locales no se suben con el deployment.
+Existe una única configuración de Worker con un entorno con nombre, `staging` (`env.staging` en
+`wrangler.jsonc`): el mismo código como su propio Worker, con sus propias bases de datos y secreto. Un entorno
+con nombre se selecciona con `CLOUDFLARE_ENV` en tiempo de build, tal como exige la
+[integración de Cloudflare con Vite](https://developers.cloudflare.com/workers/vite-plugin/reference/cloudflare-environments/);
+`mise run cf:staging` hace eso y luego todo lo que hace `cf:deploy`. Mantén la
+implementación compartida; varía solo los identificadores de recursos, los secretos y demás valores de entorno. Los
+bindings, las vars y los secretos requeridos no los hereda un entorno con nombre: cada uno se declara de nuevo ahí.
+No dupliques la aplicación ni uses bindings remotos para el desarrollo local habitual. Los secretos locales
+permanecen en `.dev.vars`, que está ignorado; los secretos desplegados se gestionan a través de Cloudflare. Los
+datos locales no se suben con el deployment.
 
 ## Dos tipos de página [#two-kinds-of-page]
 
@@ -162,10 +166,10 @@ estuvo equivocado durante semanas).
   página lleva el sello con el que se construyó; cuando su deployment responde con otro, la página es una
   pestaña que quedó abierta a través de un deploy, y el sello ofrece el reload. Nunca se recarga por sí sola.
 - **`Versions`**, para una página de ajustes o acerca de: esta app, su Worker de docs (`docs` en
-  `defineRemyApp`) y cualquier `deployments` que la app enumere (un servicio al que llama), cada uno
+  `defineRemyApp`) y los `deployments` que la app enumera ahí (staging junto a producción, un servicio al que llama), cada uno
   respondiendo por sí mismo, y luego los paquetes con los que se hizo este build. La página de Settings de
-  remy-auth lo muestra.
-- **`mise run cf:versions`** imprime una fila por deployment (`DEPLOY_ORIGIN` y `DOCS_ORIGIN`, o los
+  remy-auth lo muestra, con su producción y su staging.
+- **`mise run cf:versions`** imprime una fila por deployment (`DEPLOY_ORIGIN`, `STAGING_ORIGIN` y `DOCS_ORIGIN`, o los
   origins dados), situando cada commit respecto a este checkout: `= HEAD`, `3 behind HEAD`. Úsalo antes de
   decir qué está en producción.
 

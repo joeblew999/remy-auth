@@ -46,8 +46,9 @@ ahí; cambia las opciones y luego genera, nunca edites a mano las tablas de Bett
 sesión localmente: `mise run project:dev`, abre `/en/app/account` y pulsa sobre una de las personas
 de ejemplo, o introduce cualquier dirección y lee su código con `auth:mail`. No se envía ningún correo
 localmente: el entorno local lo guarda en el buzón de salida del Worker en su lugar (la tabla de
-entornos en `src/auth/environment.ts`, [explicado](./auth.md#environments-one-table); cualquier otro
-entorno es producción, donde el correo se envía a través de Cloudflare Email Service). La base de datos
+entornos en `src/auth/environment.ts`, [explicado](./auth.md#environments-one-table); staging también
+tiene a las personas de ejemplo y envía correo de verdad; cualquier otro entorno es producción, donde
+el correo se envía a través de Cloudflare Email Service y no hay nadie de ejemplo). La base de datos
 desplegada, sus migraciones y el secreto de Worker `BETTER_AUTH_SECRET` solo se crean a petición del
 propietario: `auth:provision` imprime los pasos, y hasta que la base de datos exista, `cf:deploy` se
 niega a desplegar, porque de otro modo Wrangler la crearía por sí misma.
@@ -95,7 +96,7 @@ Las tareas de passthrough de la CLI aceptan directamente los flags originales, c
 | `ui:*` | Compila los catálogos compartidos (`ui:generate`), regenera los componentes y el tema de shadcn (`ui:components`, `ui:theme`), demuestra que no se han modificado (`ui:verify`), publica el paquete y las tareas (`ui:release`, la `packages:release` compartida) |
 | `skills:*` | Instala, lista y elimina los skills oficiales fijados |
 | `auth:*` | Better Auth: su CLI y diagnóstico (`auth:cli`, `auth:info`), migraciones para la D1 local (`auth:generate`, `auth:migrate`), el entorno local (`auth:local`), sus códigos de inicio de sesión capturados (`auth:mail`) y lo que necesita un despliegue (`auth:provision`, solo imprime) |
-| `cf:*` | CLI de Cloudflare, logs en vivo, despliegue (`cf:deploy`), qué está ejecutando cada despliegue (`cf:versions`), Workers de comprobación desechables (`cf:preview`, `cf:preview-delete`), logs almacenados y uso de IA (`cf:events`, `cf:ai-*`); tareas compartidas, listadas en el [README de tareas](./tasks.md#cloudflare-tasks) |
+| `cf:*` | CLI de Cloudflare, logs en vivo, despliegue (`cf:deploy` para producción, `cf:staging` para staging), qué está ejecutando cada despliegue (`cf:versions`), Workers de comprobación desechables (`cf:preview`, `cf:preview-delete`), logs almacenados y uso de IA (`cf:events`, `cf:ai-*`); tareas compartidas, listadas en el [README de tareas](./tasks.md#cloudflare-tasks) |
 | `api:*` | El documento OpenAPI generado que sirve un Worker en ejecución (`api:spec`, `--urls` para sus operaciones; tarea compartida) |
 | `browser:*` | CLI de Chrome DevTools, ciclo de vida de la sesión y servidor MCP |
 | `web:*` | Búsqueda y recuperación de Modern Web Guidance |
