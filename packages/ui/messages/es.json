@@ -336,6 +336,46 @@
   "nav_clock": "Reloj",
   "nav_account": "Cuenta",
   "nav_settings": "Ajustes",
+  "nav_notes": "Notas",
+  "notes_title": "Notas",
+  "notes_description": "Notas que escribes y compartes. Lo que cada persona puede leer o cambiar depende de su relación con ella.",
+  "notes_intro": "Escribe una nota y compártela. Lo que cada persona puede hacer con ella depende de su relación con ella, y el servidor lo decide.",
+  "notes_signed_out_title": "Inicia sesión para guardar notas",
+  "notes_signed_out_description": "Las notas pertenecen a una cuenta, así que no hay nada que mostrar hasta que inicies sesión.",
+  "notes_new_title": "Nueva nota",
+  "notes_title_label": "Título",
+  "notes_title_required": "Ponle a la nota un título de hasta 120 caracteres.",
+  "notes_body_label": "Nota",
+  "notes_save": "Guardar",
+  "notes_cancel": "Cancelar",
+  "notes_empty_title": "Todavía no hay notas",
+  "notes_empty_description": "Las notas que escribes, y las que otras personas comparten contigo, aparecen aquí.",
+  "notes_yours": "Tuyas",
+  "notes_shared_with_you": "Compartidas contigo",
+  "notes_shared_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Compartida con {count} persona",
+        "countPlural=*": "Compartida con {count} personas"
+      }
+    }
+  ],
+  "notes_read_only": "Puedes leer esta nota.",
+  "notes_edit": "Editar",
+  "notes_share": "Compartir",
+  "notes_delete": "Eliminar",
+  "notes_share_email_label": "Su dirección de correo electrónico",
+  "notes_share_hint": "Verán la nota en cuanto inicien sesión con esta dirección.",
+  "notes_share_as_reader": "Compartir para leer",
+  "notes_share_as_editor": "Compartir para editar",
+  "notes_failed": "Eso no funcionó. La página muestra las notas tal como están ahora.",
   "nav_more": "Más",
   "nav_bottom": "Páginas principales",
   "clock_title": "Reloj",
@@ -379,6 +419,14 @@
   "account_no_name": "Todavía sin nombre",
   "account_email": "Correo electrónico",
   "account_sign_out": "Cerrar sesión",
+  "account_people_title": "Personas predefinidas",
+  "account_people_intro": "Este entorno tiene personas listas para iniciar sesión como ellas, cada una con un rol y sus propias relaciones. Su código es {code}.",
+  "account_people_sign_in": "Iniciar sesión como {name}",
+  "account_people_holds_nothing": "Aún no tiene nada",
+  "email_code_subject": "{code} es tu código de inicio de sesión de Remy",
+  "email_code_intro": "Introduce este código para iniciar sesión en Remy:",
+  "email_code_expiry": "Funciona durante cinco minutos, y solo una vez.",
+  "email_code_ignore": "Si no lo solicitaste, puedes ignorar este correo. Nadie puede iniciar sesión sin el código.",
   "home_pages_heading": "Qué puedes abrir aquí",
   "home_formats_open": "Abrir la página de formatos",
   "home_app_title": "Páginas de la app",

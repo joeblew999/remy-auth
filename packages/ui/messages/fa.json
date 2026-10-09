@@ -334,6 +334,46 @@
   "nav_clock": "ساعت",
   "nav_account": "حساب",
   "nav_settings": "تنظیمات",
+  "nav_notes": "یادداشت‌ها",
+  "notes_title": "یادداشت‌ها",
+  "notes_description": "یادداشت‌هایی که می‌نویسید و به اشتراک می‌گذارید. اینکه هر کس بتواند هر یادداشت را بخواند یا تغییر دهد، بر اساس رابطه‌اش با آن تعیین می‌شود.",
+  "notes_intro": "یادداشتی بنویسید و آن را به اشتراک بگذارید. اینکه هر فرد چه کاری می‌تواند با آن انجام دهد به رابطه‌اش با آن بستگی دارد، و سرور تصمیم می‌گیرد.",
+  "notes_signed_out_title": "برای نگهداری یادداشت‌ها وارد شوید",
+  "notes_signed_out_description": "یادداشت‌ها متعلق به یک حساب کاربری هستند، پس تا زمانی که وارد نشوید چیزی برای نمایش وجود ندارد.",
+  "notes_new_title": "یادداشت جدید",
+  "notes_title_label": "عنوان",
+  "notes_title_required": "برای یادداشت عنوانی تا ۱۲۰ نویسه بنویسید.",
+  "notes_body_label": "یادداشت",
+  "notes_save": "ذخیره",
+  "notes_cancel": "لغو",
+  "notes_empty_title": "هنوز یادداشتی نیست",
+  "notes_empty_description": "یادداشت‌هایی که می‌نویسید و یادداشت‌هایی که دیگران با شما به اشتراک می‌گذارند، اینجا نمایش داده می‌شوند.",
+  "notes_yours": "یادداشت‌های شما",
+  "notes_shared_with_you": "به اشتراک گذاشته‌شده با شما",
+  "notes_shared_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "با {count} نفر به اشتراک گذاشته شده",
+        "countPlural=*": "با {count} نفر به اشتراک گذاشته شده"
+      }
+    }
+  ],
+  "notes_read_only": "می‌توانید این یادداشت را بخوانید.",
+  "notes_edit": "ویرایش",
+  "notes_share": "اشتراک‌گذاری",
+  "notes_delete": "حذف",
+  "notes_share_email_label": "آدرس ایمیل او",
+  "notes_share_hint": "او با ورود با این آدرس، یادداشت را می‌بیند.",
+  "notes_share_as_reader": "اشتراک‌گذاری برای خواندن",
+  "notes_share_as_editor": "اشتراک‌گذاری برای ویرایش",
+  "notes_failed": "این کار انجام نشد. صفحه یادداشت‌ها را به‌صورت فعلی نشان می‌دهد.",
   "nav_more": "بیشتر",
   "nav_bottom": "صفحه‌های اصلی",
   "clock_title": "ساعت",
@@ -377,6 +417,14 @@
   "account_no_name": "هنوز نامی ثبت نشده",
   "account_email": "ایمیل",
   "account_sign_out": "خروج از حساب",
+  "account_people_title": "افراد از پیش ساخته",
+  "account_people_intro": "این محیط افرادی آماده برای ورود دارد، هر یک با نقش و روابط خاص خود. کد آن‌ها {code} است.",
+  "account_people_sign_in": "ورود به‌عنوان {name}",
+  "account_people_holds_nothing": "هنوز چیزی ندارد",
+  "email_code_subject": "{code} کد ورود شما به Remy است",
+  "email_code_intro": "این کد را برای ورود به Remy وارد کنید:",
+  "email_code_expiry": "این کد فقط پنج دقیقه و فقط یک‌بار کار می‌کند.",
+  "email_code_ignore": "اگر آن را درخواست نکرده‌اید، می‌توانید این ایمیل را نادیده بگیرید. بدون کد هیچ‌کس نمی‌تواند وارد شود.",
   "home_pages_heading": "آنچه می‌توانید اینجا باز کنید",
   "home_formats_open": "باز کردن صفحه قالب‌ها",
   "home_app_title": "صفحه‌های برنامه",

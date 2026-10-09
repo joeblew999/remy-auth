@@ -336,6 +336,47 @@
   "nav_clock": "שעון",
   "nav_account": "חשבון",
   "nav_settings": "הגדרות",
+  "nav_notes": "פתקים",
+  "notes_title": "פתקים",
+  "notes_description": "פתקים שאתה כותב ומשתף. מי מורשה לקרוא או לשנות כל פתק נקבע לפי הקשר שלו אליו.",
+  "notes_intro": "כתוב פתק ושתף אותו. מה שכל אדם יכול לעשות בו תלוי בקשר שלו אליו, והשרת קובע.",
+  "notes_signed_out_title": "התחבר כדי לשמור פתקים",
+  "notes_signed_out_description": "פתקים משויכים לחשבון, כך שאין מה להציג לפני שתתחבר.",
+  "notes_new_title": "פתק חדש",
+  "notes_title_label": "כותרת",
+  "notes_title_required": "תן לפתק כותרת של עד 120 תווים.",
+  "notes_body_label": "פתק",
+  "notes_save": "שמור",
+  "notes_cancel": "ביטול",
+  "notes_empty_title": "אין פתקים עדיין",
+  "notes_empty_description": "פתקים שאתה כותב, ופתקים שאחרים משתפים איתך, מופיעים כאן.",
+  "notes_yours": "שלך",
+  "notes_shared_with_you": "משותפים איתך",
+  "notes_shared_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=other": "משותף עם {count} אנשים",
+        "countPlural=one": "משותף עם {count} איש",
+        "countPlural=two": "משותף עם {count} אנשים"
+      }
+    }
+  ],
+  "notes_read_only": "אתה יכול לקרוא פתק זה.",
+  "notes_edit": "ערוך",
+  "notes_share": "שתף",
+  "notes_delete": "מחק",
+  "notes_share_email_label": "כתובת האימייל שלהם",
+  "notes_share_hint": "הם יראו את הפתק כשיתחברו עם כתובת זו.",
+  "notes_share_as_reader": "שתף לקריאה",
+  "notes_share_as_editor": "שתף לעריכה",
+  "notes_failed": "זה לא עבד. העמוד מציג את הפתקים כפי שהם כעת.",
   "nav_more": "עוד",
   "nav_bottom": "עמודים ראשיים",
   "clock_title": "שעון",
@@ -379,6 +420,14 @@
   "account_no_name": "אין עדיין שם",
   "account_email": "אימייל",
   "account_sign_out": "התנתקות",
+  "account_people_title": "אנשים מוכנים מראש",
+  "account_people_intro": "בסביבה זו יש אנשים מוכנים להתחברות, כל אחד עם תפקיד וקשרים משלו. הקוד שלהם הוא {code}.",
+  "account_people_sign_in": "התחבר בשם {name}",
+  "account_people_holds_nothing": "לא מחזיק בכלום עדיין",
+  "email_code_subject": "{code} הוא קוד ההתחברות שלך ל-Remy",
+  "email_code_intro": "הזן קוד זה כדי להתחבר ל-Remy:",
+  "email_code_expiry": "הוא תקף לחמש דקות, ופעם אחת בלבד.",
+  "email_code_ignore": "אם לא בקשת אותו, אפשר להתעלם מהודעה זו. אף אחד לא יכול להתחבר בלי הקוד.",
   "home_pages_heading": "מה אפשר לפתוח כאן",
   "home_formats_open": "פתיחת דף הפורמטים",
   "home_app_title": "דפי האפליקציה",

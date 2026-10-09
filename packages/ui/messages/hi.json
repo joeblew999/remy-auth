@@ -338,6 +338,46 @@
   "nav_clock": "घड़ी",
   "nav_account": "खाता",
   "nav_settings": "सेटिंग",
+  "nav_notes": "नोट्स",
+  "notes_title": "नोट्स",
+  "notes_description": "वे नोट्स जो आप लिखते और साझा करते हैं। हर नोट को कौन पढ़ या बदल सकता है, यह उसके साथ उनके संबंध से तय होता है।",
+  "notes_intro": "एक नोट लिखें और उसे साझा करें। हर व्यक्ति उसके साथ क्या कर सकता है, यह उसके संबंध पर निर्भर करता है, और यह सर्वर तय करता है।",
+  "notes_signed_out_title": "नोट्स रखने के लिए साइन इन करें",
+  "notes_signed_out_description": "नोट्स किसी खाते से जुड़े होते हैं, इसलिए जब तक आप साइन इन नहीं करते, दिखाने के लिए कुछ नहीं है।",
+  "notes_new_title": "नया नोट",
+  "notes_title_label": "शीर्षक",
+  "notes_title_required": "नोट को 120 वर्णों तक का शीर्षक दें।",
+  "notes_body_label": "नोट",
+  "notes_save": "सहेजें",
+  "notes_cancel": "रद्द करें",
+  "notes_empty_title": "अभी तक कोई नोट नहीं",
+  "notes_empty_description": "आपके लिखे नोट्स और दूसरे लोगों द्वारा आपके साथ साझा किए गए नोट्स यहाँ दिखाई देते हैं।",
+  "notes_yours": "आपके",
+  "notes_shared_with_you": "आपके साथ साझा किए गए",
+  "notes_shared_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "{count} व्यक्ति के साथ साझा किया गया",
+        "countPlural=*": "{count} लोगों के साथ साझा किया गया"
+      }
+    }
+  ],
+  "notes_read_only": "आप इस नोट को पढ़ सकते हैं।",
+  "notes_edit": "संपादित करें",
+  "notes_share": "साझा करें",
+  "notes_delete": "हटाएं",
+  "notes_share_email_label": "उनका ईमेल पता",
+  "notes_share_hint": "इस पते से साइन इन करने पर वे नोट देख सकेंगे।",
+  "notes_share_as_reader": "पढ़ने के लिए साझा करें",
+  "notes_share_as_editor": "संपादित करने के लिए साझा करें",
+  "notes_failed": "यह काम नहीं हुआ। पेज पर नोट्स उनकी वर्तमान स्थिति में दिखाए गए हैं।",
   "nav_more": "और",
   "nav_bottom": "मुख्य पेज",
   "clock_title": "घड़ी",
@@ -381,6 +421,14 @@
   "account_no_name": "अभी तक कोई नाम नहीं",
   "account_email": "ईमेल",
   "account_sign_out": "साइन आउट करें",
+  "account_people_title": "तैयार लोग",
+  "account_people_intro": "इस वातावरण में साइन इन करने के लिए तैयार लोग हैं, हर एक की एक भूमिका और अपने संबंध हैं। उनका कोड {code} है।",
+  "account_people_sign_in": "{name} के रूप में साइन इन करें",
+  "account_people_holds_nothing": "अभी तक कुछ भी नहीं है",
+  "email_code_subject": "{code} आपका Remy साइन-इन कोड है",
+  "email_code_intro": "Remy में साइन इन करने के लिए यह कोड दर्ज करें:",
+  "email_code_expiry": "यह पाँच मिनट तक, और केवल एक बार काम करता है।",
+  "email_code_ignore": "अगर आपने इसके लिए नहीं कहा था, तो आप इस ईमेल को नज़रअंदाज़ कर सकते हैं। कोड के बिना कोई भी साइन इन नहीं कर सकता।",
   "home_pages_heading": "यहाँ आप क्या खोल सकते हैं",
   "home_formats_open": "फ़ॉर्मैट पेज खोलें",
   "home_app_title": "ऐप पेज",

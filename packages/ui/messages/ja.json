@@ -332,6 +332,45 @@
   "nav_clock": "時計",
   "nav_account": "アカウント",
   "nav_settings": "設定",
+  "nav_notes": "ノート",
+  "notes_title": "ノート",
+  "notes_description": "あなたが書いて共有するノートです。それぞれを誰が読めるか、変更できるかは、そのノートとの関係によって決まります。",
+  "notes_intro": "ノートを書いて共有しましょう。各ユーザーがそのノートに対して何をできるかは、ノートとの関係に応じてサーバーが決定します。",
+  "notes_signed_out_title": "ノートを保存するにはサインインしてください",
+  "notes_signed_out_description": "ノートはアカウントに紐づいているため、サインインするまで表示するものがありません。",
+  "notes_new_title": "新しいノート",
+  "notes_title_label": "タイトル",
+  "notes_title_required": "ノートに120文字以内のタイトルを付けてください。",
+  "notes_body_label": "ノート",
+  "notes_save": "保存",
+  "notes_cancel": "キャンセル",
+  "notes_empty_title": "まだノートがありません",
+  "notes_empty_description": "あなたが書いたノートと、他の人があなたと共有したノートがここに表示されます。",
+  "notes_yours": "あなたのノート",
+  "notes_shared_with_you": "共有されたノート",
+  "notes_shared_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=other": "{count}人と共有中"
+      }
+    }
+  ],
+  "notes_read_only": "このノートは読み取りのみ可能です。",
+  "notes_edit": "編集",
+  "notes_share": "共有",
+  "notes_delete": "削除",
+  "notes_share_email_label": "相手のメールアドレス",
+  "notes_share_hint": "相手がこのアドレスでサインインすると、ノートが表示されます。",
+  "notes_share_as_reader": "読み取り用に共有",
+  "notes_share_as_editor": "編集用に共有",
+  "notes_failed": "うまくいきませんでした。ページには現在のノートの状態が表示されています。",
   "nav_more": "その他",
   "nav_bottom": "メインページ",
   "clock_title": "時計",
@@ -375,6 +414,14 @@
   "account_no_name": "名前はまだありません",
   "account_email": "メール",
   "account_sign_out": "サインアウト",
+  "account_people_title": "用意されたユーザー",
+  "account_people_intro": "この環境には、サインインに使えるユーザーがあらかじめ用意されており、それぞれに役割と独自の関係があります。コードは{code}です。",
+  "account_people_sign_in": "{name}としてサインイン",
+  "account_people_holds_nothing": "まだ何も持っていません",
+  "email_code_subject": "{code}はあなたのRemyサインインコードです",
+  "email_code_intro": "Remyにサインインするには、このコードを入力してください:",
+  "email_code_expiry": "このコードは5分間のみ、1回だけ使用できます。",
+  "email_code_ignore": "このコードをリクエストしていない場合は、このメールを無視してください。コードなしでサインインすることはできません。",
   "home_pages_heading": "ここで開けるもの",
   "home_formats_open": "フォーマットのページを開く",
   "home_app_title": "アプリのページ",

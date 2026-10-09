@@ -334,6 +334,46 @@
   "nav_clock": "Uhr",
   "nav_account": "Konto",
   "nav_settings": "Einstellungen",
+  "nav_notes": "Notizen",
+  "notes_title": "Notizen",
+  "notes_description": "Notizen, die du schreibst und teilst. Wer jede davon lesen oder ändern darf, richtet sich nach ihrer Beziehung dazu.",
+  "notes_intro": "Schreibe eine Notiz und teile sie. Was jede Person damit tun darf, hängt von ihrer Beziehung dazu ab, und der Server entscheidet.",
+  "notes_signed_out_title": "Melde dich an, um Notizen zu führen",
+  "notes_signed_out_description": "Notizen gehören zu einem Konto, daher gibt es nichts anzuzeigen, bis du dich anmeldest.",
+  "notes_new_title": "Neue Notiz",
+  "notes_title_label": "Titel",
+  "notes_title_required": "Gib der Notiz einen Titel mit bis zu 120 Zeichen.",
+  "notes_body_label": "Notiz",
+  "notes_save": "Speichern",
+  "notes_cancel": "Abbrechen",
+  "notes_empty_title": "Noch keine Notizen",
+  "notes_empty_description": "Notizen, die du schreibst, und Notizen, die andere mit dir teilen, erscheinen hier.",
+  "notes_yours": "Deine",
+  "notes_shared_with_you": "Mit dir geteilt",
+  "notes_shared_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=other": "Mit {count} Personen geteilt",
+        "countPlural=one": "Mit {count} Person geteilt"
+      }
+    }
+  ],
+  "notes_read_only": "Du kannst diese Notiz lesen.",
+  "notes_edit": "Bearbeiten",
+  "notes_share": "Teilen",
+  "notes_delete": "Löschen",
+  "notes_share_email_label": "Ihre E-Mail-Adresse",
+  "notes_share_hint": "Sie sehen die Notiz, sobald sie sich mit dieser Adresse anmelden.",
+  "notes_share_as_reader": "Zum Lesen teilen",
+  "notes_share_as_editor": "Zum Bearbeiten teilen",
+  "notes_failed": "Das hat nicht funktioniert. Die Seite zeigt die Notizen im aktuellen Zustand.",
   "nav_more": "Mehr",
   "nav_bottom": "Hauptseiten",
   "clock_title": "Uhr",
@@ -377,6 +417,14 @@
   "account_no_name": "Noch kein Name",
   "account_email": "E-Mail",
   "account_sign_out": "Abmelden",
+  "account_people_title": "Vorbereitete Personen",
+  "account_people_intro": "Diese Umgebung hält Personen bereit, als die du dich anmelden kannst, jede mit einer Rolle und eigenen Beziehungen. Ihr Code ist {code}.",
+  "account_people_sign_in": "Anmelden als {name}",
+  "account_people_holds_nothing": "Hat noch nichts",
+  "email_code_subject": "{code} ist dein Remy-Anmeldecode",
+  "email_code_intro": "Gib diesen Code ein, um dich bei Remy anzumelden:",
+  "email_code_expiry": "Er funktioniert fünf Minuten lang und nur einmal.",
+  "email_code_ignore": "Wenn du ihn nicht angefordert hast, kannst du diese E-Mail ignorieren. Niemand kann sich ohne den Code anmelden.",
   "home_pages_heading": "Was du hier öffnen kannst",
   "home_formats_open": "Formate-Seite öffnen",
   "home_app_title": "App-Seiten",

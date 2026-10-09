@@ -338,6 +338,48 @@
   "nav_clock": "Zegar",
   "nav_account": "Konto",
   "nav_settings": "Ustawienia",
+  "nav_notes": "Notatki",
+  "notes_title": "Notatki",
+  "notes_description": "Notatki, które piszesz i udostępniasz. To, kto może czytać lub zmieniać każdą z nich, zależy od relacji z nią.",
+  "notes_intro": "Napisz notatkę i udostępnij ją. To, co może z nią zrobić każda osoba, zależy od jej relacji z notatką, a decyduje o tym serwer.",
+  "notes_signed_out_title": "Zaloguj się, aby prowadzić notatki",
+  "notes_signed_out_description": "Notatki należą do konta, więc nie ma nic do wyświetlenia, dopóki się nie zalogujesz.",
+  "notes_new_title": "Nowa notatka",
+  "notes_title_label": "Tytuł",
+  "notes_title_required": "Podaj tytuł notatki, maksymalnie 120 znaków.",
+  "notes_body_label": "Notatka",
+  "notes_save": "Zapisz",
+  "notes_cancel": "Anuluj",
+  "notes_empty_title": "Brak notatek",
+  "notes_empty_description": "Tutaj pojawiają się notatki, które piszesz, oraz te udostępnione Ci przez innych.",
+  "notes_yours": "Twoje",
+  "notes_shared_with_you": "Udostępnione Tobie",
+  "notes_shared_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=many": "Udostępniono {count} osobom",
+        "countPlural=one": "Udostępniono {count} osobie",
+        "countPlural=few": "Udostępniono {count} osobom",
+        "countPlural=*": "Udostępniono {count} osobom"
+      }
+    }
+  ],
+  "notes_read_only": "Możesz odczytać tę notatkę.",
+  "notes_edit": "Edytuj",
+  "notes_share": "Udostępnij",
+  "notes_delete": "Usuń",
+  "notes_share_email_label": "Ich adres e-mail",
+  "notes_share_hint": "Zobaczą notatkę, gdy zalogują się tym adresem.",
+  "notes_share_as_reader": "Udostępnij do odczytu",
+  "notes_share_as_editor": "Udostępnij do edycji",
+  "notes_failed": "To się nie powiodło. Strona pokazuje notatki w ich obecnym stanie.",
   "nav_more": "Więcej",
   "nav_bottom": "Strony główne",
   "clock_title": "Zegar",
@@ -381,6 +423,14 @@
   "account_no_name": "Brak imienia",
   "account_email": "E-mail",
   "account_sign_out": "Wyloguj się",
+  "account_people_title": "Przykładowe osoby",
+  "account_people_intro": "To środowisko ma przygotowane osoby, na które można się zalogować, każda z własną rolą i relacjami. Ich kod to {code}.",
+  "account_people_sign_in": "Zaloguj się jako {name}",
+  "account_people_holds_nothing": "Na razie nic nie posiada",
+  "email_code_subject": "{code} to Twój kod logowania do Remy",
+  "email_code_intro": "Wpisz ten kod, aby zalogować się do Remy:",
+  "email_code_expiry": "Działa pięć minut i tylko raz.",
+  "email_code_ignore": "Jeśli o niego nie prosiłeś, możesz zignorować tę wiadomość. Nikt nie może się zalogować bez kodu.",
   "home_pages_heading": "Co możesz tu otworzyć",
   "home_formats_open": "Otwórz stronę formatów",
   "home_app_title": "Strony aplikacji",

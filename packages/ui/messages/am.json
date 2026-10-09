@@ -334,6 +334,46 @@
   "nav_clock": "ሰዓት",
   "nav_account": "መለያ",
   "nav_settings": "ቅንብሮች",
+  "nav_notes": "ማስታወሻዎች",
+  "notes_title": "ማስታወሻዎች",
+  "notes_description": "እርስዎ የሚጽፏቸው እና የሚያጋሩዋቸው ማስታወሻዎች። እያንዳንዷን ማስታወሻ ማን ማንበብ ወይም መቀየር እንደሚችል ከእሷ ካለው ግንኙነት ይወሰናል።",
+  "notes_intro": "ማስታወሻ ይጻፉ እና ያጋሩት። እያንዳንዱ ሰው ከእሷ ጋር ምን ማድረግ እንደሚችል በእሷ ካለው ግንኙነት ይወሰናል፣ ውሳኔውንም የሚያደርገው አገልጋዩ ነው።",
+  "notes_signed_out_title": "ማስታወሻዎችን ለማቆየት ይግቡ",
+  "notes_signed_out_description": "ማስታወሻዎች የአካውንት ናቸው፣ ስለዚህ እስኪገቡ ድረስ የሚታይ ነገር የለም።",
+  "notes_new_title": "አዲስ ማስታወሻ",
+  "notes_title_label": "ርዕስ",
+  "notes_title_required": "ለማስታወሻው እስከ 120 ፊደላት ያለው ርዕስ ይስጡ።",
+  "notes_body_label": "ማስታወሻ",
+  "notes_save": "አስቀምጥ",
+  "notes_cancel": "ይቅር",
+  "notes_empty_title": "እስካሁን ማስታወሻ የለም",
+  "notes_empty_description": "እርስዎ የሚጽፏቸው ማስታወሻዎች፣ እና ሌሎች ሰዎች ከእርስዎ ጋር የሚያጋሩዋቸው ማስታወሻዎች፣ እዚህ ይታያሉ።",
+  "notes_yours": "የእርስዎ",
+  "notes_shared_with_you": "ከእርስዎ ጋር የተጋራ",
+  "notes_shared_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "ከ{count} ሰው ጋር የተጋራ",
+        "countPlural=*": "ከ{count} ሰዎች ጋር የተጋራ"
+      }
+    }
+  ],
+  "notes_read_only": "ይህን ማስታወሻ ማንበብ ይችላሉ።",
+  "notes_edit": "አርትዕ",
+  "notes_share": "አጋራ",
+  "notes_delete": "አጥፋ",
+  "notes_share_email_label": "የእነሱ ኢሜይል አድራሻ",
+  "notes_share_hint": "በዚህ አድራሻ ሲገቡ ማስታወሻውን ያያሉ።",
+  "notes_share_as_reader": "ለማንበብ አጋራ",
+  "notes_share_as_editor": "ለማርትዕ አጋራ",
+  "notes_failed": "ይህ አልሰራም። ገጹ ማስታወሻዎቹን እንደ አሁኑ ሁኔታቸው ያሳያል።",
   "nav_more": "ተጨማሪ",
   "nav_bottom": "ዋና ገጾች",
   "clock_title": "ሰዓት",
@@ -377,6 +417,14 @@
   "account_no_name": "ገና ስም የለም",
   "account_email": "ኢሜይል",
   "account_sign_out": "ይውጡ",
+  "account_people_title": "የተዘጋጁ ሰዎች",
+  "account_people_intro": "ይህ አካባቢ እንደሆኑ ለመግባት የተዘጋጁ ሰዎች አለው፣ እያንዳንዳቸው የራሳቸው ሚና እና ግንኙነቶች ያላቸው። ኮዳቸው {code} ነው።",
+  "account_people_sign_in": "እንደ {name} ይግቡ",
+  "account_people_holds_nothing": "እስካሁን ምንም የለውም",
+  "email_code_subject": "{code} የ Remy መግቢያ ኮድዎ ነው",
+  "email_code_intro": "ወደ Remy ለመግባት ይህን ኮድ ያስገቡ፦",
+  "email_code_expiry": "ለአምስት ደቂቃ ብቻ እና አንድ ጊዜ ብቻ ይሰራል።",
+  "email_code_ignore": "ካልጠየቁት፣ ይህን ኢሜይል ወደ ጎን መተው ይችላሉ። ያለ ኮዱ ማንም መግባት አይችልም።",
   "home_pages_heading": "እዚህ ምን መክፈት ይችላሉ",
   "home_formats_open": "የቅርጸቶችን ገጽ ክፈት",
   "home_app_title": "የመተግበሪያ ገጾች",

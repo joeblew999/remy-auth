@@ -332,6 +332,45 @@
   "nav_clock": "時鐘",
   "nav_account": "帳號",
   "nav_settings": "設定",
+  "nav_notes": "筆記",
+  "notes_title": "筆記",
+  "notes_description": "您撰寫並分享的筆記。每個人能讀取或變更哪些筆記，取決於他們與該筆記的關係。",
+  "notes_intro": "撰寫一則筆記並分享出去。每個人對它能做什麼，取決於他們與該筆記的關係，由伺服器決定。",
+  "notes_signed_out_title": "登入以保留筆記",
+  "notes_signed_out_description": "筆記屬於帳號，因此在您登入前沒有內容可顯示。",
+  "notes_new_title": "新增筆記",
+  "notes_title_label": "標題",
+  "notes_title_required": "請為筆記取一個標題，最多120個字元。",
+  "notes_body_label": "筆記內容",
+  "notes_save": "儲存",
+  "notes_cancel": "取消",
+  "notes_empty_title": "尚無筆記",
+  "notes_empty_description": "您撰寫的筆記，以及其他人與您分享的筆記，會顯示在這裡。",
+  "notes_yours": "您的",
+  "notes_shared_with_you": "與您分享的",
+  "notes_shared_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=other": "已與{count}人分享"
+      }
+    }
+  ],
+  "notes_read_only": "您可以讀取這則筆記。",
+  "notes_edit": "編輯",
+  "notes_share": "分享",
+  "notes_delete": "刪除",
+  "notes_share_email_label": "對方的電子郵件地址",
+  "notes_share_hint": "對方使用此地址登入後即可看到這則筆記。",
+  "notes_share_as_reader": "分享以供閱讀",
+  "notes_share_as_editor": "分享以供編輯",
+  "notes_failed": "這項操作失敗了。此頁面顯示的是筆記目前的實際狀態。",
   "nav_more": "更多",
   "nav_bottom": "主要頁面",
   "clock_title": "時鐘",
@@ -375,6 +414,14 @@
   "account_no_name": "尚未設定姓名",
   "account_email": "電子郵件",
   "account_sign_out": "登出",
+  "account_people_title": "預設人員",
+  "account_people_intro": "此環境已備妥可供登入的人員，每位皆有角色與各自的關係。他們的代碼是{code}。",
+  "account_people_sign_in": "以{name}身分登入",
+  "account_people_holds_nothing": "尚未持有任何內容",
+  "email_code_subject": "{code} 是您的 Remy 登入代碼",
+  "email_code_intro": "輸入此代碼以登入 Remy：",
+  "email_code_expiry": "此代碼有效期限為五分鐘，且僅能使用一次。",
+  "email_code_ignore": "如果您並未要求此代碼，可以忽略這封郵件。沒有代碼任何人都無法登入。",
   "home_pages_heading": "在這裡你可以開啟什麼",
   "home_formats_open": "開啟格式頁面",
   "home_app_title": "應用程式頁面",

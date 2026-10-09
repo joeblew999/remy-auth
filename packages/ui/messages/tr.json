@@ -334,6 +334,46 @@
   "nav_clock": "Saat",
   "nav_account": "Hesap",
   "nav_settings": "Ayarlar",
+  "nav_notes": "Notlar",
+  "notes_title": "Notlar",
+  "notes_description": "Yazıp paylaştığınız notlar. Her birini kimin okuyabileceğini veya değiştirebileceğini, onunla olan ilişkisi belirler.",
+  "notes_intro": "Bir not yazın ve paylaşın. Her kişinin onunla ne yapabileceği, onunla olan ilişkisine bağlıdır ve buna sunucu karar verir.",
+  "notes_signed_out_title": "Not tutmak için oturum açın",
+  "notes_signed_out_description": "Notlar bir hesaba aittir, bu nedenle oturum açana kadar gösterilecek bir şey yoktur.",
+  "notes_new_title": "Yeni not",
+  "notes_title_label": "Başlık",
+  "notes_title_required": "Nota en fazla 120 karakterlik bir başlık verin.",
+  "notes_body_label": "Not",
+  "notes_save": "Kaydet",
+  "notes_cancel": "İptal",
+  "notes_empty_title": "Henüz not yok",
+  "notes_empty_description": "Yazdığınız notlar ve başkalarının sizinle paylaştığı notlar burada görünür.",
+  "notes_yours": "Sizinkiler",
+  "notes_shared_with_you": "Sizinle paylaşılanlar",
+  "notes_shared_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=other": "{count} kişiyle paylaşıldı",
+        "countPlural=one": "{count} kişiyle paylaşıldı"
+      }
+    }
+  ],
+  "notes_read_only": "Bu notu okuyabilirsiniz.",
+  "notes_edit": "Düzenle",
+  "notes_share": "Paylaş",
+  "notes_delete": "Sil",
+  "notes_share_email_label": "Kişinin e-posta adresi",
+  "notes_share_hint": "Bu adresle oturum açtıklarında notu görürler.",
+  "notes_share_as_reader": "Okumak için paylaş",
+  "notes_share_as_editor": "Düzenlemek için paylaş",
+  "notes_failed": "Bu işe yaramadı. Sayfa notları şu anki durumlarıyla gösteriyor.",
   "nav_more": "Daha fazla",
   "nav_bottom": "Ana sayfalar",
   "clock_title": "Saat",
@@ -377,6 +417,14 @@
   "account_no_name": "Henüz ad yok",
   "account_email": "E-posta",
   "account_sign_out": "Çıkış yap",
+  "account_people_title": "Hazır kişiler",
+  "account_people_intro": "Bu ortamda, her biri bir role ve kendi ilişkilerine sahip, oturum açmaya hazır kişiler bulunur. Kodları {code}.",
+  "account_people_sign_in": "{name} olarak oturum aç",
+  "account_people_holds_nothing": "Henüz hiçbir şeye sahip değil",
+  "email_code_subject": "{code}, Remy oturum açma kodunuz",
+  "email_code_intro": "Remy'de oturum açmak için bu kodu girin:",
+  "email_code_expiry": "Beş dakika boyunca ve yalnızca bir kez çalışır.",
+  "email_code_ignore": "Bunu siz istemediyseniz bu e-postayı görmezden gelebilirsiniz. Kimse kod olmadan oturum açamaz.",
   "home_pages_heading": "Burada neleri açabilirsiniz",
   "home_formats_open": "Biçimler sayfasını aç",
   "home_app_title": "Uygulama sayfaları",
