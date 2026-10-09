@@ -1,0 +1,7 @@
+{
+  // The guard's fixture Worker (tests/guard.spec.ts starts it); never deployed.
+  "name": "remy-auth-guard-fixture",
+  "main": "./worker.ts",
+  "compatibility_date": "2026-09-24",
+  "compatibility_flags": ["nodejs_compat"]
+}

@@ -278,9 +278,35 @@ export function SettingsPage({ locale, preferred }: { locale: Locale; preferred?
   </AppShell>;
 }
 
-/** The account: an honest empty state until the auth service signs people in (.plans/parked/auth-service.md). */
-export function AccountPage({ locale, preferred }: { locale: Locale; preferred?: Locale }) {
+/** What an app with sign-in hands the account page: who is signed in (null when nobody is), and its own controls. */
+export type AccountAuth = { account: { name: string; email: string } | null; signIn: React.ReactNode; signOut: React.ReactNode };
+
+/**
+ * The account. With `auth` (an app that signs people in; remy-auth, .plans/auth-service.md): who is
+ * signed in and the app's sign-out control, or the app's sign-in form. Without it: an honest empty state.
+ */
+export function AccountPage({ locale, preferred, auth }: { locale: Locale; preferred?: Locale; auth?: AccountAuth }) {
   const o = { locale };
+  if (auth) return <AppShell locale={locale} path="/app/account" preferred={preferred}>
+    <section className="flex flex-col gap-6">
+      <Intro locale={locale} title={m.account_title({}, o)} intro={m.account_auth_intro({}, o)} backTo="app" />
+      {auth.account ? <Card data-account="signed-in">
+        <CardHeader><CardTitle>{m.account_signed_in_title({}, o)}</CardTitle></CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-[auto_1fr]">
+            <dt className="text-muted-foreground">{m.account_name({}, o)}</dt>
+            <dd dir="auto" className="text-start" data-account="name">{auth.account.name || m.account_no_name({}, o)}</dd>
+            <dt className="text-muted-foreground">{m.account_email({}, o)}</dt>
+            <dd dir="ltr" className="text-start break-all" data-account="email">{auth.account.email}</dd>
+          </dl>
+          <div>{auth.signOut}</div>
+        </CardContent>
+      </Card> : <Card data-account="signed-out">
+        <CardHeader><CardTitle>{m.account_sign_in_title({}, o)}</CardTitle></CardHeader>
+        <CardContent>{auth.signIn}</CardContent>
+      </Card>}
+    </section>
+  </AppShell>;
   return <AppShell locale={locale} path="/app/account" preferred={preferred}>
     <section className="flex flex-col gap-6">
       <Intro locale={locale} title={m.account_title({}, o)} intro={m.account_intro({}, o)} backTo="app" />

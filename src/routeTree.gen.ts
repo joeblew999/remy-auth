@@ -23,8 +23,10 @@ import { Route as AppDotdemoRouteImport } from './routes/app.demo'
 import { Route as AppDotformatsRouteImport } from './routes/app.formats'
 import { Route as AppDotlocationRouteImport } from './routes/app.location'
 import { Route as AppDotsettingsRouteImport } from './routes/app.settings'
+import { Route as DevDotmailRouteImport } from './routes/dev.mail'
 import { Route as DocsDotsplatRouteImport } from './routes/docs.$'
 import { Route as TimeZonesDotsplatRouteImport } from './../packages/showcase/src/parts/time-zones/routes/time-zones.$'
+import { Route as ApiDotauthDotsplatRouteImport } from './routes/api.auth.$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -98,6 +100,11 @@ const AppDotsettingsRoute = AppDotsettingsRouteImport.update({
   path: '/app/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DevDotmailRoute = DevDotmailRouteImport.update({
+  id: '/dev/mail',
+  path: '/dev/mail',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DocsDotsplatRoute = DocsDotsplatRouteImport.update({
   id: '/docs/$',
   path: '/docs/$',
@@ -106,6 +113,11 @@ const DocsDotsplatRoute = DocsDotsplatRouteImport.update({
 const TimeZonesDotsplatRoute = TimeZonesDotsplatRouteImport.update({
   id: '/time-zones/$',
   path: '/time-zones/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDotauthDotsplatRoute = ApiDotauthDotsplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -123,9 +135,11 @@ export interface FileRoutesByFullPath {
   '/app/formats': typeof AppDotformatsRoute
   '/app/location': typeof AppDotlocationRoute
   '/app/settings': typeof AppDotsettingsRoute
+  '/dev/mail': typeof DevDotmailRoute
   '/docs/$': typeof DocsDotsplatRoute
   '/time-zones/$': typeof TimeZonesDotsplatRoute
   '/app/': typeof AppDotindexRoute
+  '/api/auth/$': typeof ApiDotauthDotsplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -141,9 +155,11 @@ export interface FileRoutesByTo {
   '/app/formats': typeof AppDotformatsRoute
   '/app/location': typeof AppDotlocationRoute
   '/app/settings': typeof AppDotsettingsRoute
+  '/dev/mail': typeof DevDotmailRoute
   '/docs/$': typeof DocsDotsplatRoute
   '/time-zones/$': typeof TimeZonesDotsplatRoute
   '/app': typeof AppDotindexRoute
+  '/api/auth/$': typeof ApiDotauthDotsplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -160,9 +176,11 @@ export interface FileRoutesById {
   '/app/formats': typeof AppDotformatsRoute
   '/app/location': typeof AppDotlocationRoute
   '/app/settings': typeof AppDotsettingsRoute
+  '/dev/mail': typeof DevDotmailRoute
   '/docs/$': typeof DocsDotsplatRoute
   '/time-zones/$': typeof TimeZonesDotsplatRoute
   '/app/': typeof AppDotindexRoute
+  '/api/auth/$': typeof ApiDotauthDotsplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -180,9 +198,11 @@ export interface FileRouteTypes {
     | '/app/formats'
     | '/app/location'
     | '/app/settings'
+    | '/dev/mail'
     | '/docs/$'
     | '/time-zones/$'
     | '/app/'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -198,9 +218,11 @@ export interface FileRouteTypes {
     | '/app/formats'
     | '/app/location'
     | '/app/settings'
+    | '/dev/mail'
     | '/docs/$'
     | '/time-zones/$'
     | '/app'
+    | '/api/auth/$'
   id:
     | '__root__'
     | '/'
@@ -216,9 +238,11 @@ export interface FileRouteTypes {
     | '/app/formats'
     | '/app/location'
     | '/app/settings'
+    | '/dev/mail'
     | '/docs/$'
     | '/time-zones/$'
     | '/app/'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -235,9 +259,11 @@ export interface RootRouteChildren {
   AppDotformatsRoute: typeof AppDotformatsRoute
   AppDotlocationRoute: typeof AppDotlocationRoute
   AppDotsettingsRoute: typeof AppDotsettingsRoute
+  DevDotmailRoute: typeof DevDotmailRoute
   DocsDotsplatRoute: typeof DocsDotsplatRoute
   TimeZonesDotsplatRoute: typeof TimeZonesDotsplatRoute
   AppDotindexRoute: typeof AppDotindexRoute
+  ApiDotauthDotsplatRoute: typeof ApiDotauthDotsplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -340,6 +366,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDotsettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dev/mail': {
+      id: '/dev/mail'
+      path: '/dev/mail'
+      fullPath: '/dev/mail'
+      preLoaderRoute: typeof DevDotmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/docs/$': {
       id: '/docs/$'
       path: '/docs/$'
@@ -352,6 +385,13 @@ declare module '@tanstack/react-router' {
       path: '/time-zones/$'
       fullPath: '/time-zones/$'
       preLoaderRoute: typeof TimeZonesDotsplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiDotauthDotsplatRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -371,9 +411,11 @@ const rootRouteChildren: RootRouteChildren = {
   AppDotformatsRoute: AppDotformatsRoute,
   AppDotlocationRoute: AppDotlocationRoute,
   AppDotsettingsRoute: AppDotsettingsRoute,
+  DevDotmailRoute: DevDotmailRoute,
   DocsDotsplatRoute: DocsDotsplatRoute,
   TimeZonesDotsplatRoute: TimeZonesDotsplatRoute,
   AppDotindexRoute: AppDotindexRoute,
+  ApiDotauthDotsplatRoute: ApiDotauthDotsplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

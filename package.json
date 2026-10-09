@@ -7,14 +7,15 @@
   },
   "devDependencies": {
     "@fumadocs/cli": "1.7.0",
-    "auth": "1.7.5",
+    "auth": "1.7.6",
     "github-slugger": "2.0.0",
     "shadcn": "4.21.0"
   },
   "dependencies": {
     "@joeblew999/remy-auth-contract": "*",
     "@joeblew999/remy-showcase": "*",
-    "@joeblew999/remy-ui": "*"
+    "@joeblew999/remy-ui": "*",
+    "better-auth": "1.7.6"
   },
   "workspaces": [
     "packages/*",

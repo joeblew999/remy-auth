@@ -1,0 +1,10 @@
+{
+  "name": "remy-auth-guard-fixture-orpc1",
+  "private": true,
+  "type": "module",
+  "description": "oRPC 1.15.4 for the guard's fixture (tests/guard/worker.ts), installed here and nowhere else, so the app's oRPC stays one copy. mise run ui:guard-fixture installs it from the lockfile beside this file.",
+  "dependencies": {
+    "@orpc/contract": "1.15.4",
+    "@orpc/server": "1.15.4"
+  }
+}

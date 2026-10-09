@@ -24,6 +24,8 @@ remove() { "$(dirname "$0")/preview-delete" "$name"; }
 
 export PUBLIC_ORIGIN="$origin"
 ./node_modules/.bin/vite build
+# Nothing is created by a deploy: every binding of the built configuration names a resource that exists.
+node "$(dirname "$0")/provisioned.mjs"
 output="$(mktemp)"
 export WRANGLER_OUTPUT_FILE_PATH="$output"
 ./node_modules/.bin/wrangler deploy --name "$name"

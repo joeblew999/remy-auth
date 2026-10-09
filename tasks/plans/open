@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="LOCAL, edits files: take a parked plan up again: mise run plans:open -- <plan> \"<why now>\". Adds the Opened line, moves it from .plans/parked/ to .plans/ (git mv), repoints links to and from it. Then add its item to now.md, and commit yourself"
+#MISE dir="{{config_root}}"
+# A shell wrapper so the module beside it loads as ESM wherever this directory is included from.
+set -euo pipefail
+exec node "$(dirname "$0")/plans.mjs" open "$@"

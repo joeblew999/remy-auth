@@ -10,7 +10,7 @@ import { sitePaths, appPaths } from '@joeblew999/remy-showcase/paths';
 import { everyPath } from '../src/paths';
 import { apiChecks } from '@joeblew999/remy-ui/api/checks';
 import { reservationApiChecks } from '@joeblew999/remy-showcase/reservation.checks';
-import { info } from '@joeblew999/remy-auth-contract';
+import { errorStatuses, info } from '@joeblew999/remy-auth-contract';
 import { router } from '../src/api/router';
 import { registeredOrigins } from '../src/api/origins';
 import { partChecks } from '@joeblew999/remy-ui/parts/checks';
@@ -38,8 +38,9 @@ partChecks({ options: {
   'seo-routes': { paths: sitePaths },
   'status-card': { service: 'remy-auth', path: '/app', endpoint: '/api/status' },
 } });
-// The demo reservation and the status card are contract endpoints (@joeblew999/remy-auth-contract).
-apiChecks({ router, title: info.title, origins: registeredOrigins });
+// The demo reservation, the status card and the signed-in account are contract endpoints
+// (@joeblew999/remy-auth-contract), each behind the guard; signing in itself is tests/auth.spec.ts.
+apiChecks({ router, title: info.title, origins: registeredOrigins, errorStatuses });
 reservationApiChecks();
 codeSplittingChecks({ paths: sitePaths });
 codeSplittingChecks({ paths: appPaths, home: '/app' });

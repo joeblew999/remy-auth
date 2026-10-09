@@ -5,7 +5,7 @@ description: "What the code must be: ownership, a single source of truth, test g
 
 This document owns what the code must be. How people and agents work day to day lives in
 [how we work](./how-we-work.md). What the auth service owns, and its storage direction, live in
-[the auth service plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/parked/auth-service.md).
+[the auth service plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/auth-service.md).
 
 ## Development principles
 

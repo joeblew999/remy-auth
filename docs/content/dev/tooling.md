@@ -24,11 +24,31 @@ arguments after `--`; they do not download a different CLI at execution time.
 
 For example, `mise run auth:cli -- generate --help` describes schema generation, and
 `mise run cf:cli -- d1 --help` shows D1 operations. `project:doctor` checks tool versions
-without logging into Cloudflare. `auth:info` reports the current scaffold; an auth
-configuration and database have not been created yet. Schema generation, migrations
-and admin creation will be wired to local D1 during service implementation.
-An `Unknown` Better Auth version in `auth:info` is expected until the application
-library is added; `project:doctor` reports the installed CLI version separately.
+without logging into Cloudflare.
+
+Better Auth runs in remy-auth's own Worker on a D1 database (`DB` in `wrangler.jsonc`), with its
+options in `src/auth/options.ts`. Its tasks are remy-auth's own, in `mise.toml`:
+
+```sh
+mise run auth:generate -- <name>        # LOCAL: what the options need beyond migrations/, as the next numbered migration
+mise run auth:migrate                   # LOCAL: apply migrations/ to Wrangler's local D1
+mise run auth:local                     # LOCAL: write .dev.vars when missing (ENVIRONMENT=local, a random BETTER_AUTH_SECRET)
+mise run auth:mail -- you@example.com   # LOCAL: the sign-in codes captured for an address, from the running Worker
+mise run auth:provision                 # Prints what the deployed sign-in needs on Cloudflare; creates nothing
+```
+
+`project:prepare` runs `auth:local`, `auth:migrate` and `ui:guard-fixture` (oRPC 1.15.4 for the
+guard's two-major check, installed in `tests/guard/v1` alone) before `project:dev` and every build, so
+dev, preview and the test tiers start on the current schema with nothing to remember. `auth:generate`
+runs the pinned CLI through `src/auth/cli.ts`, which compares the options with a throwaway SQLite
+database built from `migrations/`, so it writes only what is not there yet; change the options, then
+generate, never edit Better Auth's tables by hand. To sign in locally: `mise run project:dev`, open
+`/en/app/account`, enter an address, then read its code with `auth:mail`. No mail is sent locally:
+the local environment writes each code to its own D1 instead (the environment policy in
+`src/auth/environment.ts`; any other environment is production, where that is off). The deployed
+database, its migrations and the `BETTER_AUTH_SECRET` Worker secret are created on the owner's
+request only: `auth:provision` prints the steps, and until the database exists `cf:deploy` refuses to
+deploy, because Wrangler would otherwise create it by itself.
 
 These are developer/operator tools. Remy end-user CLI login and delegated API calls
 remain part of the service milestone. Both apps are live on Cloudflare; `cf:deploy` uploads to
@@ -72,7 +92,7 @@ CLI passthrough tasks accept upstream flags directly, such as
 | `packages:*` | Check and upgrade npm packages; pack, release and publish the repository's own packages ([tasks](./tasks.md#a-repository-that-publishes-packages)) |
 | `ui:*` | Compile the shared catalogs (`ui:generate`), regenerate the shadcn components and theme (`ui:components`, `ui:theme`), prove them untouched (`ui:verify`), release the package and the tasks (`ui:release`, the shared `packages:release`) |
 | `skills:*` | Install, list and remove the pinned official skills |
-| `auth:*` | Better Auth CLI and diagnostics |
+| `auth:*` | Better Auth: its CLI and diagnostics (`auth:cli`, `auth:info`), migrations for the local D1 (`auth:generate`, `auth:migrate`), the local environment (`auth:local`), its captured sign-in codes (`auth:mail`) and what a deployment needs (`auth:provision`, prints only) |
 | `cf:*` | Cloudflare CLI, live logs, deployment (`cf:deploy`), throwaway check Workers (`cf:preview`, `cf:preview-delete`), stored logs and AI usage (`cf:events`, `cf:ai-*`); shared tasks, listed in the [tasks README](./tasks.md#cloudflare-tasks) |
 | `api:*` | The generated OpenAPI document a running Worker serves (`api:spec`, `--urls` for its operations; shared task) |
 | `browser:*` | Chrome DevTools CLI, session lifecycle and MCP server |

@@ -156,6 +156,11 @@ CORS must be live first), then in remy-auth-app merge `contract-status-card`, `n
 
 ## oRPC 2.0 watch (2026-09-26)
 
+**Moved on 2026-10-09** (owner: "oRPC 2.0 beta"): remy-auth, the shared package and the contract are on
+2.0.0-beta.42, pinned exactly, in the auth plan's [first slice](../auth-service.md#the-move-to-orpc-20-beta).
+The watch below is what was true before, and its table is what the move then touched. What remains is
+to follow the betas to 2.0.0 and to move remy-auth-app with the next release.
+
 Checked again on 2026-09-26 against [oRPC's v1 migration guide](https://orpc.dev/docs/migrations/from-v1)
 (updated 2026-09-25). The decision stands: stay on 1.15.4.
 

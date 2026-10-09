@@ -131,7 +131,9 @@ The platform supplies every npm package the app and the tasks need, at one versi
 (in `project:check`) fails when a package that breaks when installed twice (React, TanStack Router and
 Query, the MDX stringifier; the package's `remy.singleCopy` list) is: remove the app's own pin. A task
 defined in the project's own `mise.toml` overrides the included task of the same name; the hooks meant
-for it are `project:generate` (code generated before type checking; by default the app's own catalog)
+for it are `project:generate` (code generated before type checking; by default the app's own catalog),
+`project:prepare` (the local state an app needs before it runs, which `project:dev` and `project:build`
+run first; nothing by default, and remy-auth writes its `.dev.vars` and migrates its local D1 there)
 and `project:release-checks`.
 
 Tests run in tiers, chosen by cost and by what a change can break, never by skipping checks. The
@@ -212,7 +214,7 @@ mise: outside a task mise's Node shim reapplies `[env]` and would replace `PUBLI
 
 | Task | Does |
 | --- | --- |
-| `cf:deploy` | Build with `DEPLOY_ORIGIN`, upload, wait for the new version (`cf:wait`), then its live smoke check. No tests unless `GATE=smoke\|quick\|full` picks a tier |
+| `cf:deploy` | Build with `DEPLOY_ORIGIN`, upload, wait for the new version (`cf:wait`), then its live smoke check. No tests unless `GATE=smoke\|quick\|full` picks a tier. It refuses when a D1, KV or R2 binding names no existing resource: Wrangler would create one during the deploy, and creating resources is the owner's (`cf:preview` refuses the same way) |
 | `cf:preview` | Deploy this commit as a throwaway Worker `<worker>-check-<commit>` (production untouched), run level 1 against it, delete it; `KEEP_PREVIEW=1` keeps it |
 | `cf:preview-delete` | List check Workers, or delete one by name; never the production Worker |
 | `cf:urls` | Print the production (or a given) origin's pages and `/healthz`, for reports |
@@ -236,5 +238,6 @@ every project: `.plans/now.md` is the one ordered list, `.plans/*.md` the few op
 | `plans:check` | `now.md` exists, every relative `.md` link under `.plans/` resolves, no `.md` outside `.plans/`, `done/` and `parked/`, every open plan file linked from `now.md`. Instant, no network; `project:check` runs it first |
 | `plans:close -- <plan> "<what shipped>"` | Adds `Closed <today>: ...` under the title, moves it to `done/` (from `.plans/` or `parked/`; `git mv` when tracked), repoints relative links to it in `.plans/`, `docs/`, `tasks/`, `packages/*/README.md` and the root `*.md`, and its own links from the new folder, strikes its `now.md` item |
 | `plans:park -- <plan> "<why>"` | The same into `parked/` with `Parked <today>: ...` |
+| `plans:open -- <plan> "<why now>"` | A parked plan taken up again: the same from `parked/` back into `.plans/` with `Opened <today>: ...`; add its item to `now.md` yourself |
 
 `close` and `park` change files and stage the move but never commit: read `git diff`, then commit.

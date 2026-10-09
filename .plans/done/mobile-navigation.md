@@ -67,7 +67,7 @@ Today: Overview, Formats, Demo (reservations), Location. Proposed:
 | --- | --- | --- |
 | Clock | Time now in chosen time zones (Intl), linking the site's time-zone pages | yes |
 | Settings | Language, theme, currency and number defaults (the preferences the app already keeps) | yes |
-| Account | Signed-in state and sessions; an honest empty state until the auth service ([parked](../parked/auth-service.md)) | placeholder |
+| Account | Signed-in state and sessions; an honest empty state until the auth service ([parked](../auth-service.md)) | placeholder |
 | Help | The product guide, Ask AI and the MCP servers for the app's users | yes (links) |
 
 Bar (proposed): **Overview, Formats, Clock, Account, More**. More: Demo, Location, Settings, Help, the

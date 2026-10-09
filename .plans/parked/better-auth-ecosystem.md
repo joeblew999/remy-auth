@@ -3,7 +3,7 @@
 Parked 2026-09-26 (owner: "Not big feature stuff"): not started now; picked up as its own project.
 
 Status: researched proposal, 2026-09-24. No packages installed or services provisioned.
-Companion to [the service implementation plan](auth-service.md).
+Companion to [the service implementation plan](../auth-service.md).
 
 ## Recommendation
 

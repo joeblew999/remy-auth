@@ -3,7 +3,9 @@
 import { test, expect } from '@playwright/test';
 import { oc } from '@orpc/contract';
 import { z } from 'zod';
-import { coverageProblems, procedures } from './coverage.js';
+import { coverageProblems, procedures, routeOf, statusesOf } from './coverage.js';
+import { guardProblems, policyOf } from './guard-core.js';
+import { policy } from './policy.js';
 
 /**
  * `router` is the app's implemented oRPC router (the one its /api route mounts). Every procedure
@@ -11,13 +13,56 @@ import { coverageProblems, procedures } from './coverage.js';
  * with their error responses; the reference page points at it; unknown API paths are 404s.
  * `origins` are the registered apps' origins the API answers across origins (apiHandlers'
  * `origins`): each is allowed by name, on a simple call and on a preflight; any other origin is not.
+ * `errorStatuses` are the HTTP statuses of the API's own error codes, as its server passes them.
+ * The guard (./guard-core.js): every procedure declares who may call it and has the guard in front of it,
+ * nothing reachable without a session answers with a person (`personFields` adds the app's own
+ * property names to the package's), and every procedure that needs a session refuses a stranger.
  */
-export function apiChecks({ router, title, origins = [] }) {
+export function apiChecks({ router, title, origins = [], personFields, errorStatuses }) {
+  const statuses = statusesOf(errorStatuses);
+  test('every API procedure is behind the guard, and none reachable without a session names a person', () => {
+    expect(guardProblems(router, personFields ? { personFields } : undefined)).toEqual([]);
+    // The rule itself catches each gap, so an empty list above means something: a contract that
+    // declares nothing, a public answer with an address in it, and a personal answer that does not say whose.
+    const row = z.object({ team: z.string(), coach: z.object({ email: z.string() }) });
+    const broken = {
+      forgotten: oc.output(z.object({})),
+      leaky: oc.meta(policy('public')).output(row),
+      unexplained: oc.meta(policy('session')).output(row),
+    };
+    expect(guardProblems(broken)).toEqual([
+      'forgotten: declares no policy (public or session)',
+      'leaky: reachable without a session, and its response carries email',
+      'unexplained: its response carries email; say who receives them (personal)',
+    ]);
+  });
+
+  test('every API procedure that needs a session refuses a caller without one, before answering anything', async ({ playwright, baseURL }) => {
+    // A caller of its own, with no cookies: the test's shared request context may hold a session.
+    const stranger = await playwright.request.newContext({ baseURL });
+    for (const { path, procedure } of procedures(router)) {
+      if (policyOf(procedure) === 'public') continue;
+      const { method, path: route } = routeOf(procedure);
+      const response = await stranger.fetch(route.replace(/\{[^}]+\}/g, 'x'), { method, ...(method === 'GET' ? {} : { data: {} }) });
+      expect(response.status(), `${path}: ${method} ${route} without a session`).toBe(401);
+      expect(response.headers()['cache-control'], `${path}: a refusal is never cached`).toBe('no-store');
+      expect(await response.json(), path).toEqual({ defined: expect.any(Boolean), code: 'UNAUTHORIZED', message: expect.any(String) });
+    }
+    await stranger.dispose();
+  });
+
   test('every API procedure has a route under /api/, a policy, an output and documented errors', () => {
-    expect(coverageProblems(router)).toEqual([]);
+    expect(coverageProblems(router, { errorStatuses })).toEqual([]);
     // The rule itself catches each gap, so an empty list above means something.
-    const bare = { missing: oc.input(z.object({ id: z.string() })).output(z.object({})) };
-    expect(coverageProblems(bare)).toEqual(['missing: no HTTP method', 'missing: no path under /api/', 'missing: no policy', 'missing: takes input but documents no error']);
+    const bare = {
+      missing: oc.input(z.object({ id: z.string() })).output(z.object({})),
+      unmapped: oc.errors({ OUT_OF_STOCK: {} }).output(z.object({})),
+    };
+    expect(coverageProblems(bare)).toEqual([
+      'missing: no HTTP method', 'missing: no path under /api/', 'missing: no policy', 'missing: takes input but documents no error',
+      'unmapped: no HTTP method', 'unmapped: no path under /api/', 'unmapped: undefined undefined is also missing', 'unmapped: no policy',
+      'unmapped: error OUT_OF_STOCK has no HTTP error status', 'unmapped: error OUT_OF_STOCK has no message',
+    ]);
   });
 
   test('the OpenAPI 3.1 document is generated from the router and served with its reference page', async ({ request }) => {
@@ -27,16 +72,18 @@ export function apiChecks({ router, title, origins = [] }) {
     const spec = await response.json();
     expect(spec.openapi).toMatch(/^3\.1\./);
     expect(spec.info.title).toBe(title);
-    const expected = procedures(router).map(({ procedure }) => procedure['~orpc'].route);
+    const expected = procedures(router).map(({ procedure }) => routeOf(procedure));
     const served = Object.entries(spec.paths).flatMap(([path, operations]) => Object.keys(operations).map(method => `${method.toUpperCase()} ${path}`));
     expect(served.sort()).toEqual(expected.map(route => `${route.method} ${route.path}`).sort());
+    // oRPC hoists each error's schema into components.schemas; a response names it by $ref.
+    const resolved = schema => JSON.stringify(schema ?? null, (_key, value) => (value?.$ref?.startsWith('#/components/schemas/') ? spec.components.schemas[value.$ref.split('/').pop()] : value));
     for (const { path, procedure } of procedures(router)) {
-      const { route, errorMap } = procedure['~orpc'];
+      const route = routeOf(procedure);
       const operation = spec.paths[route.path][route.method.toLowerCase()];
       expect(Object.keys(operation.responses), path).toContain('200');
-      for (const [code, error] of Object.entries(errorMap)) {
-        const body = operation.responses[String(error.status)]?.content?.['application/json']?.schema;
-        expect(JSON.stringify(body ?? null), `${path} documents ${code}`).toContain(`"const":"${code}"`);
+      for (const code of Object.keys(procedure['~orpc'].errorMap)) {
+        const body = operation.responses[String(statuses[code])]?.content?.['application/json']?.schema;
+        expect(resolved(body), `${path} documents ${code}`).toContain(`"const":"${code}"`);
       }
     }
 
@@ -57,8 +104,9 @@ export function apiChecks({ router, title, origins = [] }) {
   });
 
   test('only the registered origins may call the API from their pages (CORS)', async ({ request }) => {
-    const calls = procedures(router).map(({ procedure }) => procedure['~orpc'].route);
-    const get = calls.find(route => route.method === 'GET');
+    const calls = procedures(router).map(({ procedure }) => routeOf(procedure));
+    // A simple call needs an endpoint anyone may call: a stranger's GET of a public procedure.
+    const get = calls.find((route, index) => route.method === 'GET' && policyOf(procedures(router)[index].procedure) === 'public');
     const other = 'https://not-registered.example';
     expect(origins, 'a registered origin is exact, never a wildcard').not.toContain('*');
     for (const origin of [...origins, other]) {

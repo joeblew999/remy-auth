@@ -6,9 +6,10 @@ declare const __REMY_DOCS_API__: boolean;
 
 declare module '@remy-docs-app/contract' {
   import type { AnyRouter } from '@orpc/server';
-  import type { OpenAPI } from '@orpc/contract';
   /** The app's oRPC contract, which the API reference (/reference) documents. */
   export const contract: AnyRouter;
   /** Its OpenAPI info: title, version, description. */
-  export const info: OpenAPI.InfoObject;
+  export const info: { title: string; version: string; description?: string };
+  /** The HTTP status of each of the API's own error codes, when it has any. */
+  export const errorStatuses: Readonly<Record<string, number>> | undefined;
 }

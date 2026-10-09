@@ -69,15 +69,22 @@ description = "Run project:generate, generate Worker types and check the app (~1
 dir = "{{config_root}}"
 run = [{ task = "project:generate" }, "./node_modules/.bin/wrangler types", "./node_modules/.bin/tsc"]
 
-["project:dev"]
-description = "Run the app with hot reload (port from vite.config.ts)"
+["project:prepare"]
+description = "Hook for the local state an app needs before it runs (project:dev and project:build run it first); none by default. Override it in the project's mise.toml (remy-auth writes .dev.vars and migrates its local D1). Instant"
 dir = "{{config_root}}"
+run = "true"
+
+["project:dev"]
+description = "Run project:prepare, then the app with hot reload (port from vite.config.ts)"
+dir = "{{config_root}}"
+depends = ["project:prepare"]
 raw = true
 run = "./node_modules/.bin/vite dev"
 
 ["project:build"]
-description = "Build the deployable artifact and dry-run the Cloudflare deployment"
+description = "Run project:prepare, then build the deployable artifact and dry-run the Cloudflare deployment"
 dir = "{{config_root}}"
+depends = ["project:prepare"]
 run = ["./node_modules/.bin/vite build", "./node_modules/.bin/wrangler deploy --dry-run"]
 
 ["project:preview"]

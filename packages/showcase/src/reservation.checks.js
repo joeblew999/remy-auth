@@ -26,12 +26,12 @@ export function reservationApiChecks({ path = '/app/demo', endpoint = '/api/rese
       expect(broken.status()).toBe(400);
       expect(broken.headers()['x-request-id']).toMatch(uuid);
       const error = await broken.json();
-      expect(error).toMatchObject({ defined: true, code: 'INVALID_RESERVATION', status: 400,
+      expect(error).toMatchObject({ defined: true, code: 'INVALID_RESERVATION',
         data: { name: m.name_required({}, o), guests: m.guests_invalid({}, o) } });
 
       const malformed = await request.post(endpoint, { headers, data: { name: samples.guest, guests: '3' } });
       expect(malformed.status()).toBe(400);
-      expect(await malformed.json()).toMatchObject({ defined: false, code: 'BAD_REQUEST', status: 400 });
+      expect(await malformed.json()).toMatchObject({ defined: false, code: 'BAD_REQUEST' });
 
       const valid = await request.post(endpoint, { headers, data: { name: samples.guest, guests: 3 } });
       expect(valid.status()).toBe(200);

@@ -46,7 +46,37 @@ package follows [Semantic Versioning](https://semver.org/).
 - `template/`: the blank app a new repository starts from (identity, one home page in every language,
   a docs index per site); `docs:init` takes `template/docs`.
 
+- `api/guard-core`: the guard, free of any oRPC import so the same code runs on oRPC 1 and 2: who may call
+  a procedure is its `meta.policy` (`public` or `session`), `guardMiddleware` enforces it as the router's
+  root middleware, and a procedure that declares none never runs. `guardProblems` names a procedure
+  with no policy, with no guard in front of it, a public one whose response names a person (an email
+  address, say), and a personal one that does not say who receives it (`meta.personal`).
+- `api/guard`: `guard()` (the guard for the installed oRPC, an app router's root middleware),
+  `GuardContext` (`getSession`, as oRPC's Better Auth guide shares a session), `once`, `signedIn`,
+  `noSession`, and everything in `api/guard-core` and `api/policy`.
+- `api/policy`: `policy()` and `personal()`, the oRPC metadata a contract procedure declares for the guard.
+- `api/server`: `apiHandlers` answers `no-store` to a request with credentials, and on every 401.
+- `@joeblew999/remy-showcase/app-pages`: `AccountPage` takes `auth` (who is signed in, and the app's
+  sign-in and sign-out controls); without it, the empty state as before.
+- `@joeblew999/remy-auth-contract` 0.4.0: `me` (`GET /api/me`, the signed-in person's own account; 401
+  without a session) and `errorStatuses`; written for oRPC 2. `ui:version` sets its peer floor for
+  `@joeblew999/remy-ui` to the release.
+- Tasks: `project:prepare`, a hook `project:dev` and `project:build` run first (nothing by default);
+  `plans:open`, a parked plan taken up again.
+
 ### Changed (breaking)
+- oRPC 2: every `@orpc/*` dependency is 2.0.0-beta.42 (`@orpc/openapi-client` is gone, merged into
+  `@orpc/openapi`). An app's contract writes its routes as `.meta(openapi({ method, path, ... }))` and
+  its policy as `.meta(policy('public'))` (`api/policy`; `ApiMeta` and `oc.$meta` are gone); its errors
+  carry no `status`, and the API's own error codes get theirs from `errorStatuses`, passed to
+  `apiHandlers`, `generateSpec`, `apiChecks` and `coverageProblems`. An error's body no longer holds
+  `status`. `contractClient(contract, { origin })` replaces `{ url }`. `api/coverage` reads a route
+  with `routeOf(procedure)`. A client still on oRPC 1 reads a successful answer but not a typed error.
+- `apiChecks` now fails an API whose procedures are not behind the guard. An app with an API puts
+  `guard()` (`api/guard`) at its router's root (`implement(contract).$context<GuardContext<...>>().use(guard())`)
+  and gives each call a `getSession()` in its context; an app that signs nobody in passes `noSession`.
+- Tasks: `cf:deploy` and `cf:preview` refuse when a D1, KV or R2 binding names no existing resource,
+  instead of letting Wrangler create one during the deploy.
 - One dependency set: the framework, toolchain and the tools the shared tasks run are the package's exact
   dependencies (no more optional peers); an app's `package.json` names `@joeblew999/remy-ui` and drops its
   own pins of them, or `project:single-copies` fails.

@@ -10,8 +10,8 @@ mise run project:check     # Tier 0: typecheck and build
 ```
 
 :::note
-Google Chrome must be installed. Everything runs locally in the Workers runtime;
-no Cloudflare account, database or production credentials are needed. Browser
+Google Chrome must be installed. Everything runs locally in the Workers runtime, on Wrangler's
+local D1; no Cloudflare account, remote database or production credentials are needed. Browser
 tests own `PREVIEW_PORT` (default 4173; each agent sets its own) and refuse to reuse an unrelated
 process. Stop a manual preview before a test tier; the development server on 5173 can remain running.
 :::
@@ -43,8 +43,9 @@ TEST_BASE_URL=https://your-worker.your-subdomain.workers.dev mise run project:te
 ```
 
 The URL must be an origin, without a path or query. Current tests read public
-routes and manipulate only the browser counter. Authentication and storage tests
-will need isolated fixtures when those features exist. The remote test task can
+routes and manipulate only the browser counter. The sign-in checks (`tests/auth.spec.ts`) read
+their codes from the local mail capture, so they run against the local target only; against a
+deployment they check that the capture does not exist. The remote test task can
 also target an already-running local preview to check the external-server path.
 
 The pipeline tasks are shared defaults from `tasks/project.toml`, driven by this
@@ -98,7 +99,10 @@ Every page exists in every locale (13 prefixes such as `/en`, `/ar`, `/ja`; the 
 | `/en/app/formats` | App | The formats page's content in the app frame |
 | `/en/app/demo` | App | `ssr: false`. Counter and reservation form validated in the browser and again by the contract's `POST /api/reservations` (a TanStack Query mutation), which answers in the page's language; broken rules come back as its typed 400 and show as the form's own errors; leaving with unsaved input asks first (`useBlocker`) |
 | `/en/app/location` | App | Cloudflare's location of the request beside the device's own, which the Geolocation API gives only after the visitor presses its button |
-| `/api/status`, `/api/reservations` | API | Contract endpoints ([@joeblew999/remy-auth-contract](https://github.com/joeblew999/remy-auth/blob/main/packages/contract/README.md)) served by oRPC behind one Start server route (`src/routes/api.$.ts`, `src/api/`): input and output validated, typed errors, the language from Accept-Language (Paraglide's `routeStrategies`), no locale in the URL |
+| `/en/app/account` | App | Who is signed in (name and email, with sign-out), or the sign-in form: an email address, then the six-digit code Better Auth sends to it (TanStack Form; Better Auth's client calling `/api/auth`). The loader asks a server function that calls the contract's `me` inside the server, so the server renders the right state from the page's cookies and never caches it. Where no sign-in code can be delivered (any deployment, until mail delivery exists) it keeps the shared empty state instead of the form |
+| `/api/status`, `/api/me`, `/api/reservations` | API | Contract endpoints ([@joeblew999/remy-auth-contract](https://github.com/joeblew999/remy-auth/blob/main/packages/contract/README.md)) served by oRPC behind one Start server route (`src/routes/api.$.ts`, `src/api/`): input and output validated, typed errors, the language from Accept-Language (Paraglide's `routeStrategies`), no locale in the URL. Each runs behind the platform's guard, which enforces its contract policy: `status` and `reservations` are public, `me` answers only a signed-in person and refuses anyone else with 401 |
+| `/api/auth/*` | API | Better Auth's own endpoints (send a code, sign in, the session, sign out) behind one catch-all Start server route (`src/routes/api.auth.$.ts`), on the Worker's D1 database (`DB`); not part of the contract or its document |
+| `/dev/mail` | Local only | The sign-in codes the local environment captured for `?recipient=` instead of mailing them; 404 in any other environment (the policy table in `src/auth/environment.ts`) |
 | `/api/openapi.json`, `/api/doc` | API | The OpenAPI 3.1 document generated from the router in-process, and its reference page (oRPC's Scalar page, script pinned) |
 | `/robots.txt`, `/sitemap.xml` | Server routes | `Cache-Control: public, max-age=3600, s-maxage=3600`; methods other than GET and HEAD answer 405 with `Allow`; the sitemap lists the site pages in every locale with `hreflang` alternates |
 | Unknown route or locale | | HTTP 404 with the localized not-found page (an un-localized unknown path first redirects to the visitor's language, as TanStack's rewrite canonicalizes it) |
@@ -140,7 +144,8 @@ Fonts live in [`packages/ui/src/fonts.css`](https://github.com/joeblew999/remy-a
 
 - `src/routes/`: TanStack file routes (loaders, `head`, per-route rendering) that render the package's pages, plus this app's extra formats rows (`src/formats-extras.tsx`), while `robots.txt` and `sitemap.xml` (the seo-routes part) and `/csp-report` (`app-routes`) are the package's server routes, mounted beside them; `src/routeTree.gen.ts` is generated by the router plugin during dev and build and committed.
 - `src/server.ts`: Worker entry through the package's `localizedWorker` (request IDs, structured status logs, `/healthz`, Paraglide's middleware, entry redirects). Start receives the original request, so server functions read Cloudflare's geolocation from the request's `cf` properties in a server-only module under Start's import protection (`packages/showcase/src/parts/deferred-place/place.server.ts`, the showcase's deferred-place part). The wrapper passes its request ID inward as `X-Request-ID`; Start's request middleware exposes it as `context.requestId`, and a function middleware logs one `server_fn` line per call (the package's `start`, registered in `src/start.ts`). A second request middleware there makes the per-request CSP nonce that the shared router (`router`) hands to TanStack Router, and the package's server route `/csp-report` (`app-routes`) logs the policy's reports ([security headers](https://github.com/joeblew999/remy-auth/blob/main/.plans/parked/gui-portal.md)). The service name has one home, `src/service.ts`.
-- `src/api/`: the contract's implementation (`router.ts`, no Workers imports so the checks load it in Node), each call's context (`context.server.ts`) and the isomorphic client with its TanStack Query utilities (`client.ts`). The contract is `packages/contract/`; the shared mechanism is the package's `api/*` exports; [the contracts plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/openapi-contracts.md) owns the design.
+- `src/api/`: the contract's implementation (`router.ts`, behind the guard; no Workers imports so the checks load it in Node), each call's context, with the caller's session (`context.server.ts`), and the isomorphic client with its TanStack Query utilities (`client.ts`). The contract is `packages/contract/`; the shared mechanism is the package's `api/*` exports; [the contracts plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/openapi-contracts.md) owns the design.
+- `src/auth/`: Better Auth in this Worker ([the auth plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/auth-service.md)): its options, shared by the Worker and the CLI (`options.ts`), the instance built on first use from the D1 binding (`auth.server.ts`), the CLI's configuration (`cli.ts`), the environment policy table (`environment.ts`), mail delivery (`mail.server.ts`), the rule on fields a person can write (`fields.ts`), the account server function (`account.ts`) and the sign-in form with Better Auth's browser client (`sign-in.tsx`, `client.ts`). `migrations/` holds the numbered D1 migrations ([tasks](./tooling.md#developer-cli)).
 - `src/router.tsx`: the package's `remyRouter`, a new router and TanStack Query client per request, with Query's SSR integration. `src/routes/__root.tsx` is the package's `remyRoot` with this app's config; TanStack Devtools (Router and Query panels) is passed in there, in the app's own file, because its `devtools()` Vite plugin strips it from production builds only outside `node_modules`; the build-boundary check proves no devtools or server-only code reaches the browser.
 - `src/parts.json`: the package's [parts](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md) this app uses, one per line (the showcase's `@joeblew999/remy-showcase/time-zones`, `deferred-place` and `status-card`, and the platform's `seo-routes`); `remyParts()` in `vite.config.ts` mounts their routes and `partChecks()` in `tests/gui.spec.ts` runs their checks.
 - `packages/ui/`: everything both apps share; its [README](./ui-package.md) lists the exports.
@@ -175,8 +180,9 @@ Google's level covers site pages only (app pages are noindex by design): Lightho
 2.5 s, CLS 0.1, TBT 200 ms, Performance at least 0.9), on a throwaway Cloudflare Worker
 (`project:test:cwv`), not localhost.
 
-Limits: no Better Auth server, credentials, sessions, D1 database, authorization or cross-app SSO
-yet. The site is served from its workers.dev address (`DEPLOY_ORIGIN`); the production public origin and
+Limits: signing in works locally only, where codes are captured instead of mailed; the deployed Worker
+has no database, secret or mail delivery yet, and no organizations, roles, relationships, OAuth
+tokens or cross-app sign-in ([the auth plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/auth-service.md)). The site is served from its workers.dev address (`DEPLOY_ORIGIN`); the production public origin and
 Search Console are owner decisions ([now](https://github.com/joeblew999/remy-auth/blob/main/.plans/now.md)).
 
 Known tooling notices: Node may print the Chrome DevTools localStorage experimental

@@ -181,14 +181,15 @@ function findPlan(name, from) {
   return candidates[0];
 }
 
-// close and park: note the line under the title, move the file, repoint links to and from it, strike it in now.md.
+// close, park and open: note the line under the title, move the file, repoint links to and from it;
+// close and park strike its item in now.md, open leaves now.md to its author (the item is new work).
 function move(kind, word) {
   const [name, ...note] = args;
   const reason = note.join(' ').trim();
   if (!name || !reason) fail(`Usage: mise run plans:${kind} -- <plan> "<${kind === 'close' ? 'what shipped' : 'why'}>"`);
   if (!existsSync(plansDir)) fail('No .plans/ here.');
-  const source = findPlan(name, kind === 'close' ? [plansDir, join(plansDir, 'parked')] : [plansDir]);
-  const target = join(plansDir, kind === 'close' ? 'done' : 'parked', basename(source));
+  const source = findPlan(name, { close: [plansDir, join(plansDir, 'parked')], park: [plansDir], open: [join(plansDir, 'parked')] }[kind]);
+  const target = join(plansDir, { close: 'done', park: 'parked', open: '' }[kind], basename(source));
   if (existsSync(target)) fail(`${rel(target)} already exists.`);
 
   // The note under the title, and the plan's own links now resolve from its new folder.
@@ -218,7 +219,7 @@ function move(kind, word) {
 
   // Strike its item in now.md (now pointing at the new place).
   let struck = false;
-  if (existsSync(nowFile)) {
+  if (kind !== 'open' && existsSync(nowFile)) {
     const nowLines = read(nowFile).split('\n');
     for (const link of links(nowLines.join('\n'))) {
       if (resolveFrom(nowFile, splitTarget(link.target)[0]) !== target) continue;
@@ -236,10 +237,10 @@ function move(kind, word) {
   console.log(`${word}: ${rel(source)} -> ${rel(target)}${tracked ? ' (git mv)' : ''}`);
   console.log(`  own links repointed: ${own.changed} line(s)`);
   console.log(`  links to it repointed: ${touched.join(', ') || 'none'}`);
-  console.log(`  now.md: ${struck ? 'struck its item' : 'no open item links to it'}`);
+  console.log(`  now.md: ${kind === 'open' ? 'add its item, in the order it closes' : struck ? 'struck its item' : 'no open item links to it'}`);
   console.log('Review with git diff, then mise run plans:check.');
 }
 
-const commands = { status, check, close: () => move('close', 'Closed'), park: () => move('park', 'Parked') };
+const commands = { status, check, close: () => move('close', 'Closed'), park: () => move('park', 'Parked'), open: () => move('open', 'Opened') };
 if (!commands[command]) fail(`Unknown command ${command}; one of ${Object.keys(commands).join(', ')}.`);
 commands[command]();

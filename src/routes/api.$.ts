@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { info } from '@joeblew999/remy-auth-contract';
+import { errorStatuses, info } from '@joeblew999/remy-auth-contract';
 import { apiHandlers } from '@joeblew999/remy-ui/api/server';
 import { router } from '../api/router';
 import { apiContext } from '../api/context.server';
@@ -13,6 +13,7 @@ export const Route = createFileRoute('/api/$')({
   server: {
     handlers: apiHandlers(router, {
       info,
+      errorStatuses,
       context: apiContext,
       origins: registeredOrigins,
     }),

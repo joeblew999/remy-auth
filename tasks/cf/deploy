@@ -7,6 +7,9 @@ set -euo pipefail
 # Development deploys run no tests (owner, 2026-09-25: the gate is for real releases; ui:release runs
 # the full one). GATE picks a tier first, by the deployer's judgement (docs/content/dev/how-we-work.md, test tiers):
 # smoke (every page answers, ~15 s), quick (every check in en and ar; also GATE=1) or full (every language).
+# Before anything slow: a binding with no resource behind it stops the deploy (provisioned.mjs).
+node "$(dirname "$0")/provisioned.mjs"
+
 case "${GATE:-}" in
   "") ;;
   smoke) mise run project:test:smoke ;;
@@ -17,6 +20,8 @@ esac
 
 export PUBLIC_ORIGIN="$DEPLOY_ORIGIN"
 ./node_modules/.bin/vite build
+# Nothing is created by a deploy: every binding of the built configuration names a resource that exists.
+node "$(dirname "$0")/provisioned.mjs"
 
 # Wrangler records the deployed version in its structured output file; cf:wait reads it.
 output="$(mktemp)"

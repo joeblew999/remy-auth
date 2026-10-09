@@ -1,8 +1,7 @@
-/**
- * What every contract procedure declares besides its route. `policy` names who may call it:
- * "public", or later an action of refined C's relation engine (.plans/auth-service.md).
- */
-export type ApiMeta = { policy?: 'public' };
 export declare const apiPrefix: '/api/';
 export declare function procedures(router: unknown): { path: string; procedure: unknown }[];
-export declare function coverageProblems(router: unknown): string[];
+/** A procedure's `openapi()` metadata: its HTTP method and path, and its document fields. */
+export declare function routeOf(procedure: unknown): { method?: string; path?: string; summary?: string; description?: string; tags?: readonly string[] };
+/** The HTTP status each error code answers with: oRPC's common codes, then the API's own. */
+export declare function statusesOf(errorStatuses?: Readonly<Record<string, number>>): Record<string, number>;
+export declare function coverageProblems(router: unknown, options?: { errorStatuses?: Readonly<Record<string, number>> }): string[];
