@@ -11,6 +11,26 @@ Owner: remy-auth. First consumer: in-repo sample; first external consumer: remy-
 Executor/Reviewer roles as in [plans and roles](../docs/content/dev/development.md#plans-and-roles). Do not
 begin a fleet rollout.
 
+## What remy-auth is for, and where it stands (owner, 2026-10-09)
+
+The owner's description: "Remy-auth seems be designed as its own worker, and to provide everything that
+any Remy repo needs in order ro do the betterauth, rebac things for them such that they just have to
+import the package and they get it all for free and it's type checked all the way through. They get all
+backend and front ends bits they need so that live is easy for them. It also provides a reusable docs
+system. It itself also reuses all of itself in its demos." That is the design. Point by point:
+
+| The owner's point | True today | Not yet |
+| --- | --- | --- |
+| Its own Worker | Live at https://remy-auth.gedw99.workers.dev; it alone holds identities and sessions (Better Auth on its own D1) | Signing in on the deployment (mail delivery) |
+| An app imports the package and gets Better Auth and ReBAC for free | The guard: an app puts `guard()` at its router's root and declares `policy(...)` on its contract; the shared checks fail an app that does not. Proven in the consumer fixture, a blank app that gets the package as another repository does | An app cannot yet learn who is signed in at remy-auth (the app-trust slice), and there are no relationships yet (the relation engine's slice) |
+| Type-checked all the way through | Contract to server to client: the contract's types are the handler's and the client's, the policy is typed, and a handler's `context.user` is the session's user | The same for relationships: an app's own vocabulary as types, from the contract to the GUI |
+| Backend and front-end pieces | Backend: `api/guard`, `api/policy`, `api/server`, `api/client`, `api/checks`. Front end: the shared account page shows who is signed in | The sign-in and sign-out controls are remy-auth's own files, not the package's; nothing yet shows or hides an action by what the server allows |
+| A reusable docs system | The docs Worker is the package's (`docs/*`): remy-auth's docs run on it, and the consumer fixture builds an app's docs with it | |
+| It reuses itself in its demos | remy-auth's own app is built from the package: its API is behind the same guard, its account page is the shared one, its docs are the shared docs Worker | The sample app that signs in through remy-auth and uses relationships ([below](#sample-app-examplessample-app)) |
+
+The measure for every next slice: the consumer fixture, a blank app that only imports the package,
+gets the new piece and its `tsc` and checks pass.
+
 ## Slice 1: sign-in, the account page and the guard (2026-10-09)
 
 The owner asked for real code that stays instead of scratch proofs: Better Auth in remy-auth's own
