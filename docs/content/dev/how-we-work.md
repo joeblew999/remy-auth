@@ -181,7 +181,7 @@ every app does, from the shared tasks; `project:setup` installs the guard.
 | --- | --- | --- | --- |
 | Before a piece of work | `mise run dev:start -- <name>` | a worktree of its own from main, installed, its own ports, the guard | ~1 min |
 | After every change | `mise run dev:change` | the check (`project:check`): plans, types with the tasks' own, the plain-function checks (`tests/**/*.unit.spec.ts`), translation status; a build only when a route file changed, the docs only when docs changed | ~6 s |
-| The change leaves the machine | `mise run dev:land -- "<what changed>"` | the check, commit, fast-forward main, push, deploy staging. GitHub then runs every language, Google's audits and the consumer fixture in parallel, while you keep coding (`gh run list`) | ~1 min, mostly the deploy |
+| The change leaves the machine | `mise run dev:land -- "<what changed>"` | the check, commit, fast-forward main, push, deploy staging, then translation last when stale. GitHub then runs every language, Google's audits and the consumer fixture in parallel, while you keep coding (`gh run list`) | ~1 min to staging; translation after |
 | Production | `mise run dev:promote` | `cf:deploy` and the docs Worker, from a pushed main, no gate: staging and GitHub already ran the checks | ~1 min |
 | A release | `mise run dev:release` | `packages:release`: every check, every language, locally, on purpose, then the tag | ~5 min |
 | When landed | `mise run dev:done` | the worktree and branch go | seconds |
@@ -279,7 +279,7 @@ the only integrator, and GitHub checks every landing. Nothing here is done by ha
 | Look | `mise run dev:status` | what is going on, asked from the facts' owners: main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests. Every agent session opens with it (a hook `dev:guard` registers); a developer runs it when they sit down |
 | Start | `mise run dev:start -- <name>` | a worktree on branch `<name>` from main (`.claude/worktrees/<name>`), installed (`npm ci`, `project:prepare`), with ports of its own (`mise.local.toml`) and the flow's guard. Claude Code's own worktrees live at the same place and are only a folder: inside one, `mise run dev:start` with no name prepares it the same way |
 | Code | `mise run dev:change` | the check, in seconds, after every change |
-| Land | `mise run dev:land -- "<what changed>"` | main merged in first (a conflict stops with the files named), the check, commit, fast-forward main, push, translate when stale, staging. GitHub runs the heavy checks; a red run comments on the commit |
+| Land | `mise run dev:land -- "<what changed>"` | main merged in first (a conflict stops with the files named), the check, commit, fast-forward main, push, staging, then translation last when stale (the Claude subscription on this machine, never GitHub). GitHub runs the heavy checks; a red run comments on the commit |
 | Finish | `mise run dev:done` | the landed worktree and branch go; refuses while anything is unlanded |
 | Production | `mise run dev:promote` | from main, only a commit GitHub passed |
 

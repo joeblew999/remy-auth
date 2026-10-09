@@ -42,8 +42,13 @@ git('-C', root, 'push', 'origin', 'main');
 const landed = read('-C', root, 'rev-parse', 'main');
 console.log(`dev:land: main is ${landed.slice(0, 7)} and pushed; GitHub runs every language, Google's audits and the consumer fixture: gh run list --commit ${landed.slice(0, 7)}. A red run comments on the commit; dev:promote refuses one that is not green.`);
 
-// Translation: only when something is stale or missing (strict check: exit 1 says so), so a second
-// land after a green one costs nothing here.
+// Staging now, so the landing is usable in a minute; the translation (the Claude subscription on this
+// machine, minutes for a few pages) comes last and nobody waits for it.
+if (process.env.STAGING_ORIGIN) run('cf:staging', 'land'); else console.log('dev:land: no STAGING_ORIGIN in [env]; nothing deployed.');
+console.log('dev:land: staging is up. Production: mise run dev:promote.');
+
+// Translation, last: only when something is stale or missing (strict check: exit 1 says so), so a
+// second land after a green one costs nothing here. It commits on main and is pushed.
 const upToDate = spawnSync('mise', ['run', 'i18n:check'], { cwd: root, stdio: 'ignore', env: { ...process.env, I18N_STRICT: '1' } }).status === 0;
 if (upToDate) console.log('dev:land: translations are up to date.');
 else {
@@ -52,6 +57,4 @@ else {
   if (read('-C', root, 'rev-parse', 'main') !== before) git('-C', root, 'push', 'origin', 'main');
 }
 if (!here.onMain) git('merge', '-q', '--ff-only', 'main');
-
-if (process.env.STAGING_ORIGIN) run('cf:staging', 'land'); else console.log('dev:land: no STAGING_ORIGIN in [env]; nothing deployed.');
-console.log('dev:land: done. Production: mise run dev:promote.');
+console.log('dev:land: done.');

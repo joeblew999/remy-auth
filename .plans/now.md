@@ -5,6 +5,44 @@ out because it's now gotten into a huge mess." One list, in order. Close an item
 main and live where that applies; then move its plan to [done/](done/) with a closing line. Big features
 wait in [parked/](parked/). What broke along the way is in the [stability log](stability-log.md).
 
+## What is left, in order (2026-10-09)
+
+Owner: "make plans for all the things left." Everything open, each with its plan and its command.
+Below this section is the history of how it got here.
+
+1. **The flow's last gap**: `dev:land` deploys staging before it translates, so a landing is usable
+   in a minute and the Spanish writes itself afterwards (translation is the Claude subscription on the
+   machine, never GitHub: the API is too expensive, owner 2026-10-09). Lands with this list.
+2. **Release 0.14.0** ([thin-apps, phase D](thin-apps.md#phase-d-prepared-2026-09-29-waiting-for-the-owner)):
+   prepared on main; the owner runs `mise run dev:release` (every check, every language, Google, Core
+   Web Vitals on a preview, the tag and publish, ~6 min). It is also the first run of the phone speed
+   measurement with applied throttling (`packages/ui/src/checks.js`).
+3. **Consumers onto 0.14.0**: remy-auth-app with `mise run project:upgrade-ui -- 0.14.0` (it gets the
+   flow, the guard, the stamp, the product name); create `remy-auth-test` from the template. Each is
+   one worktree through the flow.
+4. **The tooling in TypeScript** ([plan](tooling-in-typescript.md)): the remaining `.mjs` modules and
+   their bash wrappers, in the order a wrong one costs most (`cf/versions`, `cf/urls`, `api/spec`,
+   then `plans/plans.mjs`, `cf/observe.mjs`, `browser/shots.mjs`, `cf/gateway.mjs`,
+   `mcp/register.mjs`, `packages/workspaces.mjs`, `project/single-copies.mjs`, `docs/provision.mjs`).
+   One landing each.
+5. **Auth, next slices** ([auth-service](auth-service.md#next-slices)): the app-trust comparison
+   (OAuth tokens verified locally against a service binding, each proved small); the relation
+   engine's write half (`grant`, `revoke`); a rule for server functions and routes outside the oRPC
+   router; the consumer fixture using relations; then remy-sport's own move onto the engine and the
+   aspects deferred from it (a code a human switches on for deployed checks, the sessions and devices
+   page, a person's lifecycle).
+6. **Platform structure** ([plan](platform-structure.md)): waits for the owner's three decisions
+   named there.
+7. **Docs and translations, leftovers**: [docs-for-consumers](docs-for-consumers.md) step 6 (the docs
+   app's code in the package) and [translation-pipeline](translation-pipeline.md) (upstream tools
+   that replace the i18n tasks).
+8. **Owner only** (below): the alert rule in the dashboard, a native-speaker review of the newer
+   languages, the production domain and Search Console, more docs languages.
+
+Done today, 2026-10-09, all live: auth slices 2 and 3, staging, the build stamp and versions, the
+product name, the flow with its guard and hooks, GitHub's heavy checks after every push, the task
+layer in TypeScript (part), feedback from everything asynchronous ([dev-feedback](dev-feedback.md)).
+
 ## In order
 
 1. ~~**Fonts**~~ closed 2026-09-26 ([plan](done/fonts.md)). Left: font rows on the formats page (script, font drawing it, bytes).

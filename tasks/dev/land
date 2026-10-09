@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-//MISE description="STEP 2 of the flow, when a change should leave the machine: the check, commit with <message>, fast-forward main, push (GitHub then runs every language, Google's audits and the consumer fixture in parallel), translate on main (the one writer; committed and pushed), deploy staging. Production is dev:promote. Refuses a branch behind main or a tree with nothing to commit; the flow is tasks/dev/flow.ts"
+//MISE description="STEP 2 of the flow, when a change should leave the machine: the check, commit with <message>, fast-forward main, push (GitHub then runs every language, Google's audits and the consumer fixture in parallel), deploy staging, then translate on main last (the one writer, the Claude subscription on this machine; committed and pushed). Production is dev:promote. Refuses a branch behind main or a tree with nothing to commit; the flow is tasks/dev/flow.ts"
 //MISE dir="{{config_root}}"
 //USAGE arg "<message>" help="The commit message's first line: what changed, for people"
 // The logic is land.ts beside this file: TypeScript, type-checked by project:check. Node strips

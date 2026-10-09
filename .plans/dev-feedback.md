@@ -1,8 +1,10 @@
 # Feedback from everything asynchronous, to every developer and agent, through the tooling
 
 Owner, 2026-10-09: "make a plan so that all async stuff gives all devs feedback to all devs and hence
-you via our tooling, make it integrated into what we have now." Status: planned the same day; built
-in the order below, each step landed through the flow.
+you via our tooling, make it integrated into what we have now." Status: built and on main the same day (`dev:status`, the SessionStart hook, the red-main line in
+`dev:land`, the promotion comment, the red job naming itself). One thing found while using it: a
+landing waited minutes for translation before staging; `dev:land` now deploys staging first and
+translates last ([now.md](now.md), item 1). Closes when that is on main.
 
 ## What is asynchronous now, and who hears about it
 
