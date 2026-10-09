@@ -14,6 +14,23 @@ and AI agents alike. What the code must be lives in [development principles](./d
 - Each fact has one home, as [development principles](./development.md#development-principles)
   require; that applies to these rules too.
 
+## See something: fix it, or write it down, in the same landing
+
+Owner, 2026-10-09, after finding a gap each time he asked: "It's rather clear that the agent docs are
+wrong if you're seeing issues and not acting on them and informing yourself and devs." So the rule
+is general, not only for missing tools:
+
+- An agent or developer who notices anything wrong, slow, missing or left over (a step that waits
+  for nothing, a check nobody runs, a branch nobody owns, a doc that says what is no longer true) has
+  two choices, both inside the landing they are on: **fix it** when it is small, or **write it into
+  `.plans/now.md`** ("What is left, in order": what was seen, where, and what would fix it), a plan
+  file when it is big. Mentioning it in a chat or a report alone is neither.
+- **Everyone hears it through the repo**: `dev:status` prints that list to every session (agents
+  open with it), so what one person saw reaches all, and the next landing takes the top of it.
+- **"Done" is the end of a sweep, not of a list.** Before saying it: branches and worktrees, open
+  pull requests, `cf:versions`, `plans:check`, a search for the words the change retired, the docs
+  the change touched. Show the sweep.
+
 ## Use the project's own tools first
 
 - Start with `mise run project:setup`; [developer tooling](./tooling.md) says what it installs.

@@ -24,6 +24,9 @@ GitHub's verdicts, the deployments, who is working on what); \`mise run dev:star
 worktree of your own; \`mise run dev:change\` after every change (seconds); \`mise run dev:land -- "<what
 changed>"\` to land (main, GitHub's checks, staging); \`mise run dev:done\` when landed. The tooling
 refuses the heavy checks outside those steps. Long steps run in the background; never wait on them.
+Seen something wrong, slow, missing or left over? Fix it in the same landing when small, or write it
+into \`.plans/now.md\` in that landing; \`dev:status\` shows that list to everyone. "Done" is the end
+of a sweep (branches, pull requests, deployments, plans, retired words, touched docs), not of a list.
 ${end}`;
 const current = existsSync('AGENTS.md') ? readFileSync('AGENTS.md', 'utf8') : '# Agent instructions\n';
 const marked = new RegExp(`${begin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s\\S]*?${end}`);

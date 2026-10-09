@@ -11,12 +11,14 @@ export type Facts = {
   deployments?: string;
   translations?: string;
   pulls?: { number: number; title: string; author: string }[];
+  /** The top of .plans/now.md's "What is left, in order": what the next landing takes. */
+  left?: string[];
 };
 
 const verdict = (run: RunFact | undefined) => !run ? 'no run' : run.status !== 'completed' ? `running ${run.url}` : run.conclusion === 'success' ? 'green' : `RED ${run.url}`;
 
 /** The screen, as lines. */
-export function compose({ commits, runs, branches, deployments, translations, pulls }: Facts): string[] {
+export function compose({ commits, runs, branches, deployments, translations, pulls, left }: Facts): string[] {
   const byCommit = new Map(runs.map(run => [run.headSha.slice(0, 7), run]));
   const runOf = (commit: CommitFact) => byCommit.get(commit.sha.slice(0, 7));
   const red = commits.filter(commit => runOf(commit)?.status === 'completed' && runOf(commit)?.conclusion !== 'success');
@@ -33,5 +35,6 @@ export function compose({ commits, runs, branches, deployments, translations, pu
   }
   if (translations) lines.push('', `translations: ${translations}`);
   if (pulls?.length) lines.push('', 'pull requests:', ...pulls.map(pull => `  #${pull.number} ${pull.title} (${pull.author})`));
+  if (left?.length) lines.push('', 'what is left, in order (.plans/now.md; seen something? fix it or add it there, in the same landing):', ...left.map(item => `  ${item}`));
   return lines;
 }

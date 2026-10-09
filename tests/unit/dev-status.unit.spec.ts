@@ -27,10 +27,12 @@ test('all green and landed says so, and a running check is running', () => {
     branches: [{ branch: 'main', path: '/m', ahead: 0, behind: 0, base: 'origin/main' }],
     deployments: 'ORIGIN  SERVICE\nhttps://x  s',
     pulls: [{ number: 9, title: 'bump', author: 'dependabot' }],
+    left: ['1. The next thing', '2. The one after'],
   });
   expect(lines.find(line => line.includes('ccccccc'))).toContain('running https://example.test/runs/ccccccc1');
   expect(lines.some(line => line.includes('main is red'))).toBe(false);
   expect(lines).toContain('work in progress: none (every branch is landed).');
   expect(lines).toContain('  https://x  s');
   expect(lines).toContain('  #9 bump (dependabot)');
+  expect(lines).toContain('  1. The next thing');
 });
