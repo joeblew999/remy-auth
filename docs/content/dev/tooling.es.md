@@ -24,11 +24,32 @@ después de `--`; no descargan una CLI diferente en tiempo de ejecución.
 
 Por ejemplo, `mise run auth:cli -- generate --help` describe la generación de esquemas, y
 `mise run cf:cli -- d1 --help` muestra las operaciones de D1. `project:doctor` comprueba las versiones de las herramientas
-sin iniciar sesión en Cloudflare. `auth:info` informa del scaffold actual; aún no se ha creado
-una configuración de auth ni una base de datos. La generación de esquemas, las migraciones
-y la creación del administrador se conectarán a D1 local durante la implementación del servicio.
-Una versión `Unknown` de Better Auth en `auth:info` es lo esperado hasta que se añada la biblioteca
-de la aplicación; `project:doctor` informa la versión instalada de la CLI por separado.
+sin iniciar sesión en Cloudflare.
+
+Better Auth se ejecuta en el propio Worker de remy-auth sobre una base de datos D1 (`DB` en `wrangler.jsonc`), con sus
+opciones en `src/auth/options.ts`. Sus tareas son propias de remy-auth, en `mise.toml`:
+
+```sh
+mise run auth:generate -- <name>        # LOCAL: lo que las opciones necesitan más allá de migrations/, como la siguiente migración numerada
+mise run auth:migrate                   # LOCAL: aplica migrations/ a la D1 local de Wrangler
+mise run auth:local                     # LOCAL: escribe .dev.vars cuando falta (ENVIRONMENT=local, un BETTER_AUTH_SECRET aleatorio)
+mise run auth:mail -- you@example.com   # LOCAL: los códigos de inicio de sesión capturados para una dirección, desde el Worker en ejecución
+mise run auth:provision                 # Imprime lo que necesita el inicio de sesión desplegado en Cloudflare; no crea nada
+```
+
+`project:prepare` ejecuta `auth:local`, `auth:migrate` y `ui:guard-fixture` (oRPC 1.15.4 para la comprobación
+de dos versiones mayores del guard, instalado solo en `tests/guard/v1`) antes de `project:dev` y de cada build,
+de modo que dev, preview y los niveles de prueba arrancan con el esquema actual sin nada que recordar.
+`auth:generate` ejecuta la CLI fijada a través de `src/auth/cli.ts`, que compara las opciones con una base
+de datos SQLite desechable construida a partir de `migrations/`, así que solo escribe lo que aún no está
+ahí; cambia las opciones y luego genera, nunca edites a mano las tablas de Better Auth. Para iniciar
+sesión localmente: `mise run project:dev`, abre `/en/app/account`, introduce una dirección y luego lee
+su código con `auth:mail`. No se envía ningún correo localmente: en su lugar, el entorno local escribe
+cada código en su propia D1 (la política de entorno está en `src/auth/environment.ts`; cualquier otro
+entorno es producción, donde eso está desactivado). La base de datos desplegada, sus migraciones y el
+secreto de Worker `BETTER_AUTH_SECRET` solo se crean a petición del propietario: `auth:provision` imprime
+los pasos, y hasta que la base de datos exista, `cf:deploy` se niega a desplegar, porque de otro modo
+Wrangler la crearía por sí misma.
 
 Estas son herramientas para desarrolladores/operadores. El inicio de sesión de la CLI de Remy para usuarios finales y las llamadas
 delegadas a la API siguen siendo parte del hito del servicio. Ambas apps están en vivo en Cloudflare; `cf:deploy` sube a
@@ -72,7 +93,7 @@ Las tareas de passthrough de la CLI aceptan directamente los flags originales, c
 | `packages:*` | Comprueba y actualiza paquetes npm; empaqueta, publica y sube los propios paquetes del repositorio ([tareas](./tasks.md#a-repository-that-publishes-packages)) |
 | `ui:*` | Compila los catálogos compartidos (`ui:generate`), regenera los componentes y el tema de shadcn (`ui:components`, `ui:theme`), demuestra que no se han modificado (`ui:verify`), publica el paquete y las tareas (`ui:release`, la `packages:release` compartida) |
 | `skills:*` | Instala, lista y elimina los skills oficiales fijados |
-| `auth:*` | CLI de Better Auth y diagnóstico |
+| `auth:*` | Better Auth: su CLI y diagnóstico (`auth:cli`, `auth:info`), migraciones para la D1 local (`auth:generate`, `auth:migrate`), el entorno local (`auth:local`), sus códigos de inicio de sesión capturados (`auth:mail`) y lo que necesita un despliegue (`auth:provision`, solo imprime) |
 | `cf:*` | CLI de Cloudflare, logs en vivo, despliegue (`cf:deploy`), Workers de comprobación desechables (`cf:preview`, `cf:preview-delete`), logs almacenados y uso de IA (`cf:events`, `cf:ai-*`); tareas compartidas, listadas en el [README de tareas](./tasks.md#cloudflare-tasks) |
 | `api:*` | El documento OpenAPI generado que sirve un Worker en ejecución (`api:spec`, `--urls` para sus operaciones; tarea compartida) |
 | `browser:*` | CLI de Chrome DevTools, ciclo de vida de la sesión y servidor MCP |
@@ -383,3 +404,4 @@ otorgar acceso a AI Gateway ni a Workers Logs. Para eso, las tareas leen tokens 
 Un solo token lo hace todo (el token `dev` en <https://dash.cloudflare.com/profile/api-tokens>): **AI Gateway
 Edit** (que incluye lectura) y **Workers Observability Read** son los que estas tareas necesitan; cambiar
 el gateway con `cf:ai-gateway` usa el mismo token, y cada cambio se lee de vuelta.
+</content>

@@ -4,7 +4,7 @@ title: "Arquitectura y principios de desarrollo"
 
 Este documento es el dueño de lo que el código debe ser. Cómo trabajan las personas y los agentes día a día vive en
 [cómo trabajamos](./how-we-work.md). Lo que posee el servicio de autenticación, y su dirección de almacenamiento, viven en
-[el plan del servicio de autenticación](https://github.com/joeblew999/remy-auth/blob/main/.plans/parked/auth-service.md).
+[el plan del servicio de autenticación](https://github.com/joeblew999/remy-auth/blob/main/.plans/auth-service.md).
 
 ## Principios de desarrollo [#development-principles]
 

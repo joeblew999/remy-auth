@@ -138,7 +138,9 @@ rompe si se instala por duplicado (React, TanStack Router y Query, el stringifie
 `remy.singleCopy` del paquete) está presente: quita el pin propio de la app. Una tarea definida en el
 propio `mise.toml` del proyecto sobrescribe la tarea incluida del mismo nombre; los ganchos pensados para
 ello son `project:generate` (código generado antes de comprobar los tipos; por defecto, el catálogo propio
-de la app) y `project:release-checks`.
+de la app), `project:prepare` (el estado local que una app necesita antes de ejecutarse, que `project:dev`
+y `project:build` ejecutan primero; nada por defecto, y remy-auth escribe ahí su `.dev.vars` y migra su D1
+local) y `project:release-checks`.
 
 Las pruebas se ejecutan en niveles, elegidos por costo y por lo que un cambio puede romper, nunca omitiendo comprobaciones. Los
 niveles y cuándo usar cada uno son una regla en
@@ -220,7 +222,7 @@ través de mise: fuera de una tarea, el shim de Node de mise vuelve a aplicar `[
 
 | Tarea | Hace |
 | --- | --- |
-| `cf:deploy` | Construye con `DEPLOY_ORIGIN`, sube, espera a la nueva versión (`cf:wait`) y luego ejecuta su comprobación smoke en vivo. Sin pruebas salvo que `GATE=smoke\|quick\|full` elija un nivel |
+| `cf:deploy` | Construye con `DEPLOY_ORIGIN`, sube, espera a la nueva versión (`cf:wait`) y luego ejecuta su comprobación smoke en vivo. Sin pruebas salvo que `GATE=smoke\|quick\|full` elija un nivel. Se niega cuando un binding de D1, KV o R2 nombra un recurso que no existe: Wrangler crearía uno durante el despliegue, y crear recursos corresponde al propietario (`cf:preview` se niega del mismo modo) |
 | `cf:preview` | Despliega este commit como un Worker desechable `<worker>-check-<commit>` (producción intacta), ejecuta el nivel 1 contra él y lo elimina; `KEEP_PREVIEW=1` lo conserva |
 | `cf:preview-delete` | Lista los Workers de comprobación, o elimina uno por nombre; nunca el Worker de producción |
 | `cf:urls` | Imprime las páginas y `/healthz` del origen de producción (o de uno dado), para informes |
@@ -244,5 +246,6 @@ todos los proyectos: `.plans/now.md` es la única lista ordenada, `.plans/*.md` 
 | `plans:check` | `now.md` existe, cada enlace relativo a un `.md` bajo `.plans/` resuelve, ningún `.md` fuera de `.plans/`, `done/` y `parked/`, cada archivo de plan abierto enlazado desde `now.md`. Instantánea, sin red; `project:check` la ejecuta primero |
 | `plans:close -- <plan> "<lo publicado>"` | Añade `Closed <hoy>: ...` bajo el título, lo mueve a `done/` (desde `.plans/` o `parked/`; `git mv` si está versionado), reapunta los enlaces relativos hacia él en `.plans/`, `docs/`, `tasks/`, `packages/*/README.md` y los `*.md` de la raíz, y sus propios enlaces desde la carpeta nueva, y tacha su elemento en `now.md` |
 | `plans:park -- <plan> "<por qué>"` | Lo mismo hacia `parked/` con `Parked <hoy>: ...` |
+| `plans:open -- <plan> "<por qué ahora>"` | Un plan aparcado que se retoma: lo mismo desde `parked/` de vuelta a `.plans/` con `Opened <hoy>: ...`; añade su elemento a `now.md` tú mismo |
 
 `close` y `park` cambian archivos y preparan el movimiento, pero nunca hacen commit: lee `git diff` y luego haz commit.
