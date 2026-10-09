@@ -6,11 +6,11 @@ import { checkedLocales, collectErrors, endonym, direction, localizedPath, forma
 import { serverAppChecks } from '@joeblew999/remy-ui/app-checks';
 import { localeInfo } from '@joeblew999/remy-ui/locale-info';
 import { m } from '@joeblew999/remy-ui/messages';
-import { sitePaths, appPaths } from '@joeblew999/remy-showcase/paths';
-import { everyPath } from '../src/paths';
+import { sitePaths } from '@joeblew999/remy-showcase/paths';
+import { appPagePaths, everyPath } from '../src/paths';
 import { apiChecks } from '@joeblew999/remy-ui/api/checks';
 import { reservationApiChecks } from '@joeblew999/remy-showcase/reservation.checks';
-import { errorStatuses, info } from '@joeblew999/remy-auth-contract';
+import { errorStatuses, info, notesVocabulary } from '@joeblew999/remy-auth-contract';
 import { router } from '../src/api/router';
 import { registeredOrigins } from '../src/api/origins';
 import { partChecks } from '@joeblew999/remy-ui/parts/checks';
@@ -26,7 +26,7 @@ import { buildBoundaryChecks } from '@joeblew999/remy-ui/build-boundaries.checks
 serverAppChecks({
   service: 'remy-auth',
   sitePaths,
-  appPaths,
+  appPaths: appPagePaths,
   // This app's home page words and brand: its own content, checked exactly.
   home: { title: locale => m.home_title({}, { locale }), description: locale => m.home_description({}, { locale }), brand: 'Remy' },
 });
@@ -40,10 +40,10 @@ partChecks({ options: {
 } });
 // The demo reservation, the status card and the signed-in account are contract endpoints
 // (@joeblew999/remy-auth-contract), each behind the guard; signing in itself is tests/auth.spec.ts.
-apiChecks({ router, title: info.title, origins: registeredOrigins, errorStatuses });
+apiChecks({ router, title: info.title, origins: registeredOrigins, errorStatuses, vocabulary: notesVocabulary });
 reservationApiChecks();
 codeSplittingChecks({ paths: sitePaths });
-codeSplittingChecks({ paths: appPaths, home: '/app' });
+codeSplittingChecks({ paths: appPagePaths, home: '/app' });
 // The app mounts TanStack Devtools (src/routes/__root.tsx), whose shell must never ship either.
 buildBoundaryChecks({ paths: everyPath, deviceTimePath: '/formats', markers: [
   { name: 'request.cf', pattern: /[\w$)\]]\.cf\b/, source: 'packages/showcase/src/parts/deferred-place/place.server.ts' },

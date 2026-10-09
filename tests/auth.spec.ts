@@ -1,5 +1,4 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import { randomBytes, randomUUID } from 'node:crypto';
 import { collectErrors, localizedPath } from '@joeblew999/remy-ui/checks';
 import { m } from '@joeblew999/remy-ui/messages';
 import { procedures, routeOf } from '@joeblew999/remy-ui/api/coverage';
@@ -8,34 +7,14 @@ import { router } from '../src/api/router';
 import { permits } from '../src/auth/environment';
 import { writableFieldProblems } from '../src/auth/fields';
 import { authOptions, personMayEdit } from '../src/auth/options';
+import { latestCode, local, newEmail, sendCode, signIn, visitor, visitorAddress } from './people';
 
 // Signing in (.plans/auth-service.md), on the real Worker with Better Auth and the local D1: nothing is
 // mocked. The code is the one Better Auth made; the local environment writes it to its local_mail table
 // instead of mailing it (src/auth/mail.server.ts), and these checks read it back from the Worker itself
-// (/dev/mail, src/routes/dev.mail.ts). Only the local environment captures mail, so the sign-in checks
-// run against the local target only; against a deployment, that route must not exist.
-const local = process.env.TEST_TARGET !== 'remote';
+// (/dev/mail, src/routes/dev.mail.ts; tests/people.ts). Only the local environment captures mail, so
+// the sign-in checks run against the local target only; against a deployment, that route must not exist.
 const accountPath = localizedPath('/app/account', 'en');
-
-/** The newest code the local environment captured for `email`. */
-async function latestCode(who: APIRequestContext, email: string): Promise<string> {
-  const response = await who.get(`/dev/mail?recipient=${encodeURIComponent(email)}`);
-  expect(response.status()).toBe(200);
-  return (await response.json()).mail[0]?.code;
-}
-const newEmail = () => `check-${randomUUID()}@example.test`;
-
-/**
- * A visitor of their own. Better Auth limits sign-in attempts per address (three a minute), read from
- * CF-Connecting-IP, which Cloudflare sets itself on a deployment. Locally nothing sets it, so each
- * visitor here names an address of its own (2001:db8::/32, reserved for documentation) and the limits
- * stay per visitor, as they are for real ones, instead of every check sharing 127.0.0.1's.
- */
-const visitorAddress = () => `2001:db8:${randomBytes(2).toString('hex')}:${randomBytes(2).toString('hex')}::1`;
-const visitor = (playwright: { request: { newContext: (options: object) => Promise<APIRequestContext> } }, baseURL: string | undefined, address = visitorAddress()) =>
-  playwright.request.newContext({ baseURL, extraHTTPHeaders: { 'CF-Connecting-IP': address, Origin: baseURL! } });
-const sendCode = (who: APIRequestContext, email: string) => who.post('/api/auth/email-otp/send-verification-otp', { data: { email, type: 'sign-in' } });
-const signIn = (who: APIRequestContext, email: string, otp: string) => who.post('/api/auth/sign-in/email-otp', { data: { email, otp } });
 
 test('a person signs in with an emailed code, and the session reaches the API over HTTP and the account page through the server\'s own client', async ({ playwright, baseURL }) => {
   test.skip(!local, 'reads the code from the local mail capture');

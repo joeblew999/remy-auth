@@ -6,7 +6,7 @@ Parked 2026-09-26 (owner: "Not big feature stuff"): not started now; picked up a
 
 Purpose (owner, 2026-10-09): "remy-auth is meant to support betterauth working well with tanstack and orpc". Decisions follow from it: each of the three is used the way its own documentation says.
 
-Status: [slice 1](#slice-1-sign-in-the-account-page-and-the-guard-2026-10-09) is on main and [live](#merged-and-deployed-2026-10-09) since 2026-10-09, on the oRPC 2.0 beta, with its database and secret [provisioned](#provisioned-for-the-deployment-2026-10-09). Signing in on the deployment waits for mail delivery. The next two slices are the app-trust comparison and the relation engine ([next](#next-slices)). The rest of milestone 1 has not started. Builds on the [TanStack move](done/tanstack.md), on main since release 0.9.0.
+Status: [slice 1](#slice-1-sign-in-the-account-page-and-the-guard-2026-10-09) is on main and [live](#merged-and-deployed-2026-10-09) since 2026-10-09, on the oRPC 2.0 beta, with its database and secret [provisioned](#provisioned-for-the-deployment-2026-10-09). Signing in on the deployment waits for mail delivery. [Slice 2](#slice-2-relationships-on-the-server-and-in-the-gui-2026-10-09), the relation engine used by the server and the GUI, is built on branch `auth-relations`, waiting for the owner to say ship. The next two slices are the app-trust comparison and the relation engine ([next](#next-slices)). The rest of milestone 1 has not started. Builds on the [TanStack move](done/tanstack.md), on main since release 0.9.0.
 Owner: remy-auth. First consumer: in-repo sample; first external consumer: remy-data.
 Executor/Reviewer roles as in [plans and roles](../docs/content/dev/development.md#plans-and-roles). Do not
 begin a fleet rollout.
@@ -22,11 +22,11 @@ system. It itself also reuses all of itself in its demos." That is the design. P
 | The owner's point | True today | Not yet |
 | --- | --- | --- |
 | Its own Worker | Live at https://remy-auth.gedw99.workers.dev; it alone holds identities and sessions (Better Auth on its own D1) | Signing in on the deployment (mail delivery) |
-| An app imports the package and gets Better Auth and ReBAC for free | The guard: an app puts `guard()` at its router's root and declares `policy(...)` on its contract; the shared checks fail an app that does not. Proven in the consumer fixture, a blank app that gets the package as another repository does | An app cannot yet learn who is signed in at remy-auth (the app-trust slice), and there are no relationships yet (the relation engine's slice) |
-| Type-checked all the way through | Contract to server to client: the contract's types are the handler's and the client's, the policy is typed, and a handler's `context.user` is the session's user | The same for relationships: an app's own vocabulary as types, from the contract to the GUI |
-| Backend and front-end pieces | Backend: `api/guard`, `api/policy`, `api/server`, `api/client`, `api/checks`. Front end: the shared account page shows who is signed in | The sign-in and sign-out controls are remy-auth's own files, not the package's; nothing yet shows or hides an action by what the server allows |
+| An app imports the package and gets Better Auth and ReBAC for free | The guard: an app puts `guard()` at its router's root and declares `policy(...)` on its contract; the shared checks fail an app that does not. Proven in the consumer fixture, a blank app that gets the package as another repository does. Relationships: the relation engine takes the app's vocabulary as data and answers from the app's own D1 (slice 2) | An app cannot yet learn who is signed in at remy-auth (the app-trust slice), so only remy-auth's own demo uses relationships so far; the consumer fixture does not yet |
+| Type-checked all the way through | Contract to server to client: the contract's types are the handler's and the client's, the policy is typed, and a handler's `context.user` is the session's user. An app's vocabulary types its action names in the contract's policy, the engine's answers and the page (`tests/relations/types.tsx`) | |
+| Backend and front-end pieces | Backend: `api/guard`, `api/policy`, `api/relations`, `api/server`, `api/client`, `api/checks`. Front end: the shared account page shows who is signed in, and `<Allowed>` shows a control only when the server allowed it | The sign-in and sign-out controls are remy-auth's own files, not the package's |
 | A reusable docs system | The docs Worker is the package's (`docs/*`): remy-auth's docs run on it, and the consumer fixture builds an app's docs with it | |
-| It reuses itself in its demos | remy-auth's own app is built from the package: its API is behind the same guard, its account page is the shared one, its docs are the shared docs Worker | The sample app that signs in through remy-auth and uses relationships ([below](#sample-app-examplessample-app)) |
+| It reuses itself in its demos | remy-auth's own app is built from the package: its API is behind the same guard, its account page is the shared one, its notes demo runs on the shared relation engine and `<Allowed>`, its docs are the shared docs Worker | The sample app that signs in through remy-auth from another Worker ([below](#sample-app-examplessample-app)) |
 
 The measure for every next slice: the consumer fixture, a blank app that only imports the package,
 gets the new piece and its `tsc` and checks pass.
@@ -203,6 +203,73 @@ own item in [now](now.md), and it blocks the next release, whose gate includes i
 Still assumed on the deployment, because nobody can sign in there yet: the `__Secure-` cookie prefix,
 `CF-Connecting-IP` as the only address source for the rate limits, and sessions across Worker instances.
 
+## Slice 2: relationships, on the server and in the GUI (2026-10-09)
+
+The owner said go on the relation engine, with two requirements from remy-sport: the rules cannot go
+unused on the server, and the GUI uses them too.
+
+**Built.** `api/relations` in the shared package: remy-sport's engine (`src/api/relations.ts`,
+`base.ts`, `src/domain/grants.ts`) lifted off Drizzle onto D1's own API, taking an app's vocabulary as
+data in remy-sport's row shapes. The guard gained the action policy: a contract names an action of the
+app's vocabulary (`actions(vocabulary)`), and the root middleware asks the engine (401 without a
+session, a platform relation first, 404 for a missing object before 403). `<Allowed>` shows a control
+only when the server allowed the action, from the permission map sent with each row. And remy-auth uses
+all of it in a demo of its own: notes (`/app/notes`), written by one person and shared with others to
+read or to edit, with the data in a database apart from the identities (`DEMO_DB`).
+
+### What ran, and what it showed
+
+On the same pins as slice 1, in the Workers runtime on Wrangler's local D1, nothing mocked.
+
+| Claim | How it ran |
+| --- | --- |
+| remy-sport's vocabulary runs through the lifted engine unchanged: its 27 relations and 76 actions pass the vocabulary rules, and match the schema its own 20 migrations build | By hand, read-only, against the `fix/authz-public-surface` worktree: every relation asked in all three directions, every action with and without a context, every type's permission map, as SQL on that schema. Not a gate: remy-sport is another repository, and no rows were in it |
+| Every way remy-sport derives a relation gives exactly the objects its rows say: a column on the object, a membership table, a filtered one, one reached through another entity and held between dates, inherited from a parent, a platform role, signed-in, public; with the table-name and stored-role maps; grants narrowed by a subtype, the object's own or its parent's; an action about a pair; more ids than one statement binds; ids that are SQL | Check: `tests/relations.spec.ts`, a fixture Worker with a real D1 |
+| A vocabulary that does not hold together, or names a table or column the schema lacks, is refused with the reason | Check: the same file (14 broken rules named; a drifted column named) |
+| The guard decides an action through the engine, in the order that tells a stranger nothing, on oRPC 1.15.4 and 2.0.0-beta.42 | Check: `tests/guard.spec.ts` |
+| On the real Worker, each person may do to a note exactly what their relation allows: its author everything, an editor edits, a reader reads, somebody unrelated nothing (403), nobody signed in nothing (401), a note that does not exist 404 for everyone. What the server says a person may do (`can`) is what it then allows, action by action | Check: `tests/notes.spec.ts`, four people signing in for real |
+| A note shared with an address is a relation only once somebody proves the address is theirs by signing in with it; the answer to sharing is the same whether or not the address has an account; a note's response names nobody | Check: the same file |
+| The page offers each person exactly what the server allows them, using what it offers works, and nothing offered is refused | Check: the same file, in a browser, with `offeredActions` against the server's `can` |
+| The notes vocabulary names only tables and columns its migrations make | Check: the same file |
+| An app's action names are types from the contract to the engine to the page: a name the vocabulary does not define does not compile | Check: `tests/relations/types.tsx`, in `project:typecheck` |
+| The checks fail when the rules are skipped: an update without its action policy let a reader edit (expected 403, got 200); a page showing Edit to everyone offered what the server did not allow | By hand: two breakages, each failed its check and was reverted |
+
+### Not built, or assumed
+
+- **The write half** (`grant`, `revoke`). remy-sport reads a table's unique key off its Drizzle table
+  there; here an app writes its own rows (the notes store does). Lifting it means reading the key from
+  SQLite instead; not done.
+- **remy-sport itself is unchanged.** The engine it would import exists and its vocabulary fits; moving
+  it is its own work, in its repository.
+- **A relation by platform role** is checked in the fixture only: remy-auth has no roles yet (Better
+  Auth's admin plugin is not installed), so no session here carries one.
+- **`public` checked against the vocabulary** (remy-sport's `openTo`), the printed list of exceptions,
+  and a rule for server functions and routes outside the router: the rows still open in the table below.
+- **The consumer fixture does not use relationships yet.** It signs nobody in, so it has nobody to
+  relate; that changes with the app-trust slice.
+- **The demo's database on the deployment.** `DEMO_DB` has no `database_id` yet, so `cf:deploy`
+  refuses until it is created (`mise run auth:provision` prints the steps).
+- **Speed.** A list costs one query per relation of its type, not per row, as in remy-sport; not measured.
+- **The translations** of the 27 new English messages (the translation step runs on main).
+
+### Decisions (delegated)
+
+1. **The vocabulary keeps remy-sport's row shapes**, so its generated model is the input as it is.
+   What was remy-sport's own became options: the table-name map, the stored-role map, the relation a
+   stranger holds, and the object type whose subtype narrows a grant.
+2. **The engine speaks D1's own API**, not an ORM: every Remy app on Cloudflare has it, and Better
+   Auth's own tables need no Drizzle either.
+3. **An action needs a session.** Reads open to everyone stay `public` procedures, whose responses
+   may name nobody.
+4. **The guard reads the object's id from the input as it arrived** (it wraps validation, so a
+   stranger is refused first): only a plain string is ever looked up, as a bound value.
+5. **The demo's data is in its own database**, `DEMO_DB`, not the identity database: an app's data and
+   relationships are its own, and the notes know a person only as an account ID. A share is made to
+   an address and becomes a relation when its owner signs in, so the demo never reads the identity
+   database and never says whether an address has an account.
+6. **The notes page is remy-auth's own**, not the showcase's: remy-auth-app shows the showcase and
+   has nobody signed in. The pieces it is built from (`<Allowed>`, the engine, the guard) are the package's.
+
 ## Requirements for the shared guard, from remy-sport (2026-10-09)
 
 **The owner's summary of what went wrong there** (2026-10-09): "The problem we have in Remy-sports was
@@ -210,13 +277,15 @@ that the rebac did not also get used. And also not in the gui." Two requirements
 the acceptance of the relation engine's slice:
 
 1. **It cannot go unused on the server.** Every operation is behind the guard, and the build fails on
-   one that is not. Slice 1 has this for oRPC procedures (`guardProblems`); it still lacks it for server
-   functions and server routes outside the router (the last row below).
+   one that is not. Slices 1 and 2 have this for oRPC procedures (`guardProblems`, and for an action
+   the vocabulary must define it); it is still missing for server functions and server routes outside
+   the router (the last row below).
 2. **The GUI uses it too.** A page decides nothing by itself: what it offers (a Save button, an edit
    link, a row in a list) comes from the server's answer for this viewer and this object, delivered
    with the data (`canFor`'s permission map), through shared components every Remy app gets, never from
-   the viewer's role worked out in the browser. A check proves it: for seeded people, the actions a
-   page shows are exactly the ones the server allows, and using one never answers 403.
+   the viewer's role worked out in the browser. A check proves it: the actions a page shows are
+   exactly the ones the server allows, and using one never answers 403. Slice 2 has this for the notes
+   demo (`<Allowed>`, `offeredActions`); every later page with actions owes the same check.
 
 
 remy-sport's engine leaked although every route declared a policy: nothing checked what a response
@@ -258,14 +327,8 @@ proved small. Read in Better Auth's documentation on 2026-10-09, not run:
   needs its own credential either way; and a Worker fetching another Worker's public URL on the same
   account may need a service binding or a compatibility flag, to be checked before the JWKS design.
 
-**The relation engine**, used by the server and by the GUI (the owner's two requirements above). Read
-in remy-sport on 2026-10-09 (`src/api/base.ts`, `relations.ts`,
-`src/domain/grants.ts`), not run: its 27 relations, 76 actions and grants are already data, and its
-queries are Drizzle's `sql` template, not its query builder, so the lift is mechanical for the read
-half. What ties it to remy-sport: the vocabulary imported as module globals, the grant narrowing by an
-event's subtype (`eventTypes`, the `events.type_code` column, the `EVENT` object type), the `PUBLIC` and
-`ANY_SIGNED_IN` codes, the stored-role map, and the write half reading a table's unique key off its
-Drizzle table. The guard's policies gain `action` there; the remy-sport rows above are its acceptance.
+**The relation engine** is [slice 2](#slice-2-relationships-on-the-server-and-in-the-gui-2026-10-09).
+What it left: the write half, the rows still open in the table above, and remy-sport's own move onto it.
 
 ## Problem and outcome
 

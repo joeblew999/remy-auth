@@ -22,6 +22,7 @@ import { Route as AppDotclockRouteImport } from './routes/app.clock'
 import { Route as AppDotdemoRouteImport } from './routes/app.demo'
 import { Route as AppDotformatsRouteImport } from './routes/app.formats'
 import { Route as AppDotlocationRouteImport } from './routes/app.location'
+import { Route as AppDotnotesRouteImport } from './routes/app.notes'
 import { Route as AppDotsettingsRouteImport } from './routes/app.settings'
 import { Route as DevDotmailRouteImport } from './routes/dev.mail'
 import { Route as DocsDotsplatRouteImport } from './routes/docs.$'
@@ -95,6 +96,11 @@ const AppDotlocationRoute = AppDotlocationRouteImport.update({
   path: '/app/location',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppDotnotesRoute = AppDotnotesRouteImport.update({
+  id: '/app/notes',
+  path: '/app/notes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppDotsettingsRoute = AppDotsettingsRouteImport.update({
   id: '/app/settings',
   path: '/app/settings',
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/app/demo': typeof AppDotdemoRoute
   '/app/formats': typeof AppDotformatsRoute
   '/app/location': typeof AppDotlocationRoute
+  '/app/notes': typeof AppDotnotesRoute
   '/app/settings': typeof AppDotsettingsRoute
   '/dev/mail': typeof DevDotmailRoute
   '/docs/$': typeof DocsDotsplatRoute
@@ -154,6 +161,7 @@ export interface FileRoutesByTo {
   '/app/demo': typeof AppDotdemoRoute
   '/app/formats': typeof AppDotformatsRoute
   '/app/location': typeof AppDotlocationRoute
+  '/app/notes': typeof AppDotnotesRoute
   '/app/settings': typeof AppDotsettingsRoute
   '/dev/mail': typeof DevDotmailRoute
   '/docs/$': typeof DocsDotsplatRoute
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/app/demo': typeof AppDotdemoRoute
   '/app/formats': typeof AppDotformatsRoute
   '/app/location': typeof AppDotlocationRoute
+  '/app/notes': typeof AppDotnotesRoute
   '/app/settings': typeof AppDotsettingsRoute
   '/dev/mail': typeof DevDotmailRoute
   '/docs/$': typeof DocsDotsplatRoute
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/app/demo'
     | '/app/formats'
     | '/app/location'
+    | '/app/notes'
     | '/app/settings'
     | '/dev/mail'
     | '/docs/$'
@@ -217,6 +227,7 @@ export interface FileRouteTypes {
     | '/app/demo'
     | '/app/formats'
     | '/app/location'
+    | '/app/notes'
     | '/app/settings'
     | '/dev/mail'
     | '/docs/$'
@@ -237,6 +248,7 @@ export interface FileRouteTypes {
     | '/app/demo'
     | '/app/formats'
     | '/app/location'
+    | '/app/notes'
     | '/app/settings'
     | '/dev/mail'
     | '/docs/$'
@@ -258,6 +270,7 @@ export interface RootRouteChildren {
   AppDotdemoRoute: typeof AppDotdemoRoute
   AppDotformatsRoute: typeof AppDotformatsRoute
   AppDotlocationRoute: typeof AppDotlocationRoute
+  AppDotnotesRoute: typeof AppDotnotesRoute
   AppDotsettingsRoute: typeof AppDotsettingsRoute
   DevDotmailRoute: typeof DevDotmailRoute
   DocsDotsplatRoute: typeof DocsDotsplatRoute
@@ -359,6 +372,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDotlocationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/notes': {
+      id: '/app/notes'
+      path: '/app/notes'
+      fullPath: '/app/notes'
+      preLoaderRoute: typeof AppDotnotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/settings': {
       id: '/app/settings'
       path: '/app/settings'
@@ -410,6 +430,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppDotdemoRoute: AppDotdemoRoute,
   AppDotformatsRoute: AppDotformatsRoute,
   AppDotlocationRoute: AppDotlocationRoute,
+  AppDotnotesRoute: AppDotnotesRoute,
   AppDotsettingsRoute: AppDotsettingsRoute,
   DevDotmailRoute: DevDotmailRoute,
   DocsDotsplatRoute: DocsDotsplatRoute,

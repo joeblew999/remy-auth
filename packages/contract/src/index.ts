@@ -2,8 +2,11 @@ import { oc } from '@orpc/contract';
 import { openapi } from '@orpc/openapi';
 import { z } from 'zod';
 import { reservationConfirmation, reservationFieldErrors, reservationInput } from '@joeblew999/remy-showcase/reservation';
-import { personal, policy } from '@joeblew999/remy-ui/api/policy';
+import { actions, personal, policy } from '@joeblew999/remy-ui/api/policy';
 import pkg from '../package.json' with { type: 'json' };
+import { note, noteDraft, noteEdit, noteId, noteList, noteShare, notesVocabulary } from './notes';
+
+export * from './notes';
 
 // remy-auth's API, contract first (.plans/openapi-contracts.md): every endpoint the Worker serves
 // under /api is declared here with its method, path, input, output and errors as Zod 4 schemas, and
@@ -41,6 +44,14 @@ export const account = z.object({
   emailVerified: z.boolean().describe('Whether a sign-in code has proved the address'),
 });
 
+// The notes demo's policies: only an action its vocabulary defines type-checks here.
+const may = actions(notesVocabulary);
+const refusals = {
+  UNAUTHORIZED: { message: 'Nobody is signed in.' },
+  FORBIDDEN: { message: 'The signed-in person holds no relation to this note that allows it.' },
+  NOT_FOUND: { message: 'There is no such note.' },
+};
+
 export const contract = {
   status: oc
     .meta(policy('public'))
@@ -52,6 +63,37 @@ export const contract = {
     .meta(openapi({ method: 'GET', path: '/api/me', summary: 'The signed-in account', tags: ['account'], description: 'Needs a session (the cookie Better Auth sets at sign-in). Answers 401 without one.' }))
     .errors({ UNAUTHORIZED: { message: 'Nobody is signed in.' } })
     .output(account),
+  notes: {
+    list: oc
+      .meta(policy('session'))
+      .meta(openapi({ method: 'GET', path: '/api/notes', tags: ['notes'], summary: 'The signed-in person\'s notes', description: 'The notes they wrote and the notes shared with them, each with what they may do to it.' }))
+      .errors({ UNAUTHORIZED: refusals.UNAUTHORIZED })
+      .output(noteList),
+    create: oc
+      .meta(may('CREATE_NOTE'))
+      .meta(openapi({ method: 'POST', path: '/api/notes', tags: ['notes'], summary: 'Write a note' }))
+      .errors({ UNAUTHORIZED: refusals.UNAUTHORIZED })
+      .input(noteDraft)
+      .output(note),
+    update: oc
+      .meta(may('EDIT_NOTE'))
+      .meta(openapi({ method: 'POST', path: '/api/notes/{id}', tags: ['notes'], summary: 'Change a note', description: 'Its author and the people it is shared with as editors may.' }))
+      .errors(refusals)
+      .input(noteEdit)
+      .output(note),
+    share: oc
+      .meta(may('SHARE_NOTE'))
+      .meta(openapi({ method: 'POST', path: '/api/notes/{id}/share', tags: ['notes'], summary: 'Share a note with an address', description: 'Only its author may. The person sees the note once they sign in with that address; the answer is the same whether or not the address has an account.' }))
+      .errors(refusals)
+      .input(noteShare)
+      .output(note),
+    remove: oc
+      .meta(may('DELETE_NOTE'))
+      .meta(openapi({ method: 'POST', path: '/api/notes/{id}/delete', tags: ['notes'], summary: 'Delete a note', description: 'Only its author may.' }))
+      .errors(refusals)
+      .input(noteId)
+      .output(noteId),
+  },
   reservations: {
     create: oc
       .meta(policy('public'))

@@ -31,7 +31,7 @@ options in `src/auth/options.ts`. Its tasks are remy-auth's own, in `mise.toml`:
 
 ```sh
 mise run auth:generate -- <name>        # LOCAL: what the options need beyond migrations/, as the next numbered migration
-mise run auth:migrate                   # LOCAL: apply migrations/ to Wrangler's local D1
+mise run auth:migrate                   # LOCAL: apply migrations/ and migrations-demo/ to Wrangler's local D1 databases
 mise run auth:local                     # LOCAL: write .dev.vars when missing (ENVIRONMENT=local, a random BETTER_AUTH_SECRET)
 mise run auth:mail -- you@example.com   # LOCAL: the sign-in codes captured for an address, from the running Worker
 mise run auth:provision                 # Prints what the deployed sign-in needs on Cloudflare; creates nothing

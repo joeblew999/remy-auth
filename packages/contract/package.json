@@ -16,7 +16,8 @@
     "README.md"
   ],
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./notes": "./src/notes.ts"
   },
   "peerDependencies": {
     "@joeblew999/remy-showcase": ">=0.1.0",

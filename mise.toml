@@ -61,9 +61,9 @@ echo "auth:generate: wrote $file; apply it with mise run auth:migrate."
 '''
 
 [tasks."auth:migrate"]
-description = "LOCAL: apply migrations/ to Wrangler's local D1 (wrangler d1 migrations apply --local; only what is not applied yet, ~2 s). project:prepare runs it, so dev, preview and every test tier start on the current schema. The deployed database is migrated on the owner's request only"
+description = "LOCAL: apply migrations/ (identities) and migrations-demo/ (the showcase's notes) to Wrangler's local D1 databases (wrangler d1 migrations apply --local; only what is not applied yet, ~3 s). project:prepare runs it, so dev, preview and every test tier start on the current schema. The deployed databases are migrated on the owner's request only"
 dir = "{{config_root}}"
-run = "./node_modules/.bin/wrangler d1 migrations apply DB --local"
+run = ["./node_modules/.bin/wrangler d1 migrations apply DB --local", "./node_modules/.bin/wrangler d1 migrations apply DEMO_DB --local"]
 
 [tasks."auth:local"]
 description = "LOCAL: write .dev.vars (ignored by git) when it is missing: ENVIRONMENT=local and a random BETTER_AUTH_SECRET. Never overwrites one that exists. Instant; project:prepare runs it"
@@ -84,7 +84,7 @@ dir = "{{config_root}}"
 run = 'curl --fail --silent --show-error --get --data-urlencode "recipient=${usage_email}" "${usage_origin}/dev/mail"'
 
 [tasks."auth:provision"]
-description = "Prints what the deployed sign-in needs on Cloudflare and creates nothing (that is the owner's): the D1 database and its id in wrangler.jsonc, the migrations, the secret. Until then cf:deploy refuses to deploy, because Wrangler would create the database by itself. Instant"
+description = "Prints what the deployment needs on Cloudflare and creates nothing (that is the owner's): the identity database and the showcase's, each with its id in wrangler.jsonc and its migrations, and the secret. Until then cf:deploy refuses to deploy, because Wrangler would create the database by itself. Instant"
 dir = "{{config_root}}"
 run = '''
 cat <<'STEPS'
@@ -94,6 +94,12 @@ The deployed sign-in needs three things, in this order (each changes the Cloudfl
      then put the printed database_id in wrangler.jsonc, in d1_databases beside "binding": "DB".
   2. Its tables:        ./node_modules/.bin/wrangler d1 migrations apply DB --remote
   3. The signing secret: openssl rand -base64 32 | ./node_modules/.bin/wrangler secret put BETTER_AUTH_SECRET
+
+The showcase's notes demo keeps its own data in a second database, the same three steps without a secret:
+
+  4. The database:      ./node_modules/.bin/wrangler d1 create remy-auth-demo
+     then put the printed database_id in wrangler.jsonc, beside "binding": "DEMO_DB".
+  5. Its tables:        ./node_modules/.bin/wrangler d1 migrations apply DEMO_DB --remote
 
 Sign-in itself stays off on the deployment until mail delivery exists (.plans/auth-service.md):
 the account page keeps its empty state there.

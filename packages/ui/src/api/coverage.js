@@ -36,7 +36,7 @@ export function coverageProblems(router, { errorStatuses } = {}) {
     const key = `${route.method} ${route.path}`;
     if (routes.has(key)) problems.push(`${path}: ${key} is also ${routes.get(key)}`);
     routes.set(key, path);
-    if (typeof meta.policy !== 'string' || !meta.policy) problems.push(`${path}: no policy`);
+    if (!meta.policy) problems.push(`${path}: no policy`);
     if (outputSchemas.length === 0) problems.push(`${path}: no output schema`);
     const errors = Object.entries(errorMap).filter(([, error]) => error);
     if (inputSchemas.length > 0 && errors.length === 0) problems.push(`${path}: takes input but documents no error`);

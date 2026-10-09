@@ -9,10 +9,18 @@ it. Why and how: [the contracts plan](../../.plans/openapi-contracts.md).
 | --- | --- | --- | --- |
 | `status` | `GET /api/status` | anyone (`public`) | none of its own |
 | `me` | `GET /api/me` | a signed-in person (`session`): their own account | `UNAUTHORIZED` (401, nobody is signed in) |
+| `notes.list` | `GET /api/notes` | a signed-in person (`session`): the notes they wrote and the ones shared with them, each with what they may do to it (`can`) | `UNAUTHORIZED` |
+| `notes.create` | `POST /api/notes` | the action `CREATE_NOTE`: anyone signed in | `UNAUTHORIZED` |
+| `notes.update` | `POST /api/notes/{id}` | the action `EDIT_NOTE`: the note's author and its editors | `UNAUTHORIZED`, `NOT_FOUND` (404), `FORBIDDEN` (403) |
+| `notes.share` | `POST /api/notes/{id}/share` | the action `SHARE_NOTE`: the note's author | the same |
+| `notes.remove` | `POST /api/notes/{id}/delete` | the action `DELETE_NOTE`: the note's author | the same |
 | `reservations.create` | `POST /api/reservations` | anyone (`public`) | `INVALID_RESERVATION` (400, field errors in the asked language) |
 
 Each procedure declares who may call it (`policy(...)` from `@joeblew999/remy-ui/api/policy`), and
-remy-auth's router enforces it with the platform's guard (`@joeblew999/remy-ui/api/guard`). Routes are
+remy-auth's router enforces it with the platform's guard (`@joeblew999/remy-ui/api/guard`). The notes
+procedures name actions of `notesVocabulary` (`./notes`, also exported from the package root): the
+relation vocabulary the server's relation engine answers from, whose action names are the types of
+each note's `can` map. Routes are
 oRPC 2's `openapi()` metadata. oRPC 2 keeps HTTP statuses out of the errors: `errorStatuses` gives this
 API's own codes theirs, for the server and the generated document, and an error's body is
 `{ defined, code, message, data }`, with the status on the response. `me` needs the session cookie remy-auth sets at

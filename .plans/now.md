@@ -105,10 +105,11 @@ formats page's intro and "This language" share the first screen on desktop; issu
 D1, sign-in by emailed code, the account page, the shared guard and its checks on oRPC 1 and 2, and the
 move to the oRPC 2.0 beta) is on main and live since 2026-10-09 (https://remy-auth.gedw99.workers.dev),
 with its database and secret provisioned. The owner delegated its design decisions the same day; they
-are recorded in the plan. Signing in on the deployment waits for mail delivery. Then, in order: the
-app-trust comparison (OAuth tokens verified locally, or a service binding), and the relation engine
-lifted from remy-sport, which must be used by every server operation and by the GUI (owner: "the rebac
-did not also get used. And also not in the gui").
+are recorded in the plan. Signing in on the deployment waits for mail delivery. Slice 2, the relation
+engine lifted from remy-sport and used by every server operation and by the GUI (owner: "the rebac did
+not also get used. And also not in the gui"), with the notes demo, is built on branch `auth-relations`
+and waits for the owner to say ship. Then: the app-trust comparison (OAuth tokens verified locally, or
+a service binding), which lets other apps use all of it.
 
 ## Core Web Vitals: the mobile formats page is over the limit (found 2026-10-09)
 

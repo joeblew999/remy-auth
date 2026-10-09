@@ -54,12 +54,20 @@ package follows [Semantic Versioning](https://semver.org/).
 - `api/guard`: `guard()` (the guard for the installed oRPC, an app router's root middleware),
   `GuardContext` (`getSession`, as oRPC's Better Auth guide shares a session), `once`, `signedIn`,
   `noSession`, and everything in `api/guard-core` and `api/policy`.
-- `api/policy`: `policy()` and `personal()`, the oRPC metadata a contract procedure declares for the guard.
+- `api/policy`: `policy()` and `personal()`, the oRPC metadata a contract procedure declares for the guard,
+  and `actions(vocabulary)` for policies that are actions of the app's relation vocabulary.
+- `api/relations`: the relation engine, lifted from remy-sport and taking an app's vocabulary as data
+  (`defineVocabulary`, `relationEngine` with `can`, `canAll`, `canFor`, `holds`, `heldAmong`,
+  `objectsHeldBy`, `usersHolding`, `audienceFor`; `vocabularyProblems`, `schemaProblems`). The guard
+  enforces an action policy with it: 401 without a session, 404 for a missing object before 403.
+- `allowed`: `<Allowed can action>`, which shows a control only when the server allowed that action
+  for this viewer on this object; `allowed.checks`: `offeredActions`, `allowedActions`.
 - `api/server`: `apiHandlers` answers `no-store` to a request with credentials, and on every 401.
 - `@joeblew999/remy-showcase/app-pages`: `AccountPage` takes `auth` (who is signed in, and the app's
   sign-in and sign-out controls); without it, the empty state as before.
 - `@joeblew999/remy-auth-contract` 0.4.0: `me` (`GET /api/me`, the signed-in person's own account; 401
-  without a session) and `errorStatuses`; written for oRPC 2. `ui:version` sets its peer floor for
+  without a session), the notes demo (`notes.*`, `notesVocabulary`, `./notes`) and `errorStatuses`;
+  written for oRPC 2. `ui:version` sets its peer floor for
   `@joeblew999/remy-ui` to the release.
 - Tasks: `project:prepare`, a hook `project:dev` and `project:build` run first (nothing by default);
   `plans:open`, a parked plan taken up again.

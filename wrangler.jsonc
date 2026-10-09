@@ -12,7 +12,13 @@
   "vars": { "ENVIRONMENT": "production" },
   // The identity database (.plans/auth-service.md): Better Auth's tables, through the numbered
   // migrations in migrations/ (mise run auth:generate, auth:migrate). Only this Worker reads or writes it.
-  "d1_databases": [{ "binding": "DB", "database_name": "remy-auth", "database_id": "4f420203-69a4-4173-9048-453002a4b8e6", "migrations_dir": "migrations" }],
+  // DEMO_DB is the showcase's own data (the notes demo), apart from the identities, as any app keeps
+  // its data in its own database: the relation engine reads who may do what from those tables alone.
+  // Its migrations are in migrations-demo/ (mise run auth:migrate applies both locally).
+  "d1_databases": [
+    { "binding": "DB", "database_name": "remy-auth", "database_id": "4f420203-69a4-4173-9048-453002a4b8e6", "migrations_dir": "migrations" },
+    { "binding": "DEMO_DB", "database_name": "remy-auth-demo", "migrations_dir": "migrations-demo" }
+  ],
   // Better Auth signs and hashes with it. Local: .dev.vars (mise run auth:local). Deployed: a Worker secret.
   "secrets": { "required": ["BETTER_AUTH_SECRET"] },
   "assets": { "directory": "./dist/client" },

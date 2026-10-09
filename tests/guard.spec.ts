@@ -14,9 +14,11 @@ type Major = {
   inProcess: Record<'openAnonymous' | 'whoamiAnonymous' | 'whoamiSignedIn' | 'echoAnonymousBadInput' | 'forgottenSignedIn', Outcome> & { lookupsForOpen: number };
   http: Record<'openAnonymous' | 'whoamiAnonymous' | 'whoamiSignedIn' | 'forgottenSignedIn', { status: number; body: string }>;
   contractFirst: Record<'whoamiAnonymous' | 'whoamiSignedIn' | 'echoAnonymousBadInput', Outcome> & { contractProblems: string[]; problems: string[] };
-  ran: Record<'open' | 'whoami' | 'echo' | 'forgotten', number>;
+  actions: Record<string, Outcome>;
+  ran: Record<'open' | 'whoami' | 'echo' | 'forgotten' | 'edit' | 'create', number>;
   problems: string[];
   brokenProblems: string[];
+  withoutVocabulary: string[];
 };
 
 const version = (folder: string): string => JSON.parse(readFileSync(`${folder}/package.json`, 'utf8')).version;
@@ -72,15 +74,41 @@ for (const major of ['v1', 'v2'] as const) test.describe(`the guard on oRPC ${in
     expect(inProcess.forgottenSignedIn).toEqual({ code: 'INTERNAL_SERVER_ERROR' });
     expect(http.forgottenSignedIn.status).toBe(500);
     expect(ran.forgotten).toBe(0);
-    expect(problems).toEqual(['forgotten: declares no policy (public or session)']);
+    expect(problems).toEqual(['forgotten: declares no policy (public, session or an action)']);
   });
 
-  test('the rule names a public answer that carries an address, a personal answer that does not say whose, and a procedure without the guard', () => {
+  test('the rule names a public answer that carries an address, a personal answer that does not say whose, a procedure without the guard, and an action the vocabulary or the input cannot place', () => {
     expect(results[major].brokenProblems).toEqual([
       'leaky: reachable without a session, and its response carries email',
       'unexplained: its response carries email; say who receives them (personal)',
       'unguarded: the guard is not in front of it',
+      'ghost: its policy names PUBLISH_NOTE, which the vocabulary does not define',
+      'blind: EDIT_NOTE acts on a NOTE, and its input has no "id" to say which',
     ]);
+    expect(results[major].withoutVocabulary).toEqual(['edit: its policy is the action EDIT_NOTE, and the check was given no vocabulary to find it in']);
+  });
+
+  test('an action is decided by the relation engine: nobody without a session, a missing object before anybody is refused, then the relation', () => {
+    expect(results[major].actions).toEqual({
+      editAnonymous: { code: 'UNAUTHORIZED' },
+      editByAuthor: { value: { id: 'n1' } },
+      editByAnother: { code: 'FORBIDDEN' },
+      // A missing object is 404 to its author and to anybody else alike: "forbidden" never says which ids are real.
+      editMissingByAuthor: { code: 'NOT_FOUND' },
+      editMissingByAnother: { code: 'NOT_FOUND' },
+      // The guard runs before validation, so only a plain string is ever looked up.
+      editWithAnIdThatIsNoString: { code: 'NOT_FOUND' },
+      // An action on nothing yet (creating) needs no object.
+      createByAnyone: { value: { ok: true } },
+      // The id may sit in another input field, when the policy says which.
+      retitleByAuthor: { value: { ok: true } },
+      retitleByAnother: { code: 'FORBIDDEN' },
+      // An action with no engine to ask is refused, never waved through.
+      editWithNoEngine: { code: 'INTERNAL_SERVER_ERROR' },
+    });
+    // The handlers ran for the allowed calls only.
+    expect(results[major].ran.edit).toBe(1);
+    expect(results[major].ran.create).toBe(1);
   });
 
   test('contract first: the policy on the contract is the one the implementation enforces', () => {

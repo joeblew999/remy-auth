@@ -14,14 +14,15 @@ import { policy } from './policy.js';
  * `origins` are the registered apps' origins the API answers across origins (apiHandlers'
  * `origins`): each is allowed by name, on a simple call and on a preflight; any other origin is not.
  * `errorStatuses` are the HTTP statuses of the API's own error codes, as its server passes them.
+ * `vocabulary` is the app's relation vocabulary, when procedures name its actions as their policy.
  * The guard (./guard-core.js): every procedure declares who may call it and has the guard in front of it,
  * nothing reachable without a session answers with a person (`personFields` adds the app's own
  * property names to the package's), and every procedure that needs a session refuses a stranger.
  */
-export function apiChecks({ router, title, origins = [], personFields, errorStatuses }) {
+export function apiChecks({ router, title, origins = [], personFields, errorStatuses, vocabulary }) {
   const statuses = statusesOf(errorStatuses);
   test('every API procedure is behind the guard, and none reachable without a session names a person', () => {
-    expect(guardProblems(router, personFields ? { personFields } : undefined)).toEqual([]);
+    expect(guardProblems(router, { ...(personFields ? { personFields } : {}), vocabulary })).toEqual([]);
     // The rule itself catches each gap, so an empty list above means something: a contract that
     // declares nothing, a public answer with an address in it, and a personal answer that does not say whose.
     const row = z.object({ team: z.string(), coach: z.object({ email: z.string() }) });
@@ -31,7 +32,7 @@ export function apiChecks({ router, title, origins = [], personFields, errorStat
       unexplained: oc.meta(policy('session')).output(row),
     };
     expect(guardProblems(broken)).toEqual([
-      'forgotten: declares no policy (public or session)',
+      'forgotten: declares no policy (public, session or an action)',
       'leaky: reachable without a session, and its response carries email',
       'unexplained: its response carries email; say who receives them (personal)',
     ]);
