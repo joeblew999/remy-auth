@@ -95,7 +95,7 @@ Las tareas de passthrough de la CLI aceptan directamente los flags originales, c
 | `ui:*` | Compila los catálogos compartidos (`ui:generate`), regenera los componentes y el tema de shadcn (`ui:components`, `ui:theme`), demuestra que no se han modificado (`ui:verify`), publica el paquete y las tareas (`ui:release`, la `packages:release` compartida) |
 | `skills:*` | Instala, lista y elimina los skills oficiales fijados |
 | `auth:*` | Better Auth: su CLI y diagnóstico (`auth:cli`, `auth:info`), migraciones para la D1 local (`auth:generate`, `auth:migrate`), el entorno local (`auth:local`), sus códigos de inicio de sesión capturados (`auth:mail`) y lo que necesita un despliegue (`auth:provision`, solo imprime) |
-| `cf:*` | CLI de Cloudflare, logs en vivo, despliegue (`cf:deploy`), Workers de comprobación desechables (`cf:preview`, `cf:preview-delete`), logs almacenados y uso de IA (`cf:events`, `cf:ai-*`); tareas compartidas, listadas en el [README de tareas](./tasks.md#cloudflare-tasks) |
+| `cf:*` | CLI de Cloudflare, logs en vivo, despliegue (`cf:deploy`), qué está ejecutando cada despliegue (`cf:versions`), Workers de comprobación desechables (`cf:preview`, `cf:preview-delete`), logs almacenados y uso de IA (`cf:events`, `cf:ai-*`); tareas compartidas, listadas en el [README de tareas](./tasks.md#cloudflare-tasks) |
 | `api:*` | El documento OpenAPI generado que sirve un Worker en ejecución (`api:spec`, `--urls` para sus operaciones; tarea compartida) |
 | `browser:*` | CLI de Chrome DevTools, ciclo de vida de la sesión y servidor MCP |
 | `web:*` | Búsqueda y recuperación de Modern Web Guidance |
@@ -406,4 +406,3 @@ Un solo token lo hace todo (el token `dev` en <https://dash.cloudflare.com/profi
 Edit** (que incluye lectura) y **Workers Observability Read** son los que estas tareas necesitan; cambiar
 el gateway con `cf:ai-gateway` usa el mismo token, y cada cambio se lee de vuelta.
 </content>
-</invoke>

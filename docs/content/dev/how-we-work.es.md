@@ -218,6 +218,8 @@ y las comprobaciones sensibles al tiempo ya fallaban mucho antes de eso. Por tan
 - Todo informe sobre algo que el propietario pueda revisar incluye sus URLs: los sitios en producción, la preview
   (`mise run cf:preview` la imprime) y un enlace directo a cada página o funcionalidad tratada.
 - Indica qué se comprobó y qué no.
+- Lo que está en producción se pregunta, no se recuerda: `mise run cf:versions` muestra qué está ejecutando cada deployment
+  y cuán lejos está eso de tu checkout. Dilo a partir de eso, no de lo último que desplegaste.
 
 ## Trabajo multiagente [#multi-agent-work]
 

@@ -100,10 +100,12 @@ Cada página existe en cada locale (13 prefijos como `/en`, `/ar`, `/ja`; las p�
 | `/en/app/demo` | App | `ssr: false`. Contador y formulario de reserva validados en el navegador y de nuevo por el `POST /api/reservations` del contrato (una mutación de TanStack Query), que responde en el idioma de la página; las reglas incumplidas vuelven como su 400 tipado y se muestran como errores propios del formulario; salir con entradas sin guardar pregunta primero (`useBlocker`) |
 | `/en/app/location` | App | La ubicación de la petición según Cloudflare junto a la propia del dispositivo, que la API de Geolocation solo entrega después de que el visitante pulse su botón |
 | `/en/app/account` | App | Quién ha iniciado sesión (nombre y correo, con cierre de sesión), o el formulario de inicio de sesión: una dirección de correo y después el código de seis cifras que Better Auth le envía (TanStack Form; el cliente de Better Auth llamando a `/api/auth`). El loader pregunta a una función de servidor que llama al `me` del contrato dentro del servidor, de modo que el servidor renderiza el estado correcto a partir de las cookies de la página y nunca lo cachea. El correo del código se escribe en el idioma de la página y se envía a través de Cloudflare Email Service. Donde el entorno ofrece personas precargadas (solo en local), el formulario las enumera con su rol y lo que poseen, con una sola pulsación para iniciar sesión como cada una. Donde no se pudo entregar ningún código de inicio de sesión, mantiene el estado vacío compartido en lugar del formulario |
+| `/en/app/settings` | App | El idioma y la apariencia (guardados en el dispositivo), lo que el dispositivo le dice a la app, [el nombre del producto](#the-products-name) dónde se usa y cómo se leería con otro nombre, y [qué está desplegado](#which-version-is-deployed) |
 | `/en/app/notes` | App | Página propia de remy-auth, la demo de notas: una persona que ha iniciado sesión escribe notas y comparte cada una con una dirección, para leer o para editar. Quién puede hacer qué lo deciden las relaciones (su autor, sus editores, sus lectores; `packages/contract/src/notes.ts` contiene el vocabulario), el servidor lo aplica mediante el guard, y la página muestra un control solo dentro de `<Allowed>`, a partir de los permisos que el servidor envió con cada nota. Sin sesión iniciada, apunta a la página de cuenta |
 | `/api/status`, `/api/me`, `/api/notes`..., `/api/reservations` | API | Endpoints del contrato ([@joeblew999/remy-auth-contract](https://github.com/joeblew999/remy-auth/blob/main/packages/contract/README.md)) servidos por oRPC tras una única ruta de servidor de Start (`src/routes/api.$.ts`, `src/api/`): entrada y salida validadas, errores tipados, el idioma a partir de Accept-Language (`routeStrategies` de Paraglide), sin locale en la URL. Cada uno se ejecuta tras el guard de la plataforma, que aplica su política de contrato: `status` y `reservations` son públicos, `me` y el listado de notas responden solo a una persona que haya iniciado sesión y rechazan a cualquier otra con 401, y cada cambio a una nota es una acción que decide el motor de relaciones (404 para una nota que no existe, 403 sin una relación que lo permita) |
 | `/api/auth/*` | API | Los endpoints propios de Better Auth (enviar un código, iniciar sesión, la sesión, cerrar sesión) tras una única ruta de servidor catch-all de Start (`src/routes/api.auth.$.ts`), sobre la base de datos D1 del Worker (`DB`); no forma parte del contrato ni de su documento |
 | `/dev/mail`, `/dev/people` | Solo local | La bandeja de salida del entorno local (el correo capturado para `?recipient=` en lugar de enviado) y su inicio de sesión precargado (las personas que ofrece, lo que posee cada una, y el código publicado con el que inician sesión); 404 en cualquier otro entorno (la tabla en `src/auth/environment.ts`, [explicado](./auth.md#environments-one-table)) |
+| `/healthz` | Cada Worker | Liveness, y [qué deployment respondió](#which-version-is-deployed): su entorno, la versión de Cloudflare y el sello de build |
 | `/api/openapi.json`, `/api/doc` | API | El documento OpenAPI 3.1 generado a partir del router en el propio proceso, y su página de referencia (la página Scalar de oRPC, con el script fijado a una versión) |
 | `/robots.txt`, `/sitemap.xml` | Rutas de servidor | `Cache-Control: public, max-age=3600, s-maxage=3600`; los métodos distintos de GET y HEAD responden 405 con `Allow`; el sitemap enumera las páginas de sitio en cada locale con alternativas `hreflang` |
 | Ruta o locale desconocidos | | HTTP 404 con la página de no encontrado localizada (una ruta desconocida sin localizar primero redirige al idioma del visitante, ya que el rewrite de TanStack la canonicaliza) |
@@ -140,6 +142,73 @@ Las fuentes viven en [`packages/ui/src/fonts.css`](https://github.com/joeblew999
 `globals.css` (ver [`src/styles.css`](https://github.com/joeblew999/remy-auth/blob/main/src/styles.css)); el archivo explica sus reglas. fontaine en
 [`vite.config.ts`](https://github.com/joeblew999/remy-auth/blob/main/vite.config.ts) genera las fuentes de respaldo ajustadas en tamaño que nombra.
 `publicPageChecks` falla ante cualquier familia nombrada que no esté cargada.
+
+## Qué versión está desplegada [#which-version-is-deployed]
+
+Nada registra qué está desplegado: cada deployment dice qué es cuando se le pregunta, de modo que la
+respuesta no puede quedar desactualizada (el diseño es de remy-sport, cuyo registro versionado de deployments
+estuvo equivocado durante semanas).
+
+- **El sello de build.** `remyApp()` y `remyDocs()` lo calculan una vez por build a partir de las
+  fuentes: el paquete de la app, el commit, un hash corto de cualquier cambio sin confirmar, y la versión
+  instalada de cada paquete de la plataforma (`build: { packages: [...] }` en `remyApp()` enumera más). El
+  mismo checkout produce el mismo sello; no incluye la hora de build, así que un bundle solo cambia cuando
+  cambia su código.
+- **`/healthz`**, en cada Worker construido sobre el paquete, responde con él: `service`, `environment`
+  (lo que el Worker declara; producción cuando no declara ninguno), `release` y `deployedAt` (la versión
+  de Cloudflare y cuándo se le asignó) y `build`. No nombra a nadie, y cualquier origin puede leerlo.
+- **`BuildStamp`** (`@joeblew999/remy-ui/versions`) está en el pie del marco de la app, así que toda página
+  de app de toda app lo tiene: el entorno salvo que sea producción, el nombre del producto, el commit. La
+  página lleva el sello con el que se construyó; cuando su deployment responde con otro, la página es una
+  pestaña que quedó abierta a través de un deploy, y el sello ofrece el reload. Nunca se recarga por sí sola.
+- **`Versions`**, para una página de ajustes o acerca de: esta app, su Worker de docs (`docs` en
+  `defineRemyApp`) y cualquier `deployments` que la app enumere (un servicio al que llama), cada uno
+  respondiendo por sí mismo, y luego los paquetes con los que se hizo este build. La página de Settings de
+  remy-auth lo muestra.
+- **`mise run cf:versions`** imprime una fila por deployment (`DEPLOY_ORIGIN` y `DOCS_ORIGIN`, o los
+  origins dados), situando cada commit respecto a este checkout: `= HEAD`, `3 behind HEAD`. Úsalo antes de
+  decir qué está en producción.
+
+Los conjuntos de comprobaciones compartidos lo demuestran en cada app: `/healthz` nombra el commit de este
+checkout en una ejecución local (un sello que quedó de un build anterior falla), y el marco ofrece el reload
+solo cuando el deployment ha avanzado.
+
+## El nombre del producto [#the-products-name]
+
+Remy es el nombre de este prototipo. Un proyecto construido sobre el mismo código tiene el suyo propio, y lo
+escribe una sola vez:
+
+```ts
+// docs/docs.config.ts: los docs lo dicen, y la app lo toma de aquí
+const product = 'Harbor';
+export const docsConfig = defineDocsConfig({ product, ... });
+
+// src/remy-app.tsx
+export const remyApp = defineRemyApp({ brand: docsConfig.product, ... });
+```
+
+Una app sin docs escribe `brand` directamente. Todo lo que una persona lee toma el nombre de ahí: el marco,
+el título de cada página, los datos estructurados de la página de inicio, y todo mensaje que diga el nombre,
+que lo recibe como parámetro:
+
+```tsx
+m.home_title({ product: useRemyApp().brand }, { locale })                       // en una página
+pageHead({ ..., description: (locale, product) => m.home_description({ product }, { locale }) })   // en un head
+codeMail({ otp, product }, locale)                                              // el correo de inicio de sesión
+```
+
+Un mensaje que nombra al producto se escribe con `{product}`, nunca con un nombre fijo, de modo que los
+tipos de Paraglide rechazan a quien lo omita. La página de Settings de remy-auth muestra dónde se usa el
+nombre, y cómo se leería cada lugar con otro nombre.
+
+Lo que no es el nombre del producto, y permanece: los paquetes (`@joeblew999/remy-ui`), la skill `remy`, los
+nombres de tareas, el nombre de servicio de un Worker y el nombre de un servidor MCP. Son identificadores
+que ve un desarrollador.
+
+Comprobaciones: el título de cada página termina con el nombre de la app, y una app con otro nombre nunca
+muestra «Remy» (`productNameChecks`, en el conjunto compartido de cada app; el fixture consumidor, llamado
+«My app», es donde esto se nota); el catálogo de la plataforma no nombra a ningún producto
+(`tests/product.spec.ts`).
 
 ## Estructura y reutilización [#structure-and-reuse]
 

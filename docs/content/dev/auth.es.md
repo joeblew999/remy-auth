@@ -129,8 +129,8 @@ nada de ello existe en un despliegue.
 `send_email` del Worker (Cloudflare Email Service), desde una dirección en un dominio que la cuenta
 tiene habilitado para Email Sending, o guarda el mensaje en la bandeja de salida donde el entorno
 captura el correo. Un correo siempre tiene una parte en texto plano; un envío rechazado dice para
-quién era y por qué. El correo del código de inicio de sesión se escribe en el idioma del lector, con
-el código y sin enlace.
+quién era y por qué. El correo del código de inicio de sesión se escribe en el idioma del lector y en
+[el nombre del producto](./gui.md#the-products-name), con el código y sin enlace.
 
 ## Qué comprueba cada pieza [#what-each-piece-is-checked-by]
 
