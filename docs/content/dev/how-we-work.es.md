@@ -193,6 +193,11 @@ cualquier app, desde las tareas compartidas; `project:setup` instala el guardiá
   terminal: eso es una decisión; que un agente ejecute uno sin que se le pida es el fallo para el que existe el guardián.
 - Una regla que pueda expresarse como función va en `tests/**/*.unit.spec.ts` (sin build, sin Worker, sin
   navegador), de modo que se ejecuta gratis en cada comprobación. El navegador es para lo que solo el navegador muestra.
+- **Un agente nunca espera a un paso de larga duración.** `dev:land`, `dev:promote`, `dev:release`, una
+  traducción, una suite remota: inícialo en segundo plano, sigue trabajando o responde al propietario, y actúa
+  cuando el harness indique que ha terminado. Iniciarlo en segundo plano y luego consultarlo en
+  primer plano es el mismo fallo (el propietario, el 2026-10-09: «Has vuelto a hacerlo con 2 cosas de larga
+  duración»). Solo `dev:change` (segundos) se ejecuta y se espera.
 - Una ejecución roja en GitHub es lo siguiente que hay que arreglar: `mise run <the failed task>` la reproduce en local, a
   propósito. Informa de qué se probó y qué no; nunca llames verificado a un trabajo no probado.
 - Nunca encadenes un comando de puerta de control con `grep` o `tail` mediante una tubería: la tubería oculta su código de salida.
@@ -272,4 +277,3 @@ usa esta forma:
    y usa cada pieza en un Chrome real, limitado a un teléfono gama media, con una traza de rendimiento y capturas de pantalla.
    Anota cómo se siente: la espera antes del contenido, los saltos de layout, los destellos y cualquier cosa
    molesta. Corrige lo que se sienta mal antes de fusionar, incluso cuando sus comprobaciones pasen.
-</content>
