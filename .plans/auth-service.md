@@ -182,6 +182,12 @@ checks passed afterwards (`project:test:live`). Signing in on the deployment wai
 (Cloudflare Email Service, which needs the production domain). Not solved yet: `cf:preview`'s
 throwaway Workers bind this same database.
 
+For slices 2 and 3 (the owner, 2026-10-09: "Deploy immediately without any ci when you're ready"):
+the D1 database `remy-auth-demo` was created for the notes demo, with its `database_id` in
+`wrangler.jsonc` and `migrations-demo/` applied; `migrations/` 0003 (roles) and 0004 (no `local_mail`)
+were applied to `remy-auth`. Nothing was needed for mail: `mail.ubuntusoftware.net` was already
+enabled for sending.
+
 ### Merged and deployed (2026-10-09)
 
 The owner said "you do it all for me". The branch was merged to main (fast-forward), the translation

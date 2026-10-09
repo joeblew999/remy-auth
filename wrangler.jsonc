@@ -17,7 +17,7 @@
   // Its migrations are in migrations-demo/ (mise run auth:migrate applies both locally).
   "d1_databases": [
     { "binding": "DB", "database_name": "remy-auth", "database_id": "4f420203-69a4-4173-9048-453002a4b8e6", "migrations_dir": "migrations" },
-    { "binding": "DEMO_DB", "database_name": "remy-auth-demo", "migrations_dir": "migrations-demo" }
+    { "binding": "DEMO_DB", "database_name": "remy-auth-demo", "database_id": "c9bec7d1-4c5e-4502-8a82-ed2d016d9f7e", "migrations_dir": "migrations-demo" }
   ],
   // Sign-in codes leave through Cloudflare Email Service, from EMAIL_FROM: an address on a domain the
   // account has enabled for Email Sending (wrangler email sending list). A local Worker captures mail
