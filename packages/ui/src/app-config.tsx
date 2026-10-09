@@ -24,7 +24,11 @@ export type NavItem = {
 };
 
 export type RemyApp = {
-  /** The app's name: the site header's and the app frame's brand, page titles, the home page's structured data. */
+  /**
+   * The product's name, the one place it is written for everything a person reads: the site header's and
+   * the app frame's brand, page titles, the home page's structured data, and every message that says the
+   * name (each takes it as `{product}`: `useRemyApp().brand` in a page, pageHead's second argument in a head).
+   */
   brand: string;
   /** The Worker's service name: its log lines, /healthz and the CSP report endpoint's logs. */
   service?: string;
@@ -54,6 +58,9 @@ export type RemyApp = {
   };
 };
 
+/** A page's title as the browser tab shows it: the page's own, then the app's name. */
+export const pageTitle = (title: string, brand?: string) => brand ? `${title} | ${brand}` : title;
+
 let registered: RemyApp | undefined;
 
 /**
@@ -66,7 +73,7 @@ export const defineRemyApp = (app: RemyApp) => (registered = app);
 /** The app's settings as registered by defineRemyApp, if it has run. */
 export const registeredApp = () => registered;
 
-const RemyAppContext = createContext<RemyApp>({ brand: 'Remy', sitePaths: [''] });
+const RemyAppContext = createContext<RemyApp>({ brand: '', sitePaths: [''] });
 const PreferredContext = createContext<Locale | undefined>(undefined);
 
 export const RemyAppProvider = RemyAppContext.Provider;

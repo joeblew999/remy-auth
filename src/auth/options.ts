@@ -2,6 +2,7 @@ import type { BetterAuthOptions } from 'better-auth';
 import { admin } from 'better-auth/plugins/admin';
 import { emailOTP } from 'better-auth/plugins/email-otp';
 import { tanstackStartCookies } from 'better-auth/tanstack-start';
+import { product } from '../product';
 
 /** One sign-in code to deliver. */
 export type CodeMail = { email: string; otp: string; type: string };
@@ -37,7 +38,7 @@ export const personMayEdit: Record<string, Record<string, string>> = {};
  */
 export function authOptions({ database, secret, baseURL, sendCode, fixedCode }: AuthDeps) {
   return {
-    appName: 'Remy',
+    appName: product,
     baseURL,
     secret,
     database,

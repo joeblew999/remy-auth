@@ -12,7 +12,7 @@ type AppCheckOptions = {
   home?: HomeContent;
 };
 
-/** The shared checks of a server-rendered app over its own pages: zones, public pages, text, fonts, redirecting entry URLs, the theme, observability, CSP. */
+/** The shared checks of a server-rendered app over its own pages: zones, public pages, text, fonts, redirecting entry URLs, the theme, observability, CSP, the build stamp and the product's name. */
 export declare function serverAppChecks(options: AppCheckOptions & {
   oneLanguage?: { locale: string; paths: string[]; translations?: Record<string, string[]> };
   /**
@@ -23,5 +23,5 @@ export declare function serverAppChecks(options: AppCheckOptions & {
   /** Whether the app enforces its nonce CSP (default true) or sends it report-only: the app's own switch, passed to cspChecks. */
   cspEnforced?: boolean;
 }): void;
-/** The shared checks of a fully prerendered app over its own pages: zones, public pages, static entry pages, the theme, text, observability. */
+/** The shared checks of a fully prerendered app over its own pages: zones, public pages, static entry pages, the theme, text, observability, the build stamp and the product's name. */
 export declare function prerenderedAppChecks(options: AppCheckOptions): void;

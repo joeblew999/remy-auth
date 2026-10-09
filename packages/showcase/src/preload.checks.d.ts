@@ -1,1 +1,1 @@
-export declare function preloadChecks(options?: { serverFn?: boolean; locale?: string }): void;
+export declare function preloadChecks(options: { product: string; serverFn?: boolean; locale?: string }): void;

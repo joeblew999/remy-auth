@@ -10,11 +10,11 @@ import { m } from '@joeblew999/remy-ui/messages';
 const escape = (text: string) => text.replace(/[&<>"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[character]!);
 const font = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 
-/** The mail carrying `otp`, written in `locale`: subject, plain text and HTML. */
-export function codeMail({ otp }: { otp: string }, locale: Locale): Omit<Mail, 'to'> {
+/** The mail carrying `otp` for signing in to `product`, written in `locale`: subject, plain text and HTML. */
+export function codeMail({ otp, product }: { otp: string; product: string }, locale: Locale): Omit<Mail, 'to'> {
   const o = { locale };
-  const subject = m.email_code_subject({ code: otp }, o);
-  const lines = [m.email_code_intro({}, o), m.email_code_expiry({}, o), m.email_code_ignore({}, o)];
+  const subject = m.email_code_subject({ code: otp, product }, o);
+  const lines = [m.email_code_intro({ product }, o), m.email_code_expiry({}, o), m.email_code_ignore({}, o)];
   const html = `<!doctype html><html lang="${locale}" dir="${direction(locale)}"><head><meta charset="utf-8"><title>${escape(subject)}</title></head>`
     + `<body style="margin:0;padding:24px 0;background-color:#f4f4f5;font-family:${font}">`
     + `<div style="margin:0 auto;max-width:480px;padding:32px 28px;border-radius:12px;background-color:#ffffff">`

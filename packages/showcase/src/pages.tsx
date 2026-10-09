@@ -23,6 +23,7 @@ export { sitePaths, appPaths, allPaths } from './paths.js';
 export { SkipLink, ZoneBadge, SiteShell, Shell, Intro } from '@joeblew999/remy-ui/shell';
 export { Group, Row, NameList } from '@joeblew999/remy-ui/rows';
 import { Shell, Intro } from '@joeblew999/remy-ui/shell';
+import { useRemyApp } from '@joeblew999/remy-ui/app-config';
 import { Group, Row, NameList } from '@joeblew999/remy-ui/rows';
 
 /**
@@ -37,12 +38,13 @@ export function HomeCard({ title, description, children }: { title: string; desc
 }
 
 /**
- * The home page: what Remy is, where to go from here and what every Remy app shares, all from what
+ * The home page: what the product is, where to go from here and what every app on the package shares, all from what
  * the package really provides. `cards` are an app's own destinations beside the shared ones (remy-auth
  * adds its docs); `children` go under the page's links, for example an app's live status.
  */
 export function HomePage({ locale, preferred, cards, children }: { locale: Locale; preferred?: Locale; cards?: React.ReactNode; children?: React.ReactNode }) {
   const o = { locale };
+  const product = useRemyApp().brand;
   const count = new Intl.NumberFormat(formatLocale(locale)).format(locales.length);
   const shared = [
     [PaletteIcon, m.home_shared_components_title({}, o), m.home_shared_components_text({}, o)],
@@ -53,7 +55,7 @@ export function HomePage({ locale, preferred, cards, children }: { locale: Local
   return <Shell locale={locale} preferred={preferred}>
     <div className="flex flex-col gap-16">
       <section className="flex flex-col gap-6">
-        <Intro locale={locale} back={false} label={m.public_label({}, o)} title={m.home_title({}, o)} intro={m.home_intro({}, o)} />
+        <Intro locale={locale} back={false} label={m.public_label({}, o)} title={m.home_title({ product }, o)} intro={m.home_intro({ product }, o)} />
         <div className="flex flex-wrap gap-3">
           <Link className={buttonVariants({ size: 'lg' })} to="/app/demo" preload="intent">{m.demo_link({}, o)}</Link>
           <Link className={buttonVariants({ size: 'lg', variant: 'outline' })} to="/formats" preload="intent">{m.formats_link({}, o)}</Link>
@@ -63,10 +65,10 @@ export function HomePage({ locale, preferred, cards, children }: { locale: Local
       <section aria-labelledby="home-pages" className="flex flex-col gap-4">
         <h2 id="home-pages" className="text-2xl font-semibold tracking-tight">{m.home_pages_heading({}, o)}</h2>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <HomeCard title={m.formats_title({}, o)} description={m.formats_description({}, o)}>
+          <HomeCard title={m.formats_title({}, o)} description={m.formats_description({ product }, o)}>
             <Link className={buttonVariants({ variant: 'outline' })} to="/formats" preload="intent">{m.home_formats_open({}, o)}</Link>
           </HomeCard>
-          <HomeCard title={m.home_app_title({}, o)} description={m.app_home_description({}, o)}>
+          <HomeCard title={m.home_app_title({}, o)} description={m.app_home_description({ product }, o)}>
             <Link className={buttonVariants({ variant: 'outline' })} to="/app" preload="intent">{m.home_app_open({}, o)}</Link>
           </HomeCard>
           {cards}
@@ -74,8 +76,8 @@ export function HomePage({ locale, preferred, cards, children }: { locale: Local
       </section>
       <section aria-labelledby="home-shared" className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h2 id="home-shared" className="text-2xl font-semibold tracking-tight">{m.home_shared_heading({}, o)}</h2>
-          <p className="max-w-2xl text-muted-foreground">{m.home_shared_intro({}, o)}</p>
+          <h2 id="home-shared" className="text-2xl font-semibold tracking-tight">{m.home_shared_heading({ product }, o)}</h2>
+          <p className="max-w-2xl text-muted-foreground">{m.home_shared_intro({ product }, o)}</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {shared.map(([Icon, title, text]) => <Card key={title} className="h-full">
@@ -133,7 +135,7 @@ export function FormatsContent({ locale, info, extras = {}, controls = {}, backT
   const list = new Intl.ListFormat(locale, { type: 'conjunction' });
   const calendarName = new Intl.DisplayNames([locale], { type: 'calendar' });
   const currencyName = new Intl.DisplayNames([locale], { type: 'currency' });
-  const title = m.home_title({}, o);
+  const title = m.home_title({ product: useRemyApp().brand }, o);
   const titleWords = words(locale, title);
   const sections = [
     ['language', m.section_language({}, o)], ['time', m.section_time({}, o)], ['numbers', m.section_numbers({}, o)],

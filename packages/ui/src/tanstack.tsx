@@ -6,7 +6,7 @@ import { preferredFromHeader, preferredFromNavigator } from './matching.js';
 import { alternates } from './seo';
 import { withObservability } from './worker';
 import { isAppPath } from './paths.js';
-import { registeredApp } from './app-config';
+import { pageTitle, registeredApp } from './app-config';
 
 // TanStack Router and Start glue over Paraglide's official integration
 // (https://paraglidejs.com/tanstack-start). Plain functions only: nothing here needs the Start
@@ -80,8 +80,9 @@ export function suggestedLocaleInBrowser(page: Locale): Locale | undefined {
 type HeadOptions = {
   /** The de-localized public path: '' for home, '/formats', ... */
   path: string;
-  title: (locale: Locale) => string;
-  description: (locale: Locale) => string;
+  /** The page's title and description in `locale`; `product` is the app's name (defineRemyApp's `brand`), for a message that says it. */
+  title: (locale: Locale, product: string) => string;
+  description: (locale: Locale, product: string) => string;
   /** Defaults to the page's locale from Paraglide (the request on the server, the URL in the browser). */
   locale?: Locale;
   /** Defaults to the request's origin on the server and the page's origin in the browser; pass the public origin when prerendering. */
@@ -98,7 +99,7 @@ type HeadOptions = {
 export function pageHead({ path, title, description, locale = getLocale(), origin = getUrlOrigin(), brand = registeredApp()?.brand }: HeadOptions) {
   const links = alternates(origin, path, locale);
   return {
-    meta: [{ title: brand ? `${title(locale)} | ${brand}` : title(locale) }, { name: 'description', content: description(locale) },
+    meta: [{ title: pageTitle(title(locale, brand ?? ''), brand) }, { name: 'description', content: description(locale, brand ?? '') },
       // App pages are for people using the app, not for search: kept out of the index (paths.js).
       ...(isAppPath(path) ? [{ name: 'robots', content: 'noindex' }] : []),
       ...(path === '' && brand ? [{ 'script:ld+json': { '@context': 'https://schema.org', '@type': 'WebSite', name: brand, url: `${origin}/` } }] : [])],

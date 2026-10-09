@@ -1,10 +1,14 @@
+/// <reference path="./build-virtual.d.ts" />
+import { build } from 'virtual:remy-build';
+import type { Deployment } from './build';
 import { isLocale } from './paraglide/runtime.js';
 
 // Generic observability for any Worker built on this package: a request ID on every response,
-// one structured log line per request following the shared log contract, and a liveness route.
-// Never logs URLs, query strings, cookies, headers, bodies or geolocation.
+// one structured log line per request following the shared log contract, and a liveness route
+// that also says which deployment answered. Never logs URLs, query strings, cookies, headers,
+// bodies or geolocation.
 
-export type ObservedEnv = { ENVIRONMENT?: string; CF_VERSION_METADATA?: { id?: string } };
+export type ObservedEnv = { ENVIRONMENT?: string; CF_VERSION_METADATA?: { id?: string; timestamp?: string } };
 type Fetch<E> = (request: Request, env: E, ctx: ExecutionContext) => Response | Promise<Response>;
 
 /** The header carrying the request ID: on every response, and on the request the inner handler sees. */
@@ -33,7 +37,9 @@ export function writeLog(line: { level: string } & Record<string, unknown>) {
 }
 
 /**
- * Wraps a Worker's fetch handler. `/healthz` answers liveness without reaching the app.
+ * Wraps a Worker's fetch handler. `/healthz` answers liveness without reaching the app, and what
+ * this deployment is (`Deployment`, ./build.ts): its environment, Cloudflare's version of it and the
+ * build stamp. It names nobody and any origin may read it, so one deployment can show another's.
  * The handler receives the request with this request's ID in `X-Request-ID` (any value the
  * client sent is replaced), so its own logs, for example per server function, correlate.
  * Durations are left to Cloudflare's invocation data: the runtime freezes timers during a request.
@@ -62,7 +68,9 @@ export function withObservability<E extends ObservedEnv>(service: string, handle
         return out;
       };
       if (pathname === '/healthz') {
-        return finish(Response.json({ status: 'ok', service, release: base.release }, { headers: { 'Cache-Control': 'no-store' } }), 'liveness', '/healthz');
+        const deployedAt = env.CF_VERSION_METADATA?.timestamp;
+        const body: Deployment = { status: 'ok', service, release: base.release, environment: base.environment, ...(deployedAt ? { deployedAt } : {}), build };
+        return finish(Response.json(body, { headers: { 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' } }), 'liveness', '/healthz');
       }
       try {
         // Same URL, method, body and Cloudflare properties (`cf`); only the request ID header differs.

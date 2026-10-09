@@ -8,13 +8,13 @@ platform only through the platform's exports, and nothing in the platform import
 | Export | What it holds |
 | --- | --- |
 | `pages` | `HomePage`, `HomeCard`, `FormatsContent`, `FormatsPage`, and the showcase's `sitePaths`, `appPaths`, `allPaths` |
-| `app-pages` | `AppHomePage`, `AppFormatsPage`, `LocationPage`, `DemoPage`, `ClockPage`, `SettingsPage`, `AccountPage` |
+| `app-pages` | `AppHomePage`, `AppFormatsPage`, `LocationPage`, `DemoPage`, `ClockPage`, `SettingsPage` (with `ProductNameCard`: where the product's name is used and how another would read; and the platform's `Versions`: what is deployed), `AccountPage` |
 | `app-nav` | `showcaseSiteNav`, `showcaseAppNav`: the showcase's navigation, for `defineRemyApp`'s `site.nav` and `app.nav` |
 | `paths` | The showcase's pages: `sitePaths`, `appPaths`, `allPaths` |
 | `clock-route` | `clockRouteOptions`, `clockDefaults`, `clockZones`: the Clock route's search params |
 | `reservation` | The demo reservation's Zod schema (seats typed in any script's digits), `asciiDigits` |
 | `search-params`, `navigation-blocking` | The formats page's search params and `choiceCards`; the demo's leave guard |
-| `showcase.checks` | `showcaseChecks({ rendering, formats, devicePath, network })`: every showcase check, which an app showing the showcase calls itself |
+| `showcase.checks` | `showcaseChecks({ product, rendering, formats, devicePath, network })`: every showcase check, which an app showing the showcase calls itself; `product` is the app's name (its `defineRemyApp` `brand`), which the pages say |
 | `reservation.checks` | `reservationApiChecks`: the demo reservation's typed 400 in every locale, and a response that breaks the contract refused in the browser |
 | `parts/catalog.json`, `parts/status-card/card`, `parts/status-card/query`, `parts/deferred-place/device-place`, `parts/time-zones/page` | Its parts' catalog, and their pieces an app or another page uses directly |
 | `tailwind.css` | Where the showcase's classes live: import it beside `@joeblew999/remy-ui/tailwind.css` |

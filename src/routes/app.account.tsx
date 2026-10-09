@@ -16,7 +16,7 @@ export const Route = createFileRoute('/app/account')({
   // Whoever is signed in can change at any moment in another tab: never serve this from the router's cache.
   staleTime: 0,
   gcTime: 0,
-  head: () => pageHead({ path: '/app/account', title: locale => m.account_title({}, { locale }), description: locale => m.account_description({}, { locale }) }),
+  head: () => pageHead({ path: '/app/account', title: locale => m.account_title({}, { locale }), description: (locale, product) => m.account_sign_in_description({ product }, { locale }) }),
   component: Account,
   ...problemPages,
 });

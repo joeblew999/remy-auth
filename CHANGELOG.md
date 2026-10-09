@@ -7,6 +7,20 @@ package follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- Which version is deployed (remy-sport's build stamp, for every app). `build/vite`: `remyBuild()`, in
+  `remyApp()` and `remyDocs()` already, works out a stamp per build from the sources (the app's package,
+  the commit, a hash of anything uncommitted, the platform packages' versions) as `virtual:remy-build`.
+  Every Worker's `/healthz` answers with it, its `environment` and Cloudflare's `deployedAt`, readable
+  from any origin. `versions`: `BuildStamp`, now in the app frame's footer (the environment off
+  production, the product's name, the commit, a reload control when the deployment has moved on under
+  an open page), and `Versions` (this app, its docs Worker and other listed deployments, each answering
+  for itself). `build`: the shapes and TanStack Query options. `mise run cf:versions`: a row per
+  deployment, each commit placed against the checkout. Checks in every app's shared set
+  (`versions.checks`, `build.checks`).
+- The product's name is the app's, written once (`defineRemyApp`'s `brand`): `pageTitle`, pageHead's
+  `title` and `description` receive it as a second argument, and `productNameChecks` (every app's shared
+  set) fails a page of an app with another name that says "Remy". The showcase's Settings page shows
+  where the name is used and how another would read (`ProductNameCard`).
 - `app-config`: `defineRemyApp` (the app's brand, source, and site and app navigation, each link written
   with TanStack's `linkOptions` so it is checked against the app's own routes), `NavItem`, `useRemyApp`,
   `usePreferredLocale`. The shared frame names no route but `/`, so an app with other pages than
@@ -76,6 +90,13 @@ package follows [Semantic Versioning](https://semver.org/).
   `plans:open`, a parked plan taken up again.
 
 ### Changed (breaking)
+- Every message that named the product takes it as `{product}`: `home_title`,
+  `home_description`, `home_intro`, `home_shared_heading`, `home_shared_intro`, `home_developers_text`,
+  `formats_description`, `app_home_description`, `account_description`, `account_empty_description`,
+  `account_sign_in_description`, `email_code_subject`, `email_code_intro`. Pass
+  `{ product: useRemyApp().brand }`; TypeScript names each caller. `showcaseChecks`, `formatsChecks` and
+  `preloadChecks` need `product`. Without `AppProviders` the frame's brand is empty, no longer "Remy".
+  Three messages nothing used are gone: `ask_description`, `ask_intro`, `search_description`.
 - oRPC 2: every `@orpc/*` dependency is 2.0.0-beta.42 (`@orpc/openapi-client` is gone, merged into
   `@orpc/openapi`). An app's contract writes its routes as `.meta(openapi({ method, path, ... }))` and
   its policy as `.meta(policy('public'))` (`api/policy`; `ApiMeta` and `oc.$meta` are gone); its errors

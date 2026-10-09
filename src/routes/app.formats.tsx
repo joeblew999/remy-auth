@@ -12,7 +12,7 @@ import { problemPages } from '@joeblew999/remy-ui/problem';
 export const Route = createFileRoute('/app/formats')({
   ...formatsRouteOptions,
   search: { middlewares: [stripSearchParams(searchDefaults)] },
-  head: () => pageHead({ path: '/app/formats', title: locale => m.formats_title({}, { locale }), description: locale => m.formats_description({}, { locale }) }),
+  head: () => pageHead({ path: '/app/formats', title: locale => m.formats_title({}, { locale }), description: (locale, product) => m.formats_description({ product }, { locale }) }),
   component: Formats,
   ...problemPages,
 });

@@ -8,6 +8,7 @@ import { localeInfo } from '@joeblew999/remy-ui/locale-info';
 import { m } from '@joeblew999/remy-ui/messages';
 import { sitePaths } from '@joeblew999/remy-showcase/paths';
 import { appPagePaths, everyPath } from '../src/paths';
+import { product } from '../src/product';
 import { apiChecks } from '@joeblew999/remy-ui/api/checks';
 import { reservationApiChecks } from '@joeblew999/remy-showcase/reservation.checks';
 import { errorStatuses, info, notesVocabulary } from '@joeblew999/remy-auth-contract';
@@ -28,10 +29,10 @@ serverAppChecks({
   sitePaths,
   appPaths: appPagePaths,
   // This app's home page words and brand: its own content, checked exactly.
-  home: { title: locale => m.home_title({}, { locale }), description: locale => m.home_description({}, { locale }), brand: 'Remy' },
+  home: { title: locale => m.home_title({ product }, { locale }), description: locale => m.home_description({ product }, { locale }), brand: product },
 });
 // It shows remy-auth's showcase pages, so their checks run too (the device place beside the network's: deferred-place).
-showcaseChecks({ formats: { extra: formatsExtra }, network: true });
+showcaseChecks({ product, formats: { extra: formatsExtra }, network: true });
 // Every part listed in src/parts.json brings its own checks: the sitemap (seo-routes), the streamed
 // place and its failing navigation (deferred-place), the status card, the time-zone pages.
 partChecks({ options: {

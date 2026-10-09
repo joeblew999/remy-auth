@@ -2,6 +2,7 @@ import { getLocale } from '@joeblew999/remy-ui/locale';
 import { mailerFor } from '@joeblew999/remy-ui/mail';
 import { codeMail } from './code-mail';
 import { permits } from './environment';
+import { product } from '../product';
 import type { CodeMail } from './options';
 
 type MailEnv = { ENVIRONMENT?: string; EMAIL?: SendEmail; EMAIL_FROM?: string };
@@ -18,5 +19,5 @@ export const canSendCodes = (env: MailEnv) => permits(env, 'capturesMail') || Bo
  * delivery throws, so the person sees an error. Never a fallback code.
  */
 export function codeSender(env: MailEnv) {
-  return ({ email, otp }: CodeMail) => mailer(env).send({ to: email, ...codeMail({ otp }, getLocale()) });
+  return ({ email, otp }: CodeMail) => mailer(env).send({ to: email, ...codeMail({ otp, product }, getLocale()) });
 }

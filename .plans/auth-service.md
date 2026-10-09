@@ -6,7 +6,7 @@ Parked 2026-09-26 (owner: "Not big feature stuff"): not started now; picked up a
 
 Purpose (owner, 2026-10-09): "remy-auth is meant to support betterauth working well with tanstack and orpc". Decisions follow from it: each of the three is used the way its own documentation says.
 
-Status: [slice 1](#slice-1-sign-in-the-account-page-and-the-guard-2026-10-09) is on main and [live](#merged-and-deployed-2026-10-09) since 2026-10-09, on the oRPC 2.0 beta, with its database and secret [provisioned](#provisioned-for-the-deployment-2026-10-09). Signing in on the deployment waits for mail delivery. [Slice 2](#slice-2-relationships-on-the-server-and-in-the-gui-2026-10-09), the relation engine used by the server and the GUI, and [slice 3](#slice-3-remy-sports-way-of-signing-in-for-every-remy-app-2026-10-09), remy-sport's way of signing in (Cloudflare email, environments, seeded people with roles), are built on branch `auth-relations`, waiting for the owner to say ship. The next two slices are the app-trust comparison and the relation engine ([next](#next-slices)). The rest of milestone 1 has not started. Builds on the [TanStack move](done/tanstack.md), on main since release 0.9.0.
+Status: [slice 1](#slice-1-sign-in-the-account-page-and-the-guard-2026-10-09) is on main and [live](#merged-and-deployed-2026-10-09) since 2026-10-09, on the oRPC 2.0 beta, with its database and secret [provisioned](#provisioned-for-the-deployment-2026-10-09). [Slice 2](#slice-2-relationships-on-the-server-and-in-the-gui-2026-10-09), the relation engine used by the server and the GUI, and [slice 3](#slice-3-remy-sports-way-of-signing-in-for-every-remy-app-2026-10-09), remy-sport's way of signing in (Cloudflare email, environments, seeded people with roles), are on main and [live](#slices-2-and-3-merged-and-deployed-2026-10-09) since the same day; that a sign-in code really arrives by email is not confirmed yet. The next slice is the app-trust comparison ([next](#next-slices)). The rest of milestone 1 has not started. Builds on the [TanStack move](done/tanstack.md), on main since release 0.9.0.
 Owner: remy-auth. First consumer: in-repo sample; first external consumer: remy-data.
 Executor/Reviewer roles as in [plans and roles](../docs/content/dev/development.md#plans-and-roles). Do not
 begin a fleet rollout.
@@ -366,6 +366,29 @@ it's easy to any Remy repo to use ... with its own demo using it and showing it 
    binding's allow-list.
 5. **Platform roles are `admin` and `user`.** What somebody may do in an app is that app's relations;
    a role is only one way to hold one.
+
+### Slices 2 and 3: merged and deployed (2026-10-09)
+
+The owner: "Deploy immediately without any ci when you're ready." Both slices are on main, and the app
+and the docs Worker are deployed (app version `9fc3d170-39a3-4f89-9423-1cc2b0949cbe`), with no gate on
+the deploy, as asked. What ran before it and after it:
+
+- **Before**, on the branch: the full local gate, 349 passed and 1 failed. The failure was a check
+  pressing "Sign in" by a name that the seeded people's buttons also start with; the check now asks for
+  the exact name, and it and the other browser sign-in checks passed when run again.
+- **After**: the deploy's own smoke checks failed once on the first load after the upload (the English
+  home page took more than 5 s to hydrate) and passed 4 of 4 when run again a minute later.
+- **By hand, on the deployment**: the account page offers the sign-in form and no seeded people;
+  `/dev/mail` and `/dev/people` answer 404; `/api/me` and `/api/notes` answer 401 to a stranger.
+- **The docs deploy's last step failed**: one of the six fixed search questions did not find its page
+  ("What are the architecture and development principles?" should find `/dev/development`), asked
+  seconds after the index was told to sync. The docs Worker itself is live; the question has to be
+  asked again once the sync has finished.
+- **Translations** of both slices' messages and docs pages are on main (two commits) and not deployed
+  yet: the deployment shows the new strings in English in every language until the next deploy.
+
+Not confirmed: **a real email arriving.** The first sign-in on the deployment is the first mail it
+ever sent.
 
 ## Requirements for the shared guard, from remy-sport (2026-10-09)
 

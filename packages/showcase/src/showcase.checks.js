@@ -14,19 +14,63 @@ import { searchParamsChecks } from './search-params.checks.js';
 import { devicePlaceChecks } from './device-place.checks.js';
 
 /**
- * Every showcase check, for an app showing the showcase pages. `rendering`: 'server' (TanStack Start renders
+ * Every showcase check, for an app showing the showcase pages. `product`: the app's name, which the pages say
+ * (its defineRemyApp `brand`); `rendering`: 'server' (TanStack Start renders
  * each request) or 'prerendered' (no server functions); `formats`: rows only this app's formats page has;
  * `devicePath`: where the device-place row is; `network`: the network place beside it (the deferred-place part).
  */
-export function showcaseChecks({ rendering = 'server', formats = {}, devicePath = '/app/location', network = false } = {}) {
+export function showcaseChecks({ product, rendering = 'server', formats = {}, devicePath = '/app/location', network = false } = {}) {
+  if (!product) throw new Error("showcaseChecks: pass the app's name as `product` (its defineRemyApp `brand`); the pages say it");
   const server = rendering === 'server';
   demoChecks();
   appNavChecks();
-  formatsChecks(formats);
+  formatsChecks({ ...formats, product });
+  settingsChecks({ product });
   navigationBlockingChecks();
-  preloadChecks(server ? undefined : { serverFn: false });
+  preloadChecks({ product, serverFn: server });
   searchParamsChecks(server ? undefined : { serverRendered: false });
   devicePlaceChecks(server ? { path: devicePath, network } : { path: devicePath });
+}
+
+/**
+ * The Settings page's two cards about the app itself. The product's name: every sample is the real
+ * message with the app's name, and typing another name runs the same messages with that one, on this
+ * page only. What is deployed: this app answers for itself, with the build the page was made from.
+ */
+export function settingsChecks({ product }) {
+  const o = { locale: baseLocale };
+  test("the Settings page shows where the product's name is used, and how another name would read", async ({ page }) => {
+    await page.goto(localizedPath('/app/settings', baseLocale));
+    const card = page.locator('[data-product-name]');
+    const sample = name => card.locator(`[data-product-sample="${name}"]`);
+    const field = card.getByLabel(m.product_try_label({}, o), { exact: true });
+    await hydrated(field);
+    await expect(card).toHaveAttribute('data-product-name', product);
+    await expect(sample('brand')).toHaveText(product);
+    await expect(sample('page-title')).toHaveText(await page.title());
+    await expect(sample('home')).toHaveText(m.home_title({ product }, o));
+    await field.fill('Harbor');
+    await expect(sample('brand')).toHaveText('Harbor');
+    await expect(sample('home')).toHaveText(m.home_title({ product: 'Harbor' }, o));
+    await expect(sample('email')).toContainText('Harbor');
+    for (const name of ['brand', 'page-title', 'home', 'email']) await expect(sample(name)).not.toContainText(product);
+    // Only the samples: the app is still called what it is called.
+    await expect(page.locator('.brand').first()).toHaveText(product);
+    await field.fill('');
+    await expect(sample('brand')).toHaveText(product);
+  });
+  test('the Settings page says what is deployed: this app answers for itself, with the build the page was made from', async ({ page, request }) => {
+    const deployment = await (await request.get('/healthz')).json();
+    await page.goto(localizedPath('/app/settings', baseLocale));
+    const own = page.locator('[data-versions] [data-deployment="own"]');
+    await expect(own).toHaveAttribute('data-answered', 'yes');
+    await expect(own.locator('[data-version="service"]')).toHaveText(deployment.service);
+    await expect(own.locator('[data-version="environment"]')).toHaveText(deployment.environment);
+    await expect(own.locator('[data-version="release"]')).toHaveText(deployment.release);
+    if (deployment.build.commit) await expect(own.locator('[data-version="commit"]')).toContainText(deployment.build.commit.slice(0, 7));
+    const packages = page.locator('[data-versions] [data-version="packages"]');
+    for (const [name, version] of Object.entries(deployment.build.packages)) await expect(packages).toContainText(`${name}${version}`);
+  });
 }
 
 /**
@@ -117,7 +161,7 @@ const formatsAreas = ['language', 'time', 'numbers', 'money', 'words'];
  * first (marked), then every other locale's, all from locale-data.js: a new locale needs no edit
  * here. `extra` checks an app's additional rows.
  */
-export function formatsChecks({ extra } = {}) {
+export function formatsChecks({ extra, product } = {}) {
   for (const locale of checkedLocales) {
     const o = { locale };
     test(`${locale}: formats page matches this language's Intl output without JavaScript`, async ({ browser, baseURL }) => {
@@ -136,7 +180,7 @@ export function formatsChecks({ extra } = {}) {
       const numbering = tag.getNumberingSystems()[0];
       const { firstDay, weekend } = tag.getWeekInfo();
       const list = new Intl.ListFormat(locale, { type: 'conjunction' });
-      const titleWords = [...new Intl.Segmenter(locale, { granularity: 'word' }).segment(m.home_title({}, o))].filter(part => part.isWordLike).map(part => part.segment);
+      const titleWords = [...new Intl.Segmenter(locale, { granularity: 'word' }).segment(m.home_title({ product }, o))].filter(part => part.isWordLike).map(part => part.segment);
       const expected = {
         tag: locale,
         name: endonym(locale),

@@ -246,6 +246,8 @@ and timing-sensitive checks failed well before that. So:
 - Every report about something the owner can look at gives its URLs: the live sites, the preview
   (`mise run cf:preview` prints it) and a direct link to each page or feature discussed.
 - Say what was checked and what was not.
+- What is live is asked, not remembered: `mise run cf:versions` prints what each deployment is running
+  and how far that is from your checkout. Say it from there, not from what you last deployed.
 
 ## Multi-agent work
 

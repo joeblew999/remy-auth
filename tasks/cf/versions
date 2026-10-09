@@ -1,0 +1,57 @@
+#!/usr/bin/env node
+//MISE description="REMOTE, read only: ask each deployment what it is running and print one row each: service, environment, commit, how far that is from this checkout, when it was deployed (~1 s; safe beside anything). Asked, never remembered: each Worker answers at /healthz. Defaults to DEPLOY_ORIGIN and DOCS_ORIGIN; pass origins (a preview's, a local server's) to ask those instead"
+//MISE dir="{{config_root}}"
+//USAGE arg "[origins]..." help="Origins to ask; defaults to DEPLOY_ORIGIN and DOCS_ORIGIN"
+// Nothing is written down anywhere, so nothing can drift: a committed record of deployments is wrong
+// the first time somebody deploys from another branch (remy-sport's was, for weeks). "abc1234" alone
+// says little; "3 behind HEAD" is the sentence somebody needs, so each commit is placed against this
+// checkout's.
+import { execFileSync } from 'node:child_process';
+
+const origins = process.argv.slice(2).length ? process.argv.slice(2) : [process.env.DEPLOY_ORIGIN, process.env.DOCS_ORIGIN].filter(Boolean);
+if (!origins.length) { console.error('cf:versions: pass an origin, or set DEPLOY_ORIGIN (and DOCS_ORIGIN) in [env]'); process.exit(1); }
+
+const git = (...args) => {
+  try {
+    return execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  } catch {
+    return '';
+  }
+};
+
+/** Where a deployed commit is from here; a deployment can be older or newer than the branch you hold. */
+function distance(commit) {
+  if (!commit) return 'no commit in its stamp';
+  if (!git('cat-file', '-t', commit)) return 'unknown to this checkout';
+  const behind = git('rev-list', '--count', `${commit}..HEAD`);
+  const ahead = git('rev-list', '--count', `HEAD..${commit}`);
+  if (behind === '0' && ahead === '0') return '= HEAD';
+  return [behind !== '0' && `${behind} behind HEAD`, ahead !== '0' && `${ahead} ahead of HEAD`].filter(Boolean).join(', ');
+}
+
+async function ask(origin) {
+  try {
+    const response = await fetch(new URL('/healthz', origin), { cache: 'no-store', signal: AbortSignal.timeout(10_000) });
+    if (!response.ok) return { error: `HTTP ${response.status}` };
+    return await response.json();
+  } catch (error) {
+    return { error: error.cause?.code ?? error.message };
+  }
+}
+
+const rows = [['ORIGIN', 'SERVICE', 'ENVIRONMENT', 'COMMIT', 'FROM HERE', 'DEPLOYED', 'RELEASE']];
+let unanswered = 0;
+for (const [index, answer] of (await Promise.all(origins.map(ask))).entries()) {
+  const origin = new URL(origins[index]).origin;
+  if (answer.error) { unanswered++; rows.push([origin, `no answer (${answer.error})`, '', '', '', '', '']); continue; }
+  const { build } = answer;
+  // A deployment made before the build stamp existed answers liveness only.
+  if (!build) { rows.push([origin, answer.service, '?', 'no stamp', 'deployed before the build stamp', '', answer.release]); continue; }
+  const commit = build.commit ? `${build.commit.slice(0, 7)}${build.changes ? '+changes' : ''}` : '';
+  rows.push([origin, answer.service, answer.environment, commit, distance(build.commit), (answer.deployedAt ?? '').slice(0, 16).replace('T', ' '), answer.release]);
+}
+
+const widths = rows[0].map((_, column) => Math.max(...rows.map(row => row[column].length)));
+for (const row of rows) console.log(row.map((cell, column) => cell.padEnd(widths[column])).join('  ').trimEnd());
+if (git('status', '--porcelain')) console.log('\nThis checkout has uncommitted changes: HEAD is its last commit, not what is on disk.');
+process.exit(unanswered ? 1 : 0);

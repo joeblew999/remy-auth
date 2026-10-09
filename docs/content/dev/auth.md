@@ -121,7 +121,8 @@ Nothing here creates a session outside Better Auth, and none of it exists on a d
 `send_email` binding (Cloudflare Email Service), from an address on a domain the account has enabled
 for Email Sending, or keeps the message in the outbox where the environment captures mail. A mail
 always has a plain-text part; a refused send says who it was for and why. The sign-in code's email
-is written in the reader's language, with the code and no link.
+is written in the reader's language and in [the product's name](./gui.md#the-products-name), with the
+code and no link.
 
 ## What each piece is checked by
 

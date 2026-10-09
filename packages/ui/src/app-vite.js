@@ -16,14 +16,16 @@ import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { remyParts } from './parts/vite.js';
+import { remyBuild } from './build-vite.js';
 import { appCatalog } from './app-catalog.js';
 
 /**
  * The app's Vite configuration. `plugins`: the app's own, after TanStack Devtools (which must come first)
  * and before the shared ones; `start`: more TanStack Start options (e.g. `prerender`), merged over the
- * shared ones; `cloudflare`: more Cloudflare Vite plugin options; `port`: the dev server's.
+ * shared ones; `cloudflare`: more Cloudflare Vite plugin options; `port`: the dev server's; `build`:
+ * the build stamp's options (`packages`: more packages whose versions it lists).
  */
-export function remyApp({ plugins = [], start = {}, cloudflare: cloudflareOptions = {}, port = 5173, root = process.cwd() } = {}) {
+export function remyApp({ plugins = [], start = {}, cloudflare: cloudflareOptions = {}, port = 5173, root = process.cwd(), build = {} } = {}) {
   // The shared package's parts the app lists in src/parts.json (.plans/parts.md): their routes and the
   // package's own (the CSP report endpoint) mount beside src/routes, and `virtual:remy-parts` says which.
   const parts = remyParts({ root });
@@ -37,6 +39,8 @@ export function remyApp({ plugins = [], start = {}, cloudflare: cloudflareOption
       ...plugins,
       ...catalog,
       parts.plugin,
+      // What this build is (`virtual:remy-build`): /healthz answers with it and the page carries it.
+      remyBuild({ root, ...build }),
       cloudflare({ viteEnvironment: { name: 'ssr' }, ...cloudflareOptions }),
       // Fallback faces sized to the web fonts (size-adjust and ascent/descent overrides), so the swap to
       // Geist keeps the layout and LCP; fonts.css lists them. Before Tailwind.

@@ -11,10 +11,12 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTi
 import { canonicalTimeZone, timeZoneName, timeZonePath } from './parts/time-zones/names';
 import { Button, buttonVariants } from '@joeblew999/remy-ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@joeblew999/remy-ui/components/card';
-import { Field, FieldError, FieldGroup, FieldLabel } from '@joeblew999/remy-ui/components/field';
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@joeblew999/remy-ui/components/field';
 import { Input } from '@joeblew999/remy-ui/components/input';
 import { FormatsContent, type FormatsControlCards, type FormatsExtras } from './pages';
 import { Intro } from '@joeblew999/remy-ui/shell';
+import { pageTitle, useRemyApp } from '@joeblew999/remy-ui/app-config';
+import { Versions } from '@joeblew999/remy-ui/versions';
 import { AppShell } from '@joeblew999/remy-ui/app-shell';
 import { formatLocale, type LocaleInfo } from '@joeblew999/remy-ui/locale-info';
 import { reservationSchema, type Reservation, type ReservationDraft, type ReservationResult } from './reservation';
@@ -240,7 +242,46 @@ export function ClockPage({ locale, preferred, zones, onZonesChange }: { locale:
   </AppShell>;
 }
 
-/** Settings: the language and the appearance (kept on this device), and what the device tells the app. */
+/** A sign-in code for the samples: not one any environment accepts. */
+const sampleCode = '123456';
+
+/**
+ * The product's name, shown where it is used. An app writes its name once (defineRemyApp's `brand`)
+ * and every message that says it takes it as `{product}`; typing another name here runs the same
+ * messages with it, on this page only, so a reader sees what a project of another name gets.
+ */
+export function ProductNameCard({ locale }: { locale: Locale }) {
+  const o = { locale };
+  const { brand } = useRemyApp();
+  const [typed, setTyped] = useState('');
+  const product = typed.trim() || brand;
+  const samples = [
+    ['brand', m.product_sample_brand({}, o), product],
+    ['page-title', m.product_sample_page_title({}, o), pageTitle(m.settings_title({}, o), product)],
+    ['home', m.product_sample_home({}, o), m.home_title({ product }, o)],
+    ['email', m.product_sample_email({}, o), m.email_code_subject({ code: sampleCode, product }, o)],
+  ] as const;
+  return <Card data-product-name={product}>
+    <CardHeader><CardTitle>{m.product_title({}, o)}</CardTitle></CardHeader>
+    <CardContent className="flex flex-col gap-6">
+      <FieldGroup>
+        <Field>
+          <FieldLabel htmlFor="product-name">{m.product_try_label({}, o)}</FieldLabel>
+          <Input id="product-name" name="product" autoComplete="off" maxLength={40} placeholder={brand} value={typed} onChange={event => setTyped(event.target.value)} aria-describedby="product-name-hint" />
+          <FieldDescription id="product-name-hint">{m.product_intro({ product: brand }, o)}</FieldDescription>
+        </Field>
+      </FieldGroup>
+      <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-[auto_1fr]">
+        {samples.map(([sample, label, text]) => <div key={sample} className="contents">
+          <dt className="text-muted-foreground">{label}</dt>
+          <dd data-product-sample={sample} className="[overflow-wrap:anywhere]">{text}</dd>
+        </div>)}
+      </dl>
+    </CardContent>
+  </Card>;
+}
+
+/** Settings: the language and the appearance (kept on this device), what the device tells the app, the product's name and what is deployed. */
 export function SettingsPage({ locale, preferred }: { locale: Locale; preferred?: Locale }) {
   const o = { locale };
   const { theme, setTheme } = useTheme();
@@ -274,6 +315,8 @@ export function SettingsPage({ locale, preferred }: { locale: Locale; preferred?
           </dl>
         </CardContent>
       </Card>
+      <ProductNameCard locale={locale} />
+      <Versions locale={locale} />
     </section>
   </AppShell>;
 }
@@ -287,6 +330,7 @@ export type AccountAuth = { account: { name: string; email: string } | null; sig
  */
 export function AccountPage({ locale, preferred, auth }: { locale: Locale; preferred?: Locale; auth?: AccountAuth }) {
   const o = { locale };
+  const product = useRemyApp().brand;
   if (auth) return <AppShell locale={locale} path="/app/account" preferred={preferred}>
     <section className="flex flex-col gap-6">
       <Intro locale={locale} title={m.account_title({}, o)} intro={m.account_auth_intro({}, o)} backTo="app" />
@@ -314,7 +358,7 @@ export function AccountPage({ locale, preferred, auth }: { locale: Locale; prefe
         <EmptyHeader>
           <EmptyMedia variant="icon"><UserIcon /></EmptyMedia>
           <EmptyTitle>{m.account_empty_title({}, o)}</EmptyTitle>
-          <EmptyDescription>{m.account_empty_description({}, o)}</EmptyDescription>
+          <EmptyDescription>{m.account_empty_description({ product }, o)}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent><Link className={buttonVariants({ variant: 'outline' })} to="/app/settings" preload="intent">{m.nav_settings({}, o)}</Link></EmptyContent>
       </Empty>

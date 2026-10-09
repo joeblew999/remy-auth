@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { buildChecks } from '../../build.checks.js';
 
 // What is ours in the docs Worker (Fumadocs is tested by Fumadocs): the head search engines read
 // (<html lang>, canonical, hreflang: docs/page.ts), Ask AI's chat route (routes/api/chat.$site.ts) when the
@@ -35,6 +36,9 @@ const hydratePaths = (['docs', 'dev']).flatMap(site => {
   return [...(first ? [`/${site}/${first}`] : [`/${site}`]), ...(translated ? [`/${site}/${translated}/${first}`] : [])];
 });
 const attr = (html, pattern) => pattern.exec(html)?.[1];
+
+// The docs Worker answers what it is, as every Worker on the package does (an app's page lists it: Versions).
+buildChecks({ service: docsConfig.service });
 
 test('every sitemap page answers in its own language, canonical to itself, with the sitemap\'s alternates', async ({ request }) => {
   const xml = await (await request.get('/sitemap.xml')).text();

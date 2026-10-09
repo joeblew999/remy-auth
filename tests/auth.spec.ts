@@ -8,6 +8,7 @@ import { environments } from '@joeblew999/remy-ui/environment';
 import { clearOutbox, mailerFor, readOutbox } from '@joeblew999/remy-ui/mail';
 import { DEMO_SIGN_IN_CODE, environmentOf, fixedSignInCode, policyFor } from '../src/auth/environment';
 import { seededPeople } from '../src/auth/seed';
+import { product } from '../src/product';
 import { writableFieldProblems } from '../src/auth/fields';
 import { authOptions, personMayEdit } from '../src/auth/options';
 import { capturedMail, latestCode, local, newEmail, seededSignIn, sendCode, signIn, signedInAsSeeded, visitor, visitorAddress } from './people';
@@ -217,9 +218,9 @@ test('the sign-in code is one email: the code and nothing to click, written for 
   const [mail, ...earlier] = await capturedMail(reader, email);
   expect(earlier).toEqual([]);
   const code = mail.text.match(/\b\d{6}\b/)![0];
-  expect(mail).toMatchObject({ to: email, from: 'noreply@mail.ubuntusoftware.net', subject: m.email_code_subject({ code }, { locale: 'ar' }) });
+  expect(mail).toMatchObject({ to: email, from: 'noreply@mail.ubuntusoftware.net', subject: m.email_code_subject({ code, product }, { locale: 'ar' }) });
   // Plain text and HTML say the same; the HTML is in the reader's language and direction, and the code reads left to right.
-  for (const line of [m.email_code_intro({}, { locale: 'ar' }), m.email_code_expiry({}, { locale: 'ar' }), m.email_code_ignore({}, { locale: 'ar' })]) expect(mail.text).toContain(line);
+  for (const line of [m.email_code_intro({ product }, { locale: 'ar' }), m.email_code_expiry({}, { locale: 'ar' }), m.email_code_ignore({}, { locale: 'ar' })]) expect(mail.text).toContain(line);
   expect(mail.html).toContain('<html lang="ar" dir="rtl">');
   expect(mail.html).toContain(`<h1 dir="ltr"`);
   expect(mail.html).toContain(`>${code}</h1>`);

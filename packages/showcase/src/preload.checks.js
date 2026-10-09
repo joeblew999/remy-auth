@@ -21,7 +21,7 @@ function record(page) {
  * app reading Cloudflare's request); a prerendered app passes false and the check then requires
  * no data request at all.
  */
-export function preloadChecks({ serverFn = true, locale = 'en' } = {}) {
+export function preloadChecks({ product, serverFn = true, locale = 'en' } = {}) {
   const o = { locale };
 
   test('hovering an in-app link loads its route code and data before the click; the click then fetches nothing', async ({ page, baseURL }) => {
@@ -63,7 +63,7 @@ export function preloadChecks({ serverFn = true, locale = 'en' } = {}) {
       if (step === 'back') await page.goBack(); else await page.goForward();
       const formats = step === 'forward';
       await expect(page).toHaveURL(`${baseURL}${localizedPath(formats ? '/formats' : '', locale)}`);
-      await expect(page.getByRole('heading', { level: 1 })).toHaveText(formats ? m.formats_title({}, o) : m.home_title({}, o));
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText(formats ? m.formats_title({}, o) : m.home_title({ product }, o));
     }
     await page.waitForLoadState('networkidle');
     expect(log.since(mark).filter(request => isServerFn(request) || ['fetch', 'xhr', 'document'].includes(request.resourceType())).map(request => request.url()),

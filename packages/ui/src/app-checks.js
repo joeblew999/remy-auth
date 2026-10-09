@@ -1,15 +1,24 @@
 import { zoneChecks, publicPageChecks, entryChecks, themeChecks, textChecks, fontChecks, observabilityChecks, cspChecks } from './checks.js';
+import { buildChecks, buildStampChecks, productNameChecks } from './versions.checks.js';
 import { existsSync } from 'node:fs';
 import { partsFile, readParts } from './parts/list.js';
 
 // One call per kind of app for the checks every app on the package runs, over the app's own pages (its
-// `sitePaths` and `appPaths`: both zones, their entry URLs, text, fonts, observability, CSP, the theme), and
+// `sitePaths` and `appPaths`: both zones, their entry URLs, text, fonts, observability, CSP, the theme, which
+// build and whose name each page carries), and
 // nothing more: an app with pages of its own adds their checks. The home page's words are the app's to check (`home`); the structure is every app's
 // (.plans/thin-apps.md, group 4). Checks that are not in a set stay separate calls. Part-aware
 // (.plans/parts.md): what a listed part owns runs with partChecks() instead, never twice.
 
 /** The app's listed parts: `parts` when given, else its src/parts.json when it has one, else none. */
 const listedParts = parts => parts ?? (existsSync(partsFile) ? readParts() : []);
+
+/** What the app is, to its reader: the build its Worker answers with, the stamp its app frame shows, and its own name on every page. */
+function identityChecks({ service, appPaths, every }) {
+  buildChecks({ service });
+  if (appPaths.length) buildStampChecks({ path: appPaths[0] });
+  productNameChecks({ paths: every });
+}
 
 /**
  * A server-rendered app (TanStack Start rendering every request in the Worker): entry URLs redirect
@@ -28,6 +37,7 @@ export function serverAppChecks({ service, sitePaths, appPaths = [], home, oneLa
   themeChecks();
   observabilityChecks({ service, paths: every });
   cspChecks({ paths: every, enforce: cspEnforced });
+  identityChecks({ service, appPaths, every });
 }
 
 /**
@@ -42,4 +52,5 @@ export function prerenderedAppChecks({ service, sitePaths, appPaths = [], home }
   themeChecks();
   observabilityChecks({ service, paths: every });
   textChecks({ paths: every });
+  identityChecks({ service, appPaths, every });
 }

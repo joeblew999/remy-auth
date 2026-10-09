@@ -13,7 +13,7 @@ export const Route = createFileRoute('/app/')({
   // it pulls in the API client and its contract (oRPC and Zod), which no other page's first load needs.
   codeSplitGroupings: [['loader', 'component']],
   loader: statusCardLoader,
-  head: () => pageHead({ path: '/app', title: locale => m.app_home_title({}, { locale }), description: locale => m.app_home_description({}, { locale }) }),
+  head: () => pageHead({ path: '/app', title: locale => m.app_home_title({}, { locale }), description: (locale, product) => m.app_home_description({ product }, { locale }) }),
   component: AppHome,
   ...problemPages,
 });

@@ -218,6 +218,7 @@ mise: outside a task mise's Node shim reapplies `[env]` and would replace `PUBLI
 | `cf:preview` | Deploy this commit as a throwaway Worker `<worker>-check-<commit>` (production untouched), run level 1 against it, delete it; `KEEP_PREVIEW=1` keeps it |
 | `cf:preview-delete` | List check Workers, or delete one by name; never the production Worker |
 | `cf:urls` | Print the production (or a given) origin's pages and `/healthz`, for reports |
+| `cf:versions` | Ask each deployment (`DEPLOY_ORIGIN` and `DOCS_ORIGIN`, or the origins given) what it is running: service, environment, commit, how far that is from this checkout, when it was deployed. [Asked, never remembered](./gui.md#which-version-is-deployed) |
 | `project:test:remote` | Level 1 against `TEST_BASE_URL` |
 | `cf:events`, `cf:ai-usage`, `cf:ai-check`, `cf:ai-gateway` | Stored Workers Logs, AI Gateway usage, AI setup check, the gateway's settings ([tooling](./tooling.md#the-docs-answers-on-cloudflare-ai-search-and-ai-gateway)) |
 | `project:upgrade-ui` | Move an app to one shared release: package version and tasks `ref` together, then `project:verify` |

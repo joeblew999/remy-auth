@@ -99,6 +99,12 @@ formats page's intro and "This language" share the first screen on desktop; issu
   break; `packages:upgrade` and the gates say), and move remy-auth-app with the next release
   ([what the move touched](done/openapi-contracts.md#orpc-20-watch-2026-09-26), issue #1).
 
+## What is deployed, and whose name it carries (owner, 2026-10-09)
+
+[product-identity](product-identity.md): the build stamp every Worker answers with at `/healthz`, the
+`BuildStamp` and `Versions` components, `cf:versions`, and the product's name as one value every message
+takes. Built on branch `product-identity`; waits for the owner to say ship.
+
 ## Auth service (owner, 2026-10-09)
 
 [auth-service](auth-service.md): opened for its first real slice. Slice 1 (Better Auth in the Worker on
@@ -109,8 +115,8 @@ are recorded in the plan. Signing in on the deployment waits for mail delivery. 
 engine lifted from remy-sport and used by every server operation and by the GUI (owner: "the rebac did
 not also get used. And also not in the gui"), with the notes demo, and slice 3, remy-sport's way of
 signing in for every Remy app (mail through Cloudflare Email Service, one table of what each
-environment permits, seeded people with roles and a one-press picker), are built on branch
-`auth-relations` and wait for the owner to say ship. Then: the app-trust comparison (OAuth tokens verified locally, or
+environment permits, seeded people with roles and a one-press picker), are on main
+and live since 2026-10-09. Then: the app-trust comparison (OAuth tokens verified locally, or
 a service binding), which lets other apps use all of it.
 
 ## Core Web Vitals: the mobile formats page is over the limit (found 2026-10-09)

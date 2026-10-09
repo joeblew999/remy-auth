@@ -6,6 +6,7 @@ import { defineRemyApp } from '@joeblew999/remy-ui/app-config';
 import { showcaseAppNav, showcaseSiteNav } from '@joeblew999/remy-showcase/app-nav';
 import { docsConfig } from '../docs/docs.config';
 import { docsOrigin } from './docs/origin';
+import { product } from './product';
 import { service } from './service';
 import { sitePaths } from './paths';
 
@@ -20,7 +21,7 @@ const appNav = [
 ];
 
 export const remyApp = defineRemyApp({
-  brand: 'Remy',
+  brand: product,
   service,
   sitePaths,
   repository: docsConfig.repository,

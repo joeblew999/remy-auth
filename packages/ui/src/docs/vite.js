@@ -10,6 +10,7 @@ import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import remarkDirective from 'remark-directive';
 import { remarkAutoTypeTable } from 'fumadocs-typescript';
 import { remarkDirectiveAdmonition, remarkMdxMermaid, remarkSteps } from 'fumadocs-core/mdx-plugins';
+import { remyBuild } from '../build-vite.js';
 
 // An app's whole docs Worker from its docs.config.ts (.plans/thin-apps.md, group 2): its docs/vite.config.ts
 // is `export default remyDocs(docsConfig, { contract: '<its contract package>' })`. The Worker itself is this
@@ -67,6 +68,8 @@ export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
   writeFileSync(join(generated, 'wrangler.json'), `${JSON.stringify({ ...docsWorkerConfig(docsConfig, `../${srcDirectory}`), assets: { directory: '../dist/client' } }, null, 2)}\n`);
   return defineConfig({
     plugins: [
+      // What this build is (`virtual:remy-build`): the docs Worker's /healthz answers with it, as an app's does.
+      remyBuild({ root }),
       // Cloudflare's static-asset headers, the same for every app's docs: Vite names these files by their
       // content hash, so they never change; browsers may keep them for a year without asking again.
       {

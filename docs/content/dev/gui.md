@@ -100,10 +100,12 @@ Every page exists in every locale (13 prefixes such as `/en`, `/ar`, `/ja`; the 
 | `/en/app/demo` | App | `ssr: false`. Counter and reservation form validated in the browser and again by the contract's `POST /api/reservations` (a TanStack Query mutation), which answers in the page's language; broken rules come back as its typed 400 and show as the form's own errors; leaving with unsaved input asks first (`useBlocker`) |
 | `/en/app/location` | App | Cloudflare's location of the request beside the device's own, which the Geolocation API gives only after the visitor presses its button |
 | `/en/app/account` | App | Who is signed in (name and email, with sign-out), or the sign-in form: an email address, then the six-digit code Better Auth sends to it (TanStack Form; Better Auth's client calling `/api/auth`). The loader asks a server function that calls the contract's `me` inside the server, so the server renders the right state from the page's cookies and never caches it. The code's email is written in the page's language and sent through Cloudflare Email Service. Where the environment offers seeded people (local only), the form lists them with their role and what they hold, one press to sign in as each. Where no sign-in code could be delivered it keeps the shared empty state instead of the form |
+| `/en/app/settings` | App | The language and the appearance (kept on the device), what the device tells the app, [the product's name](#the-products-name) where it is used and how another name would read, and [what is deployed](#which-version-is-deployed) |
 | `/en/app/notes` | App | remy-auth's own page, the notes demo: a signed-in person writes notes and shares each with an address, to read or to edit. Who may do what is decided by relations (its author, its editors, its readers; `packages/contract/src/notes.ts` holds the vocabulary), the server enforces it through the guard, and the page shows a control only inside `<Allowed>`, from the permissions the server sent with each note. Signed out, it points at the account page |
 | `/api/status`, `/api/me`, `/api/notes`..., `/api/reservations` | API | Contract endpoints ([@joeblew999/remy-auth-contract](https://github.com/joeblew999/remy-auth/blob/main/packages/contract/README.md)) served by oRPC behind one Start server route (`src/routes/api.$.ts`, `src/api/`): input and output validated, typed errors, the language from Accept-Language (Paraglide's `routeStrategies`), no locale in the URL. Each runs behind the platform's guard, which enforces its contract policy: `status` and `reservations` are public, `me` and the notes list answer only a signed-in person and refuse anyone else with 401, and each change to a note is an action the relation engine decides (404 for a note that does not exist, 403 without a relation that allows it) |
 | `/api/auth/*` | API | Better Auth's own endpoints (send a code, sign in, the session, sign out) behind one catch-all Start server route (`src/routes/api.auth.$.ts`), on the Worker's D1 database (`DB`); not part of the contract or its document |
 | `/dev/mail`, `/dev/people` | Local only | The local environment's outbox (the mail captured for `?recipient=` instead of sent) and its seeded sign-in (the people it offers, what each holds, and the published code they sign in with); 404 in any other environment (the table in `src/auth/environment.ts`, [explained](./auth.md#environments-one-table)) |
+| `/healthz` | Every Worker | Liveness, and [which deployment answered](#which-version-is-deployed): its environment, Cloudflare's version and the build stamp |
 | `/api/openapi.json`, `/api/doc` | API | The OpenAPI 3.1 document generated from the router in-process, and its reference page (oRPC's Scalar page, script pinned) |
 | `/robots.txt`, `/sitemap.xml` | Server routes | `Cache-Control: public, max-age=3600, s-maxage=3600`; methods other than GET and HEAD answer 405 with `Allow`; the sitemap lists the site pages in every locale with `hreflang` alternates |
 | Unknown route or locale | | HTTP 404 with the localized not-found page (an un-localized unknown path first redirects to the visitor's language, as TanStack's rewrite canonicalizes it) |
@@ -140,6 +142,67 @@ Fonts live in [`packages/ui/src/fonts.css`](https://github.com/joeblew999/remy-a
 `globals.css` (see [`src/styles.css`](https://github.com/joeblew999/remy-auth/blob/main/src/styles.css)); the file explains its rules. fontaine in
 [`vite.config.ts`](https://github.com/joeblew999/remy-auth/blob/main/vite.config.ts) generates the size-matched fallback faces it names.
 `publicPageChecks` fails on any named family that is not loaded.
+
+## Which version is deployed
+
+Nothing records what is deployed: each deployment says what it is when asked, so the answer cannot be
+out of date (the design is remy-sport's, whose committed record of deployments was wrong for weeks).
+
+- **The build stamp.** `remyApp()` and `remyDocs()` work it out once per build from the sources: the
+  app's package, the commit, a short hash of anything uncommitted, and the installed version of each
+  platform package (`build: { packages: [...] }` in `remyApp()` lists more). The same checkout builds
+  the same stamp; there is no build time in it, so a bundle changes only when its code does.
+- **`/healthz`**, on every Worker built on the package, answers with it: `service`, `environment`
+  (what the Worker declares; production when it declares none), `release` and `deployedAt` (Cloudflare's
+  version and when it was given it) and `build`. It names nobody, and any origin may read it.
+- **`BuildStamp`** (`@joeblew999/remy-ui/versions`) is in the app frame's footer, so every app page of
+  every app has it: the environment unless it is production, the product's name, the commit. The page
+  carries the stamp it was built with; when its deployment answers with another, the page is a tab
+  left open across a deploy, and the stamp offers the reload. It never reloads by itself.
+- **`Versions`**, for a settings or about page: this app, its docs Worker (`docs` in `defineRemyApp`)
+  and any `deployments` the app lists (a service it calls), each answering for itself, then the
+  packages this build was made with. remy-auth's Settings page shows it.
+- **`mise run cf:versions`** prints a row per deployment (`DEPLOY_ORIGIN` and `DOCS_ORIGIN`, or the
+  origins given), with each commit placed against this checkout: `= HEAD`, `3 behind HEAD`. Use it
+  before saying what is live.
+
+The shared check sets prove it in every app: `/healthz` names this checkout's commit on a local run
+(a stamp left over from an earlier build fails), and the frame offers the reload only when the
+deployment has moved on.
+
+## The product's name
+
+Remy is this prototype's name. A project built on the same code has its own, and writes it once:
+
+```ts
+// docs/docs.config.ts: the docs say it, and the app takes it from here
+const product = 'Harbor';
+export const docsConfig = defineDocsConfig({ product, ... });
+
+// src/remy-app.tsx
+export const remyApp = defineRemyApp({ brand: docsConfig.product, ... });
+```
+
+An app without docs writes `brand` directly. Everything a person reads takes the name from there: the
+frame, every page's title, the home page's structured data, and every message that says the name,
+which takes it as a parameter:
+
+```tsx
+m.home_title({ product: useRemyApp().brand }, { locale })                       // in a page
+pageHead({ ..., description: (locale, product) => m.home_description({ product }, { locale }) })   // in a head
+codeMail({ otp, product }, locale)                                              // the sign-in email
+```
+
+A message that names the product is written with `{product}`, never with a name, so Paraglide's types
+refuse a caller that leaves it out. remy-auth's Settings page shows where the name is used, and how
+each place reads under another name.
+
+What is not the product's name, and stays: the packages (`@joeblew999/remy-ui`), the `remy` skill, task
+names, a Worker's service name and an MCP server's name. Those are identifiers a developer sees.
+
+Checks: every page's title ends with the app's name, and an app of another name never shows "Remy"
+(`productNameChecks`, in every app's shared set; the consumer fixture, called "My app", is where it
+bites); the platform's catalog names no product (`tests/product.spec.ts`).
 
 ## Structure and reuse
 
