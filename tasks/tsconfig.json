@@ -1,9 +1,15 @@
 {
-  "//": "The shared tasks' TypeScript (tasks/**/*.ts): Node runs each file as it is (no build), and tsc checks them all here. project:typecheck runs it from the app that includes the tasks, so a task that no longer compiles fails the check instead of the deploy.",
-  "include": ["./**/*.ts"],
+  "//": "The shared tasks' TypeScript (tasks/**/*.ts): Node runs each file as it is (no build), and tsc checks them all here. project:typecheck-tasks runs it from the app that includes the tasks. In a consumer this folder is mise's include cache with no node_modules above it, so that task links the app's node_modules next to the tasks folder (beside it, never inside: mise reads every TOML under tasks/ as a task file), and the packages the tasks import (wrangler, node's types) resolve as they do in the app.",
+  "include": [
+    "./**/*.ts"
+  ],
   "compilerOptions": {
-    "lib": ["ES2022"],
-    "types": ["node"],
+    "lib": [
+      "ES2022"
+    ],
+    "types": [
+      "node"
+    ],
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",

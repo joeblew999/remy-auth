@@ -1,0 +1,5 @@
+{
+  "//": "The shared tasks are ECMAScript modules (tasks/**/*.ts): Node and tsc read this wherever the folder sits, this repository or a consumer's include cache. Not a package: nothing is published from here.",
+  "type": "module",
+  "private": true
+}

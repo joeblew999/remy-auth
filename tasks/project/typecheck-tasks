@@ -3,4 +3,10 @@
 #MISE dir="{{config_root}}"
 set -euo pipefail
 # A file task knows its own folder; a TOML task in an include does not, which is why this is a file.
-exec ./node_modules/.bin/tsc -p "$(dirname "$0")/../tsconfig.json"
+# The packages the tasks import resolve from the app: in a consumer the tasks sit in mise's cache with
+# no node_modules above them, so the app's is linked next to the tasks folder (beside, never inside it:
+# mise reads every TOML under tasks/ as a task file). In this repository that folder is the repo root,
+# which has its own node_modules already.
+tasks="$(cd "$(dirname "$0")/.." && pwd)"
+[ -e "$tasks/../node_modules" ] || ln -s "$PWD/node_modules" "$tasks/../node_modules"
+exec ./node_modules/.bin/tsc -p "$tasks/tsconfig.json"
