@@ -276,7 +276,7 @@ por los mismos cuatro comandos; main es el único integrador, y GitHub comprueba
 
 | | Comando | Qué hace |
 | --- | --- | --- |
-| Iniciar | `mise run dev:start -- <name>` | un worktree en la rama `<name>` a partir de main (`.claude/worktrees/<name>`), instalado, con puertos propios (`mise.local.toml`) y el guardián del flujo |
+| Iniciar | `mise run dev:start -- <name>` | un worktree en la rama `<name>` a partir de main (`.claude/worktrees/<name>`), instalado (`npm ci`, `project:prepare`), con puertos propios (`mise.local.toml`) y el guardián del flujo. Los worktrees propios de Claude Code viven en el mismo lugar y son solo una carpeta: dentro de uno, `mise run dev:start` sin nombre lo prepara de la misma manera |
 | Programar | `mise run dev:change` | la comprobación, en segundos, después de cada cambio |
 | Aterrizar | `mise run dev:land -- "<what changed>"` | primero se fusiona main (un conflicto se detiene nombrando los archivos), la comprobación, commit, fast-forward de main, push, traducción cuando está desactualizada, staging. GitHub ejecuta las comprobaciones pesadas; una ejecución roja comenta en el commit |
 | Terminar | `mise run dev:done` | el worktree y la rama ya aterrizados desaparecen; se rechaza mientras quede algo sin aterrizar |
