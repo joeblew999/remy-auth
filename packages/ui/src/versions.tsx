@@ -1,4 +1,5 @@
 /// <reference path="./build-virtual.d.ts" />
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { build } from 'virtual:remy-build';
 import type { Locale } from './paraglide/runtime.js';
@@ -79,18 +80,23 @@ function DeploymentCard({ locale, title, origin = '', repository, own }: { local
 
 /**
  * What is deployed, each part answering for itself: this app, its docs Worker when the app has one
- * (`docs` in defineRemyApp), any other `deployments` the app lists (a service it calls), and the
- * packages this build was made with. For a settings or about page.
+ * (`docs` in defineRemyApp), the app's other deployments (`deployments` there: staging beside
+ * production, a service it calls) and any more given here, and the packages this build was made with.
+ * For a settings or about page. The others are asked by the browser, so they appear once it has the
+ * page; the one this page is served from is "this app" and is not listed twice.
  */
 export function Versions({ locale, deployments = [] }: { locale: Locale; deployments?: readonly ListedDeployment[] }) {
   const o = { locale };
   const app = useRemyApp();
   const packages = Object.entries(build.packages);
+  const [here, setHere] = useState<string>();
+  useEffect(() => setHere(window.location.origin), []);
+  const others = here === undefined ? [] : [...(app.deployments ?? []), ...deployments].filter(listed => new URL(listed.origin).origin !== here);
   return <section className="flex flex-col gap-4" aria-labelledby="versions-title" data-versions>
     <h2 id="versions-title" className="text-lg font-medium">{m.versions_title({}, o)}</h2>
     <DeploymentCard locale={locale} title={app.brand} repository={app.repository} own={build} />
     {app.docs && <DeploymentCard locale={locale} title={m.versions_docs({}, o)} origin={app.docs} repository={app.repository} />}
-    {deployments.map(listed => <DeploymentCard key={listed.origin} locale={locale} title={listed.name} origin={listed.origin} repository={listed.repository} />)}
+    {others.map(listed => <DeploymentCard key={listed.origin} locale={locale} title={listed.name} origin={listed.origin} repository={listed.repository ?? app.repository} />)}
     {packages.length > 0 && <Card data-version="packages">
       <CardHeader><CardTitle>{m.versions_packages({}, o)}</CardTitle></CardHeader>
       <CardContent><dl className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-x-4 gap-y-3 text-sm">

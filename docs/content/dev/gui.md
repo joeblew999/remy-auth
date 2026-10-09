@@ -31,7 +31,8 @@ Development uses the same Worker source and Cloudflare runtime with hot reload.
 | `project:preview` | Build, then serve the production artifact on Cloudflare's local host at `PREVIEW_PORT` (4173) |
 | `project:check` … `project:verify` | The test tiers, on the same local host ([rule](./how-we-work.md#gates-before-anything-leaves-the-machine), [tasks](./tasks.md)) |
 | `project:test:google` / `project:test:cwv` | Google's level: Lighthouse audits locally; Core Web Vitals on a throwaway Cloudflare Worker |
-| `cf:deploy` | Build, then upload to the authenticated Cloudflare account (no tests unless `GATE` picks a tier) |
+| `cf:deploy` | Build, then upload production to the authenticated Cloudflare account (no tests unless `GATE` picks a tier) |
+| `cf:staging` | The same for the staging environment: its own Worker (`STAGING_ORIGIN`) and resources |
 | `cf:preview` | Deploy this commit as a throwaway Worker, run level 1 against it, delete it |
 | `project:test:remote` | Same tests against `TEST_BASE_URL`; no local server or deployment |
 | `project:report` / `project:report:remote` | Open the last local or remote run's HTML report, including Lighthouse reports |
@@ -42,10 +43,11 @@ After deliberately deploying to the intended account, run:
 TEST_BASE_URL=https://your-worker.your-subdomain.workers.dev mise run project:test:remote
 ```
 
-The URL must be an origin, without a path or query. Current tests read public
-routes and manipulate only the browser counter. The sign-in checks (`tests/auth.spec.ts`) read
-their codes from the local mail capture, so they run against the local target only; against a
-deployment they check that the capture does not exist. The remote test task can
+The URL must be an origin, without a path or query (`STAGING_ORIGIN` for staging). The checks that
+need a new person read their code from the local mail capture, so they run against the local target
+only. The rest ask the Worker which environment it is (`/healthz`) and expect what
+[the table](./auth.md#environments-one-table) gives it: against staging the seeded people are there
+and one press signs in as one of them; against production none of it exists. The remote test task can
 also target an already-running local preview to check the external-server path.
 
 The pipeline tasks are shared defaults from `tasks/project.toml`, driven by this
@@ -53,12 +55,13 @@ project's `[env]` inputs (`PREVIEW_PORT`, `DEPLOY_ORIGIN`); this repository over
 `project:typecheck` and `project:verify` because it owns the package. The Playwright
 configuration is the package's `playwrightConfig()`.
 
-There is currently one Worker configuration and no named staging environment.
-If environments are added, select them using `CLOUDFLARE_ENV` at build time,
-as required by the [Cloudflare Vite integration](https://developers.cloudflare.com/workers/vite-plugin/reference/cloudflare-environments/).
-Keep the implementation shared; vary only resource identifiers, secrets and other
-environment values. Bindings that Wrangler does not inherit must be declared for
-each named environment. Do not copy the application or use remote bindings for
+There is one Worker configuration with one named environment, `staging` (`env.staging` in
+`wrangler.jsonc`): the same code as its own Worker, with its own databases and secret. A named
+environment is selected with `CLOUDFLARE_ENV` at build time, as the
+[Cloudflare Vite integration](https://developers.cloudflare.com/workers/vite-plugin/reference/cloudflare-environments/)
+requires; `mise run cf:staging` does that and then everything `cf:deploy` does. Keep the
+implementation shared; vary only resource identifiers, secrets and other environment values. Bindings,
+vars and required secrets are not inherited by a named environment: each is declared again there. Do not copy the application or use remote bindings for
 ordinary local development. Local secrets stay in ignored `.dev.vars`; deployed
 secrets are managed through Cloudflare. Local data is not uploaded by deployment.
 
@@ -160,9 +163,10 @@ out of date (the design is remy-sport's, whose committed record of deployments w
   carries the stamp it was built with; when its deployment answers with another, the page is a tab
   left open across a deploy, and the stamp offers the reload. It never reloads by itself.
 - **`Versions`**, for a settings or about page: this app, its docs Worker (`docs` in `defineRemyApp`)
-  and any `deployments` the app lists (a service it calls), each answering for itself, then the
-  packages this build was made with. remy-auth's Settings page shows it.
-- **`mise run cf:versions`** prints a row per deployment (`DEPLOY_ORIGIN` and `DOCS_ORIGIN`, or the
+  and the `deployments` the app lists there (staging beside production, a service it calls), each
+  answering for itself, then the packages this build was made with. remy-auth's Settings page shows
+  it, with its production and staging.
+- **`mise run cf:versions`** prints a row per deployment (`DEPLOY_ORIGIN`, `STAGING_ORIGIN` and `DOCS_ORIGIN`, or the
   origins given), with each commit placed against this checkout: `= HEAD`, `3 behind HEAD`. Use it
   before saying what is live.
 

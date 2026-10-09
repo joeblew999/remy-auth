@@ -41,6 +41,11 @@ export type RemyApp = {
    * "Docs" and "Developers" links and the app sidebar's "Guide". None shows none.
    */
   docs?: string;
+  /**
+   * The app's deployments (production, staging) and the services it calls, for `Versions`: each is asked
+   * what it is running. The one a page is itself served from is left out there: it is "this app".
+   */
+  deployments?: readonly { name: string; origin: string; repository?: string }[];
   site?: {
     /** The site header's navigation, after the brand. */
     nav?: readonly NavItem[];

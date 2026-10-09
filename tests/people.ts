@@ -1,15 +1,28 @@
 import { expect, type APIRequestContext } from '@playwright/test';
 import { randomBytes, randomUUID } from 'node:crypto';
+import { policyFor } from '../src/auth/environment';
 
 // People for the checks that need somebody signed in, on the local Worker: each is a visitor of their
 // own who signs in for real. A new person gets Better Auth's own random code, which the local
 // environment keeps in its outbox instead of mailing (src/auth/mail.server.ts) and the Worker reads
 // back (/dev/mail). A seeded person (src/auth/seed.ts) signs in with the code the environment
 // publishes for them (/dev/people). Nothing is mocked and no session is made outside Better Auth.
-// Only a local Worker captures mail and offers seeded people, so these run against the local target.
+// Only a local Worker captures mail, so a check that needs a new person runs against the local target;
+// staging offers the seeded people too, so a check that needs only them runs there as well. Each
+// check asks the Worker what it permits (`permitted`) instead of guessing it from the target.
 
 /** Whether the checks run against the local Worker (TEST_TARGET is "remote" against a deployment). */
 export const local = process.env.TEST_TARGET !== 'remote';
+
+/**
+ * What the Worker under test permits: it says which environment it is (/healthz), and the app's table
+ * says what that means. So a check asks what should be there instead of guessing it from the target:
+ * staging is a deployment with seeded people, production a deployment with none.
+ */
+export async function permitted(who: APIRequestContext) {
+  const { environment }: { environment: string } = await (await who.get('/healthz')).json();
+  return { environment, ...policyFor({ ENVIRONMENT: environment }) };
+}
 
 type Playwright = { request: { newContext: (options: object) => Promise<APIRequestContext> } };
 
@@ -24,9 +37,15 @@ export const newEmail = (name = 'check') => `${name}-${randomUUID()}@example.tes
  */
 export const visitorAddress = () => `2001:db8:${randomBytes(2).toString('hex')}:${randomBytes(2).toString('hex')}::1`;
 
-/** A visitor with their own cookies and address: nobody is signed in yet. */
+/**
+ * The header that gives a visitor an address of their own, on a local Worker only. A deployment is
+ * behind Cloudflare, which sets the header itself and refuses a request that arrives with one.
+ */
+export const ownAddress = (address = visitorAddress()): Record<string, string> => (local ? { 'CF-Connecting-IP': address } : {});
+
+/** A visitor with their own cookies and (locally) address: nobody is signed in yet. */
 export const visitor = (playwright: Playwright, baseURL: string | undefined, address = visitorAddress()) =>
-  playwright.request.newContext({ baseURL, extraHTTPHeaders: { 'CF-Connecting-IP': address, Origin: baseURL! } });
+  playwright.request.newContext({ baseURL, extraHTTPHeaders: { ...ownAddress(address), Origin: baseURL! } });
 
 export const sendCode = (who: APIRequestContext, email: string) => who.post('/api/auth/email-otp/send-verification-otp', { data: { email, type: 'sign-in' } });
 export const signIn = (who: APIRequestContext, email: string, otp: string) => who.post('/api/auth/sign-in/email-otp', { data: { email, otp } });

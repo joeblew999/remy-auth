@@ -6,7 +6,7 @@ Parked 2026-09-26 (owner: "Not big feature stuff"): not started now; picked up a
 
 Purpose (owner, 2026-10-09): "remy-auth is meant to support betterauth working well with tanstack and orpc". Decisions follow from it: each of the three is used the way its own documentation says.
 
-Status: [slice 1](#slice-1-sign-in-the-account-page-and-the-guard-2026-10-09) is on main and [live](#merged-and-deployed-2026-10-09) since 2026-10-09, on the oRPC 2.0 beta, with its database and secret [provisioned](#provisioned-for-the-deployment-2026-10-09). [Slice 2](#slice-2-relationships-on-the-server-and-in-the-gui-2026-10-09), the relation engine used by the server and the GUI, and [slice 3](#slice-3-remy-sports-way-of-signing-in-for-every-remy-app-2026-10-09), remy-sport's way of signing in (Cloudflare email, environments, seeded people with roles), are on main and [live](#slices-2-and-3-merged-and-deployed-2026-10-09) since the same day; that a sign-in code really arrives by email is not confirmed yet. The next slice is the app-trust comparison ([next](#next-slices)). The rest of milestone 1 has not started. Builds on the [TanStack move](done/tanstack.md), on main since release 0.9.0.
+Status: [slice 1](#slice-1-sign-in-the-account-page-and-the-guard-2026-10-09) is on main and [live](#merged-and-deployed-2026-10-09) since 2026-10-09, on the oRPC 2.0 beta, with its database and secret [provisioned](#provisioned-for-the-deployment-2026-10-09). [Slice 2](#slice-2-relationships-on-the-server-and-in-the-gui-2026-10-09), the relation engine used by the server and the GUI, and [slice 3](#slice-3-remy-sports-way-of-signing-in-for-every-remy-app-2026-10-09), remy-sport's way of signing in (Cloudflare email, environments, seeded people with roles), are on main and [live](#slices-2-and-3-merged-and-deployed-2026-10-09) since the same day, and a mailed code has been redeemed on production. [Staging](#staging-the-automatic-sign-in-on-a-deployment-2026-10-09) has the automatic sign-in on a deployment of its own. The next slice is the app-trust comparison ([next](#next-slices)). The rest of milestone 1 has not started. Builds on the [TanStack move](done/tanstack.md), on main since release 0.9.0.
 Owner: remy-auth. First consumer: in-repo sample; first external consumer: remy-data.
 Executor/Reviewer roles as in [plans and roles](../docs/content/dev/development.md#plans-and-roles). Do not
 begin a fleet rollout.
@@ -158,9 +158,9 @@ list is production, with everything off ([the rule](../docs/content/dev/developm
 | Convenience | Where | What it does |
 | --- | --- | --- |
 | `capturesMail` | `local` only | Mail is kept in the Worker's outbox instead of sent, and `GET /dev/mail?recipient=` reads the newest back (`mise run auth:mail`, the checks). Elsewhere mail is sent through Cloudflare Email Service and the route answers 404 |
-| `seededSignIn` | `local` only | The seeded people exist (made when first asked for), and the sign-in form and `GET /dev/people` offer them with what each holds. Elsewhere there are none and the route answers 404 |
-| `signInCode: derived` | `local` only | A seeded person signs in with the published code `424242`. Any other address gets Better Auth's random code |
-| `offersAdminSignIn` | `local` only | The seeded administrator is offered and may use that code too |
+| `seededSignIn` | `local` and `staging` | The seeded people exist (made when first asked for), and the sign-in form and `GET /dev/people` offer them with what each holds. In production there are none and the route answers 404 |
+| `signInCode: derived` | `local` and `staging` | A seeded person signs in with the published code `424242`. Any other address gets Better Auth's random code, by mail on staging |
+| `offersAdminSignIn` | `local` only | The seeded administrator is offered and may use that code too. Staging is a deployment, and a deployment never publishes a way in as one |
 
 Every sign-in is still Better Auth's own: a code is asked for and redeemed, and only Better Auth
 makes an account or a session. The checks also name an address of their own in `CF-Connecting-IP`,
@@ -324,9 +324,8 @@ it's easy to any Remy repo to use ... with its own demo using it and showing it 
 
 ### Not run: assumed
 
-- **A real email arriving.** No mail was sent: locally the binding is not used, and nothing is
-  deployed. That Cloudflare accepts `noreply@mail.ubuntusoftware.net` as the sender, and that the code
-  reaches an inbox and not a spam folder, are first seen when somebody signs in on the deployment.
+- **A real email arriving** was assumed when this slice was built; it has since
+  [been seen](#slices-2-and-3-merged-and-deployed-2026-10-09).
 - **The translations** of the new English messages, the email's among them (on main, as always).
 
 ### What remy-sport has in this area, and where each went
@@ -345,7 +344,7 @@ it's easy to any Remy repo to use ... with its own demo using it and showing it 
 | An address space of its own for the checks, an account per check | Already so: `tests/people.ts` |
 | The relation engine, the 404 before 403, the checks on what a response names | Slices 1 and 2 |
 | A code only a human can switch on for a deployment (`TEST_OTP`), so the deployed checks can sign in | Not taken yet: the sign-in checks still run locally only |
-| A staging environment: real mail, seeded people, no administrator | Not taken: remy-auth has one deployment. It is a column in the table when there is one |
+| A staging environment: real mail, seeded people, no administrator | Taken the same day: [staging](#staging-the-automatic-sign-in-on-a-deployment-2026-10-09) |
 | Where a session was started (city, country, network) and the devices page ("was that me?") | Not taken yet: the account page lists no sessions |
 | A person's lifecycle (pending approval, suspended), and refusing a session by it | Not taken: it is remy-sport's own model. Better Auth's `banned` is there with the admin plugin |
 | Thirty-day sessions, ten-minute codes | Not taken: decision 5 keeps seven days and Better Auth's five minutes |
@@ -387,8 +386,40 @@ the deploy, as asked. What ran before it and after it:
 - **Translations** of both slices' messages and docs pages are on main (two commits) and not deployed
   yet: the deployment shows the new strings in English in every language until the next deploy.
 
-Not confirmed: **a real email arriving.** The first sign-in on the deployment is the first mail it
-ever sent.
+**A real email arrives.** Seen in the data the same day, without reading anybody's address: the
+production database has one account with a verified address, which only redeeming a mailed code
+makes. Whether it landed in the inbox or the spam folder is the owner's to say.
+
+### Staging: the automatic sign-in on a deployment (2026-10-09)
+
+The owner, after using the deployment: "the email OTP from remy-sports can work in both modes!!
+automatic and normal. I did not see that in the demo, the idea is that dev and staging is in automatic
+mode and prod is not of course." The only deployment was production, which rightly has no automatic
+mode, so there was nowhere to see it. Now there is.
+
+- **A `staging` column in the table** ([above](#development-conveniences)), as remy-sport's: mail is
+  sent for real, the seeded people sign in with one press, and the administrator is not offered.
+- **A staging deployment**, https://remy-auth-staging.gedw99.workers.dev: the same code as its own
+  Worker (`env.staging` in `wrangler.jsonc`, `mise run cf:staging`), with its own two D1 databases
+  (`remy-auth-staging`, `remy-auth-demo-staging`) and its own signing secret. Created on the owner's
+  account for this; nothing of production's was touched. It holds fixtures and what visitors write,
+  and must never be given a copy of production's data: anybody who finds it can sign in as a seeded
+  person.
+- **No mail to an address no mail can reach**: a seeded person's address is `.test`, so on staging
+  their code is never mailed (`unreachable`, in the shared mailer). remy-sport sends it and is refused.
+- **The checks ask the Worker what it is** (`/healthz`) and expect exactly what the table gives that
+  environment, instead of treating every deployment as production.
+
+What ran against staging: every remote check (356 passed, with Google's audits; the two that failed
+were the checks' own mistakes, fixed and passed: a deployment refuses a request that names its own
+client address, and one comparison was written wrongly), and by hand the people it offers (Ben, Cleo,
+Dev and Eli, with what each holds; no Ada). One press signing in as Cleo ran in a real browser against
+the deployment.
+
+Not run on staging: the checks that need a new person (they read the code from the local outbox), the
+five-person sign-in and the notes checks (three code requests a minute per address is Better Auth's
+limit, and a deployment sees one address for the whole run). Not taken from remy-sport: the published
+code for a reserved test domain, which would let those run there.
 
 ## Requirements for the shared guard, from remy-sport (2026-10-09)
 

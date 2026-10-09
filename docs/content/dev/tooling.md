@@ -46,7 +46,8 @@ generate, never edit Better Auth's tables by hand. To sign in locally: `mise run
 `/en/app/account` and press one of the seeded people, or enter any address and read its code with
 `auth:mail`. No mail is sent locally: the local environment keeps it in the Worker's outbox instead
 (the environment table in `src/auth/environment.ts`, [explained](./auth.md#environments-one-table);
-any other environment is production, where mail is sent through Cloudflare Email Service). The deployed
+staging has the seeded people too and sends mail for real; any other environment is production,
+where mail is sent through Cloudflare Email Service and nobody is seeded). The deployed
 database, its migrations and the `BETTER_AUTH_SECRET` Worker secret are created on the owner's
 request only: `auth:provision` prints the steps, and until the database exists `cf:deploy` refuses to
 deploy, because Wrangler would otherwise create it by itself.
@@ -94,7 +95,7 @@ CLI passthrough tasks accept upstream flags directly, such as
 | `ui:*` | Compile the shared catalogs (`ui:generate`), regenerate the shadcn components and theme (`ui:components`, `ui:theme`), prove them untouched (`ui:verify`), release the package and the tasks (`ui:release`, the shared `packages:release`) |
 | `skills:*` | Install, list and remove the pinned official skills |
 | `auth:*` | Better Auth: its CLI and diagnostics (`auth:cli`, `auth:info`), migrations for the local D1 (`auth:generate`, `auth:migrate`), the local environment (`auth:local`), its captured sign-in codes (`auth:mail`) and what a deployment needs (`auth:provision`, prints only) |
-| `cf:*` | Cloudflare CLI, live logs, deployment (`cf:deploy`), what each deployment is running (`cf:versions`), throwaway check Workers (`cf:preview`, `cf:preview-delete`), stored logs and AI usage (`cf:events`, `cf:ai-*`); shared tasks, listed in the [tasks README](./tasks.md#cloudflare-tasks) |
+| `cf:*` | Cloudflare CLI, live logs, deployment (`cf:deploy` for production, `cf:staging` for staging), what each deployment is running (`cf:versions`), throwaway check Workers (`cf:preview`, `cf:preview-delete`), stored logs and AI usage (`cf:events`, `cf:ai-*`); shared tasks, listed in the [tasks README](./tasks.md#cloudflare-tasks) |
 | `api:*` | The generated OpenAPI document a running Worker serves (`api:spec`, `--urls` for its operations; shared task) |
 | `browser:*` | Chrome DevTools CLI, session lifecycle and MCP server |
 | `web:*` | Modern web guidance search and retrieval |

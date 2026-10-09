@@ -239,7 +239,7 @@ and timing-sensitive checks failed well before that. So:
 
 - **After every deploy, the report starts with the live URLs of what was deployed**, whatever else it says
   (owner, 2026-09-26: "I keep telling you ... give me the url when you deploy"): the app
-  <https://remy-auth.gedw99.workers.dev>, and for the docs Worker its guide
+  <https://remy-auth.gedw99.workers.dev>, its staging <https://remy-auth-staging.gedw99.workers.dev>, and for the docs Worker its guide
   <https://remy-auth-docs.gedw99.workers.dev/docs>, developer docs
   <https://remy-auth-docs.gedw99.workers.dev/dev> and API reference
   <https://remy-auth-docs.gedw99.workers.dev/reference>. `cf:deploy` and `docs:deploy` print them last.

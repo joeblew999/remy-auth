@@ -17,6 +17,11 @@ package follows [Semantic Versioning](https://semver.org/).
   for itself). `build`: the shapes and TanStack Query options. `mise run cf:versions`: a row per
   deployment, each commit placed against the checkout. Checks in every app's shared set
   (`versions.checks`, `build.checks`).
+- Staging: `mise run cf:staging` deploys the Wrangler configuration's `env.staging` (built with
+  `CLOUDFLARE_ENV=staging`) to `STAGING_ORIGIN`; `cf:deploy` and its provisioning guard read the
+  environment being deployed, and `cf:versions` asks staging too. `defineRemyApp`'s `deployments`:
+  the app's deployments, which `Versions` lists. `mail`'s `unreachable(address)`: a message to a
+  reserved test or example domain is never sent.
 - The product's name is the app's, written once (`defineRemyApp`'s `brand`): `pageTitle`, pageHead's
   `title` and `description` receive it as a second argument, and `productNameChecks` (every app's shared
   set) fails a page of an app with another name that says "Remy". The showcase's Settings page shows

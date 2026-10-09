@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Build (no tests; GATE=smoke|quick|full runs that tier first; releases run the full gate) with DEPLOY_ORIGIN as the public origin, upload to the authenticated Cloudflare account and wait until production serves the new version (~1 min). Builds into dist/: not alongside a local level. Then run project:test:remote in the background and keep working"
+#MISE description="REMOTE, PRODUCTION: build (no tests; GATE=smoke|quick|full runs that tier first; releases run the full gate) with DEPLOY_ORIGIN as the public origin, upload to the authenticated Cloudflare account and wait until production serves the new version (~1 min). Builds into dist/: not alongside a local level. Then run project:test:remote in the background and keep working. cf:staging does the same for the staging environment"
 #MISE dir="{{config_root}}"
 set -euo pipefail
 : "${DEPLOY_ORIGIN:?cf:deploy needs DEPLOY_ORIGIN in [env]}"
@@ -7,6 +7,8 @@ set -euo pipefail
 # Development deploys run no tests (owner, 2026-09-25: the gate is for real releases; ui:release runs
 # the full one). GATE picks a tier first, by the deployer's judgement (docs/content/dev/how-we-work.md, test tiers):
 # smoke (every page answers, ~15 s), quick (every check in en and ar; also GATE=1) or full (every language).
+# With CLOUDFLARE_ENV set (cf:staging), the Cloudflare Vite plugin builds that named environment of the
+# Wrangler configuration, and the upload below is that environment's Worker; DEPLOY_ORIGIN is then its origin.
 # Before anything slow: a binding with no resource behind it stops the deploy (provisioned.mjs).
 node "$(dirname "$0")/provisioned.mjs"
 
@@ -29,7 +31,7 @@ trap 'rm -f "$output"' EXIT
 export WRANGLER_OUTPUT_FILE_PATH="$output"
 ./node_modules/.bin/wrangler deploy
 "$(dirname "$0")/wait" "$DEPLOY_ORIGIN" "$output"
-echo "Live: $DEPLOY_ORIGIN"
+echo "Live${CLOUDFLARE_ENV:+ ($CLOUDFLARE_ENV)}: $DEPLOY_ORIGIN"
 
 # The deploy proves itself with the tools, not by hand: the smoke checks against the live site.
 TEST_BASE_URL="$DEPLOY_ORIGIN" mise run project:test:live

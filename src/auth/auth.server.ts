@@ -1,20 +1,12 @@
 import { env } from 'cloudflare:workers';
 import { betterAuth } from 'better-auth';
-import { fixedSignInCode, permits } from './environment';
+import { permits, publishedCodeFor } from './environment';
 import { codeSender } from './mail.server';
 import { authOptions } from './options';
-import { seededPeople, seededPerson } from './seed';
+import { seededPeople } from './seed';
 
-/**
- * The code a seeded person signs in with, where the environment derives one (never production), or
- * undefined for a random code. Only a seeded address gets it, so no account is made with a known
- * code; and the administrator only where the environment offers that account at all.
- */
-function fixedCode(email: string): string | undefined {
-  const person = seededPerson(email);
-  if (!person || (person.role === 'admin' && !permits(env, 'offersAdminSignIn'))) return undefined;
-  return fixedSignInCode(env);
-}
+/** The code a seeded person signs in with where this environment publishes one (./environment.ts). */
+const fixedCode = (email: string) => publishedCodeFor(env, email);
 
 const build = (baseURL: string) => betterAuth(authOptions({ database: env.DB, secret: env.BETTER_AUTH_SECRET, baseURL, sendCode: codeSender(env), fixedCode }));
 

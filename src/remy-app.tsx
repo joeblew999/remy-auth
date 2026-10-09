@@ -7,6 +7,7 @@ import { showcaseAppNav, showcaseSiteNav } from '@joeblew999/remy-showcase/app-n
 import { docsConfig } from '../docs/docs.config';
 import { docsOrigin } from './docs/origin';
 import { product } from './product';
+import { deployments } from './deployments';
 import { service } from './service';
 import { sitePaths } from './paths';
 
@@ -26,6 +27,7 @@ export const remyApp = defineRemyApp({
   sitePaths,
   repository: docsConfig.repository,
   docs: docsOrigin,
+  deployments,
   site: { nav: showcaseSiteNav },
   app: { home: linkOptions({ to: '/app' }), nav: appNav },
 });

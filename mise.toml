@@ -21,6 +21,11 @@ includes = ["tasks"]
 # A worktree or agent picks its own port from the shell: PREVIEW_PORT=4231 mise run project:verify.
 PREVIEW_PORT = "{{ get_env(name='PREVIEW_PORT', default='4173') }}"
 DEPLOY_ORIGIN = "https://remy-auth.gedw99.workers.dev"
+# The staging environment's origin (cf:staging; env.staging in wrangler.jsonc): its own Worker and databases.
+STAGING_ORIGIN = "https://remy-auth-staging.gedw99.workers.dev"
+# The two again for the page (Vite reads VITE_*): the Settings page lists what each deployment is running.
+VITE_DEPLOY_ORIGIN = "https://remy-auth.gedw99.workers.dev"
+VITE_STAGING_ORIGIN = "https://remy-auth-staging.gedw99.workers.dev"
 # The docs Worker (docs/): its public origin, the app's "Docs" link to it (Vite reads VITE_*), and the
 # shared i18n tasks' docs folder (Fumadocs' layout, one folder per site).
 DOCS_ORIGIN = "https://remy-auth-docs.gedw99.workers.dev"
@@ -84,7 +89,7 @@ dir = "{{config_root}}"
 run = 'curl --fail --silent --show-error --get --data-urlencode "recipient=${usage_email}" "${usage_origin}/dev/mail"'
 
 [tasks."auth:provision"]
-description = "Prints what the deployment needs on Cloudflare and creates nothing (that is the owner's): the identity database and the showcase's, each with its id in wrangler.jsonc and its migrations, the secret, and the domain the sign-in code is mailed from. Until then cf:deploy refuses to deploy, because Wrangler would create the database by itself. Instant"
+description = "Prints what a deployment (production, and staging beside it) needs on Cloudflare and creates nothing (that is the owner's): the identity database and the showcase's, each with its id in wrangler.jsonc and its migrations, the secret, and the domain the sign-in code is mailed from. Until then cf:deploy refuses to deploy, because Wrangler would create the database by itself. Instant"
 dir = "{{config_root}}"
 run = '''
 cat <<'STEPS'
@@ -108,6 +113,13 @@ the send_email binding beside it must allow. Its domain has to be enabled for se
      and if it is not:  ./node_modules/.bin/wrangler email sending enable <the address's domain>
 
 A later migration is step 2 or 5 again, before the deploy that needs it.
+
+Staging (mise run cf:staging) is the same five steps on its own resources, with --env staging:
+databases remy-auth-staging and remy-auth-demo-staging, their ids in wrangler.jsonc under env.staging,
+then for each binding
+     ./node_modules/.bin/wrangler d1 migrations apply <DB|DEMO_DB> --remote --env staging
+and  openssl rand -base64 32 | ./node_modules/.bin/wrangler secret put BETTER_AUTH_SECRET --env staging
+Its secret is its own: a session made on staging means nothing to production.
 STEPS
 '''
 

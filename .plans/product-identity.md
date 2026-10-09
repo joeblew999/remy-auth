@@ -1,6 +1,6 @@
 # What is deployed, and whose name it carries
 
-Status: built on branch `product-identity` on 2026-10-09, waiting for the owner to say ship.
+Status: on main and live since 2026-10-09 (the owner: "Get into main and deploy then!"): the app and the docs Worker both answer commit `e3d8bb3` to `mise run cf:versions`. Left before it closes: `project:test:remote` green against production.
 
 Two requests from the owner on 2026-10-09, while slices 2 and 3 of [the auth plan](auth-service.md)
 went live:
@@ -60,12 +60,11 @@ repo: [the GUI page](../docs/content/dev/gui.md#which-version-is-deployed).
 
 ## Not run: assumed
 
-- **The translations** of the 13 changed and 18 new messages: other languages still say "Remy" in
-  those 13 until `i18n:translate` runs on main, whose check fails a translation that loses `{product}`.
-  That is why `productNameChecks` reads the English pages.
-- **A deployment with the stamp.** Both live Workers predate it. Until they are deployed again,
-  `cf:versions` says so, and a page asking the docs Worker shows "No answer" (its `/healthz` does not
-  yet allow another origin to read it).
+- **The translations** of the 13 changed and 18 new messages ran on main the same day; no catalog says
+  "Remy" any more. `productNameChecks` still reads the English pages only: a translation can go stale
+  on a branch before `i18n:translate` runs, and its check is what fails one that loses `{product}`.
+- **A deployment with the stamp** was assumed when this was written; both Workers were deployed with it
+  the same day, and `cf:versions` showed each at the commit just merged.
 - **An app whose Vite configuration is not `remyApp()`** would not build (`virtual:remy-build` has no
   plugin behind it). Every app known uses it.
 - **An app built outside a git checkout** names no commit; the frame then shows the name alone.

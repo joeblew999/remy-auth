@@ -103,7 +103,7 @@ formats page's intro and "This language" share the first screen on desktop; issu
 
 [product-identity](product-identity.md): the build stamp every Worker answers with at `/healthz`, the
 `BuildStamp` and `Versions` components, `cf:versions`, and the product's name as one value every message
-takes. Built on branch `product-identity`; waits for the owner to say ship.
+takes. On main and live since 2026-10-09; closes when `project:test:remote` is green against production.
 
 ## Auth service (owner, 2026-10-09)
 
@@ -116,7 +116,8 @@ engine lifted from remy-sport and used by every server operation and by the GUI 
 not also get used. And also not in the gui"), with the notes demo, and slice 3, remy-sport's way of
 signing in for every Remy app (mail through Cloudflare Email Service, one table of what each
 environment permits, seeded people with roles and a one-press picker), are on main
-and live since 2026-10-09. Then: the app-trust comparison (OAuth tokens verified locally, or
+and live since 2026-10-09, with a staging deployment (https://remy-auth-staging.gedw99.workers.dev)
+that has the automatic sign-in beside the normal one, as the owner asked. Then: the app-trust comparison (OAuth tokens verified locally, or
 a service binding), which lets other apps use all of it.
 
 ## Core Web Vitals: the mobile formats page is over the limit (found 2026-10-09)

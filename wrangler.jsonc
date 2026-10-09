@@ -7,8 +7,9 @@
   "compatibility_flags": ["nodejs_compat"],
   // Release and environment for the shared log contract (@joeblew999/remy-ui/worker).
   "version_metadata": { "binding": "CF_VERSION_METADATA" },
-  // "production" unless a local .dev.vars says "local" (mise run auth:local): the environment policy
-  // table in src/auth/environment.ts reads it, and anything unknown is production.
+  // "production" here, "staging" in env.staging below, and "local" where a local .dev.vars says so
+  // (mise run auth:local): the environment policy table in src/auth/environment.ts reads it, and
+  // anything unknown is production.
   "vars": { "ENVIRONMENT": "production", "EMAIL_FROM": "noreply@mail.ubuntusoftware.net" },
   // The identity database (.plans/auth-service.md): Better Auth's tables, through the numbered
   // migrations in migrations/ (mise run auth:generate, auth:migrate). Only this Worker reads or writes it.
@@ -30,6 +31,24 @@
   // the AI answers on the production index, and old versions never see the ASK_PAUSED stop. Cloudflare's
   // newer Previews are served through this same switch, so cf:preview deploys a throwaway Worker instead.
   "preview_urls": false,
+  // Staging (mise run cf:staging, which builds with CLOUDFLARE_ENV=staging): the same code as its own
+  // Worker, with its own two databases, so nothing a visitor does there touches production's. Its
+  // environment gives it the automatic sign-in (the seeded people, one press each) beside the normal
+  // one; mail is sent for real. It holds fixtures and what visitors write, never a copy of production's
+  // data. Bindings and vars are not inherited by a named environment, so each is written again.
+  "env": {
+    "staging": {
+      "name": "remy-auth-staging",
+      "version_metadata": { "binding": "CF_VERSION_METADATA" },
+      "vars": { "ENVIRONMENT": "staging", "EMAIL_FROM": "noreply@mail.ubuntusoftware.net" },
+      "d1_databases": [
+        { "binding": "DB", "database_name": "remy-auth-staging", "database_id": "3a5b3025-9bf7-418b-b923-8911b0437fbc", "migrations_dir": "migrations" },
+        { "binding": "DEMO_DB", "database_name": "remy-auth-demo-staging", "database_id": "ca900198-1d91-4ee9-b797-ee18b2c87e7e", "migrations_dir": "migrations-demo" }
+      ],
+      "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["noreply@mail.ubuntusoftware.net"] }],
+      "secrets": { "required": ["BETTER_AUTH_SECRET"] }
+    }
+  },
   "observability": {
     "enabled": true,
     "redact_query_string": true,

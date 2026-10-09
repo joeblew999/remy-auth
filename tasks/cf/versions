@@ -1,15 +1,15 @@
 #!/usr/bin/env node
-//MISE description="REMOTE, read only: ask each deployment what it is running and print one row each: service, environment, commit, how far that is from this checkout, when it was deployed (~1 s; safe beside anything). Asked, never remembered: each Worker answers at /healthz. Defaults to DEPLOY_ORIGIN and DOCS_ORIGIN; pass origins (a preview's, a local server's) to ask those instead"
+//MISE description="REMOTE, read only: ask each deployment what it is running and print one row each: service, environment, commit, how far that is from this checkout, when it was deployed (~1 s; safe beside anything). Asked, never remembered: each Worker answers at /healthz. Defaults to DEPLOY_ORIGIN, STAGING_ORIGIN and DOCS_ORIGIN; pass origins (a preview's, a local server's) to ask those instead"
 //MISE dir="{{config_root}}"
-//USAGE arg "[origins]..." help="Origins to ask; defaults to DEPLOY_ORIGIN and DOCS_ORIGIN"
+//USAGE arg "[origins]..." help="Origins to ask; defaults to DEPLOY_ORIGIN, STAGING_ORIGIN and DOCS_ORIGIN"
 // Nothing is written down anywhere, so nothing can drift: a committed record of deployments is wrong
 // the first time somebody deploys from another branch (remy-sport's was, for weeks). "abc1234" alone
 // says little; "3 behind HEAD" is the sentence somebody needs, so each commit is placed against this
 // checkout's.
 import { execFileSync } from 'node:child_process';
 
-const origins = process.argv.slice(2).length ? process.argv.slice(2) : [process.env.DEPLOY_ORIGIN, process.env.DOCS_ORIGIN].filter(Boolean);
-if (!origins.length) { console.error('cf:versions: pass an origin, or set DEPLOY_ORIGIN (and DOCS_ORIGIN) in [env]'); process.exit(1); }
+const origins = process.argv.slice(2).length ? process.argv.slice(2) : [process.env.DEPLOY_ORIGIN, process.env.STAGING_ORIGIN, process.env.DOCS_ORIGIN].filter(Boolean);
+if (!origins.length) { console.error('cf:versions: pass an origin, or set DEPLOY_ORIGIN (and STAGING_ORIGIN, DOCS_ORIGIN) in [env]'); process.exit(1); }
 
 const git = (...args) => {
   try {

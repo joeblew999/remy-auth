@@ -5,13 +5,13 @@ import { procedures, routeOf } from '@joeblew999/remy-ui/api/coverage';
 import { policyOf } from '@joeblew999/remy-ui/api/guard-core';
 import { router } from '../src/api/router';
 import { environments } from '@joeblew999/remy-ui/environment';
-import { clearOutbox, mailerFor, readOutbox } from '@joeblew999/remy-ui/mail';
-import { DEMO_SIGN_IN_CODE, environmentOf, fixedSignInCode, policyFor } from '../src/auth/environment';
+import { clearOutbox, mailerFor, readOutbox, unreachable } from '@joeblew999/remy-ui/mail';
+import { DEMO_SIGN_IN_CODE, environmentOf, fixedSignInCode, policyFor, publishedCodeFor } from '../src/auth/environment';
 import { seededPeople } from '../src/auth/seed';
 import { product } from '../src/product';
 import { writableFieldProblems } from '../src/auth/fields';
 import { authOptions, personMayEdit } from '../src/auth/options';
-import { capturedMail, latestCode, local, newEmail, seededSignIn, sendCode, signIn, signedInAsSeeded, visitor, visitorAddress } from './people';
+import { capturedMail, latestCode, local, newEmail, ownAddress, permitted, seededSignIn, sendCode, signIn, signedInAsSeeded, visitor } from './people';
 
 // Signing in (.plans/auth-service.md), on the real Worker with Better Auth and the local D1: nothing is
 // mocked. The code is the one Better Auth made; the local environment writes it to its local_mail table
@@ -95,7 +95,7 @@ test('a person signs in with an emailed code, and the session reaches the API ov
 });
 
 test.describe('in the browser', () => {
-  test.use({ extraHTTPHeaders: { 'CF-Connecting-IP': visitorAddress() } });
+  test.use({ extraHTTPHeaders: ownAddress() });
 
   test('the account page signs a person in with the code, keeps them signed in on reload, and signs them out', async ({ page }) => {
     test.skip(!local, 'reads the code from the local mail capture');
@@ -139,17 +139,18 @@ test.describe('in the browser', () => {
 });
 
 test.describe('the seeded people, in the browser', () => {
-  test.use({ extraHTTPHeaders: { 'CF-Connecting-IP': visitorAddress() } });
+  test.use({ extraHTTPHeaders: ownAddress() });
 
   test('the sign-in form offers the seeded people with what they hold, and one press signs in as one of them', async ({ page }) => {
-    test.skip(!local, 'only the local environment offers seeded people');
+    const here = await permitted(page.request);
+    test.skip(!here.seededSignIn, `${here.environment} offers no seeded people`);
     const errors = collectErrors(page);
     const o = { locale: 'en' } as const;
     await page.goto(accountPath);
     await page.waitForLoadState('networkidle');
     const people = page.locator('[data-seeded-people]');
     await expect(people).toContainText(m.account_people_intro({ code: DEMO_SIGN_IN_CODE }, o));
-    await expect(people.locator('[data-person]')).toHaveCount(seededPeople.length);
+    await expect(people.locator('[data-person]')).toHaveCount(seededPeople.filter(person => person.role !== 'admin' || here.offersAdminSignIn).length);
     const cleo = people.locator('[data-person="cleo@remy.test"]');
     await expect(cleo.locator('[data-person-holds]')).toContainText('NOTE_EDITOR note_squad');
     await expect(people.locator('[data-person="eli@remy.test"] [data-person-holds]')).toHaveText(m.account_people_holds_nothing({}, o));
@@ -191,23 +192,37 @@ test('a person can write no field on their account that nobody decided is theirs
 
 test('one table says what each environment permits; anything undeclared is production, where no convenience exists', async ({ request }) => {
   expect(policyFor({ ENVIRONMENT: 'local' })).toEqual({ capturesMail: true, seededSignIn: true, signInCode: 'derived', offersAdminSignIn: true });
+  // Staging: the automatic sign-in beside the normal one, with real mail, and no administrator on offer.
+  expect(policyFor({ ENVIRONMENT: 'staging' })).toEqual({ capturesMail: false, seededSignIn: true, signInCode: 'derived', offersAdminSignIn: false });
   const production = { capturesMail: false, seededSignIn: false, signInCode: 'none', offersAdminSignIn: false };
-  for (const environment of ['production', undefined, '', 'staging', 'Local', 'constructor', '__proto__']) {
+  for (const environment of ['production', undefined, '', 'preview', 'Staging', 'Local', 'constructor', '__proto__']) {
     expect(policyFor({ ENVIRONMENT: environment }), String(environment)).toEqual(production);
     expect(fixedSignInCode({ ENVIRONMENT: environment }), String(environment)).toBeUndefined();
   }
   expect(environmentOf({ ENVIRONMENT: 'local' })).toBe('local');
+  expect(environmentOf({ ENVIRONMENT: 'staging' })).toBe('staging');
   expect(environmentOf({})).toBe('production');
   expect(fixedSignInCode({ ENVIRONMENT: 'local' })).toBe(DEMO_SIGN_IN_CODE);
+  expect(fixedSignInCode({ ENVIRONMENT: 'staging' })).toBe(DEMO_SIGN_IN_CODE);
   // The shared table itself refuses to be built without a production column to fall back to.
   expect(() => environments({ local: { capturesMail: true } } as never)).toThrow(/production/);
-  // On the Worker: the outbox and the seeded people are there locally, and are 404s on a deployment.
-  expect((await request.get('/dev/mail?recipient=nobody@example.test')).status()).toBe(local ? 200 : 404);
-  expect((await request.get('/dev/people')).status()).toBe(local ? 200 : 404);
-  // Where no code can be delivered, the account page offers no form: it keeps its empty state.
+
+  // On the Worker under test, which says what it is (/healthz): exactly what the table gives that
+  // environment exists, and nothing else. A local run is never mistaken for a deployment, or the reverse.
+  const here = await permitted(request);
+  expect(local ? ['local'] : ['staging', 'production']).toContain(here.environment);
+  expect((await request.get('/dev/mail?recipient=nobody@example.test')).status()).toBe(here.capturesMail ? 200 : 404);
+  const people = await request.get('/dev/people');
+  expect(people.status()).toBe(here.seededSignIn ? 200 : 404);
+  if (here.seededSignIn) {
+    const offered: { email: string; role: string }[] = (await people.json()).people;
+    expect(offered.map(person => person.email)).toEqual(seededPeople.filter(person => person.role !== 'admin' || here.offersAdminSignIn).map(person => person.email));
+    expect(offered.some(person => person.role === 'admin'), 'the administrator is offered').toBe(here.offersAdminSignIn);
+  }
+  // The normal way in is everywhere a code can be delivered: captured locally, mailed on a deployment.
   const account = await (await request.get(accountPath)).text();
-  expect(account.includes('data-sign-in="address"'), 'the sign-in form').toBe(local);
-  expect(account.includes('data-seeded-people'), 'the seeded people').toBe(local);
+  expect(account.includes('data-sign-in="address"'), 'the sign-in form').toBe(true);
+  expect(account.includes('data-seeded-people'), 'the seeded people').toBe(here.seededSignIn);
 });
 
 test('the sign-in code is one email: the code and nothing to click, written for the reader, from the configured sender', async ({ playwright, baseURL }) => {
@@ -232,20 +247,51 @@ test('the sign-in code is one email: the code and nothing to click, written for 
 
 test('mail leaves through Cloudflare\'s binding from the configured sender, is captured instead where the table says so, and a failure says who it was for', async () => {
   const sent: unknown[] = [];
-  const message = { to: 'ada@example.test', subject: 'Hello', text: 'Plain', html: '<p>Plain</p>' };
+  const message = { to: 'ada@inbox.remy-checks.dev', subject: 'Hello', text: 'Plain', html: '<p>Plain</p>' };
   await mailerFor({ capture: false, from: 'noreply@mail.example', binding: { send: async mail => { sent.push(mail); } } }).send(message);
   expect(sent).toEqual([{ ...message, from: 'noreply@mail.example' }]);
   // Captured: nothing reaches the binding, and the outbox holds what would have gone on the wire.
   clearOutbox();
   await mailerFor({ capture: true, from: 'noreply@mail.example', binding: { send: async () => { throw new Error('must not send'); } } }).send(message);
-  expect(readOutbox('ADA@example.test')).toEqual([{ ...message, from: 'noreply@mail.example', id: expect.any(String), createdAt: expect.any(String) }]);
+  expect(readOutbox('ADA@inbox.remy-checks.dev')).toEqual([{ ...message, from: 'noreply@mail.example', id: expect.any(String), createdAt: expect.any(String) }]);
   expect(readOutbox('someone-else@example.test')).toEqual([]);
   // Not configured, or refused: an error naming the reader, never a silent drop.
-  await expect(mailerFor({ capture: false, from: 'noreply@mail.example' }).send(message)).rejects.toThrow('mail: not configured (no send_email binding); nothing was sent to ada@example.test');
+  await expect(mailerFor({ capture: false, from: 'noreply@mail.example' }).send(message)).rejects.toThrow('mail: not configured (no send_email binding); nothing was sent to ada@inbox.remy-checks.dev');
   await expect(mailerFor({ capture: false, binding: { send: async () => {} } }).send(message)).rejects.toThrow('no sender address');
   const refuse = Object.assign(new Error('destination address is not verified'), { code: 'E_RECIPIENT' });
   await expect(mailerFor({ capture: false, from: 'noreply@mail.example', binding: { send: async () => { throw refuse; } } }).send(message))
-    .rejects.toThrow('mail: noreply@mail.example to ada@example.test was refused (E_RECIPIENT): destination address is not verified');
+    .rejects.toThrow('mail: noreply@mail.example to ada@inbox.remy-checks.dev was refused (E_RECIPIENT): destination address is not verified');
+});
+
+test('no mail is sent to an address no mail can reach: a seeded person\'s, or any other on a reserved domain', async () => {
+  for (const address of [...seededPeople.map(person => person.email), 'check@example.test', 'a@b.example', 'x@example.com', 'x@mail.example.org', 'x@nowhere.invalid', 'x@localhost', 'X@REMY.TEST'])
+    expect(unreachable(address), address).toBe(true);
+  for (const address of ['someone@gmail.com', 'a@testing.dev', 'a@example.dev', 'noreply@mail.ubuntusoftware.net', 'a@contest.io'])
+    expect(unreachable(address), address).toBe(false);
+  // Where mail is sent (staging, production), the binding never sees such a message, and that is no error.
+  const sent: unknown[] = [];
+  const mailer = mailerFor({ capture: false, from: 'noreply@mail.example', binding: { send: async mail => { sent.push(mail); } } });
+  await mailer.send({ to: 'ben@remy.test', subject: 'Your code', text: '424242' });
+  expect(sent).toEqual([]);
+  // Where mail is captured (local), it is still kept, so a check can read what would have been said.
+  clearOutbox();
+  await mailerFor({ capture: true, from: 'noreply@mail.example' }).send({ to: 'ben@remy.test', subject: 'Your code', text: '424242' });
+  expect(readOutbox('ben@remy.test')).toHaveLength(1);
+});
+
+test('the published code is a seeded person\'s only, where the environment has one, and never the administrator\'s on a deployment', async () => {
+  const [admin, ...others] = seededPeople;
+  expect(admin.role).toBe('admin');
+  for (const person of seededPeople) {
+    expect(publishedCodeFor({ ENVIRONMENT: 'local' }, person.email), person.email).toBe(DEMO_SIGN_IN_CODE);
+    expect(publishedCodeFor({ ENVIRONMENT: 'production' }, person.email), person.email).toBeUndefined();
+    expect(publishedCodeFor({}, person.email), person.email).toBeUndefined();
+  }
+  // Staging is automatic for the seeded people and is still a deployment: no published way in as the administrator.
+  for (const person of others) expect(publishedCodeFor({ ENVIRONMENT: 'staging' }, person.email), person.email).toBe(DEMO_SIGN_IN_CODE);
+  expect(publishedCodeFor({ ENVIRONMENT: 'staging' }, admin.email)).toBeUndefined();
+  // Anybody else gets a random code everywhere, so no account is ever made with a known one.
+  for (const environment of ['local', 'staging', 'production']) expect(publishedCodeFor({ ENVIRONMENT: environment }, 'someone@gmail.com'), environment).toBeUndefined();
 });
 
 test('the seeded people sign in with the published code, each with their role and what they hold; nobody else can use that code', async ({ playwright, baseURL }) => {

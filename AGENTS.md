@@ -3,7 +3,7 @@
 This file is an index. The rules live in the documents below; read them before
 changing anything, and follow them over your own defaults. Do not copy their content here.
 
-Live: the app https://remy-auth.gedw99.workers.dev; the developer docs https://remy-auth-docs.gedw99.workers.dev/dev
+Live: the app https://remy-auth.gedw99.workers.dev (staging, with the automatic sign-in: https://remy-auth-staging.gedw99.workers.dev); the developer docs https://remy-auth-docs.gedw99.workers.dev/dev
 (the product guide `/docs`, the API reference `/reference`; MCP servers `/api/mcp/dev`, `/api/mcp/reference`,
 `/api/mcp/docs`; everything for AI tools at `/llms.txt`). The documents below are the English developer docs'
 source, `docs/content/dev/*.md`: read those, not the translations beside them (`*.es.md`).

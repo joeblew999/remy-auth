@@ -97,30 +97,49 @@ handler (`/api/auth/*`) through its client, as its TanStack guide says; `tanstac
 forwards cookies from server-side calls. A request with no session cookie is nobody without asking
 Better Auth or the database. How another Worker learns who is signed in at remy-auth is not built yet.
 
+## Two ways to sign in
+
+The normal way is everywhere: an address, then the six-digit code mailed to it. The automatic way is
+beside it where the environment allows: the seeded people, listed on the sign-in form with what each
+holds, one press each, with no inbox. Local and staging have both; production has only the normal
+way. Both are Better Auth's own sign-in: a code is asked for and redeemed, and only Better Auth makes
+a session.
+
 ## Environments: one table
 
 What an environment may do that production may not is one table, and anything undeclared or unknown
 is production (`environments()` from `@joeblew999/remy-ui/environment`; remy-sport's design).
 remy-auth's table, `src/auth/environment.ts`:
 
-| Capability | `local` | `production` |
-| --- | --- | --- |
-| `capturesMail`: mail is kept in the Worker's outbox, read at `/dev/mail`, instead of sent | yes | no: sent through Cloudflare Email Service |
-| `seededSignIn`: the seeded people exist, and the sign-in form offers them (`/dev/people`) | yes | no |
-| `signInCode`: a seeded person signs in with the published code `424242`; nobody else can | derived | none: every code is random |
-| `offersAdminSignIn`: the seeded administrator is offered too | yes | no |
+| Capability | `local` | `staging` | `production` |
+| --- | --- | --- | --- |
+| `capturesMail`: mail is kept in the Worker's outbox, read at `/dev/mail`, instead of sent | yes | no: sent, which is the thing a local run cannot show | no: sent |
+| `seededSignIn`: the seeded people exist, and the sign-in form offers them (`/dev/people`) | yes | yes | no |
+| `signInCode`: a seeded person signs in with the published code `424242`; nobody else can | derived | derived | none: every code is random |
+| `offersAdminSignIn`: the seeded administrator is offered too | yes | no: a deployment never publishes a way in as one | no |
 
-So locally a fresh checkout has people with roles and their own relations, one press away, and no
-mail is sent. The seed is `src/auth/seed.ts` (stable IDs, `.test` addresses) and, for the notes demo,
-`src/notes/seed.ts`, which names those IDs: that is all an app's seed ever knows about a person.
-Nothing here creates a session outside Better Auth, and none of it exists on a deployment.
+So a fresh checkout has people with roles and their own relations, one press away, and sends no mail;
+staging has the same people on a real deployment, and mails a real address its code. The seed is
+`src/auth/seed.ts` (stable IDs, `.test` addresses) and, for the notes demo, `src/notes/seed.ts`, which
+names those IDs: that is all an app's seed ever knows about a person. Nothing here creates a session
+outside Better Auth.
+
+Staging is its own Worker with its own databases and secret (`env.staging` in `wrangler.jsonc`,
+deployed by `mise run cf:staging`), so nothing done there touches production's data. It holds
+fixtures and what visitors write. Never copy production's data into it: anybody who finds it can sign
+in as a seeded person.
+
+A Worker says which environment it is at `/healthz`, so nothing guesses it from a hostname: the
+checks ask it and expect exactly what the table gives that environment (`permitted`, `tests/people.ts`).
 
 ## Mail
 
 `mailerFor({ capture, binding, from })` from `@joeblew999/remy-ui/mail` sends through the Worker's
 `send_email` binding (Cloudflare Email Service), from an address on a domain the account has enabled
 for Email Sending, or keeps the message in the outbox where the environment captures mail. A mail
-always has a plain-text part; a refused send says who it was for and why. The sign-in code's email
+always has a plain-text part; a refused send says who it was for and why. A message to an address no
+mail can reach (`unreachable`: `.test`, `.example`, `example.com` and the like, which a seeded
+person's address is) is never sent: it could only bounce. The sign-in code's email
 is written in the reader's language and in [the product's name](./gui.md#the-products-name), with the
 code and no link.
 

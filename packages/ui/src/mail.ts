@@ -32,10 +32,23 @@ export function clearOutbox(): void {
 }
 
 /**
+ * Whether no mail can ever reach `address`: its domain is one the internet reserves for tests and
+ * examples (RFC 2606 and 6761: .test, .example, .invalid, .localhost, example.com/.net/.org). A
+ * seeded person's address is one of these on purpose. Sending to one only earns the sender a refusal
+ * or a bounce, and bounces are what a sending domain's reputation is judged by.
+ */
+export function unreachable(address: string): boolean {
+  const domain = address.slice(address.lastIndexOf('@') + 1).toLowerCase().replace(/\.$/, '');
+  return /(^|\.)(test|example|invalid|localhost)$/.test(domain) || /(^|\.)example\.(com|net|org)$/.test(domain);
+}
+
+/**
  * The mailer for this environment. `capture: true` keeps each message in the outbox (`readOutbox`)
  * and sends nothing. Otherwise the message goes out through `binding`, from `from` (an address on a
  * domain enabled for Email Sending); a missing binding or sender is an error, never a silent drop,
  * and a refusal says who it was for and why, because whoever called `send` may log only a stack.
+ * The one message not sent is one to an address no mail can reach (`unreachable`): there is nobody
+ * to receive it, on any environment that sends.
  */
 export function mailerFor({ capture, binding, from }: { capture: boolean; binding?: EmailBinding; from?: string }): Mailer {
   return {
@@ -44,6 +57,7 @@ export function mailerFor({ capture, binding, from }: { capture: boolean; bindin
         outbox().push({ ...mail, id: crypto.randomUUID(), from: from ?? '', createdAt: new Date().toISOString() });
         return;
       }
+      if (unreachable(mail.to)) return;
       if (!binding || !from) throw new Error(`mail: not configured (${binding ? 'no sender address' : 'no send_email binding'}); nothing was sent to ${mail.to}`);
       try {
         await binding.send({ to: mail.to, from, subject: mail.subject, text: mail.text, ...(mail.html ? { html: mail.html } : {}), ...(mail.headers ? { headers: mail.headers } : {}) });
