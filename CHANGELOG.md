@@ -60,6 +60,9 @@ package follows [Semantic Versioning](https://semver.org/).
   (`defineVocabulary`, `relationEngine` with `can`, `canAll`, `canFor`, `holds`, `heldAmong`,
   `objectsHeldBy`, `usersHolding`, `audienceFor`; `vocabularyProblems`, `schemaProblems`). The guard
   enforces an action policy with it: 401 without a session, 404 for a missing object before 403.
+- `environment`: `environments()`, an app's table of what each environment permits; anything
+  undeclared is production. `mail`: `mailerFor`, mail through Cloudflare Email Service or kept in the
+  Worker's outbox where the environment captures it.
 - `allowed`: `<Allowed can action>`, which shows a control only when the server allowed that action
   for this viewer on this object; `allowed.checks`: `offeredActions`, `allowedActions`.
 - `api/server`: `apiHandlers` answers `no-store` to a request with credentials, and on every 401.

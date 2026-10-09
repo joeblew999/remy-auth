@@ -7,7 +7,7 @@ import { MAX_IN, relationEngine } from '@joeblew999/remy-ui/api/relations';
 // No Workers imports, so the checks load the router that uses this in Node.
 
 /** The signed-in person, as far as notes need to know them. */
-type Person = { id: string; email: string; emailVerified: boolean };
+type Person = { id: string; email: string; emailVerified: boolean; role?: string | null };
 type Row = { id: string; author_id: string; title: string; body: string; updated_at: string };
 
 const marks = (values: readonly unknown[]) => values.map(() => '?').join(', ');
@@ -53,10 +53,15 @@ export function notesStore(db: D1Database) {
       // A share made to this person's address before they signed in becomes theirs now: the sign-in
       // code proved the address is. Until then it was an address, not a relation.
       if (person.emailVerified) await db.prepare('update "note_share" set "user_id" = ? where "email" = ? and "user_id" is null').bind(person.id, person.email.toLowerCase()).run();
-      const held = await Promise.all(notesVocabulary.grants.VIEW_NOTE.map(grant => relations.objectsHeldBy(grant.relation, person.id)));
-      const ids = [...new Set(held.flat())];
-      const rows = await inBatches<Row>(ids, batch => `select "id", "author_id", "title", "body", "updated_at" from "note" where "id" in (${marks(batch)})`);
-      rows.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+      let rows: Row[];
+      if (await relations.can('VIEW_NOTE', person, null)) {
+        // Somebody a platform relation lets view any note (an administrator): the newest of them all.
+        rows = (await db.prepare('select "id", "author_id", "title", "body", "updated_at" from "note" order by "updated_at" desc limit 200').all<Row>()).results;
+      } else {
+        const held = await Promise.all(notesVocabulary.grants.VIEW_NOTE.map(grant => relations.objectsHeldBy(grant.relation, person.id)));
+        rows = await inBatches<Row>([...new Set(held.flat())], batch => `select "id", "author_id", "title", "body", "updated_at" from "note" where "id" in (${marks(batch)})`);
+        rows.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+      }
       return { notes: await seenBy(person, rows), can: { CREATE_NOTE: await relations.can('CREATE_NOTE', person, null) } };
     },
 

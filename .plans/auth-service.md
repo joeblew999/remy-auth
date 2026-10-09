@@ -6,7 +6,7 @@ Parked 2026-09-26 (owner: "Not big feature stuff"): not started now; picked up a
 
 Purpose (owner, 2026-10-09): "remy-auth is meant to support betterauth working well with tanstack and orpc". Decisions follow from it: each of the three is used the way its own documentation says.
 
-Status: [slice 1](#slice-1-sign-in-the-account-page-and-the-guard-2026-10-09) is on main and [live](#merged-and-deployed-2026-10-09) since 2026-10-09, on the oRPC 2.0 beta, with its database and secret [provisioned](#provisioned-for-the-deployment-2026-10-09). Signing in on the deployment waits for mail delivery. [Slice 2](#slice-2-relationships-on-the-server-and-in-the-gui-2026-10-09), the relation engine used by the server and the GUI, is built on branch `auth-relations`, waiting for the owner to say ship. The next two slices are the app-trust comparison and the relation engine ([next](#next-slices)). The rest of milestone 1 has not started. Builds on the [TanStack move](done/tanstack.md), on main since release 0.9.0.
+Status: [slice 1](#slice-1-sign-in-the-account-page-and-the-guard-2026-10-09) is on main and [live](#merged-and-deployed-2026-10-09) since 2026-10-09, on the oRPC 2.0 beta, with its database and secret [provisioned](#provisioned-for-the-deployment-2026-10-09). Signing in on the deployment waits for mail delivery. [Slice 2](#slice-2-relationships-on-the-server-and-in-the-gui-2026-10-09), the relation engine used by the server and the GUI, and [slice 3](#slice-3-remy-sports-way-of-signing-in-for-every-remy-app-2026-10-09), remy-sport's way of signing in (Cloudflare email, environments, seeded people with roles), are built on branch `auth-relations`, waiting for the owner to say ship. The next two slices are the app-trust comparison and the relation engine ([next](#next-slices)). The rest of milestone 1 has not started. Builds on the [TanStack move](done/tanstack.md), on main since release 0.9.0.
 Owner: remy-auth. First consumer: in-repo sample; first external consumer: remy-data.
 Executor/Reviewer roles as in [plans and roles](../docs/content/dev/development.md#plans-and-roles). Do not
 begin a fleet rollout.
@@ -87,8 +87,8 @@ Three findings changed the design while building:
   be checked there was. Nobody can sign in there yet, so the `__Secure-` cookie prefix on HTTPS,
   `CF-Connecting-IP` as the only address source, sessions across two Worker instances, and D1 latency
   under real sign-ins are all assumed.
-- **Mail delivery.** Outside the local environment sending a code throws, and the account page offers
-  no form there. Cloudflare Email Service waits for the production domain.
+- **Mail delivery**, in slice 1. [Slice 3](#slice-3-remy-sports-way-of-signing-in-for-every-remy-app-2026-10-09)
+  sends through Cloudflare Email Service.
 - **`tanstackStartCookies()`'s cookie forwarding.** It is installed and last. Sign-in and sign-out go
   through Better Auth's handler, which sets cookies itself; the plugin acts only when a server-side
   `auth.api` call sets one (a session refresh after `updateAge`, a day), which no check reaches.
@@ -151,16 +151,21 @@ against a 2.0 remy-auth (the by-hand row above), so the two need not deploy in t
 
 ### Development conveniences
 
-The one policy table is `src/auth/environment.ts`; any environment it does not list is production,
-with everything off ([the rule](../docs/content/dev/development.md#development-principles)).
+The one table is `src/auth/environment.ts` (the shared `environments()`); any environment it does not
+list is production, with everything off ([the rule](../docs/content/dev/development.md#development-principles),
+[explained for developers](../docs/content/dev/auth.md#environments-one-table)).
 
 | Convenience | Where | What it does |
 | --- | --- | --- |
-| `captureMail` | `local` only | A sign-in code is written to the local D1's `local_mail` table instead of mailed, and `GET /dev/mail?recipient=` reads the newest back (`mise run auth:mail`, the sign-in checks). The code is Better Auth's own; accounts and sessions are made only by Better Auth. Elsewhere the route answers 404 and the table stays empty |
+| `capturesMail` | `local` only | Mail is kept in the Worker's outbox instead of sent, and `GET /dev/mail?recipient=` reads the newest back (`mise run auth:mail`, the checks). Elsewhere mail is sent through Cloudflare Email Service and the route answers 404 |
+| `seededSignIn` | `local` only | The seeded people exist (made when first asked for), and the sign-in form and `GET /dev/people` offer them with what each holds. Elsewhere there are none and the route answers 404 |
+| `signInCode: derived` | `local` only | A seeded person signs in with the published code `424242`. Any other address gets Better Auth's random code |
+| `offersAdminSignIn` | `local` only | The seeded administrator is offered and may use that code too |
 
-The checks also name an address of their own in `CF-Connecting-IP`, so Better Auth's per-address limits
-apply per check instead of to `127.0.0.1` as a whole. Only a local Worker believes that header; on a
-deployment Cloudflare sets it. No Worker code serves the checks.
+Every sign-in is still Better Auth's own: a code is asked for and redeemed, and only Better Auth
+makes an account or a session. The checks also name an address of their own in `CF-Connecting-IP`,
+so Better Auth's per-address limits apply per check instead of to `127.0.0.1` as a whole. Only a
+local Worker believes that header; on a deployment Cloudflare sets it.
 
 ### Provisioned for the deployment (2026-10-09)
 
@@ -241,8 +246,8 @@ On the same pins as slice 1, in the Workers runtime on Wrangler's local D1, noth
   SQLite instead; not done.
 - **remy-sport itself is unchanged.** The engine it would import exists and its vocabulary fits; moving
   it is its own work, in its repository.
-- **A relation by platform role** is checked in the fixture only: remy-auth has no roles yet (Better
-  Auth's admin plugin is not installed), so no session here carries one.
+- **A relation by platform role** was checked in the fixture only in this slice; slice 3 added roles
+  and the administrator's relation in the notes demo.
 - **`public` checked against the vocabulary** (remy-sport's `openTo`), the printed list of exceptions,
   and a rule for server functions and routes outside the router: the rows still open in the table below.
 - **The consumer fixture does not use relationships yet.** It signs nobody in, so it has nobody to
@@ -269,6 +274,92 @@ On the same pins as slice 1, in the Workers runtime on Wrangler's local D1, noth
    database and never says whether an address has an account.
 6. **The notes page is remy-auth's own**, not the showcase's: remy-auth-app shows the showcase and
    has nobody signed in. The pieces it is built from (`<Allowed>`, the engine, the guard) are the package's.
+
+## Slice 3: remy-sport's way of signing in, for every Remy app (2026-10-09)
+
+The owner: "The Remy-auth repo needs to support the same email otp thing fully using Cloudflare email
+like Remy sport does. The way it's designed so that users, roles and sign in can happen automatically
+for certain environments is elegant and works really well ... this should all be in Remy-auth so that
+it's easy to any Remy repo to use ... with its own demo using it and showing it off."
+
+**Built**, each piece in the package where an app can use it, and used by remy-auth itself:
+
+- **One table of what each environment permits** (`environment`, remy-sport's `src/environment.ts`):
+  declared, never inferred; anything unknown is production. remy-auth's rows are
+  [below](#development-conveniences).
+- **Mail through Cloudflare Email Service** (`mail`, remy-sport's `src/mail/mailer.ts`): the Worker's
+  `send_email` binding, or the Worker's outbox where the environment captures mail. remy-auth sends
+  from `noreply@mail.ubuntusoftware.net`, on the sending domain the account already has enabled.
+- **The sign-in code's email**, in the reader's language (the page's, which the sign-in form sends),
+  with the code and no link.
+- **Platform roles** (Better Auth's admin plugin): an account is a `user` unless made an `admin`; the
+  role is in the session, typed, and a relation can be held by role.
+- **Seeded people** with stable IDs, roles and relations of their own (`src/auth/seed.ts`,
+  `src/notes/seed.ts`), who exist where the table allows, sign in with a published code, and are
+  offered by the sign-in form with what each holds, read from the data through the relation engine.
+- **The demo shows all of it**: sign in as Ben, Cleo, Dev or Eli and the same note is yours to edit and
+  share, yours to edit, yours to read, or not there; sign in as Ada and her role alone lets her see
+  and remove any note.
+- **The docs**: a page for developers and agents of every Remy repo, [sign-in and
+  permissions](../docs/content/dev/auth.md), in the `remy` skill, and the rule that docs and the demo
+  move with the code ([how we work](../docs/content/dev/how-we-work.md#the-docs-and-the-demo-move-with-the-code)).
+
+### What ran
+
+| Claim | How it ran |
+| --- | --- |
+| Each seeded person signs in for real with the published code and is who the seed says, role included; the code works for nobody else, so no account is made with a known code; nobody can give themselves a role | Check: `tests/auth.spec.ts` |
+| The sign-in form offers the seeded people with what they hold, and one press signs in as one | Check: the same file, in a browser |
+| The sign-in code is one email, in the language asked for (text direction too), from the configured sender, with no link | Check: the same file, from the local outbox |
+| Mail goes to the binding with the configured sender, is captured instead where the table says so, and a refusal names the reader and the reason | Check: the same file, against a stand-in for the binding |
+| The table: local permits its four conveniences; production, an undeclared and an unknown environment permit none; the outbox, the seeded people and the sign-in form's picker do not exist on a deployment | Check: the same file (the deployment half runs against a deployment) |
+| The seeded people hold the seeded relations, and an administrator, by role alone, may see and remove any note but not change it; the page offers them Delete alone | Check: `tests/notes.spec.ts` |
+| The account's sending domain is enabled for Email Sending | By hand: `wrangler email sending list` shows `mail.ubuntusoftware.net` |
+
+### Not run: assumed
+
+- **A real email arriving.** No mail was sent: locally the binding is not used, and nothing is
+  deployed. That Cloudflare accepts `noreply@mail.ubuntusoftware.net` as the sender, and that the code
+  reaches an inbox and not a spam folder, are first seen when somebody signs in on the deployment.
+- **The translations** of the new English messages, the email's among them (on main, as always).
+
+### What remy-sport has in this area, and where each went
+
+| In remy-sport | Here |
+| --- | --- |
+| The environment table, unknown means production | Taken: `environment`, for every app |
+| The mailer on Cloudflare's binding, with an outbox where mail is captured, held in the isolate and not in a table | Taken: `mail`. Slice 1's `local_mail` table is dropped (migration 0004) |
+| A refused send says who it was for and why | Taken |
+| The code's email in the reader's language, the code and no link | Taken. Its React Email templates are not: one template does not need them yet |
+| A fixed, published code for seeded `.test` people only, never for the administrator on a deployment | Taken: `signInCode`, `offersAdminSignIn` |
+| The picker that lists seeded people with what they hold | Taken, and what they hold is read from the data through the engine instead of from the seed |
+| Roles on the account, a default role, the role never writable by its holder | Taken: Better Auth's admin plugin, `user` by default |
+| Codes hashed at rest, passwords off, no cookie cache, the client address from `CF-Connecting-IP`, the base URL from the request | Already so since slice 1 |
+| A seed with stable IDs that an app's own rows name | Taken: `src/auth/seed.ts`; idempotent, and it never overwrites an edited row |
+| An address space of its own for the checks, an account per check | Already so: `tests/people.ts` |
+| The relation engine, the 404 before 403, the checks on what a response names | Slices 1 and 2 |
+| A code only a human can switch on for a deployment (`TEST_OTP`), so the deployed checks can sign in | Not taken yet: the sign-in checks still run locally only |
+| A staging environment: real mail, seeded people, no administrator | Not taken: remy-auth has one deployment. It is a column in the table when there is one |
+| Where a session was started (city, country, network) and the devices page ("was that me?") | Not taken yet: the account page lists no sessions |
+| A person's lifecycle (pending approval, suspended), and refusing a session by it | Not taken: it is remy-sport's own model. Better Auth's `banned` is there with the admin plugin |
+| Thirty-day sessions, ten-minute codes | Not taken: decision 5 keeps seven days and Better Auth's five minutes |
+| Bulk mail on its own sender, with List-Unsubscribe | Not taken: remy-auth sends only sign-in codes |
+| The write half of relations (`grant`, `revoke`), impersonation by an administrator, mail previews, session pruning | Not taken yet |
+
+### Decisions (delegated)
+
+1. **The published code is for seeded people only.** remy-sport also gives it to a reserved test
+   domain; here a new address always gets a random code, read from the outbox, so "no account creation
+   through a fixed code" holds without exception.
+2. **Seeded people are made to exist when they are first asked for**, where the table allows it, so a
+   fresh local database needs no step. This replaces "startup must not silently seed" for the local
+   environment only, on the owner's word that the automatic way is the one wanted.
+3. **They are created through Better Auth's own adapter**, not SQL, so its column mapping is its own.
+4. **The sender is `noreply@mail.ubuntusoftware.net`**: the one sending domain the account has
+   enabled that is the owner's own. Another sender is one variable (`EMAIL_FROM`) and one line in the
+   binding's allow-list.
+5. **Platform roles are `admin` and `user`.** What somebody may do in an app is that app's relations;
+   a role is only one way to hold one.
 
 ## Requirements for the shared guard, from remy-sport (2026-10-09)
 

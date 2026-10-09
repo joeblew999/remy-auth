@@ -84,7 +84,7 @@ dir = "{{config_root}}"
 run = 'curl --fail --silent --show-error --get --data-urlencode "recipient=${usage_email}" "${usage_origin}/dev/mail"'
 
 [tasks."auth:provision"]
-description = "Prints what the deployment needs on Cloudflare and creates nothing (that is the owner's): the identity database and the showcase's, each with its id in wrangler.jsonc and its migrations, and the secret. Until then cf:deploy refuses to deploy, because Wrangler would create the database by itself. Instant"
+description = "Prints what the deployment needs on Cloudflare and creates nothing (that is the owner's): the identity database and the showcase's, each with its id in wrangler.jsonc and its migrations, the secret, and the domain the sign-in code is mailed from. Until then cf:deploy refuses to deploy, because Wrangler would create the database by itself. Instant"
 dir = "{{config_root}}"
 run = '''
 cat <<'STEPS'
@@ -101,8 +101,13 @@ The showcase's notes demo keeps its own data in a second database, the same thre
      then put the printed database_id in wrangler.jsonc, beside "binding": "DEMO_DB".
   5. Its tables:        ./node_modules/.bin/wrangler d1 migrations apply DEMO_DB --remote
 
-Sign-in itself stays off on the deployment until mail delivery exists (.plans/auth-service.md):
-the account page keeps its empty state there.
+The sign-in code is mailed through Cloudflare Email Service, from EMAIL_FROM in wrangler.jsonc, which
+the send_email binding beside it must allow. Its domain has to be enabled for sending on the account:
+
+  6. See what is:       ./node_modules/.bin/wrangler email sending list
+     and if it is not:  ./node_modules/.bin/wrangler email sending enable <the address's domain>
+
+A later migration is step 2 or 5 again, before the deploy that needs it.
 STEPS
 '''
 

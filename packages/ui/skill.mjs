@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 const here = fileURLToPath(new URL('.', import.meta.url));
 const docs = join(here, '../../docs/content/dev');
 const out = join(here, 'skills/remy');
-const pages = ['how-we-work', 'development', 'tooling', 'tasks', 'ui-package', 'writing-docs', 'gui'];
+const pages = ['how-we-work', 'development', 'tooling', 'tasks', 'ui-package', 'auth', 'writing-docs', 'gui'];
 const { version } = JSON.parse(readFileSync(join(here, 'package.json'), 'utf8'));
 const front = text => Object.fromEntries([...(/^---\n([\s\S]*?)\n---/.exec(text)?.[1] ?? '').matchAll(/^(\w+):\s*"?(.*?)"?$/gm)].map(([, key, value]) => [key, value]));
 

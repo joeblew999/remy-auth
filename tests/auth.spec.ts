@@ -4,10 +4,13 @@ import { m } from '@joeblew999/remy-ui/messages';
 import { procedures, routeOf } from '@joeblew999/remy-ui/api/coverage';
 import { policyOf } from '@joeblew999/remy-ui/api/guard-core';
 import { router } from '../src/api/router';
-import { permits } from '../src/auth/environment';
+import { environments } from '@joeblew999/remy-ui/environment';
+import { clearOutbox, mailerFor, readOutbox } from '@joeblew999/remy-ui/mail';
+import { DEMO_SIGN_IN_CODE, environmentOf, fixedSignInCode, policyFor } from '../src/auth/environment';
+import { seededPeople } from '../src/auth/seed';
 import { writableFieldProblems } from '../src/auth/fields';
 import { authOptions, personMayEdit } from '../src/auth/options';
-import { latestCode, local, newEmail, sendCode, signIn, visitor, visitorAddress } from './people';
+import { capturedMail, latestCode, local, newEmail, seededSignIn, sendCode, signIn, signedInAsSeeded, visitor, visitorAddress } from './people';
 
 // Signing in (.plans/auth-service.md), on the real Worker with Better Auth and the local D1: nothing is
 // mocked. The code is the one Better Auth made; the local environment writes it to its local_mail table
@@ -34,7 +37,7 @@ test('a person signs in with an emailed code, and the session reaches the API ov
 
   // The code is Better Auth's own: six digits, made for this address.
   expect((await sendCode(person, email)).status()).toBe(200);
-  const code = await latestCode(person, email);
+  const code = (await latestCode(person, email))!;
   expect(code).toMatch(/^\d{6}$/);
   expect(await latestCode(person, newEmail())).toBeUndefined();
 
@@ -109,15 +112,15 @@ test.describe('in the browser', () => {
     await page.getByLabel(m.account_email_label({}, o)).fill(email);
     await page.getByRole('button', { name: m.account_send_code({}, o) }).click();
     await expect(page.locator('#sign-in-code-hint')).toHaveText(m.account_code_sent({ email }, o));
-    const code = await latestCode(page.request, email);
+    const code = (await latestCode(page.request, email))!;
 
-    // A wrong code says so and signs nobody in.
+    // A wrong code says so and signs nobody in. (The exact name: each seeded person's button starts with it.)
     await page.getByLabel(m.account_code_label({}, o)).fill(code === '000000' ? '111111' : '000000');
-    await page.getByRole('button', { name: m.account_verify({}, o) }).click();
+    await page.getByRole('button', { name: m.account_verify({}, o), exact: true }).click();
     await expect(page.getByRole('alert')).toHaveText(m.account_code_wrong({}, o));
 
     await page.getByLabel(m.account_code_label({}, o)).fill(code);
-    await page.getByRole('button', { name: m.account_verify({}, o) }).click();
+    await page.getByRole('button', { name: m.account_verify({}, o), exact: true }).click();
     await expect(page.locator('[data-account="email"]')).toHaveText(email);
     await expect(page.locator('[data-account="name"]')).toHaveText(m.account_no_name({}, o));
 
@@ -131,6 +134,28 @@ test.describe('in the browser', () => {
     await expect(page.getByLabel(m.account_email_label({}, o))).toBeVisible();
     // The refused sign-in is the one failed request the page made (Better Auth's 400).
     expect(errors.filter(error => !/400/.test(error))).toEqual([]);
+  });
+});
+
+test.describe('the seeded people, in the browser', () => {
+  test.use({ extraHTTPHeaders: { 'CF-Connecting-IP': visitorAddress() } });
+
+  test('the sign-in form offers the seeded people with what they hold, and one press signs in as one of them', async ({ page }) => {
+    test.skip(!local, 'only the local environment offers seeded people');
+    const errors = collectErrors(page);
+    const o = { locale: 'en' } as const;
+    await page.goto(accountPath);
+    await page.waitForLoadState('networkidle');
+    const people = page.locator('[data-seeded-people]');
+    await expect(people).toContainText(m.account_people_intro({ code: DEMO_SIGN_IN_CODE }, o));
+    await expect(people.locator('[data-person]')).toHaveCount(seededPeople.length);
+    const cleo = people.locator('[data-person="cleo@remy.test"]');
+    await expect(cleo.locator('[data-person-holds]')).toContainText('NOTE_EDITOR note_squad');
+    await expect(people.locator('[data-person="eli@remy.test"] [data-person-holds]')).toHaveText(m.account_people_holds_nothing({}, o));
+    await cleo.getByRole('button', { name: m.account_people_sign_in({ name: 'Cleo Tanaka' }, o) }).click();
+    await expect(page.locator('[data-account="email"]')).toHaveText('cleo@remy.test');
+    await expect(page.locator('[data-account="name"]')).toHaveText('Cleo Tanaka');
+    expect(errors).toEqual([]);
   });
 });
 
@@ -163,13 +188,97 @@ test('a person can write no field on their account that nobody decided is theirs
   ]);
 });
 
-test('only the local environment has a convenience; anything unknown is production, where the mail capture does not exist', async ({ request }) => {
-  expect(permits('local', 'captureMail')).toBe(true);
-  for (const environment of ['production', undefined, '', 'staging', 'Local', 'constructor', '__proto__']) expect(permits(environment, 'captureMail'), String(environment)).toBe(false);
-  // The route that reads the capture back: there locally, a 404 on a deployment.
+test('one table says what each environment permits; anything undeclared is production, where no convenience exists', async ({ request }) => {
+  expect(policyFor({ ENVIRONMENT: 'local' })).toEqual({ capturesMail: true, seededSignIn: true, signInCode: 'derived', offersAdminSignIn: true });
+  const production = { capturesMail: false, seededSignIn: false, signInCode: 'none', offersAdminSignIn: false };
+  for (const environment of ['production', undefined, '', 'staging', 'Local', 'constructor', '__proto__']) {
+    expect(policyFor({ ENVIRONMENT: environment }), String(environment)).toEqual(production);
+    expect(fixedSignInCode({ ENVIRONMENT: environment }), String(environment)).toBeUndefined();
+  }
+  expect(environmentOf({ ENVIRONMENT: 'local' })).toBe('local');
+  expect(environmentOf({})).toBe('production');
+  expect(fixedSignInCode({ ENVIRONMENT: 'local' })).toBe(DEMO_SIGN_IN_CODE);
+  // The shared table itself refuses to be built without a production column to fall back to.
+  expect(() => environments({ local: { capturesMail: true } } as never)).toThrow(/production/);
+  // On the Worker: the outbox and the seeded people are there locally, and are 404s on a deployment.
   expect((await request.get('/dev/mail?recipient=nobody@example.test')).status()).toBe(local ? 200 : 404);
+  expect((await request.get('/dev/people')).status()).toBe(local ? 200 : 404);
   // Where no code can be delivered, the account page offers no form: it keeps its empty state.
   const account = await (await request.get(accountPath)).text();
   expect(account.includes('data-sign-in="address"'), 'the sign-in form').toBe(local);
-  expect(account.includes(m.account_empty_title({}, { locale: 'en' })), 'the empty state').toBe(!local);
+  expect(account.includes('data-seeded-people'), 'the seeded people').toBe(local);
+});
+
+test('the sign-in code is one email: the code and nothing to click, written for the reader, from the configured sender', async ({ playwright, baseURL }) => {
+  test.skip(!local, 'reads the local outbox');
+  const reader = await visitor(playwright, baseURL);
+  const email = newEmail('reader');
+  expect((await reader.post('/api/auth/email-otp/send-verification-otp', { data: { email, type: 'sign-in' }, headers: { 'Accept-Language': 'ar' } })).status()).toBe(200);
+  const [mail, ...earlier] = await capturedMail(reader, email);
+  expect(earlier).toEqual([]);
+  const code = mail.text.match(/\b\d{6}\b/)![0];
+  expect(mail).toMatchObject({ to: email, from: 'noreply@mail.ubuntusoftware.net', subject: m.email_code_subject({ code }, { locale: 'ar' }) });
+  // Plain text and HTML say the same; the HTML is in the reader's language and direction, and the code reads left to right.
+  for (const line of [m.email_code_intro({}, { locale: 'ar' }), m.email_code_expiry({}, { locale: 'ar' }), m.email_code_ignore({}, { locale: 'ar' })]) expect(mail.text).toContain(line);
+  expect(mail.html).toContain('<html lang="ar" dir="rtl">');
+  expect(mail.html).toContain(`<h1 dir="ltr"`);
+  expect(mail.html).toContain(`>${code}</h1>`);
+  // A code somebody retypes cannot be forwarded as a way in: no link, in either part.
+  expect(mail.html).not.toMatch(/<a\b|https?:/);
+  expect(mail.text).not.toMatch(/https?:/);
+  await reader.dispose();
+});
+
+test('mail leaves through Cloudflare\'s binding from the configured sender, is captured instead where the table says so, and a failure says who it was for', async () => {
+  const sent: unknown[] = [];
+  const message = { to: 'ada@example.test', subject: 'Hello', text: 'Plain', html: '<p>Plain</p>' };
+  await mailerFor({ capture: false, from: 'noreply@mail.example', binding: { send: async mail => { sent.push(mail); } } }).send(message);
+  expect(sent).toEqual([{ ...message, from: 'noreply@mail.example' }]);
+  // Captured: nothing reaches the binding, and the outbox holds what would have gone on the wire.
+  clearOutbox();
+  await mailerFor({ capture: true, from: 'noreply@mail.example', binding: { send: async () => { throw new Error('must not send'); } } }).send(message);
+  expect(readOutbox('ADA@example.test')).toEqual([{ ...message, from: 'noreply@mail.example', id: expect.any(String), createdAt: expect.any(String) }]);
+  expect(readOutbox('someone-else@example.test')).toEqual([]);
+  // Not configured, or refused: an error naming the reader, never a silent drop.
+  await expect(mailerFor({ capture: false, from: 'noreply@mail.example' }).send(message)).rejects.toThrow('mail: not configured (no send_email binding); nothing was sent to ada@example.test');
+  await expect(mailerFor({ capture: false, binding: { send: async () => {} } }).send(message)).rejects.toThrow('no sender address');
+  const refuse = Object.assign(new Error('destination address is not verified'), { code: 'E_RECIPIENT' });
+  await expect(mailerFor({ capture: false, from: 'noreply@mail.example', binding: { send: async () => { throw refuse; } } }).send(message))
+    .rejects.toThrow('mail: noreply@mail.example to ada@example.test was refused (E_RECIPIENT): destination address is not verified');
+});
+
+test('the seeded people sign in with the published code, each with their role and what they hold; nobody else can use that code', async ({ playwright, baseURL }) => {
+  test.skip(!local, 'only the local environment offers seeded people');
+  const asker = await visitor(playwright, baseURL);
+  const seeded = await seededSignIn(asker);
+  // The people are the seed's, the administrator among them locally, and what each holds is read from the notes demo's data.
+  expect(seeded.code).toBe(DEMO_SIGN_IN_CODE);
+  expect(seeded.people.map(({ name, email, role }) => ({ name, email, role }))).toEqual(seededPeople.map(({ name, email, role }) => ({ name, email, role })));
+  const holds = Object.fromEntries(seeded.people.map(person => [person.email, person.holds]));
+  expect(holds['ben@remy.test']).toContain('NOTE_AUTHOR note_squad');
+  expect(holds['cleo@remy.test']).toEqual(expect.arrayContaining(['NOTE_AUTHOR note_camp', 'NOTE_EDITOR note_squad']));
+  expect(holds['dev@remy.test']).toContain('NOTE_READER note_squad');
+  expect(holds['eli@remy.test']).toEqual([]);
+
+  // Each signs in for real with that code, and is who the seed says, role included.
+  for (const person of seededPeople) {
+    const who = await signedInAsSeeded(playwright, baseURL, person.email);
+    const session = await (await who.get('/api/auth/get-session')).json();
+    expect(session.user, person.email).toMatchObject({ id: person.id, name: person.name, email: person.email, emailVerified: true, role: person.role });
+    expect(await (await who.get('/api/me')).json()).toEqual({ id: person.id, name: person.name, email: person.email, emailVerified: true });
+    await who.dispose();
+  }
+
+  // The published code is a seeded person's only: for any other address the code is random, so no account is made with a known one.
+  const other = await visitor(playwright, baseURL);
+  const email = newEmail('not-seeded');
+  expect((await sendCode(other, email)).status()).toBe(200);
+  expect(await latestCode(other, email)).not.toBe(seeded.code);
+  expect((await signIn(other, email, seeded.code)).status()).toBe(400);
+  expect((await other.get('/api/me')).status()).toBe(401);
+  // And a new account is an ordinary person: nobody can give themselves a role.
+  expect((await signIn(other, email, (await latestCode(other, email))!)).status()).toBe(200);
+  expect((await other.post('/api/auth/update-user', { data: { role: 'admin' } })).status()).not.toBe(200);
+  expect((await (await other.get('/api/auth/get-session')).json()).user.role).toBe('user');
+  await Promise.all([asker, other].map(context => context.dispose()));
 });

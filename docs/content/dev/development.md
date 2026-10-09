@@ -38,9 +38,9 @@ This document owns what the code must be. How people and agents work day to day 
   owner. Ask; do not choose, unless the owner has delegated them
   ([how we work](./how-we-work.md#when-the-owner-delegates-decisions)). Deploying, provisioning and filing upstream issues
   also wait for the owner's explicit request.
-- Do not mock Better Auth, D1 or the Workers runtime. Development conveniences (a seed route,
-  a sign-in picker for seeded people, a fixed sign-in code) are allowed only behind one
-  per-environment policy table whose default, and whose value for any unknown environment, is
+- Do not mock Better Auth, D1 or the Workers runtime. Development conveniences (seeded people,
+  a sign-in picker for them, a fixed sign-in code, captured mail) are allowed only behind one
+  per-environment policy table ([remy-auth's](./auth.md#environments-one-table)) whose default, and whose value for any unknown environment, is
   production with everything off; they never create sessions outside Better Auth, never exist
   in production, require authentication outside local development, and are listed in the
   owning plan. No other test-only routes, flags or bypasses.

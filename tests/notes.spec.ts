@@ -6,7 +6,7 @@ import { schemaProblems } from '@joeblew999/remy-ui/api/relations';
 import { allowedActions, offeredActions } from '@joeblew999/remy-ui/allowed.checks';
 import { collectErrors, localizedPath } from '@joeblew999/remy-ui/checks';
 import { m } from '@joeblew999/remy-ui/messages';
-import { local, newEmail, signedIn, visitor } from './people';
+import { local, newEmail, signedIn, signedInAsSeeded, visitor } from './people';
 
 // The notes demo (.plans/auth-service.md): relations decide who may do what, on the real Worker with
 // its own D1. The owner's two requirements are what is checked: the rules cannot go unused on the
@@ -178,4 +178,36 @@ test('the notes page offers each person exactly what the server allows them, and
   // Nothing any page offered was refused, and no page logged an error.
   for (const [who, { errors }] of Object.entries({ ...pages, elsewhere, nobody })) expect(errors, who).toEqual([]);
   await Promise.all([author, editor, reader, outsider].map(context => context.dispose()));
+});
+
+test('the seeded people hold the seeded relations, and an administrator, by role alone, may see and remove any note but not change it', async ({ browser, playwright, baseURL }) => {
+  test.skip(!local, 'only the local environment offers seeded people');
+  const o = { locale: 'en' } as const;
+  const [ada, ben, cleo, dev, eli] = await Promise.all(['ada', 'ben', 'cleo', 'dev', 'eli'].map(name => signedInAsSeeded(playwright, baseURL, `${name}@remy.test`)));
+  const squad = async (who: APIRequestContext) => (await list(who)).notes.find(note => note.id === 'note_squad')?.can;
+  // The same seeded note, seen through four different relations and through none.
+  expect(await squad(ben)).toEqual({ VIEW_NOTE: true, EDIT_NOTE: true, SHARE_NOTE: true, DELETE_NOTE: true });
+  expect(await squad(cleo)).toEqual({ VIEW_NOTE: true, EDIT_NOTE: true, SHARE_NOTE: false, DELETE_NOTE: false });
+  expect(await squad(dev)).toEqual({ VIEW_NOTE: true, EDIT_NOTE: false, SHARE_NOTE: false, DELETE_NOTE: false });
+  expect(await squad(eli)).toBeUndefined();
+  // The administrator holds no relation to it: the role is what lets them see it and remove it, and nothing more.
+  expect(await squad(ada)).toEqual({ VIEW_NOTE: true, EDIT_NOTE: false, SHARE_NOTE: false, DELETE_NOTE: true });
+
+  // On a note written for this check: the administrator's page offers Delete alone, the server refuses the rest, and Delete works.
+  const author = await signedIn(playwright, baseURL, newEmail('author'));
+  const note = await (await author.post('/api/notes', { data: { title: `To moderate ${newEmail('n')}`, body: '' } })).json() as Note;
+  expect(await take(ada, 'EDIT_NOTE', note)).toBe(403);
+  expect(await take(ada, 'SHARE_NOTE', note)).toBe(403);
+  const context = await browser.newContext({ baseURL, storageState: await ada.storageState() });
+  const page = await context.newPage();
+  const errors = collectErrors(page);
+  await page.goto(localizedPath('/app/notes', 'en'));
+  const card = page.locator(`[data-note="${note.id}"]`);
+  await expect(card).toBeVisible();
+  expect(await offeredActions(card)).toEqual(['DELETE_NOTE']);
+  await card.getByRole('button', { name: m.notes_delete({}, o) }).click();
+  await expect(card).toHaveCount(0);
+  expect((await list(author)).notes).toEqual([]);
+  expect(errors).toEqual([]);
+  await Promise.all([ada, ben, cleo, dev, eli, author].map(who => who.dispose()));
 });

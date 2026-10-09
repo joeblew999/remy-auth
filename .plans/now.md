@@ -107,8 +107,10 @@ move to the oRPC 2.0 beta) is on main and live since 2026-10-09 (https://remy-au
 with its database and secret provisioned. The owner delegated its design decisions the same day; they
 are recorded in the plan. Signing in on the deployment waits for mail delivery. Slice 2, the relation
 engine lifted from remy-sport and used by every server operation and by the GUI (owner: "the rebac did
-not also get used. And also not in the gui"), with the notes demo, is built on branch `auth-relations`
-and waits for the owner to say ship. Then: the app-trust comparison (OAuth tokens verified locally, or
+not also get used. And also not in the gui"), with the notes demo, and slice 3, remy-sport's way of
+signing in for every Remy app (mail through Cloudflare Email Service, one table of what each
+environment permits, seeded people with roles and a one-press picker), are built on branch
+`auth-relations` and wait for the owner to say ship. Then: the app-trust comparison (OAuth tokens verified locally, or
 a service binding), which lets other apps use all of it.
 
 ## Core Web Vitals: the mobile formats page is over the limit (found 2026-10-09)

@@ -10,7 +10,10 @@ import { Alert, AlertDescription } from '@joeblew999/remy-ui/components/alert';
 import { Button } from '@joeblew999/remy-ui/button';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@joeblew999/remy-ui/components/field';
 import { Input } from '@joeblew999/remy-ui/components/input';
+import { Badge } from '@joeblew999/remy-ui/components/badge';
+import { Separator } from '@joeblew999/remy-ui/components/separator';
 import { authClient } from './client';
+import type { SeededSignIn } from './people.server';
 
 // Signing in and out on the account page (.plans/auth-service.md, decision 1): an email address, then
 // the one-time code Better Auth sends to it. TanStack Form with shadcn's Field components, like the
@@ -87,6 +90,44 @@ export function SignIn({ locale }: { locale: Locale }) {
       <Button type="button" variant="outline" onClick={() => { setSentTo(undefined); setFailure(undefined); code.reset(); }}>{m.account_other_email({}, o)}</Button>
     </div>} />
   </form>;
+}
+
+/**
+ * The seeded people this environment offers (never a deployment): each with their role and what they
+ * hold, and one press to sign in as them. It is a real sign-in: a code is asked for and redeemed, with
+ * the published code the environment fixes for seeded people.
+ */
+export function SeededPeople({ locale, seeded }: { locale: Locale; seeded: SeededSignIn }) {
+  const o = { locale };
+  const refresh = useRefresh();
+  const [busy, setBusy] = useState<string>();
+  const [failed, setFailed] = useState(false);
+  const signInAs = async (email: string) => {
+    setBusy(email);
+    const sent = await authClient.emailOtp.sendVerificationOtp({ email, type: 'sign-in' });
+    const signedIn = sent.error ? sent : await authClient.signIn.emailOtp({ email, otp: seeded.code });
+    setFailed(Boolean(signedIn.error));
+    if (!signedIn.error) await refresh();
+    setBusy(undefined);
+  };
+  return <section className="flex flex-col gap-4" data-seeded-people>
+    <Separator />
+    <div className="flex flex-col gap-1">
+      <h2 className="font-medium">{m.account_people_title({}, o)}</h2>
+      <p className="text-sm text-muted-foreground">{m.account_people_intro({ code: seeded.code }, o)}</p>
+    </div>
+    {failed && <Alert variant="destructive"><AlertDescription>{m.account_code_wrong({}, o)}</AlertDescription></Alert>}
+    <ul className="flex flex-col gap-3">
+      {seeded.people.map(person => <li key={person.email} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3" data-person={person.email}>
+        <div className="flex min-w-0 flex-col gap-1">
+          <p className="flex flex-wrap items-center gap-2"><span className="font-medium">{person.name}</span><Badge variant={person.role === 'admin' ? 'default' : 'secondary'}>{person.role}</Badge></p>
+          <p dir="ltr" className="text-start text-sm text-muted-foreground">{person.email}</p>
+          <p dir="ltr" className="text-start text-xs text-muted-foreground" data-person-holds>{person.holds.length ? person.holds.join(' · ') : m.account_people_holds_nothing({}, o)}</p>
+        </div>
+        <Button variant="outline" disabled={busy !== undefined} onClick={() => void signInAs(person.email)}>{m.account_people_sign_in({ name: person.name }, o)}</Button>
+      </li>)}
+    </ul>
+  </section>;
 }
 
 /** The sign-out button. */

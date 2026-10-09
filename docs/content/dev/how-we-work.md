@@ -101,6 +101,16 @@ fast: read their current docs and installed skills before using them, not an age
 
 Moving a library from "Not yet" to in use follows [choose tools by survey](#choose-tools-by-survey-not-by-first-find).
 
+## The docs and the demo move with the code
+
+remy-auth is what every other Remy repo builds on, and its developer docs are what their agents and
+developers read (through the `remy` skill, generated from these pages). So a feature is done when
+four things are true: it is in the package for every app, remy-auth's own app uses it where anyone
+can see it work, a check fails when it is skipped, and the page that describes it is updated in the
+same change. Owner, 2026-10-09: "By make Remy-auth reuses all its features in its own demo it makes it
+easy to onboard AI and devs ... the docs are part of what any other agent and dev in other repos get."
+A page that describes what the code no longer does is a bug; fix it where you find it.
+
 ## Language: Paraglide owns it
 
 Paraglide owns all language behaviour: which language a request gets, through its strategies

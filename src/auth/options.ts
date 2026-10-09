@@ -1,4 +1,5 @@
 import type { BetterAuthOptions } from 'better-auth';
+import { admin } from 'better-auth/plugins/admin';
 import { emailOTP } from 'better-auth/plugins/email-otp';
 import { tanstackStartCookies } from 'better-auth/tanstack-start';
 
@@ -14,6 +15,11 @@ export type AuthDeps = {
   baseURL: string;
   /** Delivers a code, or throws: a failed delivery is an error to the person, never a fallback code. */
   sendCode: (mail: CodeMail) => Promise<void>;
+  /**
+   * The code for this address where the environment fixes one (a seeded person, where the policy
+   * table derives a code), or undefined for Better Auth's own random code. The CLI passes none.
+   */
+  fixedCode?: (email: string) => string | undefined;
 };
 
 /**
@@ -29,7 +35,7 @@ export const personMayEdit: Record<string, Record<string, string>> = {};
  * Better Auth's options for remy-auth, in one place for the Worker and the CLI (.plans/auth-service.md,
  * decisions 1, 3 and 5). No Workers imports, so `auth generate` and the checks load it in Node.
  */
-export function authOptions({ database, secret, baseURL, sendCode }: AuthDeps) {
+export function authOptions({ database, secret, baseURL, sendCode, fixedCode }: AuthDeps) {
   return {
     appName: 'Remy',
     baseURL,
@@ -46,7 +52,10 @@ export function authOptions({ database, secret, baseURL, sendCode }: AuthDeps) {
     plugins: [
       // Better Auth's defaults otherwise: 6 digits, 300 seconds, 3 attempts. Sign-up is open, and a
       // new account holds nothing.
-      emailOTP({ storeOTP: 'hashed', sendVerificationOTP: sendCode }),
+      emailOTP({ storeOTP: 'hashed', sendVerificationOTP: sendCode, generateOTP: ({ email }) => fixedCode?.(email) }),
+      // Platform roles (decision 6): an account is a "user" unless made an "admin". The role is the
+      // plugin's own column, which no account can write on itself.
+      admin({ defaultRole: 'user', adminRoles: ['admin'] }),
       // Last, as Better Auth requires: forwards cookies set by server-side auth.api calls to Start's response.
       tanstackStartCookies(),
     ],

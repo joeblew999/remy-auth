@@ -9,7 +9,7 @@
   "version_metadata": { "binding": "CF_VERSION_METADATA" },
   // "production" unless a local .dev.vars says "local" (mise run auth:local): the environment policy
   // table in src/auth/environment.ts reads it, and anything unknown is production.
-  "vars": { "ENVIRONMENT": "production" },
+  "vars": { "ENVIRONMENT": "production", "EMAIL_FROM": "noreply@mail.ubuntusoftware.net" },
   // The identity database (.plans/auth-service.md): Better Auth's tables, through the numbered
   // migrations in migrations/ (mise run auth:generate, auth:migrate). Only this Worker reads or writes it.
   // DEMO_DB is the showcase's own data (the notes demo), apart from the identities, as any app keeps
@@ -19,6 +19,10 @@
     { "binding": "DB", "database_name": "remy-auth", "database_id": "4f420203-69a4-4173-9048-453002a4b8e6", "migrations_dir": "migrations" },
     { "binding": "DEMO_DB", "database_name": "remy-auth-demo", "migrations_dir": "migrations-demo" }
   ],
+  // Sign-in codes leave through Cloudflare Email Service, from EMAIL_FROM: an address on a domain the
+  // account has enabled for Email Sending (wrangler email sending list). A local Worker captures mail
+  // instead of sending it (the environment table), so this binding is only ever used on a deployment.
+  "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["noreply@mail.ubuntusoftware.net"] }],
   // Better Auth signs and hashes with it. Local: .dev.vars (mise run auth:local). Deployed: a Worker secret.
   "secrets": { "required": ["BETTER_AUTH_SECRET"] },
   "assets": { "directory": "./dist/client" },

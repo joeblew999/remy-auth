@@ -15,7 +15,9 @@ source, `docs/content/dev/*.md`: read those, not the translations beside them (`
 3. [GUI runtime workflow](docs/content/dev/gui.md) — one Worker, local and remote test targets.
 4. [How we work](docs/content/dev/how-we-work.md) — project tools first, surveys before tool choices,
    shadcn and TanStack all the way for UI, local gates, multi-agent work. Record working rules there, not in agent memory.
-5. The plan in [`.plans/`](.plans/) covering your task, and its
+5. [Sign-in and permissions](docs/content/dev/auth.md) — the guard, the relation engine, `<Allowed>`, environments
+   and mail: what every Remy app gets, and where remy-auth uses each itself.
+6. The plan in [`.plans/`](.plans/) covering your task, and its
    [Executor/Reviewer roles](docs/content/dev/development.md#plans-and-roles).
 
 Start with [the project's own tools](docs/content/dev/how-we-work.md#use-the-projects-own-tools-first) and

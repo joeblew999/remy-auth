@@ -51,6 +51,8 @@
     "./app-config": "./src/app-config.tsx",
     "./app-shell": "./src/app-shell.tsx",
     "./allowed": "./src/allowed.tsx",
+    "./environment": "./src/environment.js",
+    "./mail": "./src/mail.ts",
     "./allowed.checks": "./src/allowed.checks.js",
     "./app/vite": "./src/app-vite.js",
     "./docs/vite": "./src/docs/vite.js",

@@ -9,11 +9,11 @@ it. Why and how: [the contracts plan](../../.plans/openapi-contracts.md).
 | --- | --- | --- | --- |
 | `status` | `GET /api/status` | anyone (`public`) | none of its own |
 | `me` | `GET /api/me` | a signed-in person (`session`): their own account | `UNAUTHORIZED` (401, nobody is signed in) |
-| `notes.list` | `GET /api/notes` | a signed-in person (`session`): the notes they wrote and the ones shared with them, each with what they may do to it (`can`) | `UNAUTHORIZED` |
+| `notes.list` | `GET /api/notes` | a signed-in person (`session`): the notes they wrote and the ones shared with them (every note, for a platform administrator), each with what they may do to it (`can`) | `UNAUTHORIZED` |
 | `notes.create` | `POST /api/notes` | the action `CREATE_NOTE`: anyone signed in | `UNAUTHORIZED` |
 | `notes.update` | `POST /api/notes/{id}` | the action `EDIT_NOTE`: the note's author and its editors | `UNAUTHORIZED`, `NOT_FOUND` (404), `FORBIDDEN` (403) |
 | `notes.share` | `POST /api/notes/{id}/share` | the action `SHARE_NOTE`: the note's author | the same |
-| `notes.remove` | `POST /api/notes/{id}/delete` | the action `DELETE_NOTE`: the note's author | the same |
+| `notes.remove` | `POST /api/notes/{id}/delete` | the action `DELETE_NOTE`: the note's author, and a platform administrator (the account's role) | the same |
 | `reservations.create` | `POST /api/reservations` | anyone (`public`) | `INVALID_RESERVATION` (400, field errors in the asked language) |
 
 Each procedure declares who may call it (`policy(...)` from `@joeblew999/remy-ui/api/policy`), and

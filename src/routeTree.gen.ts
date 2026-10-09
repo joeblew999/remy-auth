@@ -25,6 +25,7 @@ import { Route as AppDotlocationRouteImport } from './routes/app.location'
 import { Route as AppDotnotesRouteImport } from './routes/app.notes'
 import { Route as AppDotsettingsRouteImport } from './routes/app.settings'
 import { Route as DevDotmailRouteImport } from './routes/dev.mail'
+import { Route as DevDotpeopleRouteImport } from './routes/dev.people'
 import { Route as DocsDotsplatRouteImport } from './routes/docs.$'
 import { Route as TimeZonesDotsplatRouteImport } from './../packages/showcase/src/parts/time-zones/routes/time-zones.$'
 import { Route as ApiDotauthDotsplatRouteImport } from './routes/api.auth.$'
@@ -111,6 +112,11 @@ const DevDotmailRoute = DevDotmailRouteImport.update({
   path: '/dev/mail',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DevDotpeopleRoute = DevDotpeopleRouteImport.update({
+  id: '/dev/people',
+  path: '/dev/people',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DocsDotsplatRoute = DocsDotsplatRouteImport.update({
   id: '/docs/$',
   path: '/docs/$',
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/app/notes': typeof AppDotnotesRoute
   '/app/settings': typeof AppDotsettingsRoute
   '/dev/mail': typeof DevDotmailRoute
+  '/dev/people': typeof DevDotpeopleRoute
   '/docs/$': typeof DocsDotsplatRoute
   '/time-zones/$': typeof TimeZonesDotsplatRoute
   '/app/': typeof AppDotindexRoute
@@ -164,6 +171,7 @@ export interface FileRoutesByTo {
   '/app/notes': typeof AppDotnotesRoute
   '/app/settings': typeof AppDotsettingsRoute
   '/dev/mail': typeof DevDotmailRoute
+  '/dev/people': typeof DevDotpeopleRoute
   '/docs/$': typeof DocsDotsplatRoute
   '/time-zones/$': typeof TimeZonesDotsplatRoute
   '/app': typeof AppDotindexRoute
@@ -186,6 +194,7 @@ export interface FileRoutesById {
   '/app/notes': typeof AppDotnotesRoute
   '/app/settings': typeof AppDotsettingsRoute
   '/dev/mail': typeof DevDotmailRoute
+  '/dev/people': typeof DevDotpeopleRoute
   '/docs/$': typeof DocsDotsplatRoute
   '/time-zones/$': typeof TimeZonesDotsplatRoute
   '/app/': typeof AppDotindexRoute
@@ -209,6 +218,7 @@ export interface FileRouteTypes {
     | '/app/notes'
     | '/app/settings'
     | '/dev/mail'
+    | '/dev/people'
     | '/docs/$'
     | '/time-zones/$'
     | '/app/'
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/app/notes'
     | '/app/settings'
     | '/dev/mail'
+    | '/dev/people'
     | '/docs/$'
     | '/time-zones/$'
     | '/app'
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/app/notes'
     | '/app/settings'
     | '/dev/mail'
+    | '/dev/people'
     | '/docs/$'
     | '/time-zones/$'
     | '/app/'
@@ -273,6 +285,7 @@ export interface RootRouteChildren {
   AppDotnotesRoute: typeof AppDotnotesRoute
   AppDotsettingsRoute: typeof AppDotsettingsRoute
   DevDotmailRoute: typeof DevDotmailRoute
+  DevDotpeopleRoute: typeof DevDotpeopleRoute
   DocsDotsplatRoute: typeof DocsDotsplatRoute
   TimeZonesDotsplatRoute: typeof TimeZonesDotsplatRoute
   AppDotindexRoute: typeof AppDotindexRoute
@@ -393,6 +406,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevDotmailRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dev/people': {
+      id: '/dev/people'
+      path: '/dev/people'
+      fullPath: '/dev/people'
+      preLoaderRoute: typeof DevDotpeopleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/docs/$': {
       id: '/docs/$'
       path: '/docs/$'
@@ -433,6 +453,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppDotnotesRoute: AppDotnotesRoute,
   AppDotsettingsRoute: AppDotsettingsRoute,
   DevDotmailRoute: DevDotmailRoute,
+  DevDotpeopleRoute: DevDotpeopleRoute,
   DocsDotsplatRoute: DocsDotsplatRoute,
   TimeZonesDotsplatRoute: TimeZonesDotsplatRoute,
   AppDotindexRoute: AppDotindexRoute,

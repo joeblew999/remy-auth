@@ -8,12 +8,14 @@ description: "For developers building Remy or an app on it: shared authenticatio
 
 https://github.com/joeblew999/remy-auth
 
-Shared authentication for Remy apps, using **Better Auth on Cloudflare Workers**
-with **D1** as the planned identity and session store.
+Shared authentication for Remy apps, using **Better Auth on Cloudflare Workers** with **D1** as
+the identity and session store, and relationship-based permissions every app gets from the shared
+package ([sign-in and permissions](./auth.md)).
 
-**Status:** the GUI foundation is live on Cloudflare in two apps built on TanStack Start, in
-English, Spanish and Arabic, from the shared `@joeblew999/remy-ui` package. Authentication and D1
-storage are still planned; open work is listed in [.plans/now.md](https://github.com/joeblew999/remy-auth/blob/main/.plans/now.md).
+**Status:** the GUI foundation is live on Cloudflare in two apps built on TanStack Start, from the
+shared `@joeblew999/remy-ui` package. remy-auth signs people in with an emailed code, guards its API
+by policy, and decides who may do what by relations, shown in its own notes demo. How another app
+learns who is signed in is the next piece; open work is listed in [.plans/now.md](https://github.com/joeblew999/remy-auth/blob/main/.plans/now.md).
 
 ## Where to look
 

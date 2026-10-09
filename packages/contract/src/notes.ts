@@ -18,6 +18,8 @@ export const notesVocabulary = defineVocabulary({
     // Whoever it is shared with, by the role the author gave them.
     { code: 'NOTE_EDITOR', objectTypeCode: 'NOTE', via: 'table', sourceTable: 'note_share', objectColumn: 'note_id', userColumn: 'user_id', filterColumn: 'role', filterValue: 'editor' },
     { code: 'NOTE_READER', objectTypeCode: 'NOTE', via: 'table', sourceTable: 'note_share', objectColumn: 'note_id', userColumn: 'user_id', filterColumn: 'role', filterValue: 'reader' },
+    // The platform's administrators, by the role their account holds: they may see and remove any note.
+    { code: 'PLATFORM_ADMIN', objectTypeCode: 'PLATFORM', via: 'role', roleCode: 'ADMIN' },
     { code: 'ANY_SIGNED_IN', objectTypeCode: 'PLATFORM', via: 'everyone' },
     { code: 'PUBLIC', objectTypeCode: 'PLATFORM', via: 'everyone' },
   ],
@@ -30,11 +32,13 @@ export const notesVocabulary = defineVocabulary({
   ],
   grants: {
     CREATE_NOTE: [{ relation: 'ANY_SIGNED_IN' }],
-    VIEW_NOTE: [{ relation: 'NOTE_AUTHOR' }, { relation: 'NOTE_EDITOR' }, { relation: 'NOTE_READER' }],
+    VIEW_NOTE: [{ relation: 'NOTE_AUTHOR' }, { relation: 'NOTE_EDITOR' }, { relation: 'NOTE_READER' }, { relation: 'PLATFORM_ADMIN' }],
     EDIT_NOTE: [{ relation: 'NOTE_AUTHOR' }, { relation: 'NOTE_EDITOR' }],
     SHARE_NOTE: [{ relation: 'NOTE_AUTHOR' }],
-    DELETE_NOTE: [{ relation: 'NOTE_AUTHOR' }],
+    DELETE_NOTE: [{ relation: 'NOTE_AUTHOR' }, { relation: 'PLATFORM_ADMIN' }],
   },
+  // The role as remy-auth stores it on an account (Better Auth's admin plugin).
+  roles: { ADMIN: 'admin' },
 });
 
 /** What a note carries for its viewer: each action on it, allowed or not, as the server answered. */

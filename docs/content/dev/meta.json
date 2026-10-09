@@ -7,6 +7,7 @@
     "tooling",
     "gui",
     "ui-package",
+    "auth",
     "tasks",
     "writing-docs",
     "ai-tools",

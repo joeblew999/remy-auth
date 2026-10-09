@@ -43,9 +43,10 @@ dev, preview and the test tiers start on the current schema with nothing to reme
 runs the pinned CLI through `src/auth/cli.ts`, which compares the options with a throwaway SQLite
 database built from `migrations/`, so it writes only what is not there yet; change the options, then
 generate, never edit Better Auth's tables by hand. To sign in locally: `mise run project:dev`, open
-`/en/app/account`, enter an address, then read its code with `auth:mail`. No mail is sent locally:
-the local environment writes each code to its own D1 instead (the environment policy in
-`src/auth/environment.ts`; any other environment is production, where that is off). The deployed
+`/en/app/account` and press one of the seeded people, or enter any address and read its code with
+`auth:mail`. No mail is sent locally: the local environment keeps it in the Worker's outbox instead
+(the environment table in `src/auth/environment.ts`, [explained](./auth.md#environments-one-table);
+any other environment is production, where mail is sent through Cloudflare Email Service). The deployed
 database, its migrations and the `BETTER_AUTH_SECRET` Worker secret are created on the owner's
 request only: `auth:provision` prints the steps, and until the database exists `cf:deploy` refuses to
 deploy, because Wrangler would otherwise create it by itself.
