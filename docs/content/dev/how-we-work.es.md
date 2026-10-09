@@ -179,10 +179,12 @@ cualquier app, desde las tareas compartidas; `project:setup` instala el guardiá
 
 | Paso | Comando | Qué ejecuta | Tiempo |
 | --- | --- | --- | --- |
+| Antes de empezar una pieza de trabajo | `mise run dev:start -- <name>` | un worktree propio a partir de main, instalado, con sus propios puertos, el guardián | ~1 min |
 | Después de cada cambio | `mise run dev:change` | la comprobación (`project:check`): planes, tipos con los propios de las tareas, las comprobaciones de funciones puras (`tests/**/*.unit.spec.ts`), el estado de las traducciones; un build solo cuando cambia un archivo de ruta, la documentación solo cuando cambia la documentación | ~6 s |
 | El cambio sale de la máquina | `mise run dev:land -- "<what changed>"` | la comprobación, commit, fast-forward de main, push, deploy a staging. GitHub ejecuta entonces todos los idiomas, las auditorías de Google y el fixture de consumidor en paralelo, mientras sigues programando (`gh run list`) | ~1 min, sobre todo el deploy |
 | Producción | `mise run dev:promote` | `cf:deploy` y el Worker de la documentación, desde un main ya enviado, sin puerta de control: staging y GitHub ya ejecutaron las comprobaciones | ~1 min |
 | Un release | `mise run dev:release` | `packages:release`: todas las comprobaciones, todos los idiomas, en local, a propósito, y luego el tag | ~5 min |
+| Al aterrizar | `mise run dev:done` | el worktree y la rama desaparecen | segundos |
 
 - Un punto que puede parecer extraño: `mise run project:test:only -- <words>` (las comprobaciones de navegador cuyo título
   coincide, en y ar, ~30 s). Es la única ejecución de navegador que ningún paso posee.
@@ -243,9 +245,9 @@ La máquina se bloqueó el 2026-09-25 con unos diez agentes construyendo y proba
 y las comprobaciones sensibles al tiempo ya fallaban mucho antes de eso. Por tanto:
 
 - Un agente construye y prueba solo en su propio git worktree, nunca en el checkout principal: las builds escriben
-  en `dist/`, y dos builds en un mismo checkout se borran los archivos mutuamente.
-- Cada agente define su propio `PREVIEW_PORT` desde el shell (el `mise.toml` del repositorio lo lee; nunca 4190,
-  que los navegadores bloquean).
+  en `dist/`, y dos builds en un mismo checkout se borran los archivos mutuamente. `dev:start` crea el worktree.
+- Cada worktree tiene su propio `PREVIEW_PORT` y `DOCS_PREVIEW_PORT` (`dev:start` los escribe en
+  `mise.local.toml`, nunca 4190, que los navegadores bloquean).
 - Como máximo tres agentes ejecutan pruebas a la vez; la investigación, la escritura y las pruebas exploratorias no
   cuentan. Cuando se necesiten más, define `PLAYWRIGHT_WORKERS=2` para cada uno.
 - El nivel de Google (`project:test:google`, `project:test:cwv`) toma un bloqueo a nivel de máquina, de modo que una segunda
@@ -266,18 +268,31 @@ y las comprobaciones sensibles al tiempo ya fallaban mucho antes de eso. Por tan
 - Lo que está en producción se pregunta, no se recuerda: `mise run cf:versions` muestra qué está ejecutando cada deployment
   y cuán lejos está eso de tu checkout. Dilo a partir de eso, no de lo último que desplegaste.
 
-## Trabajo multiagente [#multi-agent-work]
+## Muchos agentes, un solo flujo [#many-agents-one-flow]
 
-Cuando el trabajo se divide en partes independientes y el propietario ha pedido orquestación multiagente,
-usa esta forma:
+El propietario, el 2026-10-09: «formaliza la forma en que organizamos el trabajo de desarrollo con muchos agentes
+para que usen el nuevo flujo de desarrollo». Cada pieza de trabajo, quienquiera que la haga, es un worktree que pasa
+por los mismos cuatro comandos; main es el único integrador, y GitHub comprueba cada aterrizaje. Nada de esto se hace a mano.
 
-1. **Prueba exploratoria primero.** Un agente demuestra los puntos de riesgo y se detiene si encuentra un bloqueo.
-2. **Un agente por parte.** Cada uno trabaja en su propio git worktree y usa su propio puerto, de modo que las partes
-   nunca colisionan.
-3. **Cada parte se demuestra a sí misma.** Cada parte se entrega con su propia comprobación compartida.
-4. **Un integrador.** Fusiona las partes en la rama de trabajo y ejecuta el nivel 1 y el nivel 2.
-   Nada llega a `main` a menos que ambos pasen.
-5. **Pase manual.** Pasar las comprobaciones no es el final. Despliega una preview con `mise run cf:preview`
-   y usa cada pieza en un Chrome real, limitado a un teléfono gama media, con una traza de rendimiento y capturas de pantalla.
-   Anota cómo se siente: la espera antes del contenido, los saltos de layout, los destellos y cualquier cosa
-   molesta. Corrige lo que se sienta mal antes de fusionar, incluso cuando sus comprobaciones pasen.
+| | Comando | Qué hace |
+| --- | --- | --- |
+| Iniciar | `mise run dev:start -- <name>` | un worktree en la rama `<name>` a partir de main (`.claude/worktrees/<name>`), instalado, con puertos propios (`mise.local.toml`) y el guardián del flujo |
+| Programar | `mise run dev:change` | la comprobación, en segundos, después de cada cambio |
+| Aterrizar | `mise run dev:land -- "<what changed>"` | primero se fusiona main (un conflicto se detiene nombrando los archivos), la comprobación, commit, fast-forward de main, push, traducción cuando está desactualizada, staging. GitHub ejecuta las comprobaciones pesadas; una ejecución roja comenta en el commit |
+| Terminar | `mise run dev:done` | el worktree y la rama ya aterrizados desaparecen; se rechaza mientras quede algo sin aterrizar |
+| Producción | `mise run dev:promote` | desde main, solo un commit que GitHub ha aprobado |
+
+- **Divide por independencia.** Un orquestador divide el trabajo en partes que tocan archivos distintos, y
+  inicia un agente por parte con `dev:start`. Una parte que necesita el resultado de otra espera a ese
+  aterrizaje; no comparte worktree.
+- **Prueba exploratoria primero cuando el riesgo es desconocido**: un agente demuestra el punto de riesgo y aterriza o se detiene.
+- **Cada parte se demuestra a sí misma**: aterriza con su propia comprobación en `tests/`, en el nivel de funciones puras
+  cuando puede serlo, en el navegador cuando solo el navegador lo muestra.
+- **Los aterrizajes se serializan solos.** Si dos agentes aterrizan a la vez: el `dev:land` del segundo ve que main se
+  movió, lo fusiona, vuelve a comprobar y aterriza. El paso de traducción es un solo redactor entre worktrees.
+- **Pase manual antes de producción.** Pasar las comprobaciones no es el final: usa la pieza en staging en un
+  navegador real, con el ancho de un teléfono, y corrige lo que se sienta mal. Luego `dev:promote`.
+- **Un agente nunca espera en primer plano** a `dev:land`, `dev:promote` ni a una ejecución de GitHub; los inicia
+  en segundo plano y actúa según el resultado. Solo se espera a `dev:change`.
+</content>
+</invoke>
