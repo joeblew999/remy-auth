@@ -136,12 +136,13 @@ a service binding), which lets other apps use all of it.
 
 ## Core Web Vitals: the mobile formats page is over the limit (found 2026-10-09)
 
-`/en/formats` on a phone fails Google's LCP threshold (2.5 s): median 3251 ms on main before the auth
-slice (`4d979fb`, on a throwaway Worker), 2809 ms and 3399 ms on the live site after it. Runs swing
-between about 2.0 s and 3.4 s. Not from the auth slice: the browser's bundles did not grow and the
-server answers in under 0.2 s. It fails `project:test:cwv`, so it blocks the next release
-(`ui:release`). To do: find which request the slow runs wait for (the Lighthouse report of a slow
-run), and fix the cause.
+Found 2026-10-09: the page is not slow, the measurement was. The live home page paints in under
+0.25 s; Lighthouse's default simulation loads it at full speed and then estimates, and when the
+scripts arrive before the first paint (a quick line to the host) it takes them for render-blocking and
+says 1.1 s on some runs and 3.5 s on others for the same page. Its applied throttling (the page really
+loads slowed down) said 0.83 s on every one of five runs. `performanceChecks` now measures a phone that
+way (`packages/ui/src/checks.js`; desktop unchanged). Not yet run through `project:test:cwv`: GitHub
+runs Google's level after this push, and `cf:preview` measures it on a throwaway Worker on purpose.
 
 ## Next: platform structure (owner, 2026-09-29)
 
