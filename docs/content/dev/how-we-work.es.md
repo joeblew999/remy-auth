@@ -198,8 +198,12 @@ cualquier app, desde las tareas compartidas; `project:setup` instala el guardiá
   cuando el harness indique que ha terminado. Iniciarlo en segundo plano y luego consultarlo en
   primer plano es el mismo fallo (el propietario, el 2026-10-09: «Has vuelto a hacerlo con 2 cosas de larga
   duración»). Solo `dev:change` (segundos) se ejecuta y se espera.
-- Una ejecución roja en GitHub es lo siguiente que hay que arreglar: `mise run <the failed task>` la reproduce en local, a
-  propósito. Informa de qué se probó y qué no; nunca llames verificado a un trabajo no probado.
+- **La respuesta de GitHub te llega a ti.** Una ejecución roja comenta en el commit (GitHub avisa a su autor), nombrando
+  la ejecución; `dev:change` empieza indicando qué hizo la última ejecución en main; `dev:promote` rechaza un commit
+  cuya ejecución no esté en verde o no haya terminado. Para reproducir un job en rojo: `REMY_FLOW=hand mise run <its task>`,
+  la misma tarea que ejecutó GitHub, ya que el workflow no contiene lógica propia (`project:verify-tooling`
+  comprueba que exista cada tarea que un workflow nombra). Informa de qué se probó y qué no; nunca llames
+  verificado a un trabajo no probado.
 - Nunca encadenes un comando de puerta de control con `grep` o `tail` mediante una tubería: la tubería oculta su código de salida.
   Esto ya provocó una vez el release de una versión cuyas comprobaciones habían fallado.
 
