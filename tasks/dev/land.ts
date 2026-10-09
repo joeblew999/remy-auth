@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from 'node:child_process';
-import { run, steps, where } from './flow.ts';
+import { describeRun, latestRun, run, steps, where } from './flow.ts';
 
 // The land step, in order, each part once: the check; commit what changed; fast-forward main and
 // push it (GitHub takes it from there); translate on main only when the check says a translation is
@@ -12,6 +12,9 @@ const read = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8'
 const task = (name: string, cwd = '.') => spawnSync('mise', ['run', name], { cwd, stdio: 'inherit', env: { ...process.env, REMY_FLOW: 'land' } }).status === 0;
 
 const here = where();
+// Landing on a red main is allowed (the fix is a landing too) and never silent.
+const mainRun = latestRun();
+if (mainRun && mainRun.status === 'completed' && mainRun.conclusion !== 'success') console.log(`dev:land: main is RED, ${describeRun(mainRun)}. Landing on it anyway; if this is not the fix, somebody's is owed.`);
 // Among many agents main moves under every branch. What is landed is the branch with main in it, so
 // main comes in first (a merge; a conflict stops here with the files named), and the check runs on that.
 if (!here.onMain) {

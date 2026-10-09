@@ -53,7 +53,7 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write # the comment on a red commit below; nothing else writes
       packages: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -82,20 +82,16 @@ jobs:
           path: playwright-report/local
           retention-days: 14
           if-no-files-found: ignore
-
-  # A red run reaches the person who pushed without anybody polling: a comment on the commit, which
-  # GitHub sends to its author, naming the run. dev:promote refuses a commit whose run is not green.
-  report:
-    if: failure()
-    needs: checks
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - env:
+      # A red job reaches the person who pushed without anybody polling: a comment on the commit,
+      # which GitHub sends to its author, naming this job and its task. dev:promote refuses a commit
+      # whose run is not green; dev:status and dev:land say main is red.
+      - if: failure() && github.event_name == 'push'
+        env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BODY: "The checks failed on this commit: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} (which job, and its first failing check, are in the run). Locally, on purpose: REMY_FLOW=hand mise run <that job's task>. dev:promote refuses this commit until a run is green."
+          BODY: "The checks failed on this commit, job \"${{ matrix.name }}\" (mise run ${{ matrix.task }}): ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Locally, on purpose: REMY_FLOW=hand mise run ${{ matrix.task }}. dev:promote refuses this commit until a run is green."
         run: gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/comments" -f body="$BODY" > /dev/null
+
+  # (A red job writes on the commit itself, in its own last step above, naming itself.)
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')

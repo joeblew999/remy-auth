@@ -276,6 +276,7 @@ the only integrator, and GitHub checks every landing. Nothing here is done by ha
 
 | | Command | What it does |
 | --- | --- | --- |
+| Look | `mise run dev:status` | what is going on, asked from the facts' owners: main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests. Every agent session opens with it (a hook `dev:guard` registers); a developer runs it when they sit down |
 | Start | `mise run dev:start -- <name>` | a worktree on branch `<name>` from main (`.claude/worktrees/<name>`), installed (`npm ci`, `project:prepare`), with ports of its own (`mise.local.toml`) and the flow's guard. Claude Code's own worktrees live at the same place and are only a folder: inside one, `mise run dev:start` with no name prepares it the same way |
 | Code | `mise run dev:change` | the check, in seconds, after every change |
 | Land | `mise run dev:land -- "<what changed>"` | main merged in first (a conflict stops with the files named), the check, commit, fast-forward main, push, translate when stale, staging. GitHub runs the heavy checks; a red run comments on the commit |
@@ -294,3 +295,7 @@ the only integrator, and GitHub checks every landing. Nothing here is done by ha
   real browser, on a phone's width, and fix what feels bad. Then `dev:promote`.
 - **An agent never waits in the foreground** on `dev:land`, `dev:promote` or a GitHub run; it starts
   them in the background and acts on the result. Only `dev:change` is waited for.
+- **Everything asynchronous comes back to everyone** ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/dev-feedback.md)):
+  a red GitHub job writes on the commit, naming itself; `dev:land` says when main is red; `dev:promote`
+  writes on the commit what went live; `dev:status` shows all of it to whoever asks, and every agent
+  session asks first.

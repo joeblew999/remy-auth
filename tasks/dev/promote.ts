@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { describeRun, installed, latestRun, run, where } from './flow.ts';
 
@@ -20,3 +20,12 @@ installed();
 run('cf:deploy', 'promote');
 if (existsSync('docs')) run('docs:deploy', 'promote');
 run('cf:versions', 'promote');
+// The commit page says what went live (GitHub tells the commit's author); cf:versions stays the truth of now.
+const origin = process.env.DEPLOY_ORIGIN;
+if (origin) {
+  const release = await fetch(`${origin}/healthz`, { cache: 'no-store' }).then(r => r.json() as Promise<{ release?: string }>).then(body => body.release).catch(() => undefined);
+  const body = `Promoted to production: ${origin} serves this commit (Worker version ${release ?? 'unknown'})${process.env.DOCS_ORIGIN && existsSync('docs') ? `; docs: ${process.env.DOCS_ORIGIN}/dev` : ''}. Live now: mise run cf:versions.`;
+  const slug = spawnSync('gh', ['repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner'], { encoding: 'utf8' }).stdout?.trim();
+  const posted = slug ? spawnSync('gh', ['api', `repos/${slug}/commits/${head}/comments`, '-f', `body=${body}`], { stdio: 'ignore' }).status === 0 : false;
+  console.log(posted ? `dev:promote: written on the commit (${head.slice(0, 7)}).` : 'dev:promote: could not write on the commit (gh); the deployments say what they run.');
+}

@@ -20,5 +20,5 @@ source, `docs/content/dev/*.md`: read those, not the translations beside them (`
 6. The plan in [`.plans/`](.plans/) covering your task, and its
    [Executor/Reviewer roles](docs/content/dev/development.md#plans-and-roles).
 
-Start with [the project's own tools](docs/content/dev/how-we-work.md#use-the-projects-own-tools-first) and
+Start with `mise run dev:status` (what is going on) and [the project's own tools](docs/content/dev/how-we-work.md#use-the-projects-own-tools-first), and
 finish through [the flow](docs/content/dev/how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest): `mise run dev:change` after every change, `mise run dev:land -- "<what changed>"` when it should leave the machine.

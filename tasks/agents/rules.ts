@@ -10,7 +10,7 @@ if (existsSync('tasks') && existsSync('docs/content/dev/how-we-work.md')) {
 }
 const pkg = 'node_modules/@joeblew999/remy-ui/package.json';
 if (!existsSync(pkg)) throw new Error('agents:rules: @joeblew999/remy-ui is not installed (mise run project:setup)');
-const { version } = JSON.parse(readFileSync(pkg, 'utf8'));
+const { version } = JSON.parse(readFileSync(pkg, 'utf8')) as { version: string };
 const begin = '<!-- BEGIN:remy-rules (written by mise run agents:rules; edit around it, not in it) -->';
 const end = '<!-- END:remy-rules -->';
 const block = `${begin}
@@ -18,6 +18,12 @@ This repo is built on the Remy platform: @joeblew999/remy-ui ${version} and remy
 at the same tag. Its rules are the \`remy\` skill; read \`.agents/skills/remy/SKILL.md\` (Claude:
 \`.claude/skills/remy/SKILL.md\`) before changing anything. It lists the references: how we work, the
 development principles, tooling, the shared tasks, the UI package and writing docs.
+
+The flow is code, and the only way to work here: \`mise run dev:status\` first (what is going on: main,
+GitHub's verdicts, the deployments, who is working on what); \`mise run dev:start -- <name>\` for a
+worktree of your own; \`mise run dev:change\` after every change (seconds); \`mise run dev:land -- "<what
+changed>"\` to land (main, GitHub's checks, staging); \`mise run dev:done\` when landed. The tooling
+refuses the heavy checks outside those steps. Long steps run in the background; never wait on them.
 ${end}`;
 const current = existsSync('AGENTS.md') ? readFileSync('AGENTS.md', 'utf8') : '# Agent instructions\n';
 const marked = new RegExp(`${begin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s\\S]*?${end}`);

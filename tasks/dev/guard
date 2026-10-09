@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-//MISE description="Register the flow's guard for this repo's agents: a Claude Code PreToolUse hook (.claude/settings.json) that refuses a heavy check run outside the flow (project:verify, project:test*, template:test, a bare playwright run, i18n:translate) and names the dev:* step instead. project:setup and project:upgrade-ui run it; --check only verifies. The guard is tasks/dev/guard.ts, the flow tasks/dev/flow.ts"
+//MISE description="Register the flow's hooks for this repo's agents (.claude/settings.json): PreToolUse on Bash refuses a heavy check run outside the flow (project:verify, project:test*, template:test, a bare playwright run, i18n:translate) and names the dev:* step instead; SessionStart runs dev:status, so every session opens with what is going on. project:setup and project:upgrade-ui run it; --check only verifies. The guard is tasks/dev/guard.ts, the flow tasks/dev/flow.ts"
 //MISE dir="{{config_root}}"
 //USAGE flag "--check" help="Verify the hook is registered as it should be; change nothing"
 // The logic is guard.ts beside this file: TypeScript, type-checked by project:check. Node strips
