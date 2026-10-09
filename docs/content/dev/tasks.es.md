@@ -73,8 +73,8 @@ las tareas, que un solo cambio de versión actualiza.
    documentación), haz commit de ello y ejecuta `mise run i18n:translate`, que escribe y hace commit de los
    demás idiomas.
 6. `mise run cf:deploy`, y `mise run docs:deploy` para la documentación.
-7. CI: `.github/workflows/google.yml` llama al flujo de trabajo compartido de remy-auth en la misma tag (los
-   tipos y las auditorías de Google en cada push a `main`). Da al repositorio nuevo acceso de lectura en la
+7. CI: `.github/workflows/google.yml` llama al flujo de trabajo compartido de remy-auth en la misma tag (todos los
+   idiomas, las auditorías de Google en cada push a `main`). Da al repositorio nuevo acceso de lectura en la
    configuración del paquete `@joeblew999/remy-ui` ("Manage Actions access"), o `npm ci` falla allí.
 
 Después, la app crece en sus propios archivos: páginas en `src/routes/` (una página junto a la ruta de un
@@ -85,8 +85,9 @@ paquete de contrato y `src/api/` (todo procedimiento que recibe entrada document
 falla: la regla `api/coverage` del paquete), documentación en `docs/content/`. Pasa a una versión nueva con
 `mise run project:upgrade-ui -- <version>` (el paquete, el `ref` de las tareas y la tag del flujo de trabajo
 de CI, juntos). `ref=main` (`mise.dev.toml`) queda en caché y nunca se refresca solo: `mise run
-project:refresh-tasks` cuando `main` avance. Dos niveles locales a la vez comparten `PREVIEW_PORT` y el
-segundo falla al iniciar su servidor: dale a cada shell el suyo (`PREVIEW_PORT=4232 mise run …`).
+project:refresh-tasks` cuando `main` avance. Dos ejecuciones de navegador locales a la vez comparten
+`PREVIEW_PORT` y el segundo falla al iniciar su servidor: dale a cada shell el suyo (`PREVIEW_PORT=4232
+mise run …`).
 
 ### Un repositorio que publica paquetes [#a-repository-that-publishes-packages]
 
@@ -142,29 +143,30 @@ de la app), `project:prepare` (el estado local que una app necesita antes de eje
 y `project:build` ejecutan primero; nada por defecto, y remy-auth escribe ahí su `.dev.vars` y migra su D1
 local) y `project:release-checks`.
 
-Las pruebas se ejecutan en niveles, elegidos por costo y por lo que un cambio puede romper, nunca omitiendo comprobaciones. Los
-niveles y cuándo usar cada uno son una regla en
-[cómo trabajamos](./how-we-work.md#gates-before-anything-leaves-the-machine); las tareas son:
+El flujo de desarrollo es código, `tasks/dev/flow.ts`, con tres comandos y un guardián
+([cómo trabajamos](./how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest)):
 
-| Nivel | Tarea |
+| Paso | Tarea |
 | --- | --- |
-| 0 | `project:check` (comprobación de tipos y build, sin navegador; después `i18n:check`, como aviso) |
-| 1 | `project:test:smoke` (`tests/smoke.spec.ts`, construido sobre las comprobaciones `./smoke` del paquete) |
-| 2 | `project:test:only -- <words>` (las comprobaciones cuyo título coincide, en `QUICK_LOCALES`) |
-| 3 | `project:test:quick` (todas las comprobaciones en `QUICK_LOCALES`, por defecto `en,ar`; después `project:test:consumers`) |
-| 4 | `project:verify` (todo, en todos los idiomas; `packages:release` lo ejecuta) |
+| Cada cambio | `dev:change` (`project:check`: planes, `project:routes` cuando cambia un archivo de ruta, tipos con `project:typecheck-tasks`, `project:test:unit`, `i18n:check` como aviso, `project:check:docs` cuando cambia la documentación) |
+| Sale de la máquina | `dev:land -- "<message>"` (la comprobación, commit, main, push, `cf:staging`; GitHub ejecuta `project:test`, `project:test:google`, `project:test:consumers`) |
+| Producción | `dev:promote` (`cf:deploy`, `docs:deploy`, `cf:versions`) |
+| Un release | `dev:release` (`packages:release`, que ejecuta `project:verify`) |
+| Un área | `project:test:only -- <words>` |
+| El guardián | `dev:guard` lo registra (`project:setup` lo hace); `dev:guard -- --check` lo verifica (`project:verify` lo hace) |
 
-`project:test` es cada una de nuestras comprobaciones en todos los idiomas (dentro de `project:verify`). Los
-niveles 3 y 4 y CI terminan con `project:test:consumers`, los demás repositorios a los que este sirve,
+`project:test` es cada una de nuestras comprobaciones en todos los idiomas (dentro de `project:verify`).
+`project:verify` y CI terminan con `project:test:consumers`, los demás repositorios a los que este sirve,
 probados tal como los reciben: nada por defecto; en remy-auth, `template:test`, que construye la app en
 blanco y un paquete propio a partir de la plataforma de este commit (el paquete desde un tarball con
 versión propia, las tareas desde una copia fuera de cualquier `node_modules`, el `.npmrc` de la plantilla)
 y ejecuta la instalación, las skills (instaladas una vez por lista fijada y luego reutilizadas), las
-herramientas, el nivel 0, el nivel 3, la documentación y una publicación de prueba (dry-run) (~1,5 a 3 min,
-sobre todo la red). Un cambio que rompería otro repositorio falla ahí, no en ese repositorio. Las pruebas
-se comprueban con tipos junto con la app (`tsconfig.json` incluye `tests/`). El nivel de Google es
-`project:test:google` (auditorías de Lighthouse, local; CI en cada push y tag) y `project:test:cwv`
-(Core Web Vitals en un Worker de Cloudflare desechable); `packages:release` ejecuta ambas.
+herramientas, la comprobación, las comprobaciones rápidas de navegador, la documentación y una publicación
+de prueba (dry-run) (~1,5 a 3 min, sobre todo la red). Un cambio que rompería otro repositorio falla ahí, no
+en ese repositorio. Las pruebas se comprueban con tipos junto con la app (`tsconfig.json` incluye
+`tests/`). El nivel de Google es `project:test:google` (auditorías de Lighthouse, local; CI en cada push y
+tag) y `project:test:cwv` (Core Web Vitals en un Worker de Cloudflare desechable); `packages:release`
+ejecuta ambas.
 
 Dónde se ejecutan las comprobaciones: el comportamiento propio del paquete compartido se comprueba una vez, en remy-auth, antes de cada
 release. Una app construida sobre el paquete ejecuta un conjunto de contrato (sus páginas renderizan, las páginas de sitio y de app se mantienen
@@ -172,7 +174,7 @@ separadas, sus propias funcionalidades funcionan) más el nivel de Google en sus
 de nuevo. Mantén las comprobaciones baratas en lugar de quitarlas (el reloj de Playwright en lugar de esperas
 reales, una página de navegador por comprobación, workers en paralelo). Las comprobaciones recorren `checkedLocales` de
 `@joeblew999/remy-ui/checks`, que respeta `CHECK_LOCALES`. Define `[settings] task.timings = true` en el
-`mise.toml` que incluye, para que cada nivel imprima duraciones por tarea y totales.
+`mise.toml` que incluye, para que cada paso imprima duraciones por tarea y totales.
 
 ### Traducciones [#translations]
 
@@ -222,7 +224,7 @@ través de mise: fuera de una tarea, el shim de Node de mise vuelve a aplicar `[
 
 | Tarea | Hace |
 | --- | --- |
-| `cf:deploy` | Construye con `DEPLOY_ORIGIN`, sube, espera a la nueva versión (`cf:wait`) y luego ejecuta su comprobación smoke en vivo. Sin pruebas salvo que `GATE=smoke\|quick\|full` elija un nivel. Se niega cuando un binding de D1, KV o R2 nombra un recurso que no existe: Wrangler crearía uno durante el despliegue, y crear recursos corresponde al propietario (`cf:preview` se niega del mismo modo) |
+| `cf:deploy` | Construye con `DEPLOY_ORIGIN`, sube, espera a la nueva versión (`cf:wait`) y luego ejecuta su comprobación smoke en vivo. Sin pruebas antes: `dev:promote` lo ejecuta después de las comprobaciones del flujo. Se niega cuando un binding de D1, KV o R2 nombra un recurso que no existe: Wrangler crearía uno durante el despliegue, y crear recursos corresponde al propietario (`cf:preview` se niega del mismo modo) |
 | `cf:preview` | Despliega este commit como un Worker desechable `<worker>-check-<commit>` (producción intacta), ejecuta el nivel 1 contra él y lo elimina; `KEEP_PREVIEW=1` lo conserva |
 | `cf:preview-delete` | Lista los Workers de comprobación, o elimina uno por nombre; nunca el Worker de producción |
 | `cf:urls` | Imprime las páginas y `/healthz` del origen de producción (o de uno dado), para informes |

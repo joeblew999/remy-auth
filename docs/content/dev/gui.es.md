@@ -6,14 +6,14 @@ description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en 
 ```sh
 mise run project:dev       # http://127.0.0.1:5173/en
 mise run project:preview   # Production build on local Workers, port 4173
-mise run project:check     # Tier 0: typecheck and build
+mise run dev:change        # The check, in seconds (the flow's first step)
 ```
 
 :::note
 Google Chrome debe estar instalado. Todo se ejecuta localmente en el runtime de Workers, sobre la
 D1 local de Wrangler; no se necesita ninguna cuenta de Cloudflare, base de datos remota ni credenciales de producción. Las pruebas
 de navegador son dueñas de `PREVIEW_PORT` (por defecto 4173; cada agente define el suyo) y se niegan a reutilizar
-un proceso no relacionado. Detén una preview manual antes de un nivel de pruebas; el servidor de desarrollo en el 5173 puede seguir en ejecución.
+un proceso no relacionado. Detén una preview manual antes de una comprobación de navegador; el servidor de desarrollo en el 5173 puede seguir en ejecución.
 :::
 
 ## Un único scaffold para local y Cloudflare [#one-scaffold-for-local-and-cloudflare]
@@ -29,9 +29,9 @@ El desarrollo usa el mismo código fuente del Worker y el mismo runtime de Cloud
 | `project:dev` | Workers local, hot reload, puerto 5173 |
 | `project:build` | Build y ensayo (dry run) del deployment de Wrangler; sin subida |
 | `project:preview` | Build y luego sirve el artefacto de producción en el host local de Cloudflare en `PREVIEW_PORT` (4173) |
-| `project:check` … `project:verify` | Los niveles de pruebas, en el mismo host local ([regla](./how-we-work.md#gates-before-anything-leaves-the-machine), [tareas](./tasks.md)) |
+| `dev:change`, `dev:land`, `dev:promote`, `dev:release` | El flujo ([cómo trabajamos](./how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest), [tareas](./tasks.md)); sus comprobaciones se ejecutan en el mismo host local |
 | `project:test:google` / `project:test:cwv` | El nivel de Google: auditorías de Lighthouse en local; Core Web Vitals en un Worker de Cloudflare desechable |
-| `cf:deploy` | Build y luego sube producción a la cuenta de Cloudflare autenticada (sin pruebas salvo que `GATE` elija un nivel) |
+| `cf:deploy` | Build y luego sube producción a la cuenta de Cloudflare autenticada; `dev:promote` lo ejecuta |
 | `cf:staging` | Lo mismo para el entorno de staging: su propio Worker (`STAGING_ORIGIN`) y sus propios recursos |
 | `cf:preview` | Despliega este commit como un Worker desechable, ejecuta el nivel 1 contra él y lo elimina |
 | `project:test:remote` | Las mismas pruebas contra `TEST_BASE_URL`; sin servidor local ni deployment |
@@ -240,8 +240,8 @@ las ejecuta sobre páginas renderizadas en servidor.
 ## Evidencia y límites [#evidence-and-limits]
 
 Lo que cubren las comprobaciones son las propias comprobaciones: `tests/` y el
-`@joeblew999/remy-ui/checks` del paquete (el título de cada comprobación dice qué demuestra); los niveles que las ejecutan están en
-[cómo trabajamos](./how-we-work.md#gates-before-anything-leaves-the-machine). En resumen: cada página en cada
+`@joeblew999/remy-ui/checks` del paquete (el título de cada comprobación dice qué demuestra); los pasos del flujo que las ejecutan están en
+[cómo trabajamos](./how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest). En resumen: cada página en cada
 idioma sin JavaScript (idioma, dirección, metadatos, enlaces), catálogos y plurales, los valores de formatos
 frente a Intl, las redirecciones de entrada y la sugerencia de idioma, la hidratación, el formulario de demo y la API,
 los estados HTTP, el sitemap y `hreflang`, las cabeceras de seguridad y el nonce de CSP, las pantallas estrechas, y

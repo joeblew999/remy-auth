@@ -167,30 +167,66 @@ Cuando el propietario delega decisiones, por ejemplo para terminar el trabajo si
 - Mantén todas las puertas de control en verde; la delegación nunca relaja una comprobación.
 - Deja un informe completo: qué se decidió, qué se hizo, qué se comprobó y qué no.
 
-## Puertas de control antes de que algo salga de la máquina [#gates-before-anything-leaves-the-machine]
+## El flujo: tres comandos, y un guardián que rechaza el resto [#the-flow-three-commands-and-a-guard-that-refuses-the-rest]
 
-- La puerta de control completa (`mise run project:verify`, todos los idiomas) es para los releases reales: `ui:release`
-  la ejecuta, y un tag o un release de paquete nunca sale sin ella. El propietario, el 2026-09-25: «Solo
-  hace falta para los releases reales, no podemos tardar una eternidad en desarrollo. Tenéis que empezar a usar
-  mejor vuestro criterio sobre cuándo un deploy necesita una prueba de control».
-- Niveles de prueba (el propietario, el 2026-09-25: «haced grandes cantidades de código sin pruebas y luego pasad por otro nivel
-  si hay problemas»). Programa libremente con el nivel 0; sube solo cuando algo parezca ir mal o antes de que
-  algo salga de la máquina:
+El propietario, el 2026-10-09: «El 95 % del tiempo ha sido comprobar y el 5 % programar. Esto no puede seguir así»,
+«Es una cuestión de qué ejecutas en local y qué ejecutas en GitHub de forma asíncrona», y «La herramienta formaliza lo que
+pasa en desarrollo ... asegúrate de que el flujo de los desarrolladores también esté formalizado, para que no vuelvan a
+pasar estas putadas de mierda. Y así tú y los desarrolladores usáis ese mismo flujo para que quede arreglado para siempre».
+Así que el flujo es código, no una regla que recordar: `tasks/dev/flow.ts` es el único lugar donde viven sus decisiones,
+tres comandos son sus pasos, y un guardián rechaza lo que no sea uno de ellos. remy-auth lo obtiene igual que
+cualquier app, desde las tareas compartidas; `project:setup` instala el guardián.
 
-  | Nivel | Comando | Qué | Tiempo |
-  | --- | --- | --- | --- |
-  | 0 | `mise run project:check` | comprobación de tipos y build; estado de las traducciones como aviso | ~15 s |
-  | 1 | `mise run project:test:smoke` | cada página responde en en y ar; la página de inicio y la documentación se hidratan; la búsqueda y ask responden | ~15 s |
-  | 2 | `mise run project:test:only -- <words>` | solo las comprobaciones cuyo título coincide, en y ar | variable |
-  | 3 | `mise run project:test:quick` | todas las comprobaciones, en y ar; luego los demás repositorios a los que este da servicio (remy-auth: el fixture de consumidor, de ~1,5 a 3 min) | ~45 s (remy-auth ~2 a 4 min) |
-  | 4 | `mise run project:verify` | todo, todos los idiomas | releases |
+| Paso | Comando | Qué ejecuta | Tiempo |
+| --- | --- | --- | --- |
+| Después de cada cambio | `mise run dev:change` | la comprobación (`project:check`): planes, tipos con los propios de las tareas, las comprobaciones de funciones puras (`tests/**/*.unit.spec.ts`), el estado de las traducciones; un build solo cuando cambia un archivo de ruta, la documentación solo cuando cambia la documentación | ~6 s |
+| El cambio sale de la máquina | `mise run dev:land -- "<what changed>"` | la comprobación, commit, fast-forward de main, push, deploy a staging. GitHub ejecuta entonces todos los idiomas, las auditorías de Google y el fixture de consumidor en paralelo, mientras sigues programando (`gh run list`) | ~1 min, sobre todo el deploy |
+| Producción | `mise run dev:promote` | `cf:deploy` y el Worker de la documentación, desde un main ya enviado, sin puerta de control: staging y GitHub ya ejecutaron las comprobaciones | ~1 min |
+| Un release | `mise run dev:release` | `packages:release`: todas las comprobaciones, todos los idiomas, en local, a propósito, y luego el tag | ~5 min |
 
-- Los deploys no ejecutan pruebas a menos que `GATE` elija un nivel: `GATE=smoke` para la mayoría de los cambios de código, `GATE=quick`
-  para cambios en el paquete compartido o transversales (en remy-auth incluye el fixture de consumidor, +1,5 a 3 min y la red), `GATE=full` rara vez. El texto de documentación, los planes, las tareas y la configuración
-  se despliegan directamente. Indica qué nivel se ejecutó al informar.
+- Un punto que puede parecer extraño: `mise run project:test:only -- <words>` (las comprobaciones de navegador cuyo título
+  coincide, en y ar, ~30 s). Es la única ejecución de navegador que ningún paso posee.
+- **El guardián** (`dev:guard`, un hook de Claude Code en cada comando de shell que ejecuta un agente) rechaza
+  `project:verify`, `project:test`, `project:test:quick`, `project:test:remote`, `project:test:google`,
+  `project:test:cwv`, `project:test:consumers`, `template:test`, un `playwright test` suelto e
+  `i18n:translate` fuera del flujo, y en su lugar indica el paso correspondiente. Cada uno se puede seguir ejecutando a mano desde una
+  terminal: eso es una decisión; que un agente ejecute uno sin que se le pida es el fallo para el que existe el guardián.
+- Una regla que pueda expresarse como función va en `tests/**/*.unit.spec.ts` (sin build, sin Worker, sin
+  navegador), de modo que se ejecuta gratis en cada comprobación. El navegador es para lo que solo el navegador muestra.
+- Una ejecución roja en GitHub es lo siguiente que hay que arreglar: `mise run <the failed task>` la reproduce en local, a
+  propósito. Informa de qué se probó y qué no; nunca llames verificado a un trabajo no probado.
 - Nunca encadenes un comando de puerta de control con `grep` o `tail` mediante una tubería: la tubería oculta su código de salida.
   Esto ya provocó una vez el release de una versión cuyas comprobaciones habían fallado.
-- Informa de qué se probó y qué no; nunca llames verificado a un trabajo no probado.
+
+## El trabajo manual se convierte en tareas de mise sobre herramientas reales [#manual-work-becomes-mise-tasks-over-real-tools]
+
+El propietario, el 2026-09-26: «¡Tenéis que llegar al punto en que vuestra comprobación use mise y la herramienta subyacente!»
+y «asegúrate de tener algo en la documentación sobre usar tu criterio para que las cosas que haces a mano
+se conviertan en una tarea de mise que use una herramienta ... Es vital porque todos nuestros repositorios van a usar esto».
+
+- Cada comprobación se ejecuta mediante una tarea de mise que envuelve la herramienta real: los pasos del flujo y las comprobaciones (`project:test:*`,
+  Playwright), `project:test:live` después de un deploy, `plans:check`, `i18n:check`, `browser:shots` para mirar.
+  Nada de bucles de `curl`, scripts puntuales ni greps improvisados para decidir si algo funciona: no se pueden
+  repetir, las apps que usan el paquete no los obtienen, y nadie los ve después.
+- Usa el criterio en todo lo que se hace a mano, no solo en las comprobaciones: la segunda vez que escribas los mismos comandos
+  o recurras a un script desechable, conviértelo en una tarea compartida (en `tasks/`, para que la tenga toda app) que llame
+  a la herramienta que hace el trabajo: Wrangler, Playwright, gh, npm, las propias funciones de mise.
+- ¿No encuentras una herramienta? No escribas un script y sigas adelante. Añade una línea a `.plans/now.md` para hacer un estudio
+  ([elige las herramientas mediante un estudio](#choose-tools-by-survey-not-by-first-find)); si la búsqueda o el cambio son grandes,
+  escribe tú mismo un plan en `.plans/` (o `.plans/parked/`). Los agentes crean estas líneas y planes en cuanto
+  se topan con algo así; el propietario no tiene que pedirlo.
+- Una tarea que sea más que una línea de una herramienta es una tarea de archivo TypeScript (`tasks/<namespace>/<name>.ts`;
+  Node la ejecuta tal cual, `project:check` le comprueba los tipos dondequiera que estén las tareas, incluida la caché de include
+  de un consumidor), nunca lógica en bash ni JavaScript sin tipos: lo que el compilador no puede ver, un agente lo
+  pasa por alto (el propietario, issue #9). Donde varias tareas comparten lógica, se avanza hacia una sola herramienta de línea de comandos ([aparcado: remy-cli](https://github.com/joeblew999/remy-auth/blob/main/.plans/tooling-in-typescript.md)).
+
+## Ramas: de vida corta, eliminadas tras el merge [#branches-short-lived-deleted-after-merge]
+
+- El trabajo ocurre en ramas dentro de git worktrees (uno por agente); se fusionan en `main` y se eliminan, junto con
+  su worktree, justo después del merge. Solo se envían a GitHub `main` y los tags de release; una rama llega a GitHub
+  solo para una pull request, y GitHub la elimina cuando el PR se fusiona («Automatically delete head
+  branches», activado para todos los repositorios, 2026-09-26).
+- Una rama fusionada que queda (en local o en GitHub) es ruido, no historia: `main` y los tags ya la conservan.
 
 ## Compartir una máquina entre agentes [#sharing-one-machine-between-agents]
 
@@ -205,7 +241,7 @@ y las comprobaciones sensibles al tiempo ya fallaban mucho antes de eso. Por tan
   cuentan. Cuando se necesiten más, define `PLAYWRIGHT_WORKERS=2` para cada uno.
 - El nivel de Google (`project:test:google`, `project:test:cwv`) toma un bloqueo a nivel de máquina, de modo que una segunda
   ejecución espera en lugar de distorsionar la primera.
-- `GATE=<tier> mise run cf:deploy` ejecuta el nivel por sí mismo; nunca encadenes un deploy después de una puerta con `;`.
+- Nunca encadenes un deploy después de una comprobación con `;`: los pasos del flujo se ejecutan uno tras otro y se detienen en el primer fallo.
 
 ## Informar al propietario [#reporting-to-the-owner]
 
@@ -236,3 +272,4 @@ usa esta forma:
    y usa cada pieza en un Chrome real, limitado a un teléfono gama media, con una traza de rendimiento y capturas de pantalla.
    Anota cómo se siente: la espera antes del contenido, los saltos de layout, los destellos y cualquier cosa
    molesta. Corrige lo que se sienta mal antes de fusionar, incluso cuando sus comprobaciones pasen.
+</content>
