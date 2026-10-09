@@ -95,7 +95,7 @@ formats page's intro and "This language" share the first screen on desktop; issu
 ## Watching
 
 - oRPC 2.0: on the beta since 2026-10-09 (owner: "oRPC 2.0 beta"), pinned at 2.0.0-beta.42 in the
-  [auth slice](auth-service.md#the-move-to-orpc-20-beta), on branch `auth-proof`. Follow the betas to 2.0.0 (each can
+  [auth slice](auth-service.md#the-move-to-orpc-20-beta), on main and live. Follow the betas to 2.0.0 (each can
   break; `packages:upgrade` and the gates say), and move remy-auth-app with the next release
   ([what the move touched](done/openapi-contracts.md#orpc-20-watch-2026-09-26), issue #1).
 
@@ -103,11 +103,21 @@ formats page's intro and "This language" share the first screen on desktop; issu
 
 [auth-service](auth-service.md): opened for its first real slice. Slice 1 (Better Auth in the Worker on
 D1, sign-in by emailed code, the account page, the shared guard and its checks on oRPC 1 and 2, and the
-move to the oRPC 2.0 beta) is committed on branch `auth-proof`, not merged or pushed, and its database
-and secret are provisioned (owner, 2026-10-09: "commit and provision"). The owner delegated its design
-decisions the same day; they are recorded in the plan. Then, in order: the app-trust comparison (OAuth
-tokens verified locally, or a service binding), and the relation engine lifted from remy-sport. Owner
-only: say when to merge to main and when to deploy.
+move to the oRPC 2.0 beta) is on main and live since 2026-10-09 (https://remy-auth.gedw99.workers.dev),
+with its database and secret provisioned. The owner delegated its design decisions the same day; they
+are recorded in the plan. Signing in on the deployment waits for mail delivery. Then, in order: the
+app-trust comparison (OAuth tokens verified locally, or a service binding), and the relation engine
+lifted from remy-sport, which must be used by every server operation and by the GUI (owner: "the rebac
+did not also get used. And also not in the gui").
+
+## Core Web Vitals: the mobile formats page is over the limit (found 2026-10-09)
+
+`/en/formats` on a phone fails Google's LCP threshold (2.5 s): median 3251 ms on main before the auth
+slice (`4d979fb`, on a throwaway Worker), 2809 ms and 3399 ms on the live site after it. Runs swing
+between about 2.0 s and 3.4 s. Not from the auth slice: the browser's bundles did not grow and the
+server answers in under 0.2 s. It fails `project:test:cwv`, so it blocks the next release
+(`ui:release`). To do: find which request the slow runs wait for (the Lighthouse report of a slow
+run), and fix the cause.
 
 ## Next: platform structure (owner, 2026-09-29)
 

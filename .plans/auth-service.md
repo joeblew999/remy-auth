@@ -6,7 +6,7 @@ Parked 2026-09-26 (owner: "Not big feature stuff"): not started now; picked up a
 
 Purpose (owner, 2026-10-09): "remy-auth is meant to support betterauth working well with tanstack and orpc". Decisions follow from it: each of the three is used the way its own documentation says.
 
-Status: [slice 1](#slice-1-sign-in-the-account-page-and-the-guard-2026-10-09) is committed on branch `auth-proof` (a worktree), on the oRPC 2.0 beta, not merged or pushed. Its database and secret are [provisioned](#provisioned-for-the-deployment-2026-10-09); the slice is not deployed. The next two slices are the app-trust comparison and the relation engine ([next](#next-slices)). The rest of milestone 1 has not started. Builds on the [TanStack move](done/tanstack.md), on main since release 0.9.0.
+Status: [slice 1](#slice-1-sign-in-the-account-page-and-the-guard-2026-10-09) is on main and [live](#merged-and-deployed-2026-10-09) since 2026-10-09, on the oRPC 2.0 beta, with its database and secret [provisioned](#provisioned-for-the-deployment-2026-10-09). Signing in on the deployment waits for mail delivery. The next two slices are the app-trust comparison and the relation engine ([next](#next-slices)). The rest of milestone 1 has not started. Builds on the [TanStack move](done/tanstack.md), on main since release 0.9.0.
 Owner: remy-auth. First consumer: in-repo sample; first external consumer: remy-data.
 Executor/Reviewer roles as in [plans and roles](../docs/content/dev/development.md#plans-and-roles). Do not
 begin a fleet rollout.
@@ -63,16 +63,15 @@ Three findings changed the design while building:
 
 ### Not run: assumed
 
-- **The slice on a deployment.** The database and the secret exist, but this code has not been
-  deployed. There, the `__Secure-` cookie prefix on HTTPS, `CF-Connecting-IP` as the only address
-  source, sessions across two Worker instances, and D1 latency are all assumed.
+- **Signing in on a deployment.** The slice is [live](#merged-and-deployed-2026-10-09) and what could
+  be checked there was. Nobody can sign in there yet, so the `__Secure-` cookie prefix on HTTPS,
+  `CF-Connecting-IP` as the only address source, sessions across two Worker instances, and D1 latency
+  under real sign-ins are all assumed.
 - **Mail delivery.** Outside the local environment sending a code throws, and the account page offers
   no form there. Cloudflare Email Service waits for the production domain.
 - **`tanstackStartCookies()`'s cookie forwarding.** It is installed and last. Sign-in and sign-out go
   through Better Auth's handler, which sets cookies itself; the plugin acts only when a server-side
   `auth.api` call sets one (a session refresh after `updateAge`, a day), which no check reaches.
-- **The account page's empty state where no code can be delivered.** The check for it runs against a
-  deployment only (`tests/auth.spec.ts`), and nothing is deployed.
 - **`cf:deploy` refusing an unprovisioned binding.** The precondition was run alone: it refused
   before the database existed and passes now. A whole `cf:deploy` was not run, because that is a deploy.
 - **Organizations, platform roles, JWT and JWKS, the OAuth provider, MCP, passkeys:** not installed.
@@ -154,13 +153,51 @@ steps `mise run auth:provision` prints were run on the owner's Cloudflare accoun
   unseen, so nobody holds it; replacing it signs everyone out.
 
 Setting a secret makes Cloudflare roll out the Worker's current code again with it; the live smoke
-checks passed afterwards (`project:test:live`). The slice itself is not deployed: `cf:deploy` would
-now be allowed, and stays the owner's to ask for. Once deployed, `/api/me` answers and the account
-page keeps its empty state; signing in there waits for mail delivery (Cloudflare Email Service, which
-needs the production domain). Not solved yet: `cf:preview`'s throwaway Workers bind this same
-database.
+checks passed afterwards (`project:test:live`). Signing in on the deployment waits for mail delivery
+(Cloudflare Email Service, which needs the production domain). Not solved yet: `cf:preview`'s
+throwaway Workers bind this same database.
+
+### Merged and deployed (2026-10-09)
+
+The owner said "you do it all for me". The branch was merged to main (fast-forward), the translation
+step ran there (the 19 new messages in 12 languages, 6 Spanish docs pages), and `GATE=quick cf:deploy`
+put it live: https://remy-auth.gedw99.workers.dev (101 checks in English and Arabic, the consumer
+fixture 43 + 4, then the live smoke checks).
+
+What was checked on the live Worker:
+
+| Check | Result |
+| --- | --- |
+| Both test levels against production (`project:test:remote`) | 337 passed; 3 skipped by design (the sign-in checks need the local mail capture); 1 failed, below |
+| `/dev/mail` (the local-only mail capture) | 404: the deployment runs as production |
+| `/api/me` without a session, and with a made-up session cookie (which goes through Better Auth and D1) | 401 both times |
+| `/api/auth/ok`, `/api/auth/get-session` for nobody | `{"ok":true}`, `null`: Better Auth starts with the real secret |
+| The account page | the empty state, no sign-in form |
+
+The one failure is not this slice's: Core Web Vitals on the mobile formats page (`/en/formats`, median
+LCP over the 2.5 s limit). The commit before the slice fails it too, measured the same way on a
+throwaway Worker (median 3251 ms on `4d979fb`; the live site after the deploy: 2809 ms and 3399 ms in
+two runs). The browser's bundles did not grow and the page's server answers in under 0.2 s. It is its
+own item in [now](now.md), and it blocks the next release, whose gate includes it.
+
+Still assumed on the deployment, because nobody can sign in there yet: the `__Secure-` cookie prefix,
+`CF-Connecting-IP` as the only address source for the rate limits, and sessions across Worker instances.
 
 ## Requirements for the shared guard, from remy-sport (2026-10-09)
+
+**The owner's summary of what went wrong there** (2026-10-09): "The problem we have in Remy-sports was
+that the rebac did not also get used. And also not in the gui." Two requirements follow, and they are
+the acceptance of the relation engine's slice:
+
+1. **It cannot go unused on the server.** Every operation is behind the guard, and the build fails on
+   one that is not. Slice 1 has this for oRPC procedures (`guardProblems`); it still lacks it for server
+   functions and server routes outside the router (the last row below).
+2. **The GUI uses it too.** A page decides nothing by itself: what it offers (a Save button, an edit
+   link, a row in a list) comes from the server's answer for this viewer and this object, delivered
+   with the data (`canFor`'s permission map), through shared components every Remy app gets, never from
+   the viewer's role worked out in the browser. A check proves it: for seeded people, the actions a
+   page shows are exactly the ones the server allows, and using one never answers 403.
+
 
 remy-sport's engine leaked although every route declared a policy: nothing checked what a response
 returned, or whether a session stood in front of it. Its fixes are on its branch
@@ -201,7 +238,8 @@ proved small. Read in Better Auth's documentation on 2026-10-09, not run:
   needs its own credential either way; and a Worker fetching another Worker's public URL on the same
   account may need a service binding or a compatibility flag, to be checked before the JWKS design.
 
-**The relation engine.** Read in remy-sport on 2026-10-09 (`src/api/base.ts`, `relations.ts`,
+**The relation engine**, used by the server and by the GUI (the owner's two requirements above). Read
+in remy-sport on 2026-10-09 (`src/api/base.ts`, `relations.ts`,
 `src/domain/grants.ts`), not run: its 27 relations, 76 actions and grants are already data, and its
 queries are Drizzle's `sql` template, not its query builder, so the lift is mechanical for the read
 half. What ties it to remy-sport: the vocabulary imported as module globals, the grant narrowing by an
