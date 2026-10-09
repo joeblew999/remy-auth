@@ -276,6 +276,7 @@ por los mismos cuatro comandos; main es el único integrador, y GitHub comprueba
 
 | | Comando | Qué hace |
 | --- | --- | --- |
+| Mirar | `mise run dev:status` | qué está pasando, preguntado a quienes poseen los datos: los últimos commits de main con el veredicto de GitHub, qué ejecuta cada deployment, cada worktree por delante y por detrás de main, traducciones, pull requests. Cada sesión de agente empieza con esto (lo registra un hook `dev:guard`); un desarrollador lo ejecuta al sentarse a trabajar |
 | Iniciar | `mise run dev:start -- <name>` | un worktree en la rama `<name>` a partir de main (`.claude/worktrees/<name>`), instalado (`npm ci`, `project:prepare`), con puertos propios (`mise.local.toml`) y el guardián del flujo. Los worktrees propios de Claude Code viven en el mismo lugar y son solo una carpeta: dentro de uno, `mise run dev:start` sin nombre lo prepara de la misma manera |
 | Programar | `mise run dev:change` | la comprobación, en segundos, después de cada cambio |
 | Aterrizar | `mise run dev:land -- "<what changed>"` | primero se fusiona main (un conflicto se detiene nombrando los archivos), la comprobación, commit, fast-forward de main, push, traducción cuando está desactualizada, staging. GitHub ejecuta las comprobaciones pesadas; una ejecución roja comenta en el commit |
@@ -294,5 +295,7 @@ por los mismos cuatro comandos; main es el único integrador, y GitHub comprueba
   navegador real, con el ancho de un teléfono, y corrige lo que se sienta mal. Luego `dev:promote`.
 - **Un agente nunca espera en primer plano** a `dev:land`, `dev:promote` ni a una ejecución de GitHub; los inicia
   en segundo plano y actúa según el resultado. Solo se espera a `dev:change`.
-</content>
-</invoke>
+- **Todo lo asíncrono vuelve a todos** ([el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/dev-feedback.md)):
+  un job rojo de GitHub escribe en el commit, nombrándose a sí mismo; `dev:land` indica cuándo main está en rojo; `dev:promote`
+  escribe en el commit qué se publicó; `dev:status` muestra todo esto a quien lo pregunte, y cada sesión de agente
+  pregunta primero.

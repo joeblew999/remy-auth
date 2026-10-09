@@ -148,6 +148,7 @@ El flujo de desarrollo es código, `tasks/dev/flow.ts`, con tres comandos y un g
 
 | Paso | Tarea |
 | --- | --- |
+| Primero | `dev:status` (main con los veredictos de GitHub, los despliegues, los worktrees por delante y por detrás, las traducciones, las pull requests; un hook `SessionStart` lo ejecuta para los agentes) |
 | Un trabajo | `dev:start -- <name>` (un worktree propio desde main, `npm ci`, puertos en `mise.local.toml`, `dev:guard`); `dev:done` lo elimina una vez fusionado |
 | Cada cambio | `dev:change` (`project:check`: planes, `project:routes` cuando cambia un archivo de ruta, tipos con `project:typecheck-tasks`, `project:test:unit`, `i18n:check` como aviso, `project:check:docs` cuando cambia la documentación) |
 | Sale de la máquina | `dev:land -- "<message>"` (la comprobación, commit, main, push, traduce cuando está desactualizado, `cf:staging`; GitHub ejecuta entonces `project:test`, `project:test:google` y `project:test:consumers` en paralelo, y una ejecución en rojo comenta en el commit. Las mismas tres en local, a propósito: `REMY_FLOW=hand mise run <task>`) |
