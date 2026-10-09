@@ -1,12 +1,14 @@
-# Level 2 checks (Google's Lighthouse audits) on every push to main and every version tag, then the
-# release for tags. Every Remy repo runs this same workflow (.plans/thin-apps.md, group 6): remy-auth
-# through the triggers below, any other repo by calling it at the tag its tasks and package are on,
-# which project:upgrade-ui moves with them:
+# The heavy checks, on GitHub after every push to main and on every version tag, in parallel, while
+# the developer keeps coding; then the release for tags. Locally the check is project:check (seconds);
+# each of these can still be run on purpose (mise run project:test, project:test:google,
+# project:test:consumers). Every Remy repo runs this same workflow (.plans/thin-apps.md, group 6):
+# remy-auth through the triggers below, any other repo by calling it at the tag its tasks and package
+# are on, which project:upgrade-ui moves with them:
 #
 #   on: { push: { branches: [main], tags: ['v*'] }, workflow_dispatch: {} }
 #   permissions: {}
 #   jobs:
-#     google:
+#     checks:
 #       uses: joeblew999/remy-auth/.github/workflows/google.yml@vX.Y.Z
 #       permissions: { contents: write, packages: write }
 #
@@ -15,7 +17,7 @@
 # with packages:release (remy-auth: ui:release) is left alone; a repository that publishes no packages
 # never tags. npm ci reads @joeblew999/remy-ui from GitHub Packages with the run's token (the app's
 # .npmrc), once the package grants the repository read access ("Manage Actions access").
-name: Google checks and release
+name: Checks and release
 
 on:
   push:
@@ -27,13 +29,26 @@ on:
 permissions: {}
 
 # packages:tag pushes main and then the tag for the same commit: the tag's run (which releases)
-# cancels main's run instead of running level 2 twice. Runs of different commits never collide.
+# cancels main's run instead of running everything twice. Runs of different commits never collide.
 concurrency:
-  group: google-${{ github.repository }}-${{ github.sha }}
+  group: checks-${{ github.repository }}-${{ github.sha }}
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/tags/v') }}
 
 jobs:
-  google:
+  # Three jobs, not one: each takes a few minutes and they share nothing, so the answer comes back in
+  # the time of the longest. Each is one mise task, the same one a developer can run by hand.
+  checks:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: every language
+            task: project:test
+          - name: google
+            task: project:test:google
+          - name: consumers
+            task: project:test:consumers
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -50,22 +65,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: mise run project:typecheck
-      - run: mise run project:test:google
-      # The other repositories this one serves, as they get it (remy-auth: the consumer fixture); none by default.
-      - run: mise run project:test:consumers
+      - run: mise run project:test:unit
+      - run: mise run ${{ matrix.task }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: google-report
+          name: report-${{ strategy.job-index }}
           path: playwright-report/local
           retention-days: 14
+          if-no-files-found: ignore
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: google
+    needs: checks
     runs-on: ubuntu-latest
     permissions:
       contents: write

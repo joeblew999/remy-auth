@@ -1,11 +1,14 @@
 // Shared Playwright configuration for apps built on this package: TEST_TARGET "local" starts
 // Cloudflare's local host on PREVIEW_PORT over the built artifact, "remote" tests TEST_BASE_URL,
-// and HTML reports go to playwright-report/<target>. A project's playwright.config.ts is one call.
+// "unit" starts nothing, and HTML reports go to playwright-report/<target>. A project's
+// playwright.config.ts is one call.
 import { defineConfig, devices } from '@playwright/test';
 import { baseLocale, localizeUrl } from './paraglide/runtime.js';
 
 export function playwrightConfig({ webServer, testDir = './tests', timezoneId = 'Asia/Tokyo' } = {}) {
   const remote = process.env.TEST_TARGET === 'remote';
+  // The checks that are plain functions (*.unit.spec.ts): no Worker, no build, no browser.
+  const unit = process.env.TEST_TARGET === 'unit';
   if (remote && !process.env.TEST_BASE_URL) throw new Error('Set TEST_BASE_URL to the deployed origin for project:test:remote.');
   const port = process.env.PREVIEW_PORT ?? '4173';
   const target = new URL(remote ? process.env.TEST_BASE_URL : `http://127.0.0.1:${port}`);
@@ -17,17 +20,19 @@ export function playwrightConfig({ webServer, testDir = './tests', timezoneId = 
     fullyParallel: true,
     // PLAYWRIGHT_WORKERS caps the browsers this run starts, for machines running several agents at once.
     ...(process.env.PLAYWRIGHT_WORKERS ? { workers: Number(process.env.PLAYWRIGHT_WORKERS) } : {}),
-    reporter: [['list'], ['html', { open: 'never', outputFolder: `playwright-report/${remote ? 'remote' : 'local'}` }]],
+    reporter: unit ? [['list']] : [['list'], ['html', { open: 'never', outputFolder: `playwright-report/${remote ? 'remote' : 'local'}` }]],
     use: { baseURL: target.origin, ...devices['Desktop Chrome'], channel: 'chrome', timezoneId, colorScheme: process.env.COLOR_SCHEME ?? 'light' },
     // Two levels. "ours": the app's own checks, fast, gate every local release.
     // "google" and "google-cwv": Lighthouse audits and Core Web Vitals, slow, run in CI.
     // Core Web Vitals run after the Lighthouse audits so no other browser inflates the timings.
+    // "unit": what needs no Worker (mise run project:test:unit), in seconds, on every check.
     projects: [
-      { name: 'ours', testIgnore: /(lighthouse|performance)\.spec\.[jt]s$/ },
+      { name: 'unit', testMatch: /\.unit\.spec\.[jt]s$/ },
+      { name: 'ours', testIgnore: /(lighthouse|performance|\.unit)\.spec\.[jt]s$/ },
       { name: 'google', testMatch: /lighthouse\.spec\.[jt]s$/ },
       { name: 'google-cwv', testMatch: /performance\.spec\.[jt]s$/, dependencies: ['google'] },
     ],
-    webServer: remote ? undefined : {
+    webServer: remote || unit ? undefined : {
       command: webServer ?? `./node_modules/.bin/wrangler dev --ip 127.0.0.1 --port ${port}`,
       url: localizeUrl(new URL('/', target.origin), { locale: baseLocale }).href,
       reuseExistingServer: false,

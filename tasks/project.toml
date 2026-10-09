@@ -95,19 +95,36 @@ raw = true
 run = "./node_modules/.bin/wrangler dev --ip 127.0.0.1 --port \"${PREVIEW_PORT:-4173}\""
 
 ["project:test"]
-description = "Tier 4 with project:verify, releases: build, then every check of ours in every language ( ~75 s with 13 languages). Uses dist/ and PREVIEW_PORT: never two local levels at once"
+description = "Every browser check of ours in every language (~2 min with 13 languages): GitHub runs it after every push and project:verify at a release. Locally only to reproduce what failed there. Uses dist/ and PREVIEW_PORT: never two local levels at once"
 dir = "{{config_root}}"
 depends = ["project:build"]
 env = { TEST_TARGET = "local" }
-run = ["./node_modules/.bin/playwright test --project=ours", { task = "project:test:consumers" }]
+run = "./node_modules/.bin/playwright test --project=ours"
 
 ["project:check"]
-description = "Tier 0 while coding: plans:check, build and typecheck, no browser (~15 s), then i18n:check, and docs:check when the app has a docs Worker (docs/) (missing or stale translations are a warning here). Code freely; run a test tier when something looks wrong (docs/content/dev/how-we-work.md, test tiers)"
+description = "THE check while coding, in seconds: the plans list, types, and the checks that are plain functions (no build, no server, no browser), then translation status as a warning. Two parts run only when their inputs changed since they last passed: the route tree (a build, when a route file changed) and the docs Worker (when docs/ changed). Everything slower is on demand (project:test:only -- <words>) or runs on GitHub after a push; see docs/content/dev/how-we-work.md, test tiers"
 dir = "{{config_root}}"
-# Build before typecheck: in a TanStack Start app the build is TanStack's route generator (Start's Vite
-# plugin writes src/routeTree.gen.ts, with Start's Register types). TanStack's router CLI (tsr generate)
-# writes the tree without that block, so the next build rewrites the file; tried and dropped 2026-09-26.
-run = [{ task = "plans:check" }, { task = "project:single-copies" }, "./node_modules/.bin/vite build", { task = "project:typecheck" }, { task = "i18n:check" }, "[ ! -d docs ] || mise run docs:check"]
+run = [{ task = "plans:check" }, { task = "project:single-copies" }, { task = "project:routes" }, { task = "project:typecheck" }, { task = "project:test:unit" }, { task = "i18n:check" }, { task = "project:check:docs" }]
+
+["project:routes"]
+description = "Regenerate src/routeTree.gen.ts when a route file or the parts list changed since the last time (TanStack Start's Vite plugin writes it during a build, ~5 s); otherwise nothing. project:check runs it before the types"
+dir = "{{config_root}}"
+sources = ["src/routes/**/*", "src/parts.json"]
+outputs = { auto = true }
+run = "./node_modules/.bin/vite build"
+
+["project:check:docs"]
+description = "The docs Worker's check (docs:check: build, types; ~30 s) when the app has docs and something in them changed since it last passed; otherwise nothing. project:check runs it last"
+dir = "{{config_root}}"
+sources = ["docs/content/**/*", "docs/*.ts", "docs/*.json", "packages/ui/src/docs/**/*.ts", "packages/ui/src/docs/**/*.tsx", "packages/ui/src/docs/**/*.js"]
+outputs = { auto = true }
+run = "[ ! -d docs ] || mise run docs:check"
+
+["project:test:unit"]
+description = "The checks that are plain functions (tests/**/*.unit.spec.ts): no build, no Worker, no browser (~2 s). project:check runs them every time; a rule that can be a function belongs here, not in the browser suite"
+dir = "{{config_root}}"
+env = { TEST_TARGET = "unit" }
+run = "./node_modules/.bin/playwright test --project=unit --pass-with-no-tests"
 
 ["project:test:smoke"]
 description = "Tier 1, smoke: build, then the smoke checks only (tests/smoke.spec.ts calls the package's smokeChecks): every page in en and ar answers with a heading, the pages named there hydrate without errors (~15 s)"
@@ -126,11 +143,11 @@ env = { TEST_TARGET = "local", CHECK_LOCALES = "{{ env.CHECK_LOCALES | default(v
 run = "./node_modules/.bin/playwright test --project=ours --grep"
 
 ["project:test:quick"]
-description = "Tier 3, quick: build, then every check of ours in QUICK_LOCALES only (default en and ar: left to right and right to left; languages not configured yet are skipped). Not a gate: project:verify, releases and CI run every language"
+description = "On demand, before a risky merge: build, then every browser check of ours in QUICK_LOCALES (en and ar: left to right and right to left), ~45 s. Every language, the consumer fixture and Google's audits run on GitHub after a push, not here"
 dir = "{{config_root}}"
 depends = ["project:build"]
 env = { TEST_TARGET = "local", CHECK_LOCALES = "{{ env.QUICK_LOCALES | default(value='en,ar') }}" }
-run = ["./node_modules/.bin/playwright test --project=ours", { task = "project:test:consumers" }]
+run = "./node_modules/.bin/playwright test --project=ours"
 
 ["project:test:google"]
 description = "Level 2, audits: build, then run Google's Lighthouse audits (accessibility, best practices, SEO) locally (~40 s; CI runs this). Core Web Vitals are judged on a Cloudflare preview instead: project:test:cwv. Uses dist/, PREVIEW_PORT and the Chrome DevTools daemon: never alongside another local level or a remote level 2"
@@ -142,6 +159,6 @@ env = { TEST_TARGET = "local" }
 run = "$(command -v flock >/dev/null && echo flock || echo 'lockf -k') \"${TMPDIR:-/tmp}/remy-level2.lock\" ./node_modules/.bin/playwright test --project=google"
 
 ["project:verify"]
-description = "Tier 4, releases: verify the tasks, dependencies, MCP registration, CLI versions and tooling invariants, types, then every check of ours in every language (~2 min)"
+description = "RELEASES ONLY (packages:release runs it; GitHub runs its parts after every push): the tasks, dependencies, MCP registration, CLI versions and tooling invariants, types, the plain-function checks, every browser check in every language, then the other repositories this one serves (~4.5 min in remy-auth). Never while coding: project:check is the check"
 dir = "{{config_root}}"
-run = ["mise tasks validate", "npm ls --depth=0", { task = "mcp:verify" }, { task = "project:doctor" }, { task = "project:verify-tooling" }, { task = "project:typecheck" }, { task = "project:test" }]
+run = ["mise tasks validate", "npm ls --depth=0", { task = "mcp:verify" }, { task = "project:doctor" }, { task = "project:verify-tooling" }, { task = "project:typecheck" }, { task = "project:test:unit" }, { task = "project:test" }, { task = "project:test:consumers" }]

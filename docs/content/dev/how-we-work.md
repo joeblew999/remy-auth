@@ -169,25 +169,31 @@ When the owner hands over decisions, for example to finish work unattended:
 
 ## Gates before anything leaves the machine
 
-- The full gate (`mise run project:verify`, every language) is for real releases: `ui:release`
-  runs it, and a tag or package release never goes out without it. Owner, 2026-09-25: "It's just
-  only needed for real releases, we can't take forever in development. You have to start to use
-  your judgement better on when a deploy needs a gateway test."
-- Test tiers (owner, 2026-09-25: "do huge coding with no tests and then run through a different tier
-  if there are issues"). Code freely with tier 0; move up only when something looks wrong or before
-  something leaves the machine:
+Owner, 2026-10-09: "95% of time has been checking and 5% coding. It can't go on." and "It's a question
+of what you run locally and what you run in GitHub asynchronously." So the rule is a split, not a
+ladder: **locally, seconds, on every change; the heavy checks on GitHub after every push, in
+parallel, while you keep coding.** Every heavy check still exists as a task and can be run locally on
+purpose; what changed is what runs by default.
 
-  | Tier | Command | What | Time |
-  | --- | --- | --- | --- |
-  | 0 | `mise run project:check` | typecheck and build; translation status as a warning | ~15 s |
-  | 1 | `mise run project:test:smoke` | every page in en and ar answers; home and docs hydrate; search and ask respond | ~15 s |
-  | 2 | `mise run project:test:only -- <words>` | only the checks whose title matches, en and ar | varies |
-  | 3 | `mise run project:test:quick` | every check, en and ar; then the other repositories this one serves (remy-auth: the consumer fixture, ~1.5 to 3 min) | ~45 s (remy-auth ~2 to 4 min) |
-  | 4 | `mise run project:verify` | everything, every language | releases |
+| When | What | Time |
+| --- | --- | --- |
+| After every change | `mise run project:check`: the plans list, types, the plain-function checks (`tests/**/*.unit.spec.ts`), translation status as a warning; a build only when a route file changed, the docs Worker only when docs changed | ~6 s (first time ~17 s) |
+| When something looks wrong, or you changed one area | `mise run project:test:only -- <words>`: the browser checks whose title matches, in en and ar | ~30 s |
+| Before a risky merge, on purpose | `mise run project:test:quick`: every browser check of ours, en and ar | ~45 s |
+| After every push to main, on GitHub, in parallel | every language (`project:test`), Google's audits (`project:test:google`), the other repositories this one serves (`project:test:consumers`) | minutes, nobody waits |
+| A release | `mise run project:verify` inside `packages:release`: all of it, locally, on purpose | ~5 min |
 
-- Deploys run no tests unless `GATE` picks a tier: `GATE=smoke` for most code changes, `GATE=quick`
-  for shared-package or cross-cutting changes (in remy-auth it includes the consumer fixture, +1.5 to 3 min and the network), `GATE=full` rarely. Docs text, plans, tasks and config
-  deploy straight away. Say which tier ran when reporting.
+- An agent runs `project:check` and deploys. It does not run `project:test:quick`, `project:test`,
+  `project:verify`, `project:test:remote` or `template:test` unless the owner asks, a release is being
+  made, or a GitHub run failed and it is reproducing that failure. Running a green suite again proves
+  nothing and costs minutes of the owner's time.
+- A rule that can be a function belongs in `tests/**/*.unit.spec.ts` (no build, no Worker, no
+  browser), not in the browser suite: it then runs on every check for free. The browser is for what
+  only a browser shows.
+- Deploys run no tests unless `GATE` picks a tier (`GATE=smoke` for a code change you cannot see,
+  rarely more). Docs text, plans, tasks and config deploy straight away. Say which tier ran.
+- GitHub's answer comes back as a check on the commit (`gh run list`, `gh run watch`); a red run is
+  the next thing to fix, and `mise run <the failed task>` reproduces it locally.
 - Never pipe a gating command through `grep` or `tail` in a chain: the pipe hides its exit code.
   This once released a version whose checks had failed.
 - Report what was tested and what was not; never call untested work verified.

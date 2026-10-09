@@ -121,8 +121,8 @@ will need its own tests when Better Auth is integrated.
 
 ### Verification
 
-Tests run in tiers, from `project:check` (typecheck and build) to `project:verify` (everything,
-every language); the tiers and when to use each are in
+Locally `project:check` runs in seconds on every change; the heavy checks run on GitHub after every
+push and `project:verify` (everything, every language) at a release; the rule and the tasks are in
 [how we work](./how-we-work.md#gates-before-anything-leaves-the-machine), the tasks in the
 [tasks README](./tasks.md). Deploys run no tests unless `GATE` picks a tier.
 

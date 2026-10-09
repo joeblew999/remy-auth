@@ -340,6 +340,16 @@ export function lighthouseChecks({ pages }) {
  * Lighthouse's variability guidance advises (github.com/GoogleChrome/lighthouse/blob/main/docs/variability.md).
  * Call it from tests/performance.spec.ts, which
  * the shared Playwright config runs alone after all other checks. Tighten `thresholds` per project if needed.
+ *
+ * A phone is measured with Lighthouse's applied throttling (`throttlingMethod: 'devtools'`): the page
+ * really loads on Lighthouse's slow 4G and four-times-slower CPU, so what is timed is what was
+ * painted. Its default, the simulation, loads the page at full speed and then estimates; when the
+ * scripts happen to arrive before the first paint, as they do from a machine with a quick line to
+ * the host, it takes them for render-blocking and reports a largest paint three times too late.
+ * Measured on 2026-10-09 against the deployed home page, which paints in under 0.25 s: the
+ * simulation said 1.1 s on some runs and 3.3 s on others, the applied throttling 0.83 s on every
+ * one. The desktop measurement stays simulated: Lighthouse's desktop preset applies no slowing of
+ * its own, and there the misjudgement costs tenths of a second, nowhere near a threshold.
  */
 export function performanceChecks({ pages, thresholds = {}, runs = 5 }) {
   const limits = { score: 0.9, lcp: 2500, cls: 0.1, tbt: 200, ...thresholds };
@@ -364,7 +374,7 @@ export function performanceChecks({ pages, thresholds = {}, runs = 5 }) {
         for (let run = 0; run < runs; run++) {
           const page = await puppeteerBrowser.newPage();
           const result = await navigation(page, `${baseURL}${path}`, {
-            flags: { output: 'json', logLevel: 'error', onlyCategories: ['performance'] },
+            flags: { output: 'json', logLevel: 'error', onlyCategories: ['performance'], ...(device === 'desktop' ? {} : { throttlingMethod: 'devtools' }) },
             config: device === 'desktop' ? desktopConfig : undefined,
           });
           await page.close();

@@ -1,6 +1,7 @@
-# Google's audits on every push to main: remy-auth's shared workflow, at the tag of the tasks and package
-# (project:upgrade-ui moves it). Its release job runs only for tags, which an app that publishes no packages never makes.
-name: Google checks
+# The heavy checks (every language, Google's audits, the repositories this one serves) on every push to
+# main, in parallel, on GitHub: remy-auth's shared workflow, at the tag of the tasks and package
+# (project:upgrade-ui moves it). Locally the check is project:check, in seconds. Its release job runs only for tags, which an app that publishes no packages never makes.
+name: Checks
 
 on:
   push:
@@ -11,7 +12,7 @@ on:
 permissions: {}
 
 jobs:
-  google:
+  checks:
     uses: joeblew999/remy-auth/.github/workflows/google.yml@v0.13.0
     permissions:
       contents: write

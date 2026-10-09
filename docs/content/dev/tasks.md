@@ -70,7 +70,7 @@ Everything else is the package and the tasks, which one version bump upgrades.
    blank app's strings come translated; after the English changes (`messages/en.json`, the docs), commit it
    and run `mise run i18n:translate`, which writes and commits the other languages.
 6. `mise run cf:deploy`, and `mise run docs:deploy` for the docs.
-7. CI: `.github/workflows/google.yml` calls remy-auth's shared workflow at the same tag (types and Google's
+7. CI: `.github/workflows/google.yml` calls remy-auth's shared workflow at the same tag (every language, Google's
    audits on every push to `main`). Grant the new repository read access in the `@joeblew999/remy-ui`
    package's settings ("Manage Actions access"), or `npm ci` fails there.
 
@@ -136,23 +136,23 @@ for it are `project:generate` (code generated before type checking; by default t
 run first; nothing by default, and remy-auth writes its `.dev.vars` and migrates its local D1 there)
 and `project:release-checks`.
 
-Tests run in tiers, chosen by cost and by what a change can break, never by skipping checks. The
-tiers and when to use each are a rule in
-[how we work](./how-we-work.md#gates-before-anything-leaves-the-machine); the tasks are:
+What runs locally and what runs on GitHub is a rule in
+[how we work](./how-we-work.md#gates-before-anything-leaves-the-machine): locally seconds on every
+change, the heavy checks on GitHub after every push. The tasks:
 
-| Tier | Task |
+| When | Task |
 | --- | --- |
-| 0 | `project:check` (typecheck and build, no browser; then `i18n:check`, a warning) |
-| 1 | `project:test:smoke` (`tests/smoke.spec.ts`, built on the package's `./smoke` checks) |
-| 2 | `project:test:only -- <words>` (checks whose title matches, in `QUICK_LOCALES`) |
-| 3 | `project:test:quick` (every check in `QUICK_LOCALES`, default `en,ar`; then `project:test:consumers`) |
-| 4 | `project:verify` (everything, every language; `packages:release` runs it) |
+| Every change | `project:check` (plans, `project:routes` when a route file changed, types, `project:test:unit`, `i18n:check` as a warning, `project:check:docs` when docs changed) |
+| One area | `project:test:only -- <words>` (the browser checks whose title matches, en and ar) |
+| On purpose | `project:test:quick` (every browser check, en and ar) |
+| GitHub, after a push | `project:test` (every language), `project:test:google`, `project:test:consumers`, in parallel |
+| A release | `project:verify` (all of it; `packages:release` runs it) |
 
-`project:test` is every check of ours in every language (inside `project:verify`). Tiers 3 and 4 and CI end with
+`project:test` is every check of ours in every language (inside `project:verify`). `project:verify` and CI end with
 `project:test:consumers`, the other repositories this one serves tested as they get it: nothing by default; in
 remy-auth, `template:test`, which builds the blank app and a package it owns from this commit's platform
 (the package from a tarball with a version of its own, the tasks from a copy outside any `node_modules`, the
-template's `.npmrc`) and runs install, skills (installed once per pinned list, then reused), tooling, tier 0, tier 3, the docs and a dry-run publish (~1.5 to 3 min, mostly the network).
+template's `.npmrc`) and runs install, skills (installed once per pinned list, then reused), tooling, the check, the quick browser checks, the docs and a dry-run publish (~1.5 to 3 min, mostly the network).
 A change that would break another repository fails there, not in that repository. Tests are type-checked with
 the app (`tsconfig.json` includes `tests/`). Google's level is
 `project:test:google` (Lighthouse audits, local; CI on every push and tag) and `project:test:cwv`
