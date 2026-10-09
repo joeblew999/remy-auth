@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+//MISE description="STEP 2 of the flow, when a change should leave the machine: the check, commit with <message>, fast-forward main, push (GitHub then runs every language, Google's audits and the consumer fixture in parallel), deploy staging, translate on main. Production is dev:promote. Refuses a branch behind main or a tree with nothing to commit; the flow is tasks/dev/flow.ts"
+//MISE dir="{{config_root}}"
+//USAGE arg "<message>" help="The commit message's first line: what changed, for people"
+// The logic is land.ts beside this file: TypeScript, type-checked by project:check. Node strips
+// types only from a .ts file, so a file task without an extension is this one line.
+import './land.ts';

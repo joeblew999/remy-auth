@@ -1,0 +1,6 @@
+#!/usr/bin/env node
+//MISE description="The flow's gate in the tooling: the heavy tasks run it first (mise run dev:allowed -- <task>), and it passes only inside a dev:* step (REMY_FLOW), on GitHub, or by a hand that said so (REMY_FLOW=hand). Otherwise it refuses and names the step. The flow is tasks/dev/flow.ts"
+//MISE dir="{{config_root}}"
+//MISE hide=true
+//USAGE arg "<task>" help="The task asking"
+import './allowed.ts';

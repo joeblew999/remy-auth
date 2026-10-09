@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+//MISE description="STEP 4 of the flow, rarely and on purpose: a release. packages:release runs every check in every language locally (project:verify, Google's audits, Core Web Vitals on a preview), then the tag, push and publish. The flow is tasks/dev/flow.ts"
+//MISE dir="{{config_root}}"
+// The logic is release.ts beside this file: TypeScript, type-checked by project:check.
+import './release.ts';

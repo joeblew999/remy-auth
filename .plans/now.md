@@ -105,7 +105,7 @@ Fixed the same day, for every app through the shared tasks: `project:check` is t
 (plans, types, the plain-function tier `tests/**/*.unit.spec.ts`, translation status; a build or the
 docs only when their inputs changed). The heavy checks (every language, Google's audits, the consumer
 fixture) run on GitHub after every push, in parallel; each still runs locally on purpose, and
-`project:verify` at a release. The rule: [how we work](../docs/content/dev/how-we-work.md#gates-before-anything-leaves-the-machine).
+`project:verify` at a release. Then formalised as the flow: `dev:change`, `dev:land`, `dev:promote`, `dev:release`, with a guard in the tooling itself (every heavy task refuses outside a step, on any machine, for any agent) and a Claude hook that answers a step earlier. The rule: [how we work](../docs/content/dev/how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest).
 
 ## The tooling in TypeScript (owner, 2026-10-09, issue #9)
 

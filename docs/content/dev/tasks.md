@@ -81,7 +81,7 @@ Then the app grows in its own files: pages in `src/routes/` (a page beside a par
 takes input documents an error, or `apiChecks` fails: the package's `api/coverage` rule), docs in
 `docs/content/`. Move to a new release with `mise run project:upgrade-ui -- <version>` (package, tasks
 `ref` and the CI workflow's tag together). `ref=main` (`mise.dev.toml`) is cached and never refreshed
-on its own: `mise run project:refresh-tasks` after `main` moves. Two local tiers at once share
+on its own: `mise run project:refresh-tasks` after `main` moves. Two local browser runs at once share
 `PREVIEW_PORT` and the second fails to start its server: give each shell its own
 (`PREVIEW_PORT=4232 mise run …`).
 
@@ -136,17 +136,17 @@ for it are `project:generate` (code generated before type checking; by default t
 run first; nothing by default, and remy-auth writes its `.dev.vars` and migrates its local D1 there)
 and `project:release-checks`.
 
-What runs locally and what runs on GitHub is a rule in
-[how we work](./how-we-work.md#gates-before-anything-leaves-the-machine): locally seconds on every
-change, the heavy checks on GitHub after every push. The tasks:
+The development flow is code, `tasks/dev/flow.ts`, with three commands and a guard
+([how we work](./how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest)):
 
-| When | Task |
+| Step | Task |
 | --- | --- |
-| Every change | `project:check` (plans, `project:routes` when a route file changed, types, including the shared tasks' own TypeScript (`project:typecheck-tasks`: `tasks/**/*.ts` are run by Node as they are and checked by `tsc` wherever the tasks are), `project:test:unit`, `i18n:check` as a warning, `project:check:docs` when docs changed) |
-| One area | `project:test:only -- <words>` (the browser checks whose title matches, en and ar) |
-| On purpose | `project:test:quick` (every browser check, en and ar) |
-| GitHub, after a push | `project:test` (every language), `project:test:google`, `project:test:consumers`, in parallel |
-| A release | `project:verify` (all of it; `packages:release` runs it) |
+| Every change | `dev:change` (`project:check`: plans, `project:routes` when a route file changed, types with `project:typecheck-tasks`, `project:test:unit`, `i18n:check` as a warning, `project:check:docs` when docs changed) |
+| Leaves the machine | `dev:land -- "<message>"` (the check, commit, main, push, `cf:staging`; GitHub runs `project:test`, `project:test:google`, `project:test:consumers`) |
+| Production | `dev:promote` (`cf:deploy`, `docs:deploy`, `cf:versions`) |
+| A release | `dev:release` (`packages:release`, which runs `project:verify`) |
+| One area | `project:test:only -- <words>` |
+| The guard | `dev:guard` registers it (`project:setup` does); `dev:guard -- --check` verifies it (`project:verify` does) |
 
 `project:test` is every check of ours in every language (inside `project:verify`). `project:verify` and CI end with
 `project:test:consumers`, the other repositories this one serves tested as they get it: nothing by default; in
@@ -164,7 +164,7 @@ apart, its own features work) plus Google's level on its own site pages, not the
 suite again. Keep checks cheap rather than dropping them (Playwright's clock rather than real
 waits, one browser page per check, parallel workers). Checks loop over `checkedLocales` from
 `@joeblew999/remy-ui/checks`, which honours `CHECK_LOCALES`. Set `[settings] task.timings = true` in
-the including `mise.toml` so each tier prints per-task and total durations.
+the including `mise.toml` so each step prints per-task and total durations.
 
 ### Translations
 
@@ -214,7 +214,7 @@ mise: outside a task mise's Node shim reapplies `[env]` and would replace `PUBLI
 
 | Task | Does |
 | --- | --- |
-| `cf:deploy` | Build with `DEPLOY_ORIGIN`, upload, wait for the new version (`cf:wait`), then its live smoke check. No tests unless `GATE=smoke\|quick\|full` picks a tier. It refuses when a D1, KV or R2 binding names no existing resource: Wrangler would create one during the deploy, and creating resources is the owner's (`cf:preview` refuses the same way) |
+| `cf:deploy` | Build with `DEPLOY_ORIGIN`, upload, wait for the new version (`cf:wait`), then its live smoke check. No tests before it: `dev:promote` runs it after the flow's checks. It refuses when a D1, KV or R2 binding names no existing resource: Wrangler would create one during the deploy, and creating resources is the owner's (`cf:preview` refuses the same way) |
 | `cf:preview` | Deploy this commit as a throwaway Worker `<worker>-check-<commit>` (production untouched), run level 1 against it, delete it; `KEEP_PREVIEW=1` keeps it |
 | `cf:preview-delete` | List check Workers, or delete one by name; never the production Worker |
 | `cf:urls` | Print the production (or a given) origin's pages and `/healthz`, for reports |

@@ -2,5 +2,6 @@
 #MISE description="LOCAL, the one writer: i18n:messages:translate, then i18n:docs:translate (each on main only, one run at a time across worktrees, one commit each). Never a depends"
 #MISE dir="{{config_root}}"
 set -euo pipefail
+mise run dev:allowed -- i18n:translate
 mise run i18n:messages:translate
 mise run i18n:docs:translate

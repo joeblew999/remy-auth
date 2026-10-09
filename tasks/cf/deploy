@@ -1,24 +1,14 @@
 #!/usr/bin/env bash
-#MISE description="REMOTE, PRODUCTION: build (no tests; GATE=smoke|quick|full runs that tier first; releases run the full gate) with DEPLOY_ORIGIN as the public origin, upload to the authenticated Cloudflare account and wait until production serves the new version (~1 min). Builds into dist/: not alongside a local level. Then run project:test:remote in the background and keep working. cf:staging does the same for the staging environment"
+#MISE description="REMOTE, PRODUCTION: build with DEPLOY_ORIGIN as the public origin, upload to the authenticated Cloudflare account, wait until production serves the new version, then its live smoke check (~1 min). No tests before it: the flow decides what ran (dev:promote runs this after dev:land's check, staging and GitHub's heavy checks). Builds into dist/: not alongside a local level. cf:staging does the same for the staging environment"
 #MISE dir="{{config_root}}"
 set -euo pipefail
 : "${DEPLOY_ORIGIN:?cf:deploy needs DEPLOY_ORIGIN in [env]}"
 
-# Development deploys run no tests (owner, 2026-09-25: the gate is for real releases; ui:release runs
-# the full one). GATE picks a tier first, by the deployer's judgement (docs/content/dev/how-we-work.md, test tiers):
-# smoke (every page answers, ~15 s), quick (every check in en and ar; also GATE=1) or full (every language).
+# No tests here: what ran before a deploy is the flow's decision (tasks/dev/flow.ts), not this task's.
 # With CLOUDFLARE_ENV set (cf:staging), the Cloudflare Vite plugin builds that named environment of the
 # Wrangler configuration, and the upload below is that environment's Worker; DEPLOY_ORIGIN is then its origin.
-# Before anything slow: a binding with no resource behind it stops the deploy (provisioned.mjs).
+# Before anything slow: a binding with no resource behind it stops the deploy (provisioned.ts).
 node "$(dirname "$0")/provisioned.ts"
-
-case "${GATE:-}" in
-  "") ;;
-  smoke) mise run project:test:smoke ;;
-  1|quick) export CHECK_LOCALES="${CHECK_LOCALES:-${QUICK_LOCALES:-en,ar}}"; mise run project:verify ;;
-  full) mise run project:verify ;;
-  *) echo "cf:deploy: GATE is smoke, quick or full (got $GATE)" >&2; exit 1 ;;
-esac
 
 export PUBLIC_ORIGIN="$DEPLOY_ORIGIN"
 ./node_modules/.bin/vite build

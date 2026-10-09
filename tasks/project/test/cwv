@@ -3,6 +3,7 @@
 #MISE dir="{{config_root}}"
 #USAGE arg "[alias]" help="Preview alias; defaults to the current git branch"
 set -euo pipefail
+mise run dev:allowed -- project:test:cwv
 log="$(mktemp)"
 # The throwaway check Worker is kept for the speed run, then deleted whatever happens.
 cleanup() {

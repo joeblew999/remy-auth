@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="REMOTE, STAGING: cf:deploy for the staging environment (env.staging in the Wrangler configuration, built with CLOUDFLARE_ENV=staging) at STAGING_ORIGIN: its own Worker and its own resources, production untouched (~1 min). GATE=smoke|quick|full runs that tier first. Builds into dist/: not alongside a local level, and the build left there is staging's"
+#MISE description="REMOTE, STAGING: cf:deploy for the staging environment (env.staging in the Wrangler configuration, built with CLOUDFLARE_ENV=staging) at STAGING_ORIGIN: its own Worker and its own resources, production untouched (~1 min). Builds into dist/: not alongside a local level, and the build left there is staging's"
 #MISE dir="{{config_root}}"
 # Staging is where what a local run cannot show is seen before production: mail really sent, Cloudflare's
 # own address for a visitor, a deployed database. What it permits beyond production is the app's

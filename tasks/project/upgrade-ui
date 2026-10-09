@@ -27,4 +27,5 @@ done
 # version), the AGENTS.md block naming it, then project:verify.
 mise run skills:install
 mise run agents:rules
+mise run dev:guard
 mise run project:verify

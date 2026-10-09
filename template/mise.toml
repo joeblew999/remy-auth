@@ -14,7 +14,7 @@ task.timings = true
 includes = ["git::https://github.com/joeblew999/remy-auth.git//tasks?ref=v0.13.0"]
 
 [env]
-# A worktree or agent picks its own port from the shell: PREVIEW_PORT=4232 mise run project:test:quick.
+# A worktree or agent picks its own port from the shell: PREVIEW_PORT=4232 mise run dev:change.
 PREVIEW_PORT = "{{ get_env(name='PREVIEW_PORT', default='4173') }}"
 DEPLOY_ORIGIN = "https://my-app.example.workers.dev"
 # The docs Worker (docs/): its origin, the app's links to it (Vite reads VITE_*), its content for the i18n tasks.

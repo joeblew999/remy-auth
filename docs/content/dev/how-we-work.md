@@ -167,36 +167,36 @@ When the owner hands over decisions, for example to finish work unattended:
 - Keep every gate green; delegation never loosens a check.
 - Leave a full report: what was decided, what was done, what was checked and what was not.
 
-## Gates before anything leaves the machine
+## The flow: three commands, and a guard that refuses the rest
 
-Owner, 2026-10-09: "95% of time has been checking and 5% coding. It can't go on." and "It's a question
-of what you run locally and what you run in GitHub asynchronously." So the rule is a split, not a
-ladder: **locally, seconds, on every change; the heavy checks on GitHub after every push, in
-parallel, while you keep coding.** Every heavy check still exists as a task and can be run locally on
-purpose; what changed is what runs by default.
+Owner, 2026-10-09: "95% of time has been checking and 5% coding. It can't go on", "It's a question of
+what you run locally and what you run in GitHub asynchronously", and "The tooling formalises what
+happens at development ... make sure the developer flow is also formalised so that this stupid
+fuckups can't happen. And so you and developers use that same flow so that it's fixed forever." So
+the flow is code, not a rule to remember: `tasks/dev/flow.ts` is the one place its decisions live,
+three commands are its steps, and a guard refuses what is not one of them. remy-auth gets it the way
+every app does, from the shared tasks; `project:setup` installs the guard.
 
-| When | What | Time |
-| --- | --- | --- |
-| After every change | `mise run project:check`: the plans list, types, the plain-function checks (`tests/**/*.unit.spec.ts`), translation status as a warning; a build only when a route file changed, the docs Worker only when docs changed | ~6 s (first time ~17 s) |
-| When something looks wrong, or you changed one area | `mise run project:test:only -- <words>`: the browser checks whose title matches, in en and ar | ~30 s |
-| Before a risky merge, on purpose | `mise run project:test:quick`: every browser check of ours, en and ar | ~45 s |
-| After every push to main, on GitHub, in parallel | every language (`project:test`), Google's audits (`project:test:google`), the other repositories this one serves (`project:test:consumers`) | minutes, nobody waits |
-| A release | `mise run project:verify` inside `packages:release`: all of it, locally, on purpose | ~5 min |
+| Step | Command | What runs | Time |
+| --- | --- | --- | --- |
+| After every change | `mise run dev:change` | the check (`project:check`): plans, types with the tasks' own, the plain-function checks (`tests/**/*.unit.spec.ts`), translation status; a build only when a route file changed, the docs only when docs changed | ~6 s |
+| The change leaves the machine | `mise run dev:land -- "<what changed>"` | the check, commit, fast-forward main, push, deploy staging. GitHub then runs every language, Google's audits and the consumer fixture in parallel, while you keep coding (`gh run list`) | ~1 min, mostly the deploy |
+| Production | `mise run dev:promote` | `cf:deploy` and the docs Worker, from a pushed main, no gate: staging and GitHub already ran the checks | ~1 min |
+| A release | `mise run dev:release` | `packages:release`: every check, every language, locally, on purpose, then the tag | ~5 min |
 
-- An agent runs `project:check` and deploys. It does not run `project:test:quick`, `project:test`,
-  `project:verify`, `project:test:remote` or `template:test` unless the owner asks, a release is being
-  made, or a GitHub run failed and it is reproducing that failure. Running a green suite again proves
-  nothing and costs minutes of the owner's time.
+- One area that looks wrong: `mise run project:test:only -- <words>` (the browser checks whose title
+  matches, en and ar, ~30 s). It is the only browser run a step does not own.
+- **The guard** (`dev:guard`, a Claude Code hook on every shell command an agent runs) refuses
+  `project:verify`, `project:test`, `project:test:quick`, `project:test:remote`, `project:test:google`,
+  `project:test:cwv`, `project:test:consumers`, `template:test`, a bare `playwright test` and
+  `i18n:translate` outside the flow, and names the step instead. Every one still runs by hand from a
+  terminal: that is a decision; an agent running one unasked is the fault the guard exists for.
 - A rule that can be a function belongs in `tests/**/*.unit.spec.ts` (no build, no Worker, no
-  browser), not in the browser suite: it then runs on every check for free. The browser is for what
-  only a browser shows.
-- Deploys run no tests unless `GATE` picks a tier (`GATE=smoke` for a code change you cannot see,
-  rarely more). Docs text, plans, tasks and config deploy straight away. Say which tier ran.
-- GitHub's answer comes back as a check on the commit (`gh run list`, `gh run watch`); a red run is
-  the next thing to fix, and `mise run <the failed task>` reproduces it locally.
+  browser), so it runs on every check for free. The browser is for what only a browser shows.
+- A red GitHub run is the next thing to fix: `mise run <the failed task>` reproduces it locally, on
+  purpose. Report what was tested and what was not; never call untested work verified.
 - Never pipe a gating command through `grep` or `tail` in a chain: the pipe hides its exit code.
   This once released a version whose checks had failed.
-- Report what was tested and what was not; never call untested work verified.
 
 ## Manual work becomes mise tasks over real tools
 
@@ -204,7 +204,7 @@ Owner, 2026-09-26: "You need to get to the point that your checking uses mise an
 and "make sure you have something in docs about using your judgment about things that you do manually
 being turned into a mise task that uses a tool ... It's vital because all our repos will be using this."
 
-- Every check runs through a mise task that wraps the real tool: the test tiers (`project:test:*`,
+- Every check runs through a mise task that wraps the real tool: the flow's steps and the checks (`project:test:*`,
   Playwright), `project:test:live` after a deploy, `plans:check`, `i18n:check`, `browser:shots` to look.
   No `curl` loops, one-off scripts or ad-hoc greps to decide whether something works: they cannot be
   repeated, apps on the package do not get them, and nobody sees them later.
@@ -241,7 +241,7 @@ and timing-sensitive checks failed well before that. So:
   count. When more are needed, set `PLAYWRIGHT_WORKERS=2` for each.
 - Google's level (`project:test:google`, `project:test:cwv`) takes a machine-wide lock, so a second
   run waits rather than skewing the first.
-- `GATE=<tier> mise run cf:deploy` runs the tier itself; never chain a deploy after a gate with `;`.
+- Never chain a deploy after a check with `;`: the flow's steps run each in turn and stop at the first failure.
 
 ## Reporting to the owner
 

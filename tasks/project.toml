@@ -6,10 +6,10 @@
 description = "Both levels against TEST_BASE_URL, default DEPLOY_ORIGIN (~90 s). Touches no local build or port: run it in the background and keep coding"
 dir = "{{config_root}}"
 env = { TEST_TARGET = "remote", TEST_BASE_URL = "{{ get_env(name='TEST_BASE_URL', default=env.DEPLOY_ORIGIN) }}" }
-run = "./node_modules/.bin/playwright test"
+run = ["mise run dev:allowed -- project:test:remote", "./node_modules/.bin/playwright test"]
 
 ["project:test:live"]
-description = "Tier 1 against the live site: the smoke checks (tests/smoke.spec.ts) at TEST_BASE_URL, default DEPLOY_ORIGIN (~5 s). cf:deploy runs it once the new version is live; use it instead of curl"
+description = "The smoke checks against the live site (tests/smoke.spec.ts) at TEST_BASE_URL, default DEPLOY_ORIGIN (~5 s). cf:deploy runs it once the new version is live; use it instead of curl"
 dir = "{{config_root}}"
 env = { TEST_TARGET = "remote", TEST_BASE_URL = "{{ get_env(name='TEST_BASE_URL', default=env.DEPLOY_ORIGIN) }}" }
 # By title, not by file: the shared checks are defined in the package's smoke.js, so a file filter
@@ -29,16 +29,16 @@ raw = true
 run = "./node_modules/.bin/playwright show-report playwright-report/remote"
 
 ["project:setup"]
-description = "Install dependencies, the shared skills, the AGENTS.md rules block and MCP registration, then verify (~1.5 min). GITHUB_TOKEN (read:packages, for the shared UI) comes from the shell or else from `gh auth token`"
+description = "Install dependencies, the shared skills, the AGENTS.md rules block, MCP registration and the flow's guard for agents, then verify (~1.5 min). GITHUB_TOKEN (read:packages, for the shared UI) comes from the shell or else from `gh auth token`"
 dir = "{{config_root}}"
 # Rendered only when the task runs; gh is asked only when the shell has no GITHUB_TOKEN.
 # gh pinned here, so every app has the same one for `gh auth token` (a task's tools are active in its env).
 tools = { "aqua:cli/cli" = "2.101.0" }
 env = { GITHUB_TOKEN = "{% set token = get_env(name='GITHUB_TOKEN', default='') %}{% if token %}{{ token }}{% else %}{{ exec(command='gh auth token') }}{% endif %}" }
-run = [{ task = "project:preconditions" }, "npm ci", { task = "skills:install" }, { task = "agents:rules" }, { task = "mcp:register" }, { task = "project:verify" }]
+run = [{ task = "project:preconditions" }, "npm ci", { task = "skills:install" }, { task = "agents:rules" }, { task = "mcp:register" }, { task = "dev:guard" }, { task = "project:verify" }]
 
 ["project:test:consumers"]
-description = "Hook for the other repositories this one serves, tested as they get it (tier 3 and CI run it last); none by default. remy-auth runs template:test, its consumer fixture. Instant"
+description = "Hook for the other repositories this one serves, tested as they get it (GitHub runs it after every push, project:verify at a release); none by default. remy-auth runs template:test, its consumer fixture. Instant"
 dir = "{{config_root}}"
 run = "true"
 
@@ -99,7 +99,7 @@ description = "Every browser check of ours in every language (~2 min with 13 lan
 dir = "{{config_root}}"
 depends = ["project:build"]
 env = { TEST_TARGET = "local" }
-run = "./node_modules/.bin/playwright test --project=ours"
+run = ["mise run dev:allowed -- project:test", "./node_modules/.bin/playwright test --project=ours"]
 
 ["project:check"]
 description = "THE check while coding, in seconds: the plans list, types, and the checks that are plain functions (no build, no server, no browser), then translation status as a warning. Two parts run only when their inputs changed since they last passed: the route tree (a build, when a route file changed) and the docs Worker (when docs/ changed). Everything slower is on demand (project:test:only -- <words>) or runs on GitHub after a push; see docs/content/dev/how-we-work.md, test tiers"
@@ -127,7 +127,7 @@ env = { TEST_TARGET = "unit" }
 run = "./node_modules/.bin/playwright test --project=unit --pass-with-no-tests"
 
 ["project:test:smoke"]
-description = "Tier 1, smoke: build, then the smoke checks only (tests/smoke.spec.ts calls the package's smokeChecks): every page in en and ar answers with a heading, the pages named there hydrate without errors (~15 s)"
+description = "Smoke, on purpose: build, then the smoke checks only (tests/smoke.spec.ts calls the package's smokeChecks): every page in en and ar answers with a heading, the pages named there hydrate without errors (~15 s)"
 dir = "{{config_root}}"
 depends = ["project:build"]
 env = { TEST_TARGET = "local" }
@@ -136,7 +136,7 @@ env = { TEST_TARGET = "local" }
 run = "./node_modules/.bin/playwright test --project=ours --grep 'smoke [a-zA-Z-]+:'"
 
 ["project:test:only"]
-description = "Tier 2, targeted: build, then only the checks whose title matches the words given, in QUICK_LOCALES (en, ar), e.g. mise run project:test:only -- formats. For an area that looks broken"
+description = "One area: build, then only the checks whose title matches the words given, in QUICK_LOCALES (en, ar), e.g. mise run project:test:only -- formats. The one browser run the flow leaves to judgement, for an area that looks broken"
 dir = "{{config_root}}"
 depends = ["project:build"]
 env = { TEST_TARGET = "local", CHECK_LOCALES = "{{ env.CHECK_LOCALES | default(value=env.QUICK_LOCALES | default(value='en,ar')) }}" }
@@ -147,7 +147,7 @@ description = "On demand, before a risky merge: build, then every browser check 
 dir = "{{config_root}}"
 depends = ["project:build"]
 env = { TEST_TARGET = "local", CHECK_LOCALES = "{{ env.QUICK_LOCALES | default(value='en,ar') }}" }
-run = "./node_modules/.bin/playwright test --project=ours"
+run = ["mise run dev:allowed -- project:test:quick", "./node_modules/.bin/playwright test --project=ours"]
 
 ["project:test:google"]
 description = "Level 2, audits: build, then run Google's Lighthouse audits (accessibility, best practices, SEO) locally (~40 s; CI runs this). Core Web Vitals are judged on a Cloudflare preview instead: project:test:cwv. Uses dist/, PREVIEW_PORT and the Chrome DevTools daemon: never alongside another local level or a remote level 2"
@@ -156,9 +156,9 @@ depends = ["project:build"]
 env = { TEST_TARGET = "local" }
 # One level 2 at a time on this machine (flock on Linux, lockf on macOS): Lighthouse shares one
 # Chrome DevTools daemon and needs a quiet CPU; a second run waits instead of skewing the first.
-run = "$(command -v flock >/dev/null && echo flock || echo 'lockf -k') \"${TMPDIR:-/tmp}/remy-level2.lock\" ./node_modules/.bin/playwright test --project=google"
+run = ["mise run dev:allowed -- project:test:google", "$(command -v flock >/dev/null && echo flock || echo 'lockf -k') \"${TMPDIR:-/tmp}/remy-level2.lock\" ./node_modules/.bin/playwright test --project=google"]
 
 ["project:verify"]
 description = "RELEASES ONLY (packages:release runs it; GitHub runs its parts after every push): the tasks, dependencies, MCP registration, CLI versions and tooling invariants, types, the plain-function checks, every browser check in every language, then the other repositories this one serves (~4.5 min in remy-auth). Never while coding: project:check is the check"
 dir = "{{config_root}}"
-run = ["mise tasks validate", "npm ls --depth=0", { task = "mcp:verify" }, { task = "project:doctor" }, { task = "project:verify-tooling" }, { task = "project:typecheck" }, { task = "project:test:unit" }, { task = "project:test" }, { task = "project:test:consumers" }]
+run = ["mise run dev:allowed -- project:verify", "mise tasks validate", "npm ls --depth=0", { task = "mcp:verify" }, "mise run dev:guard -- --check", { task = "project:doctor" }, { task = "project:verify-tooling" }, { task = "project:typecheck" }, { task = "project:test:unit" }, { task = "project:test" }, { task = "project:test:consumers" }]

@@ -39,7 +39,7 @@ mise run auth:provision                 # Prints what the deployed sign-in needs
 
 `project:prepare` runs `auth:local`, `auth:migrate` and `ui:guard-fixture` (oRPC 1.15.4 for the
 guard's two-major check, installed in `tests/guard/v1` alone) before `project:dev` and every build, so
-dev, preview and the test tiers start on the current schema with nothing to remember. `auth:generate`
+dev, preview and every check start on the current schema with nothing to remember. `auth:generate`
 runs the pinned CLI through `src/auth/cli.ts`, which compares the options with a throwaway SQLite
 database built from `migrations/`, so it writes only what is not there yet; change the options, then
 generate, never edit Better Auth's tables by hand. To sign in locally: `mise run project:dev`, open
@@ -121,10 +121,11 @@ will need its own tests when Better Auth is integrated.
 
 ### Verification
 
-Locally `project:check` runs in seconds on every change; the heavy checks run on GitHub after every
-push and `project:verify` (everything, every language) at a release; the rule and the tasks are in
-[how we work](./how-we-work.md#gates-before-anything-leaves-the-machine), the tasks in the
-[tasks README](./tasks.md). Deploys run no tests unless `GATE` picks a tier.
+The flow is four commands: `dev:change` (the check, seconds, after every change), `dev:land` (commit,
+main, push, staging; GitHub runs the heavy checks), `dev:promote` (production) and `dev:release`; a
+guard in the tooling refuses the heavy checks outside them. The rule is in
+[how we work](./how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest), the tasks in the
+[tasks README](./tasks.md).
 
 Run `mise run project:verify` before a release; `project:setup` and `packages:upgrade` also finish with it. It checks
 mise tasks, installed dependencies, CLI versions, manifest/lockfile consistency,

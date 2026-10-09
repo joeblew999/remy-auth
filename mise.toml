@@ -213,12 +213,12 @@ mise run template:check
 '''
 
 [tasks."template:test"]
-description = "The consumer fixture (fixtures/consumer): the blank app and a package it owns, set up as another repository gets the platform (the package from a tarball with a version of its own, the tasks outside any node_modules, the template's .npmrc), then install, skills, tooling, tier 3, docs and a dry-run publish (~1.5 to 3 min, needs the network; ports PREVIEW_PORT and DOCS_PREVIEW_PORT + 100). Tier 3, CI and releases run it (project:test:consumers)"
+description = "The consumer fixture (fixtures/consumer): the blank app and a package it owns, set up as another repository gets the platform (the package from a tarball with a version of its own, the tasks outside any node_modules, the template's .npmrc), then install, skills, tooling, tier 3, docs and a dry-run publish (~1.5 to 3 min, needs the network; ports PREVIEW_PORT and DOCS_PREVIEW_PORT + 100). GitHub runs it after every push; locally inside the flow and releases run it (project:test:consumers)"
 dir = "{{config_root}}"
-run = "bash fixtures/consumer/run.sh"
+run = ["mise run dev:allowed -- template:test", "bash fixtures/consumer/run.sh"]
 
 [tasks."project:test:consumers"]
-description = "remy-auth's consumer checks (overrides the shared hook that tier 3 and CI run last): template:test"
+description = "remy-auth's consumer checks (overrides the shared hook GitHub runs after every push and project:verify at a release): template:test"
 dir = "{{config_root}}"
 run = [{ task = "template:test" }]
 

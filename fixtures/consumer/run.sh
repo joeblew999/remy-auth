@@ -59,8 +59,9 @@ else
   if [ -e "$skills" ]; then rm -rf "$skills.$$"; else mv "$skills.$$" "$skills"; fi
 fi
 mise run project:verify-tooling
-mise run project:check
-PREVIEW_PORT=$((${PREVIEW_PORT:-4173} + 100)) mise run project:test:quick
+mise run dev:change
+# The quick browser checks, as the flow would run them for the new app: this run is inside template:test, which the flow authorised.
+REMY_FLOW="${REMY_FLOW:-land}" PREVIEW_PORT=$((${PREVIEW_PORT:-4173} + 100)) mise run project:test:quick
 DOCS_PREVIEW_PORT=$((${DOCS_PREVIEW_PORT:-4174} + 100)) mise run docs:test
 # As a release runs it: no GITHUB_TOKEN in the environment (the task finds its own token).
 # In CI the release job hands the token over as NODE_AUTH_TOKEN (google.yml); on a machine, gh's login.

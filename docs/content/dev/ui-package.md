@@ -60,7 +60,7 @@ prerendered example):
   showcase's Clock spreads `clockRouteOptions` from `@joeblew999/remy-showcase/clock-route`).
 - **`tests/smoke.spec.ts`**, one `smokeChecks(...)` call: `project:test:smoke` and the check after every
   `cf:deploy` (`project:test:live`) run it, and fail with "No tests found" without it.
-- **`.plans/now.md`**, the one ordered list of open work (`plans:check`, in tier 0).
+- **`.plans/now.md`**, the one ordered list of open work (`plans:check`, in the check).
 - **Installs and upgrades through the shared tasks**, never by hand: `mise run project:setup` (install,
   skills, MCP, verify) and `mise run project:upgrade-ui <version>` (the exact package version and the
   tasks include at the same tag, then verify). Both take GitHub Packages' token from `gh auth token`.

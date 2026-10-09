@@ -11,6 +11,7 @@ docs/.remy-docs/
 # Installed by mise run skills:install from skills-lock.json.
 .agents/skills/
 .claude/skills/
+.claude/settings.json
 # A developer's own overrides, e.g. the shared tasks from a local remy-auth checkout.
 mise.local.toml
 src/paraglide/

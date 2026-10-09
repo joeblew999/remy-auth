@@ -18,7 +18,7 @@ dir = "{{config_root}}/docs"
 run = "../node_modules/.bin/vite build"
 
 ["docs:check"]
-description = "LOCAL: the docs Worker's tier 0: build (which writes .remy-docs/), binding types, typecheck (~30 s); project:check runs it"
+description = "LOCAL: the docs Worker's check: build (which writes .remy-docs/), binding types, typecheck (~30 s); project:check runs it"
 dir = "{{config_root}}/docs"
 run = [{ task = "docs:build" }, "../node_modules/.bin/wrangler types -c .remy-docs/wrangler.json", "../node_modules/.bin/tsc -p ."]
 

@@ -6,14 +6,14 @@ description: "One Cloudflare Worker serves the site and the app; how to run it l
 ```sh
 mise run project:dev       # http://127.0.0.1:5173/en
 mise run project:preview   # Production build on local Workers, port 4173
-mise run project:check     # Tier 0: typecheck and build
+mise run dev:change        # The check, in seconds (the flow's first step)
 ```
 
 :::note
 Google Chrome must be installed. Everything runs locally in the Workers runtime, on Wrangler's
 local D1; no Cloudflare account, remote database or production credentials are needed. Browser
 tests own `PREVIEW_PORT` (default 4173; each agent sets its own) and refuse to reuse an unrelated
-process. Stop a manual preview before a test tier; the development server on 5173 can remain running.
+process. Stop a manual preview before a browser check; the development server on 5173 can remain running.
 :::
 
 ## One scaffold for local and Cloudflare
@@ -29,9 +29,9 @@ Development uses the same Worker source and Cloudflare runtime with hot reload.
 | `project:dev` | Local Workers, hot reload, port 5173 |
 | `project:build` | Build and Wrangler deployment dry run; no upload |
 | `project:preview` | Build, then serve the production artifact on Cloudflare's local host at `PREVIEW_PORT` (4173) |
-| `project:check` … `project:verify` | The test tiers, on the same local host ([rule](./how-we-work.md#gates-before-anything-leaves-the-machine), [tasks](./tasks.md)) |
+| `dev:change`, `dev:land`, `dev:promote`, `dev:release` | The flow ([how we work](./how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest), [tasks](./tasks.md)); its checks run on the same local host |
 | `project:test:google` / `project:test:cwv` | Google's level: Lighthouse audits locally; Core Web Vitals on a throwaway Cloudflare Worker |
-| `cf:deploy` | Build, then upload production to the authenticated Cloudflare account (no tests unless `GATE` picks a tier) |
+| `cf:deploy` | Build, then upload production to the authenticated Cloudflare account; `dev:promote` runs it |
 | `cf:staging` | The same for the staging environment: its own Worker (`STAGING_ORIGIN`) and resources |
 | `cf:preview` | Deploy this commit as a throwaway Worker, run level 1 against it, delete it |
 | `project:test:remote` | Same tests against `TEST_BASE_URL`; no local server or deployment |
@@ -234,8 +234,8 @@ runs them on server-rendered ones.
 ## Evidence and limits
 
 What the checks cover is the checks themselves: `tests/` and the package's
-`@joeblew999/remy-ui/checks` (each check's title says what it proves); the tiers that run them are in
-[how we work](./how-we-work.md#gates-before-anything-leaves-the-machine). In short: every page in every
+`@joeblew999/remy-ui/checks` (each check's title says what it proves); the flow's steps that run them are in
+[how we work](./how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest). In short: every page in every
 language without JavaScript (language, direction, metadata, links), catalogs and plurals, the formats
 values against Intl, entry redirects and the language hint, hydration, the demo form and the API,
 HTTP statuses, the sitemap and `hreflang`, security headers and the CSP nonce, narrow screens, and

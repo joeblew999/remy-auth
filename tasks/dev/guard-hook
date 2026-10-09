@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+//MISE description="The flow's guard itself, run by the Claude Code hook dev:guard registers (stdin: the tool call as JSON). Not for hands: it reads stdin and answers with an exit code"
+//MISE dir="{{config_root}}"
+//MISE hide=true
+import './guard-hook.ts';

@@ -27,6 +27,8 @@ node_modules/
 # Installed by mise run skills:install from skills-lock.json; not committed.
 .agents/skills/
 .claude/skills/
+# Written by mise run dev:guard (project:setup): the flow's guard, with this machine's absolute paths, like .mcp.json.
+.claude/settings.json
 # Temporary git worktrees that agents create; machine-local.
 .claude/worktrees/
 

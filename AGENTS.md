@@ -21,4 +21,4 @@ source, `docs/content/dev/*.md`: read those, not the translations beside them (`
    [Executor/Reviewer roles](docs/content/dev/development.md#plans-and-roles).
 
 Start with [the project's own tools](docs/content/dev/how-we-work.md#use-the-projects-own-tools-first) and
-finish with [the gates](docs/content/dev/how-we-work.md#gates-before-anything-leaves-the-machine).
+finish through [the flow](docs/content/dev/how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest): `mise run dev:change` after every change, `mise run dev:land -- "<what changed>"` when it should leave the machine.
