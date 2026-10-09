@@ -39,7 +39,7 @@ mise run auth:provision                 # Imprime lo que necesita el inicio de s
 
 `project:prepare` ejecuta `auth:local`, `auth:migrate` y `ui:guard-fixture` (oRPC 1.15.4 para la comprobación
 de dos versiones mayores del guard, instalado solo en `tests/guard/v1`) antes de `project:dev` y de cada build,
-de modo que dev, preview y los niveles de prueba arrancan con el esquema actual sin nada que recordar.
+de modo que dev, preview y cada comprobación arrancan con el esquema actual sin nada que recordar.
 `auth:generate` ejecuta la CLI fijada a través de `src/auth/cli.ts`, que compara las opciones con una base
 de datos SQLite desechable construida a partir de `migrations/`, así que solo escribe lo que aún no está
 ahí; cambia las opciones y luego genera, nunca edites a mano las tablas de Better Auth. Para iniciar
@@ -122,10 +122,12 @@ necesitará sus propias pruebas cuando se integre Better Auth.
 
 ### Verificación [#verification]
 
-Las pruebas se ejecutan por niveles, desde `project:check` (comprobación de tipos y build) hasta
-`project:verify` (todo, en todos los idiomas); los niveles y cuándo usar cada uno están en
-[cómo trabajamos](./how-we-work.md#gates-before-anything-leaves-the-machine), y las tareas en el
-[README de tareas](./tasks.md). Los despliegues no ejecutan pruebas salvo que `GATE` elija un nivel.
+El flujo son cuatro comandos: `dev:change` (la comprobación, en segundos, después de cada cambio),
+`dev:land` (commit, main, push, staging; GitHub ejecuta las comprobaciones pesadas), `dev:promote`
+(producción) y `dev:release`; un guard en las herramientas se niega a ejecutar las comprobaciones
+pesadas fuera de ellos. La regla está en
+[cómo trabajamos](./how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest), las tareas en el
+[README de tareas](./tasks.md).
 
 Ejecuta `mise run project:verify` antes de una publicación; `project:setup` y `packages:upgrade` también terminan con ella. Comprueba
 las tareas de mise, las dependencias instaladas, las versiones de las CLI, la consistencia del manifiesto/lockfile,

@@ -66,7 +66,7 @@ Lo que tiene toda app basada en el paquete, para que las tareas y comprobaciones
   Reloj de la demostración (showcase) propaga `clockRouteOptions` desde `@joeblew999/remy-showcase/clock-route`).
 - **`tests/smoke.spec.ts`**, una sola llamada a `smokeChecks(...)`: `project:test:smoke` y la comprobación tras cada
   `cf:deploy` (`project:test:live`) lo ejecutan, y fallan con «No tests found» si no existe.
-- **`.plans/now.md`**, la única lista ordenada del trabajo pendiente (`plans:check`, en el nivel 0).
+- **`.plans/now.md`**, la única lista ordenada del trabajo pendiente (`plans:check`, en la comprobación).
 - **Instalaciones y actualizaciones mediante las tareas compartidas**, nunca a mano: `mise run project:setup` (instalar,
   skills, MCP, verificar) y `mise run project:upgrade-ui <version>` (la versión exacta del paquete y el include de
   tareas en el mismo tag, y después verificar). Ambas toman el token de GitHub Packages de `gh auth token`.
@@ -200,4 +200,5 @@ listan por nombre (`"seo-routes"`); cualquier paquete puede ofrecer partes tambi
 Lo que en cambio sigue siendo un módulo normal del paquete: el código que toda app necesita (observabilidad), un hook
 que una app debe llamar siempre (leave-guard) o los controles propios de una página compartida (search-params).
 </content>
-</invoke>
+</StructuredOutput>
+
