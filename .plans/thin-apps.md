@@ -629,7 +629,7 @@ Everything here is ready; each step goes out only when the owner says so (workin
    (0.2.1, already published). Owner: merge it to main, then `mise run ui:release` (~5 min; the full gate,
    then tag, push, publish and the GitHub release; the tag's CI job repeats Google's audits and is the first
    run of the reusable workflow's release job).
-2. **Deploy remy-auth** (the app and its docs Worker, both on the new shape): `GATE=quick mise run cf:deploy`
+2. **Deploy remy-auth** (the app and its docs Worker, both on the new shape): `mise run dev:promote`
    and `mise run docs:deploy`, after `mise run cf:preview` and a hands-on pass.
 3. **Create `remy-auth-test`** from the blank app at v0.14.0 (tasks.md, "A new consumer"): public on
    GitHub, the package's "Manage Actions access" granted to it, one page and one procedure added (as the

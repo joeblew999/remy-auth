@@ -6,6 +6,7 @@
 // agent hook (tasks/dev/guard.ts) refuses what is not one of them. TypeScript, type-checked by
 // project:check, so a wrong step fails before it runs.
 import { execFileSync, spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 
 /** The steps of development, in the order they happen (dev:start and dev:done bracket them for a worktree). */
 export type Step = 'change' | 'land' | 'promote' | 'release';
@@ -62,6 +63,19 @@ export function latestRun(commit?: string): Run | null | undefined {
   if (result.status !== 0) return undefined;
   const [run] = JSON.parse(result.stdout || '[]') as Run[];
   return run ?? null;
+}
+
+/**
+ * The install is what the lockfile says, or it is made so: npm writes what it installed to
+ * node_modules/.package-lock.json, so a lockfile that moved (a version bump, a merge) shows there.
+ * Nobody runs npm ci by hand; the steps that build (dev:start, dev:promote) call this first.
+ */
+export function installed(cwd = '.'): void {
+  const same = (() => { try { return readFileSync(`${cwd}/package-lock.json`, 'utf8') === readFileSync(`${cwd}/node_modules/.package-lock.json`, 'utf8'); } catch { return false; } })();
+  if (same) return;
+  console.log(`${cwd === '.' ? '' : `${cwd}: `}node_modules is not what package-lock.json says; npm ci.`);
+  const result = spawnSync('npm', ['ci', '--no-audit', '--no-fund', '--loglevel=error'], { cwd, stdio: 'inherit' });
+  if (result.status !== 0) process.exit(result.status ?? 1);
 }
 
 /** One line a person reads: what GitHub said about a commit. */

@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { describeRun, latestRun, run, where } from './flow.ts';
+import { describeRun, installed, latestRun, run, where } from './flow.ts';
 
 const read = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8' }).trim();
 const here = where();
@@ -16,6 +16,7 @@ if (checks === null) console.log(`dev:promote: GitHub has no run for ${head.slic
 else if (checks.status !== 'completed') { console.error(`dev:promote: GitHub is still checking ${head.slice(0, 7)}: ${checks.url} (gh run watch)`); process.exit(1); }
 else if (checks.conclusion !== 'success') { console.error(`dev:promote: GitHub's checks did not pass, ${describeRun(checks)}; fix that first (mise run <the failed task> reproduces it, with REMY_FLOW=hand)`); process.exit(1); }
 else console.log(`dev:promote: GitHub's checks passed, ${describeRun(checks)}`);
+installed();
 run('cf:deploy', 'promote');
 if (existsSync('docs')) run('docs:deploy', 'promote');
 run('cf:versions', 'promote');

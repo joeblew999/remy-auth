@@ -66,7 +66,7 @@ echo "auth:generate: wrote $file; apply it with mise run auth:migrate."
 '''
 
 [tasks."auth:migrate"]
-description = "LOCAL: apply migrations/ (identities) and migrations-demo/ (the showcase's notes) to Wrangler's local D1 databases (wrangler d1 migrations apply --local; only what is not applied yet, ~3 s). project:prepare runs it, so dev, preview and every test tier start on the current schema. The deployed databases are migrated on the owner's request only"
+description = "LOCAL: apply migrations/ (identities) and migrations-demo/ (the showcase's notes) to Wrangler's local D1 databases (wrangler d1 migrations apply --local; only what is not applied yet, ~3 s). project:prepare runs it, so dev, preview and every check start on the current schema. The deployed databases are migrated on the owner's request only"
 dir = "{{config_root}}"
 run = ["./node_modules/.bin/wrangler d1 migrations apply DB --local", "./node_modules/.bin/wrangler d1 migrations apply DEMO_DB --local"]
 

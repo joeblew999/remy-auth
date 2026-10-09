@@ -1,4 +1,5 @@
 import { execFileSync, spawnSync } from 'node:child_process';
+import { installed } from './flow.ts';
 import { createHash } from 'node:crypto';
 import { existsSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
@@ -37,10 +38,7 @@ const run = (task: string) => {
   const result = spawnSync('mise', ['--cd', path, 'run', task], { stdio: 'inherit' });
   if (result.status !== 0) { console.error(`dev:start: ${task} failed`); process.exit(result.status ?? 1); }
 };
-if (!existsSync(join(path, 'node_modules'))) {
-  const npm = spawnSync('npm', ['ci', '--no-audit', '--no-fund', '--loglevel=error'], { cwd: path, stdio: 'inherit' });
-  if (npm.status !== 0) process.exit(npm.status ?? 1);
-}
+installed(path);
 // The app's local state (remy-auth: .dev.vars, the local databases, the guard's oRPC v1 fixture).
 run('project:prepare');
 run('dev:guard');
