@@ -26,7 +26,7 @@ one() {
   jq -n --arg l "$l" --arg name "$(node -p "new Intl.DisplayNames(['en'],{type:'language'}).of('$l')")" --argjson plural "$plural" \
      --slurpfile en "$en" --arg keys "$keys" \
      '{locale: $l, language: $name, plural: $plural, entries: ($en[0] | with_entries(select(.key as $k | $keys | split("\n") | index($k))))}' \
-    | agent "$here/../prompts/messages.md" '{"type":"object","additionalProperties":{"anyOf":[{"type":"string"},{"type":"array"}]}}' > "$work/$l.json" \
+    | agent "$here/../prompts/messages.md" '{"type":"object","additionalProperties":{"anyOf":[{"type":"string"},{"type":"array"}]}}' "$l" > "$work/$l.json" \
     || { echo "  $l: the agent failed"; return 1; }
   # Every key asked for came back, or nothing is written.
   local lacking; lacking=$(jq -rn --slurpfile got "$work/$l.json" --arg keys "$keys" '$keys | split("\n") - ($got[0] | keys) | .[]')

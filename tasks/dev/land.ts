@@ -1,15 +1,19 @@
 import { execFileSync, spawnSync } from 'node:child_process';
+import { span, took, type Part } from './feedback.ts';
 import { describeRun, latestRun, run, steps, where } from './flow.ts';
 
 // The land step, in order, each part once: the check; commit what changed; fast-forward main and
 // push it (GitHub takes it from there); deploy staging; translate on main, last, only when the check
 // says a translation is stale or missing (the one writer, a Claude agent on this machine, minutes; it
-// commits, and that is pushed too); bring main back to the branch. Production is dev:promote.
+// commits, and that is pushed too); bring main back to the branch. Production is dev:promote. It says
+// what each part took, and when staging was up: a slow landing is a number, not a feeling.
 const message = process.argv.slice(2).join(' ').trim();
 if (!message) { console.error('dev:land: say what changed: mise run dev:land -- "<message>"'); process.exit(1); }
 const git = (...args: string[]) => execFileSync('git', args, { stdio: ['ignore', 'inherit', 'inherit'] });
 const read = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8' }).trim();
 const task = (name: string, cwd = '.') => spawnSync('mise', ['run', name], { cwd, stdio: 'inherit', env: { ...process.env, REMY_FLOW: 'land' } }).status === 0;
+const parts: Part[] = []; let mark = Date.now();
+const lap = (what: string) => { const now = Date.now(); parts.push({ what, ms: now - mark }); mark = now; };
 
 const here = where();
 // Landing on a red main is allowed (the fix is a landing too) and never silent.
@@ -27,6 +31,7 @@ if (!here.onMain) {
   }
 }
 for (const name of steps.land.tasks) run(name, 'land');
+lap('the check');
 if (!here.clean) { git('add', '-A'); git('commit', '-q', '-m', message); }
 else console.log('dev:land: nothing new to commit; landing what is committed.');
 
@@ -39,22 +44,25 @@ if (!here.onMain) {
   if (result.status !== 0) { console.error(`dev:land: ${here.branch} is not on top of main (another landing came between); land again`); process.exit(1); }
 }
 git('-C', root, 'push', 'origin', 'main');
+lap('commit, main and push');
 const landed = read('-C', root, 'rev-parse', 'main');
 console.log(`dev:land: main is ${landed.slice(0, 7)} and pushed; GitHub runs every language, Google's audits and the consumer fixture: gh run list --commit ${landed.slice(0, 7)}. A red run comments on the commit; dev:promote refuses one that is not green.`);
 
 // Staging now, so the landing is usable in a minute; the translation (the Claude subscription on this
 // machine, minutes for a few pages) comes last and nobody waits for it.
 if (process.env.STAGING_ORIGIN) run('cf:staging', 'land'); else console.log('dev:land: no STAGING_ORIGIN in [env]; nothing deployed.');
-console.log('dev:land: staging is up. Production: mise run dev:promote.');
+lap('staging');
+console.log(`dev:land: staging is up, ${span(parts.reduce((sum, part) => sum + part.ms, 0))} after the start. Production: mise run dev:promote.`);
 
 // Translation, last: only when something is stale or missing (strict check: exit 1 says so), so a
 // second land after a green one costs nothing here. It commits on main and is pushed.
 const upToDate = spawnSync('mise', ['run', 'i18n:check'], { cwd: root, stdio: 'ignore', env: { ...process.env, I18N_STRICT: '1' } }).status === 0;
-if (upToDate) console.log('dev:land: translations are up to date.');
+if (upToDate) { lap('translation check'); console.log('dev:land: translations are up to date.'); }
 else {
   const before = read('-C', root, 'rev-parse', 'main');
-  if (!task('i18n:translate', root)) { console.error('dev:land: translation failed (the lines above name the page and why); main is pushed and staging is up, the translation is still owed and the next dev:land tries it again'); process.exit(1); }
+  if (!task('i18n:translate', root)) { lap('translation, failed'); console.error(`dev:land: translation failed (the lines above name the page and why); main is pushed and staging is up, the translation is still owed and the next dev:land tries it again. It took ${took(parts)}.`); process.exit(1); }
   if (read('-C', root, 'rev-parse', 'main') !== before) git('-C', root, 'push', 'origin', 'main');
+  lap('translation');
 }
 if (!here.onMain) git('merge', '-q', '--ff-only', 'main');
-console.log('dev:land: done.');
+console.log(`dev:land: done in ${took(parts)}.`);

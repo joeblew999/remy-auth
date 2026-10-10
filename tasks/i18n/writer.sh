@@ -21,13 +21,17 @@ writer_guard() {
     || { echo "Translations have uncommitted changes: commit or discard them first." >&2; exit 2; }
 }
 
-# agent <system prompt file> <JSON schema>: the prompt on stdin, the structured result on stdout. Claude
+# agent <system prompt file> <JSON schema> [what it is for]: the prompt on stdin, the structured result on stdout. Claude
 # Code headless, from a scratch directory (no CLAUDE.md, hooks, settings, MCP servers or skills), no tools.
 # A run with no structured result prints nothing here, says on stderr what Claude Code said, and fails.
+# Every call says on stderr what it took, from Claude Code's own report (seconds, of which in the API,
+# turns, tokens written), so a slow translation is a number in the log.
 agent() {
   local dir; dir=$(mktemp -d)
   (cd "$dir" && claude -p --tools "" --strict-mcp-config --disable-slash-commands --setting-sources "" --no-session-persistence \
     --model "${I18N_MODEL:-sonnet}" --system-prompt "$(cat "$1")" --output-format json --json-schema "$2") \
-    | jq -e '.structured_output // ("  the agent returned no result (\(.subtype? // "no subtype")): \(.result? // "" | tostring | .[0:300])\n" | halt_error(1))'
+    | jq -e --arg what "${3:-the agent}" '
+        ("  \($what): the agent took \((.duration_ms? // 0) / 1000 | round) s (\((.duration_api_ms? // 0) / 1000 | round) s in the API, \(.num_turns? // "?") turn(s), \((.usage.output_tokens)? // "?") tokens written)\n" | stderr | empty),
+        (.structured_output // ("  \($what): the agent returned no result (\(.subtype? // "no subtype")): \(.result? // "" | tostring | .[0:300])\n" | halt_error(1)))'
   local status=$?; rm -rf "$dir"; return $status
 }

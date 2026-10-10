@@ -52,6 +52,12 @@ Below this section is the history of how it got here.
    but does not compile would reach main and stop the next `dev:change` and `dev:promote`. The fix:
    the docs writer builds the docs before its commit counts, as the messages writer runs its checks
    (in a worktree of its own, never the main checkout), or GitHub gains a docs build job.
+   Seen the same day: `dev:land` holds its terminal until the translation ends, six minutes for a
+   landing that was on staging after 40 seconds (one page from scratch took 5 min 14 s; an update of
+   the same page about 2 min, because the agent returns the whole page whatever changed). The step
+   and the translator now say what each part and each agent call took. The fix: `dev:land` returns
+   when staging is up and the translation runs detached, its result in `dev:status`; after that,
+   translate only the sections whose English changed.
 9. **Owner only** (below): the alert rule in the dashboard, a native-speaker review of the newer
    languages, the production domain and Search Console, more docs languages.
 

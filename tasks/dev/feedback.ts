@@ -1,5 +1,5 @@
-// What dev:status says, composed from facts it is given, so a check can hand it facts (tests/unit).
-// No imports: the app's checks load this too.
+// What dev:status and dev:land say, composed from facts they are given, so a check can hand them facts
+// (tests/unit). No imports: the app's checks load this too.
 
 export type CommitFact = { sha: string; subject: string; author: string; when: string };
 export type RunFact = { headSha: string; status: string; conclusion: string | null; url: string };
@@ -38,3 +38,12 @@ export function compose({ commits, runs, branches, deployments, translations, pu
   if (left?.length) lines.push('', 'what is left, in order (.plans/now.md; seen something? fix it or add it there, in the same landing):', ...left.map(item => `  ${item}`));
   return lines;
 }
+
+/** A part of a step and how long it took. */
+export type Part = { what: string; ms: number };
+
+/** A length of time as a person reads it: "6 s", "5 min 14 s". */
+export const span = (ms: number) => { const seconds = Math.round(ms / 1000); return seconds < 60 ? `${seconds} s` : `${Math.floor(seconds / 60)} min ${seconds % 60} s`; };
+
+/** What a step says about its time: the whole, then each part ("5 min 57 s: the check 6 s, staging 33 s, translation 5 min 14 s"). */
+export const took = (parts: Part[]) => `${span(parts.reduce((sum, part) => sum + part.ms, 0))}: ${parts.map(part => `${part.what} ${span(part.ms)}`).join(', ')}`;
