@@ -66,10 +66,13 @@ Cómo iniciar, reanudar y recargar Codex o Claude Code, en VS Code o en una term
 
 | Tarea | Comando |
 | --- | --- |
+| Ver qué está pasando | `mise run dev:status` |
+| Empezar una tarea, en un worktree propio | `mise run dev:start -- <name>` |
+| Comprobar, después de cada cambio | `mise run dev:change` |
+| Aterrizar el trabajo terminado: main, las comprobaciones de GitHub, staging | `mise run dev:land -- "<what changed>"` |
 | Explorar las tareas del proyecto | `mise tasks ls --local` |
 | Ejecutar la GUI local | `mise run project:dev` |
 | Probar el build de producción en local | `mise run project:preview` |
-| Verificar la configuración | `mise run project:verify` |
 | Diagnosticar mise | `mise doctor` |
 | Comprobar actualizaciones de paquetes | `mise run packages:check` |
 | Actualizar paquetes, incluidas las versiones mayores | `mise run packages:upgrade` |
@@ -77,6 +80,10 @@ Cómo iniciar, reanudar y recargar Codex o Claude Code, en VS Code o en una term
 | Ayuda de la CLI de Cloudflare | `mise run cf:cli -- --help` |
 | Inspeccionar las herramientas de navegador | `mise run browser:cli -- --help` |
 | Inspeccionar el estado de MCP en ambos clientes | `mise run mcp:status` |
+
+Las primeras cuatro son [el flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), que
+también dice quién ejecuta producción y una publicación. Las comprobaciones pesadas no son comandos cotidianos: GitHub las
+ejecuta después de cada aterrizaje, y las herramientas las rechazan fuera del flujo.
 
 La vista previa local y el despliegue remoto usan el mismo build y la misma configuración de Wrangler.
 Consulta los [comandos locales/remotos](./gui.md#one-scaffold-for-local-and-cloudflare)

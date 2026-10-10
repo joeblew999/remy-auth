@@ -37,10 +37,13 @@ El desarrollo usa el mismo código fuente del Worker y el mismo runtime de Cloud
 | `project:test:remote` | Las mismas pruebas contra `TEST_BASE_URL`; sin servidor local ni deployment |
 | `project:report` / `project:report:remote` | Abre el informe HTML de la última ejecución local o remota, incluidos los informes de Lighthouse |
 
-Tras desplegar deliberadamente a la cuenta prevista, ejecuta:
+El flujo no ejecuta toda la suite contra un deployment: `cf:deploy` y `cf:staging` terminan con
+el smoke en vivo, y GitHub ejecuta la suite después de cada landing. Para ejecutarla toda contra una
+URL desplegada a propósito, una persona lo indica en una terminal (la tarea se niega sin ello, y el guard
+se niega a hacerlo desde un agente):
 
 ```sh
-TEST_BASE_URL=https://your-worker.your-subdomain.workers.dev mise run project:test:remote
+REMY_FLOW=hand TEST_BASE_URL=https://your-worker.your-subdomain.workers.dev mise run project:test:remote
 ```
 
 La URL debe ser un origin, sin path ni query (`STAGING_ORIGIN` para staging). Las comprobaciones que

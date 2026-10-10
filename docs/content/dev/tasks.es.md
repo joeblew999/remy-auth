@@ -70,9 +70,12 @@ las tareas, que un solo cambio de versión actualiza.
    `AGENTS.md`, registro MCP, `project:verify`).
 5. Haz commit de todo, `package-lock.json`, `skills-lock.json` y `src/routeTree.gen.ts` incluidos. Las
    cadenas de la app en blanco ya vienen traducidas; cuando el inglés cambie (`messages/en.json`, la
-   documentación), haz commit de ello y ejecuta `mise run i18n:translate`, que escribe y hace commit de los
-   demás idiomas.
-6. `mise run cf:deploy`, y `mise run docs:deploy` para la documentación.
+   documentación), haz commit de ello y traduce esto una vez a mano, `REMY_FLOW=hand mise run
+   i18n:translate`, que escribe y hace commit de los demás idiomas; a partir de entonces lo hace
+   `dev:land`.
+6. El primer despliegue, a mano: `mise run cf:deploy`, y `mise run docs:deploy` para la documentación.
+   Una vez que el repositorio está en GitHub (paso 7), el trabajo pasa por [el flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest):
+   `dev:land` para cada cambio terminado, `dev:promote` para producción y la documentación.
 7. CI: `.github/workflows/google.yml` llama al flujo de trabajo compartido de remy-auth en la misma tag (todos los
    idiomas, las auditorías de Google en cada push a `main`). Da al repositorio nuevo acceso de lectura en la
    configuración del paquete `@joeblew999/remy-ui` ("Manage Actions access"), o `npm ci` falla allí.
@@ -143,7 +146,7 @@ de la app), `project:prepare` (el estado local que una app necesita antes de eje
 y `project:build` ejecutan primero; nada por defecto, y remy-auth escribe ahí su `.dev.vars` y migra su D1
 local) y `project:release-checks`.
 
-El flujo de desarrollo es código, `tasks/dev/flow.ts`, con tres comandos y un guardián
+El flujo de desarrollo es código, `tasks/dev/flow.ts`, con cuatro pasos y un guardián
 ([cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)):
 
 | Paso | Tarea |
@@ -151,7 +154,7 @@ El flujo de desarrollo es código, `tasks/dev/flow.ts`, con tres comandos y un g
 | Primero | `dev:status` (main con los veredictos de GitHub, los despliegues, los worktrees por delante y por detrás, las traducciones, las pull requests; un hook `SessionStart` lo ejecuta para los agentes) |
 | Un trabajo | `dev:start -- <name>` (un worktree propio desde main, `npm ci`, puertos en `mise.local.toml`, `dev:guard`); `dev:done` lo elimina una vez fusionado |
 | Cada cambio | `dev:change` (`project:check`: planes, `project:routes` cuando cambia un archivo de ruta, tipos con `project:typecheck-tasks`, `project:test:unit`, `i18n:check` como aviso, `project:check:docs` cuando cambia la documentación) |
-| Sale de la máquina | `dev:land -- "<message>"` (la comprobación, commit, main, push, traduce cuando está desactualizado, `cf:staging`; GitHub ejecuta entonces `project:test`, `project:test:google` y `project:test:consumers` en paralelo, y una ejecución en rojo comenta en el commit. Las mismas tres en local, a propósito: `REMY_FLOW=hand mise run <task>`) |
+| Trabajo terminado | `dev:land -- "<message>"` (la comprobación, commit, main, push, `cf:staging`, y luego la traducción cuando está desactualizada; GitHub ejecuta entonces `project:test`, `project:test:google` y `project:test:consumers` en paralelo, y una ejecución en rojo comenta en el commit. Las mismas tres en local, a propósito: `REMY_FLOW=hand mise run <task>`) |
 | Producción | `dev:promote` (se niega ante un commit que GitHub no ha aprobado; luego `cf:deploy`, `docs:deploy`, `cf:versions`) |
 | Un release | `dev:release` (`packages:release`, que ejecuta `project:verify`) |
 | Un área | `project:test:only -- <words>` |

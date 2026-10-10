@@ -18,7 +18,7 @@ el `[tools]` de `mise.toml`; las tareas compartidas fijan las herramientas que e
 las incluye obtiene las mismas versiones sin una entrada propia: `gh` (`project:setup`, `project:upgrade-ui`,
 `ui:release`), `jq`, `@lingual/i18n-check` y Claude Code (`i18n:*`). La CLI de Better Auth (`auth`), Wrangler,
 Chrome DevTools y Modern Web Guidance están fijados en `package.json` y `package-lock.json`. `project:setup` ejecuta `npm ci`, instala los skills oficiales fijados
-para Codex y Claude, registra las herramientas MCP del proyecto y luego ejecuta `mise run project:verify`. Se detiene ante cualquier
+para Codex y Claude, registra las herramientas MCP del proyecto y luego ejecuta `project:verify`. Se detiene ante cualquier
 paso fallido. Los comandos usan los binarios locales y aceptan los argumentos de la CLI original
 después de `--`; no descargan una CLI diferente en tiempo de ejecución.
 
@@ -130,7 +130,9 @@ fuera de ellos. La regla está en
 [cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), las tareas en el
 [README de tareas](./tasks.md).
 
-Ejecuta `mise run project:verify` antes de una publicación; `project:setup` y `packages:upgrade` también terminan con ella. Comprueba
+`project:verify` es la puerta del release: `dev:release` lo ejecuta, y `project:setup`, `packages:upgrade` y
+`project:upgrade-ui` terminan con él. Nadie lo ejecuta mientras programa (`dev:change` es la comprobación); a mano, a
+propósito, es `REMY_FLOW=hand mise run project:verify`. Comprueba
 las tareas de mise, las dependencias instaladas, las versiones de las CLI, la consistencia del manifiesto/lockfile,
 la configuración de Wrangler y los ajustes de observabilidad, y la fuente fijada, los archivos
 y el symlink de Claude de cada skill. Usa la instalación local existente y
@@ -237,8 +239,8 @@ Para añadir una fuente, solo de los propios mantenedores de la biblioteca:
    commit de `git ls-remote https://github.com/<owner>/<repo> HEAD`.
 2. Añade su línea a la lista `run` de esa tarea, nombrando los skills con `--skill` en lugar de `'*'`
    cuando el repositorio también incluya skills solo para contribuidores.
-3. Ejecuta `mise run skills:remove`, `mise run skills:install` y `mise run project:verify`.
-   La verificación lee los pins de `tasks/skills.toml` y rechaza los skills instalados desde fuentes no fijadas.
+3. Ejecuta `mise run skills:remove`, `mise run skills:install` y `mise run project:verify-tooling`
+   (segundos), que lee los pins de `tasks/skills.toml` y rechaza los skills instalados desde fuentes no fijadas.
 
 
 ## Registro de MCP [#mcp-registration]

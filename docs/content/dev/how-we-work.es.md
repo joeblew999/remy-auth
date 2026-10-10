@@ -170,11 +170,12 @@ choca y deja los idiomas a medio actualizar.
 - Un agente de funcionalidad escribe solo en inglés: la documentación en inglés y el catálogo base
   (`messages/en.json`). Nunca edita una traducción (`<página>.<idioma>.md` en `docs/content`) ni el
   catálogo de otro locale.
-- La traducción es su propio paso, en `main` tras los merges: `mise run i18n:translate`. El agente
-  Claude, fijado en la tarea, traduce exactamente lo que lista `i18n:check`, y la tarea lo comitea; **el
-  commit es la marca** (git decide qué está desactualizado: una traducción está desactualizada cuando su
-  inglés cambió después del último commit de la traducción). Se niega a ejecutarse en otras ramas, con
-  inglés sin comitear, con traducciones sin comitear y en una segunda ejecución mientras otra mantiene el
+- La traducción es su propio paso, en `main` tras los merges: `dev:land` ejecuta `i18n:translate` ahí,
+  al final, cuando algo está desactualizado; nadie la ejecuta por su cuenta. El agente Claude, fijado
+  en la tarea, traduce exactamente lo que lista `i18n:check`, y la tarea lo comitea; **el commit es la
+  marca** (git decide qué está desactualizado: una traducción está desactualizada cuando su inglés
+  cambió después del último commit de la traducción). Se niega a ejecutarse en otras ramas, con inglés
+  sin comitear, con traducciones sin comitear y en una segunda ejecución mientras otra mantiene el
   lock, que comparte cada worktree, así que los agentes en paralelo no pueden disparar traducciones ni
   competir por ellas.
 - El agente no recibe herramientas: se le entrega el inglés (y, para una página desactualizada, el diff
@@ -264,8 +265,17 @@ que cada app, desde las tareas compartidas; `project:setup` instala el guardián
   niega a ejecutar `project:verify`, `project:test`, `project:test:quick`, `project:test:remote`,
   `project:test:google`, `project:test:cwv`, `project:test:consumers`, `template:test`, un
   `playwright test` desnudo e `i18n:translate` fuera del flujo, y en su lugar nombra el paso
-  correspondiente. Todos ellos siguen pudiendo ejecutarse a mano desde una terminal: eso es una
-  decisión; que un agente ejecute uno sin que se le pida es el fallo para el que existe el guardián.
+  correspondiente. Todos ellos siguen pudiendo ejecutarse a mano desde una terminal, con
+  `REMY_FLOW=hand` por delante (`REMY_FLOW=hand mise run project:test`): la propia tarea pregunta quién
+  la está ejecutando (`dev:allowed`) y se niega ante un `mise run` desnudo, en cualquier máquina. Eso es
+  una decisión de una persona; el guardián se niega a ejecutarlo desde un agente aun así, que es el
+  fallo para el que existe. Una tarea cuyo propio trabajo termina con la verificación (`project:setup`,
+  `packages:upgrade`, `project:upgrade-ui`) indica que está preguntando, así que esas se ejecutan tal
+  como están escritas.
+- **Estas páginas nunca dan un comando que las herramientas rechacen.** Una tarea pesada se escribe con
+  `REMY_FLOW=hand` por delante o se nombra sin `mise run`; `tests/unit/dev-flow.unit.spec.ts` lee cada
+  página en inglés y cada tarea en busca de una ejecución desnuda, en cada comprobación (2026-10-10:
+  ocho líneas en cinco páginas lo hacían, y `project:setup` terminó en el rechazo).
 - Una regla que puede ser una función pertenece a `tests/**/*.unit.spec.ts` (sin build, sin Worker, sin
   navegador), así se ejecuta en cada comprobación gratis. El navegador es para lo que solo un navegador
   muestra.
@@ -283,10 +293,11 @@ que cada app, desde las tareas compartidas; `project:setup` instala el guardián
 - **La respuesta de GitHub viene a ti.** Una ejecución en rojo comenta en el commit (GitHub se lo dice a
   su autor), nombrando la ejecución; `dev:change` empieza diciendo qué hizo la última ejecución en
   main; `dev:promote` se niega sobre un commit cuya ejecución no esté en verde o no haya terminado. Para
-  reproducir un job en rojo: `REMY_FLOW=hand mise run <su tarea>`, la misma tarea que ejecutó GitHub, ya
-  que el workflow no contiene lógica propia (`project:verify-tooling` comprueba que exista cada tarea
-  que un workflow nombra). Informa de qué se probó y qué no; nunca llames verificado a un trabajo no
-  probado.
+  reproducir un job en rojo, una persona ejecuta `REMY_FLOW=hand mise run <su tarea>`, la misma tarea
+  que ejecutó GitHub, ya que el workflow no contiene lógica propia (`project:verify-tooling` comprueba
+  que exista cada tarea que un workflow nombra). Un agente lee el propio log de la ejecución
+  (`gh run view <id> --log-failed`) y ejecuta el área concreta (`mise run project:test:only --
+  <palabras>`). Informa de qué se probó y qué no; nunca llames verificado a un trabajo no probado.
 - **Un landing que falla después del push aun así termina lo que puede, y dice dónde se detuvo.**
   Main se empuja antes que staging; cuando el despliegue de staging o su smoke en vivo falla,
   `dev:land` igualmente ejecuta la traducción (está en main, se debe de todos modos), y luego termina
