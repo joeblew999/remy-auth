@@ -68,8 +68,11 @@ Everything else is the package and the tasks, which one version bump upgrades.
    MCP registration, `project:verify`).
 5. Commit everything, `package-lock.json`, `skills-lock.json` and `src/routeTree.gen.ts` included. The
    blank app's strings come translated; after the English changes (`messages/en.json`, the docs), commit it
-   and run `mise run i18n:translate`, which writes and commits the other languages.
-6. `mise run cf:deploy`, and `mise run docs:deploy` for the docs.
+   and translate this once by hand, `REMY_FLOW=hand mise run i18n:translate`, which writes and commits the
+   other languages; from then on `dev:land` does it.
+6. The first deploy, by hand: `mise run cf:deploy`, and `mise run docs:deploy` for the docs. Once the
+   repository is on GitHub (step 7), work goes through [the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest):
+   `dev:land` for every finished change, `dev:promote` for production and the docs.
 7. CI: `.github/workflows/google.yml` calls remy-auth's shared workflow at the same tag (every language, Google's
    audits on every push to `main`). Grant the new repository read access in the `@joeblew999/remy-ui`
    package's settings ("Manage Actions access"), or `npm ci` fails there.
@@ -136,7 +139,7 @@ for it are `project:generate` (code generated before type checking; by default t
 run first; nothing by default, and remy-auth writes its `.dev.vars` and migrates its local D1 there)
 and `project:release-checks`.
 
-The development flow is code, `tasks/dev/flow.ts`, with three commands and a guard
+The development flow is code, `tasks/dev/flow.ts`, with four steps and a guard
 ([how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)):
 
 | Step | Task |
@@ -144,7 +147,7 @@ The development flow is code, `tasks/dev/flow.ts`, with three commands and a gua
 | First | `dev:status` (main with GitHub's verdicts, the deployments, worktrees ahead and behind, translations, pull requests; a `SessionStart` hook runs it for agents) |
 | A piece of work | `dev:start -- <name>` (a worktree of its own from main, `npm ci`, ports in `mise.local.toml`, `dev:guard`); `dev:done` removes it once landed |
 | Every change | `dev:change` (`project:check`: plans, `project:routes` when a route file changed, types with `project:typecheck-tasks`, `project:test:unit`, `i18n:check` as a warning, `project:check:docs` when docs changed) |
-| Leaves the machine | `dev:land -- "<message>"` (the check, commit, main, push, translate when stale, `cf:staging`; GitHub then runs `project:test`, `project:test:google` and `project:test:consumers` in parallel, and a red run comments on the commit. The same three locally, on purpose: `REMY_FLOW=hand mise run <task>`) |
+| Finished work | `dev:land -- "<message>"` (the check, commit, main, push, `cf:staging`, then translation when stale; GitHub then runs `project:test`, `project:test:google` and `project:test:consumers` in parallel, and a red run comments on the commit. The same three locally, on purpose: `REMY_FLOW=hand mise run <task>`) |
 | Production | `dev:promote` (refuses a commit GitHub has not passed; then `cf:deploy`, `docs:deploy`, `cf:versions`) |
 | A release | `dev:release` (`packages:release`, which runs `project:verify`) |
 | One area | `project:test:only -- <words>` |

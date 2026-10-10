@@ -46,7 +46,7 @@ if (!here.onMain) {
 git('-C', root, 'push', 'origin', 'main');
 lap('commit, main and push');
 const landed = read('-C', root, 'rev-parse', 'main');
-console.log(`dev:land: main is ${landed.slice(0, 7)} and pushed; GitHub runs every language, Google's audits and the consumer fixture: gh run list --commit ${landed.slice(0, 7)}. A red run comments on the commit; dev:promote refuses one that is not green.`);
+console.log(`dev:land: main is ${landed.slice(0, 7)} and pushed; GitHub runs every language, Google's audits and the consumer fixture: gh run list --commit ${landed}. A red run comments on the commit; dev:promote refuses one that is not green.`);
 
 // Staging now, so the landing is usable in a minute; the translation (the Claude subscription on this
 // machine, minutes for a few pages) comes last and nobody waits for it. A staging failure (the deploy

@@ -34,6 +34,24 @@ Below this section is the history of how it got here.
      repeats the experiment. If it repeats, find what the first load waits on (a cold fetch of the
      route's chunks from Workers Assets is the suspect) and fix that, not the 5 s. What the flow did
      with it is fixed the same day: `dev:land` no longer stops there with the translation skipped.
+   - **The by-hand tasks that end in the verification, never run since the gate.** `project:setup`,
+     `packages:upgrade` and `project:upgrade-ui` called `project:verify` bare, which the gate (10-09)
+     refuses; fixed 2026-10-10 by each saying it is asking, and proved at the gate only
+     (`REMY_FLOW=setup mise run dev:allowed -- project:verify` passes, a bare one is refused). None of
+     the three has been run end to end since: item 3's `project:upgrade-ui` on remy-auth-app is the
+     first, and the place it would have failed. Their descriptions disagree on the time too
+     (`project:setup` says ~1.5 min, the `project:verify` it ends with ~4.5 min in remy-auth): put the
+     measured number in both at that run. Open with it: whether setup and an upgrade should end with
+     every browser check in every language at all, when GitHub runs them after the landing.
+   - **The guard and a search.** The agent hook refuses any command that contains the words of a bare
+     browser-suite run, a `grep` for them included (seen 2026-10-10 while searching the docs for
+     exactly that). The safe direction, and the search is reworded in seconds; narrow it to a
+     command position only if it bites again. An agent also cannot reproduce a red job with the
+     task GitHub ran (the hook refuses `REMY_FLOW=hand` from an agent): its way is the run's log and
+     `project:test:only`, now said in how-we-work.
+   - **The new-app steps** in [tasks](../docs/content/dev/tasks.md) were corrected by reading, not by
+     running (translate once by hand with `REMY_FLOW=hand`, the first deploy by hand, then the flow);
+     creating `remy-auth-test` (item 3) is their first run.
    - Closed of it: `dev:land` deploys staging before it translates (05896d6, 2026-10-09). The word
      `null` committed as the Spanish "How we work" the same day (b9a4a22) is fixed: the writer writes
      only what is a page, a failed agent fails the run, a unit check reads every translated page

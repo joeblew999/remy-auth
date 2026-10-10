@@ -35,7 +35,7 @@ dir = "{{config_root}}"
 # gh pinned here, so every app has the same one for `gh auth token` (a task's tools are active in its env).
 tools = { "aqua:cli/cli" = "2.101.0" }
 env = { GITHUB_TOKEN = "{% set token = get_env(name='GITHUB_TOKEN', default='') %}{% if token %}{{ token }}{% else %}{{ exec(command='gh auth token') }}{% endif %}" }
-run = [{ task = "project:preconditions" }, "npm ci", { task = "skills:install" }, { task = "agents:rules" }, { task = "mcp:register" }, { task = "dev:guard" }, { task = "project:verify" }]
+run = [{ task = "project:preconditions" }, "npm ci", { task = "skills:install" }, { task = "agents:rules" }, { task = "mcp:register" }, { task = "dev:guard" }, "REMY_FLOW=${REMY_FLOW:-setup} mise run project:verify"]
 
 ["project:test:consumers"]
 description = "Hook for the other repositories this one serves, tested as they get it (GitHub runs it after every push, project:verify at a release); none by default. remy-auth runs template:test, its consumer fixture. Instant"

@@ -65,10 +65,13 @@ Starting, resuming and reloading Codex or Claude Code, in VS Code or a terminal,
 
 | Task | Command |
 | --- | --- |
+| See what is going on | `mise run dev:status` |
+| Start a piece of work, in a worktree of its own | `mise run dev:start -- <name>` |
+| Check, after every change | `mise run dev:change` |
+| Land finished work: main, GitHub's checks, staging | `mise run dev:land -- "<what changed>"` |
 | Browse project tasks | `mise tasks ls --local` |
 | Run the local GUI | `mise run project:dev` |
 | Try the production build locally | `mise run project:preview` |
-| Verify the setup | `mise run project:verify` |
 | Diagnose mise itself | `mise doctor` |
 | Check for package updates | `mise run packages:check` |
 | Upgrade packages, including major versions | `mise run packages:upgrade` |
@@ -76,6 +79,10 @@ Starting, resuming and reloading Codex or Claude Code, in VS Code or a terminal,
 | Cloudflare CLI help | `mise run cf:cli -- --help` |
 | Inspect browser tooling | `mise run browser:cli -- --help` |
 | Inspect MCP status in both clients | `mise run mcp:status` |
+
+The first four are [the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), which
+also says who runs production and a release. The heavy checks are not everyday commands: GitHub runs
+them after every landing, and the tooling refuses them outside the flow.
 
 Local preview and remote deployment use the same build and Wrangler configuration.
 See [local/remote commands](./gui.md#one-scaffold-for-local-and-cloudflare)

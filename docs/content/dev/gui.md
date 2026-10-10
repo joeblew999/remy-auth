@@ -37,10 +37,13 @@ Development uses the same Worker source and Cloudflare runtime with hot reload.
 | `project:test:remote` | Same tests against `TEST_BASE_URL`; no local server or deployment |
 | `project:report` / `project:report:remote` | Open the last local or remote run's HTML report, including Lighthouse reports |
 
-After deliberately deploying to the intended account, run:
+The flow does not run the whole suite against a deployment: `cf:deploy` and `cf:staging` end with
+the live smoke, and GitHub runs the suite after every landing. To run all of it against a deployed
+URL on purpose, a person says so at a terminal (the task refuses without it, and the guard refuses
+it from an agent):
 
 ```sh
-TEST_BASE_URL=https://your-worker.your-subdomain.workers.dev mise run project:test:remote
+REMY_FLOW=hand TEST_BASE_URL=https://your-worker.your-subdomain.workers.dev mise run project:test:remote
 ```
 
 The URL must be an origin, without a path or query (`STAGING_ORIGIN` for staging). The checks that

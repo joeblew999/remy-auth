@@ -148,7 +148,8 @@ half-updated.
 
 - A feature agent writes English only: the English docs and the base catalog (`messages/en.json`).
   It never edits a translation (`<page>.<lang>.md` in `docs/content`) or another locale's catalog.
-- Translation is its own step, on `main` after the merges: `mise run i18n:translate`. The Claude agent,
+- Translation is its own step, on `main` after the merges: `dev:land` runs `i18n:translate` there,
+  last, when something is stale; nobody runs it by itself. The Claude agent,
   pinned in the task, translates exactly what `i18n:check` lists, and the task commits it; **the commit
   is the mark** (git decides what is stale: a translation is stale when its English changed after the
   translation's last commit). It refuses other branches, uncommitted English, uncommitted translations
@@ -231,7 +232,15 @@ tasks; `project:setup` installs the guard.
   `project:verify`, `project:test`, `project:test:quick`, `project:test:remote`, `project:test:google`,
   `project:test:cwv`, `project:test:consumers`, `template:test`, a bare `playwright test` and
   `i18n:translate` outside the flow, and names the step instead. Every one still runs by hand from a
-  terminal: that is a decision; an agent running one unasked is the fault the guard exists for.
+  terminal, with `REMY_FLOW=hand` in front (`REMY_FLOW=hand mise run project:test`): the task itself
+  asks who is running it (`dev:allowed`) and refuses a bare `mise run`, on every machine. That is a
+  person's decision; the guard refuses it from an agent even so, which is the fault it exists for.
+  A task whose own job ends with the verification (`project:setup`, `packages:upgrade`,
+  `project:upgrade-ui`) says it is asking, so those run as written.
+- **These pages never give a command the tooling refuses.** A heavy task is written with
+  `REMY_FLOW=hand` in front or named without `mise run`; `tests/unit/dev-flow.unit.spec.ts` reads
+  every English page and every task for one run bare, on every check (2026-10-10: eight lines on five
+  pages did, and `project:setup` ended in the refusal).
 - A rule that can be a function belongs in `tests/**/*.unit.spec.ts` (no build, no Worker, no
   browser), so it runs on every check for free. The browser is for what only a browser shows.
 - **An agent never waits on a long-running step.** `dev:land`, `dev:promote`, `dev:release`, a
@@ -247,9 +256,11 @@ tasks; `project:setup` installs the guard.
   6 minutes").
 - **GitHub's answer comes to you.** A red run comments on the commit (GitHub tells its author), naming
   the run; `dev:change` starts by saying what the last run on main did; `dev:promote` refuses a commit
-  whose run is not green or not finished. To reproduce a red job: `REMY_FLOW=hand mise run <its task>`,
-  the same task GitHub ran, since the workflow holds no logic of its own (`project:verify-tooling`
-  checks every task a workflow names exists). Report what was tested and what was not; never call
+  whose run is not green or not finished. To reproduce a red job, a person runs
+  `REMY_FLOW=hand mise run <its task>`, the same task GitHub ran, since the workflow holds no logic of
+  its own (`project:verify-tooling` checks every task a workflow names exists). An agent reads the
+  run's own log (`gh run view <id> --log-failed`) and runs the one area
+  (`mise run project:test:only -- <words>`). Report what was tested and what was not; never call
   untested work verified.
 - **A landing that fails after the push still finishes what it can, and says where it stopped.**
   Main is pushed before staging; when staging's deploy or its live smoke fails, `dev:land` still runs

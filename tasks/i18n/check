@@ -4,4 +4,4 @@
 set -uo pipefail
 mise run -q i18n:messages:check ::: i18n:docs:check && exit 0
 [ -z "${I18N_STRICT:-}" ] || exit 1
-echo "WARNING: translations are incomplete or stale; on main, mise run i18n:translate fills them."
+echo "WARNING: translations are incomplete or stale; the next mise run dev:land translates them, on main."

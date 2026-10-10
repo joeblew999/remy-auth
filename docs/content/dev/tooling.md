@@ -18,7 +18,7 @@ Every tool comes through mise, down to the operating system's level. Node and fn
 includes them gets the same versions with no entry of its own: `gh` (`project:setup`, `project:upgrade-ui`,
 `ui:release`), `jq`, `@lingual/i18n-check` and Claude Code (`i18n:*`). Better Auth CLI (`auth`), Wrangler,
 Chrome DevTools and Modern Web Guidance are pinned in `package.json` and `package-lock.json`. `project:setup` runs `npm ci`, installs the pinned official
-skills for Codex and Claude, registers project MCP tooling, then runs `mise run project:verify`. It stops on any
+skills for Codex and Claude, registers project MCP tooling, then runs `project:verify`. It stops on any
 failed step. Commands use the local binaries and accept upstream CLI
 arguments after `--`; they do not download a different CLI at execution time.
 
@@ -128,7 +128,9 @@ refuses the heavy checks outside them. The rule is in
 [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), the tasks in the
 [tasks README](./tasks.md).
 
-Run `mise run project:verify` before a release; `project:setup` and `packages:upgrade` also finish with it. It checks
+`project:verify` is the release's gate: `dev:release` runs it, and `project:setup`, `packages:upgrade` and
+`project:upgrade-ui` finish with it. Nobody runs it while coding (`dev:change` is the check); by hand, on
+purpose, it is `REMY_FLOW=hand mise run project:verify`. It checks
 mise tasks, installed dependencies, CLI versions, manifest/lockfile consistency,
 Wrangler configuration and observability settings, and every skill's pinned
 source, files and Claude symlink. It uses the existing local installation and
@@ -234,8 +236,8 @@ To add a source, only from the library's own maintainers:
    commit from `git ls-remote https://github.com/<owner>/<repo> HEAD`.
 2. Add its line to that task's `run` list, naming the skills with `--skill` rather than `'*'`
    when the repository also ships contributor-only skills.
-3. Run `mise run skills:remove`, `mise run skills:install` and `mise run project:verify`.
-   Verification reads the pins from `tasks/skills.toml` and rejects installed skills from unpinned sources.
+3. Run `mise run skills:remove`, `mise run skills:install` and `mise run project:verify-tooling`
+   (seconds), which reads the pins from `tasks/skills.toml` and rejects installed skills from unpinned sources.
 
 
 ## MCP registration
