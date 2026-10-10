@@ -31,12 +31,18 @@ Below this section is the history of how it got here.
    router; the consumer fixture using relations; then remy-sport's own move onto the engine and the
    aspects deferred from it (a code a human switches on for deployed checks, the sessions and devices
    page, a person's lifecycle).
-6. **Platform structure** ([plan](platform-structure.md)): waits for the owner's three decisions
+6. **Cedar over the relation engine** ([plan](cedar.md), from [the research](cedar-research.md),
+   2026-10-10): policies that decide from the relations the engine derives, so an app can say what
+   `grants` cannot (a deny with a reason, a share until a date, a sign-in recent enough) in a file any
+   language runs and a test file proves. Slice 0 is a spike that can stop it; then generated policies
+   with nothing changing, hand-written ones in the notes demo, facts about the sign-in. After the
+   app-trust slice (5), which it rides on for other Workers.
+7. **Platform structure** ([plan](platform-structure.md)): waits for the owner's three decisions
    named there.
-7. **Docs and translations, leftovers**: [docs-for-consumers](docs-for-consumers.md) step 6 (the docs
+8. **Docs and translations, leftovers**: [docs-for-consumers](docs-for-consumers.md) step 6 (the docs
    app's code in the package) and [translation-pipeline](translation-pipeline.md) (upstream tools
    that replace the i18n tasks).
-8. **Owner only** (below): the alert rule in the dashboard, a native-speaker review of the newer
+9. **Owner only** (below): the alert rule in the dashboard, a native-speaker review of the newer
    languages, the production domain and Search Console, more docs languages.
 
 Done today, 2026-10-09, all live: auth slices 2 and 3, staging, the build stamp and versions, the
