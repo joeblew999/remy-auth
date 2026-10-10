@@ -202,14 +202,21 @@ the flow is code, not a rule to remember: `tasks/dev/flow.ts` is the one place i
 three commands are its steps, and a guard refuses what is not one of them. remy-auth gets it the way
 every app does, from the shared tasks; `project:setup` installs the guard.
 
-| Step | Command | What runs | Time |
-| --- | --- | --- | --- |
-| Before a piece of work | `mise run dev:start -- <name>` | a worktree of its own from main, installed, its own ports, the guard | ~1 min |
-| After every change | `mise run dev:change` | the check (`project:check`): plans, types with the tasks' own, the plain-function checks (`tests/**/*.unit.spec.ts`), translation status; a build only when a route file changed, the docs only when docs changed | ~6 s |
-| The change leaves the machine | `mise run dev:land -- "<what changed>"` | the check, commit, fast-forward main, push, deploy staging, then translation last when stale. GitHub then runs every language, Google's audits and the consumer fixture in parallel, while you keep coding (`gh run list`) | ~1 min to staging; translation after |
-| Production | `mise run dev:promote` | `cf:deploy` and the docs Worker, from a pushed main, no gate: staging and GitHub already ran the checks | ~1 min |
-| A release | `mise run dev:release` | `packages:release`: every check, every language, locally, on purpose, then the tag | ~5 min |
-| When landed | `mise run dev:done` | the worktree and branch go | seconds |
+| Step | Command | Who runs it, and when | What runs | Time |
+| --- | --- | --- | --- | --- |
+| Before a piece of work | `mise run dev:start -- <name>` | whoever does the work, for every piece, a one-line edit included | a worktree of its own from main, installed, its own ports, the guard | ~1 min |
+| After every change | `mise run dev:change` | whoever is coding; the only step waited for | the check (`project:check`): plans, types with the tasks' own, the plain-function checks (`tests/**/*.unit.spec.ts`), translation status; a build only when a route file changed, the docs only when docs changed | ~6 s |
+| The change leaves the machine | `mise run dev:land -- "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | the check, commit, fast-forward main, push, deploy staging, then translation last when stale. GitHub then runs every language, Google's audits and the consumer fixture in parallel, while you keep coding (`gh run list`) | ~1 min to staging; translation after |
+| Production | `mise run dev:promote` | the owner, or an agent the owner asked in that session | `cf:deploy` and the docs Worker, from a pushed main, no gate: staging and GitHub already ran the checks | ~1 min |
+| A release | `mise run dev:release` | the owner, or an agent the owner asked in that session | `packages:release`: every check, every language, locally, on purpose, then the tag | ~5 min |
+| When landed | `mise run dev:done` | whoever landed, when the piece of work is over; a worktree lives through as many landings as the work takes | the worktree and branch go | seconds |
+
+- **Who runs a step is in the table, and it is never a question.** An agent lands its own finished
+  work without asking: staging is part of landing, GitHub checks every landing, and nothing reaches
+  production by it. The owner's word is for production and a release, the two steps whose column says
+  so, and for provisioning ([development principles](./development.md#development-principles)). An agent that
+  reads the table and still asks whether to land has stopped using the flow (owner, 2026-10-10,
+  after one did: "Is it absolutely clear when each should be run by you?").
 
 - One area that looks wrong: `mise run project:test:only -- <words>` (the browser checks whose title
   matches, en and ar, ~30 s). It is the only browser run a step does not own.
@@ -312,7 +319,7 @@ the only integrator, and GitHub checks every landing. Nothing here is done by ha
 | Code | `mise run dev:change` | the check, in seconds, after every change |
 | Land | `mise run dev:land -- "<what changed>"` | main merged in first (a conflict stops with the files named), the check, commit, fast-forward main, push, staging, then translation last when stale (the Claude subscription on this machine, never GitHub). GitHub runs the heavy checks; a red run comments on the commit |
 | Finish | `mise run dev:done` | the landed worktree and branch go; refuses while anything is unlanded |
-| Production | `mise run dev:promote` | from main, only a commit GitHub passed |
+| Production | `mise run dev:promote` | from main, only a commit GitHub passed, on the owner's word |
 
 - **Split by independence.** An orchestrator splits work into parts that touch different files, and
   starts one agent per part with `dev:start`. A part that needs another's result waits for that

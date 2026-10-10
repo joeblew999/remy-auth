@@ -36,8 +36,10 @@ This document owns what the code must be. How people and agents work day to day 
   (including `src/routeTree.gen.ts`) by regenerating. Do not hand-edit or override generated output elsewhere.
 - Decisions that plans leave open, or fixes that conflict with a plan, belong to the
   owner. Ask; do not choose, unless the owner has delegated them
-  ([how we work](./how-we-work.md#when-the-owner-delegates-decisions)). Deploying, provisioning and filing upstream issues
-  also wait for the owner's explicit request.
+  ([how we work](./how-we-work.md#when-the-owner-delegates-decisions)). Production (`dev:promote`), a release
+  (`dev:release`), provisioning and filing upstream issues also wait for the owner's explicit request.
+  Landing (`dev:land`, staging included) does not: it is the step every finished change takes, by
+  whoever made it ([the flow](./how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest)).
 - Do not mock Better Auth, D1 or the Workers runtime. Development conveniences (seeded people,
   a sign-in picker for them, a fixed sign-in code, captured mail) are allowed only behind one
   per-environment policy table ([remy-auth's](./auth.md#environments-one-table)) whose default, and whose value for any unknown environment, is
