@@ -47,7 +47,7 @@ encuentra; ninguna comprobación propia lo mantiene.
 | `packages/<name>/` con `README.md` | `plans:*`, `packages:*` | los paquetes que publica el repositorio, si los hay |
 | `messages/`, `project.inlang/` | el preset de la app, `project:generate`, `i18n:messages:*` | las cadenas propias de la app, si las hay (compiladas en `src/paraglide/`) |
 | `.plans/` (`now.md`, `done/`, `parked/`) | `plans:*` | los planes del repositorio |
-| `AGENTS.md`, `.github/workflows/` | agentes; GitHub | el índice de los agentes; CI |
+| `AGENTS.md`, `.github/workflows/` | agentes; GitHub | el puntero de los agentes a la documentación; CI |
 | `tasks/`, `template/`, `fixtures/consumer/` | el include; `giget`; `template:test` | solo remy-auth: las propias tareas compartidas, la app en blanco desde la que arranca un repositorio nuevo, y el fixture de consumidor que prueba ambos tal como los recibiría otro repositorio |
 
 ### Un consumidor nuevo [#a-new-consumer]
@@ -144,7 +144,7 @@ y `project:build` ejecutan primero; nada por defecto, y remy-auth escribe ahí s
 local) y `project:release-checks`.
 
 El flujo de desarrollo es código, `tasks/dev/flow.ts`, con tres comandos y un guardián
-([cómo trabajamos](./how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest)):
+([cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)):
 
 | Paso | Tarea |
 | --- | --- |

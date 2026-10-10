@@ -122,11 +122,12 @@ necesitará sus propias pruebas cuando se integre Better Auth.
 
 ### Verificación [#verification]
 
-El flujo son cuatro comandos: `dev:change` (la comprobación, en segundos, después de cada cambio),
+El flujo son cuatro pasos: `dev:change` (la comprobación, en segundos, después de cada cambio),
 `dev:land` (commit, main, push, staging; GitHub ejecuta las comprobaciones pesadas), `dev:promote`
-(producción) y `dev:release`; un guard en las herramientas se niega a ejecutar las comprobaciones
-pesadas fuera de ellos. La regla está en
-[cómo trabajamos](./how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest), las tareas en el
+(producción) y `dev:release`, con `dev:start` y `dev:done` alrededor de una pieza de trabajo y
+`dev:status` para mirar; un guard en las herramientas se niega a ejecutar las comprobaciones pesadas
+fuera de ellos. La regla está en
+[cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), las tareas en el
 [README de tareas](./tasks.md).
 
 Ejecuta `mise run project:verify` antes de una publicación; `project:setup` y `packages:upgrade` también terminan con ella. Comprueba
@@ -219,8 +220,8 @@ compartidas, el paquete de UI, cómo escribir docs, la GUI) mediante `ui:generat
 empaquetado y publicación (`packages/ui/skill.mjs`); los docs siguen siendo la única fuente. En una app,
 `mise run agents:rules` mantiene un bloque marcado en `AGENTS.md` que dirige a sus agentes hacia el skill y
 nombra la versión; `project:setup` y `project:upgrade-ui` la ejecutan, así que una actualización cambia las
-reglas que leen los agentes en el mismo paso. El propio `AGENTS.md` de remy-auth indexa los docs
-directamente.
+reglas que leen los agentes en el mismo paso. El propio `AGENTS.md` de remy-auth es un puntero a
+[Agentes: empieza aquí](./agents.md).
 El instalador registra la procedencia en `skills-lock.json`. Volver a ejecutar la instalación
 restaura los skills seleccionados desde las fuentes fijadas; actualiza sus commits de fuente deliberadamente
 para adoptar cambios upstream. Solo se hace commit de `skills-lock.json`; los skills instalados y sus

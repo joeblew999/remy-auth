@@ -88,7 +88,7 @@ commits de origen de las skills y las tareas compartidas de arranque del agente 
 
 ## Documentación del proyecto [#project-documentation]
 
-- [Índice de agentes](https://github.com/joeblew999/remy-auth/blob/main/AGENTS.md): por dónde empiezan los agentes.
+- [Agentes: empieza aquí](./agents.md): por dónde empiezan los agentes; el `AGENTS.md` y `CLAUDE.md` raíz solo apuntan a él.
 - [Principios de desarrollo](./development.md): qué debe ser el código, y cómo funcionan los planes.
 - [Cómo trabajamos](./how-we-work.md): cómo trabajan las personas y los agentes.
 - [Herramientas de desarrollo](./tooling.md): tareas de mise, skills, MCP y herramientas de navegador.

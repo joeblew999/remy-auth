@@ -29,7 +29,7 @@ El desarrollo usa el mismo código fuente del Worker y el mismo runtime de Cloud
 | `project:dev` | Workers local, hot reload, puerto 5173 |
 | `project:build` | Build y ensayo (dry run) del deployment de Wrangler; sin subida |
 | `project:preview` | Build y luego sirve el artefacto de producción en el host local de Cloudflare en `PREVIEW_PORT` (4173) |
-| `dev:change`, `dev:land`, `dev:promote`, `dev:release` | El flujo ([cómo trabajamos](./how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest), [tareas](./tasks.md)); sus comprobaciones se ejecutan en el mismo host local |
+| `dev:change`, `dev:land`, `dev:promote`, `dev:release` | El flujo ([cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), [tareas](./tasks.md)); sus comprobaciones se ejecutan en el mismo host local |
 | `project:test:google` / `project:test:cwv` | El nivel de Google: auditorías de Lighthouse en local; Core Web Vitals en un Worker de Cloudflare desechable |
 | `cf:deploy` | Build y luego sube producción a la cuenta de Cloudflare autenticada; `dev:promote` lo ejecuta |
 | `cf:staging` | Lo mismo para el entorno de staging: su propio Worker (`STAGING_ORIGIN`) y sus propios recursos |
@@ -241,7 +241,7 @@ las ejecuta sobre páginas renderizadas en servidor.
 
 Lo que cubren las comprobaciones son las propias comprobaciones: `tests/` y el
 `@joeblew999/remy-ui/checks` del paquete (el título de cada comprobación dice qué demuestra); los pasos del flujo que las ejecutan están en
-[cómo trabajamos](./how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest). En resumen: cada página en cada
+[cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). En resumen: cada página en cada
 idioma sin JavaScript (idioma, dirección, metadatos, enlaces), catálogos y plurales, los valores de formatos
 frente a Intl, las redirecciones de entrada y la sugerencia de idioma, la hidratación, el formulario de demo y la API,
 los estados HTTP, el sitemap y `hreflang`, las cabeceras de seguridad y el nonce de CSP, las pantallas estrechas, y

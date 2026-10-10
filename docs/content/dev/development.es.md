@@ -36,8 +36,10 @@ Este documento es el dueño de lo que el código debe ser. Cómo trabajan las pe
   (incluido `src/routeTree.gen.ts`) regenerándola. No edites a mano ni sobrescribas la salida generada en otro lugar.
 - Las decisiones que los planes dejan abiertas, o las correcciones que entran en conflicto con un plan, pertenecen al
   dueño. Pregunta; no elijas, a menos que el dueño las haya delegado
-  ([cómo trabajamos](./how-we-work.md#when-the-owner-delegates-decisions)). Desplegar, aprovisionar y abrir issues upstream
-  también esperan la solicitud explícita del dueño.
+  ([cómo trabajamos](./how-we-work.md#when-the-owner-delegates-decisions)). Producción (`dev:promote`), un release
+  (`dev:release`), aprovisionar y abrir issues upstream también esperan la solicitud explícita del dueño.
+  Hacer landing (`dev:land`, incluyendo staging) no: es el paso que da todo cambio terminado, por
+  quien lo haya hecho ([el flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)).
 - No mockees Better Auth, D1 ni el runtime de Workers. Las conveniencias de desarrollo (personas creadas mediante seed,
   un selector de inicio de sesión para ellas, un código de inicio de sesión fijo, correo capturado) solo se permiten detrás de una
   única tabla de políticas por entorno ([de remy-auth](./auth.md#environments-one-table)) cuyo valor por defecto, y cuyo valor para cualquier entorno desconocido, es

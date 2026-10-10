@@ -14,6 +14,11 @@ propietario, tanto para desarrolladores como para agentes de IA. Lo que el códi
   es solo para cosas que concierne a un único agente, nunca para cómo funciona el proyecto.
 - Cada hecho tiene un único hogar, como exigen los
   [principios de desarrollo](./development.md#development-principles); eso también aplica a estas reglas.
+- Los `AGENTS.md` y `CLAUDE.md` de la raíz son punteros a [Agentes: empieza aquí](./agents.md) y no
+  contienen ninguna regla propia: `CLAUDE.md` es un `@import` de esa página, así que Claude Code la
+  carga; `AGENTS.md` la nombra, para Codex y cualquier otra herramienta. Una regla escrita en
+  cualquiera de los dos está en el lugar equivocado (propietario, 2026-10-10: «Agents.md y Claude.md en
+  la raíz deben ser solo un puntero al área de documentación para agentes»).
 
 ## Ves algo: arréglalo o escríbelo, en el mismo landing [#see-something-fix-it-or-write-it-down-in-the-same-landing]
 
@@ -221,7 +226,7 @@ Cuando el propietario delega decisiones, por ejemplo para terminar trabajo sin s
 - Mantén todas las puertas de control en verde; la delegación nunca relaja una comprobación.
 - Deja un informe completo: qué se decidió, qué se hizo, qué se comprobó y qué no.
 
-## El flujo: tres comandos, y un guardián que rechaza el resto [#the-flow-three-commands-and-a-guard-that-refuses-the-rest]
+## El flujo: cuatro pasos, y un guardián que rechaza el resto [#the-flow-four-steps-and-a-guard-that-refuses-the-rest]
 
 Propietario, 2026-10-09: «El 95% del tiempo ha sido comprobar y el 5% codificar. Esto no puede
 continuar así», «Es una cuestión de qué ejecutas localmente y qué ejecutas en GitHub de forma
@@ -229,18 +234,28 @@ asíncrona», y «Las herramientas formalizan lo que pasa en el desarrollo… as
 desarrollador también esté formalizado para que estas putadas estúpidas no puedan volver a pasar. Y
 para que tú y los desarrolladores usen ese mismo flujo para que quede arreglado para siempre». Así que
 el flujo es código, no una regla que recordar: `tasks/dev/flow.ts` es el único lugar donde viven sus
-decisiones, tres comandos son sus pasos, y un guardián se niega a ejecutar lo que no es uno de ellos.
-remy-auth lo obtiene de la misma forma que cada app, desde las tareas compartidas; `project:setup`
-instala el guardián.
+decisiones. Sus cuatro pasos son `dev:change`, `dev:land`, `dev:promote` y `dev:release` (el `Step` de
+`flow.ts`); `dev:start` y `dev:done` enmarcan un trozo de trabajo; `dev:status` mira; un guardián
+rechaza lo que no sea uno de ellos. Siete comandos, nada más. remy-auth lo obtiene de la misma forma
+que cada app, desde las tareas compartidas; `project:setup` instala el guardián.
 
-| Paso | Comando | Qué ejecuta | Tiempo |
-| --- | --- | --- | --- |
-| Antes de un trozo de trabajo | `mise run dev:start -- <nombre>` | un worktree propio a partir de main, instalado, con sus propios puertos, el guardián | ~1 min |
-| Después de cada cambio | `mise run dev:change` | la comprobación (`project:check`): planes, tipos con los de las propias tareas, las comprobaciones de funciones simples (`tests/**/*.unit.spec.ts`), el estado de las traducciones; una build solo cuando cambió un archivo de ruta, la documentación solo cuando cambió la documentación | ~6 s |
-| El cambio deja la máquina | `mise run dev:land -- "<qué cambió>"` | la comprobación, commit, fast-forward de main, push, despliegue en staging, y luego la traducción al final cuando está desactualizada. GitHub entonces ejecuta cada idioma, las auditorías de Google y el fixture de consumer en paralelo, mientras sigues codificando (`gh run list`) | ~1 min hasta staging; la traducción después |
-| Producción | `mise run dev:promote` | `cf:deploy` y el Worker de documentación, a partir de un main ya empujado, sin puerta de control: staging y GitHub ya ejecutaron las comprobaciones | ~1 min |
-| Una publicación | `mise run dev:release` | `packages:release`: cada comprobación, cada idioma, localmente, a propósito, y luego la etiqueta | ~5 min |
-| Cuando está landed | `mise run dev:done` | el worktree y la rama desaparecen | segundos |
+| Paso | Comando | Quién lo ejecuta, y cuándo | Qué ejecuta | Tiempo |
+| --- | --- | --- | --- | --- |
+| Mirar | `mise run dev:status` | todos, primero: cada sesión de agente se abre con esto (un hook), un desarrollador cuando se sienta a trabajar | los últimos commits de main con el veredicto de GitHub, qué ejecuta cada despliegue, cada worktree por delante y por detrás de main, traducciones, pull requests, lo primero de `.plans/now.md` | segundos |
+| Antes de un trozo de trabajo | `mise run dev:start -- <nombre>` | quien hace el trabajo, para cada trozo, incluida una edición de una línea | un worktree propio a partir de main, instalado, con sus propios puertos, el guardián | ~1 min |
+| Después de cada cambio | `mise run dev:change` | quien esté codificando; el único paso que se espera | la comprobación (`project:check`): planes, tipos con los de las propias tareas, las comprobaciones de funciones simples (`tests/**/*.unit.spec.ts`), el estado de las traducciones; una build solo cuando cambió un archivo de ruta, la documentación solo cuando cambió la documentación | ~6 s |
+| El cambio deja la máquina | `mise run dev:land -- "<qué cambió>"` | quien hizo el trabajo, por su cuenta, en cuanto termina y la comprobación está en verde | la comprobación, commit, fast-forward de main, push, despliegue en staging, y luego la traducción al final cuando está desactualizada. GitHub entonces ejecuta cada idioma, las auditorías de Google y el fixture de consumer en paralelo, mientras sigues codificando (`gh run list`) | ~1 min hasta staging; la traducción después |
+| Producción | `mise run dev:promote` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `cf:deploy` y el Worker de documentación, a partir de un main ya empujado, sin puerta de control: staging y GitHub ya ejecutaron las comprobaciones | ~1 min |
+| Una publicación | `mise run dev:release` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `packages:release`: cada comprobación, cada idioma, localmente, a propósito, y luego la etiqueta | ~5 min |
+| Cuando está landed | `mise run dev:done` | quien hizo el landing, cuando el trozo de trabajo termina; un worktree sobrevive a tantos landings como el trabajo necesite | el worktree y la rama desaparecen | segundos |
+
+- **Quién ejecuta un paso está en la tabla, y nunca es una pregunta.** Un agente aterriza su propio
+  trabajo terminado sin preguntar: staging forma parte del landing, GitHub comprueba cada landing, y
+  nada llega a producción por ese camino. La palabra del propietario es para producción y para una
+  publicación, los dos pasos cuya columna así lo dice, y para el aprovisionamiento
+  ([principios de desarrollo](./development.md#development-principles)). Un agente que lee la tabla y
+  aun así pregunta si debe aterrizar ha dejado de usar el flujo (propietario, 2026-10-10, después de que
+  uno lo hiciera: «¿Está absolutamente claro cuándo te corresponde ejecutar cada paso?»).
 
 - Un área que parece mal: `mise run project:test:only -- <palabras>` (las comprobaciones de navegador
   cuyo título coincide, en y ar, ~30 s). Es la única ejecución de navegador que no es propiedad de un
@@ -272,8 +287,16 @@ instala el guardián.
   que el workflow no contiene lógica propia (`project:verify-tooling` comprueba que exista cada tarea
   que un workflow nombra). Informa de qué se probó y qué no; nunca llames verificado a un trabajo no
   probado.
+- **Un landing que falla después del push aun así termina lo que puede, y dice dónde se detuvo.**
+  Main se empuja antes que staging; cuando el despliegue de staging o su smoke en vivo falla,
+  `dev:land` igualmente ejecuta la traducción (está en main, se debe de todos modos), y luego termina
+  con código distinto de cero con el estado en una línea: en qué commit se empujó main, si staging se
+  desplegó o no, qué smoke falló, si la traducción se hizo o no. No se deja nada a medias para que la
+  siguiente persona lo descubra (propietario, 2026-10-10, después de que un landing se detuviera en el
+  smoke con la traducción omitida en silencio: «ahora tú y los demás agentes estáis jodidos»).
 - Nunca encadenes un comando de control con `grep` o `tail` mediante un pipe: el pipe oculta su código
-  de salida. Una vez esto publicó una versión cuyas comprobaciones habían fallado.
+  de salida. Una vez esto publicó una versión cuyas comprobaciones habían fallado, y el 2026-10-10
+  ocultó un `dev:land` fallido.
 
 ## El trabajo manual se convierte en tareas de mise sobre herramientas reales [#manual-work-becomes-mise-tasks-over-real-tools]
 
@@ -349,7 +372,7 @@ las comprobaciones sensibles al tiempo fallaron mucho antes de eso. Así que:
 
 Propietario, 2026-10-09: «formaliza la forma en que gestionamos el trabajo de desarrollo entre muchos
 agentes para usar el nuevo flujo de desarrollo». Cada trozo de trabajo, quienquiera que lo haga, es un
-worktree a través de los mismos cuatro comandos; main es el único integrador, y GitHub comprueba cada
+worktree a través de los mismos comandos; main es el único integrador, y GitHub comprueba cada
 landing. Nada de esto se hace a mano.
 
 | | Comando | Qué hace |
@@ -359,7 +382,7 @@ landing. Nada de esto se hace a mano.
 | Codificar | `mise run dev:change` | la comprobación, en segundos, después de cada cambio |
 | Aterrizar | `mise run dev:land -- "<qué cambió>"` | primero se mezcla main (un conflicto se detiene nombrando los archivos), la comprobación, commit, fast-forward de main, push, staging, y luego la traducción al final cuando está desactualizada (la suscripción de Claude en esta máquina, nunca GitHub). GitHub ejecuta las comprobaciones pesadas; una ejecución en rojo comenta en el commit |
 | Terminar | `mise run dev:done` | el worktree y la rama que ya aterrizaron desaparecen; se niega mientras algo quede sin aterrizar |
-| Producción | `mise run dev:promote` | a partir de main, solo un commit que GitHub aprobó |
+| Producción | `mise run dev:promote` | a partir de main, solo un commit que GitHub aprobó, con la palabra del propietario |
 
 - **Divide por independencia.** Un orquestador divide el trabajo en partes que tocan archivos
   diferentes, y inicia un agente por parte con `dev:start`. Una parte que necesita el resultado de otra
