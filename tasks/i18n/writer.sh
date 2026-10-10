@@ -23,9 +23,11 @@ writer_guard() {
 
 # agent <system prompt file> <JSON schema>: the prompt on stdin, the structured result on stdout. Claude
 # Code headless, from a scratch directory (no CLAUDE.md, hooks, settings, MCP servers or skills), no tools.
+# A run with no structured result prints nothing here, says on stderr what Claude Code said, and fails.
 agent() {
   local dir; dir=$(mktemp -d)
   (cd "$dir" && claude -p --tools "" --strict-mcp-config --disable-slash-commands --setting-sources "" --no-session-persistence \
-    --model "${I18N_MODEL:-sonnet}" --system-prompt "$(cat "$1")" --output-format json --json-schema "$2") | jq -e '.structured_output'
+    --model "${I18N_MODEL:-sonnet}" --system-prompt "$(cat "$1")" --output-format json --json-schema "$2") \
+    | jq -e '.structured_output // ("  the agent returned no result (\(.subtype? // "no subtype")): \(.result? // "" | tostring | .[0:300])\n" | halt_error(1))'
   local status=$?; rm -rf "$dir"; return $status
 }

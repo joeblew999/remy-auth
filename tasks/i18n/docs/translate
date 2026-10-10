@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="LOCAL, the one writer (on main, one run at a time across worktrees): the pinned Claude agent translates the pages i18n:docs:check lists (missing: the English; stale: the English diff since the translation's last commit and the translation), one page per call in parallel (I18N_JOBS, 4), with no tools, and Fumadocs' UI text; one commit marks them current. Name translation files to redo them in full (mise run i18n:docs:translate -- docs/content/dev/gui.es.md). I18N_MODEL (sonnet), I18N_COMMIT=0 leaves the change for review"
+#MISE description="LOCAL, the one writer (on main, one run at a time across worktrees): the pinned Claude agent translates the pages i18n:docs:check lists (missing: the English; stale: the English diff since the translation's last commit and the translation), one page per call in parallel (I18N_JOBS, 4), with no tools, and Fumadocs' UI text; a result that is not the page (page.ts: the English's frontmatter fields, and text) is not written and fails the run; one commit marks them current. Name translation files to redo them in full (mise run i18n:docs:translate -- docs/content/dev/gui.es.md). I18N_MODEL (sonnet), I18N_COMMIT=0 leaves the change for review"
 #MISE dir="{{config_root}}"
 #MISE tools={"aqua:jqlang/jq"="1.8.2","aqua:anthropics/claude-code"="2.1.282"}
 #MISE env={DISABLE_TELEMETRY="1",DISABLE_ERROR_REPORTING="1",CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC="1"}
@@ -32,8 +32,10 @@ page() {
       redo)  echo "Bring this translation fully in line with the current English: translate anything missing or changed, remove what the English no longer has, and keep sentences that are already right as they are."
              echo "<english>"; cat "$e"; echo "</english>"; echo "<translation>"; cat "$t"; echo "</translation>" ;;
     esac
-  } | agent "$here/../prompts/docs.md" "$schema" | jq -jr '.content' > "$t.new" && [ -s "$t.new" ] && mv "$t.new" "$t" && echo "  $kind $t" \
-    || { rm -f "$t.new"; echo "  $t: the agent failed"; return 1; }
+  # What the agent returned is written only when it is the page (accept.ts, the rule is page.ts): on
+  # 2026-10-09 a failed agent's "null" went through jq here and was committed as a page.
+  } | agent "$here/../prompts/docs.md" "$schema" | node "$here/accept.ts" "$e" > "$t.new" && mv "$t.new" "$t" && echo "  $kind $t" \
+    || { rm -f "$t.new"; echo "  $t: nothing written, the page is as it was"; return 1; }
 }
 ui() {
   local l=$1 en="$dir/ui/en.json" t="$dir/ui/$1.json" keys
@@ -50,7 +52,9 @@ export -f page ui agent; export list dir here lang_re schema
 units=$( { echo "$list" | awk '$2 ~ /^(missing|stale|redo)$/ && $3 !~ /\.json$/ { print "page " $2 " " $3 }'
            echo "$list" | awk '$2 ~ /^ui-/ || $3 ~ /\.json$/ { print "ui " $1 }' | sort -u; } )
 echo "Docs: $(echo "$units" | wc -l | tr -d ' ') translations with ${I18N_MODEL:-sonnet} (${I18N_JOBS:-4} at a time)..."
-failed=0; echo "$units" | xargs -P "${I18N_JOBS:-4}" -L1 bash -c '"$@"' _ || failed=1
+# Each unit runs in a shell of its own, which does not inherit this script's options: pipefail is said
+# again, or a failure in the middle of a pipe (the agent's) is lost to the stage after it.
+failed=0; echo "$units" | xargs -P "${I18N_JOBS:-4}" -L1 bash -o pipefail -c '"$@"' _ || failed=1
 changed=$( { git diff --name-only -- $targets; git ls-files --others --exclude-standard -- $targets; } | sort -u)
 if [ -n "$changed" ] && [ "${I18N_COMMIT:-1}" = 1 ]; then
   git add -- $changed && git commit -q -m "i18n(docs): translate $(echo "$changed" | wc -l | tr -d ' ') files" -- $changed && echo "Committed: $(git log -1 --format='%h %s')"

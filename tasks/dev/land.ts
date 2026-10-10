@@ -2,9 +2,9 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { describeRun, latestRun, run, steps, where } from './flow.ts';
 
 // The land step, in order, each part once: the check; commit what changed; fast-forward main and
-// push it (GitHub takes it from there); translate on main only when the check says a translation is
-// stale or missing (the one writer, a Claude agent on this machine, minutes; it commits, and that is
-// pushed too); bring main back to the branch; deploy staging. Production is dev:promote.
+// push it (GitHub takes it from there); deploy staging; translate on main, last, only when the check
+// says a translation is stale or missing (the one writer, a Claude agent on this machine, minutes; it
+// commits, and that is pushed too); bring main back to the branch. Production is dev:promote.
 const message = process.argv.slice(2).join(' ').trim();
 if (!message) { console.error('dev:land: say what changed: mise run dev:land -- "<message>"'); process.exit(1); }
 const git = (...args: string[]) => execFileSync('git', args, { stdio: ['ignore', 'inherit', 'inherit'] });
@@ -53,7 +53,7 @@ const upToDate = spawnSync('mise', ['run', 'i18n:check'], { cwd: root, stdio: 'i
 if (upToDate) console.log('dev:land: translations are up to date.');
 else {
   const before = read('-C', root, 'rev-parse', 'main');
-  if (!task('i18n:translate', root)) { console.error('dev:land: translation failed; main is pushed, staging is not deployed'); process.exit(1); }
+  if (!task('i18n:translate', root)) { console.error('dev:land: translation failed (the lines above name the page and why); main is pushed and staging is up, the translation is still owed and the next dev:land tries it again'); process.exit(1); }
   if (read('-C', root, 'rev-parse', 'main') !== before) git('-C', root, 'push', 'origin', 'main');
 }
 if (!here.onMain) git('merge', '-q', '--ff-only', 'main');

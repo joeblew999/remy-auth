@@ -25,12 +25,13 @@ const deployments = process.env.DEPLOY_ORIGIN ? ask('mise', ['run', '-q', 'cf:ve
 const translations = (() => { const r = spawnSync('mise', ['run', '-q', 'i18n:check'], { encoding: 'utf8', timeout: 20_000, env: { ...process.env, I18N_STRICT: '1' } }); return r.status === 0 ? 'complete and current' : 'stale or missing (dev:land translates on main)'; })();
 const pulls = JSON.parse(ask('gh', ['pr', 'list', '--json', 'number,title,author']) ?? '[]').map((pull: { number: number; title: string; author: { login: string } }) => ({ number: pull.number, title: pull.title, author: pull.author.login }));
 
-// The open list, as the repo keeps it: the numbered items of now.md's "What is left" section, first line each.
+// The open list, as the repo keeps it: the numbered items of now.md's "What is left" section, first line
+// each; a struck item (~~closed~~) is not left.
 const left = (() => {
   try {
     const now = readFileSync(`${root}/.plans/now.md`, 'utf8');
     const section = now.split(/^## /m).find(part => part.startsWith('What is left')) ?? '';
-    return section.split('\n').filter(line => /^\d+\. /.test(line)).slice(0, 8).map(line => line.replace(/\*\*/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').slice(0, 110));
+    return section.split('\n').filter(line => /^\d+\. (?!~~)/.test(line)).slice(0, 8).map(line => line.replace(/\*\*/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').slice(0, 110));
   } catch { return []; }
 })();
 console.log(compose({ commits, runs, branches, deployments, translations, pulls, left }).join('\n'));

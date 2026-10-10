@@ -10,9 +10,14 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
 Owner: "make plans for all the things left." Everything open, each with its plan and its command.
 Below this section is the history of how it got here.
 
-1. **The flow's last gap**: `dev:land` deploys staging before it translates, so a landing is usable
-   in a minute and the Spanish writes itself afterwards (translation is the Claude subscription on the
-   machine, never GitHub: the API is too expensive, owner 2026-10-09). Lands with this list.
+1. ~~**The flow's last gap**~~ closed 2026-10-10: `dev:land` deploys staging before it translates
+   (05896d6), so a landing is usable in a minute and the Spanish writes itself afterwards (translation
+   is the Claude subscription on the machine, never GitHub: the API is too expensive, owner
+   2026-10-09). It was not the last: that translation is pushed with no check after it, and the same
+   day's run committed the word `null` as the Spanish "How we work" (b9a4a22), which stopped the docs
+   building on main while every check was green. Fixed 2026-10-10: the writer writes only what is a
+   page, a failed agent fails the run, and a unit check reads every translated page
+   ([stability log](stability-log.md)). What is still open of it is in item 8.
 2. **Release 0.14.0** ([thin-apps, phase D](thin-apps.md#phase-d-prepared-2026-09-29-waiting-for-the-owner)):
    prepared on main; the owner runs `mise run dev:release` (every check, every language, Google, Core
    Web Vitals on a preview, the tag and publish, ~6 min). It is also the first run of the phone speed
@@ -41,7 +46,12 @@ Below this section is the history of how it got here.
    named there.
 8. **Docs and translations, leftovers**: [docs-for-consumers](docs-for-consumers.md) step 6 (the docs
    app's code in the package) and [translation-pipeline](translation-pipeline.md) (upstream tools
-   that replace the i18n tasks).
+   that replace the i18n tasks). Seen 2026-10-10: nothing builds the docs with a translation's own
+   commit in them. `dev:land` translates after its check and pushes, and GitHub's three jobs do not
+   build the docs, so a translated page that passes `tasks/i18n/docs/page.ts` (frontmatter and text)
+   but does not compile would reach main and stop the next `dev:change` and `dev:promote`. The fix:
+   the docs writer builds the docs before its commit counts, as the messages writer runs its checks
+   (in a worktree of its own, never the main checkout), or GitHub gains a docs build job.
 9. **Owner only** (below): the alert rule in the dashboard, a native-speaker review of the newer
    languages, the production domain and Search Console, more docs languages.
 

@@ -152,6 +152,14 @@ half-updated.
   off translations or race on them.
 - The agent gets no tools: it is handed the English (and, for a stale page, the English diff and the
   current translation) and returns text; the task writes the files it asked for and nothing else.
+- What the agent returns is written only when it is the page: every frontmatter field its English
+  has, and text after it (`tasks/i18n/docs/page.ts`). A failed agent leaves the page as it was, says
+  why and fails the run; `dev:land` then says the translation is still owed, and the next landing
+  tries again. `tests/unit/i18n-docs.unit.spec.ts` holds every translated page in the repository to
+  the same rule, on every check and on GitHub, the only check a translation's own commit gets. On
+  2026-10-09 a failed agent's `null` was committed as a page and stopped the docs building on main.
+- A translation that is not a page is deleted, never restored by hand: a missing page is translated
+  from the English by the next landing, and a restored one would be marked current by its commit.
 - `i18n:check` only reads, offline, so it is safe anywhere, in any number of worktrees, and as a
   `depends`. `i18n:translate` is never a `depends`.
 - Stale or missing is a warning while pumping (`project:check` prints it) and an error at release
