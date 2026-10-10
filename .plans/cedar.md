@@ -1,56 +1,75 @@
 <!-- .plans/cedar.md -->
 
-# Cedar: policies over the relation engine, for every Remy app
+# Cedar in remy-auth: rules any app can write, test and prove
 
-Status: proposed 2026-10-10, from the research in [cedar-research.md](cedar-research.md). Not started.
-Owner: remy-auth. The owner delegated the design ("The plan should be for what you think is best", 2026-10-10);
-the decisions are recorded under [Decisions](#decisions-delegated-2026-10-10) with their reasons, and the three
-things only the owner can settle are under [For the owner](#for-the-owner).
-Executor/Reviewer roles as in [plans and roles](../docs/content/dev/development.md#plans-and-roles).
-Each slice lands through [the flow](../docs/content/dev/how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest).
+Status: proposed 2026-10-10. Not started. Owner: remy-auth.
+Comes from [cedar-research.md](cedar-research.md), the comparison of Better Auth and Rauthy with Cedar.
+The owner delegated the design ("The plan should be for what you think is best", 2026-10-10). Decisions are under
+[Decisions](#decisions-delegated-2026-10-10); the three things only the owner can settle are under [For the owner](#for-the-owner).
+Executor/Reviewer roles as in [plans and roles](../docs/content/dev/development.md#plans-and-roles). Each slice lands
+through [the flow](../docs/content/dev/how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest).
 
-## Why
+## In one paragraph
 
-The owner's intent (2026-10-10): remy-auth is "everything running so that any other system can use it".
-The research compared four ways to get sign-in and real permissions: Better Auth alone, Better Auth with
-Cedar in the Worker, Rauthy unchanged with Cedar in the Worker, and Cedar built into Rauthy. Its verdict
-for a central platform was "Cedar built into the identity server", the one option that does not exist.
+remy-auth already answers "who are you" (Better Auth) and "what do you hold on this thing" (the relation
+engine, from the app's own tables). What it cannot do is say **no**: a relation can only grant. It also
+cannot look at anything but relations: not the time, not how the person signed in. And its rules are
+TypeScript data, so no test file proves them and no other language can run them. Cedar adds exactly
+that: a small policy file per app that decides from what the engine found, can refuse with a reason, can
+read the clock and the sign-in, has its own test format, and can be proven in CI. Nothing an app has
+today changes. Better Auth stays. The engine stays. `<Allowed>` stays.
 
-remy-auth is already that shape. It owns identities and sessions (Better Auth on its own D1), every app
-gets the guard and the relation engine from the package, and `<Allowed>` renders what the server allows
-([sign-in and permissions](../docs/content/dev/auth.md)). What the research found missing from that
-shape, remy-auth is also missing:
+## The three layers, and what each decides
 
-| The research's point | remy-auth today | Gap |
+| Layer | Question it answers | Where it runs | Exists today |
+| --- | --- | --- | --- |
+| Better Auth | Who is this? When and how did they sign in? | remy-auth's Worker, its own D1 | Yes |
+| The relation engine | Which relations does this person hold on this thing? (author, editor, member, parent's admin, platform admin) | The app's Worker, the app's own D1 | Yes |
+| Cedar | Given those relations, the time and the sign-in, may they do this action? If not, why? | The app's Worker, as WASM, inside the guard | **This plan** |
+
+The browser never decides. It gets `can` with each row and renders through `<Allowed>`. That is what
+fixed remy-sport's unused permissions and it does not change.
+
+## What we want from Cedar, and what each one takes
+
+Every Cedar capability the research named, with the honest answer for remy-auth:
+
+| Wanted | How we get it | Slice |
 | --- | --- | --- |
-| Structural relations derived from the app's own tables (Cedar's "attribute" case) | The relation engine: `via: 'table'`, parent, role, everyone; one query per relation | None. This is the part that works, proven on remy-sport's 27 relations |
-| Shares that exist only for access | `note_share` rows, read by the engine as `NOTE_EDITOR` / `NOTE_READER`; a relation can be held only between dates (`activeFromColumn`, `activeToColumn`) | Works as an app table, expiry included. Only the write half is missing from the package (`grant`, `revoke`: [slice 2 left it](auth-service.md#not-built-or-assumed)), and that is not Cedar's job |
-| Deny rules that always win, with a reason | None. `grants` only add; a relation can grant, never refuse | A locked note, a person excluded from a note shared with their group, "never outside your organisation": each is app code today, or impossible |
-| Rules that know how the user signed in | None. The guard knows the session exists | "Deleting needs a sign-in in the last 15 minutes" cannot be written |
-| A policy language with tests and proofs, readable by any system | The vocabulary is TypeScript data; its checks are TypeScript | A Rust or Go system cannot run the same rules. Nothing proves what a rule change does |
-| "Allowed actions" per row, so the GUI never decides | `canFor` and `<Allowed>` | None. This is what fixed remy-sport's unused ReBAC |
-| Other Workers learn who is signed in | Not built; the app-trust slice is next in [auth-service](auth-service.md#next-slices) | Independent of Cedar; Cedar's login facts ride on whatever it chooses |
+| Per-thing decisions ("can Alice edit note 42") | Already: the engine. Cedar decides from its answer | 1 |
+| Inheritance ("admin of the team is admin of its notes") | Already: `via: 'parent'`. Becomes Cedar `parents`, so `resource in Team::"x"` works too | 1 |
+| Shares, with an end date | Already: a `note_share` row, held between dates. No Cedar needed; Cedar templates are not used (decision 2) | — |
+| **Deny rules that always win, with a reason** | Cedar `forbid` with `@reason`. The reason reaches the 403 body and the `can` map | 2 |
+| **Rules about the sign-in** ("delete needs a sign-in in the last 15 minutes") | `context.auth` from the Better Auth session: `now`, `signedInAt`, `method` | 3 |
+| Allowed actions per row, so the GUI never decides | Already: `canFor` and `<Allowed>`. Cedar now computes them, and a denied action carries its reason | 2 |
+| Listing ("what can I see") | Already: `objectsHeldBy` for "yours", then `canFor` on the page | — |
+| **A test file that proves the rules** | Cedar's own `run-tests` format (`name`, `request`, `entities`, `decision`, `reason`, `num_errors`), run in `project:check` | 1 |
+| **Proof that a change does what you think** | `cedar symcc` in GitHub's heavy checks: guardrails such as "nobody edits a locked note", proven against every edit | 4 |
+| Level validation (the app knows exactly which entities to send) | Validate at level 1: policies may read the resource and its parents, nothing deeper | 1 |
+| **Rules any language can run** | The policies, schema and entity shapes are the contract; a Rust or Go system runs Cedar itself | 5 |
+| Fail closed | `has` guards on every optional fact; an erroring `forbid` is a deny | 1 |
+| Decisions you can audit | Every deny is logged with the policy id that decided it, through the existing observability | 2 |
+| Live change preview in an admin screen | **Not this plan.** Proofs run in CI instead | — |
+| MFA and passkey facts | **After** Better Auth's two-factor and passkey plugins are in remy-auth. The schema leaves `mfa` and `passkey` optional until then | later |
 
-So the honest scope: Cedar is not a replacement for the engine, and not a central store. It is the
-decision layer the engine lacks: given what the engine knows (which relations this person holds on this
-thing) plus facts the engine cannot see (time, how they signed in, a deny), a policy decides, and the same
-policy file runs in any language.
+## What an app does
 
-## The design
+An app using TanStack and oRPC does five things. The first four it already does today.
 
-**One sentence.** The engine keeps deriving relations from the app's tables; Cedar decides from them.
-`grants` become policies, generated at first so nothing changes, then written by hand where an app needs
-what `grants` cannot say.
+1. Installs `@joeblew999/remy-ui` and gets the package: guard, engine, Cedar, `<Allowed>`.
+2. Writes its vocabulary as data (object types, relations, actions), as today.
+3. Puts `guard()` at its oRPC router's root and declares a policy on every procedure, as today.
+4. Renders controls inside `<Allowed>`, as today.
+5. **New:** keeps `policies/` beside its code: `generated.cedar` (from its vocabulary's `grants`, by the
+   package, checked in), `schema.cedarschema` (generated too), hand-written `*.cedar` for what grants
+   cannot say, and `*.tests.json`. `project:check` validates, runs the tests, and fails if the generated
+   file drifts from the vocabulary.
 
-| Piece | Where | What |
-| --- | --- | --- |
-| Policies, schema, tests | The app's repo: `policies/*.cedar`, `policies/schema.cedarschema`, `policies/*.tests.json` | Versioned with the app's code. The tests are in the Cedar CLI's own format (`name`, `request`, `entities`, `decision`, `reason`, `num_errors`), so the same file runs in `project:check` and from the CLI |
-| The engine | `@joeblew999/remy-ui/api/relations`, unchanged | Answers `holds` per relation, as today |
-| The entities for one check | Built by the package per request | `principal`: the account, with platform roles as parents (`Remy::User in [Remy::Role]`). `resource`: the object with the relations this person holds on it as a set (`held`, from `heldAmong` per relation, the same one query per relation that `canFor` costs today) and its parent chain (the engine's `via: 'parent'`, as Cedar `parents`). `context.auth`: facts from the session or token |
-| The decision | Cedar as WASM (`@cedar-policy/cedar-wasm`), in the app's Worker, behind the same guard | `permit`/`forbid`; `forbid` always wins; a missing fact means deny (`has` guards; deny on any erroring `forbid`) |
-| The GUI | `canFor` and `<Allowed>`, unchanged | `canFor` now asks Cedar per row; a denied action may carry the `@reason` of the `forbid` that decided it |
+An app that uses TanStack server functions without oRPC calls the same `decide()` the guard calls. The
+check that nothing outside the router escapes is [an open row of the auth plan](auth-service.md#requirements-for-the-shared-guard-from-remy-sport-2026-10-09),
+not this one; Cedar gives it one function to require.
 
-A vocabulary's `grants` compile mechanically:
+What the generated file looks like, for the notes demo:
 
 ```cedar
 // Generated from grants: { EDIT_NOTE: [{ relation: 'NOTE_AUTHOR' }, { relation: 'NOTE_EDITOR' }] }
@@ -59,13 +78,18 @@ permit(principal, action == Notes::Action::"EDIT_NOTE", resource is Notes::NOTE)
 when { resource.held.contains("NOTE_AUTHOR") || resource.held.contains("NOTE_EDITOR") };
 ```
 
-And what `grants` cannot say becomes a hand-written policy beside it:
+And the hand-written file beside it:
 
 ```cedar
 @id("notes-locked")
 @reason("This note is locked")
 forbid(principal, action == Notes::Action::"EDIT_NOTE", resource is Notes::NOTE)
 when { resource.locked };
+
+@id("notes-excluded")
+@reason("The author has removed your access to this note")
+forbid(principal, action, resource is Notes::NOTE)
+when { resource.held.contains("NOTE_EXCLUDED") };
 
 @id("notes-delete-fresh")
 @reason("Deleting needs a sign-in in the last 15 minutes")
@@ -76,108 +100,91 @@ unless {
 };
 ```
 
-What stays as it is, on purpose: relationships local (each app's own D1, [decided 2026-09-25](auth-service.md#runtime-architecture-identity-central-relationships-local-decided-2026-09-25-refined)),
-identity central, the guard at the root, `<Allowed>` on the page, the four-places rule for every new
-piece ([adding to it](../docs/content/dev/auth.md#adding-to-it)).
+`held` is the set of relations this person holds on this thing, built from the engine's `heldAmong`,
+one query per relation, the same cost `canFor` pays today.
+
+## What remy-auth itself shows
+
+Every piece is used by remy-auth before any app takes it ([the four-places rule](../docs/content/dev/auth.md#adding-to-it)).
+
+| Piece | Shown in remy-auth | Checked by |
+| --- | --- | --- |
+| Generated policies decide the notes demo, with nothing changing | `/app/notes` behaves as today | Every existing check: `tests/notes.spec.ts`, `tests/relations.spec.ts`, `tests/guard.spec.ts`, the types-only file |
+| A deny with a reason | A locked note: Edit is missing and the page says why. An excluded person: the note shared with their group is not theirs | `tests/notes.spec.ts`: the reason in the 403 and in `can`; `offeredActions` still exact |
+| A rule about the sign-in | Deleting a note after 15 minutes asks for a fresh sign-in | `tests/notes.spec.ts`, with a session older than the limit |
+| The shared GUI | `<Allowed>` with `reason`; the account page shows when and how you signed in (the facts policies read) | The page's `offeredActions` check; `tests/auth.spec.ts` |
+| The docs | [Sign-in and permissions](../docs/content/dev/auth.md) gains "Rules: Cedar" with the five steps, and the contract for other languages | `docs:check`; the `remy` skill reads it |
+| Any app gets it | The consumer fixture, a blank app that only imports the package, keeps a policy file and its tests | The fixture's `project:check` |
+| The deploy | On staging and production, with the stamp | `project:test:live` |
 
 ## Slices
 
-Each slice is small, lands on its own, and is measured by the consumer fixture: a blank app that only
-imports the package gets the piece and its checks pass. The first slice is a spike that can end the plan.
+Small, in order, each landed on its own. Slice 0 can stop the plan.
 
-### 0. Spike: Cedar runs in a Worker
+**0. Spike: Cedar runs in a Worker.** Build the notes demo's Worker with `@cedar-policy/cedar-wasm` (its
+ESM build imports the `.wasm` as a module, which Wrangler bundles) and answer one check. Record the
+bundle size against `build-boundaries.checks` and the code-splitting check, the cold start, and the
+time of one `isAuthorized` with ten policies and five entities. The research measured 4.3 MB, 1.4 MB
+gzipped, about 32 ms to compile in Node; Workers allow 64 MiB and 1 s. If it does not fit, or a check
+costs more than a millisecond, the plan stops here and says why.
 
-Build the notes demo's Worker with `@cedar-policy/cedar-wasm` and answer one check in it. The package's
-ESM build imports its `.wasm` as a module (`import * as wasm from "./cedar_wasm_bg.wasm"`), which is
-what Wrangler bundles; record whether it does so cleanly, the bundle size against `build-boundaries.checks` and the code-splitting check, cold-start cost, and whether
-`isAuthorized` with ten policies and five entities is under a millisecond. The research measured 4.3 MB
-(1.4 MB gzipped) and about 32 ms to compile in Node, inside Workers' 64 MiB and 1 s limits; this
-confirms it in the real runtime. **If any of these fails, the plan stops here and says why.**
+**1. Generated policies, nothing changes.** `api/cedar` in the package: entities from the engine,
+`decide()`, `can` from the answer. The generator for `generated.cedar` and the schema. Level-1
+validation, the test runner in `project:check`, the drift check. The notes demo checks its files in.
+Done when every existing check passes unchanged and the new ones run.
 
-### 1. Cedar decides the notes demo, with nothing changing
+**2. Denies with reasons.** The locked note and the exclusion in the demo, each with a test. The reason in
+the 403 body and the `can` map; `<Allowed>` gains `reason`; every deny logged with its policy id.
 
-`api/cedar` in the package: build entities from the engine's answers, evaluate, map back to `can`.
-A generator turns a vocabulary's `grants` into `policies/generated.cedar` and a schema; the notes demo
-checks both in. Every existing check passes unchanged (`tests/notes.spec.ts`, `tests/relations.spec.ts`,
-`tests/guard.spec.ts`, the types-only file). New checks: Cedar validates the policies against the schema;
-the demo's `policies/notes.tests.json` runs in `project:check`; a vocabulary whose generated policies
-drift from the checked-in file fails the build.
+**3. Facts about the sign-in.** `context.auth` from the Better Auth session. The fresh-sign-in rule in
+the demo, proven with an old session. The account page shows the facts. When the app-trust slice of
+[auth-service](auth-service.md#next-slices) lands, the same facts come from the token in another
+Worker, and the consumer fixture proves it there.
 
-### 2. What `grants` cannot say
+**4. Proofs in CI.** `cedar symcc` in GitHub's heavy checks, with `cvc5`: one guardrail per app. If
+`cvc5` will not install on the runner, record that and close the slice.
 
-The first hand-written policies in the demo, each with a test, and each something `grants` cannot say
-because a relation can only grant: a locked note (`forbid` when `resource.locked`), and one person
-excluded from a note shared with their group (a `note_exclusion` row the engine reads as
-`NOTE_EXCLUDED`, and `forbid` when `held` contains it, which wins over the share). The `@reason` of
-the deciding `forbid` reaches the 403 body and the `can` map. `<Allowed>` gains an optional reason for a denied action, so a page can say why a
-control is missing instead of hiding it.
-
-### 3. Facts about the sign-in
-
-`context.auth` from the session remy-auth owns: `now`, `signedInAt`, `method` (today only the emailed
-code). One rule in the demo uses it (deleting needs a recent sign-in), and `tests/notes.spec.ts` proves
-it with a session older than the limit. When the app-trust slice lands, the same facts come from the
-token in another Worker, and the fixture proves it there. MFA and passkey facts wait for Better Auth's
-two-factor and passkey plugins, which remy-auth does not run yet; the schema leaves them optional.
-
-### 4. Proofs in CI
-
-`cedar symcc` in GitHub's heavy checks (it needs `cvc5`, which cannot run in a Worker): a guardrail per
-app, written as a policy set that must always be implied, such as "nobody edits a locked note". Not in
-`project:check`: too slow, and an external binary. If `cvc5` is not installable on the runner, this
-slice records that and closes.
-
-### 5. remy-sport, and other systems
-
-remy-sport's 27 relations and 76 actions already run through the engine; its `grants` generate its
-policies. Its own move is work in its repository. For a system not in TypeScript, the contract is the
-schema, the policies, the entity shapes and the token: it runs Cedar itself (Rust, Java, Go through
-`cedar-go`, or WASM) against its own data. This slice writes that contract down in the developer docs.
+**5. Other languages, and remy-sport.** The contract written in the docs: schema, policies, entity
+shapes, token. remy-sport's vocabulary generates its policies; its move is work in its own repository.
 
 ## Decisions (delegated 2026-10-10)
 
-1. **Cedar sits over the engine; it does not replace it.** The engine's strength is deriving relations
-   from tables in one query per relation. Cedar cannot query; it decides from entities. Replacing the
-   engine would mean loading rows into entities by hand, which is what the engine already does better.
-2. **Relationships stay in each app's D1.** The research's `authz_links` table is the same idea as
-   `note_share`: a row that exists only for access. An app keeps writing such rows itself; the package
-   does not get a central link store. This keeps the 2026-09-25 decision.
-3. **Generated policies first.** Slice 1 changes no behaviour, so every existing check is the proof.
-   Hand-written policies come only where `grants` cannot express the rule.
-4. **The Cedar CLI's test format, unchanged.** One file runs in `project:check`, from the CLI, and in
-   any other language's Cedar.
-5. **Fail closed.** Every optional fact is guarded with `has`; any erroring `forbid` is a deny. Cedar
-   skips a policy that errors, which would let a broken `forbid` fail open.
-6. **Cedar runs in the app's Worker, never in the browser, never as a call to remy-auth per check.**
-   The browser asks its backend; the backend decides. This is the research's rule for every option.
-7. **Rauthy is not used.** Its cluster needs persistent disks and node-to-node networking, which
-   Cloudflare Containers do not offer, and its one advantage over remy-auth here (login facts filled by
-   the identity server) remy-auth already has, because it owns the session.
-8. **Stable Cedar features only.** Level validation, `datetime` and tags are stable; typed partial
+1. **Cedar decides; the engine still finds.** Cedar cannot query a database. The engine's one query
+   per relation is the right way to find what a person holds. Replacing it would mean loading rows by
+   hand, which is what it already does better.
+2. **No Cedar templates, no central link store.** A share is a row in the app's own D1, read by the
+   engine, as today. This keeps [relationships local](auth-service.md#runtime-architecture-identity-central-relationships-local-decided-2026-09-25-refined), decided 2026-09-25.
+3. **Generated policies first, so nothing changes.** Hand-written policies only for what `grants`
+   cannot say. The existing checks are the proof of slice 1.
+4. **Cedar's own test format**, so one file runs in `project:check`, from the CLI, and in any language.
+5. **Fail closed.** Cedar skips a policy that errors, which would let a broken `forbid` fail open.
+   Every optional fact is guarded with `has`; any erroring `forbid` is a deny.
+6. **Cedar runs in the app's Worker.** Never in the browser (the user can change anything there), never
+   as a call to remy-auth per check (an app's data is its own).
+7. **Better Auth stays as it is.** It is the only source of identity, sessions and the sign-in facts.
+8. **Rauthy is not used.** Its cluster needs disks and node-to-node networking that Cloudflare
+   Containers do not give, and its one advantage here, sign-in facts from the identity server, remy-auth
+   already has, because it owns the session.
+9. **Stable Cedar features only.** Level validation, `datetime` and tags are stable. Typed partial
    evaluation is experimental and waits.
 
 ## What this is not
 
-- Not a central policy store or decision log. Each app's policies live with its code; its decisions are
-  its own events. The research says this is the one real loss against the built-in design, and that it
-  only matters at many apps in several languages. Revisit at the second non-TypeScript consumer.
-- Not a live change preview. Proofs run in CI (slice 4).
-- Not free: 4.3 MB of WASM in every app's Worker (1.4 MB over the wire), confirmed or refuted by the spike.
+- Not a central policy store or one log for every app. Each app's policies live with its code. The
+  research says that only matters at many apps in several languages; revisit at the second one.
+- Not an admin screen with live preview. Proofs run in CI.
+- Not free: about 4.3 MB of WASM in every app's Worker. Slice 0 decides whether that is acceptable.
 
 ## Definition of done
 
-Every slice lands in four places or it is not done ([adding to it](../docs/content/dev/auth.md#adding-to-it)):
-the package, remy-auth's notes demo, a check that fails when it is skipped, and the sign-in and
-permissions page. The plan closes when slice 3 is on main and live, the consumer fixture uses a policy,
-and slices 4 and 5 are either done or recorded as left with their reason.
+The plan closes when slices 0 to 3 are on main and live, the consumer fixture keeps a policy file and
+its tests pass, the docs page is updated, and slices 4 and 5 are done or recorded as left with the reason.
 
 ## For the owner
 
-1. **A check endpoint on remy-auth for systems that cannot run Cedar?** The decided architecture says
-   relationships local, so remy-auth would need the app's data per call. The research shows how
-   (resource, parents and attributes sent with each check). Not in this plan unless asked.
-2. **Publish the research on the docs site?** It is in [.plans/cedar-research.md](cedar-research.md), so it
-   is not translated and not public. Moving it to `docs/content/dev/` puts ~900 lines into the Spanish
-   queue (translation is the Claude subscription on the machine, owner 2026-10-09).
-3. **When do passkeys and two-factor come to remy-auth?** Until they do, "facts about the sign-in" are
-   the time and the method only.
+1. **A check endpoint on remy-auth for systems that cannot run Cedar?** It would need the app's data
+   with each call; the research shows how. Not in this plan unless asked.
+2. **Publish the research on the docs site?** It is in `.plans/`, so not translated and not public.
+   Moving it to `docs/content/dev/` puts about 900 lines into the Spanish queue.
+3. **When do passkeys and two-factor come to remy-auth?** Until then, the sign-in facts are the time
+   and the method.
