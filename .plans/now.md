@@ -10,14 +10,27 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
 Owner: "make plans for all the things left." Everything open, each with its plan and its command.
 Below this section is the history of how it got here.
 
-1. ~~**The flow's last gap**~~ closed 2026-10-10: `dev:land` deploys staging before it translates
-   (05896d6), so a landing is usable in a minute and the Spanish writes itself afterwards (translation
-   is the Claude subscription on the machine, never GitHub: the API is too expensive, owner
-   2026-10-09). It was not the last: that translation is pushed with no check after it, and the same
-   day's run committed the word `null` as the Spanish "How we work" (b9a4a22), which stopped the docs
-   building on main while every check was green. Fixed 2026-10-10: the writer writes only what is a
-   page, a failed agent fails the run, and a unit check reads every translated page
-   ([stability log](stability-log.md)). What is still open of it is in item 8.
+1. **The flow's open gaps**: `dev:land` holds its terminal through the translation, and nothing
+   builds the docs with a translation's own commit in them. Both seen and measured 2026-10-10.
+   - **The terminal.** A landing is on staging after 44 s; the command then waits for the
+     translation: 2 min 15 s to update one page (the agent wrote 13,248 tokens to change a few lines,
+     because it returns the whole page), 5 min 14 s for the same page from scratch. The fix:
+     `dev:land` returns when staging is up and the translation runs detached, its result in
+     `dev:status`; after that, the agent changes the lines the English changed instead of returning
+     the page ([translation-pipeline](translation-pipeline.md)'s analysis had it edit in place; the
+     build gives it no tools).
+   - **The docs build.** `dev:land` translates after its check and pushes, and GitHub's three jobs do
+     not build the docs. A translated page that passes `tasks/i18n/docs/page.ts` (frontmatter and
+     text) but does not compile would reach main: the next `dev:change` that builds the docs fails,
+     and `dev:promote` would deploy the app and then fail at the docs, since it runs `cf:deploy`
+     before `docs:deploy` (read in `tasks/dev/promote.ts`, not run). The fix: the docs writer builds
+     the docs before its commit counts, as the messages writer runs its checks (in a worktree of its
+     own, never the main checkout), or GitHub gains a docs build job.
+   - Closed of it: `dev:land` deploys staging before it translates (05896d6, 2026-10-09). The word
+     `null` committed as the Spanish "How we work" the same day (b9a4a22) is fixed: the writer writes
+     only what is a page, a failed agent fails the run, a unit check reads every translated page
+     ([stability log](stability-log.md)). The step and the translator say what each part and each
+     agent call took.
 2. **Release 0.14.0** ([thin-apps, phase D](thin-apps.md#phase-d-prepared-2026-09-29-waiting-for-the-owner)):
    prepared on main; the owner runs `mise run dev:release` (every check, every language, Google, Core
    Web Vitals on a preview, the tag and publish, ~6 min). It is also the first run of the phone speed
@@ -44,20 +57,11 @@ Below this section is the history of how it got here.
    app-trust slice (5), which it rides on for other Workers.
 7. **Platform structure** ([plan](platform-structure.md)): waits for the owner's three decisions
    named there.
-8. **Docs and translations, leftovers**: [docs-for-consumers](docs-for-consumers.md) step 6 (the docs
-   app's code in the package) and [translation-pipeline](translation-pipeline.md) (upstream tools
-   that replace the i18n tasks). Seen 2026-10-10: nothing builds the docs with a translation's own
-   commit in them. `dev:land` translates after its check and pushes, and GitHub's three jobs do not
-   build the docs, so a translated page that passes `tasks/i18n/docs/page.ts` (frontmatter and text)
-   but does not compile would reach main and stop the next `dev:change` and `dev:promote`. The fix:
-   the docs writer builds the docs before its commit counts, as the messages writer runs its checks
-   (in a worktree of its own, never the main checkout), or GitHub gains a docs build job.
-   Seen the same day: `dev:land` holds its terminal until the translation ends, six minutes for a
-   landing that was on staging after 40 seconds (one page from scratch took 5 min 14 s; an update of
-   the same page about 2 min, because the agent returns the whole page whatever changed). The step
-   and the translator now say what each part and each agent call took. The fix: `dev:land` returns
-   when staging is up and the translation runs detached, its result in `dev:status`; after that,
-   translate only the sections whose English changed.
+8. **Docs and translations, leftovers**: [docs-for-consumers](docs-for-consumers.md), the shared
+   docs part (the docs app's code into the package, so a consumer adds `docs/content` only: the last
+   of its "Next, in order", restated under round 4), and [translation-pipeline](translation-pipeline.md)
+   (built 2026-09-26; left of it are step 5, proving it in remy-auth-app, which waits for the
+   release, and step 6, once there is a domain).
 9. **Owner only** (below): the alert rule in the dashboard, a native-speaker review of the newer
    languages, the production domain and Search Console, more docs languages.
 
