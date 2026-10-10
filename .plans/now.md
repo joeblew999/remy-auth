@@ -26,6 +26,14 @@ Below this section is the history of how it got here.
      before `docs:deploy` (read in `tasks/dev/promote.ts`, not run). The fix: the docs writer builds
      the docs before its commit counts, as the messages writer runs its checks (in a worktree of its
      own, never the main checkout), or GitHub gains a docs build job.
+   - **The live smoke right after a staging deploy.** On a docs-only landing (9102bf7, 2026-10-10)
+     the smoke's "hydrate without errors" timed out waiting 5 s for React to hydrate the just-deployed
+     Worker's `/en` (3 of 4 passed; staging was up at that commit; no console error in the page
+     snapshot); twenty minutes later the same smoke against the same staging passed 4 of 4, hydrating
+     in 1.4 s. So it is the first load of a fresh version, not the page. Seen once; every landing
+     repeats the experiment. If it repeats, find what the first load waits on (a cold fetch of the
+     route's chunks from Workers Assets is the suspect) and fix that, not the 5 s. What the flow did
+     with it is fixed the same day: `dev:land` no longer stops there with the translation skipped.
    - Closed of it: `dev:land` deploys staging before it translates (05896d6, 2026-10-09). The word
      `null` committed as the Spanish "How we work" the same day (b9a4a22) is fixed: the writer writes
      only what is a page, a failed agent fails the run, a unit check reads every translated page
@@ -170,7 +178,7 @@ Fixed the same day, for every app through the shared tasks: `project:check` is t
 (plans, types, the plain-function tier `tests/**/*.unit.spec.ts`, translation status; a build or the
 docs only when their inputs changed). The heavy checks (every language, Google's audits, the consumer
 fixture) run on GitHub after every push, in parallel; each still runs locally on purpose, and
-`project:verify` at a release. Then formalised as the flow: `dev:change`, `dev:land`, `dev:promote`, `dev:release`, with a guard in the tooling itself (every heavy task refuses outside a step, on any machine, for any agent) and a Claude hook that answers a step earlier. The rule: [how we work](../docs/content/dev/how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest).
+`project:verify` at a release. Then formalised as the flow: `dev:change`, `dev:land`, `dev:promote`, `dev:release`, with a guard in the tooling itself (every heavy task refuses outside a step, on any machine, for any agent) and a Claude hook that answers a step earlier. The rule: [how we work](../docs/content/dev/how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
 
 ## Feedback from everything asynchronous (owner, 2026-10-09)
 

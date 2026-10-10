@@ -121,10 +121,11 @@ will need its own tests when Better Auth is integrated.
 
 ### Verification
 
-The flow is four commands: `dev:change` (the check, seconds, after every change), `dev:land` (commit,
-main, push, staging; GitHub runs the heavy checks), `dev:promote` (production) and `dev:release`; a
-guard in the tooling refuses the heavy checks outside them. The rule is in
-[how we work](./how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest), the tasks in the
+The flow is four steps: `dev:change` (the check, seconds, after every change), `dev:land` (commit,
+main, push, staging; GitHub runs the heavy checks), `dev:promote` (production) and `dev:release`, with
+`dev:start` and `dev:done` around a piece of work and `dev:status` to look; a guard in the tooling
+refuses the heavy checks outside them. The rule is in
+[how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), the tasks in the
 [tasks README](./tasks.md).
 
 Run `mise run project:verify` before a release; `project:setup` and `packages:upgrade` also finish with it. It checks
@@ -217,7 +218,7 @@ package, writing docs, the GUI) by `ui:generate`, which every pack and release r
 (`packages/ui/skill.mjs`); the docs stay the one source. In an app, `mise run agents:rules` keeps a marked
 block in `AGENTS.md` pointing its agents at the skill and naming the version; `project:setup` and
 `project:upgrade-ui` run it, so an upgrade changes the rules the agents read in the same step.
-remy-auth's own `AGENTS.md` indexes the docs themselves.
+remy-auth's own `AGENTS.md` is a pointer to [Agents: start here](./agents.md).
 The installer records provenance in `skills-lock.json`. Re-running installation
 restores the selected skills from the pinned sources; update their source commits deliberately to adopt upstream
 changes. Only `skills-lock.json` is committed; the installed skills and their Claude links are

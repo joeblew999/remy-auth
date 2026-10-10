@@ -16,5 +16,5 @@ All of it for AI tools: https://remy-auth-docs.gedw99.workers.dev/llms.txt; how 
 Gemini CLI): https://remy-auth-docs.gedw99.workers.dev/dev/ai-tools.
 
 The docs' source is [docs/content](docs/content/) (`users/` for the product guide, `dev/` for developers), served by
-the docs Worker in [docs/](docs/). Agents start at [AGENTS.md](AGENTS.md); open work is in
+the docs Worker in [docs/](docs/). Agents start at [docs/content/dev/agents.md](docs/content/dev/agents.md); open work is in
 [.plans/now.md](.plans/now.md); releases in [CHANGELOG.md](CHANGELOG.md).

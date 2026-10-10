@@ -87,7 +87,7 @@ skill-source commits and the shared agent bootstrap tasks live in
 
 ## Project documentation
 
-- [Agent index](https://github.com/joeblew999/remy-auth/blob/main/AGENTS.md): where agents start.
+- [Agents: start here](./agents.md): where agents start; the root `AGENTS.md` and `CLAUDE.md` only point at it.
 - [Development principles](./development.md): what the code must be, and how plans work.
 - [How we work](./how-we-work.md): how people and agents work.
 - [Developer tooling](./tooling.md): mise tasks, skills, MCP and browser tools.

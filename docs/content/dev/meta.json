@@ -2,6 +2,7 @@
   "title": "Remy developer docs",
   "pages": [
     "index",
+    "agents",
     "development",
     "how-we-work",
     "tooling",

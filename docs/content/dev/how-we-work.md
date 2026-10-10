@@ -13,6 +13,10 @@ and AI agents alike. What the code must be lives in [development principles](./d
   things that concern one agent, never for how the project works.
 - Each fact has one home, as [development principles](./development.md#development-principles)
   require; that applies to these rules too.
+- The root `AGENTS.md` and `CLAUDE.md` are pointers to [Agents: start here](./agents.md) and hold no
+  rule of their own: `CLAUDE.md` is an `@import` of that page, so Claude Code loads it; `AGENTS.md`
+  names it, for Codex and every other tool. A rule written into either is in the wrong place (owner,
+  2026-10-10: "Agents.md and Claude.md in the root must just be a pointer to docs area for agents").
 
 ## See something: fix it, or write it down, in the same landing
 
@@ -192,18 +196,21 @@ When the owner hands over decisions, for example to finish work unattended:
 - Keep every gate green; delegation never loosens a check.
 - Leave a full report: what was decided, what was done, what was checked and what was not.
 
-## The flow: three commands, and a guard that refuses the rest
+## The flow: four steps, and a guard that refuses the rest
 
 Owner, 2026-10-09: "95% of time has been checking and 5% coding. It can't go on", "It's a question of
 what you run locally and what you run in GitHub asynchronously", and "The tooling formalises what
 happens at development ... make sure the developer flow is also formalised so that this stupid
 fuckups can't happen. And so you and developers use that same flow so that it's fixed forever." So
-the flow is code, not a rule to remember: `tasks/dev/flow.ts` is the one place its decisions live,
-three commands are its steps, and a guard refuses what is not one of them. remy-auth gets it the way
-every app does, from the shared tasks; `project:setup` installs the guard.
+the flow is code, not a rule to remember: `tasks/dev/flow.ts` is the one place its decisions live.
+Its four steps are `dev:change`, `dev:land`, `dev:promote` and `dev:release` (`flow.ts`'s `Step`);
+`dev:start` and `dev:done` bracket a piece of work; `dev:status` looks; a guard refuses what is not
+one of them. Seven commands, nothing else. remy-auth gets it the way every app does, from the shared
+tasks; `project:setup` installs the guard.
 
 | Step | Command | Who runs it, and when | What runs | Time |
 | --- | --- | --- | --- | --- |
+| Look | `mise run dev:status` | everyone, first: every agent session opens with it (a hook), a developer when they sit down | main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests, the top of `.plans/now.md` | seconds |
 | Before a piece of work | `mise run dev:start -- <name>` | whoever does the work, for every piece, a one-line edit included | a worktree of its own from main, installed, its own ports, the guard | ~1 min |
 | After every change | `mise run dev:change` | whoever is coding; the only step waited for | the check (`project:check`): plans, types with the tasks' own, the plain-function checks (`tests/**/*.unit.spec.ts`), translation status; a build only when a route file changed, the docs only when docs changed | ~6 s |
 | The change leaves the machine | `mise run dev:land -- "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | the check, commit, fast-forward main, push, deploy staging, then translation last when stale. GitHub then runs every language, Google's audits and the consumer fixture in parallel, while you keep coding (`gh run list`) | ~1 min to staging; translation after |
@@ -244,8 +251,14 @@ every app does, from the shared tasks; `project:setup` installs the guard.
   the same task GitHub ran, since the workflow holds no logic of its own (`project:verify-tooling`
   checks every task a workflow names exists). Report what was tested and what was not; never call
   untested work verified.
+- **A landing that fails after the push still finishes what it can, and says where it stopped.**
+  Main is pushed before staging; when staging's deploy or its live smoke fails, `dev:land` still runs
+  the translation (it is on main, owed regardless), then ends non-zero with the state in one line:
+  main pushed at which commit, staging deployed or not, which smoke failed, translation done or not.
+  Nothing half-done is left for the next person to discover (owner, 2026-10-10, after a landing stopped
+  at the smoke with the translation silently skipped: "now you and other agents are screwed").
 - Never pipe a gating command through `grep` or `tail` in a chain: the pipe hides its exit code.
-  This once released a version whose checks had failed.
+  This once released a version whose checks had failed, and on 2026-10-10 hid a failed `dev:land`.
 
 ## Manual work becomes mise tasks over real tools
 
@@ -309,7 +322,7 @@ and timing-sensitive checks failed well before that. So:
 ## Many agents, one flow
 
 Owner, 2026-10-09: "formalise the way we workflow the dev work in many agents to use the new dev
-flow". Each piece of work, whoever does it, is one worktree through the same four commands; main is
+flow". Each piece of work, whoever does it, is one worktree through the same commands; main is
 the only integrator, and GitHub checks every landing. Nothing here is done by hand.
 
 | | Command | What it does |

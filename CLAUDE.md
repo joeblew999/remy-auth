@@ -1,1 +1,1 @@
-@AGENTS.md
+@docs/content/dev/agents.md

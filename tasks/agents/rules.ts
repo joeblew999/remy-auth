@@ -1,11 +1,11 @@
 // agents:rules: the marked block in this repo's AGENTS.md that points its agents at the platform's rules,
 // the `remy` skill from the installed @joeblew999/remy-ui (skills:install puts it in .agents/skills and
 // .claude/skills), naming the version. Written or refreshed in place; the rest of AGENTS.md is the repo's.
-// Not in remy-auth: its AGENTS.md indexes the rules' source, docs/content/dev.
+// Not in remy-auth: its AGENTS.md is a pointer to the rules' source, docs/content/dev/agents.md.
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
 if (existsSync('tasks') && existsSync('docs/content/dev/how-we-work.md')) {
-  console.log('agents:rules: remy-auth indexes the rules themselves (AGENTS.md); nothing to write.');
+  console.log('agents:rules: remy-auth owns the rules (docs/content/dev/agents.md, which AGENTS.md points at); nothing to write.');
   process.exit(0);
 }
 const pkg = 'node_modules/@joeblew999/remy-ui/package.json';

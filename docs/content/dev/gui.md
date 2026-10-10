@@ -29,7 +29,7 @@ Development uses the same Worker source and Cloudflare runtime with hot reload.
 | `project:dev` | Local Workers, hot reload, port 5173 |
 | `project:build` | Build and Wrangler deployment dry run; no upload |
 | `project:preview` | Build, then serve the production artifact on Cloudflare's local host at `PREVIEW_PORT` (4173) |
-| `dev:change`, `dev:land`, `dev:promote`, `dev:release` | The flow ([how we work](./how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest), [tasks](./tasks.md)); its checks run on the same local host |
+| `dev:change`, `dev:land`, `dev:promote`, `dev:release` | The flow ([how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), [tasks](./tasks.md)); its checks run on the same local host |
 | `project:test:google` / `project:test:cwv` | Google's level: Lighthouse audits locally; Core Web Vitals on a throwaway Cloudflare Worker |
 | `cf:deploy` | Build, then upload production to the authenticated Cloudflare account; `dev:promote` runs it |
 | `cf:staging` | The same for the staging environment: its own Worker (`STAGING_ORIGIN`) and resources |
@@ -235,7 +235,7 @@ runs them on server-rendered ones.
 
 What the checks cover is the checks themselves: `tests/` and the package's
 `@joeblew999/remy-ui/checks` (each check's title says what it proves); the flow's steps that run them are in
-[how we work](./how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest). In short: every page in every
+[how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). In short: every page in every
 language without JavaScript (language, direction, metadata, links), catalogs and plurals, the formats
 values against Intl, entry redirects and the language hint, hydration, the demo form and the API,
 HTTP statuses, the sitemap and `hreflang`, security headers and the CSP nonce, narrow screens, and

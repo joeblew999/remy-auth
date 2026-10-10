@@ -46,7 +46,7 @@ anywhere else is simply not found; no checker of its own keeps it.
 | `packages/<name>/` with `README.md` | `plans:*`, `packages:*` | packages the repo publishes, if any |
 | `messages/`, `project.inlang/` | the app preset, `project:generate`, `i18n:messages:*` | the app's own strings, if any (compiled into `src/paraglide/`) |
 | `.plans/` (`now.md`, `done/`, `parked/`) | `plans:*` | the repo's plans |
-| `AGENTS.md`, `.github/workflows/` | agents; GitHub | the agents' index; CI |
+| `AGENTS.md`, `.github/workflows/` | agents; GitHub | the agents' pointer at the docs; CI |
 | `tasks/`, `template/`, `fixtures/consumer/` | the include; `giget`; `template:test` | remy-auth only: the shared tasks themselves, the blank app a new repo starts from, and the consumer fixture that tests both as another repo gets them |
 
 ### A new consumer
@@ -137,7 +137,7 @@ run first; nothing by default, and remy-auth writes its `.dev.vars` and migrates
 and `project:release-checks`.
 
 The development flow is code, `tasks/dev/flow.ts`, with three commands and a guard
-([how we work](./how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest)):
+([how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)):
 
 | Step | Task |
 | --- | --- |

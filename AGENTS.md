@@ -1,24 +1,4 @@
-# Agent instructions
+# Agents
 
-This file is an index. The rules live in the documents below; read them before
-changing anything, and follow them over your own defaults. Do not copy their content here.
-
-Live: the app https://remy-auth.gedw99.workers.dev (staging, with the automatic sign-in: https://remy-auth-staging.gedw99.workers.dev); the developer docs https://remy-auth-docs.gedw99.workers.dev/dev
-(the product guide `/docs`, the API reference `/reference`; MCP servers `/api/mcp/dev`, `/api/mcp/reference`,
-`/api/mcp/docs`; everything for AI tools at `/llms.txt`). The documents below are the English developer docs'
-source, `docs/content/dev/*.md`: read those, not the translations beside them (`*.es.md`).
-
-1. [Development principles](docs/content/dev/development.md) — ownership, single source of truth,
-   test gates, generated code, owner decisions.
-2. [Developer tooling](docs/content/dev/tooling.md) — mise tasks, pinned tools and agent skills.
-   Run project commands through `mise run <namespace:action>`.
-3. [GUI runtime workflow](docs/content/dev/gui.md) — one Worker, local and remote test targets.
-4. [How we work](docs/content/dev/how-we-work.md) — project tools first, surveys before tool choices,
-   shadcn and TanStack all the way for UI, local gates, multi-agent work. Record working rules there, not in agent memory.
-5. [Sign-in and permissions](docs/content/dev/auth.md) — the guard, the relation engine, `<Allowed>`, environments
-   and mail: what every Remy app gets, and where remy-auth uses each itself.
-6. The plan in [`.plans/`](.plans/) covering your task, and its
-   [Executor/Reviewer roles](docs/content/dev/development.md#plans-and-roles).
-
-Start with `mise run dev:status` (what is going on) and [the project's own tools](docs/content/dev/how-we-work.md#use-the-projects-own-tools-first), and
-finish through [the flow](docs/content/dev/how-we-work.md#the-flow-three-commands-and-a-guard-that-refuses-the-rest): `mise run dev:change` after every change, `mise run dev:land -- "<what changed>"` when it should leave the machine.
+Start at [docs/content/dev/agents.md](docs/content/dev/agents.md). The developer docs own every rule;
+this file only points there ([where rules live](docs/content/dev/how-we-work.md#where-rules-live)).
