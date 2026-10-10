@@ -259,6 +259,12 @@ instala el guardián.
   propietario, y actúa cuando el harness diga que terminó. Iniciarlo en segundo plano y luego hacer
   polling de él en primer plano es el mismo fallo (propietario, 2026-10-09: «Acabas de hacerlo otra vez
   con 2 cosas de larga duración»). Solo `dev:change` (segundos) se ejecuta y se espera.
+- **Cada paso dice cuánto tardó.** mise imprime el tiempo de cada tarea; `dev:land` termina con sus
+  partes (la comprobación; commit, main y push; staging; traducción) y dice cuánto tardó staging en
+  estar listo desde el inicio; el traductor dice, para cada llamada al agente, cuánto tardó Claude
+  Code, cuánto de eso fue la API, y cuántos tokens escribió. Un paso lento es un número en el log, no
+  una sensación (propietario, 2026-10-10, sobre un landing con staging listo a los 40 segundos cuyo
+  comando tardó seis minutos: «cómo puede ser 6 minutos»).
 - **La respuesta de GitHub viene a ti.** Una ejecución en rojo comenta en el commit (GitHub se lo dice a
   su autor), nombrando la ejecución; `dev:change` empieza diciendo qué hizo la última ejecución en
   main; `dev:promote` se niega sobre un commit cuya ejecución no esté en verde o no haya terminado. Para
