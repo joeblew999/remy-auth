@@ -1,0 +1,348 @@
+[
+ {
+  "name": "author edits",
+  "request": {
+   "principal": "Notes::User::\"alice\"",
+   "action": "Notes::Action::\"EDIT_NOTE\"",
+   "resource": "Notes::NOTE::\"n1\"",
+   "context": {
+    "auth": {
+     "now": {
+      "__extn": {
+       "fn": "datetime",
+       "arg": "2026-10-10T10:00:00Z"
+      }
+     }
+    }
+   }
+  },
+  "entities": [
+   {
+    "uid": {
+     "type": "Notes::NOTE",
+     "id": "n1"
+    },
+    "attrs": {
+     "held": [
+      "NOTE_AUTHOR"
+     ],
+     "locked": false
+    },
+    "parents": []
+   },
+   {
+    "uid": {
+     "type": "Notes::User",
+     "id": "alice"
+    },
+    "attrs": {},
+    "parents": []
+   }
+  ],
+  "decision": "allow",
+  "reason": [
+   "notes-edit"
+  ],
+  "num_errors": 0
+ },
+ {
+  "name": "locked note: even the author cannot edit, and the reason is the lock",
+  "request": {
+   "principal": "Notes::User::\"alice\"",
+   "action": "Notes::Action::\"EDIT_NOTE\"",
+   "resource": "Notes::NOTE::\"n1\"",
+   "context": {
+    "auth": {
+     "now": {
+      "__extn": {
+       "fn": "datetime",
+       "arg": "2026-10-10T10:00:00Z"
+      }
+     }
+    }
+   }
+  },
+  "entities": [
+   {
+    "uid": {
+     "type": "Notes::NOTE",
+     "id": "n1"
+    },
+    "attrs": {
+     "held": [
+      "NOTE_AUTHOR"
+     ],
+     "locked": true
+    },
+    "parents": []
+   },
+   {
+    "uid": {
+     "type": "Notes::User",
+     "id": "alice"
+    },
+    "attrs": {},
+    "parents": []
+   }
+  ],
+  "decision": "deny",
+  "reason": [
+   "notes-locked"
+  ],
+  "num_errors": 0
+ },
+ {
+  "name": "excluded person: a share through the group grants nothing",
+  "request": {
+   "principal": "Notes::User::\"carol\"",
+   "action": "Notes::Action::\"READ_NOTE\"",
+   "resource": "Notes::NOTE::\"n1\"",
+   "context": {
+    "auth": {
+     "now": {
+      "__extn": {
+       "fn": "datetime",
+       "arg": "2026-10-10T10:00:00Z"
+      }
+     }
+    }
+   }
+  },
+  "entities": [
+   {
+    "uid": {
+     "type": "Notes::NOTE",
+     "id": "n1"
+    },
+    "attrs": {
+     "held": [
+      "NOTE_READER",
+      "NOTE_EXCLUDED"
+     ],
+     "locked": false
+    },
+    "parents": []
+   },
+   {
+    "uid": {
+     "type": "Notes::User",
+     "id": "carol"
+    },
+    "attrs": {},
+    "parents": []
+   }
+  ],
+  "decision": "deny",
+  "reason": [
+   "notes-excluded"
+  ],
+  "num_errors": 0
+ },
+ {
+  "name": "delete with a fresh sign-in",
+  "request": {
+   "principal": "Notes::User::\"alice\"",
+   "action": "Notes::Action::\"DELETE_NOTE\"",
+   "resource": "Notes::NOTE::\"n1\"",
+   "context": {
+    "auth": {
+     "now": {
+      "__extn": {
+       "fn": "datetime",
+       "arg": "2026-10-10T10:00:00Z"
+      }
+     },
+     "signedInAt": {
+      "__extn": {
+       "fn": "datetime",
+       "arg": "2026-10-10T09:50:00Z"
+      }
+     }
+    }
+   }
+  },
+  "entities": [
+   {
+    "uid": {
+     "type": "Notes::NOTE",
+     "id": "n1"
+    },
+    "attrs": {
+     "held": [
+      "NOTE_AUTHOR"
+     ],
+     "locked": false
+    },
+    "parents": []
+   },
+   {
+    "uid": {
+     "type": "Notes::User",
+     "id": "alice"
+    },
+    "attrs": {},
+    "parents": []
+   }
+  ],
+  "decision": "allow",
+  "reason": [
+   "notes-delete"
+  ],
+  "num_errors": 0
+ },
+ {
+  "name": "delete with an old sign-in is refused",
+  "request": {
+   "principal": "Notes::User::\"alice\"",
+   "action": "Notes::Action::\"DELETE_NOTE\"",
+   "resource": "Notes::NOTE::\"n1\"",
+   "context": {
+    "auth": {
+     "now": {
+      "__extn": {
+       "fn": "datetime",
+       "arg": "2026-10-10T10:00:00Z"
+      }
+     },
+     "signedInAt": {
+      "__extn": {
+       "fn": "datetime",
+       "arg": "2026-10-10T09:00:00Z"
+      }
+     }
+    }
+   }
+  },
+  "entities": [
+   {
+    "uid": {
+     "type": "Notes::NOTE",
+     "id": "n1"
+    },
+    "attrs": {
+     "held": [
+      "NOTE_AUTHOR"
+     ],
+     "locked": false
+    },
+    "parents": []
+   },
+   {
+    "uid": {
+     "type": "Notes::User",
+     "id": "alice"
+    },
+    "attrs": {},
+    "parents": []
+   }
+  ],
+  "decision": "deny",
+  "reason": [
+   "notes-delete-fresh"
+  ],
+  "num_errors": 0
+ },
+ {
+  "name": "delete with no sign-in time at all is refused (fail closed)",
+  "request": {
+   "principal": "Notes::User::\"alice\"",
+   "action": "Notes::Action::\"DELETE_NOTE\"",
+   "resource": "Notes::NOTE::\"n1\"",
+   "context": {
+    "auth": {
+     "now": {
+      "__extn": {
+       "fn": "datetime",
+       "arg": "2026-10-10T10:00:00Z"
+      }
+     }
+    }
+   }
+  },
+  "entities": [
+   {
+    "uid": {
+     "type": "Notes::NOTE",
+     "id": "n1"
+    },
+    "attrs": {
+     "held": [
+      "NOTE_AUTHOR"
+     ],
+     "locked": false
+    },
+    "parents": []
+   },
+   {
+    "uid": {
+     "type": "Notes::User",
+     "id": "alice"
+    },
+    "attrs": {},
+    "parents": []
+   }
+  ],
+  "decision": "deny",
+  "reason": [
+   "notes-delete-fresh"
+  ],
+  "num_errors": 0
+ },
+ {
+  "name": "platform admin reads anything",
+  "request": {
+   "principal": "Notes::User::\"root\"",
+   "action": "Notes::Action::\"READ_NOTE\"",
+   "resource": "Notes::NOTE::\"n1\"",
+   "context": {
+    "auth": {
+     "now": {
+      "__extn": {
+       "fn": "datetime",
+       "arg": "2026-10-10T10:00:00Z"
+      }
+     }
+    }
+   }
+  },
+  "entities": [
+   {
+    "uid": {
+     "type": "Notes::NOTE",
+     "id": "n1"
+    },
+    "attrs": {
+     "held": [],
+     "locked": false
+    },
+    "parents": []
+   },
+   {
+    "uid": {
+     "type": "Notes::User",
+     "id": "root"
+    },
+    "attrs": {},
+    "parents": [
+     {
+      "type": "Notes::Role",
+      "id": "ADMIN"
+     }
+    ]
+   },
+   {
+    "uid": {
+     "type": "Notes::Role",
+     "id": "ADMIN"
+    },
+    "attrs": {},
+    "parents": []
+   }
+  ],
+  "decision": "allow",
+  "reason": [
+   "notes-platform-admin"
+  ],
+  "num_errors": 0
+ }
+]
