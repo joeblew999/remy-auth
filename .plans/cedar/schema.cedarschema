@@ -1,0 +1,9 @@
+namespace Notes {
+  entity Role;
+  entity User in [Role];
+  entity NOTE { held: Set<String>, locked: Bool };
+  type Auth = { now: datetime, signedInAt?: datetime, method?: String };
+  type Ctx = { auth: Auth };
+  action EDIT_NOTE, READ_NOTE, DELETE_NOTE, SHARE_NOTE
+    appliesTo { principal: User, resource: NOTE, context: Ctx };
+}
