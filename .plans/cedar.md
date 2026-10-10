@@ -24,8 +24,8 @@ shape, remy-auth is also missing:
 | The research's point | remy-auth today | Gap |
 | --- | --- | --- |
 | Structural relations derived from the app's own tables (Cedar's "attribute" case) | The relation engine: `via: 'table'`, parent, role, everyone; one query per relation | None. This is the part that works, proven on remy-sport's 27 relations |
-| Shares that exist only for access | `note_share` rows, read by the engine as `NOTE_EDITOR` / `NOTE_READER` | Works as an app table. No expiry, no "until a date", no write half in the package (`grant`, `revoke`: [slice 2 left it](auth-service.md#not-built-or-assumed)) |
-| Deny rules that always win, with a reason | None. `grants` only add | A locked note, an excluded person, "never outside your organisation": each is app code today |
+| Shares that exist only for access | `note_share` rows, read by the engine as `NOTE_EDITOR` / `NOTE_READER`; a relation can be held only between dates (`activeFromColumn`, `activeToColumn`) | Works as an app table, expiry included. Only the write half is missing from the package (`grant`, `revoke`: [slice 2 left it](auth-service.md#not-built-or-assumed)), and that is not Cedar's job |
+| Deny rules that always win, with a reason | None. `grants` only add; a relation can grant, never refuse | A locked note, a person excluded from a note shared with their group, "never outside your organisation": each is app code today, or impossible |
 | Rules that know how the user signed in | None. The guard knows the session exists | "Deleting needs a sign-in in the last 15 minutes" cannot be written |
 | A policy language with tests and proofs, readable by any system | The vocabulary is TypeScript data; its checks are TypeScript | A Rust or Go system cannot run the same rules. Nothing proves what a rule change does |
 | "Allowed actions" per row, so the GUI never decides | `canFor` and `<Allowed>` | None. This is what fixed remy-sport's unused ReBAC |
@@ -46,7 +46,7 @@ what `grants` cannot say.
 | --- | --- | --- |
 | Policies, schema, tests | The app's repo: `policies/*.cedar`, `policies/schema.cedarschema`, `policies/*.tests.json` | Versioned with the app's code. The tests are in the Cedar CLI's own format (`name`, `request`, `entities`, `decision`, `reason`, `num_errors`), so the same file runs in `project:check` and from the CLI |
 | The engine | `@joeblew999/remy-ui/api/relations`, unchanged | Answers `holds` per relation, as today |
-| The entities for one check | Built by the package per request | `principal`: the account, with platform roles as parents (`Remy::User in [Remy::Role]`). `resource`: the object with the relations this person holds on it as a set (`held`) and its parent chain (the engine's `inherited from a parent`, as Cedar `parents`). `context.auth`: facts from the session or token |
+| The entities for one check | Built by the package per request | `principal`: the account, with platform roles as parents (`Remy::User in [Remy::Role]`). `resource`: the object with the relations this person holds on it as a set (`held`, from `heldAmong` per relation, the same one query per relation that `canFor` costs today) and its parent chain (the engine's `via: 'parent'`, as Cedar `parents`). `context.auth`: facts from the session or token |
 | The decision | Cedar as WASM (`@cedar-policy/cedar-wasm`), in the app's Worker, behind the same guard | `permit`/`forbid`; `forbid` always wins; a missing fact means deny (`has` guards; deny on any erroring `forbid`) |
 | The GUI | `canFor` and `<Allowed>`, unchanged | `canFor` now asks Cedar per row; a denied action may carry the `@reason` of the `forbid` that decided it |
 
@@ -87,9 +87,9 @@ imports the package gets the piece and its checks pass. The first slice is a spi
 
 ### 0. Spike: Cedar runs in a Worker
 
-Build the notes demo's Worker with `@cedar-policy/cedar-wasm` and answer one check in it. Record: how
-the `.wasm` is imported under Wrangler (a module import, not the package's `fetch` of its own file),
-bundle size against `build-boundaries.checks` and the code-splitting check, cold-start cost, and whether
+Build the notes demo's Worker with `@cedar-policy/cedar-wasm` and answer one check in it. The package's
+ESM build imports its `.wasm` as a module (`import * as wasm from "./cedar_wasm_bg.wasm"`), which is
+what Wrangler bundles; record whether it does so cleanly, the bundle size against `build-boundaries.checks` and the code-splitting check, cold-start cost, and whether
 `isAuthorized` with ten policies and five entities is under a millisecond. The research measured 4.3 MB
 (1.4 MB gzipped) and about 32 ms to compile in Node, inside Workers' 64 MiB and 1 s limits; this
 confirms it in the real runtime. **If any of these fails, the plan stops here and says why.**
@@ -105,10 +105,11 @@ drift from the checked-in file fails the build.
 
 ### 2. What `grants` cannot say
 
-The first hand-written policies in the demo, each with a test: a locked note (`forbid`, with its
-`@reason` reaching the 403 body and the `can` map), and a share with an end date (`note_share.until`,
-read as a `datetime` attribute; the engine already reads a relation "held between dates", so this is
-the policy saying so). `<Allowed>` gains an optional reason for a denied action, so a page can say why a
+The first hand-written policies in the demo, each with a test, and each something `grants` cannot say
+because a relation can only grant: a locked note (`forbid` when `resource.locked`), and one person
+excluded from a note shared with their group (a `note_exclusion` row the engine reads as
+`NOTE_EXCLUDED`, and `forbid` when `held` contains it, which wins over the share). The `@reason` of
+the deciding `forbid` reaches the 403 body and the `can` map. `<Allowed>` gains an optional reason for a denied action, so a page can say why a
 control is missing instead of hiding it.
 
 ### 3. Facts about the sign-in
