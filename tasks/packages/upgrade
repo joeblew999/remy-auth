@@ -4,5 +4,4 @@
 set -euo pipefail
 source "$(dirname "$0")/ncu.sh" --upgrade
 npm install --prefer-online --strict-peer-deps
-# project:verify is gated (dev:allowed): this task says it is the one asking.
-REMY_FLOW="${REMY_FLOW:-upgrade}" mise run project:verify
+mise run project:verify-setup

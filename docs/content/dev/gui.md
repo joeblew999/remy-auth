@@ -54,8 +54,9 @@ and one press signs in as one of them; against production none of it exists. The
 also target an already-running local preview to check the external-server path.
 
 The pipeline tasks are shared defaults from `tasks/project.toml`, driven by this
-project's `[env]` inputs (`PREVIEW_PORT`, `DEPLOY_ORIGIN`); this repository overrides only
-`project:typecheck` and `project:verify` because it owns the package. The Playwright
+project's `[env]` inputs (`PREVIEW_PORT`, `DEPLOY_ORIGIN`); this repository overrides only the hooks
+meant for it (`project:prepare`, `project:generate`, `project:release-checks`, `project:test:consumers`;
+[tasks](./tasks.md#choosing-the-version-released-development-or-local)). The Playwright
 configuration is the package's `playwrightConfig()`.
 
 There is one Worker configuration with one named environment, `staging` (`env.staging` in
@@ -236,7 +237,8 @@ runs them on server-rendered ones.
 
 ## Evidence and limits
 
-What the checks cover is the checks themselves: `tests/` and the package's
+Two levels: level 1 is every check of ours in every language (`project:test`); level 2 is Google's
+(`project:test:google`, `project:test:cwv`). What the checks cover is the checks themselves: `tests/` and the package's
 `@joeblew999/remy-ui/checks` (each check's title says what it proves); the flow's steps that run them are in
 [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). In short: every page in every
 language without JavaScript (language, direction, metadata, links), catalogs and plurals, the formats

@@ -125,7 +125,7 @@ names those IDs: that is all an app's seed ever knows about a person. Nothing he
 outside Better Auth.
 
 Staging is its own Worker with its own databases and secret (`env.staging` in `wrangler.jsonc`,
-deployed by `mise run cf:staging`), so nothing done there touches production's data. It holds
+deployed by every `dev:land` through `cf:staging`), so nothing done there touches production's data. It holds
 fixtures and what visitors write. Never copy production's data into it: anybody who finds it can sign
 in as a seeded person.
 

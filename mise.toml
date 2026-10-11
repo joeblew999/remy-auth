@@ -173,10 +173,10 @@ run = [
 ]
 
 [tasks."ui:release"]
-description = "Release the shared UI and the tasks together (alias release): the shared packages:release (every gate, then tag vX.Y.Z of @joeblew999/remy-ui, publish the package and the contract when new, create the GitHub release; ~5 min, nothing else local at the same time). Before it, in one commit: the versions and CHANGELOG.md's section"
+description = "Release the shared UI and the tasks together (alias release): the flow's dev:release, from a clean main, which runs the shared packages:release (every gate, then tag vX.Y.Z of @joeblew999/remy-ui, publish the package and the contract when new, create the GitHub release; ~5 min, nothing else local at the same time). Before it, in one commit: the versions and CHANGELOG.md's section"
 alias = "release"
 dir = "{{config_root}}"
-run = [{ task = "packages:release" }]
+run = [{ task = "dev:release" }]
 
 [tasks."project:release-checks"]
 description = "remy-auth's own release checks (overrides the shared hook, which packages:release runs after project:verify): the blank app pins this release (template:check), the shadcn files are exactly what the CLI writes (ui:verify)"

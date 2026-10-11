@@ -29,13 +29,13 @@ raw = true
 run = "./node_modules/.bin/playwright show-report playwright-report/remote"
 
 ["project:setup"]
-description = "Install dependencies, the shared skills, the AGENTS.md rules block, MCP registration and the flow's guard for agents, then verify (~1.5 min). GITHUB_TOKEN (read:packages, for the shared UI) comes from the shell or else from `gh auth token`"
+description = "Install dependencies, the shared skills, the AGENTS.md rules block, MCP registration and the flow's guard for agents, then the installation's checks and the check (project:verify-setup; about a minute, no browser: the browser suite is GitHub's after every landing). ~2 min. GITHUB_TOKEN (read:packages, for the shared UI) comes from the shell or else from `gh auth token`"
 dir = "{{config_root}}"
 # Rendered only when the task runs; gh is asked only when the shell has no GITHUB_TOKEN.
 # gh pinned here, so every app has the same one for `gh auth token` (a task's tools are active in its env).
 tools = { "aqua:cli/cli" = "2.101.0" }
 env = { GITHUB_TOKEN = "{% set token = get_env(name='GITHUB_TOKEN', default='') %}{% if token %}{{ token }}{% else %}{{ exec(command='gh auth token') }}{% endif %}" }
-run = [{ task = "project:preconditions" }, "npm ci", { task = "skills:install" }, { task = "agents:rules" }, { task = "mcp:register" }, { task = "dev:guard" }, "REMY_FLOW=${REMY_FLOW:-setup} mise run project:verify"]
+run = [{ task = "project:preconditions" }, "npm ci", { task = "skills:install" }, { task = "agents:rules" }, { task = "mcp:register" }, { task = "dev:guard" }, { task = "project:verify-setup" }]
 
 ["project:test:consumers"]
 description = "Hook for the other repositories this one serves, tested as they get it (GitHub runs it after every push, project:verify at a release); none by default. remy-auth runs template:test, its consumer fixture. Instant"
@@ -158,7 +158,12 @@ env = { TEST_TARGET = "local" }
 # Chrome DevTools daemon and needs a quiet CPU; a second run waits instead of skewing the first.
 run = ["mise run dev:allowed -- project:test:google", "$(command -v flock >/dev/null && echo flock || echo 'lockf -k') \"${TMPDIR:-/tmp}/remy-level2.lock\" ./node_modules/.bin/playwright test --project=google"]
 
-["project:verify"]
-description = "RELEASES ONLY (packages:release runs it; GitHub runs its parts after every push): the tasks, dependencies, MCP registration, CLI versions and tooling invariants, types, the plain-function checks, every browser check in every language, then the other repositories this one serves (~4.5 min in remy-auth). Never while coding: project:check is the check"
+["project:verify-setup"]
+description = "What an installation must satisfy, about a minute, no browser: the tasks are valid, the dependencies and MCP registration are in place, the guard is registered, the CLI versions and tooling invariants hold (project:verify-tooling), then the check (project:check). project:setup, packages:upgrade and project:upgrade-ui end with it; project:verify starts with it. Not gated: nothing heavy runs here"
 dir = "{{config_root}}"
-run = ["mise run dev:allowed -- project:verify", "mise tasks validate", "npm ls --depth=0", { task = "mcp:verify" }, "mise run dev:guard -- --check", { task = "project:doctor" }, { task = "project:verify-tooling" }, { task = "project:typecheck" }, { task = "project:test:unit" }, { task = "project:test" }, { task = "project:test:consumers" }]
+run = ["mise tasks validate", "npm ls --depth=0", { task = "mcp:verify" }, "mise run dev:guard -- --check", { task = "project:doctor" }, { task = "project:verify-tooling" }, { task = "project:check" }]
+
+["project:verify"]
+description = "RELEASES ONLY (packages:release runs it; GitHub runs its parts after every push): the installation's checks (project:verify-setup), then every browser check in every language, then the other repositories this one serves (~4.5 min in remy-auth). Never while coding: project:check is the check; an installation ends with project:verify-setup"
+dir = "{{config_root}}"
+run = ["mise run dev:allowed -- project:verify", { task = "project:verify-setup" }, { task = "project:test" }, { task = "project:test:consumers" }]

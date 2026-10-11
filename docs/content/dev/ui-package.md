@@ -62,7 +62,7 @@ prerendered example):
   `cf:deploy` (`project:test:live`) run it, and fail with "No tests found" without it.
 - **`.plans/now.md`**, the one ordered list of open work (`plans:check`, in the check).
 - **Installs and upgrades through the shared tasks**, never by hand: `mise run project:setup` (install,
-  skills, MCP, verify) and `mise run project:upgrade-ui <version>` (the exact package version and the
+  skills, MCP, verify) and `mise run project:upgrade-ui -- <version>` (the exact package version and the
   tasks include at the same tag, then verify). Both take GitHub Packages' token from `gh auth token`.
 
 ## Exports
@@ -136,7 +136,7 @@ Chinese, Hindi, Amharic, Polish, Turkish and German) is agent-authored and unrev
 ## Publishing
 
 The package is `@joeblew999/remy-ui` on GitHub Packages (the scope must equal the
-GitHub owner there). `mise run ui:release` does the whole release from this machine, stopping at the
+GitHub owner there). `mise run dev:release` (alias `release`) does the whole release from this machine, stopping at the
 first failure: translations complete and current (`i18n:check`, strict), every check of ours
 (`project:verify`), shadcn's files exactly as its CLI writes them (`ui:verify`), Google's Lighthouse audits,
 and Core Web Vitals measured cold on a throwaway Cloudflare Worker (`project:test:cwv`: the first visits
@@ -183,7 +183,7 @@ listed by name (`"seo-routes"`); any package can offer parts too, listed as `"<p
    its own routes, or to the app's pages through its `app` options (the time-zones part's breadcrumb takes
    `parent`), never to a page another app may not have: the consumer fixture lists a showcase part and
    type-checks it without the showcase's pages.
-4. **Prove it:** `mise run project:check` passes with the part listed, with it removed, and with the list
+4. **Prove it:** `mise run dev:change` passes with the part listed, with it removed, and with the list
    empty (run a build once after editing `src/parts.json`, which regenerates the route tree).
 
 What stays a plain package module instead: code every app needs (observability), a hook an app must

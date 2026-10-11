@@ -113,8 +113,8 @@ writes it everywhere it appears (the package and the blank app's three pins).
 
 ### Choosing the version: released, development or local
 
-The tasks and the package are released together: remy-auth's `mise run ui:release` (the shared
-`packages:release`) publishes `@joeblew999/remy-ui` X.Y.Z and tags the same commit `vX.Y.Z`. A consumer
+The tasks and the package are released together: remy-auth's `mise run dev:release` (`ui:release` and `release` are its
+aliases; it runs the shared `packages:release`) publishes `@joeblew999/remy-ui` X.Y.Z and tags the same commit `vX.Y.Z`. A consumer
 therefore pins both to one number, and `project:upgrade-ui` changes them together:
 
 | Want | How | Where |
@@ -145,7 +145,7 @@ The development flow is code, `tasks/dev/flow.ts`, with four steps and a guard
 | Step | Task |
 | --- | --- |
 | First | `dev:status` (main with GitHub's verdicts, the deployments, worktrees ahead and behind, translations, pull requests; a `SessionStart` hook runs it for agents) |
-| A piece of work | `dev:start -- <name>` (a worktree of its own from main, `npm ci`, ports in `mise.local.toml`, `dev:guard`); `dev:done` removes it once landed |
+| A piece of work | `dev:start -- <name>` (a worktree of its own from main, `npm ci`, ports in `mise.local.toml`, `dev:guard`); `dev:done` removes it when the piece of work is over and landed |
 | Every change | `dev:change` (`project:check`: plans, `project:routes` when a route file changed, types with `project:typecheck-tasks`, `project:test:unit`, `i18n:check` as a warning, `project:check:docs` when docs changed) |
 | Finished work | `dev:land -- "<message>"` (the check, commit, main, push, `cf:staging`, then translation when stale; GitHub then runs `project:test`, `project:test:google` and `project:test:consumers` in parallel, and a red run comments on the commit. The same three locally, on purpose: `REMY_FLOW=hand mise run <task>`) |
 | Production | `dev:promote` (refuses a commit GitHub has not passed; then `cf:deploy`, `docs:deploy`, `cf:versions`) |
@@ -205,7 +205,7 @@ tools, translate with the pinned Claude agent, commit.
 | `i18n:check` | Both checks in parallel; a WARNING and exit 0 while coding (`project:check` runs it), exit 1 with `I18N_STRICT=1` (`packages:release`) |
 | `i18n:messages:check` | The catalogs' gaps, and languages that differ from the platform's (`de unlisted`); `-- --list` one line per gap (`es missing nav_more`) |
 | `i18n:docs:check` | The docs' gaps; `-- --list` one line per gap (`es stale docs/content/dev/gui.es.md`) |
-| `i18n:translate` | On main: messages, then docs, one commit each |
+| `i18n:translate` | On main: messages, then docs, one commit each; `dev:land` runs it, last |
 | `i18n:messages:translate` | The catalogs' gaps, one language per agent call |
 | `i18n:docs:translate [files]` | The docs' gaps, one page per agent call; named translation files are redone in full |
 
@@ -225,7 +225,7 @@ mise: outside a task mise's Node shim reapplies `[env]` and would replace `PUBLI
 | `cf:urls` | Print the production (or a given) origin's pages and `/healthz`, for reports |
 | `cf:staging` | `cf:deploy` for the staging environment: builds with `CLOUDFLARE_ENV=staging` (`env.staging` in the Wrangler configuration) and uploads its own Worker at `STAGING_ORIGIN`; production is untouched. What staging permits beyond production is the app's [environment table](./auth.md#environments-one-table) |
 | `cf:versions` | Ask each deployment (`DEPLOY_ORIGIN`, `STAGING_ORIGIN` and `DOCS_ORIGIN`, or the origins given) what it is running: service, environment, commit, how far that is from this checkout, when it was deployed. [Asked, never remembered](./gui.md#which-version-is-deployed) |
-| `project:test:remote` | Level 1 against `TEST_BASE_URL` |
+| `project:test:remote` | Level 1 against `TEST_BASE_URL`, by hand only (`REMY_FLOW=hand`): the flow's deploys end with the live smoke, and GitHub runs the suite |
 | `cf:events`, `cf:ai-usage`, `cf:ai-check`, `cf:ai-gateway` | Stored Workers Logs, AI Gateway usage, AI setup check, the gateway's settings ([tooling](./tooling.md#the-docs-answers-on-cloudflare-ai-search-and-ai-gateway)) |
 | `project:upgrade-ui` | Move an app to one shared release: package version and tasks `ref` together, then `project:verify` |
 

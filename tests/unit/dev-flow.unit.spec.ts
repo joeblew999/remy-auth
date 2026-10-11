@@ -4,9 +4,10 @@ import { parse } from 'smol-toml';
 import { heavy } from '../../tasks/dev/flow';
 
 // The flow's gate (tasks/dev/allowed.ts) refuses a heavy task that nobody said they were running. On
-// 2026-10-10, a day after the gate, eight lines on five pages still gave such a command bare, and
+// 2026-10-10, a day after the gate, eight lines on six pages still gave such a command bare, and
 // project:setup, packages:upgrade and project:upgrade-ui each ended in the refusal: GitHub runs none
-// of the three, so every check was green. Reading the pages and the tasks is a plain function.
+// of the three, so every check was green; ui:release (alias release) reached project:verify through
+// packages:release the same way. Reading the pages and the tasks is a plain function.
 
 // A heavy task run through mise: `mise run project:test`, never `mise run project:test:only`.
 const names = Object.keys(heavy).filter(task => !task.includes(' ')).map(task => task.replace(/[:.]/g, '\\$&')).join('|');
@@ -36,8 +37,9 @@ test('no task runs a heavy task without saying who is asking: REMY_FLOW on the l
   expect(bare).toEqual([]);
 
   // TOML tasks: a run list reaches a heavy task as a command or as { task = "…" }. A command says who
-  // is asking; a { task } is only for a task that is itself heavy (its caller was asked already) or
-  // for packages:release, which dev:release runs with REMY_FLOW=release.
+  // is asking; a { task } is only from a task that is itself heavy (its caller was asked already).
+  // packages:release is heavy by what it runs (project:verify): only dev:release reaches it, with
+  // REMY_FLOW=release; a { task = "packages:release" } elsewhere is the same fault (ui:release had it).
   const viaFlow = new Set(['packages:release']);
   const tomls = [...walk('tasks').filter(file => file.endsWith('.toml')), 'mise.toml'].filter(file => existsSync(file));
   const wrong = tomls.flatMap(file => {
@@ -52,15 +54,22 @@ test('no task runs a heavy task without saying who is asking: REMY_FLOW on the l
           return found && !/\bREMY_FLOW=/.test(entry.slice(0, found.index)) ? [`${file} ${name}: mise run ${found[1]} without REMY_FLOW`] : [];
         }
         const called = (entry as { task?: string })?.task;
-        return called && called in heavy && !asked ? [`${file} ${name}: { task = "${called}" } from a task the flow does not run`] : [];
+        return called && (called in heavy || viaFlow.has(called)) && !asked ? [`${file} ${name}: { task = "${called}" } from a task the flow does not run`] : [];
       });
     });
   });
   expect(wrong).toEqual([]);
 });
 
-test('the tasks that end with the verification are the three the gate names, and each says it is asking', () => {
-  const setup = (parse(readFileSync('tasks/project.toml', 'utf8')) as Record<string, any>)['project:setup'].run as unknown[];
-  expect(setup.at(-1)).toBe('REMY_FLOW=${REMY_FLOW:-setup} mise run project:verify');
-  for (const file of ['tasks/packages/upgrade', 'tasks/project/upgrade-ui']) expect(readFileSync(file, 'utf8'), file).toMatch(/^REMY_FLOW="\$\{REMY_FLOW:-upgrade\}" mise run project:verify$/m);
+// An installation (setup, the upgrades) ends with its own checks, about a minute and no browser; the
+// browser suite is GitHub's after every landing and the release's (owner, 2026-10-11, of a setup that
+// ran it: "Setup takes 2 minutes. This is clearly wrong").
+test('an installation ends with project:verify-setup, which runs nothing heavy; the release gate starts with it', () => {
+  const tasks = parse(readFileSync('tasks/project.toml', 'utf8')) as Record<string, any>;
+  expect((tasks['project:setup'].run as unknown[]).at(-1)).toEqual({ task: 'project:verify-setup' });
+  for (const file of ['tasks/packages/upgrade', 'tasks/project/upgrade-ui']) expect(readFileSync(file, 'utf8'), file).toMatch(/^mise run project:verify-setup$/m);
+  const run = tasks['project:verify-setup'].run as unknown[];
+  const wrong = run.flatMap(entry => typeof entry === 'string' ? (runsHeavy.test(entry) ? [entry] : []) : ((entry as { task?: string }).task ?? '') in heavy ? [entry] : []);
+  expect(wrong).toEqual([]);
+  expect((tasks['project:verify'].run as unknown[])[1]).toEqual({ task: 'project:verify-setup' });
 });

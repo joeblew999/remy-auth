@@ -35,8 +35,9 @@ Below this section is the history of how it got here.
      route's chunks from Workers Assets is the suspect) and fix that, not the 5 s. What the flow did
      with it is fixed the same day: `dev:land` no longer stops there with the translation skipped.
    - **The by-hand tasks that end in the verification, never run since the gate.** `project:setup`,
-     `packages:upgrade` and `project:upgrade-ui` called `project:verify` bare, which the gate (10-09)
-     refuses; fixed 2026-10-10 by each saying it is asking, and proved at the gate only
+     `packages:upgrade` and `project:upgrade-ui` called `project:verify` bare, and `ui:release` called
+     `packages:release` bare, which the gate (10-09) refuses; fixed 2026-10-10 by each saying it is
+     asking (`ui:release` is now an alias of `dev:release`), and proved at the gate only
      (`REMY_FLOW=setup mise run dev:allowed -- project:verify` passes, a bare one is refused). None of
      the three has been run end to end since: item 3's `project:upgrade-ui` on remy-auth-app is the
      first, and the place it would have failed. Their descriptions disagree on the time too
@@ -49,6 +50,11 @@ Below this section is the history of how it got here.
      command position only if it bites again. An agent also cannot reproduce a red job with the
      task GitHub ran (the hook refuses `REMY_FLOW=hand` from an agent): its way is the run's log and
      `project:test:only`, now said in how-we-work.
+   - **The `remy` skill's hash moves with the docs.** `skills-lock.json` records a hash of the `remy`
+     skill, which `ui:generate` makes from these developer docs, so every docs landing leaves the lock
+     stale until someone's `project:setup` rewrites it (seen 2026-10-10: setup dirtied the tree after the
+     day's doc changes). Either the lock stops hashing a generated skill, or `dev:land` refreshes it
+     when docs changed; decide in item 4's work on the tooling.
    - **The new-app steps** in [tasks](../docs/content/dev/tasks.md) were corrected by reading, not by
      running (translate once by hand with `REMY_FLOW=hand`, the first deploy by hand, then the flow);
      creating `remy-auth-test` (item 3) is their first run.

@@ -242,7 +242,7 @@
     "remy": {
       "source": "./node_modules/@joeblew999/remy-ui/skills",
       "sourceType": "local",
-      "computedHash": "a56e3ac2779de157c5a9ec832ab34fb27f5c097619127cbdf8a4af028616c4be"
+      "computedHash": "9e4b15b2d0ab45d7235999f381626c7914d5cf0fa0116dd69eda95b7cc465866"
     },
     "router-core": {
       "source": "TanStack/router",

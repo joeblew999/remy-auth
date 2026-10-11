@@ -168,7 +168,7 @@ half-updated.
 - `i18n:check` only reads, offline, so it is safe anywhere, in any number of worktrees, and as a
   `depends`. `i18n:translate` is never a `depends`.
 - Stale or missing is a warning while pumping (`project:check` prints it) and an error at release
-  (`ui:release` runs `i18n:check` with `I18N_STRICT=1` first).
+  (`dev:release` runs `i18n:check` with `I18N_STRICT=1` first).
 - Commit only real translation changes to a translation file: any commit to it marks it current. A
   structural change (a rename, a sweep) that touches docs translations is followed by
   `mise run i18n:docs:translate -- <file>…`, which re-checks those files against the English in full.
@@ -186,7 +186,7 @@ not a file of their own. A plan closes the day its work ships: a closing line, t
 features wait in `.plans/parked/`. Closing a plan needs no extra deploy or test run of its own: batch the
 code into one deploy and one full run at the end.
 The shared `plans:*` tasks do the moves: `plans:status` lists what is open, `plans:close`, `plans:park` and
-`plans:open` (a parked plan taken up again) add the line, move the file and repoint every link, and `plans:check` (in tier 0) keeps `.plans/` tidy
+`plans:open` (a parked plan taken up again) add the line, move the file and repoint every link, and `plans:check` (in the check, `dev:change`) keeps `.plans/` tidy
 ([tasks](./tasks.md#plans)).
 
 ## When the owner delegates decisions
@@ -239,7 +239,7 @@ tasks; `project:setup` installs the guard.
   `project:upgrade-ui`) says it is asking, so those run as written.
 - **These pages never give a command the tooling refuses.** A heavy task is written with
   `REMY_FLOW=hand` in front or named without `mise run`; `tests/unit/dev-flow.unit.spec.ts` reads
-  every English page and every task for one run bare, on every check (2026-10-10: eight lines on five
+  every English page and every task for one run bare, on every check (2026-10-10: eight lines on six
   pages did, and `project:setup` ended in the refusal).
 - A rule that can be a function belongs in `tests/**/*.unit.spec.ts` (no build, no Worker, no
   browser), so it runs on every check for free. The browser is for what only a browser shows.
@@ -349,8 +349,8 @@ the only integrator, and GitHub checks every landing. Nothing here is done by ha
   starts one agent per part with `dev:start`. A part that needs another's result waits for that
   landing; it does not share a worktree.
 - **Spike first when the risk is unknown**: one agent proves the risky point and lands or stops.
-- **Every part proves itself**: it lands with its own check in `tests/`, in the plain-function tier
-  when it can be one, in the browser when only a browser shows it.
+- **Every part proves itself**: it lands with its own check in `tests/`, a plain function
+  (`tests/**/*.unit.spec.ts`) when it can be one, in the browser when only a browser shows it.
 - **Landings serialise themselves.** Two agents landing at once: the second's `dev:land` sees main
   moved, merges it in, checks again and lands. The translation step is one writer across worktrees.
 - **Hands-on pass before production.** Passing checks is not the end: use the piece on staging in a

@@ -24,9 +24,8 @@ for workflow in .github/workflows/*.yml; do
 done
 
 # New mise processes, so the tasks of the release just selected run: its skills (the remy skill of this
-# version), the AGENTS.md block naming it, then project:verify.
+# version), the AGENTS.md block naming it, then the installation's checks (project:verify-setup).
 mise run skills:install
 mise run agents:rules
 mise run dev:guard
-# project:verify is gated (dev:allowed): this task says it is the one asking.
-REMY_FLOW="${REMY_FLOW:-upgrade}" mise run project:verify
+mise run project:verify-setup

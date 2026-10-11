@@ -9,6 +9,11 @@ reading order. The root `AGENTS.md` and `CLAUDE.md` only point here
 ([where rules live](./how-we-work.md#where-rules-live)). Read the documents below before changing
 anything, and follow them over your own defaults.
 
+When two pages disagree, [the flow's table](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)
+wins, and the page that disagrees is a bug: fix it in the landing you are on
+([see something: fix it](./how-we-work.md#see-something-fix-it-or-write-it-down-in-the-same-landing)).
+A contradiction between pages is never a reason to stop, or to ask the owner which is right.
+
 Live: the app <https://remy-auth.gedw99.workers.dev> (staging, with the automatic sign-in:
 <https://remy-auth-staging.gedw99.workers.dev>); the developer docs <https://remy-auth-docs.gedw99.workers.dev/dev>
 (the product guide `/docs`, the API reference `/reference`; MCP servers `/api/mcp/dev`, `/api/mcp/reference`,

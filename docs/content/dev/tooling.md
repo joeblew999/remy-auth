@@ -16,7 +16,7 @@ mise run auth:info
 Every tool comes through mise, down to the operating system's level. Node and fnox are pinned in
 `mise.toml`'s `[tools]`; the shared tasks pin the tools they run as task-level `tools`, so every app that
 includes them gets the same versions with no entry of its own: `gh` (`project:setup`, `project:upgrade-ui`,
-`ui:release`), `jq`, `@lingual/i18n-check` and Claude Code (`i18n:*`). Better Auth CLI (`auth`), Wrangler,
+`dev:release`), `jq`, `@lingual/i18n-check` and Claude Code (`i18n:*`). Better Auth CLI (`auth`), Wrangler,
 Chrome DevTools and Modern Web Guidance are pinned in `package.json` and `package-lock.json`. `project:setup` runs `npm ci`, installs the pinned official
 skills for Codex and Claude, registers project MCP tooling, then runs `project:verify`. It stops on any
 failed step. Commands use the local binaries and accept upstream CLI
@@ -54,7 +54,7 @@ deploy, because Wrangler would otherwise create it by itself.
 
 These are developer/operator tools. Remy end-user CLI login and delegated API calls
 remain part of the service milestone. Both apps are live on Cloudflare; `cf:deploy` uploads to
-`DEPLOY_ORIGIN`, set in [mise.toml](https://github.com/joeblew999/remy-auth/blob/main/mise.toml), and runs only on the owner's request.
+`DEPLOY_ORIGIN`, set in [mise.toml](https://github.com/joeblew999/remy-auth/blob/main/mise.toml); `dev:promote` runs it, on the owner's request only.
 
 ### Package upgrades
 
@@ -92,7 +92,7 @@ CLI passthrough tasks accept upstream flags directly, such as
 | --- | --- |
 | `project:*` | Setup, pipeline and verification (shared defaults from `tasks/project.toml`; `[env]` supplies the inputs) and tool diagnostics |
 | `packages:*` | Check and upgrade npm packages; pack, release and publish the repository's own packages ([tasks](./tasks.md#a-repository-that-publishes-packages)) |
-| `ui:*` | Compile the shared catalogs (`ui:generate`), regenerate the shadcn components and theme (`ui:components`, `ui:theme`), prove them untouched (`ui:verify`), release the package and the tasks (`ui:release`, the shared `packages:release`) |
+| `ui:*` | Compile the shared catalogs (`ui:generate`), regenerate the shadcn components and theme (`ui:components`, `ui:theme`), prove them untouched (`ui:verify`), release the package and the tasks (`ui:release`, an alias of the flow's `dev:release`) |
 | `skills:*` | Install, list and remove the pinned official skills |
 | `auth:*` | Better Auth: its CLI and diagnostics (`auth:cli`, `auth:info`), migrations for the local D1 (`auth:generate`, `auth:migrate`), the local environment (`auth:local`), its captured sign-in codes (`auth:mail`) and what a deployment needs (`auth:provision`, prints only) |
 | `cf:*` | Cloudflare CLI, live logs, deployment (`cf:deploy` for production, `cf:staging` for staging), what each deployment is running (`cf:versions`), throwaway check Workers (`cf:preview`, `cf:preview-delete`), stored logs and AI usage (`cf:events`, `cf:ai-*`); shared tasks, listed in the [tasks README](./tasks.md#cloudflare-tasks) |
@@ -116,8 +116,7 @@ reported conflict before using `project:setup`; no automatic rollback discards y
 `project:setup` continues to reproduce the lockfile. Workspace dependencies are upgraded too; the local `@joeblew999/remy-ui` and `@joeblew999/remy-auth-contract` references are excluded
 from registry upgrades. Node and skill-source pins in
 `mise.toml` are managed separately. The verification workflow includes GUI type checking, a Worker build and browser
-tests. Auth runtime compatibility
-will need its own tests when Better Auth is integrated.
+tests.
 
 ### Verification
 
@@ -138,9 +137,10 @@ does not provision Cloudflare resources. Skill checks cover the lockfile invento
 not upstream discovery or content-integrity hashes.
 
 The Wrangler configuration check uses its own reader. Verification then generates
-types, builds and dry-runs deployment packaging for the GUI/Worker, runs the
-Playwright and Lighthouse checks against the production artifact in local Workers using installed
-Chrome. No deployment is performed. See [the GUI proof](./gui.md) for scope and commands.
+types, builds and dry-runs deployment packaging for the GUI/Worker, runs every browser check of ours
+in every language (`project:test`) against the production artifact in local Workers using installed
+Chrome, then the consumer fixture. Google's audits are not in it: `project:test:google` and
+`project:test:cwv`, which `packages:release` runs after it. No deployment is performed. See [the GUI proof](./gui.md) for scope and commands.
 
 
 ## Start or reload your agent
@@ -327,7 +327,7 @@ The [observability plan](https://github.com/joeblew999/remy-auth/blob/main/.plan
 D1 health, durable auth audit records, correlation, dashboards and alerts.
 `wrangler.jsonc` enables logs/traces and URL query redaction for the GUI Worker.
 A GUI Worker entry now emits request IDs, status and timing without logging URLs,
-headers or cookies. D1 and authentication are not implemented.
+headers or cookies. Sign-in's durable audit records are not implemented.
 
 ```sh
 mise run cf:logs -- --help
