@@ -196,18 +196,25 @@ test('the seeded people hold the seeded relations, and an administrator, by role
   // On a note written for this check: the administrator's page offers Delete alone, the server refuses the rest, and Delete works.
   const author = await signedIn(playwright, baseURL, newEmail('author'));
   const note = await (await author.post('/api/notes', { data: { title: `To moderate ${newEmail('n')}`, body: '' } })).json() as Note;
-  expect(await take(ada, 'EDIT_NOTE', note)).toBe(403);
-  expect(await take(ada, 'SHARE_NOTE', note)).toBe(403);
-  const context = await browser.newContext({ baseURL, storageState: await ada.storageState() });
-  const page = await context.newPage();
-  const errors = collectErrors(page);
-  await page.goto(localizedPath('/app/notes', 'en'));
-  const card = page.locator(`[data-note="${note.id}"]`);
-  await expect(card).toBeVisible();
-  expect(await offeredActions(card)).toEqual(['DELETE_NOTE']);
-  await card.getByRole('button', { name: m.notes_delete({}, o) }).click();
-  await expect(card).toHaveCount(0);
-  expect((await list(author)).notes).toEqual([]);
-  expect(errors).toEqual([]);
-  await Promise.all([ada, ben, cleo, dev, eli, author].map(who => who.dispose()));
+  try {
+    expect(await take(ada, 'EDIT_NOTE', note)).toBe(403);
+    expect(await take(ada, 'SHARE_NOTE', note)).toBe(403);
+    const context = await browser.newContext({ baseURL, storageState: await ada.storageState() });
+    const page = await context.newPage();
+    const errors = collectErrors(page);
+    await page.goto(localizedPath('/app/notes', 'en'));
+    const card = page.locator(`[data-note="${note.id}"]`);
+    await expect(card).toBeVisible();
+    expect(await offeredActions(card)).toEqual(['DELETE_NOTE']);
+    await card.getByRole('button', { name: m.notes_delete({}, o) }).click();
+    // Two round trips (the delete, then the page asks the server for everything again) over every note the
+    // administrator sees: in a full run, with six workers on one local Worker, that passed 5 s (2026-10-11).
+    await expect(card).toHaveCount(0, { timeout: 20_000 });
+    expect((await list(author)).notes).toEqual([]);
+    expect(errors).toEqual([]);
+  } finally {
+    // A failed run leaves no note behind for the administrator's page to list on every later run.
+    await take(author, 'DELETE_NOTE', note);
+    await Promise.all([ada, ben, cleo, dev, eli, author].map(who => who.dispose()));
+  }
 });
