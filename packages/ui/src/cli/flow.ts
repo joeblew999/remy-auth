@@ -49,6 +49,16 @@ export const heavy: Record<string, string> = {
   'playwright test': 'the browser suite by hand: dev:change runs the check; mise run project:test:only -- <words> runs one area',
   'i18n:translate': 'translation: dev:land runs it on main, once, after the merge',
   'i18n translate': 'translation: dev:land runs it on main, once, after the merge',
+  'remy test': 'every language: GitHub runs it after every push (npm run dev:land); one area: npm run test -- only <words>',
+  'npm test': 'every language: GitHub runs it after every push (npm run dev:land); one area: npm run test -- only <words>',
+  'test:consumers': 'the consumer fixture: GitHub runs it after every push; remy test consumers is its gate',
+};
+
+/** Where a key's spelling needs more than its words: the suite is refused, its light forms (only, report, live, smoke) are not. */
+const spelled: Record<string, RegExp> = {
+  'remy test': /\bremy(?:\.[jt]s)?\s+test(?!\s+(?:only|report|live|smoke)\b)/,
+  'npm test': /\bnpm\s+(?:run\s+)?test\b(?!:)(?!\s+--\s+(?:only|report|live|smoke)\b)/,
+  'test:consumers': /\b(?:npm\s+run\s+test:consumers|fixtures\/consumer\/run\.sh)\b/,
 };
 
 const git = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
@@ -103,6 +113,7 @@ export function where(): { branch: string; onMain: boolean; clean: boolean } {
 /** What a task is, as the hook sees a shell command: the task name a `mise run` names, or a bare tool. */
 export function heavyIn(command: string): { task: string; why: string } | undefined {
   for (const [task, why] of Object.entries(heavy)) {
+    if (spelled[task]) { if (spelled[task].test(command)) return { task, why }; continue; }
     const asMise = new RegExp(`\\bmise\\s+run\\s+${task.replace(/[:.]/g, '\\$&')}(\\s|$)`);
     const asTool = task.includes(' ') ? new RegExp(`\\b${task.replace(/\s+/g, '\\s+')}\\b`) : undefined;
     if (asMise.test(command) || asTool?.test(command)) return { task, why };

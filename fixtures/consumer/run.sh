@@ -8,7 +8,7 @@ sha=$(git rev-parse --short HEAD)
 # 1. The platform and the showcase as npm serves them, each with a version no registry has (build metadata, so
 #    the showcase's peer range still holds), so npm can never substitute a published copy (it did once: the
 #    scratch tarball was 0.13.0, the published version).
-mise run project:generate > /dev/null
+npm run --silent generate > /dev/null
 pack() { # <folder> <name> -> the tarball's path
   local v; v="$(node -p "require('./packages/$1/package.json').version")+dev.$sha"
   rsync -a --exclude node_modules "packages/$1/" "$out/$1/"

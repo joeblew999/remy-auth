@@ -11,10 +11,10 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { gate } from './allowed.ts';
 import { check } from './check.ts';
-import { run } from './flow.ts';
 import { register } from './mcp.ts';
 import { main as guard } from './register.ts';
 import { pins, remySkillPath } from './skills.ts';
+import { consumers, every } from './test.ts';
 
 type Json = Record<string, any>;
 const readJson = (file: string): Json => JSON.parse(readFileSync(file, 'utf8'));
@@ -127,8 +127,9 @@ export async function verifySetup(): Promise<void> {
 export async function verify(): Promise<void> {
   gate('project:verify');
   await verifySetup();
-  run('project:test', 'release');
-  run('project:test:consumers', 'release');
+  process.env.REMY_FLOW ??= 'release';
+  every();
+  consumers();
 }
 
 export async function main(args: string[]): Promise<void> {

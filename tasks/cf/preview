@@ -1,46 +1,7 @@
 #!/usr/bin/env bash
 #MISE description="REMOTE: deploy this commit as a throwaway Worker <worker>-check-<commit> (production untouched), wait until it serves this build, run level 1 against it, then delete the Worker (~2 min). KEEP_PREVIEW=1 keeps it (project:test:cwv; cf:preview-delete removes it). Builds into dist/: not alongside a local level"
-#MISE dir="{{config_root}}"
 #USAGE arg "[alias]" help="Name part instead of the commit (lowercase letters, digits, dashes)"
-# Why a separate Worker: preview URLs are off (wrangler.jsonc: every old version and alias was public),
-# and Cloudflare's Previews are served through that same switch. A Worker of its own has its own
-# workers.dev address, needs no preview URLs, and `wrangler delete` removes it completely.
-set -euo pipefail
-remy() { if [ -f packages/ui/src/cli/remy.ts ]; then node packages/ui/src/cli/remy.ts "$@"; else node ./node_modules/@joeblew999/remy-ui/cli/remy.js "$@"; fi; }
-worker="$(node --input-type=module -e "import { unstable_readConfig } from 'wrangler'; console.log(unstable_readConfig({}).name ?? '')")"
-[ -n "$worker" ] || { echo "cf:preview: the Wrangler configuration has no Worker name" >&2; exit 1; }
-host="${DEPLOY_ORIGIN#https://}"
-case "$host" in
-  "$worker".*.workers.dev) ;;
-  *) echo "cf:preview needs DEPLOY_ORIGIN on workers.dev as https://$worker.<subdomain>.workers.dev (got $DEPLOY_ORIGIN)" >&2; exit 1 ;;
-esac
-part="${usage_alias:-$(git rev-parse --short=7 HEAD)}"
-part="$(printf '%s' "$part" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-' '-' | sed 's/^-*//; s/-*$//' | cut -c1-20)"
-name="$worker-check-$part"
-origin="https://$name.${host#"$worker".}"
-echo "Target: Cloudflare (remote), throwaway Worker $name at $origin"
-
-remove() { "$(dirname "$0")/preview-delete" "$name"; }
-[ "${KEEP_PREVIEW:-}" = 1 ] || trap remove EXIT
-
-export PUBLIC_ORIGIN="$origin"
-./node_modules/.bin/vite build
-# Nothing is created by a deploy: every binding of the built configuration names a resource that exists.
-remy cloudflare provisioned
-output="$(mktemp)"
-export WRANGLER_OUTPUT_FILE_PATH="$output"
-./node_modules/.bin/wrangler deploy --name "$name"
-remy cloudflare wait "$origin" "$output"
-rm -f "$output"
-# A brand-new workers.dev name answers 404 from some places for a while: wait for ten answers in a row.
-ok=0
-for _ in $(seq 1 120); do
-  if [ "$(curl -s -o /dev/null -w '%{http_code}' "$origin/healthz")" = 200 ]; then ok=$((ok + 1)); else ok=0; fi
-  [ "$ok" -ge 10 ] && break
-  sleep 1
-done
-[ "$ok" -ge 10 ] || { echo "cf:preview: $origin did not answer steadily within 2 minutes" >&2; exit 1; }
-
-export TEST_BASE_URL="$origin" TEST_TARGET=remote CHECK_LOCALES="${CHECK_LOCALES:-${QUICK_LOCALES:-en,ar}}"
-./node_modules/.bin/playwright test --project=ours
-echo "Preview passed level 1: $origin"
+#MISE dir="{{config_root}}"
+# In TypeScript now (packages/ui/src/cli): this task forwards for whoever still types mise run, and goes with mise.
+if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts cloudflare preview "$@"; fi
+exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js cloudflare preview "$@"

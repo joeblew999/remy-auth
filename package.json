@@ -33,6 +33,12 @@
     "generate": "node packages/ui/paraglide.mjs && node packages/ui/skill.mjs && tsc -p packages/ui/src/cli",
     "setup": "node packages/ui/src/cli/remy.ts setup",
     "packages": "node packages/ui/src/cli/remy.ts packages",
-    "release-checks": "mise run template:check && mise run ui:verify"
+    "release-checks": "mise run template:check && mise run ui:verify",
+    "dev": "node packages/ui/src/cli/remy.ts app dev",
+    "build": "node packages/ui/src/cli/remy.ts app build",
+    "preview": "node packages/ui/src/cli/remy.ts app preview",
+    "test": "node packages/ui/src/cli/remy.ts test",
+    "local": "node scripts/local.ts",
+    "test:consumers": "bash fixtures/consumer/run.sh"
   }
 }

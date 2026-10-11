@@ -7,8 +7,8 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { run } from './flow.ts';
 import { translationGaps } from './i18n.ts';
+import { cwv, google } from './test.ts';
 import { verify, verifySetup } from './verify.ts';
 
 function fail(message: string): never { console.error(message); process.exit(1); }
@@ -158,8 +158,9 @@ export async function release(): Promise<void> {
   bumped();
   await verify();
   tool('npm', ['run', '--if-present', '--silent', 'release-checks'], { what: 'release-checks' });
-  run('project:test:google', 'release');
-  run('project:test:cwv', 'release', ['release']);
+  process.env.REMY_FLOW ??= 'release';
+  await google();
+  await cwv('release');
   tag();
 }
 

@@ -71,7 +71,10 @@ already does, and the scripts list is the documentation of what exists.
    [setup|tooling|doctor]`, `remy skills`, `remy mcp`, `remy rules`. The same day, `packages:*` and
    the release (`packages.ts`: `remy packages check|upgrade|pack|notes|bumped|publish|tag|release`,
    `remy release` on it; the release package and title in `remy.config.ts`; an app's own release
-   checks are its "release-checks" script). Left: `docs:*`, `ui:*`, `template:*`, `browser:*`, `api:*`, `cf:preview` and the observe and
+   checks are its "release-checks" script). The same day, the checks and the hand tools (`test.ts`:
+   `remy test` with every level, the throwaway preview and the speed measurement in `cloudflare.ts`;
+   `dev.ts`: `remy app dev|build|preview`; an app's local state is its "local" script, remy-auth's
+   `scripts/local.ts`; `npm run dev|build|preview|test`). The steps run no mise task now. Left: `docs:*`, `ui:*`, `template:*`, `browser:*`, `api:*`, `cf:preview` and the observe and
    gateway modules, and remy-auth's own `auth:*` in its `package.json`.
 6. **GitHub and the consumers:** the workflow on `actions/setup-node` and `npm run`; the template
    and remy-auth-app on the scripts (`project:upgrade-ui` becomes `npm install @joeblew999/remy-ui@x`).

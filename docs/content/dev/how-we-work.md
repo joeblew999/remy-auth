@@ -226,7 +226,7 @@ tasks; `project:setup` installs the guard.
   reads the table and still asks whether to land has stopped using the flow (owner, 2026-10-10,
   after one did: "Is it absolutely clear when each should be run by you?").
 
-- One area that looks wrong: `mise run project:test:only -- <words>` (the browser checks whose title
+- One area that looks wrong: `npm run test -- only <words>` (the browser checks whose title
   matches, en and ar, ~30 s). It is the only browser run a step does not own.
 - **The guard** (`dev:guard`, a Claude Code hook on every shell command an agent runs) refuses
   `project:verify`, `project:test`, `project:test:quick`, `project:test:remote`, `project:test:google`,
@@ -260,7 +260,7 @@ tasks; `project:setup` installs the guard.
   `REMY_FLOW=hand mise run <its task>`, the same task GitHub ran, since the workflow holds no logic of
   its own (`project:verify-tooling` checks every task a workflow names exists). An agent reads the
   run's own log (`gh run view <id> --log-failed`) and runs the one area
-  (`mise run project:test:only -- <words>`). Report what was tested and what was not; never call
+  (`npm run test -- only <words>`). Report what was tested and what was not; never call
   untested work verified.
 - **A landing that fails after the push still finishes what it can, and says where it stopped.**
   Main is pushed before staging; when staging's deploy or its live smoke fails, `dev:land` still runs

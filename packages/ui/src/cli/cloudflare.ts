@@ -189,9 +189,73 @@ export async function urls(origin = process.env.DEPLOY_ORIGIN): Promise<void> {
   console.log(`Health: ${new URL('/healthz', origin).href}`);
 }
 
+/** The Worker's name in the Wrangler configuration. */
+async function workerName(): Promise<string> {
+  const { unstable_readConfig } = await import(pathToFileURL(createRequire(join(process.cwd(), 'package.json')).resolve('wrangler')).href) as typeof import('wrangler');
+  const name = unstable_readConfig({}).name;
+  if (!name) fail('the Wrangler configuration has no Worker name');
+  return name;
+}
+
+/**
+ * Deploy this commit as a throwaway Worker <worker>-check-<alias> (production untouched), wait until it
+ * serves this build, run level 1 against it in the quick languages, then delete it (or keep it, for
+ * the speed measurement). A Worker of its own, because preview URLs are off (every old version and
+ * alias was public) and `wrangler delete` removes it completely. Answers the preview's origin.
+ */
+export async function preview(alias?: string, keep = false): Promise<string> {
+  const worker = await workerName();
+  const host = (process.env.DEPLOY_ORIGIN ?? '').replace(/^https:\/\//, '');
+  if (!host.startsWith(`${worker}.`) || !host.endsWith('.workers.dev')) fail(`preview needs origins.production on workers.dev as https://${worker}.<subdomain>.workers.dev (got ${process.env.DEPLOY_ORIGIN})`);
+  const part = (alias ?? execFileSync('git', ['rev-parse', '--short=7', 'HEAD'], { encoding: 'utf8' }).trim()).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/^-+|-+$/g, '').slice(0, 20);
+  const name = `${worker}-check-${part}`;
+  const origin = `https://${name}.${host.slice(worker.length + 1)}`;
+  console.log(`Target: Cloudflare (remote), throwaway Worker ${name} at ${origin}`);
+  const remove = async () => { await previewDelete(name).catch(error => console.error(`preview: could not delete ${name}: ${error instanceof Error ? error.message : String(error)}`)); };
+  try {
+    tool('vite', ['build'], { env: { PUBLIC_ORIGIN: origin } });
+    await provisioned();
+    const scratch = mkdtempSync(join(tmpdir(), 'remy-preview-'));
+    try {
+      const output = join(scratch, 'wrangler.ndjson');
+      tool('wrangler', ['deploy', '--name', name], { env: { WRANGLER_OUTPUT_FILE_PATH: output } });
+      await waitFor(origin, output);
+    } finally { rmSync(scratch, { recursive: true, force: true }); }
+    // A brand-new workers.dev name answers 404 from some places for a while: wait for ten answers in a row.
+    let ok = 0;
+    for (let attempt = 0; attempt < 120 && ok < 10; attempt++) {
+      ok = (await fetch(new URL('/healthz', origin), { cache: 'no-store' }).then(response => response.status === 200).catch(() => false)) ? ok + 1 : 0;
+      if (ok < 10) await sleep(1000);
+    }
+    if (ok < 10) fail(`preview: ${origin} did not answer steadily within 2 minutes`);
+    tool('playwright', ['test', '--project=ours'], { env: { TEST_BASE_URL: origin, TEST_TARGET: 'remote', CHECK_LOCALES: process.env.CHECK_LOCALES ?? process.env.QUICK_LOCALES ?? 'en,ar' } });
+    console.log(`Preview passed level 1: ${origin}`);
+    return origin;
+  } finally { if (!keep) await remove(); }
+}
+
+/** Delete a throwaway check Worker by its full name; with none, list them. Never the production Worker. */
+export async function previewDelete(name?: string): Promise<void> {
+  const worker = await workerName();
+  const wrangler = (...args: string[]) => execFileSync(join(process.cwd(), 'node_modules', '.bin', 'wrangler'), args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  if (!name) {
+    console.log(`Check Workers of ${worker} on Cloudflare:`);
+    const token = (JSON.parse(wrangler('auth', 'token', '--json')) as { token: string }).token;
+    const account = (JSON.parse(wrangler('whoami', '--json')) as { accounts: { id: string }[] }).accounts[0]!.id;
+    const answer = await (await fetch(`https://api.cloudflare.com/client/v4/accounts/${account}/workers/scripts`, { headers: { Authorization: `Bearer ${token}` } })).json() as { result?: { id: string }[] };
+    for (const script of answer.result ?? []) if (script.id.startsWith(`${worker}-check-`)) console.log(`  ${script.id}`);
+    return;
+  }
+  if (!name.startsWith(`${worker}-check-`) || name === `${worker}-check-`) fail(`preview-delete only deletes check Workers named ${worker}-check-<name> (got ${name})`);
+  console.log(`Target: Cloudflare (remote), deleting Worker ${name}`);
+  tool('wrangler', ['delete', '--name', name, '--force']);
+}
+
 export async function main(args: string[]): Promise<void> {
   const [command, ...rest] = args;
   switch (command) {
+    case 'preview': { const keep = rest.includes('--keep'); await preview(rest.find(part => !part.startsWith('--')), keep); return; }
+    case 'preview-delete': return previewDelete(rest[0]);
     case 'deploy': return deploy();
     case 'staging': return deploy('staging');
     case 'docs-deploy': return deployDocs();
@@ -199,6 +263,6 @@ export async function main(args: string[]): Promise<void> {
     case 'urls': return urls(rest[0]);
     case 'wait': { const [origin, output] = rest; if (!origin || !output) fail('remy cloudflare wait <origin> <wrangler-output-file>'); return waitFor(origin, output); }
     case 'provisioned': return provisioned();
-    default: console.error('remy cloudflare: deploy | staging | docs-deploy | versions [origins...] | urls [origin] | wait <origin> <output> | provisioned'); process.exit(2);
+    default: console.error('remy cloudflare: deploy | staging | docs-deploy | versions [origins...] | urls [origin] | preview [alias] [--keep] | preview-delete [name] | wait <origin> <output> | provisioned'); process.exit(2);
   }
 }

@@ -3,7 +3,6 @@ import { installed } from './flow.ts';
 import { existsSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { portsFor, remyCommand } from './config.ts';
-import { internal } from './internal.ts';
 
 export function main(args: string[]): void {
 
@@ -36,13 +35,10 @@ if (!worktrees.includes(`worktree ${path}\n`)) {
 const { preview: port } = portsFor(name);
 writeFileSync(join(path, 'mise.local.toml'), `# Written by npm run dev:start (${name}): this worktree's own ports, never shared with another. Not committed.\n[env]\nPREVIEW_PORT = "${port}"\nDOCS_PREVIEW_PORT = "${port + 1}"\n`);
 
-const run = (task: string) => {
-  const status = internal(task, 'start', { cwd: path });
-  if (status !== 0) { console.error(`dev:start: ${task} failed`); process.exit(status); }
-};
 installed(path);
-// The app's local state (remy-auth: .dev.vars, the local databases, the guard's oRPC v1 fixture).
-run('project:prepare');
+// The app's local state (its "local" script, when it has one: remy-auth's .dev.vars, local databases, the guard's fixture).
+const local = spawnSync('npm', ['run', '--if-present', '--silent', 'local'], { cwd: path, stdio: 'inherit' });
+if (local.status !== 0) { console.error('dev:start: the local script failed'); process.exit(local.status ?? 1); }
 // The flow's hooks for this worktree's agents, through its own bin.
 const [remy, ...rest] = remyCommand(path);
 const guard = spawnSync(remy!, [...rest, 'guard'], { cwd: path, stdio: 'inherit' });

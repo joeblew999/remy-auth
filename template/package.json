@@ -19,6 +19,10 @@
     "plans": "remy plans",
     "generate": "node node_modules/@joeblew999/remy-ui/src/app-catalog.js",
     "setup": "remy setup",
-    "packages": "remy packages"
+    "packages": "remy packages",
+    "dev": "remy app dev",
+    "build": "remy app build",
+    "preview": "remy app preview",
+    "test": "remy test"
   }
 }
