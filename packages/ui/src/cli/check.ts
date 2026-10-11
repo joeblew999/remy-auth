@@ -6,6 +6,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { run, steps } from './flow.ts';
+import { checkAll as translations } from './i18n.ts';
 import { check as plans } from './plans.ts';
 
 /**
@@ -28,22 +29,23 @@ export function singleCopies(): void {
   console.log(`single copies: one version each of ${remy?.singleCopy?.length ?? 0} packages.`);
 }
 
-/** The parts in TypeScript, in order; the rest follow from steps.change.tasks. */
-export const parts: Record<string, () => void> = {
+/** The parts in TypeScript, in order; the rest follow from steps.change.tasks. Translations are a warning here. */
+export const parts: Record<string, () => void | Promise<unknown>> = {
   plans,
   'single-copies': singleCopies,
+  translations: () => translations(false),
 };
 
 /** The whole check: the parts here, then what is still a mise task. */
-export function check(): void {
-  for (const part of Object.values(parts)) part();
+export async function check(): Promise<void> {
+  for (const part of Object.values(parts)) await part();
   for (const task of steps.change.tasks) run(task, 'change');
 }
 
-export function main(args: string[]): void {
+export async function main(args: string[]): Promise<void> {
   const [name] = args;
-  if (!name) { check(); return; }
+  if (!name) { await check(); return; }
   const part = parts[name];
   if (!part) { console.error(`remy check: no part "${name}"; one of ${Object.keys(parts).join(', ')}, or none for the whole check.`); process.exit(2); }
-  part();
+  await part();
 }

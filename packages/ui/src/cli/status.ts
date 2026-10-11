@@ -1,9 +1,10 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { compose, type BranchFact, type CommitFact, type RunFact } from './feedback.ts';
+import { translationGaps } from './i18n.ts';
 import { internalOutput } from './internal.ts';
 
-export function main(): void {
+export async function main(): Promise<void> {
 
 // Everything asynchronous, answered by whoever owns the fact and never stored: GitHub (its runs,
 // pull requests), the Workers (what each runs), git (main, every worktree), the translation check.
@@ -25,7 +26,7 @@ const branches: BranchFact[] = read('-C', root, 'worktree', 'list', '--porcelain
   return { branch, path, ahead: ahead ?? 0, behind: behind ?? 0, base };
 });
 const deployments = process.env.DEPLOY_ORIGIN ? internalOutput('cf:versions', 'status')?.split('\n').filter(line => /^(ORIGIN|https?:)/.test(line)).join('\n') : undefined;
-const translations = internalOutput('i18n:check', 'status', { env: { I18N_STRICT: '1' } }) !== undefined ? 'complete and current' : 'stale or missing (dev:land translates on main)';
+const translations = (await translationGaps(root)).length === 0 ? 'complete and current' : 'stale or missing (dev:land translates on main)';
 const pulls = JSON.parse(ask('gh', ['pr', 'list', '--json', 'number,title,author']) ?? '[]').map((pull: { number: number; title: string; author: { login: string } }) => ({ number: pull.number, title: pull.title, author: pull.author.login }));
 
 // The open list, as the repo keeps it: the numbered items of now.md's "What is left" section, first line

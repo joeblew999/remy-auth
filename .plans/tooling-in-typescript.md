@@ -48,7 +48,9 @@ already does, and the scripts list is the documentation of what exists.
    `packages:release`. Each later slice deletes one of those calls.
 2. **The check** (`project:check`), as functions of `remy change` (`check.ts`), part by part:
    plans and single copies (done 2026-10-11: `plans.ts`, `remy plans` as the hand tool, the two
-   `.mjs` gone); then routes, types, the unit checks, the translation status, the docs build;
+   `.mjs` gone); the translation checks (done 2026-10-11: `i18n.ts`, `remy i18n check`, the two bash
+   scripts, `jq`, `@lingual/i18n-check` and `plurals.mjs` gone; the land and status steps ask a
+   function); then routes, types, the unit checks, the docs build;
    `project:verify-setup` with them, as `remy setup`'s end.
 3. **Cloudflare:** `cf:deploy`, `cf:staging`, `cf:wait`, `cf:versions`, `cf:urls`, `cf:preview`,
    the provisioned check; `remy promote` and `remy land` call functions.

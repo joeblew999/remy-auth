@@ -1,6 +1,7 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import { ended, span, type Landing, type Part } from './feedback.ts';
 import { describeRun, installed, latestRun, run, steps, where } from './flow.ts';
+import { translationGaps } from './i18n.ts';
 import { internal } from './internal.ts';
 
 export async function main(args: string[]): Promise<void> {
@@ -66,7 +67,7 @@ else console.error('dev:land: staging failed (the lines above say whether the de
 // main checkout, whose install follows the lockfile first (a landing can move it: 2026-10-11, the
 // bin this landing added was not linked there, and the translation's gate found no remy).
 installed(root);
-const upToDate = internal('i18n:check', 'land', { cwd: root, silent: true, env: { I18N_STRICT: '1' } }) === 0;
+const upToDate = (await translationGaps(root)).length === 0;
 let translation: Landing['translation'] = 'up to date';
 if (upToDate) { lap('translation check'); console.log('dev:land: translations are up to date.'); }
 else {

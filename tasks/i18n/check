@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="LOCAL, offline, read-only (safe as a depends, in any number of worktrees at once): i18n:messages:check and i18n:docs:check together. A WARNING while coding (exit 0); an error with I18N_STRICT=1 (ui:release sets it). project:check runs it"
 #MISE dir="{{config_root}}"
-set -uo pipefail
-mise run -q i18n:messages:check ::: i18n:docs:check && exit 0
-[ -z "${I18N_STRICT:-}" ] || exit 1
-echo "WARNING: translations are incomplete or stale; the next mise run dev:land translates them, on main."
+# In TypeScript now (packages/ui/src/cli/i18n.ts): this task forwards for whoever still types mise run, and goes with mise.
+if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts i18n check "$@"; fi
+exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js i18n check "$@"
