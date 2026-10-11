@@ -68,8 +68,10 @@ already does, and the scripts list is the documentation of what exists.
 5. **The rest of the namespaces.** Done 2026-10-11, the installation and the verification
    (`setup.ts`, `verify.ts`, `skills.ts` with the pins as data, `mcp.ts` pointing the agent clients at
    the app's own `chrome-devtools-mcp`, `rules.ts` in the npm wording): `npm run setup`, `remy verify
-   [setup|tooling|doctor]`, `remy skills`, `remy mcp`, `remy rules`. Left: `docs:*`, `packages:*`
-   (with the release), `ui:*`, `template:*`, `browser:*`, `api:*`, `cf:preview` and the observe and
+   [setup|tooling|doctor]`, `remy skills`, `remy mcp`, `remy rules`. The same day, `packages:*` and
+   the release (`packages.ts`: `remy packages check|upgrade|pack|notes|bumped|publish|tag|release`,
+   `remy release` on it; the release package and title in `remy.config.ts`; an app's own release
+   checks are its "release-checks" script). Left: `docs:*`, `ui:*`, `template:*`, `browser:*`, `api:*`, `cf:preview` and the observe and
    gateway modules, and remy-auth's own `auth:*` in its `package.json`.
 6. **GitHub and the consumers:** the workflow on `actions/setup-node` and `npm run`; the template
    and remy-auth-app on the scripts (`project:upgrade-ui` becomes `npm install @joeblew999/remy-ui@x`).

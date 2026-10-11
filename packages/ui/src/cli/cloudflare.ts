@@ -74,10 +74,21 @@ export async function waitFor(origin: string, output: string): Promise<void> {
   for (let attempt = 1; attempt <= attempts; attempt++) {
     const response = await fetch(new URL(`/assets/${asset}`, origin), { cache: 'no-store' }).catch(() => undefined);
     streak = response?.ok ? streak + 1 : 0;
-    if (streak === 3) { console.log(`${origin} serves this build's assets (${asset}).`); return; }
+    if (streak === 3) { console.log(`${origin} serves this build's assets (${asset}).`); break; }
+    if (attempt === attempts) fail(`wait: ${origin} did not serve this build's /assets/${asset} within ${attempts} s`);
     await sleep(1000);
   }
-  fail(`wait: ${origin} did not serve this build's /assets/${asset} within ${attempts} s`);
+  // The first page a check opens needs every chunk it references, each cold at the edge after a deploy:
+  // twice (2026-10-10, 2026-10-11) the smoke's hydration wait ran out on that first load and passed
+  // a minute later. So the wait ends only when the home page's every asset answers.
+  const home = await fetch(new URL('/', origin), { cache: 'no-store', redirect: 'follow' }).then(response => (response.ok ? response.text() : '')).catch(() => '');
+  const refs = [...new Set([...home.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g)].map(match => match[1]!))];
+  for (let attempt = 1; attempt <= attempts && refs.length; attempt++) {
+    const answers = await Promise.all(refs.map(path => fetch(new URL(path, origin), { cache: 'no-store' }).then(response => response.ok).catch(() => false)));
+    if (answers.every(Boolean)) { console.log(`${origin} serves the home page's ${refs.length} assets.`); return; }
+    if (attempt === attempts) fail(`wait: ${origin} did not serve all ${refs.length} assets of its home page within ${attempts} s`);
+    await sleep(1000);
+  }
 }
 
 /** The smoke checks against a live origin: the deploy proves itself with the tools, not by hand. */

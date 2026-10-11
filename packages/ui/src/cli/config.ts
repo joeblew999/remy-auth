@@ -13,6 +13,8 @@ export type RemyProject = {
   origins?: { production?: string; staging?: string; docs?: string };
   /** The main checkout's local ports (a worktree computes its own); never 4190, which browsers block. */
   ports?: { preview?: number; docsPreview?: number };
+  /** For a repository that publishes packages: the one whose version names a release, and the release's title. */
+  release?: { package: string; title?: string };
 };
 
 export const defineRemyProject = (project: RemyProject): RemyProject => project;
@@ -59,6 +61,7 @@ export async function configure(cwd = process.cwd()): Promise<RemyProject> {
   set('DEPLOY_ORIGIN', config.origins?.production); set('VITE_DEPLOY_ORIGIN', config.origins?.production);
   set('STAGING_ORIGIN', config.origins?.staging); set('VITE_STAGING_ORIGIN', config.origins?.staging);
   set('DOCS_ORIGIN', config.origins?.docs); set('VITE_DOCS_ORIGIN', config.origins?.docs);
+  set('RELEASE_PACKAGE', config.release?.package); set('RELEASE_TITLE', config.release?.title);
   const name = worktreeName(cwd);
   const ports = name ? portsFor(name) : { preview: config.ports?.preview ?? 4173, docsPreview: config.ports?.docsPreview ?? 4174 };
   set('PREVIEW_PORT', ports.preview); set('DOCS_PREVIEW_PORT', ports.docsPreview);

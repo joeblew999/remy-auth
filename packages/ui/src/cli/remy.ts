@@ -29,6 +29,7 @@ const commands: Record<string, () => Promise<Command>> = {
   skills: () => import('./skills.ts'),
   mcp: () => import('./mcp.ts'),
   rules: () => import('./rules.ts'),
+  packages: () => import('./packages.ts'),
 };
 
 const [name = '', ...args] = process.argv.slice(2);

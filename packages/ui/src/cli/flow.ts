@@ -26,8 +26,8 @@ export const steps: Record<Step, { what: string; tasks: readonly string[] }> = {
   land: { what: 'the check, then commit, main and staging', tasks: ['project:check'] },
   // Production, on purpose: what is on a pushed main, no gate (staging and GitHub ran the checks).
   promote: { what: 'production from a pushed main', tasks: ['cf:deploy'] },
-  // A release, on purpose, rarely: all of it, locally, then the tag (packages:release does both).
-  release: { what: 'every check, every language, then the tag', tasks: ['packages:release'] },
+  // A release, on purpose, rarely: all of it, locally, then the tag (packages.ts's release does both).
+  release: { what: 'every check, every language, then the tag', tasks: [] },
 };
 
 /**

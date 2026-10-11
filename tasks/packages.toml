@@ -7,15 +7,5 @@
 ["packages:release"]
 description = "Release: the gates one after another (translations strict, project:verify, project:release-checks, Google's audits locally and Core Web Vitals on a Cloudflare preview; ~5 min, uses dist/ and PREVIEW_PORT, so nothing else local at the same time), then packages:tag (tag, push, publish, GitHub release). CI repeats the audits on the tag"
 dir = "{{config_root}}"
-# A run list, not depends: mise runs depends in parallel.
-run = [
-  # First, so a release with missing or stale translations stops before the long checks.
-  "I18N_STRICT=1 mise run i18n:check",
-  # A changed package whose version is already published would be skipped, never shipped.
-  { task = "packages:bumped" },
-  { task = "project:verify" },
-  { task = "project:release-checks" },
-  { task = "project:test:google" },
-  { task = "project:test:cwv", args = ["release"] },
-  { task = "packages:tag" },
-]
+# In TypeScript now (packages/ui/src/cli/packages.ts, remy packages release; dev:release runs it): forwards for whoever still types mise run, and goes with mise.
+run = "if [ -f packages/ui/src/cli/remy.ts ]; then node packages/ui/src/cli/remy.ts packages release; else node ./node_modules/@joeblew999/remy-ui/cli/remy.js packages release; fi"

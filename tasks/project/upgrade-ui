@@ -28,4 +28,4 @@ done
 mise run skills:install
 mise run agents:rules
 mise run dev:guard
-mise run project:verify-setup
+if [ -f packages/ui/src/cli/remy.ts ]; then node packages/ui/src/cli/remy.ts verify setup; else node ./node_modules/@joeblew999/remy-ui/cli/remy.js verify setup; fi

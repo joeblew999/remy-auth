@@ -9,4 +9,5 @@ export default {
     docs: 'https://remy-auth-docs.gedw99.workers.dev',
   },
   ports: { preview: 4173, docsPreview: 4174 },
+  release: { package: '@joeblew999/remy-ui', title: 'Shared UI' },
 } satisfies RemyProject;

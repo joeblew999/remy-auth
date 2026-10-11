@@ -37,10 +37,12 @@ Below this section is the history of how it got here.
      the smoke's "hydrate without errors" timed out waiting 5 s for React to hydrate the just-deployed
      Worker's `/en` (3 of 4 passed; staging was up at that commit; no console error in the page
      snapshot); twenty minutes later the same smoke against the same staging passed 4 of 4, hydrating
-     in 1.4 s. So it is the first load of a fresh version, not the page. Seen once; every landing
-     repeats the experiment. If it repeats, find what the first load waits on (a cold fetch of the
-     route's chunks from Workers Assets is the suspect) and fix that, not the 5 s. What the flow did
-     with it is fixed the same day: `dev:land` no longer stops there with the translation skipped.
+     in 1.4 s. So it is the first load of a fresh version, not the page. It repeated 2026-10-11
+     (be07ad0, the same check, the same recovery a minute later), so the cause is fixed, not the 5 s:
+     the deploy's wait ended when the Worker version and one asset answered, while the first page
+     needs every chunk it references, each cold at the edge after a deploy; now the wait ends only when
+     the home page's every asset answers (`cloudflare.ts`). What the flow did with it was fixed
+     2026-10-10: `dev:land` no longer stops there with the translation skipped.
    - **The by-hand tasks that end in the verification, never run since the gate.** `project:setup`,
      `packages:upgrade` and `project:upgrade-ui` called `project:verify` bare, and `ui:release` called
      `packages:release` bare, which the gate (10-09) refuses; fixed 2026-10-10 by each saying it is

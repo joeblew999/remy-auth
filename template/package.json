@@ -18,6 +18,7 @@
     "dev:done": "remy done",
     "plans": "remy plans",
     "generate": "node node_modules/@joeblew999/remy-ui/src/app-catalog.js",
-    "setup": "remy setup"
+    "setup": "remy setup",
+    "packages": "remy packages"
   }
 }
