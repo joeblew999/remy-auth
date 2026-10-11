@@ -4,8 +4,8 @@ description: "One Cloudflare Worker serves the site and the app; how to run it l
 ---
 
 ```sh
-mise run project:dev       # http://127.0.0.1:5173/en
-mise run project:preview   # Production build on local Workers, port 4173
+npm run dev                # http://127.0.0.1:5173/en
+npm run preview            # Production build on local Workers, port 4173
 npm run dev:change        # The check, in seconds (the flow's first step)
 ```
 
@@ -26,44 +26,43 @@ Development uses the same Worker source and Cloudflare runtime with hot reload.
 
 | Task | Target |
 | --- | --- |
-| `project:dev` | Local Workers, hot reload, port 5173 |
-| `project:build` | Build and Wrangler deployment dry run; no upload |
-| `project:preview` | Build, then serve the production artifact on Cloudflare's local host at `PREVIEW_PORT` (4173) |
+| `npm run dev` | Local Workers, hot reload, port 5173 |
+| `npm run build` | Build and Wrangler deployment dry run; no upload |
+| `npm run preview` | Build, then serve the production artifact on Cloudflare's local host at `PREVIEW_PORT` (4173) |
 | `dev:change`, `dev:land`, `dev:promote`, `dev:release` | The flow ([how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), [tasks](./tasks.md)); its checks run on the same local host |
-| `project:test:google` / `project:test:cwv` | Google's level: Lighthouse audits locally; Core Web Vitals on a throwaway Cloudflare Worker |
-| `cf:deploy` | Build, then upload production to the authenticated Cloudflare account; `dev:promote` runs it |
-| `cf:staging` | The same for the staging environment: its own Worker (`STAGING_ORIGIN`) and resources |
-| `cf:preview` | Deploy this commit as a throwaway Worker, run level 1 against it, delete it |
-| `project:test:remote` | Same tests against `TEST_BASE_URL`; no local server or deployment |
-| `project:report` / `project:report:remote` | Open the last local or remote run's HTML report, including Lighthouse reports |
+| `npm run test -- google` / `npm run test -- cwv` | Google's level: Lighthouse audits locally; Core Web Vitals on a throwaway Cloudflare Worker |
+| `npx remy cloudflare deploy` | Build, then upload production to the authenticated Cloudflare account; `dev:promote` runs it |
+| `npx remy cloudflare staging` | The same for the staging environment: its own Worker (`origins.staging`) and resources; `dev:land` runs it |
+| `npx remy cloudflare preview` | Deploy this commit as a throwaway Worker, run level 1 against it, delete it |
+| `npm run test -- remote [origin]` | Same tests against a deployment; no local server or deployment |
+| `npm run test -- report [remote]` | Open the last local or remote run's HTML report, including Lighthouse reports |
 
-The flow does not run the whole suite against a deployment: `cf:deploy` and `cf:staging` end with
-the live smoke, and GitHub runs the suite after every landing. To run all of it against a deployed
-URL on purpose, a person says so at a terminal (the task refuses without it, and the guard refuses
-it from an agent):
+The flow does not run the whole suite against a deployment: the deploys end with the live smoke,
+and GitHub runs the suite after every landing. To run all of it against a deployed URL on purpose, a
+person says so at a terminal (the command refuses without it, and the guard refuses it from an agent):
 
 ```sh
-REMY_FLOW=hand TEST_BASE_URL=https://your-worker.your-subdomain.workers.dev mise run project:test:remote
+REMY_FLOW=hand npm run test -- remote https://your-worker.your-subdomain.workers.dev
 ```
 
-The URL must be an origin, without a path or query (`STAGING_ORIGIN` for staging). The checks that
+The URL must be an origin, without a path or query. The checks that
 need a new person read their code from the local mail capture, so they run against the local target
 only. The rest ask the Worker which environment it is (`/healthz`) and expect what
 [the table](./auth.md#environments-one-table) gives it: against staging the seeded people are there
 and one press signs in as one of them; against production none of it exists. The remote test task can
 also target an already-running local preview to check the external-server path.
 
-The pipeline tasks are shared defaults from `tasks/project.toml`, driven by this
-project's `[env]` inputs (`PREVIEW_PORT`, `DEPLOY_ORIGIN`); this repository overrides only the hooks
-meant for it (`project:prepare`, `project:generate`, `project:release-checks`, `project:test:consumers`;
-[tasks](./tasks.md#choosing-the-version-released-development-or-local)). The Playwright
+The commands are the package's (`remy`), driven by this project's `remy.config.ts` (the origins, the
+ports); this repository's own are its `package.json` scripts (`local`, `generate`, `release-checks`,
+`test:consumers`; [the command line](./tasks.md#choosing-the-version-released-development-or-local)). The Playwright
 configuration is the package's `playwrightConfig()`.
 
 There is one Worker configuration with one named environment, `staging` (`env.staging` in
 `wrangler.jsonc`): the same code as its own Worker, with its own databases and secret. A named
 environment is selected with `CLOUDFLARE_ENV` at build time, as the
 [Cloudflare Vite integration](https://developers.cloudflare.com/workers/vite-plugin/reference/cloudflare-environments/)
-requires; `mise run cf:staging` does that and then everything `cf:deploy` does. Keep the
+requires; `remy cloudflare staging` (which `dev:land` runs) does that and then everything the
+production deploy does. Keep the
 implementation shared; vary only resource identifiers, secrets and other environment values. Bindings,
 vars and required secrets are not inherited by a named environment: each is declared again there. Do not copy the application or use remote bindings for
 ordinary local development. Local secrets stay in ignored `.dev.vars`; deployed
@@ -130,14 +129,14 @@ Components and the theme are what the shadcn CLI writes, in shadcn's monorepo la
 [`components.json`](https://github.com/joeblew999/remy-auth/blob/main/components.json) routes `shadcn add` into the package
 ([`packages/ui/components.json`](https://github.com/joeblew999/remy-auth/blob/main/packages/ui/components.json)), and
 `packages/ui/src/styles/globals.css` is written by the CLI too. Nobody edits either by hand; the
-tasks in [`mise.toml`](https://github.com/joeblew999/remy-auth/blob/main/mise.toml) are the only way they change:
+scripts in [`package.json`](https://github.com/joeblew999/remy-auth/blob/main/package.json) are the only way they change:
 
 ```sh
-mise run ui:components     # Re-add every shadcn component (extend the list there to add one)
-mise run ui:theme          # Rewrite globals.css with shadcn's default theme
-mise run ui:blocks         # Diff each owned block against upstream, in place
-mise run ui:verify         # Re-run both and fail on any difference (runs before every release)
-mise run packages:pack     # Produce the package tarballs locally
+npm run ui:components       # Re-add every shadcn component (extend the list there to add one)
+npm run ui:theme            # Rewrite globals.css with shadcn's default theme
+npm run ui:blocks           # Diff each owned block against upstream, in place
+npm run ui:verify           # Re-run both and fail on any difference (runs before every release)
+npm run packages -- pack    # Produce the package tarballs locally
 ```
 
 Blocks are owned copies, as shadcn intends; sidebar-16's README says what was changed. The
@@ -170,8 +169,8 @@ out of date (the design is remy-sport's, whose committed record of deployments w
   and the `deployments` the app lists there (staging beside production, a service it calls), each
   answering for itself, then the packages this build was made with. remy-auth's Settings page shows
   it, with its production and staging.
-- **`mise run cf:versions`** prints a row per deployment (`DEPLOY_ORIGIN`, `STAGING_ORIGIN` and `DOCS_ORIGIN`, or the
-  origins given), with each commit placed against this checkout: `= HEAD`, `3 behind HEAD`. Use it
+- **`npm run dev:status`** (and `npx remy cloudflare versions`) prints a row per deployment (the origins in
+  `remy.config.ts`, or the origins given), with each commit placed against this checkout: `= HEAD`, `3 behind HEAD`. Use it
   before saying what is live.
 
 The shared check sets prove it in every app: `/healthz` names this checkout's commit on a local run
@@ -237,8 +236,8 @@ runs them on server-rendered ones.
 
 ## Evidence and limits
 
-Two levels: level 1 is every check of ours in every language (`project:test`); level 2 is Google's
-(`project:test:google`, `project:test:cwv`). What the checks cover is the checks themselves: `tests/` and the package's
+Two levels: level 1 is every check of ours in every language (`npm run test -- every`); level 2 is Google's
+(`npm run test -- google`, `npm run test -- cwv`). What the checks cover is the checks themselves: `tests/` and the package's
 `@joeblew999/remy-ui/checks` (each check's title says what it proves); the flow's steps that run them are in
 [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). In short: every page in every
 language without JavaScript (language, direction, metadata, links), catalogs and plurals, the formats
@@ -252,7 +251,7 @@ Google's level covers site pages only (app pages are noindex by design): Lightho
 `lighthouse` package, judge `/en` (mobile and desktop) and `/en/formats`
 ([`tests/performance.spec.ts`](https://github.com/joeblew999/remy-auth/blob/main/tests/performance.spec.ts)) against Google's good thresholds (LCP
 2.5 s, CLS 0.1, TBT 200 ms, Performance at least 0.9), on a throwaway Cloudflare Worker
-(`project:test:cwv`), not localhost.
+(`npm run test -- cwv`), not localhost.
 
 Limits: no organizations, OAuth tokens or cross-app sign-in yet, so only remy-auth's own pages know
 who is signed in ([the auth plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/auth-service.md)). The site is served from its workers.dev address (`DEPLOY_ORIGIN`); the production public origin and

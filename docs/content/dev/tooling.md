@@ -1,146 +1,121 @@
 ---
 title: "Developer tooling reference"
-description: "The developer tooling reference: mise tasks, pinned tools, secrets, agent skills and the Cloudflare services behind the docs."
+description: "The developer tooling reference: the package.json scripts and the remy commands, pinned tools, secrets, agent skills and the Cloudflare services behind the docs."
 ---
 
-## Developer CLI
+## The tooling
 
 ```sh
-mise install
-mise run project:setup
-mise run auth:cli -- --help
-mise run cf:cli -- --help
-mise run auth:info
+npm run                   # every script, with what it runs
+npm run setup             # the pinned skills, MCP, the flow's guard, the installation's checks
+npm run auth -- --help    # the Better Auth CLI
+npm run wrangler -- --help
+npm run auth:info
 ```
 
-Every tool comes through mise, down to the operating system's level. Node and fnox are pinned in
-`mise.toml`'s `[tools]`; the shared tasks pin the tools they run as task-level `tools`, so every app that
-includes them gets the same versions with no entry of its own: `gh` (`project:setup`, `project:upgrade-ui`,
-`dev:release`), `jq`, `@lingual/i18n-check` and Claude Code (`i18n:*`). Better Auth CLI (`auth`), Wrangler,
-Chrome DevTools and Modern Web Guidance are pinned in `package.json` and `package-lock.json`. `project:setup` runs `npm ci`, installs the pinned official
-skills for Codex and Claude, registers project MCP tooling, then runs `project:verify`. It stops on any
-failed step. Commands use the local binaries and accept upstream CLI
-arguments after `--`; they do not download a different CLI at execution time.
-
-For example, `mise run auth:cli -- generate --help` describes schema generation, and
-`mise run cf:cli -- d1 --help` shows D1 operations. `project:doctor` checks tool versions
-without logging into Cloudflare.
+`package.json` is the entry, as in every TypeScript project: its scripts run every project command.
+Node is pinned by `.node-version` and `package.json`'s `engines`; every tool is a dependency of
+`@joeblew999/remy-ui`, so every app that installs the package gets the same versions with no pin of its
+own: Wrangler, Playwright, TypeScript, the Chrome DevTools tools, the Modern Web Guidance CLI, the
+Codex CLI. `gh` is the machine's, and Claude Code (the translator) is the machine's own, the one the
+subscription is logged into. A script that is one tool is written as that tool (`"logs": "wrangler
+tail --format json"`); anything with logic is TypeScript, a `remy` command of the package
+(`packages/ui/src/cli`, type-checked on every check) or, for what is one app's own, a `scripts/*.ts` of
+that app ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/tooling-in-typescript.md)).
+`npx remy verify doctor` prints the versions of the CLIs the tooling runs.
 
 Better Auth runs in remy-auth's own Worker on a D1 database (`DB` in `wrangler.jsonc`), with its
-options in `src/auth/options.ts`. Its tasks are remy-auth's own, in `mise.toml`:
+options in `src/auth/options.ts`. Its scripts are remy-auth's own, in `package.json`:
 
 ```sh
-mise run auth:generate -- <name>        # LOCAL: what the options need beyond migrations/, as the next numbered migration
-mise run auth:migrate                   # LOCAL: apply migrations/ and migrations-demo/ to Wrangler's local D1 databases
-mise run auth:local                     # LOCAL: write .dev.vars when missing (ENVIRONMENT=local, a random BETTER_AUTH_SECRET)
-mise run auth:mail -- you@example.com   # LOCAL: the sign-in codes captured for an address, from the running Worker
-mise run auth:provision                 # Prints what the deployed sign-in needs on Cloudflare; creates nothing
+npm run auth:generate -- <name>        # LOCAL: what the options need beyond migrations/, as the next numbered migration
+npm run auth:migrate                   # LOCAL: apply migrations/ and migrations-demo/ to Wrangler's local D1 databases
+npm run local                          # LOCAL: .dev.vars when missing, the migrations, the guard's fixture (dev, build and start run it)
+npm run auth:mail -- you@example.com   # LOCAL: the sign-in codes captured for an address, from the running Worker
+npm run auth:provision                 # Prints what the deployed sign-in needs on Cloudflare; creates nothing
 ```
 
-`project:prepare` runs `auth:local`, `auth:migrate` and `ui:guard-fixture` (oRPC 1.15.4 for the
-guard's two-major check, installed in `tests/guard/v1` alone) before `project:dev` and every build, so
-dev, preview and every check start on the current schema with nothing to remember. `auth:generate`
+`npm run local` (the app's "local" script, which `npm run dev`, `npm run build` and `dev:start` run
+first) writes `.dev.vars`, applies the migrations and installs the guard's oRPC v1 fixture (`tests/guard/v1`),
+so dev, preview and every check start on the current schema with nothing to remember. `auth:generate`
 runs the pinned CLI through `src/auth/cli.ts`, which compares the options with a throwaway SQLite
 database built from `migrations/`, so it writes only what is not there yet; change the options, then
-generate, never edit Better Auth's tables by hand. To sign in locally: `mise run project:dev`, open
+generate, never edit Better Auth's tables by hand. To sign in locally: `npm run dev`, open
 `/en/app/account` and press one of the seeded people, or enter any address and read its code with
 `auth:mail`. No mail is sent locally: the local environment keeps it in the Worker's outbox instead
 (the environment table in `src/auth/environment.ts`, [explained](./auth.md#environments-one-table);
 staging has the seeded people too and sends mail for real; any other environment is production,
 where mail is sent through Cloudflare Email Service and nobody is seeded). The deployed
 database, its migrations and the `BETTER_AUTH_SECRET` Worker secret are created on the owner's
-request only: `auth:provision` prints the steps, and until the database exists `cf:deploy` refuses to
-deploy, because Wrangler would otherwise create it by itself.
+request only: `auth:provision` prints the steps, and until the database exists the deploy refuses,
+because Wrangler would otherwise create it by itself.
 
 These are developer/operator tools. Remy end-user CLI login and delegated API calls
-remain part of the service milestone. Both apps are live on Cloudflare; `cf:deploy` uploads to
-`DEPLOY_ORIGIN`, set in [mise.toml](https://github.com/joeblew999/remy-auth/blob/main/mise.toml); `dev:promote` runs it, on the owner's request only.
+remain part of the service milestone. Both apps are live on Cloudflare; the production deploy uploads to
+`origins.production` in [remy.config.ts](https://github.com/joeblew999/remy-auth/blob/main/remy.config.ts), and `dev:promote` runs it, on the owner's request only.
 
 ### Package upgrades
 
 ```sh
-mise run packages:check            # Preview available updates
-mise run packages:upgrade          # Apply latest versions, including majors
+npm run packages -- check            # Preview available updates
+npm run packages -- upgrade          # Apply latest versions, including majors, then the installation's checks
 ```
 
-All project tasks use a namespace. List them with `mise tasks ls --local`.
+### The scripts and commands
 
-Mise's built-in commands keep their normal meaning:
+Every app on the package has the same scripts; `npm run` lists them. The flow and the hand tools are
+scripts; the rest are `remy` commands (`npx remy <command>`), one module each in `packages/ui/src/cli`.
 
-| Built-in command | Behavior in this repo |
+| Scripts and commands | Purpose |
 | --- | --- |
-| `mise install` | Install configured runtimes; use `project:setup` for npm packages and skills |
-| `mise tasks ls --local` | Discover the project's namespaced tasks |
-| `mise run` | Open mise's task selector in an interactive terminal; no automatic setup or deployment |
-| `mise exec -- node --version` | Execute using the configured Node version |
-| `mise doctor` | Diagnose the machine's mise installation; `project:doctor` checks project CLIs |
-| `mise outdated` / `mise upgrade --local --dry-run` | Inspect runtime updates; npm upgrades use `packages:upgrade` |
-| `mise fmt --check` | Check mise.toml formatting |
-| `mise run --dry-run project:setup` | Preview the complete ordered setup sequence |
+| `npm run dev:status`, `dev:start`, `dev:change`, `dev:land`, `dev:promote`, `dev:release`, `dev:done` | The flow ([how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)) |
+| `npm run dev`, `build`, `preview` | The app: hot reload, the production build with a Wrangler dry run, the built Worker on the preview port ([the GUI](./gui.md)) |
+| `npm run test -- every\|quick\|only <words>\|smoke\|google\|cwv\|remote\|live\|consumers\|report` | The browser checks at every level; the suite is GitHub's after a landing, `only <words>` is the one run a step does not own |
+| `npm run check -- [plans\|single-copies\|routes\|types\|unit\|translations\|docs]` | The check (`dev:change`), or one part of it |
+| `npm run setup`, `npx remy verify [setup\|tooling\|doctor]`, `npm run upgrade -- <version>` | An installation: its checks, the tooling invariants, the CLI versions; moving an app to a release |
+| `npm run packages -- check\|upgrade\|pack\|notes\|bumped\|publish\|tag\|release` | A repository that publishes packages ([the command line](./tasks.md#a-repository-that-publishes-packages)) |
+| `npx remy cloudflare deploy\|staging\|docs-deploy\|versions\|urls\|preview\|preview-delete` | Deployments, what each is running, an app's page URLs, a throwaway check Worker ([the command line](./tasks.md#cloudflare)) |
+| `npm run logs`, `errors`, `wrangler`, `npm run observe -- events\|ai-usage\|ai-check\|gateway` | Live logs, the Cloudflare CLI, stored logs and the AI's usage, setup and gateway (below) |
+| `npm run docs -- dev\|build\|check\|test [remote]\|preview\|answers on\|off\|publish\|provision\|init\|observe` | The docs Worker, `@joeblew999/remy-ui`'s, over an app's `docs/` ([writing docs](./writing-docs.mdx)); remy-auth alone: `npm run docs:cli`, the Fumadocs CLI in the package |
+| `npx remy i18n check [messages\|docs] [--list]`, `i18n translate` | Translations: the offline checks (a warning in the check, the gate at a release), the one writer `dev:land` runs on main ([one writer](./how-we-work.md#translations-one-writer)) |
+| `npm run plans -- status\|check\|close\|park\|open` | The plans rule ([plans](./how-we-work.md#plans-few-short-closed)) |
+| `npx remy skills install\|list\|remove`, `npx remy mcp register\|verify\|status`, `npx remy rules` | The pinned agent skills, MCP registration, the rules block in an app's `AGENTS.md` (below) |
+| `npm run shots -- <page> [--phone] [--dark] [--all] [--video]`, `npm run browser`, `browser:start`, `browser:stop`, `npm run web` | Screenshots, the Chrome DevTools CLI and session, Modern Web Guidance (below) |
+| `npm run api -- spec [origin] [--urls]` | The OpenAPI document a running Worker serves |
+| `npm run codex`, `codex:resume`, `claude`, `claude:resume` | Start or resume an agent session (below) |
+| remy-auth's own: `npm run auth…`, `ui:components`, `ui:blocks`, `ui:theme`, `ui:verify`, `ui:version`, `template:check`, `release-checks`, `generate`, `local`, `test:consumers` | Better Auth, the shadcn files, the release's own checks, what this repository generates and prepares |
 
-An exact Node pin stays fixed under ordinary `mise upgrade`. Use the built-in
-`mise upgrade --local --bump node` only when intentionally changing it, and review
-`package.json`'s Node engine constraint together with the new version. Parent and
-global mise configurations can add tools; this repo declares only Node.
-See [mise's task execution](https://mise.jdx.dev/tasks/running-tasks.html) and
-[runtime upgrade behavior](https://mise.jdx.dev/cli/upgrade.html).
-
-CLI passthrough tasks accept upstream flags directly, such as
-`mise run auth:cli --help` and `mise run cf:cli d1 --help`.
-
-| Namespace | Purpose |
-| --- | --- |
-| `project:*` | Setup, pipeline and verification (shared defaults from `tasks/project.toml`; `[env]` supplies the inputs) and tool diagnostics |
-| `packages:*` | Check and upgrade npm packages; pack, release and publish the repository's own packages ([tasks](./tasks.md#a-repository-that-publishes-packages)) |
-| `ui:*` | Compile the shared catalogs (`ui:generate`), regenerate the shadcn components and theme (`ui:components`, `ui:theme`), prove them untouched (`ui:verify`), release the package and the tasks (`ui:release`, an alias of the flow's `dev:release`) |
-| `skills:*` | Install, list and remove the pinned official skills |
-| `auth:*` | Better Auth: its CLI and diagnostics (`auth:cli`, `auth:info`), migrations for the local D1 (`auth:generate`, `auth:migrate`), the local environment (`auth:local`), its captured sign-in codes (`auth:mail`) and what a deployment needs (`auth:provision`, prints only) |
-| `cf:*` | Cloudflare CLI, live logs, deployment (`cf:deploy` for production, `cf:staging` for staging), what each deployment is running (`cf:versions`), throwaway check Workers (`cf:preview`, `cf:preview-delete`), stored logs and AI usage (`cf:events`, `cf:ai-*`); shared tasks, listed in the [tasks README](./tasks.md#cloudflare-tasks) |
-| `api:*` | The generated OpenAPI document a running Worker serves (`api:spec`, `--urls` for its operations; shared task) |
-| `browser:*` | Chrome DevTools CLI, session lifecycle and MCP server |
-| `web:*` | Modern web guidance search and retrieval |
-| `docs:*` | The docs Worker, `@joeblew999/remy-ui`'s (`src/docs`), over an app's `docs/` (`content/`, `docs.config.ts` and three one-line files): run it (`docs:dev`), build and check it (`docs:build`, `docs:check`), test it (`docs:test`, `docs:test:remote`), deploy it (`docs:preview`, `docs:deploy`), Ask AI's pages in AI Search (`docs:publish`), stop or resume answers (`docs:answers:off`, `docs:answers:on`), its logs and AI (`docs:observe`, `docs:ai-gateway`), what its Ask AI needs on Cloudflare (`docs:provision`, prints only), and starting an app's docs (`docs:init`). remy-auth alone: the Fumadocs CLI in the package (`docs:cli`) |
-| `agents:*` | `agents:rules`: the marked block in an app's `AGENTS.md` pointing its agents at the platform's rules, the `remy` skill from the installed package ([the `remy` skill](#the-remy-skill-the-platforms-rules-for-every-repos-agents)); `project:setup` and `project:upgrade-ui` run it |
-| `i18n:*` | Translations, two pipelines: UI messages (Paraglide) and docs (Fumadocs). `i18n:check` (offline, read-only; a warning, or the release gate), `i18n:translate` (the pinned Claude agent, on main, committed); shared tasks, [one writer](./how-we-work.md#translations-one-writer), [how](./tasks.md#translations) |
-| `mcp:*` | Register, verify and inspect project MCP connections |
-| `codex:*` / `claude:*` | Start or resume an interactive agent session (shared tasks) |
-
-After `project:setup`, `packages:upgrade` uses the locally pinned `npm-check-updates` to move npm
+`npm run packages -- upgrade` uses the locally pinned `npm-check-updates` to move npm
 dependencies past existing version pins, saves exact versions, installs them and
-refreshes `package-lock.json`. It then runs the full tooling verification task.
-Peer conflicts fail visibly; the task does not use npm's `--force` or
+refreshes `package-lock.json`, then runs the installation's checks.
+Peer conflicts fail visibly; the command does not use npm's `--force` or
 `--legacy-peer-deps`. Review the manifest/lockfile diff and any major-version
 migration requirements. If installation fails after manifest updates, resolve the
-reported conflict before using `project:setup`; no automatic rollback discards your edits.
-
-`project:setup` continues to reproduce the lockfile. Workspace dependencies are upgraded too; the local `@joeblew999/remy-ui` and `@joeblew999/remy-auth-contract` references are excluded
-from registry upgrades. Node and skill-source pins in
-`mise.toml` are managed separately. The verification workflow includes GUI type checking, a Worker build and browser
-tests.
+reported conflict before using `npm run setup`; no automatic rollback discards your edits.
+Workspace dependencies are upgraded too; the local `@joeblew999/remy-ui` and `@joeblew999/remy-auth-contract` references are excluded
+from registry upgrades. Node and the skill-source pins are managed separately.
 
 ### Verification
 
 The flow is four steps: `dev:change` (the check, seconds, after every change), `dev:land` (commit,
 main, push, staging; GitHub runs the heavy checks), `dev:promote` (production) and `dev:release`, with
-`dev:start` and `dev:done` around a piece of work and `dev:status` to look; a guard in the tooling
-refuses the heavy checks outside them. The rule is in
-[how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), the tasks in the
-[tasks README](./tasks.md).
+`dev:start` and `dev:done` around a piece of work and `dev:status` to look; a gate in every heavy
+command refuses it outside them. The rule is in
+[how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), the commands in
+[the command line](./tasks.md).
 
-`project:verify` is the release's gate: `dev:release` runs it, and `project:setup`, `packages:upgrade` and
-`project:upgrade-ui` finish with it. Nobody runs it while coding (`dev:change` is the check); by hand, on
-purpose, it is `REMY_FLOW=hand mise run project:verify`. It checks
-mise tasks, installed dependencies, CLI versions, manifest/lockfile consistency,
-Wrangler configuration and observability settings, and every skill's pinned
-source, files and Claude symlink. It uses the existing local installation and
-does not provision Cloudflare resources. Skill checks cover the lockfile inventory,
-not upstream discovery or content-integrity hashes.
-
-The Wrangler configuration check uses its own reader. Verification then generates
-types, builds and dry-runs deployment packaging for the GUI/Worker, runs every browser check of ours
-in every language (`project:test`) against the production artifact in local Workers using installed
-Chrome, then the consumer fixture. Google's audits are not in it: `project:test:google` and
-`project:test:cwv`, which `packages:release` runs after it. No deployment is performed. See [the GUI proof](./gui.md) for scope and commands.
+`npx remy verify` is the release's gate: `dev:release` runs it. An installation ends with
+`npx remy verify setup` (`npm run setup`, `npm run packages -- upgrade` and `npm run upgrade` run it): about
+a minute, no browser. Nobody runs the gate while coding (`dev:change` is the check); by hand, on
+purpose, it is `REMY_FLOW=hand npx remy verify`. The installation's checks are the dependencies against the
+lockfile, MCP registration, the flow's guard, the CLI versions, the tooling invariants (`npx remy verify
+tooling`: every `package.json` matches the lockfile, the Wrangler configuration keeps previews off and
+observability on, the workflows name only scripts that exist, every installed skill comes from a
+pinned source with its Claude link), then the check. They use the existing local installation and
+do not provision Cloudflare resources. The gate then runs every browser check of ours in every
+language (`npm run test -- every`) against the production artifact in local Workers using installed
+Chrome, then the consumer fixture. Google's audits are not in it: `npm run test -- google` and
+`npm run test -- cwv`, which the release runs after it. No deployment is performed. See [the GUI proof](./gui.md) for scope and commands.
 
 
 ## Start or reload your agent
@@ -156,88 +131,82 @@ its own MCP client and is not the Codex extension's configuration file.
 
 After changing skills or MCP configuration:
 
-1. Run `mise run mcp:register` in the repository terminal.
+1. Run `npx remy mcp register` in the repository terminal.
 2. Save your work, open the Command Palette (`Cmd+Shift+P` on macOS), and run
    **Developer: Reload Window**.
 3. Reopen the Codex sidebar and continue the conversation. Verify that the agent
    can call the newly configured tools; registration alone does not prove a connection.
 
-`codex:resume` launches a terminal session; it does not reload the extension.
+`npm run codex:resume` launches a terminal session; it does not reload the extension.
 The installed `code` CLI has no documented reload-window flag, so reloading uses
 VS Code's built-in command rather than a shell wrapper that pretends to restart it.
 
 ### Terminal agents
 
-After `mise run project:setup`, use the installed Codex or Claude Code CLI:
+After `npm run setup`, use the installed Codex or Claude Code CLI:
 
 ```sh
-mise run codex:start     # New Codex conversation
-mise run codex:resume    # Resume latest Codex conversation in this project
-mise run claude:start    # New Claude conversation
-mise run claude:resume   # Resume latest Claude conversation in this project
+npm run codex             # New Codex conversation
+npm run codex:resume      # Resume latest Codex conversation in this project
+npm run claude            # New Claude conversation
+npm run claude:resume     # Resume latest Claude conversation in this project
 ```
 
 To reload skills and MCP configuration, exit the current agent with `/exit`, then
-run its `:resume` task from your terminal. These tasks refresh MCP registration,
-launch from the repository root and preserve interactive terminal input/output.
-They do not stop another running session. Use `/mcp` inside the agent to check the
+run its `:resume` script from your terminal. Use `/mcp` inside the agent to check the
 connection. Pass additional upstream options after `--`, for example
-`mise run codex:start -- --help`. Setup installs the pinned official
+`npm run codex -- --help`. Setup installs the pinned official
 [`@openai/codex` CLI](https://learn.chatgpt.com/docs/codex/cli) locally, and the
-Codex tasks use that executable directly rather than relying on your shell PATH.
-`packages:upgrade` updates it alongside the other dependencies. Authenticate when
+Codex scripts use that executable directly rather than relying on your shell PATH.
+`npm run packages -- upgrade` updates it alongside the other dependencies. Authenticate when
 prompted. Claude Code is installed separately; launching Codex does not require it.
 
 
 ## Agent skills
 
-The skill sources are the `*_skills_source` vars of the `skills:install` task in
-[tasks/skills.toml](https://github.com/joeblew999/remy-auth/blob/main/tasks/skills.toml): Better Auth, Cloudflare, Chrome DevTools, Modern Web
+The skill sources are the `pins` of
+[packages/ui/src/cli/skills.ts](https://github.com/joeblew999/remy-auth/blob/main/packages/ui/src/cli/skills.ts): Better Auth, Cloudflare, Chrome DevTools, Modern Web
 Guidance, shadcn, Playwright CLI, GitHub release and TanStack Router/Start. TanStack's skills are
 named one by one, including its `react-router` skill (the React bindings), which replaced Remix's
 skill of the same name: skills install flat by name, so the two cannot coexist. TanStack Form's
 skills are not installed: they live only on its v2 alpha branches and describe the 2.0 alpha API, not
-the 1.x we pin; add them when we move to Form 2. The directory holds one file per task
-namespace; `mise.toml` includes it, and [tasks/README.md](./tasks.md) says how another
-project includes it and which npm packages that project supplies. Install the skills locally:
+the 1.x we pin; add them when we move to Form 2. Install the skills locally:
 
 ```sh
-mise install
-mise run skills:install
-mise run skills:list
+npx remy skills install
+npx remy skills list
 ```
 
-To reinstall from scratch, run `mise run skills:remove` then `mise run skills:install`.
+To reinstall from scratch, run `npx remy skills remove` then `npx remy skills install`.
 
 Skills live in `.agents/skills/`; `.claude/skills/` links to the same files.
 
 ### The `remy` skill: the platform's rules for every repo's agents
 
-Beside the pinned skills, `skills:install` installs `remy` from the installed package
-(`./node_modules/@joeblew999/remy-ui/skills`, `remy_skill_path`), so its version is the package's. It is
-generated from these developer docs (how we work, the principles, tooling, the shared tasks, the UI
-package, writing docs, the GUI) by `ui:generate`, which every pack and release runs
-(`packages/ui/skill.mjs`); the docs stay the one source. In an app, `mise run agents:rules` keeps a marked
-block in `AGENTS.md` pointing its agents at the skill and naming the version; `project:setup` and
-`project:upgrade-ui` run it, so an upgrade changes the rules the agents read in the same step.
+Beside the pinned skills, `remy skills install` installs `remy` from the installed package
+(`./node_modules/@joeblew999/remy-ui/skills`), so its version is the package's. It is
+generated from these developer docs (how we work, the principles, tooling, the command line, the UI
+package, writing docs, the GUI) by remy-auth's `generate` script, which every pack and release runs
+(`packages/ui/skill.mjs`); the docs stay the one source. In an app, `npx remy rules` keeps a marked
+block in `AGENTS.md` pointing its agents at the skill and naming the version; `npm run setup` and
+`npm run upgrade` run it, so an upgrade changes the rules the agents read in the same step.
 remy-auth's own `AGENTS.md` is a pointer to [Agents: start here](./agents.md).
 The installer records provenance in `skills-lock.json`. Re-running installation
 restores the selected skills from the pinned sources; update their source commits deliberately to adopt upstream
 changes. Only `skills-lock.json` is committed; the installed skills and their Claude links are
-ignored and recreated by `project:setup` or `skills:install`.
-`mise run skills:list` shows what is installed; [the skills plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/agent-skills.md)
+ignored and recreated by `npm run setup` or `npx remy skills install`.
+`npx remy skills list` shows what is installed; [the skills plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/agent-skills.md)
 tracks dependencies without an official skill. Reload an existing agent session
 if newly installed skills are not yet visible.
 
 To add a source, only from the library's own maintainers:
 
-1. Pin it in the `skills:install` task's `vars` in `tasks/skills.toml` as
-   `<name>_skills_source = "https://github.com/<owner>/<repo>/tree/<commit>"`, using the
-   commit from `git ls-remote https://github.com/<owner>/<repo> HEAD`.
-2. Add its line to that task's `run` list, naming the skills with `--skill` rather than `'*'`
-   when the repository also ships contributor-only skills.
-3. Run `mise run skills:remove`, `mise run skills:install` and `mise run project:verify-tooling`
-   (seconds), which reads the pins from `tasks/skills.toml` and rejects installed skills from unpinned sources.
+1. Pin it in `pins` in `packages/ui/src/cli/skills.ts` as
+   `https://github.com/<owner>/<repo>/tree/<commit>`, using the
+   commit from `git ls-remote https://github.com/<owner>/<repo> HEAD`, naming the skills to take
+   rather than `'*'` when the repository also ships contributor-only skills.
+2. Run `npx remy skills remove`, `npx remy skills install` and `npx remy verify tooling`
+   (seconds), which reads the pins and rejects installed skills from unpinned sources.
 
 
 ## MCP registration
@@ -248,15 +217,15 @@ skills also work through the existing CLIs; a skill does not automatically requi
 an MCP server.
 
 ```sh
-mise run mcp:register   # Also runs during project:setup
-mise run mcp:verify     # Also runs during project:verify
-mise run mcp:status     # Requires both Codex and Claude CLIs
+npx remy mcp register   # Also runs during npm run setup
+npx remy mcp verify     # Also runs in the installation's checks
+npx remy mcp status     # Requires both Codex and Claude CLIs
 ```
 
-Registration (`tasks/mcp/register`, a file task) writes the `chrome-devtools` entry to
-project-local `.codex/config.toml` and `.mcp.json`. Each client launches `browser:mcp` through the current mise executable
-with an explicit repository path. Generated files contain machine-specific paths
-and are gitignored; rerun registration after moving the checkout or mise executable.
+Registration (`packages/ui/src/cli/mcp.ts`) writes the `chrome-devtools` entry to
+project-local `.codex/config.toml` and `.mcp.json`. Each client launches the app's own
+`chrome-devtools-mcp` (isolated, headless, telemetry off) with an absolute path. Generated files
+contain machine-specific paths and are gitignored; rerun registration after moving the checkout.
 Unrelated settings and servers are preserved. Changed existing files receive a
 `.bak` recovery copy; TOML serialization can normalize formatting and comments.
 
@@ -270,7 +239,7 @@ review it in Claude's `/mcp` interface. Registration does not bypass client trus
 approval settings. See [Codex MCP configuration](https://developers.openai.com/codex/mcp)
 and [Claude MCP scopes](https://code.claude.com/docs/en/mcp).
 
-`mcp:verify` checks configuration, not a live connection. `mcp:status` shows what
+`remy mcp verify` checks configuration, not a live connection. `remy mcp status` shows what
 the clients see (Claude also checks connectivity for approved servers).
 
 
@@ -280,22 +249,22 @@ Google's [Chrome DevTools agent tools](https://developer.chrome.com/docs/devtool
 provide browser interaction, screenshots, accessibility inspection, network/cookie
 debugging, Lighthouse and performance analysis. Install Google Chrome separately;
 the browser is not installed by project setup. The CLI is experimental and pinned with
-the other npm tools, so `packages:upgrade` updates it too.
+the other npm tools, so `npm run packages -- upgrade` updates it too.
 
 ```sh
-mise run browser:start                          # Isolated, headless Chrome session
-mise run browser:cli -- new_page http://localhost:3000
-mise run browser:cli -- list_pages
-mise run browser:cli -- take_snapshot 1          # Use the returned page ID
-mise run browser:cli -- click 1 "UID_FROM_SNAPSHOT"
-mise run browser:stop
+npm run browser:start                           # Isolated, headless Chrome session
+npm run browser -- new_page http://localhost:3000
+npm run browser -- list_pages
+npm run browser -- take_snapshot 1              # Use the returned page ID
+npm run browser -- click 1 "UID_FROM_SNAPSHOT"
+npm run browser:stop
 ```
 
-Run `mise run browser:start -- --headless=false` for a visible window. Start once
+Run `npm run browser:start -- --headless=false` for a visible window. Start once
 per session; subsequent CLI calls reuse the background daemon. Starting again
-restarts that daemon. These sessions use a temporary Chrome profile; the start task
+restarts that daemon. These sessions use a temporary Chrome profile; the start script
 disables tool usage telemetry and CrUX URL uploads. Stop the session when finished.
-Use `mise run browser:cli -- --help` for upstream commands.
+Use `npm run browser -- --help` for upstream commands.
 
 
 ## Modern web implementation guidance
@@ -307,18 +276,17 @@ forms, accessibility, performance, passkeys and browser compatibility. The main
 `chrome-extensions` skill is omitted because this project is a web service and UI.
 
 ```sh
-mise run web:guidance -- search "animate a dialog modal backdrop"
-mise run web:guidance -- retrieve "GUIDE_ID_FROM_SEARCH"
-mise run web:guidance -- list
+npm run web -- search "animate a dialog modal backdrop"
+npm run web -- retrieve "GUIDE_ID_FROM_SEARCH"
+npm run web -- list
 ```
 
-Use the locally pinned `web:guidance` task in this repo in place of the upstream
-skill's `npx modern-web-guidance@latest` examples. `packages:upgrade` updates the CLI;
-`skills:install` restores the commit-pinned skill. Google's alternative `skills`
+Use the locally pinned `web` script in this repo in place of the upstream
+skill's `npx modern-web-guidance@latest` examples. `npm run packages -- upgrade` updates the CLI;
+`npx remy skills install` restores the commit-pinned skill. Google's alternative `skills`
 installer keeps our existing `.agents` and `.claude` layout without a second
-installer or automatic skill updates. The mise task disables usage telemetry. If
-a search returns no matches, use `list` to browse guide IDs. Browser support defaults to the skill's
-**Baseline Widely available** policy, with fallbacks for newer features.
+installer or automatic skill updates. If a search returns no matches, use `list` to browse guide IDs.
+Browser support defaults to the skill's **Baseline Widely available** policy, with fallbacks for newer features.
 
 
 ## Cloudflare observability
@@ -330,12 +298,12 @@ A GUI Worker entry now emits request IDs, status and timing without logging URLs
 headers or cookies. Sign-in's durable audit records are not implemented.
 
 ```sh
-mise run cf:logs -- --help
-mise run cf:errors -- --help
+npm run logs -- --help
+npm run errors -- --help
 ```
 
-Both tasks use the configured Worker; `cf:logs` also accepts an explicit Worker name.
-`cf:errors` filters Worker invocation failures, not all HTTP error responses. Durable audit
+Both use the configured Worker; `npm run logs` also accepts an explicit Worker name.
+`npm run errors` filters Worker invocation failures, not all HTTP error responses. Durable audit
 storage, dashboards and alert delivery are open work in the observability plan.
 
 ### The docs answers on Cloudflare: AI Search and AI Gateway
@@ -344,26 +312,26 @@ Two Cloudflare products sit behind the docs' Ask AI (the docs Worker), and they 
 
 - **AI Search** is the index (`remy-docs-pages`, remy-auth's; every name here is `docs.config.ts`'s
   `ask`). It reads the docs itself from the R2 bucket `remy-docs` (one Markdown file per docs page and language, `<site>/<lang>/<page>.md`, synced hourly
-  and whenever `docs:publish` asks),
+  and whenever `docs publish` asks),
   finds the passages that match a question, and asks a Workers AI model to write the answer.
-- **R2** holds the files AI Search reads. `docs:publish` makes the bucket hold exactly the docs
+- **R2** holds the files AI Search reads. `docs publish` makes the bucket hold exactly the docs
   pages: it puts each one and deletes anything else, so a removed page leaves the answers too.
 - **AI Gateway** is the meter in front of the model. Every model call AI Search makes passes through
   it (`remy-docs`), and it logs each one with its cost, tokens and time (and the question). It holds
-  no docs. Spend limits and rate limits live here; `docs:observe -- ai-usage` and `-- ai-check` read it.
+  no docs. Spend limits and rate limits live here; `npm run docs -- observe ai-usage` and `ai-check` read it.
 
 Local or remote: the docs pages, the Ask AI page and all checks run locally; answering
-exist only on Cloudflare (AI Search has no local version). Every `docs:*` and `cf:*` task says
-LOCAL or REMOTE (and PRODUCTION) in `mise tasks`.
+exist only on Cloudflare (AI Search has no local version). Every command says in its header comment
+whether it is local or remote (and production).
 
 ```sh
-mise run docs:publish                      # REMOTE, PRODUCTION: bucket = docs pages, sync, fixed questions (docs:deploy runs it)
-CLOUDFLARE_ENV=ask mise run docs:dev       # LOCAL docs Worker, answers from the live index
-mise run docs:answers:off                  # REMOTE, PRODUCTION: emergency stop, seconds, no build
-mise run docs:answers:on                   # REMOTE, PRODUCTION: resume (confirms)
-mise run docs:observe -- ai-check          # REMOTE, read only: AI Search, AI Gateway, answers paused or not
-mise run docs:ai-gateway                   # REMOTE: the gateway's settings
-mise run docs:ai-gateway -- rate-limit off # REMOTE: change a setting (read back after); also logs on|off
+npm run docs -- publish                          # REMOTE, PRODUCTION: bucket = docs pages, sync, fixed questions (dev:promote runs it)
+CLOUDFLARE_ENV=ask npm run docs -- dev           # LOCAL docs Worker, answers from the live index
+npm run docs -- answers off                      # REMOTE, PRODUCTION: emergency stop, seconds, no build
+npm run docs -- answers on                       # REMOTE, PRODUCTION: resume
+fnox exec -- npm run docs -- observe ai-check    # REMOTE, read only: AI Search, AI Gateway, answers paused or not
+fnox exec -- npm run docs -- observe gateway     # REMOTE: the gateway's settings
+fnox exec -- npm run docs -- observe gateway rate-limit off   # REMOTE: change a setting (read back after); also logs on|off
 ```
 
 Tokens: see [secrets](#secrets-fnox) below.
@@ -374,32 +342,31 @@ nothing; an answer about $0.0001 to $0.0007, and $0 when AI Search's cache has i
 Ask AI is each app's choice: `docs.config.ts`'s `ask` names its AI Search instance, R2 bucket, AI Gateway
 and rate-limit namespace, and the docs Worker's Cloudflare configuration is generated from it
 (`docs/.remy-docs/wrangler.json`). Without `ask` the docs have no Ask AI page, button or bindings.
-`mise run docs:provision` prints the commands that create an app's resources and creates nothing:
+`npm run docs -- provision` prints the commands that create an app's resources and creates nothing:
 that costs money and is the owner's.
 
 Stored history and the AI answers, read only, from Cloudflare's own APIs. The Worker, its AI Search
 instance and that instance's AI Gateway come from its Wrangler configuration, so an including app gets its own:
 
 ```sh
-mise run cf:events                      # Workers Logs, last 24 h: counts by event and level, latest 10
-mise run cf:events -- ask --since 7d --limit 20   # one per question: outcome, time, citations
-mise run cf:ai-usage                    # AI Gateway, last 7 days: calls, cache, failures, tokens, cost, time
-mise run cf:ai-check                    # AI Search and gateway settings against Cloudflare's advice; fails on FAIL
+fnox exec -- npm run observe -- events                      # Workers Logs, last 24 h: counts by event and level, latest 10
+fnox exec -- npm run observe -- events ask --since 7d --limit 20   # one per question: outcome, time, citations
+fnox exec -- npm run observe -- ai-usage                    # AI Gateway, last 7 days: calls, cache, failures, tokens, cost, time
+fnox exec -- npm run observe -- ai-check                    # AI Search and gateway settings against Cloudflare's advice; fails on FAIL
 ```
 
 ### Secrets: fnox
 
 Wrangler's login covers deploys, AI Search and Worker secrets, but cannot be granted AI Gateway or
-Workers Logs access. For those, the tasks read tokens from the environment:
+Workers Logs access. For those, the commands read tokens from the environment:
 
 - `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`: the shared Cloudflare token and account, the
   same keychain items in every joeblew999 repo. [`fnox.toml`](https://github.com/joeblew999/remy-auth/blob/main/fnox.toml) names them (values stay
-  in the macOS keychain, never in the file); `fnox` is pinned in `mise.toml`. Run a task with them:
-  `fnox exec -- mise run cf:ai-usage` (`docs:observe` and `docs:ai-gateway` run
-  through fnox themselves). Set one with `fnox set -p keychain CLOUDFLARE_API_TOKEN <token>` (never
+  in the macOS keychain, never in the file); `fnox` is the machine's. Run a command with them:
+  `fnox exec -- npm run observe -- ai-usage`. Set one with `fnox set -p keychain CLOUDFLARE_API_TOKEN <token>` (never
   omit `-p keychain`: without it the value is written to `fnox.toml` in plain text). It reads Workers Logs
   and AI Gateway, so it needs **Workers Observability Read** and **AI Gateway Edit**; AI Search is read
   with Wrangler's login.
 One token does it all (the `dev` token at <https://dash.cloudflare.com/profile/api-tokens>): **AI Gateway
-Edit** (which includes reading) and **Workers Observability Read** are the ones these tasks need; changing
-the gateway with `cf:ai-gateway` uses the same token, and every change is read back.
+Edit** (which includes reading) and **Workers Observability Read** are the ones these commands need; changing
+the gateway with `observe gateway` uses the same token, and every change is read back.

@@ -41,16 +41,16 @@ Two live sites, each with site pages for Google and app pages under `/app`;
 
 ## Get started
 
-Install [mise](https://mise.jdx.dev/getting-started.html), then run from this checkout:
+Node as `.node-version` says (26), then from this checkout:
 
 ```sh
-mise install
-mise run project:setup
-mise run project:dev
+npm install          # once, for the lockfile and the remy bin
+npm run setup        # the pinned skills, MCP, the flow's guard, the installation's checks
+npm run dev          # http://127.0.0.1:5173/en
 ```
 
 Open [localhost:5173/en](http://127.0.0.1:5173/en); switch to Spanish or try the demo.
-Setup installs dependencies and skills, registers MCP, then runs build and browser checks.
+Setup installs dependencies and skills, registers MCP, then runs the installation's checks (no browser).
 
 Setup installs the pinned **Codex CLI**; authenticate when prompted. **Claude Code**
 is optional and installed separately.
@@ -69,16 +69,16 @@ Starting, resuming and reloading Codex or Claude Code, in VS Code or a terminal,
 | Start a piece of work, in a worktree of its own | `npm run dev:start -- <name>` |
 | Check, after every change | `npm run dev:change` |
 | Land finished work: main, GitHub's checks, staging | `npm run dev:land -- "<what changed>"` |
-| Browse project tasks | `mise tasks ls --local` |
-| Run the local GUI | `mise run project:dev` |
-| Try the production build locally | `mise run project:preview` |
-| Diagnose mise itself | `mise doctor` |
-| Check for package updates | `mise run packages:check` |
-| Upgrade packages, including major versions | `mise run packages:upgrade` |
-| Better Auth CLI help | `mise run auth:cli -- --help` |
-| Cloudflare CLI help | `mise run cf:cli -- --help` |
-| Inspect browser tooling | `mise run browser:cli -- --help` |
-| Inspect MCP status in both clients | `mise run mcp:status` |
+| List the scripts | `npm run` |
+| Run the local GUI | `npm run dev` |
+| Try the production build locally | `npm run preview` |
+| The tooling's versions | `npx remy verify doctor` |
+| Check for package updates | `npm run packages -- check` |
+| Upgrade packages, including major versions | `npm run packages -- upgrade` |
+| Better Auth CLI help | `npm run auth -- --help` |
+| Cloudflare CLI help | `npm run wrangler -- --help` |
+| Inspect browser tooling | `npm run browser -- --help` |
+| Inspect MCP status in both clients | `npx remy mcp status` |
 
 The first four are [the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), which
 also says who runs production and a release. The heavy checks are not everyday commands: GitHub runs
@@ -88,17 +88,17 @@ Local preview and remote deployment use the same build and Wrangler configuratio
 See [local/remote commands](./gui.md#one-scaffold-for-local-and-cloudflare)
 for deployment and running the same tests against a deployed URL.
 
-Review dependency changes after upgrading. Node is pinned in [mise.toml](https://github.com/joeblew999/remy-auth/blob/main/mise.toml); the
-skill-source commits and the shared agent bootstrap tasks live in
-[tasks/](./tasks.md), one file per task namespace, which other projects include by git reference.
+Review dependency changes after upgrading. Node is pinned in `.node-version` and `package.json`'s
+`engines`; the skill-source commits are in the package (`packages/ui/src/cli/skills.ts`), which every
+app installs ([the command line](./tasks.md)).
 
 ## Project documentation
 
 - [Agents: start here](./agents.md): where agents start; the root `AGENTS.md` and `CLAUDE.md` only point at it.
 - [Development principles](./development.md): what the code must be, and how plans work.
 - [How we work](./how-we-work.md): how people and agents work.
-- [Developer tooling](./tooling.md): mise tasks, skills, MCP and browser tools.
+- [Developer tooling](./tooling.md): the scripts and commands, skills, MCP and browser tools.
 - [GUI runtime workflow](./gui.md): one Worker, local and remote test targets.
-- [Shared tasks](./tasks.md): the mise tasks other projects include.
+- [The command line](./tasks.md): `remy`, the tooling every app installs with the package.
 - [Shared UI package](./ui-package.md) and its [changelog](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
 - [Plans](https://github.com/joeblew999/remy-auth/tree/main/.plans): [.plans/now.md](https://github.com/joeblew999/remy-auth/blob/main/.plans/now.md) is the only list of what is open and where it stands.

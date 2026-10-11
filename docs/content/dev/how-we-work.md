@@ -32,22 +32,22 @@ is general, not only for missing tools:
 - **Everyone hears it through the repo**: `dev:status` prints that list to every session (agents
   open with it), so what one person saw reaches all, and the next landing takes the top of it.
 - **"Done" is the end of a sweep, not of a list.** Before saying it: branches and worktrees, open
-  pull requests, `cf:versions`, `plans:check`, a search for the words the change retired, the docs
+  pull requests, `remy cloudflare versions`, `remy plans check`, a search for the words the change retired, the docs
   the change touched. Show the sweep.
 
 ## Use the project's own tools first
 
-- Start with `mise run project:setup`; [developer tooling](./tooling.md) says what it installs.
-- Before doing any step by hand (installing, upgrading, releasing, deploying, translating), find its task:
-  `mise tasks ls | grep <word>`, in whichever repository you are in; an app has the shared tasks too. Owner,
-  2026-09-26, after an app was upgraded by hand past `project:upgrade-ui`: "you know we do not reinvent wheels".
-- Run commands through the mise tasks, check the real page with the Chrome DevTools tools
-  (`browser:*` tasks), and use the installed skills before reading upstream sources, searching
+- Start with `npm run setup`; [developer tooling](./tooling.md) says what it installs.
+- Before doing any step by hand (installing, upgrading, releasing, deploying, translating), find its script:
+  `npm run` lists them, in whichever repository you are in; an app has the same ones. Owner,
+  2026-09-26, after an app was upgraded by hand past `npm run upgrade`: "you know we do not reinvent wheels".
+- Run commands through the package.json scripts, check the real page with the Chrome DevTools tools
+  (`npm run browser`), and use the installed skills before reading upstream sources, searching
   `node_modules` or writing one-off scripts.
 - Look at the real page with the browser tools before writing a test for it.
 - Once the tools can answer a question, stop researching and use them.
-- Say how long a step will take before starting anything slower than a few seconds. Task
-  descriptions (`mise tasks ls`) give each task's duration and what may run at the same time;
+- Say how long a step will take before starting anything slower than a few seconds. Each command's
+  header comment says its duration and what may run at the same time;
   run post-deploy checks in the background and keep working.
 
 ## Choose tools by survey, not by first find
@@ -80,9 +80,9 @@ until you're pushed!" ([the Fumadocs decision](https://github.com/joeblew999/rem
 UI is hard and never done, so we take what shadcn and TanStack have spent years getting right,
 and write only what they do not provide.
 
-- **shadcn's CLI writes every component and the theme.** Components come from `mise run ui:components`,
-  the theme from `mise run ui:theme` (shadcn's default Nova style, neutral, Geist: no preset, no
-  branding of our own). `mise run ui:verify` fails the release on any hand edit. The repository uses
+- **shadcn's CLI writes every component and the theme.** Components come from `npm run ui:components`,
+  the theme from `npm run ui:theme` (shadcn's default Nova style, neutral, Geist: no preset, no
+  branding of our own). `npm run ui:verify` fails the release on any hand edit. The repository uses
   shadcn's monorepo layout, so `shadcn add` run in the app writes into the shared package.
 - **Look for a shadcn block before building a layout or a screen:**
   `./node_modules/.bin/shadcn search @shadcn -t registry:block`. Add it with `shadcn add`, keep its
@@ -96,10 +96,10 @@ and write only what they do not provide.
   and so on), install its agent skills, then delete the code it replaces.
 - Before writing any UI code, ask: does shadcn, TanStack or Paraglide already do this? If yes, use it.
 
-- Look at it: before calling UI work done, screenshot the pages you changed with `mise run browser:shots` (desktop and
+- Look at it: before calling UI work done, screenshot the pages you changed with `npm run shots` (desktop and
   phone, light and dark, English and Arabic) and look at the screenshots. Checks prove behaviour; only
   the screenshots show layout, spacing, overflow and mixed-direction text; name the pages you changed
-  (`mise run browser:shots -- /formats --phone`), `--all` only for a sweep (owner, 2026-09-26: "It's
+  (`npm run shots -- /formats --phone`), `--all` only for a sweep (owner, 2026-09-26: "It's
   really depressing how you can't see the look of the web site properly").
 
 ### Which TanStack library for what
@@ -148,9 +148,9 @@ half-updated.
 
 - A feature agent writes English only: the English docs and the base catalog (`messages/en.json`).
   It never edits a translation (`<page>.<lang>.md` in `docs/content`) or another locale's catalog.
-- Translation is its own step, on `main` after the merges: `dev:land` runs `i18n:translate` there,
+- Translation is its own step, on `main` after the merges: `dev:land` runs `remy i18n translate` there,
   last, when something is stale; nobody runs it by itself. The Claude agent,
-  pinned in the task, translates exactly what `i18n:check` lists, and the task commits it; **the commit
+  pinned in the task, translates exactly what `remy i18n check` lists, and the task commits it; **the commit
   is the mark** (git decides what is stale: a translation is stale when its English changed after the
   translation's last commit). It refuses other branches, uncommitted English, uncommitted translations
   and a second run while one holds the lock, which every worktree shares, so parallel agents cannot set
@@ -165,17 +165,17 @@ half-updated.
   2026-10-09 a failed agent's `null` was committed as a page and stopped the docs building on main.
 - A translation that is not a page is deleted, never restored by hand: a missing page is translated
   from the English by the next landing, and a restored one would be marked current by its commit.
-- `i18n:check` only reads, offline, so it is safe anywhere, in any number of worktrees, and as a
-  `depends`. `i18n:translate` is never a `depends`.
-- Stale or missing is a warning while pumping (`project:check` prints it) and an error at release
-  (`dev:release` runs `i18n:check` with `I18N_STRICT=1` first).
+- `remy i18n check` only reads, offline, so it is safe anywhere, in any number of worktrees, and as a
+  `depends`. `remy i18n translate` is never a `depends`.
+- Stale or missing is a warning while pumping (`remy check` prints it) and an error at release
+  (`dev:release` runs `remy i18n check` with `I18N_STRICT=1` first).
 - Commit only real translation changes to a translation file: any commit to it marks it current. A
   structural change (a rename, a sweep) that touches docs translations is followed by
-  `mise run i18n:docs:translate -- <file>…`, which re-checks those files against the English in full.
+  `REMY_FLOW=hand npx remy i18n translate docs <file>…`, which re-checks those files against the English in full.
   Catalogs have no such redo: change a catalog's structure (every locale's file) in the same commit as
   `en.json`, so no changed English key is hidden.
 
-The layout and the tasks are in [shared mise tasks](./tasks.md#translations).
+The layout and the commands are in [the command line](./tasks.md#translations).
 
 ## Plans: few, short, closed
 
@@ -185,8 +185,8 @@ enough to be parked or to run over weeks; research, analyses and reviews go into
 not a file of their own. A plan closes the day its work ships: a closing line, then `.plans/done/`. Big
 features wait in `.plans/parked/`. Closing a plan needs no extra deploy or test run of its own: batch the
 code into one deploy and one full run at the end.
-The shared `plans:*` tasks do the moves: `plans:status` lists what is open, `plans:close`, `plans:park` and
-`plans:open` (a parked plan taken up again) add the line, move the file and repoint every link, and `plans:check` (in the check, `dev:change`) keeps `.plans/` tidy
+The shared `remy plans …` tasks do the moves: `remy plans status` lists what is open, `remy plans close`, `remy plans park` and
+`remy plans open` (a parked plan taken up again) add the line, move the file and repoint every link, and `remy plans check` (in the check, `dev:change`) keeps `.plans/` tidy
 ([tasks](./tasks.md#plans)).
 
 ## When the owner delegates decisions
@@ -207,16 +207,16 @@ the flow is code, not a rule to remember: `tasks/dev/flow.ts` is the one place i
 Its four steps are `dev:change`, `dev:land`, `dev:promote` and `dev:release` (`flow.ts`'s `Step`);
 `dev:start` and `dev:done` bracket a piece of work; `dev:status` looks; a guard refuses what is not
 one of them. Seven commands, nothing else. remy-auth gets it the way every app does, from the shared
-tasks; `project:setup` installs the guard.
+tasks; `npm run setup` installs the guard.
 
 | Step | Command | Who runs it, and when | What runs | Time |
 | --- | --- | --- | --- | --- |
 | Look | `npm run dev:status` | everyone, first: every agent session opens with it (a hook), a developer when they sit down | main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests, the top of `.plans/now.md` | seconds |
 | Before a piece of work | `npm run dev:start -- <name>` | whoever does the work, for every piece, a one-line edit included | a worktree of its own from main, installed, its own ports, the guard | ~1 min |
-| After every change | `npm run dev:change` | whoever is coding; the only step waited for | the check (`project:check`): plans, types with the tasks' own, the plain-function checks (`tests/**/*.unit.spec.ts`), translation status; a build only when a route file changed, the docs only when docs changed | ~6 s |
+| After every change | `npm run dev:change` | whoever is coding; the only step waited for | the check (`remy check`): plans, types with the tasks' own, the plain-function checks (`tests/**/*.unit.spec.ts`), translation status; a build only when a route file changed, the docs only when docs changed | ~6 s |
 | The change leaves the machine | `npm run dev:land -- "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | the check, commit, fast-forward main, push, deploy staging, then translation last when stale. GitHub then runs every language, Google's audits and the consumer fixture in parallel, while you keep coding (`gh run list`) | ~1 min to staging; translation after |
-| Production | `npm run dev:promote` | the owner, or an agent the owner asked in that session | `cf:deploy` and the docs Worker, from a pushed main, no gate: staging and GitHub already ran the checks | ~1 min |
-| A release | `npm run dev:release` | the owner, or an agent the owner asked in that session | `packages:release`: every check, every language, locally, on purpose, then the tag | ~5 min |
+| Production | `npm run dev:promote` | the owner, or an agent the owner asked in that session | `remy cloudflare deploy` and the docs Worker, from a pushed main, no gate: staging and GitHub already ran the checks | ~1 min |
+| A release | `npm run dev:release` | the owner, or an agent the owner asked in that session | `remy packages release`: every check, every language, locally, on purpose, then the tag | ~5 min |
 | When landed | `npm run dev:done` | whoever landed, when the piece of work is over; a worktree lives through as many landings as the work takes | the worktree and branch go | seconds |
 
 - **Who runs a step is in the table, and it is never a question.** An agent lands its own finished
@@ -228,19 +228,19 @@ tasks; `project:setup` installs the guard.
 
 - One area that looks wrong: `npm run test -- only <words>` (the browser checks whose title
   matches, en and ar, ~30 s). It is the only browser run a step does not own.
-- **The guard** (`dev:guard`, a Claude Code hook on every shell command an agent runs) refuses
-  `project:verify`, `project:test`, `project:test:quick`, `project:test:remote`, `project:test:google`,
-  `project:test:cwv`, `project:test:consumers`, `template:test`, a bare `playwright test` and
-  `i18n:translate` outside the flow, and names the step instead. Every one still runs by hand from a
-  terminal, with `REMY_FLOW=hand` in front (`REMY_FLOW=hand mise run project:test`): the task itself
-  asks who is running it (`dev:allowed`) and refuses a bare `mise run`, on every machine. That is a
+- **The guard** (`remy guard`, a Claude Code hook on every shell command an agent runs) refuses
+  `remy verify`, `npm run test -- every`, `npm run test -- quick`, `npm run test -- remote`, `npm run test -- google`,
+  `npm run test -- cwv`, `npm run test -- consumers`, `npm run test -- consumers`, a bare `playwright test` and
+  `remy i18n translate` outside the flow, and names the step instead. Every one still runs by hand from a
+  terminal, with `REMY_FLOW=hand` in front (`REMY_FLOW=hand npm run test -- every`): the command itself
+  asks who is running it (the gate) and refuses a bare run, on every machine. That is a
   person's decision; the guard refuses it from an agent even so, which is the fault it exists for.
-  A task whose own job ends with the verification (`project:setup`, `packages:upgrade`,
-  `project:upgrade-ui`) says it is asking, so those run as written.
-- **These pages never give a command the tooling refuses.** A heavy task is written with
-  `REMY_FLOW=hand` in front or named without `mise run`; `tests/unit/dev-flow.unit.spec.ts` reads
+  A task whose own job ends with the verification (`npm run setup`, `npm run packages -- upgrade`,
+  `npm run upgrade`) says it is asking, so those run as written.
+- **These pages never give a command the tooling refuses.** A heavy command is written with
+  `REMY_FLOW=hand` in front or named without `npm run`; `tests/unit/dev-flow.unit.spec.ts` reads
   every English page and every task for one run bare, on every check (2026-10-10: eight lines on six
-  pages did, and `project:setup` ended in the refusal).
+  pages did, and `npm run setup` ended in the refusal).
 - A rule that can be a function belongs in `tests/**/*.unit.spec.ts` (no build, no Worker, no
   browser), so it runs on every check for free. The browser is for what only a browser shows.
 - **An agent never waits on a long-running step.** `dev:land`, `dev:promote`, `dev:release`, a
@@ -248,7 +248,7 @@ tasks; `project:setup` installs the guard.
   when the harness says it finished. Starting it in the background and then polling it in the
   foreground is the same fault (owner, 2026-10-09: "You just did it again for 2 long running
   things"). Only `dev:change` (seconds) is run and waited for.
-- **Every step says how long it took.** mise prints each task's time; `dev:land` ends with its parts
+- **Every step says how long it took.** `dev:land` ends with its parts
   (the check; commit, main and push; staging; translation) and says how long after the start staging
   was up; the translator says for every agent call how long Claude Code took, how much of that was
   the API, and how many tokens it wrote. A slow step is a number in the log, not a feeling (owner,
@@ -257,8 +257,8 @@ tasks; `project:setup` installs the guard.
 - **GitHub's answer comes to you.** A red run comments on the commit (GitHub tells its author), naming
   the run; `dev:change` starts by saying what the last run on main did; `dev:promote` refuses a commit
   whose run is not green or not finished. To reproduce a red job, a person runs
-  `REMY_FLOW=hand mise run <its task>`, the same task GitHub ran, since the workflow holds no logic of
-  its own (`project:verify-tooling` checks every task a workflow names exists). An agent reads the
+  `REMY_FLOW=hand npm run test -- <level>`, the same command GitHub ran, since the workflow holds no
+  logic of its own (`remy verify tooling` checks every script a workflow names exists). An agent reads the
   run's own log (`gh run view <id> --log-failed`) and runs the one area
   (`npm run test -- only <words>`). Report what was tested and what was not; never call
   untested work verified.
@@ -271,27 +271,29 @@ tasks; `project:setup` installs the guard.
 - Never pipe a gating command through `grep` or `tail` in a chain: the pipe hides its exit code.
   This once released a version whose checks had failed, and on 2026-10-10 hid a failed `dev:land`.
 
-## Manual work becomes mise tasks over real tools
+## Manual work becomes scripts over real tools
 
 Owner, 2026-09-26: "You need to get to the point that your checking uses mise and the underlying tool!"
 and "make sure you have something in docs about using your judgment about things that you do manually
 being turned into a mise task that uses a tool ... It's vital because all our repos will be using this."
 
-- Every check runs through a mise task that wraps the real tool: the flow's steps and the checks (`project:test:*`,
-  Playwright), `project:test:live` after a deploy, `plans:check`, `i18n:check`, `browser:shots` to look.
+- Every check runs through a script or a `remy` command that wraps the real tool: the flow's steps and
+  the checks (`npm run test`, Playwright), the live smoke after a deploy, `remy plans check`,
+  `remy i18n check`, `npm run shots` to look. (The owner's words above say mise, which the scripts
+  replaced on 2026-10-11; the rule is the same.)
   No `curl` loops, one-off scripts or ad-hoc greps to decide whether something works: they cannot be
   repeated, apps on the package do not get them, and nobody sees them later.
 - Use judgement on everything done by hand, not only checks: the second time you type the same commands
-  or reach for a throwaway script, it becomes a shared task (in `tasks/`, so every app gets it) that calls
-  the tool that does the job: Wrangler, Playwright, gh, npm, mise's own features.
+  or reach for a throwaway script, it becomes a command of the package (`packages/ui/src/cli`, so every
+  app gets it) that calls the tool that does the job: Wrangler, Playwright, gh, npm.
 - No tool found? Do not write a script and move on. Add a line to `.plans/now.md` to survey for one
   ([choose tools by survey](#choose-tools-by-survey-not-by-first-find)); if the search or the change is big,
   write a plan in `.plans/` (or `.plans/parked/`) yourself. Agents create these lines and plans as they
   meet such things; the owner does not have to ask.
-- A task that is more than one line of a tool is a TypeScript file task (`tasks/<namespace>/<name>.ts`;
-  Node runs it as it is, `project:check` type-checks it wherever the tasks are, a consumer's include
-  cache included), never bash logic or untyped JavaScript: what the compiler cannot see, an agent
-  misses (owner, issue #9). Where several tasks share logic, it moves toward one command-line tool ([parked: remy-cli](https://github.com/joeblew999/remy-auth/blob/main/.plans/tooling-in-typescript.md)).
+- Anything more than one line of a tool is TypeScript: a command of `remy` (`packages/ui/src/cli`,
+  type-checked on every check) or, for what is one app's own, a `scripts/*.ts` of that app, never
+  bash logic or untyped JavaScript: what the compiler cannot see, an agent misses (owner, issue #9).
+  A one-line tool is a `package.json` script ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/tooling-in-typescript.md)).
 
 ## Branches: short-lived, deleted after merge
 
@@ -308,11 +310,11 @@ and timing-sensitive checks failed well before that. So:
 
 - An agent builds and tests only in its own git worktree, never in the main checkout: builds write
   `dist/`, and two builds in one checkout delete each other's files. `dev:start` makes the worktree.
-- Each worktree has its own `PREVIEW_PORT` and `DOCS_PREVIEW_PORT` (`dev:start` writes them to
-  `mise.local.toml`, never 4190, which browsers block).
+- Each worktree has its own `PREVIEW_PORT` and `DOCS_PREVIEW_PORT`, computed from its name (never
+  4190, which browsers block); `PREVIEW_PORT=4232 npm run …` overrides them.
 - At most three agents run tests at the same time; research, writing and scratch spikes do not
   count. When more are needed, set `PLAYWRIGHT_WORKERS=2` for each.
-- Google's level (`project:test:google`, `project:test:cwv`) takes a machine-wide lock, so a second
+- Google's level (`npm run test -- google`, `npm run test -- cwv`) takes a machine-wide lock, so a second
   run waits rather than skewing the first.
 - Never chain a deploy after a check with `;`: the flow's steps run each in turn and stop at the first failure.
 
@@ -323,11 +325,11 @@ and timing-sensitive checks failed well before that. So:
   <https://remy-auth.gedw99.workers.dev>, its staging <https://remy-auth-staging.gedw99.workers.dev>, and for the docs Worker its guide
   <https://remy-auth-docs.gedw99.workers.dev/docs>, developer docs
   <https://remy-auth-docs.gedw99.workers.dev/dev> and API reference
-  <https://remy-auth-docs.gedw99.workers.dev/reference>. `cf:deploy` and `docs:deploy` print them last.
+  <https://remy-auth-docs.gedw99.workers.dev/reference>. `remy cloudflare deploy` and `remy cloudflare docs-deploy` print them last.
 - Every report about something the owner can look at gives its URLs: the live sites, the preview
-  (`mise run cf:preview` prints it) and a direct link to each page or feature discussed.
+  (`npx remy cloudflare preview` prints it) and a direct link to each page or feature discussed.
 - Say what was checked and what was not.
-- What is live is asked, not remembered: `mise run cf:versions` prints what each deployment is running
+- What is live is asked, not remembered: `npm run dev:status` prints what each deployment is running
   and how far that is from your checkout. Say it from there, not from what you last deployed.
 
 ## Many agents, one flow
@@ -338,8 +340,8 @@ the only integrator, and GitHub checks every landing. Nothing here is done by ha
 
 | | Command | What it does |
 | --- | --- | --- |
-| Look | `npm run dev:status` | what is going on, asked from the facts' owners: main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests. Every agent session opens with it (a hook `dev:guard` registers); a developer runs it when they sit down |
-| Start | `npm run dev:start -- <name>` | a worktree on branch `<name>` from main (`.claude/worktrees/<name>`), installed (`npm ci`, `project:prepare`), with ports of its own (`mise.local.toml`) and the flow's guard. Claude Code's own worktrees live at the same place and are only a folder: inside one, `npm run dev:start` with no name prepares it the same way |
+| Look | `npm run dev:status` | what is going on, asked from the facts' owners: main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests. Every agent session opens with it (a hook `remy guard` registers); a developer runs it when they sit down |
+| Start | `npm run dev:start -- <name>` | a worktree on branch `<name>` from main (`.claude/worktrees/<name>`), installed (`npm ci`, the app's `local` script), with ports of its own and the flow's guard. Claude Code's own worktrees live at the same place and are only a folder: inside one, `npm run dev:start` with no name prepares it the same way |
 | Code | `npm run dev:change` | the check, in seconds, after every change |
 | Land | `npm run dev:land -- "<what changed>"` | main merged in first (a conflict stops with the files named), the check, commit, fast-forward main, push, staging, then translation last when stale (the Claude subscription on this machine, never GitHub). GitHub runs the heavy checks; a red run comments on the commit |
 | Finish | `npm run dev:done` | the landed worktree and branch go; refuses while anything is unlanded |

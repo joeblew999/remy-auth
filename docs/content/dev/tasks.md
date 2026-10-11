@@ -1,67 +1,61 @@
 ---
-title: "Shared mise tasks"
-description: "The shared mise tasks every Remy app includes by git reference: one file per namespace, and what each task does."
+title: "The command line"
+description: "remy, the tooling every Remy app installs with the package: the scripts, the layout they read, a new app, publishing packages, translations, Cloudflare and plans."
 ---
 
-One file per task namespace (`skills`, `mcp`, `browser`, `web`, `codex`, `claude`, `project`, `i18n`,
-`cf`, `api`); file tasks live in their namespace's directory (`mcp/`, `cf/`, `api/`, `project/`, `i18n/`). remy-auth includes this
-directory locally; any other project includes it by git reference pinned to the release tag that
-matches its `@joeblew999/remy-ui` version:
+The tooling is `remy`, the bin of `@joeblew999/remy-ui` (`packages/ui/src/cli`, one TypeScript module per
+command); an app gets it with the package (`npm install`, at the package's version) and names it in its
+`package.json` scripts, the same ones in every app (`"dev:change": "remy change"`). An app says once, in
+`remy.config.ts`, where it is deployed and its ports:
 
-```toml
-min_version = "2026.9.12"   # the tasks rely on it; an include cannot set it
+```ts
+import type { RemyProject } from '@joeblew999/remy-ui/project';
 
-[task_config]
-includes = ["git::https://github.com/joeblew999/remy-auth.git//tasks?ref=vX.Y.Z"]
-
-[env]
-# Local host port for preview and tests, from the shell so each worktree or agent picks its own.
-PREVIEW_PORT = "{{ get_env(name='PREVIEW_PORT', default='4174') }}"
-# Origin in prerendered links for local tests; follows the port.
-PUBLIC_ORIGIN = "http://127.0.0.1:{{ env.PREVIEW_PORT }}"
-# Origin cf:deploy builds with.
-DEPLOY_ORIGIN = "https://your-app.your-subdomain.workers.dev"
+export default {
+  origins: { production: 'https://your-app.your-subdomain.workers.dev', docs: 'https://your-app-docs.your-subdomain.workers.dev' },
+  ports: { preview: 4173, docsPreview: 4174 },   // the main checkout's; a worktree computes its own from its name
+} satisfies RemyProject;
 ```
 
 ### The layout
 
 Every Remy repo, remy-auth included, has the same files in the same places; what is inside the product's
-files differs. The layout is the paths the shared tasks, their scripts and the package read, so a file
+files differs. The layout is the paths the commands and the package read, so a file
 anywhere else is simply not found; no checker of its own keeps it.
 
 | Path | Read by | Holds |
 | --- | --- | --- |
-| `mise.toml` | mise | `min_version`, the tools, the tasks include, `[env]` (`DEPLOY_ORIGIN`, `PREVIEW_PORT`, docs origins) |
-| `package.json`, `package-lock.json` | npm, `project:*`, `packages:*` (workspaces) | the app's dependencies; `workspaces` when it owns packages |
-| `wrangler.jsonc` | wrangler, the Cloudflare Vite plugin, `cf:*` | the Worker's name, bindings and assets |
-| `vite.config.ts`, `tsconfig.json`, `playwright.config.ts` | Vite, `project:typecheck`, `project:test:*` | the build, types and browser checks |
-| `fnox.toml`, `skills-lock.json` | fnox, `skills:*` | secret names; the pinned skills |
+| `package.json`'s `scripts`, `remy.config.ts`, `.node-version` | npm, `remy` | the entry: every command; the origins, ports and release package; the Node version |
+| `package.json`, `package-lock.json` | npm, `remy` (workspaces) | the app's dependencies; `workspaces` when it owns packages |
+| `wrangler.jsonc` | wrangler, the Cloudflare Vite plugin, `remy cloudflare` | the Worker's name, bindings and assets |
+| `vite.config.ts`, `tsconfig.json`, `playwright.config.ts` | Vite, `remy check types`, `remy test` | the build, types and browser checks |
+| `fnox.toml`, `skills-lock.json` | fnox, `remy skills` | secret names; the pinned skills |
 | `src/routes/`, `src/routeTree.gen.ts` | TanStack Start (the tree is generated) | the product's pages |
 | `src/parts.json` | the package's `remyParts()` | the shared parts the app lists (none without the file; the blank app lists `seo-routes`) |
 | `src/api/` | the app's `api.$` route | the product's procedures, if it has an API |
-| `tests/` (`smoke.spec.ts` by name) | `project:test:*`, `project:test:live` | the shared checks with the app's settings, and its own |
+| `tests/` (`smoke.spec.ts` by name) | `remy test`, the live smoke after a deploy | the shared checks with the app's settings, and its own |
 | `public/` | Vite | favicon, `_headers` |
-| `dist/` (`dist/client/assets`) | `cf:deploy`, the checks | build output, never committed |
-| `docs/` (`docs.config.ts`, `vite.config.ts`, `tsconfig.json`, `package.json`, `content/{users,dev,ui}/` with `i18n.json` and `meta.json`, `content/questions.json`; generated `.remy-docs/`, `dist/`) | `docs:*`, `i18n:docs:*` (`I18N_DOCS_DIR`) | the app's docs: its identity and pages; the Worker is the package's |
-| `packages/<name>/` with `README.md` | `plans:*`, `packages:*` | packages the repo publishes, if any |
-| `messages/`, `project.inlang/` | the app preset, `project:generate`, `i18n:messages:*` | the app's own strings, if any (compiled into `src/paraglide/`) |
-| `.plans/` (`now.md`, `done/`, `parked/`) | `plans:*` | the repo's plans |
+| `dist/` (`dist/client/assets`) | the deploys, the checks | build output, never committed |
+| `docs/` (`docs.config.ts`, `vite.config.ts`, `tsconfig.json`, `package.json`, `content/{users,dev,ui}/` with `i18n.json` and `meta.json`, `content/questions.json`; generated `.remy-docs/`, `dist/`) | `remy docs`, `remy i18n` (`I18N_DOCS_DIR`) | the app's docs: its identity and pages; the Worker is the package's |
+| `packages/<name>/` with `README.md` | `remy plans`, `remy packages` | packages the repo publishes, if any |
+| `messages/`, `project.inlang/` | the app preset, the app's `generate` script, `remy i18n` | the app's own strings, if any (compiled into `src/paraglide/`) |
+| `.plans/` (`now.md`, `done/`, `parked/`) | `remy plans` | the repo's plans |
 | `AGENTS.md`, `.github/workflows/` | agents; GitHub | the agents' pointer at the docs; CI |
-| `tasks/`, `template/`, `fixtures/consumer/` | the include; `giget`; `template:test` | remy-auth only: the shared tasks themselves, the blank app a new repo starts from, and the consumer fixture that tests both as another repo gets them |
+| `packages/ui/src/cli/`, `template/`, `fixtures/consumer/` | the package; `giget`; `remy test consumers` | remy-auth only: the command line itself, the blank app a new repo starts from, and the consumer fixture that tests both as another repo gets them |
 
 ### A new consumer
 
 The one recipe. A new app starts from the blank app, [`template/`](https://github.com/joeblew999/remy-auth/tree/main/template)
 in remy-auth at the release tag: the layout above with only the repo's own files in it (its names, one
 home page in every language, a docs index per site, the layout's config files at a few lines each).
-Everything else is the package and the tasks, which one version bump upgrades.
+Everything else is the package, which one version bump upgrades.
 
-1. Prerequisites: mise >= 2026.9.12, `gh auth login` with a token that has `read:packages`, Google
-   Chrome (the checks use it), and `wrangler login` before the first deploy.
+1. Prerequisites: Node as `.node-version` says, `gh auth login` with a token that has `read:packages`,
+   Google Chrome (the checks use it), and `wrangler login` before the first deploy.
 2. `npx -y giget@3.3.1 gh:joeblew999/remy-auth/template#vX.Y.Z <name>`, then `cd <name>` and `git init`
    (the translation and plans tools read git history; `npm run setup` says so if it is missing).
 3. Name the app: replace `my-app` and `My app` (`grep -rn -i "my.app" --exclude-dir=node_modules .`):
-   `package.json`, `wrangler.jsonc`, `src/service.ts`, `mise.toml`'s origins, `docs/docs.config.ts` (the
+   `package.json`, `wrangler.jsonc`, `src/service.ts`, `remy.config.ts`'s origins, `docs/docs.config.ts` (the
    product's name and source, which the app's frame reads too) and `messages/en.json`.
 4. Node as `.node-version` says, then `GITHUB_TOKEN=$(gh auth token) npm install` once to write
    `package-lock.json`, then `npm run setup` (npm ci, the pinned skills and the `remy` skill, the
@@ -90,89 +84,77 @@ start its server: give each shell its own (`PREVIEW_PORT=4232 npm run …`).
 ### A repository that publishes packages
 
 A repository may also publish packages of its own (a contract, a UI package), as remy-auth does; that
-costs no task of its own. Its packages are npm workspaces (`packages/<name>/`, `package.json`'s
-`workspaces`), and each one that is not `private` is published by the shared `packages:*` tasks:
+costs no command of its own. Its packages are npm workspaces (`packages/<name>/`, `package.json`'s
+`workspaces`), and each one that is not `private` is published by `remy packages` (`npm run packages -- …`):
 
-| Task | Does |
+| Command | Does |
 | --- | --- |
-| `packages:check`, `packages:upgrade` | Newer npm versions of the repository's own dependencies (root and workspaces; never its own packages or `@joeblew999/remy-ui`), previewed (`check`) or applied, then `project:verify` (`upgrade`) |
-| `packages:pack` | A tarball of each published package, for a scratch app to install before any release |
-| `packages:release` | The gates (translations strict, `project:verify`, `project:release-checks`, Google's audits, Core Web Vitals), then `packages:tag` |
-| `packages:tag` | On a clean `main`: tag `RELEASE_PACKAGE`'s version, push, then `packages:publish --release` |
-| `packages:publish` | Publish each package whose version is new on its registry; with `--release vX.Y.Z` also the GitHub release from `CHANGELOG.md` (`packages:notes`). The tag's CI job runs the same task |
+| `check`, `upgrade` | Newer npm versions of the repository's own dependencies (root and workspaces; never its own packages or `@joeblew999/remy-ui`), previewed (`check`) or applied, then the installation's checks (`upgrade`) |
+| `pack` | A tarball of each published package, for a scratch app to install before any release |
+| `release` | The gates (translations strict, every changed package bumped, `remy verify`, the app's `release-checks` script, Google's audits, Core Web Vitals), then `tag`; `dev:release` runs it |
+| `tag` | On a clean `main`: tag the release package's version, push, then `publish --release` |
+| `publish` | Publish each package whose version is new on its registry; with `--release vX.Y.Z` also the GitHub release from `CHANGELOG.md` (`notes`). The tag's CI job runs the same command |
 
-In `mise.toml`'s `[env]`: `RELEASE_PACKAGE` (the package whose version names the release) and
-`RELEASE_TITLE`. A package's `exports` name every subpath its users import (`"./video": "./src/video.ts"`);
+In `remy.config.ts`: `release.package` (the package whose version names the release) and
+`release.title`. A package's `exports` name every subpath its users import (`"./video": "./src/video.ts"`);
 anything else is refused at build time and in Playwright, whose message names the importing file, not the
 export map. A package's own strings are its own inlang project, compiled by its build, whose runtime
 follows the platform's language with one call, `followLocale(runtime)` (`locale`); the i18n tasks read it
-through `I18N_INLANG`. Checks the repository adds to a release go in `project:release-checks` (remy-auth:
-`template:check`, `ui:verify`). remy-auth sets a release's version with `mise run ui:version -- X.Y.Z`, which
-writes it everywhere it appears (the package and the blank app's three pins).
+through `I18N_INLANG`. Checks the repository adds to a release go in its `release-checks` script (remy-auth:
+`template:check`, `ui:verify`). remy-auth sets a release's version with `npm run ui:version -- X.Y.Z`, which
+writes it everywhere it appears (the package and the blank app's pins).
 
 ### Choosing the version: released, development or local
 
-The tasks and the package are released together: remy-auth's `npm run dev:release` (`ui:release` and `release` are its
-aliases; it runs the shared `packages:release`) publishes `@joeblew999/remy-ui` X.Y.Z and tags the same commit `vX.Y.Z`. A consumer
-therefore pins both to one number, and `project:upgrade-ui` changes them together:
-
-| Want | How | Where |
-| --- | --- | --- |
-| Released (default, stable) | `ref=vX.Y.Z`, matching the `@joeblew999/remy-ui` version in `package.json` | `mise.toml`, committed |
-| Development line | `MISE_ENV=dev mise run …` with `ref=main` | `mise.dev.toml`, committed |
-| Your own checkout, editing the tasks | the sibling path `../remy-auth/tasks` | `mise.local.toml`, gitignored |
-
-mise uses the most specific file's `includes` instead of the default (verified with mise
-2026.9.12), so the overrides never merge with the release. Remote includes are cached: after
-`main` moves, `mise run project:refresh-tasks`. Pin a commit SHA only while a branch is under test
-before release; move back to a tag at release.
+The tooling and the package are one thing: remy-auth's `npm run dev:release` publishes `@joeblew999/remy-ui`
+X.Y.Z, bin included, and tags the same commit `vX.Y.Z`. A consumer pins that one number in its
+`package.json` (and its CI workflow's tag), and `npm run upgrade -- X.Y.Z` moves both. To work against
+remy-auth's own checkout, `npm link ../remy-auth/packages/ui` (and `npm unlink` back).
 
 The platform supplies every npm package the app and the tasks need, at one version: they are
 `@joeblew999/remy-ui`'s own dependencies (the framework, the toolchain, the checks' tools), so an app's
-`package.json` names the package, its own packages and whatever its product adds. `project:single-copies`
-(in `project:check`) fails when a package that breaks when installed twice (React, TanStack Router and
-Query, the MDX stringifier; the package's `remy.singleCopy` list) is: remove the app's own pin. A task
-defined in the project's own `mise.toml` overrides the included task of the same name; the hooks meant
-for it are `project:generate` (code generated before type checking; by default the app's own catalog),
-`project:prepare` (the local state an app needs before it runs, which `project:dev` and `project:build`
-run first; nothing by default, and remy-auth writes its `.dev.vars` and migrates its local D1 there)
-and `project:release-checks`.
+`package.json` names the package, its own packages and whatever its product adds. `the check's single-copies part`
+(in `remy check`) fails when a package that breaks when installed twice (React, TanStack Router and
+Query, the MDX stringifier; the package's `remy.singleCopy` list) is: remove the app's own pin. The commands call an
+app's own hooks where it has them, as scripts of its `package.json`, run if present: `generate` (code
+generated before type checking; the blank app's compiles its own catalog), `local` (the local state an
+app needs before it runs, which `dev`, `build` and `dev:start` run first; remy-auth writes its `.dev.vars`
+and migrates its local D1 there), `release-checks` and `test:consumers`.
 
-The development flow is code, `tasks/dev/flow.ts`, with four steps and a guard
+The development flow is code, `packages/ui/src/cli/flow.ts`, with four steps and a guard
 ([how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)):
 
-| Step | Task |
+| Step | Script |
 | --- | --- |
 | First | `dev:status` (main with GitHub's verdicts, the deployments, worktrees ahead and behind, translations, pull requests; a `SessionStart` hook runs it for agents) |
-| A piece of work | `dev:start -- <name>` (a worktree of its own from main, `npm ci`, ports in `mise.local.toml`, `dev:guard`); `dev:done` removes it when the piece of work is over and landed |
+| A piece of work | `dev:start -- <name>` (a worktree of its own from main, `npm ci`, its own ports, the guard); `dev:done` removes it when the piece of work is over and landed |
 | Every change | `dev:change` (`remy change`, every part a function: plans, single copies, routes when a route file changed, types, the unit checks, translations as a warning, the docs when docs changed) |
-| Finished work | `dev:land -- "<message>"` (the check, commit, main, push, `cf:staging`, then translation when stale; GitHub then runs `project:test`, `project:test:google` and `project:test:consumers` in parallel, and a red run comments on the commit. The same three locally, on purpose: `REMY_FLOW=hand mise run <task>`) |
-| Production | `dev:promote` (refuses a commit GitHub has not passed; then `cf:deploy`, `docs:deploy`, `cf:versions`) |
-| A release | `dev:release` (`packages:release`, which runs `project:verify`) |
-| One area | `project:test:only -- <words>` |
-| The guard | `dev:guard` registers it (`project:setup` does); `dev:guard -- --check` verifies it (`project:verify` does) |
+| Finished work | `dev:land -- "<message>"` (the check, commit, main, push, the staging deploy, then translation when stale; GitHub then runs `npm run test -- every`, `google` and `consumers` in parallel, and a red run comments on the commit. The same three locally, on purpose, by a person: `REMY_FLOW=hand npm run test -- <level>`) |
+| Production | `dev:promote` (refuses a commit GitHub has not passed; then the production deploy, the docs deploy, what each deployment runs) |
+| A release | `dev:release` (`remy packages release`, which runs `remy verify`) |
+| One area | `npm run test -- only <words>` |
+| The guard | `npx remy guard` registers it (`npm run setup` does); `npx remy guard --check` verifies it (the installation's checks do) |
 
-`project:test` is every check of ours in every language (inside `project:verify`). `project:verify` and CI end with
-`project:test:consumers`, the other repositories this one serves tested as they get it: nothing by default; in
-remy-auth, `template:test`, which builds the blank app and a package it owns from this commit's platform
+`npm run test -- every` is every check of ours in every language (inside `remy verify`). `remy verify` and CI end with
+`remy test consumers`, the other repositories this one serves tested as they get it: the app's `test:consumers`
+script, nothing by default; in remy-auth, the consumer fixture, which builds the blank app and a package it owns from this commit's platform
 (the package from a tarball with a version of its own, the tasks from a copy outside any `node_modules`, the
-template's `.npmrc`) and runs install, skills (installed once per pinned list, then reused), tooling, the check, the quick browser checks, the docs and a dry-run publish (~1.5 to 3 min, mostly the network).
+template's `.npmrc`) and runs install, skills (installed once per pinned list, then reused), the tooling invariants, the check, the quick browser checks, the docs and a dry-run publish (~1.5 to 3 min, mostly the network).
 A change that would break another repository fails there, not in that repository. Tests are type-checked with
 the app (`tsconfig.json` includes `tests/`). Google's level is
-`project:test:google` (Lighthouse audits, local; CI on every push and tag) and `project:test:cwv`
-(Core Web Vitals on a throwaway Cloudflare Worker); `packages:release` runs both.
+`npm run test -- google` (Lighthouse audits, local; CI on every push and tag) and `npm run test -- cwv`
+(Core Web Vitals on a throwaway Cloudflare Worker); the release runs both.
 
 Where checks run: the shared package's own behaviour is proven once, in remy-auth, before each
 release. An app built on the package runs a contract set (its pages render, site and app pages stay
 apart, its own features work) plus Google's level on its own site pages, not the whole package
 suite again. Keep checks cheap rather than dropping them (Playwright's clock rather than real
 waits, one browser page per check, parallel workers). Checks loop over `checkedLocales` from
-`@joeblew999/remy-ui/checks`, which honours `CHECK_LOCALES`. Set `[settings] task.timings = true` in
-the including `mise.toml` so each step prints per-task and total durations.
+`@joeblew999/remy-ui/checks`, which honours `CHECK_LOCALES`. Every step says how long it took.
 
 ### Translations
 
-One layout in every app, so the same `i18n:*` tasks work everywhere (the rule for who translates is
+One layout in every app, so the same `remy i18n` commands work everywhere (the rule for who translates is
 [one writer](./how-we-work.md#translations-one-writer)):
 
 | What | English | Translation |
@@ -193,59 +175,60 @@ forward to them.
 - **Docs** (Fumadocs): the folder is `I18N_DOCS_DIR` (default `docs/content`); each site with an
   `i18n.json` translates every English page into each of its languages. Detected: missing and stale
   pages (`git`), orphans, and Fumadocs UI's own text (`ui/<lang>.json` against `ui/en.json`).
-- **The translator** is Claude Code headless (`claude -p`), pinned in the tasks, with no tools, no MCP
+- **The translator** is the machine's Claude Code headless (`claude -p`), with no tools, no MCP
   servers, skills or project settings, and structured output: a catalog's keys come back as JSON and
-  `jq` merges them in English key order; a page comes back whole. The prompts are
-  `tasks/i18n/prompts/`. One call per language (messages) or per page (docs), `I18N_JOBS` at a time.
+  are merged in English key order; a page comes back whole, and is written only when it is a page
+  (`page.ts`). The prompts are `packages/ui/src/cli/prompts.ts`. One call per language (messages) or per
+  page (docs), `I18N_JOBS` at a time.
 - Checks need no key, no network and full git history (a shallow clone is refused). Translating uses
   the Claude login on the machine.
 - An app with no inlang project and no docs sites gets "nothing to check" and exit 0.
 
-| Task | Does |
+| Command | Does |
 | --- | --- |
-| `i18n:check` | Both checks in parallel; a WARNING and exit 0 while coding (`project:check` runs it), exit 1 with `I18N_STRICT=1` (`packages:release`) |
-| `i18n:messages:check` | The catalogs' gaps, and languages that differ from the platform's (`de unlisted`); `-- --list` one line per gap (`es missing nav_more`) |
-| `i18n:docs:check` | The docs' gaps; `-- --list` one line per gap (`es stale docs/content/dev/gui.es.md`) |
-| `i18n:translate` | On main: messages, then docs, one commit each; `dev:land` runs it, last |
-| `i18n:messages:translate` | The catalogs' gaps, one language per agent call |
-| `i18n:docs:translate [files]` | The docs' gaps, one page per agent call; named translation files are redone in full |
+| `remy i18n check` | Both checks; a WARNING and exit 0 while coding (the check runs it), exit 1 with `I18N_STRICT=1` (the release) |
+| `remy i18n check messages` | The catalogs' gaps, and languages that differ from the platform's (`de unlisted`); `--list` one line per gap (`es missing nav_more`) |
+| `remy i18n check docs` | The docs' gaps; `--list` one line per gap (`es stale docs/content/dev/gui.es.md`) |
+| `remy i18n translate` | On main: messages, then docs, one commit each; `dev:land` runs it, last; by hand, `REMY_FLOW=hand` in front |
+| `remy i18n translate messages` | The catalogs' gaps, one language per agent call |
+| `remy i18n translate docs [files]` | The docs' gaps, one page per agent call; named translation files are redone in full |
 
 Settings: `I18N_MODEL` (default `sonnet`), `I18N_JOBS` (4), `I18N_COMMIT=0` (leave the change
 uncommitted for review), `I18N_BRANCH` (`main`).
 
-### Cloudflare tasks
+### Cloudflare
 
-Every `cf:*` task says LOCAL or REMOTE (and PRODUCTION) in `mise tasks`. Run file tasks through
-mise: outside a task mise's Node shim reapplies `[env]` and would replace `PUBLIC_ORIGIN`.
+`npx remy cloudflare <command>`; each says in its header comment whether it is local or remote (and production).
 
-| Task | Does |
+| Command | Does |
 | --- | --- |
-| `cf:deploy` | Build with `DEPLOY_ORIGIN`, upload, wait for the new version (`cf:wait`), then its live smoke check. No tests before it: `dev:promote` runs it after the flow's checks. It refuses when a D1, KV or R2 binding names no existing resource: Wrangler would create one during the deploy, and creating resources is the owner's (`cf:preview` refuses the same way) |
-| `cf:preview` | Deploy this commit as a throwaway Worker `<worker>-check-<commit>` (production untouched), run level 1 against it, delete it; `KEEP_PREVIEW=1` keeps it |
-| `cf:preview-delete` | List check Workers, or delete one by name; never the production Worker |
-| `cf:urls` | Print the production (or a given) origin's pages and `/healthz`, for reports |
-| `cf:staging` | `cf:deploy` for the staging environment: builds with `CLOUDFLARE_ENV=staging` (`env.staging` in the Wrangler configuration) and uploads its own Worker at `STAGING_ORIGIN`; production is untouched. What staging permits beyond production is the app's [environment table](./auth.md#environments-one-table) |
-| `cf:versions` | Ask each deployment (`DEPLOY_ORIGIN`, `STAGING_ORIGIN` and `DOCS_ORIGIN`, or the origins given) what it is running: service, environment, commit, how far that is from this checkout, when it was deployed. [Asked, never remembered](./gui.md#which-version-is-deployed) |
-| `project:test:remote` | Level 1 against `TEST_BASE_URL`, by hand only (`REMY_FLOW=hand`): the flow's deploys end with the live smoke, and GitHub runs the suite |
-| `cf:events`, `cf:ai-usage`, `cf:ai-check`, `cf:ai-gateway` | Stored Workers Logs, AI Gateway usage, AI setup check, the gateway's settings ([tooling](./tooling.md#the-docs-answers-on-cloudflare-ai-search-and-ai-gateway)) |
-| `project:upgrade-ui` | Move an app to one shared release: package version and tasks `ref` together, then `project:verify` |
+| `deploy` | Build with `DEPLOY_ORIGIN`, upload, wait for the new version (`the wait for the new version`), then its live smoke check. No tests before it: `dev:promote` runs it after the flow's checks. It refuses when a D1, KV or R2 binding names no existing resource: Wrangler would create one during the deploy, and creating resources is the owner's (`preview` refuses the same way) |
+| `preview [alias] [--keep]` | Deploy this commit as a throwaway Worker `<worker>-check-<commit>` (production untouched), run level 1 against it, delete it; `--keep` keeps it |
+| `preview-delete [name]` | List check Workers, or delete one by name; never the production Worker |
+| `urls [origin]` | Print the production (or a given) origin's pages and `/healthz`, for reports |
+| `staging` | `deploy` for the staging environment: builds with `CLOUDFLARE_ENV=staging` (`env.staging` in the Wrangler configuration) and uploads its own Worker at `origins.staging`; production is untouched. What staging permits beyond production is the app's [environment table](./auth.md#environments-one-table) |
+| `versions [origins…]` | Ask each deployment (the origins in `remy.config.ts`, or the origins given) what it is running: service, environment, commit, how far that is from this checkout, when it was deployed. [Asked, never remembered](./gui.md#which-version-is-deployed) |
+| `docs-deploy` | The docs Worker: build, deploy, publish its pages to Ask AI's index; `dev:promote` runs it |
+| `npm run test -- remote [origin]` | Level 1 against a deployment, by a person (`REMY_FLOW=hand`): the flow's deploys end with the live smoke, and GitHub runs the suite |
+| `npm run observe -- events\|ai-usage\|ai-check\|gateway` | Stored Workers Logs, AI Gateway usage, AI setup check, the gateway's settings ([tooling](./tooling.md#the-docs-answers-on-cloudflare-ai-search-and-ai-gateway)) |
+| `npm run upgrade -- <version>` | Move an app to one shared release: the package version and the CI workflow's tag together, then the installation's checks |
 
 Credentials come from Wrangler's login, or from the keychain through fnox
 ([tooling](./tooling.md#secrets-fnox)).
 
 ### Plans
 
-The plans rule ([how we work](./how-we-work.md#plans-few-short-closed)) as tasks, the same in
+The plans rule ([how we work](./how-we-work.md#plans-few-short-closed)) as commands (`npm run plans -- …`), the same in
 every project: `.plans/now.md` is the one ordered list, `.plans/*.md` the few open plan files,
 `.plans/done/` and `.plans/parked/` the rest, `.plans/stability-log.md` optional. A project with no
-`.plans/` passes `plans:check` and has nothing to list.
+`.plans/` passes `plans check` and has nothing to list.
 
-| Task | Does |
+| Command | Does |
 | --- | --- |
-| `plans:status` | Open items in `now.md` by section, open plan files with their first `Status:`/`Closed`/`Parked` line and last commit (STALE after 14 days), parked plans. `--json` for agents |
-| `plans:check` | `now.md` exists, every relative `.md` link under `.plans/` resolves, no `.md` outside `.plans/`, `done/` and `parked/`, every open plan file linked from `now.md`. Instant, no network; `project:check` runs it first |
-| `plans:close -- <plan> "<what shipped>"` | Adds `Closed <today>: ...` under the title, moves it to `done/` (from `.plans/` or `parked/`; `git mv` when tracked), repoints relative links to it in `.plans/`, `docs/`, `tasks/`, `packages/*/README.md` and the root `*.md`, and its own links from the new folder, strikes its `now.md` item |
-| `plans:park -- <plan> "<why>"` | The same into `parked/` with `Parked <today>: ...` |
-| `plans:open -- <plan> "<why now>"` | A parked plan taken up again: the same from `parked/` back into `.plans/` with `Opened <today>: ...`; add its item to `now.md` yourself |
+| `status` | Open items in `now.md` by section, open plan files with their first `Status:`/`Closed`/`Parked` line and last commit (STALE after 14 days), parked plans. `--json` for agents |
+| `check` | `now.md` exists, every relative `.md` link under `.plans/` resolves, no `.md` outside `.plans/`, `done/` and `parked/`, every open plan file linked from `now.md`. Instant, no network; the check runs it first |
+| `close <plan> "<what shipped>"` | Adds `Closed <today>: ...` under the title, moves it to `done/` (from `.plans/` or `parked/`; `git mv` when tracked), repoints relative links to it in `.plans/`, `docs/`, `packages/*/README.md` and the root `*.md`, and its own links from the new folder, strikes its `now.md` item |
+| `park <plan> "<why>"` | The same into `parked/` with `Parked <today>: ...` |
+| `open <plan> "<why now>"` | A parked plan taken up again: the same from `parked/` back into `.plans/` with `Opened <today>: ...`; add its item to `now.md` yourself |
 
-`close` and `park` change files and stage the move but never commit: read `git diff`, then commit.
+`close` and `park` change files and stage the move but never commit: read `git diff`, then `npm run dev:change`.

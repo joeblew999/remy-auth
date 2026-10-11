@@ -12,8 +12,8 @@ them. Consumers are remy-auth (server-rendered) and
 
 Everything in `src/components`, `src/hooks` and `src/styles/globals.css` is what the pinned shadcn
 CLI writes (monorepo layout: the app's `components.json` routes `shadcn add` here), including `cn`
-from shadcn's own `cn` package; nothing there is edited by hand. `mise run ui:components` and
-`mise run ui:theme` regenerate them and `mise run ui:verify` fails on any drift (see
+from shadcn's own `cn` package; nothing there is edited by hand. `npm run ui:components` and
+`npm run ui:theme` regenerate them and `npm run ui:verify` fails on any drift (see
 [docs/gui.md](./gui.md#shadcn-stock)). Blocks are owned copies in `src/blocks`.
 
 ## Usage
@@ -58,12 +58,13 @@ prerendered example):
   `themeChecks` fail without it.
 - **A route for every path in `appPaths` and `sitePaths`**, each a few lines over the shared page (the
   showcase's Clock spreads `clockRouteOptions` from `@joeblew999/remy-showcase/clock-route`).
-- **`tests/smoke.spec.ts`**, one `smokeChecks(...)` call: `project:test:smoke` and the check after every
-  `cf:deploy` (`project:test:live`) run it, and fail with "No tests found" without it.
-- **`.plans/now.md`**, the one ordered list of open work (`plans:check`, in the check).
-- **Installs and upgrades through the shared tasks**, never by hand: `mise run project:setup` (install,
-  skills, MCP, verify) and `mise run project:upgrade-ui -- <version>` (the exact package version and the
-  tasks include at the same tag, then verify). Both take GitHub Packages' token from `gh auth token`.
+- **`tests/smoke.spec.ts`**, one `smokeChecks(...)` call: `npm run test -- smoke` and the live smoke after
+  every deploy run it, and fail with "No tests found" without it.
+- **`.plans/now.md`**, the one ordered list of open work (`remy plans check`, in the check).
+- **Installs and upgrades through the package's commands**, never by hand: `npm run setup` (install,
+  skills, MCP, the installation's checks) and `npm run upgrade -- <version>` (the exact package version
+  and the CI workflow at the same tag, then the same checks). Both take GitHub Packages' token from
+  `gh auth token`.
 
 ## Exports
 
@@ -120,7 +121,7 @@ The package's dependencies are the platform's one dependency set, pinned exactly
 TanStack Start, Router and Query), the toolchain (Vite, Wrangler, Tailwind, TypeScript) and the tools the
 shared tasks and checks run (Playwright, Lighthouse, the DevTools MCP server, npm-check-updates). An app
 names only the package; `remy.singleCopy` in its `package.json` lists those that break when installed twice,
-which `project:single-copies` checks ([tasks](./tasks.md#choosing-the-version-released-development-or-local)).
+which the check's single-copies part keeps ([the command line](./tasks.md#choosing-the-version-released-development-or-local)).
 
 ## Language
 
@@ -137,9 +138,9 @@ Chinese, Hindi, Amharic, Polish, Turkish and German) is agent-authored and unrev
 
 The package is `@joeblew999/remy-ui` on GitHub Packages (the scope must equal the
 GitHub owner there). `npm run dev:release` (alias `release`) does the whole release from this machine, stopping at the
-first failure: translations complete and current (`i18n:check`, strict), every check of ours
-(`project:verify`), shadcn's files exactly as its CLI writes them (`ui:verify`), Google's Lighthouse audits,
-and Core Web Vitals measured cold on a throwaway Cloudflare Worker (`project:test:cwv`: the first visits
+first failure: translations complete and current (`remy i18n check`, strict), every check of ours
+(`remy verify`), shadcn's files exactly as its CLI writes them (`npm run ui:verify`), Google's Lighthouse audits,
+and Core Web Vitals measured cold on a throwaway Cloudflare Worker (`npm run test -- cwv`: the first visits
 after a deploy, which is what a slow page costs most). Then it tags `vX.Y.Z` from
 `packages/ui/package.json`, pushes, publishes with your `gh` token and creates the GitHub release from the
 matching CHANGELOG section. CI (`.github/workflows/google.yml`) repeats level 2 on the tag.
@@ -156,7 +157,7 @@ Consumers add to their `.npmrc`:
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
-and install through `mise run project:setup`, which takes a `read:packages` token from `gh auth token`
+and install through `npm run setup`, which takes a `read:packages` token from `gh auth token`
 (or `GITHUB_TOKEN` in the shell). Released versions are in the
 [changelog](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
 

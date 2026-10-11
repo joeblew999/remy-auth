@@ -22,8 +22,8 @@ read those, not the translations beside them (`*.es.md`).
 
 1. [Development principles](./development.md): ownership, single source of truth, test gates,
    generated code, owner decisions.
-2. [Developer tooling](./tooling.md): mise tasks, pinned tools and agent skills. Run project
-   commands through `mise run <namespace:action>`.
+2. [Developer tooling](./tooling.md): the scripts and commands, pinned tools and agent skills. Run
+   project commands through `npm run <script>`.
 3. [GUI runtime workflow](./gui.md): one Worker, local and remote test targets.
 4. [How we work](./how-we-work.md): project tools first, surveys before tool choices, shadcn and
    TanStack all the way for UI, the flow and who runs each step, multi-agent work. Record working

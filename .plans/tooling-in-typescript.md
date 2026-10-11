@@ -91,8 +91,10 @@ already does, and the scripts list is the documentation of what exists.
    tooling`, `dev:change`, `test -- quick`, the docs test, `packages publish --dry-run`); remy-auth-app
    moves with the release that carries all this (`npm install @joeblew999/remy-ui@<version>`, its
    scripts, its `remy.config.ts`), which is item 2's release.
-7. **Delete mise:** `mise.toml`, `tasks/`, `mise.local.toml`, `template/mise.toml`, `mise.dev.toml`;
-   the docs without a `mise run` in them; the hook regex and the doc check go.
+7. **Delete mise.** 7a, done 2026-10-11: the docs without mise in them (every page read, `tooling.md`
+   and `tasks.md` rewritten around the scripts and `remy`; the owner's quotes stay as said). 7b, left:
+   `mise.toml`, `tasks/` (the forwards), `mise.dev.toml`, the worktree's `mise.local.toml`, the mise
+   spellings in the guard and the gate, `internal.ts`, the unit check that scans the tasks.
 
 What is measured as each slice lands: the scripts a person can run (`npm run`, nothing else), the lines
 of bash and `.mjs` left (417 and 662 on 2026-10-11), and the `mise run` lines left in the docs.

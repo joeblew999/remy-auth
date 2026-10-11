@@ -13,9 +13,9 @@ This document owns what the code must be. How people and agents work day to day 
   Check what already exists before writing custom code. Keep wrappers thin; add
   custom behavior only for a concrete unmet requirement and document the gap.
 - Keep behaviour local to its owner and visible at the entry point.
-- Use mise to pin tools and run project commands. Do not import the retired
-  `joeblew999/.github` task library or control other repos through shared scripts.
-  Name every task `namespace:action`; keep aliases namespaced too.
+- `package.json` is the entry: its scripts run every project command; Node is pinned by
+  `.node-version`, every tool is a dependency. Do not import the retired `joeblew999/.github` task
+  library or control other repos through shared scripts.
 - Development uses local storage. Startup must not provision production identities,
   import sample data or silently change app registrations.
 - Keep one Worker implementation and one source Wrangler configuration for local

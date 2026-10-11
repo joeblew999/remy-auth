@@ -83,7 +83,7 @@ description: "How dates, numbers, currency and direction change with the languag
 
 :::note
 Take them with the project's own tool, so they show the real app:
-`mise run browser:shots -- /formats --out docs/public/media` for a picture, and add `--video`
+`npm run shots -- /formats --out docs/public/media` for a picture, and add `--video`
 for a short recording of the page.
 :::
 
@@ -112,7 +112,7 @@ and `<Tab>`, `<Steps>` and `<Step>`, `<Accordions>` and `<Accordion>`, `<Files>`
 
 ## The Fumadocs CLI
 
-`mise run docs:cli -- feature <name>` (remy-auth only) runs the pinned Fumadocs CLI in the shared docs
+`npm run docs:cli -- feature <name>` (remy-auth only) runs the pinned Fumadocs CLI in the shared docs
 Worker, `packages/ui/src/docs`; its `cli.json` maps the folders there, and what it writes is a change to
 the package, reviewed like any other. Apps take the Worker from the package and never run it.
 
@@ -126,5 +126,5 @@ the package, reviewed like any other. Apps take the Worker from the package and 
 ## Translations
 
 Write English only. `dev:land` translates on main after the landing, one writer at a time
-([translations: one writer](./how-we-work.md#translations-one-writer)); `mise run i18n:docs:check` lists what each
+([translations: one writer](./how-we-work.md#translations-one-writer)); `npx remy i18n check docs` lists what each
 language still needs.
