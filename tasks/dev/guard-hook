@@ -1,5 +1,8 @@
-#!/usr/bin/env node
-//MISE description="The flow's guard itself, run by the Claude Code hook dev:guard registers (stdin: the tool call as JSON). Not for hands: it reads stdin and answers with an exit code"
-//MISE dir="{{config_root}}"
-//MISE hide=true
-import './guard-hook.ts';
+#!/usr/bin/env bash
+#MISE description="The flow's guard itself, run by the Claude Code hook dev:guard registers (stdin: the tool call as JSON). Not for hands: it reads stdin and answers with an exit code"
+#MISE dir="{{config_root}}"
+#MISE hide=true
+# The flow is the package's command line (packages/ui/src/cli, the remy bin); npm run dev:<step> is
+# the entry. This task forwards for whoever still types mise run, and goes with mise
+# (.plans/tooling-in-typescript.md).
+exec ./node_modules/.bin/remy guard-hook "$@"

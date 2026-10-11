@@ -89,7 +89,8 @@
     "./zod-csp": "./src/zod-csp.ts",
     "./parts/virtual": {
       "types": "./src/parts/virtual.d.ts"
-    }
+    },
+    "./project": "./src/cli/config.ts"
   },
   "dependencies": {
     "@ai-sdk/react": "4.0.119",
@@ -175,5 +176,8 @@
       "@tanstack/query-core",
       "mdast-util-to-markdown"
     ]
+  },
+  "bin": {
+    "remy": "./src/cli/remy.ts"
   }
 }

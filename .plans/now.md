@@ -10,8 +10,15 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
 Owner: "make plans for all the things left." Everything open, each with its plan and its command.
 Below this section is the history of how it got here.
 
-1. **The flow's open gaps**: `dev:land` holds its terminal through the translation, and nothing
-   builds the docs with a translation's own commit in them. Both seen and measured 2026-10-10.
+1. **No mise: package.json is the entry, the tooling one TypeScript command line**
+   ([plan](tooling-in-typescript.md); owner, 2026-10-11: "strip away mise so that its all typescript",
+   "use the package.json as the entry point like all typescript projects do"). Slice 1 landed the same
+   day: `npm run dev:<step>` is the flow, `remy` (the package's bin, `packages/ui/src/cli`) is its
+   code, `remy.config.ts` the origins and ports. Next: the check (`project:check`) as functions, then
+   Cloudflare, translations, the other namespaces, GitHub and the consumers, then `mise.toml` and
+   `tasks/` deleted. The flow's own open gaps below ride on it: the detached translation comes with
+   the translations slice; the docs build with the check slice.
+   Notes from the flow's open gaps (seen and measured 2026-10-10), kept until their slices close them:
    - **The terminal.** A landing is on staging after 44 s; the command then waits for the
      translation: 2 min 15 s to update one page (the agent wrote 13,248 tokens to change a few lines,
      because it returns the whole page), 5 min 14 s for the same page from scratch. The fix:
@@ -38,7 +45,7 @@ Below this section is the history of how it got here.
      `packages:upgrade` and `project:upgrade-ui` called `project:verify` bare, and `ui:release` called
      `packages:release` bare, which the gate (10-09) refuses; fixed 2026-10-10 by each saying it is
      asking (`ui:release` is now an alias of `dev:release`), and proved at the gate only
-     (`REMY_FLOW=setup mise run dev:allowed -- project:verify` passes, a bare one is refused). None of
+     (`REMY_FLOW=setup npm run dev:allowed -- project:verify` passes, a bare one is refused). None of
      the three has been run end to end since: item 3's `project:upgrade-ui` on remy-auth-app is the
      first, and the place it would have failed. Their descriptions disagree on the time too
      (`project:setup` says ~1.5 min, the `project:verify` it ends with ~4.5 min in remy-auth): put the
@@ -63,38 +70,40 @@ Below this section is the history of how it got here.
      only what is a page, a failed agent fails the run, a unit check reads every translated page
      ([stability log](stability-log.md)). The step and the translator say what each part and each
      agent call took.
+
 2. **Release 0.14.0** ([thin-apps, phase D](thin-apps.md#phase-d-prepared-2026-09-29-waiting-for-the-owner)):
-   prepared on main; the owner runs `mise run dev:release` (every check, every language, Google, Core
+   prepared on main; the owner runs `npm run dev:release` (every check, every language, Google, Core
    Web Vitals on a preview, the tag and publish, ~6 min). It is also the first run of the phone speed
    measurement with applied throttling (`packages/ui/src/checks.js`).
+
 3. **Consumers onto 0.14.0**: remy-auth-app with `mise run project:upgrade-ui -- 0.14.0` (it gets the
    flow, the guard, the stamp, the product name); create `remy-auth-test` from the template. Each is
    one worktree through the flow.
-4. **The tooling in TypeScript** ([plan](tooling-in-typescript.md)): the remaining `.mjs` modules and
-   their bash wrappers, in the order a wrong one costs most (`cf/versions`, `cf/urls`, `api/spec`,
-   then `plans/plans.mjs`, `cf/observe.mjs`, `browser/shots.mjs`, `cf/gateway.mjs`,
-   `mcp/register.mjs`, `packages/workspaces.mjs`, `project/single-copies.mjs`, `docs/provision.mjs`).
-   One landing each.
-5. **Auth, next slices** ([auth-service](auth-service.md#next-slices)): the app-trust comparison
+
+4. **Auth, next slices** ([auth-service](auth-service.md#next-slices)): the app-trust comparison
    (OAuth tokens verified locally against a service binding, each proved small); the relation
    engine's write half (`grant`, `revoke`); a rule for server functions and routes outside the oRPC
    router; the consumer fixture using relations; then remy-sport's own move onto the engine and the
    aspects deferred from it (a code a human switches on for deployed checks, the sessions and devices
    page, a person's lifecycle).
-6. **Cedar over the relation engine** ([plan](cedar.md), from [the research](cedar-research.md),
+
+5. **Cedar over the relation engine** ([plan](cedar.md), from [the research](cedar-research.md),
    2026-10-10): policies that decide from the relations the engine derives, so an app can say what
    `grants` cannot (a deny with a reason, a share until a date, a sign-in recent enough) in a file any
    language runs and a test file proves. Slice 0 is a spike that can stop it; then generated policies
    with nothing changing, hand-written ones in the notes demo, facts about the sign-in. After the
    app-trust slice (5), which it rides on for other Workers.
-7. **Platform structure** ([plan](platform-structure.md)): waits for the owner's three decisions
+
+6. **Platform structure** ([plan](platform-structure.md)): waits for the owner's three decisions
    named there.
-8. **Docs and translations, leftovers**: [docs-for-consumers](docs-for-consumers.md), the shared
+
+7. **Docs and translations, leftovers**: [docs-for-consumers](docs-for-consumers.md), the shared
    docs part (the docs app's code into the package, so a consumer adds `docs/content` only: the last
    of its "Next, in order", restated under round 4), and [translation-pipeline](translation-pipeline.md)
    (built 2026-09-26; left of it are step 5, proving it in remy-auth-app, which waits for the
    release, and step 6, once there is a domain).
-9. **Owner only** (below): the alert rule in the dashboard, a native-speaker review of the newer
+
+8. **Owner only** (below): the alert rule in the dashboard, a native-speaker review of the newer
    languages, the production domain and Search Console, more docs languages.
 
 Done today, 2026-10-09, all live: auth slices 2 and 3, staging, the build stamp and versions, the
@@ -256,7 +265,7 @@ task logic, facts in several places), and their fixes in order. Waits for the ow
 ## Owner only
 
 - Release 0.14.0 (thin apps phase D and everything since: auth, relations, staging, the flow): prepared on
-  main 2026-10-09 (`ui:version 0.14.0`, the CHANGELOG section). One command: `mise run dev:release` (every
+  main 2026-10-09 (`ui:version 0.14.0`, the CHANGELOG section). One command: `npm run dev:release` (every
   check, every language, Google, Core Web Vitals on a preview, then the tag and publish, ~6 min). Then
   consumers move with `project:upgrade-ui -- 0.14.0`; create `remy-auth-test`; remy-auth-app later.
 

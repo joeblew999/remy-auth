@@ -1,5 +1,7 @@
-#!/usr/bin/env node
-//MISE description="What is going on, asked from whoever owns each fact and never stored (~3 s): main's last commits with GitHub's verdict on each, what every deployment runs, every worktree ahead and behind main, translations, pull requests. Every agent session starts with it (dev:guard registers the hook); run it when you sit down. The flow is tasks/dev/flow.ts; the plan .plans/dev-feedback.md"
-//MISE dir="{{config_root}}"
-// The logic is status.ts beside this file: TypeScript, type-checked by project:check.
-import './status.ts';
+#!/usr/bin/env bash
+#MISE description="What is going on, asked from whoever owns each fact and never stored (~3 s): main's last commits with GitHub's verdict on each, what every deployment runs, every worktree ahead and behind main, translations, pull requests. Every agent session starts with it (dev:guard registers the hook); run it when you sit down. The flow is tasks/dev/flow.ts; the plan .plans/dev-feedback.md"
+#MISE dir="{{config_root}}"
+# The flow is the package's command line (packages/ui/src/cli, the remy bin); npm run dev:<step> is
+# the entry. This task forwards for whoever still types mise run, and goes with mise
+# (.plans/tooling-in-typescript.md).
+exec ./node_modules/.bin/remy status "$@"

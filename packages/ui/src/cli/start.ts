@@ -1,8 +1,11 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import { installed } from './flow.ts';
-import { createHash } from 'node:crypto';
 import { existsSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
+import { portsFor } from './config.ts';
+import { internal } from './internal.ts';
+
+export function main(args: string[]): void {
 
 // STEP 0 of the flow, for one agent or developer among many: a place of their own to work in, ready.
 // A worktree on a branch of its own from main, installed (npm, the app's local state through
@@ -13,10 +16,10 @@ import { basename, join } from 'node:path';
 const read = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8' }).trim();
 const root = read('rev-parse', '--path-format=absolute', '--git-common-dir').replace(/\/\.git$/, '');
 const top = read('rev-parse', '--show-toplevel');
-const given = (process.argv[2] ?? '').trim();
+const given = (args[0] ?? '').trim();
 const inWorktree = top !== root;
 const name = given || (inWorktree ? basename(top) : '');
-if (!/^[a-z][a-z0-9-]{1,40}$/.test(name)) { console.error('dev:start: name the work: mise run dev:start -- <name> (lowercase letters, digits, dashes), or run it inside a worktree'); process.exit(1); }
+if (!/^[a-z][a-z0-9-]{1,40}$/.test(name)) { console.error('dev:start: name the work: npm run dev:start -- <name> (lowercase letters, digits, dashes), or run it inside a worktree'); process.exit(1); }
 const path = given ? join(root, '.claude', 'worktrees', name) : top;
 
 const worktrees = read('-C', root, 'worktree', 'list', '--porcelain');
@@ -28,18 +31,20 @@ if (!worktrees.includes(`worktree ${path}\n`)) {
   console.log(`dev:start: made ${path} on branch ${name} from main.`);
 } else console.log(`dev:start: preparing the worktree at ${path}.`);
 
-// Ports of this worktree's own, from its name (the same name, the same ports), never 4190, which
-// browsers block: mise.local.toml is read by mise and ignored by git.
-const seed = parseInt(createHash('sha256').update(name).digest('hex').slice(0, 6), 16);
-const port = 4200 + (seed % 400) * 2;
-writeFileSync(join(path, 'mise.local.toml'), `# Written by mise run dev:start (${name}): this worktree's own ports, never shared with another. Not committed.\n[env]\nPREVIEW_PORT = "${port}"\nDOCS_PREVIEW_PORT = "${port + 1}"\n`);
+// Ports of this worktree's own, from its name (config.ts: the same name, the same ports). The steps
+// compute them; mise.local.toml says the same for whoever still types mise run, until mise goes.
+const { preview: port } = portsFor(name);
+writeFileSync(join(path, 'mise.local.toml'), `# Written by npm run dev:start (${name}): this worktree's own ports, never shared with another. Not committed.\n[env]\nPREVIEW_PORT = "${port}"\nDOCS_PREVIEW_PORT = "${port + 1}"\n`);
 
 const run = (task: string) => {
-  const result = spawnSync('mise', ['--cd', path, 'run', task], { stdio: 'inherit' });
-  if (result.status !== 0) { console.error(`dev:start: ${task} failed`); process.exit(result.status ?? 1); }
+  const status = internal(task, 'start', { cwd: path });
+  if (status !== 0) { console.error(`dev:start: ${task} failed`); process.exit(status); }
 };
 installed(path);
 // The app's local state (remy-auth: .dev.vars, the local databases, the guard's oRPC v1 fixture).
 run('project:prepare');
-run('dev:guard');
-console.log(`dev:start: ${name} is ready at ${path} (ports ${port} and ${port + 1}).\nWork there: mise run dev:change after every change · mise run dev:land -- "<what changed>" to land · mise run dev:done when landed.`);
+// The flow's hooks for this worktree's agents, through its own bin.
+const guard = spawnSync(join(path, 'node_modules', '.bin', 'remy'), ['guard'], { cwd: path, stdio: 'inherit' });
+if (guard.status !== 0) { console.error('dev:start: remy guard failed'); process.exit(guard.status ?? 1); }
+console.log(`dev:start: ${name} is ready at ${path} (ports ${port} and ${port + 1}).\nWork there: npm run dev:change after every change · npm run dev:land -- "<what changed>" to land · npm run dev:done when landed.`);
+}

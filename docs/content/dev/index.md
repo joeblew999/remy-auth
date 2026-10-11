@@ -65,10 +65,10 @@ Starting, resuming and reloading Codex or Claude Code, in VS Code or a terminal,
 
 | Task | Command |
 | --- | --- |
-| See what is going on | `mise run dev:status` |
-| Start a piece of work, in a worktree of its own | `mise run dev:start -- <name>` |
-| Check, after every change | `mise run dev:change` |
-| Land finished work: main, GitHub's checks, staging | `mise run dev:land -- "<what changed>"` |
+| See what is going on | `npm run dev:status` |
+| Start a piece of work, in a worktree of its own | `npm run dev:start -- <name>` |
+| Check, after every change | `npm run dev:change` |
+| Land finished work: main, GitHub's checks, staging | `npm run dev:land -- "<what changed>"` |
 | Browse project tasks | `mise tasks ls --local` |
 | Run the local GUI | `mise run project:dev` |
 | Try the production build locally | `mise run project:preview` |

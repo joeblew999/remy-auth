@@ -2,11 +2,12 @@
 // development ... make sure the developer flow is also formalised so that this stupid fuckups can't
 // happen. And so you and developers use that same flow so that it's fixed forever"). This module is
 // the one place the flow's decisions live: which checks run at which step, what runs locally and what
-// runs on GitHub, what a step needs before it may run. The dev:* tasks are its commands; the
-// agent hook (tasks/dev/guard.ts) refuses what is not one of them. TypeScript, type-checked by
-// project:check, so a wrong step fails before it runs.
+// runs on GitHub, what a step needs before it may run. The scripts in package.json (npm run
+// dev:<step>, remy <step>) are its commands; the agent hook (guard-hook.ts) refuses what is not one
+// of them. TypeScript, type-checked by project:check, so a wrong step fails before it runs.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
+import { internal } from './internal.ts';
 
 /** The steps of development, in the order they happen (dev:start and dev:done bracket them for a worktree). */
 export type Step = 'change' | 'land' | 'promote' | 'release';
@@ -37,7 +38,7 @@ export const steps: Record<Step, { what: string; tasks: readonly string[] }> = {
  */
 export const heavy: Record<string, string> = {
   'project:verify': 'the release gate: dev:release runs it; GitHub runs its parts after every push',
-  'project:test': 'every language: GitHub runs it after every push (mise run dev:land)',
+  'project:test': 'every language: GitHub runs it after every push (npm run dev:land)',
   'project:test:quick': 'every browser check: on purpose only; dev:change is the check',
   'project:test:remote': 'the suite against a deployment: GitHub runs the suite; cf:deploy runs the live smoke',
   'project:test:google': "Google's audits: GitHub runs them after every push",
@@ -82,13 +83,13 @@ export function installed(cwd = '.'): void {
 export const describeRun = (run: Run) => `${run.status === 'completed' ? (run.conclusion ?? 'unknown') : 'still running'} on ${run.headSha.slice(0, 7)}: ${run.url}`;
 
 /**
- * Runs a mise task in the foreground as part of `step`; the step stops at the first failure.
- * REMY_FLOW is what dev:allowed (the gate in every heavy task) looks for: a heavy task runs when a
- * step called it, on GitHub, or by a hand that set REMY_FLOW=hand, and refuses otherwise.
+ * Runs a task (still a mise task, through internal.ts) in the foreground as part of `step`; the step
+ * stops at the first failure. REMY_FLOW is what the gate in every heavy task (allowed.ts) looks for:
+ * a heavy task runs when a step called it, on GitHub, or by a hand that set REMY_FLOW=hand.
  */
 export function run(task: string, step: Step | 'hand', args: string[] = []): void {
-  const result = spawnSync('mise', ['run', task, ...(args.length ? ['--', ...args] : [])], { stdio: 'inherit', env: { ...process.env, REMY_FLOW: step } });
-  if (result.status !== 0) { console.error(`dev:${step}: ${task} failed`); process.exit(result.status ?? 1); }
+  const status = internal(task, step, { args });
+  if (status !== 0) { console.error(`dev:${step}: ${task} failed`); process.exit(status); }
 }
 
 /** Where the work is: the branch, whether it is main, whether the tree is clean. */

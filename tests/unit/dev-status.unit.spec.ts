@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { compose } from '../../tasks/dev/feedback';
+import { compose } from '../../packages/ui/src/cli/feedback';
 
 // dev:status composes from facts their owners answer (.plans/dev-feedback.md); given facts, it says
 // what matters: a red commit by name, a branch behind it, nothing when all is landed and green.

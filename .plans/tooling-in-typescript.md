@@ -1,52 +1,71 @@
-# The tooling in TypeScript, type-checked wherever it runs
+# No mise: package.json is the entry, and the tooling is one TypeScript command line
 
-Reopened 2026-10-09 as [issue #9](https://github.com/joeblew999/remy-auth/issues/9) (owner: "Claude eats
-TypeScript for breakfast thanks to oRPC and TanStack so I might drop the mise later and only use it to
-load the tools ... The current node to script layer is getting missed by Claude because it's not type
-safe"). The same day: "The fucking thing is going to be used on all apps, including the tooling."
+Owner, 2026-10-11, after a day in which the flow's gate refused `project:setup`, a release alias and
+a `grep`, and 122 runnable tasks needed three mechanisms and 4,200 lines of docs to say who runs
+which: "fuck this. strip away mise so that its all typescript", then "use the package.json as the
+entry point like all typescript projects do". The same direction two days earlier, in
+[issue #9](https://github.com/joeblew999/remy-auth/issues/9): "Claude eats TypeScript for breakfast
+thanks to oRPC and TanStack so I might drop the mise later ... The current node to script layer is
+getting missed by Claude because it's not type safe."
 
-## Done 2026-10-09: the task layer is TypeScript, checked wherever the tasks are
+## The decision
 
-- Node 26 runs a `.ts` file as it is, so a task script is TypeScript with no build step.
-- `tasks/tsconfig.json` is the shared tasks' own TypeScript project (strict, `erasableSyntaxOnly`), and
-  `project:typecheck-tasks`, a file task that knows its own folder, checks it with the app's `tsc`: in
-  this repository, and in a consumer from mise's cache of the include. `project:typecheck` runs it, so
-  `project:check` (every change, ~6 s) fails on a task that no longer compiles instead of the deploy.
-- Converted first: what every deploy depends on, `cf/wait.ts` and `cf/provisioned.ts`; the flow itself (`dev/*.ts`); `project/verify-tooling.ts`.
-- What stays to convert, in the order a wrong one costs most: `cf/versions`, `cf/urls`, `api/spec`
-  (node scripts, rename and type), then the `.mjs` modules behind bash wrappers (`plans/plans.mjs`,
-  `cf/observe.mjs`, `browser/shots.mjs`, `cf/gateway.mjs`,
-  `mcp/register.mjs`, `agents/rules.mjs`, `packages/workspaces.mjs`, `project/single-copies.mjs`,
-  `docs/provision.mjs`): each becomes a `.ts` file task of its own, and its wrapper goes.
-- The bash that stays is glue around one tool (`cf/deploy`, `cf/preview`, `packages/*`): it is where
-  mise's own features (`depends`, `env`, `sources`/`outputs`, `usage`) replace lines, not TypeScript.
+- **`package.json` scripts are the entry, and the only one.** `npm run dev:change`,
+  `npm run dev:land -- "<what changed>"`, `npm run dev`: about fifteen scripts, the flow's seven and
+  the hand tools a person uses (the app, a preview, screenshots, logs, what is deployed). Nothing else
+  is a command; what is not a script is a function the steps call.
+- **The tooling is `remy`,** the bin of `@joeblew999/remy-ui` (`packages/ui/src/cli/`): TypeScript that
+  Node runs as it is, type-checked by the app's `tsc` on every check. A consumer's `package.json` says
+  `"dev:change": "remy change"` and gets the tooling with `npm install`, at the package's version: the
+  git-ref include of `tasks/`, `project:upgrade-ui`'s ref dance and mise's include cache go.
+- **An app says once, in `remy.config.ts`,** where it is deployed and its ports (`defineRemyProject`).
+  A worktree's ports are computed from its name, so nothing local is written for them.
+- **Pins:** Node by `engines` and `.node-version`; every tool a devDependency (wrangler, Playwright,
+  TypeScript, Claude Code for the translator); `gh` stays the machine's, as it is today.
+- **The gate stays only inside what costs money or ships** (a deploy, a publish). The agent hook's
+  regex and the unit check that reads the docs for bare commands go with the surface they police.
+- **The docs describe the scripts,** not tasks: every `mise run` line leaves them with the slice that
+  retires its task; `tasks.md` becomes the CLI's page.
 
-The owner's direction for mise, from #9: it stays the loader of pinned tools and the runner of
-one-line tasks; the logic moves to TypeScript. That is this plan. Parked 2026-09-26 (owner: "Just close out everything, so we can get back to normal"). Owner, earlier:
-"Some mise tasks are dependent on scripts. I like mise tasks to be simple ... It's worth asking if we
-could get rid of scripts if the code or code structure was different, or if we used a tool."
+Why one package and not a second: the owner calls remy-ui "the platform's one dependency set", and a
+CLI with no UI import costs its consumers nothing; a second package is a second version to pin.
+Why scripts and not a `remy` a person types: `npm run` is what every TypeScript developer and agent
+already does, and the scripts list is the documentation of what exists.
 
-## Inventory (read-only, 2026-09-26): about 1,350 lines outside one-line `run`s
+## Slices, one landing each
 
-| Verdict | Items | Lines |
-| --- | --- | --- |
-| Move to a package CLI (`remy` bin in @joeblew999/remy-ui, `node:util` parseArgs, no deps) | browser:shots, cf:events/ai-*, cf:ai-gateway, cf:preview(+delete), cf:urls, cf:wait, i18n:*, plans:* | ~960 (71%) |
-| Restructure | docs-publish (sync or a crawl source), docs-questions (a data-driven test), mcp:register (upstream `claude mcp add`), project:test:cwv (stdout parsing becomes a CLI flag) | ~150 |
-| Fold into plain mise | release-notes, release.sh (CI already publishes from the tag), api:spec (curl + jq), cf:deploy (usage flag), project:upgrade-ui | ~130 |
-| Keep | verify-tooling (trimmed: npm already refuses a mismatched lock), paraglide.mjs, three one-liners | ~110 |
+1. **Done 2026-10-11, the flow.** `tasks/dev/*.ts` moved to `packages/ui/src/cli/` as the bin's
+   commands (`remy status|start|change|land|promote|release|done|guard|guard-hook|allowed`), the
+   seven `dev:*` scripts in `package.json` and the template's, `remy.config.ts` with the origins and
+   ports (`config.ts` hands them to the tasks as the environment they read), the hooks registered as
+   the checkout's own bin, the mise `dev:*` tasks one-line forwards to it. What the steps still run
+   through mise goes through `internal.ts`, one call per task: `project:check`, `project:prepare`,
+   `cf:staging`, `cf:deploy`, `docs:deploy`, `cf:versions`, `i18n:check`, `i18n:translate`,
+   `packages:release`. Each later slice deletes one of those calls.
+2. **The check** (`project:check`): plans, single copies, routes, types, the unit checks, the
+   translation status, the docs build, as functions of `remy change`; `project:verify-setup` with
+   them, as `remy setup`'s end.
+3. **Cloudflare:** `cf:deploy`, `cf:staging`, `cf:wait`, `cf:versions`, `cf:urls`, `cf:preview`,
+   the provisioned check; `remy promote` and `remy land` call functions.
+4. **Translations:** `i18n:check` and `i18n:translate` (the writer's lock, the page rules already in
+   `tasks/i18n/docs/page.ts`), with Claude Code as a devDependency; the detached translation the
+   flow's open gap asks for comes with it.
+5. **The rest of the namespaces:** `docs:*`, `packages:*`, `ui:*`, `template:*`, `skills:*`, `mcp:*`,
+   `agents:*`, `plans:*`, `browser:*`, `api:*`, and remy-auth's own `auth:*` in its `package.json`.
+6. **GitHub and the consumers:** the workflow on `actions/setup-node` and `npm run`; the template
+   and remy-auth-app on the scripts (`project:upgrade-ui` becomes `npm install @joeblew999/remy-ui@x`).
+7. **Delete mise:** `mise.toml`, `tasks/`, `mise.local.toml`, `template/mise.toml`, `mise.dev.toml`;
+   the docs without a `mise run` in them; the hook regex and the doc check go.
 
-The 13 bash wrappers (`exec node "$(dirname "$0")/x.mjs"`) are not needed for ESM, as their comment says:
-cf/wait, cf/urls and api/spec already run as node file tasks. They exist because several tasks share
-one module and a TOML task cannot find a sibling file in mise's include cache; a CLI removes both.
+What is measured as each slice lands: the scripts a person can run (`npm run`, nothing else), the lines
+of bash and `.mjs` left (417 and 662 on 2026-10-11), and the `mise run` lines left in the docs.
 
-Translations: the i18n tasks are not to move into the CLI by default; [translation-pipeline](translation-pipeline.md)
-looks for upstream tools that replace them first.
+## Was: the task layer in TypeScript under mise (2026-10-09, superseded)
 
-## End state
-
-The package ships `bin/remy.mjs`; every task in `tasks/` is a TOML one-liner with a `usage` spec (no bash,
-no `node -e`, no stdout parsing); wrangler, smol-toml and @playwright/test become declared peers.
-Consumers get the behaviour through `npm install`. Later option: include the tasks from
-`node_modules/@joeblew999/remy-ui/tasks`, which removes the git `ref` and `project:upgrade-ui` (cost: `npm
-ci` must run before the tasks exist). Cost: a non-UI CLI in the UI package (or a second package), and CLI
-changes need a package release.
+Node 26 runs a `.ts` file as it is; the shared tasks got a TypeScript project of their own
+(`tasks/tsconfig.json`, checked by `project:typecheck-tasks`) and the flow, `cf/wait`,
+`cf/provisioned` and `verify-tooling` were converted. The direction then was that mise stays the
+loader of pinned tools and the runner of one-line tasks, with the logic in TypeScript; the inventory
+of 2026-09-26 (about 1,350 lines outside one-line `run`s, 71% of it bound for a package CLI) and the
+end state it named (`bin/remy`, every task a TOML one-liner) are what the decision above finishes
+without the TOML.

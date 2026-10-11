@@ -20,5 +20,14 @@
   "workspaces": [
     "packages/*",
     "docs"
-  ]
+  ],
+  "scripts": {
+    "dev:status": "remy status",
+    "dev:start": "remy start",
+    "dev:change": "remy change",
+    "dev:land": "remy land",
+    "dev:promote": "remy promote",
+    "dev:release": "remy release",
+    "dev:done": "remy done"
+  }
 }

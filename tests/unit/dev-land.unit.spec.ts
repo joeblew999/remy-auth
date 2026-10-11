@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { ended, span, took } from '../../tasks/dev/feedback';
+import { ended, span, took } from '../../packages/ui/src/cli/feedback';
 
 // dev:land says what each of its parts took (owner, 2026-10-10, of a landing usable after 40 seconds
 // that held the terminal for six minutes: "how can it be 6 minutes"). The words are a function.

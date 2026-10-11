@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { parse } from 'smol-toml';
-import { heavy } from '../../tasks/dev/flow';
+import { heavy } from '../../packages/ui/src/cli/flow';
 
 // The flow's gate (tasks/dev/allowed.ts) refuses a heavy task that nobody said they were running. On
 // 2026-10-10, a day after the gate, eight lines on six pages still gave such a command bare, and

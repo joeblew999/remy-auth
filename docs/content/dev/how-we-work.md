@@ -211,13 +211,13 @@ tasks; `project:setup` installs the guard.
 
 | Step | Command | Who runs it, and when | What runs | Time |
 | --- | --- | --- | --- | --- |
-| Look | `mise run dev:status` | everyone, first: every agent session opens with it (a hook), a developer when they sit down | main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests, the top of `.plans/now.md` | seconds |
-| Before a piece of work | `mise run dev:start -- <name>` | whoever does the work, for every piece, a one-line edit included | a worktree of its own from main, installed, its own ports, the guard | ~1 min |
-| After every change | `mise run dev:change` | whoever is coding; the only step waited for | the check (`project:check`): plans, types with the tasks' own, the plain-function checks (`tests/**/*.unit.spec.ts`), translation status; a build only when a route file changed, the docs only when docs changed | ~6 s |
-| The change leaves the machine | `mise run dev:land -- "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | the check, commit, fast-forward main, push, deploy staging, then translation last when stale. GitHub then runs every language, Google's audits and the consumer fixture in parallel, while you keep coding (`gh run list`) | ~1 min to staging; translation after |
-| Production | `mise run dev:promote` | the owner, or an agent the owner asked in that session | `cf:deploy` and the docs Worker, from a pushed main, no gate: staging and GitHub already ran the checks | ~1 min |
-| A release | `mise run dev:release` | the owner, or an agent the owner asked in that session | `packages:release`: every check, every language, locally, on purpose, then the tag | ~5 min |
-| When landed | `mise run dev:done` | whoever landed, when the piece of work is over; a worktree lives through as many landings as the work takes | the worktree and branch go | seconds |
+| Look | `npm run dev:status` | everyone, first: every agent session opens with it (a hook), a developer when they sit down | main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests, the top of `.plans/now.md` | seconds |
+| Before a piece of work | `npm run dev:start -- <name>` | whoever does the work, for every piece, a one-line edit included | a worktree of its own from main, installed, its own ports, the guard | ~1 min |
+| After every change | `npm run dev:change` | whoever is coding; the only step waited for | the check (`project:check`): plans, types with the tasks' own, the plain-function checks (`tests/**/*.unit.spec.ts`), translation status; a build only when a route file changed, the docs only when docs changed | ~6 s |
+| The change leaves the machine | `npm run dev:land -- "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | the check, commit, fast-forward main, push, deploy staging, then translation last when stale. GitHub then runs every language, Google's audits and the consumer fixture in parallel, while you keep coding (`gh run list`) | ~1 min to staging; translation after |
+| Production | `npm run dev:promote` | the owner, or an agent the owner asked in that session | `cf:deploy` and the docs Worker, from a pushed main, no gate: staging and GitHub already ran the checks | ~1 min |
+| A release | `npm run dev:release` | the owner, or an agent the owner asked in that session | `packages:release`: every check, every language, locally, on purpose, then the tag | ~5 min |
+| When landed | `npm run dev:done` | whoever landed, when the piece of work is over; a worktree lives through as many landings as the work takes | the worktree and branch go | seconds |
 
 - **Who runs a step is in the table, and it is never a question.** An agent lands its own finished
   work without asking: staging is part of landing, GitHub checks every landing, and nothing reaches
@@ -338,12 +338,12 @@ the only integrator, and GitHub checks every landing. Nothing here is done by ha
 
 | | Command | What it does |
 | --- | --- | --- |
-| Look | `mise run dev:status` | what is going on, asked from the facts' owners: main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests. Every agent session opens with it (a hook `dev:guard` registers); a developer runs it when they sit down |
-| Start | `mise run dev:start -- <name>` | a worktree on branch `<name>` from main (`.claude/worktrees/<name>`), installed (`npm ci`, `project:prepare`), with ports of its own (`mise.local.toml`) and the flow's guard. Claude Code's own worktrees live at the same place and are only a folder: inside one, `mise run dev:start` with no name prepares it the same way |
-| Code | `mise run dev:change` | the check, in seconds, after every change |
-| Land | `mise run dev:land -- "<what changed>"` | main merged in first (a conflict stops with the files named), the check, commit, fast-forward main, push, staging, then translation last when stale (the Claude subscription on this machine, never GitHub). GitHub runs the heavy checks; a red run comments on the commit |
-| Finish | `mise run dev:done` | the landed worktree and branch go; refuses while anything is unlanded |
-| Production | `mise run dev:promote` | from main, only a commit GitHub passed, on the owner's word |
+| Look | `npm run dev:status` | what is going on, asked from the facts' owners: main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests. Every agent session opens with it (a hook `dev:guard` registers); a developer runs it when they sit down |
+| Start | `npm run dev:start -- <name>` | a worktree on branch `<name>` from main (`.claude/worktrees/<name>`), installed (`npm ci`, `project:prepare`), with ports of its own (`mise.local.toml`) and the flow's guard. Claude Code's own worktrees live at the same place and are only a folder: inside one, `npm run dev:start` with no name prepares it the same way |
+| Code | `npm run dev:change` | the check, in seconds, after every change |
+| Land | `npm run dev:land -- "<what changed>"` | main merged in first (a conflict stops with the files named), the check, commit, fast-forward main, push, staging, then translation last when stale (the Claude subscription on this machine, never GitHub). GitHub runs the heavy checks; a red run comments on the commit |
+| Finish | `npm run dev:done` | the landed worktree and branch go; refuses while anything is unlanded |
+| Production | `npm run dev:promote` | from main, only a commit GitHub passed, on the owner's word |
 
 - **Split by independence.** An orchestrator splits work into parts that touch different files, and
   starts one agent per part with `dev:start`. A part that needs another's result waits for that

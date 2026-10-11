@@ -113,7 +113,7 @@ writes it everywhere it appears (the package and the blank app's three pins).
 
 ### Choosing the version: released, development or local
 
-The tasks and the package are released together: remy-auth's `mise run dev:release` (`ui:release` and `release` are its
+The tasks and the package are released together: remy-auth's `npm run dev:release` (`ui:release` and `release` are its
 aliases; it runs the shared `packages:release`) publishes `@joeblew999/remy-ui` X.Y.Z and tags the same commit `vX.Y.Z`. A consumer
 therefore pins both to one number, and `project:upgrade-ui` changes them together:
 

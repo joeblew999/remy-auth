@@ -2,13 +2,15 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { describeRun, installed, latestRun, run, where } from './flow.ts';
 
+export async function main(): Promise<void> {
+
 const read = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8' }).trim();
 const here = where();
-if (!here.onMain) { console.error(`dev:promote: production is deployed from main (this is ${here.branch}); mise run dev:land first`); process.exit(1); }
-if (!here.clean) { console.error('dev:promote: the tree has uncommitted changes; mise run dev:land first'); process.exit(1); }
+if (!here.onMain) { console.error(`dev:promote: production is deployed from main (this is ${here.branch}); npm run dev:land first`); process.exit(1); }
+if (!here.clean) { console.error('dev:promote: the tree has uncommitted changes; npm run dev:land first'); process.exit(1); }
 execFileSync('git', ['fetch', '-q', 'origin', 'main']);
 const head = read('rev-parse', 'HEAD');
-if (head !== read('rev-parse', 'origin/main')) { console.error('dev:promote: main is not what GitHub has; mise run dev:land first'); process.exit(1); }
+if (head !== read('rev-parse', 'origin/main')) { console.error('dev:promote: main is not what GitHub has; npm run dev:land first'); process.exit(1); }
 // Production takes a commit GitHub's checks passed, never one they failed or have not finished.
 const checks = latestRun(head);
 if (checks === undefined) { console.error('dev:promote: cannot ask GitHub what its checks said (gh auth login); to deploy regardless, by hand: mise run cf:deploy'); process.exit(1); }
@@ -28,4 +30,5 @@ if (origin) {
   const slug = spawnSync('gh', ['repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner'], { encoding: 'utf8' }).stdout?.trim();
   const posted = slug ? spawnSync('gh', ['api', `repos/${slug}/commits/${head}/comments`, '-f', `body=${body}`], { stdio: 'ignore' }).status === 0 : false;
   console.log(posted ? `dev:promote: written on the commit (${head.slice(0, 7)}).` : 'dev:promote: could not write on the commit (gh); the deployments say what they run.');
+}
 }

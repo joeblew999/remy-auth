@@ -6,7 +6,7 @@ description: "One Cloudflare Worker serves the site and the app; how to run it l
 ```sh
 mise run project:dev       # http://127.0.0.1:5173/en
 mise run project:preview   # Production build on local Workers, port 4173
-mise run dev:change        # The check, in seconds (the flow's first step)
+npm run dev:change        # The check, in seconds (the flow's first step)
 ```
 
 :::note

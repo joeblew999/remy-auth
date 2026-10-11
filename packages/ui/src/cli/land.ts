@@ -1,17 +1,20 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import { ended, span, type Landing, type Part } from './feedback.ts';
 import { describeRun, latestRun, run, steps, where } from './flow.ts';
+import { internal } from './internal.ts';
+
+export async function main(args: string[]): Promise<void> {
 
 // The land step, in order, each part once: the check; commit what changed; fast-forward main and
 // push it (GitHub takes it from there); deploy staging; translate on main, last, only when the check
 // says a translation is stale or missing (the one writer, a Claude agent on this machine, minutes; it
 // commits, and that is pushed too); bring main back to the branch. Production is dev:promote. It says
 // what each part took, and when staging was up: a slow landing is a number, not a feeling.
-const message = process.argv.slice(2).join(' ').trim();
-if (!message) { console.error('dev:land: say what changed: mise run dev:land -- "<message>"'); process.exit(1); }
+const message = args.join(' ').trim();
+if (!message) { console.error('dev:land: say what changed: npm run dev:land -- "<message>"'); process.exit(1); }
 const git = (...args: string[]) => execFileSync('git', args, { stdio: ['ignore', 'inherit', 'inherit'] });
 const read = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8' }).trim();
-const task = (name: string, cwd = '.') => spawnSync('mise', ['run', name], { cwd, stdio: 'inherit', env: { ...process.env, REMY_FLOW: 'land' } }).status === 0;
+const task = (name: string, cwd = '.') => internal(name, 'land', { cwd }) === 0;
 const parts: Part[] = []; let mark = Date.now();
 const lap = (what: string) => { const now = Date.now(); parts.push({ what, ms: now - mark }); mark = now; };
 
@@ -54,13 +57,13 @@ console.log(`dev:land: main is ${landed.slice(0, 7)} and pushed; GitHub runs eve
 // regardless; the last line says the whole state and the step ends non-zero.
 const staging: Landing['staging'] = !process.env.STAGING_ORIGIN ? 'none' : task('cf:staging') ? 'up' : 'failed';
 lap('staging');
-if (staging === 'up') console.log(`dev:land: staging is up, ${span(parts.reduce((sum, part) => sum + part.ms, 0))} after the start. Production: mise run dev:promote.`);
+if (staging === 'up') console.log(`dev:land: staging is up, ${span(parts.reduce((sum, part) => sum + part.ms, 0))} after the start. Production: npm run dev:promote.`);
 else if (staging === 'none') console.log('dev:land: no STAGING_ORIGIN in [env]; nothing deployed.');
 else console.error('dev:land: staging failed (the lines above say whether the deploy or the live smoke); main is pushed, so the translation runs now and the last line says the state.');
 
 // Translation, last: only when something is stale or missing (strict check: exit 1 says so), so a
 // second land after a green one costs nothing here. It commits on main and is pushed.
-const upToDate = spawnSync('mise', ['run', 'i18n:check'], { cwd: root, stdio: 'ignore', env: { ...process.env, I18N_STRICT: '1' } }).status === 0;
+const upToDate = internal('i18n:check', 'land', { cwd: root, silent: true, env: { I18N_STRICT: '1' } }) === 0;
 let translation: Landing['translation'] = 'up to date';
 if (upToDate) { lap('translation check'); console.log('dev:land: translations are up to date.'); }
 else {
@@ -74,3 +77,4 @@ if (!here.onMain) git('merge', '-q', '--ff-only', 'main');
 const end = ended({ commit: landed, staging, translation }, parts);
 if (end.failed) { console.error(end.line); process.exit(1); }
 console.log(end.line);
+}

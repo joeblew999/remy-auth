@@ -33,8 +33,8 @@ read those, not the translations beside them (`*.es.md`).
 6. The plan in [`.plans/`](https://github.com/joeblew999/remy-auth/tree/main/.plans) covering your
    task, and its [Executor/Reviewer roles](./development.md#plans-and-roles).
 
-Start with `mise run dev:status` (what is going on) and
+Start with `npm run dev:status` (what is going on) and
 [the project's own tools](./how-we-work.md#use-the-projects-own-tools-first), and finish through
-[the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest): `mise run dev:change`
-after every change, `mise run dev:land -- "<what changed>"` when the work is finished and the check is
+[the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest): `npm run dev:change`
+after every change, `npm run dev:land -- "<what changed>"` when the work is finished and the check is
 green.
