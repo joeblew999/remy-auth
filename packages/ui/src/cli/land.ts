@@ -3,7 +3,6 @@ import { ended, span, type Landing, type Part } from './feedback.ts';
 import { describeRun, installed, latestRun, run, steps, where } from './flow.ts';
 import { remyCommand } from './config.ts';
 import { translationGaps } from './i18n.ts';
-import { internal } from './internal.ts';
 
 export async function main(args: string[]): Promise<void> {
 
@@ -16,7 +15,6 @@ const message = args.join(' ').trim();
 if (!message) { console.error('dev:land: say what changed: npm run dev:land -- "<message>"'); process.exit(1); }
 const git = (...args: string[]) => execFileSync('git', args, { stdio: ['ignore', 'inherit', 'inherit'] });
 const read = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8' }).trim();
-const task = (name: string, cwd = '.') => internal(name, 'land', { cwd }) === 0;
 const parts: Part[] = []; let mark = Date.now();
 const lap = (what: string) => { const now = Date.now(); parts.push({ what, ms: now - mark }); mark = now; };
 
@@ -74,7 +72,8 @@ let translation: Landing['translation'] = 'up to date';
 if (upToDate) { lap('translation check'); console.log('dev:land: translations are up to date.'); }
 else {
   const before = read('-C', root, 'rev-parse', 'main');
-  if (task('i18n:translate', root)) {
+  const [remyAtRoot, ...rootArgs] = remyCommand(root);
+  if (spawnSync(remyAtRoot!, [...rootArgs, 'i18n', 'translate'], { cwd: root, stdio: 'inherit', env: { ...process.env, REMY_FLOW: 'land' } }).status === 0) {
     if (read('-C', root, 'rev-parse', 'main') !== before) git('-C', root, 'push', 'origin', 'main');
     lap('translation'); translation = 'done';
   } else { lap('translation, failed'); translation = 'failed'; }

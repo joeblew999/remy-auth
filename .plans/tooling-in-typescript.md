@@ -59,9 +59,12 @@ already does, and the scripts list is the documentation of what exists.
    each deployment runs, the page URLs; `remy promote` and `remy status` call the functions, `remy land`
    runs the staging deploy as a child so a failure there still lets the landing finish; `cf:preview`
    calls the bin for its two helpers until its own slice.
-4. **Translations:** `i18n:check` and `i18n:translate` (the writer's lock, the page rules already in
-   `tasks/i18n/docs/page.ts`), with Claude Code as a devDependency; the detached translation the
-   flow's open gap asks for comes with it.
+4. **Translations** (done 2026-10-11, `translate.ts`, `page.ts`, `prompts.ts`): the one writer's guard
+   and lock, the headless agent call with its timing line, the messages and docs translators with
+   their merge and accept rules; `remy land` runs it as a child on main. Claude Code is the machine's
+   own, the one the subscription is logged into (not a devDependency: it is a developer-machine step,
+   and the login lives there); the task had pinned 2.1.282, the machine has 2.1.296. The detached
+   translation the flow's open gap asks for is still to do, on this code.
 5. **The rest of the namespaces:** `docs:*`, `packages:*`, `ui:*`, `template:*`, `skills:*`, `mcp:*`,
    `agents:*`, `plans:*`, `browser:*`, `api:*`, and remy-auth's own `auth:*` in its `package.json`.
 6. **GitHub and the consumers:** the workflow on `actions/setup-node` and `npm run`; the template

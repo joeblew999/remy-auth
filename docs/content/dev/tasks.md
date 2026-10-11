@@ -181,8 +181,10 @@ One layout in every app, so the same `i18n:*` tasks work everywhere (the rule fo
 | Docs | `docs/content/<site>/<page>.md` or `.mdx` (Fumadocs' layout) | beside it: `<page>.<locale>.md` or `.mdx` |
 | UI catalogs | the base locale's catalog of each inlang project (`<dir>/project.inlang`) | each locale's catalog, by the project's own `pathPattern` (e.g. `messages/<locale>.json`) |
 
-Two pipelines, one for each kind of text, the same pattern in both: detect offline with git and small
-tools, translate with the pinned Claude agent, commit.
+Two pipelines, one for each kind of text, the same pattern in both: detect offline with git, translate
+with the machine's Claude Code (headless, no tools), commit. Both are TypeScript in the package
+(`packages/ui/src/cli/i18n.ts`, `translate.ts`: `remy i18n check`, `remy i18n translate`); the tasks below
+forward to them.
 
 - **UI messages** (Paraglide): the catalogs, locales and base locale come from inlang's own
   `settings.json` (`I18N_INLANG`, else the one project git knows). Detected: missing catalogs and keys

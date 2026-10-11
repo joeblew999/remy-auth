@@ -8,8 +8,8 @@
 // Claude hook (guard-hook.ts) only answers a step earlier, before the command runs.
 import { heavy } from './flow.ts';
 
-export function main(args: string[]): void {
-  const task = args[0] ?? '';
+/** Refuses `task` unless a step, GitHub or a hand that said so is running it. */
+export function gate(task: string): void {
   const by = process.env.REMY_FLOW;
   const onGitHub = process.env.GITHUB_ACTIONS === 'true';
   if (by || onGitHub) return;
@@ -17,3 +17,5 @@ export function main(args: string[]): void {
   console.error(`${task}: not in the flow (${why}).\nThe steps: npm run dev:change (after every change, seconds) · npm run dev:land -- "<message>" (commit, main, push, staging; GitHub runs the heavy checks) · npm run dev:promote (production) · npm run dev:release (a release). One area: mise run project:test:only -- <words>.\nBy hand, on purpose: REMY_FLOW=hand mise run ${task}`);
   process.exit(1);
 }
+
+export const main = (args: string[]): void => gate(args[0] ?? '');

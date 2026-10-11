@@ -1,5 +1,5 @@
-// What the docs translator may write, as functions: i18n:docs:translate passes every agent result
-// through pageFrom (accept.ts beside this file, the last stage of its pipe), and
+// What the docs translator may write, as functions: translate.ts passes every agent result through
+// pageFrom, and
 // tests/unit/i18n-docs.unit.spec.ts holds every translated page in the repository to broken. On
 // 2026-10-09 the agent returned nothing for one page, the pipe lost its failure, and the word "null"
 // was committed as the Spanish "How we work": the docs stopped building on main and every check was

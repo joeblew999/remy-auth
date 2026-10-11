@@ -196,9 +196,15 @@ export async function checkAll(strict = process.env.I18N_STRICT === '1', cwd = p
 }
 
 export async function main(args: string[]): Promise<void> {
-  const [command, which] = args;
+  const [command, which, ...rest] = args;
   const list = args.includes('--list');
-  if (command !== 'check') { console.error('remy i18n: check [messages|docs] [--list]'); process.exit(2); }
+  if (command === 'translate') {
+    const { gate } = await import('./allowed.ts');
+    gate('i18n:translate');
+    const { translate } = await import('./translate.ts');
+    return translate([which, ...rest].filter((part): part is string => part !== undefined));
+  }
+  if (command !== 'check') { console.error('remy i18n: check [messages|docs] [--list] | translate [messages|docs] [files...]'); process.exit(2); }
   const ok = which === 'messages' ? await checkMessages(list) : which === 'docs' ? checkDocs(list) : await checkAll();
   if (!ok) process.exit(1);
 }

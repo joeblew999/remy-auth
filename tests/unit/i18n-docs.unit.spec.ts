@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { broken, pageFrom } from '../../tasks/i18n/docs/page';
+import { broken, pageFrom } from '../../packages/ui/src/cli/page';
 
 // The docs translator writes pages and nothing else (tasks/i18n/docs/page.ts). On 2026-10-09 the agent
 // returned nothing, the pipe lost its failure and the word "null" was committed as a Spanish page: the

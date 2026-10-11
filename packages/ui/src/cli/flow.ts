@@ -48,6 +48,7 @@ export const heavy: Record<string, string> = {
   'template:test': 'the consumer fixture: GitHub runs it after every push',
   'playwright test': 'the browser suite by hand: dev:change runs the check; mise run project:test:only -- <words> runs one area',
   'i18n:translate': 'translation: dev:land runs it on main, once, after the merge',
+  'i18n translate': 'translation: dev:land runs it on main, once, after the merge',
 };
 
 const git = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
