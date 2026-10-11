@@ -4,6 +4,7 @@
 // present: remy-auth writes .dev.vars and migrates its local D1 there), so nothing has to be remembered.
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
+import { generate } from './check.ts';
 
 function tool(command: string, args: string[], env: Record<string, string> = {}): void {
   const result = spawnSync(command, args, { stdio: 'inherit', env: { ...process.env, ...env } });
@@ -11,8 +12,14 @@ function tool(command: string, args: string[], env: Record<string, string> = {})
 }
 const bin = (name: string) => join(process.cwd(), 'node_modules', '.bin', name);
 
-/** The app's local state before it runs: its "local" script, when it has one. */
-export const prepare = (): void => tool('npm', ['run', '--if-present', '--silent', 'local']);
+/**
+ * Before the app runs or builds: its local state (its "local" script, when it has one) and what it
+ * generates (its "generate" script: the catalogs, the skill, the command line), once, in this process,
+ * before any Vite build starts. Paraglide's Vite plugin compiles the catalogs again at build start; with
+ * the inputs unchanged it rewrites nothing. On 2026-10-11 a staging build read the messages while that
+ * compile was cleaning and rewriting them (28 of 611 modules on disk when the build died) and failed.
+ */
+export function prepare(): void { tool('npm', ['run', '--if-present', '--silent', 'local']); generate(); }
 
 export function dev(): void { prepare(); tool(bin('vite'), ['dev']); }
 

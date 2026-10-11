@@ -10,6 +10,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { publish } from './docs.ts';
+import { prepare } from './dev.ts';
 
 // A declaration, not a constant: tsc narrows after a call only to a function declared with its never type.
 function fail(message: string): never { console.error(message); process.exit(1); }
@@ -108,6 +109,7 @@ export async function deploy(environment?: 'staging'): Promise<void> {
   const env: Record<string, string> = environment ? { CLOUDFLARE_ENV: environment, DEPLOY_ORIGIN: origin } : {};
   Object.assign(process.env, env);
   await provisioned(environment);
+  prepare();
   tool('vite', ['build'], { env: { ...env, PUBLIC_ORIGIN: origin } });
   await provisioned(environment);
   const scratch = mkdtempSync(join(tmpdir(), 'remy-deploy-'));
@@ -214,6 +216,7 @@ export async function preview(alias?: string, keep = false): Promise<string> {
   console.log(`Target: Cloudflare (remote), throwaway Worker ${name} at ${origin}`);
   const remove = async () => { await previewDelete(name).catch(error => console.error(`preview: could not delete ${name}: ${error instanceof Error ? error.message : String(error)}`)); };
   try {
+    prepare();
     tool('vite', ['build'], { env: { PUBLIC_ORIGIN: origin } });
     await provisioned();
     const scratch = mkdtempSync(join(tmpdir(), 'remy-preview-'));
