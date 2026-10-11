@@ -1,7 +1,7 @@
 // A repository that publishes packages of its own (npm workspaces that are not private), remy-auth and
 // any other Remy repo alike: `remy packages check|upgrade|pack|notes|bumped|publish|tag|release`. The
 // workspace list in package.json drives them; remy.config.ts's `release` names the package whose
-// version tags a release, and its title. `remy release` (STEP 4) is `release` here: every gate, then
+// version tags a release, and its title. `remy flow release` (STEP 4) is `release` here: every gate, then
 // the tag, which publishes.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { dispatch, type Subcommands } from './commands.ts';

@@ -5,7 +5,7 @@ description: "remy, the tooling every Remy app installs with the package: the sc
 
 The tooling is `remy`, the bin of `@joeblew999/remy-ui` (`packages/ui/src/cli`, one TypeScript module per
 command); an app gets it with the package (`npm install`, at the package's version) and names it in its
-`package.json` scripts, the same ones in every app (`"dev:change": "remy change"`). An app says once, in
+`package.json` scripts, the same ones in every app (`"dev:change": "remy flow change"`). An app says once, in
 `remy.config.ts`, where it is deployed and its ports:
 
 ```ts
@@ -128,7 +128,7 @@ The development flow is code, `packages/ui/src/cli/flow.ts`, with four steps and
 | --- | --- |
 | First | `dev:status` (main with GitHub's verdicts, the deployments, worktrees ahead and behind, translations, pull requests; a `SessionStart` hook runs it for agents) |
 | A piece of work | `dev:start -- <name>` (a worktree of its own from main, `npm ci`, its own ports, the guard); `dev:done` removes it when the piece of work is over and landed |
-| Every change | `dev:change` (`remy change`, every part a function: plans, single copies, routes when a route file changed, types, the unit checks, translations as a warning, the docs when docs changed) |
+| Every change | `dev:change` (`remy flow change`, every part a function: plans, single copies, routes when a route file changed, types, the unit checks, translations as a warning, the docs when docs changed) |
 | Finished work | `dev:land -- "<message>"` (the check, commit, main, push, the staging deploy, then translation when stale; GitHub then runs `npm run test -- every`, `google` and `consumers` in parallel, and a red run comments on the commit. The same three locally, on purpose, by a person: `REMY_FLOW=hand npm run test -- <level>`) |
 | Production | `dev:promote` (refuses a commit GitHub has not passed; then the production deploy, the docs deploy, what each deployment runs) |
 | A release | `dev:release` (`remy packages release`, which runs `remy verify`) |

@@ -7,6 +7,10 @@ package follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Changed
+- The flow is one command, `remy flow <step>` (`status`, `start`, `change`, `land`, `promote`, `release`,
+  `done`), dispatched from the table in `flow.ts` like every other command; the blank app's scripts say
+  it. A bare `remy <step>` still answers, since the scripts of apps on 0.15 say that; the Claude session
+  hook now runs `remy flow status`.
 - `remy help` lists every command, and the list is read from the commands themselves: each module exports
   its one line and, where it has subcommands, their table (`commands.ts`), which its main dispatches on and
   its own usage prints from (`remy docs` with no subcommand). A command cannot exist without its line; a

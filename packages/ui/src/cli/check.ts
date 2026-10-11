@@ -1,4 +1,4 @@
-// The check (STEP 1, `remy change`): what runs after every change, in seconds, and nothing that needs a
+// The check (STEP 1, `remy flow change`): what runs after every change, in seconds, and nothing that needs a
 // browser. Every part is a function here (.plans/tooling-in-typescript.md, slice 2). `remy check
 // <part>` runs one part.
 import { execFileSync, spawnSync } from 'node:child_process';

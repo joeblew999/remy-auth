@@ -1,4 +1,4 @@
-// The one writer (`remy i18n translate`, which `remy land` runs on main, last): the machine's Claude
+// The one writer (`remy i18n translate`, which `remy flow land` runs on main, last): the machine's Claude
 // Code, headless and with no tools, translates exactly the gaps the checks list (i18n.ts), one language
 // (messages) or one page (docs) per call, I18N_JOBS at a time; this writes the files it asked for,
 // nothing else, and commits them. What keeps that safe while many agents code at once
@@ -177,7 +177,7 @@ export async function translateDocs(redo: string[] = []): Promise<boolean> {
   return ok;
 }
 
-/** Both, messages then docs: what `remy land` runs on main, last. */
+/** Both, messages then docs: what `remy flow land` runs on main, last. */
 export async function translate(args: string[]): Promise<void> {
   const [which, ...rest] = args;
   const messages = which === undefined || which === 'messages' ? await translateMessages() : true;

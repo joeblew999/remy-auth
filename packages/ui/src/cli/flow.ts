@@ -7,6 +7,7 @@
 // of them. TypeScript, type-checked by project:check, so a wrong step fails before it runs.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
+import { dispatch, type Subcommands } from './commands.ts';
 
 /** The steps of development, in the order they happen (dev:start and dev:done bracket them for a worktree). */
 export type Step = 'change' | 'land' | 'promote' | 'release';
@@ -30,15 +31,23 @@ export const steps: Record<Step, { what: string }> = {
 };
 
 /**
- * The flow's commands as `remy help` lists them (status first, then the steps, then the worktree's end).
- * The step modules are scripts, so the help never imports them: their lines live here.
+ * The flow as one command, `remy flow <step>` (npm run dev:<step>): status first, then the steps, then the
+ * worktree's end. Each step is its own module, loaded when it runs; its line here is the one `remy help`
+ * and `remy flow` print. A bare `remy <step>` still answers (remy.ts): the scripts of apps on 0.15 say it.
  */
-export const flowCommands: Record<'status' | 'start' | Step | 'done', { what: string }> = {
-  status: { what: "what is going on: main with GitHub's verdicts, the deployments, the worktrees, the translations" },
-  start: { what: '<name>: a worktree of your own from main, installed, its own ports, the guard' },
-  ...steps,
-  done: { what: 'the worktree removed once its work is on main' },
+type Script = { main: (args: string[]) => void | Promise<void> };
+const step = (load: () => Promise<Script>) => (args: string[]) => load().then(module => module.main(args));
+export const what = 'the development flow: the four steps, and the two that bracket a worktree (npm run dev:<step>)';
+export const commands: Subcommands = {
+  status: { what: "what is going on: main with GitHub's verdicts, the deployments, the worktrees, the translations", run: step(() => import('./status.ts')) },
+  start: { what: '<name>: a worktree of your own from main, installed, its own ports, the guard', run: step(() => import('./start.ts')) },
+  change: { what: steps.change.what, run: step(() => import('./change.ts')) },
+  land: { what: `"<what changed>": ${steps.land.what}`, run: step(() => import('./land.ts')) },
+  promote: { what: steps.promote.what, run: step(() => import('./promote.ts')) },
+  release: { what: steps.release.what, run: step(() => import('./release.ts')) },
+  done: { what: 'the worktree removed once its work is on main', run: step(() => import('./done.ts')) },
 };
+export const main = dispatch('flow', commands);
 
 /**
  * The heavy commands no step runs by default, and why: GitHub runs them after every push (the suite,

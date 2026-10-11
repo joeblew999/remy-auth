@@ -85,7 +85,9 @@ Below this section is the history of how it got here.
    is red at `npm ci`: GitHub Packages refuses `@joeblew999/remy-showcase` to its workflow (403), as it
    refused the contract two weeks ago; the package's "Manage Actions access" must grant the repository, a
    setting on the package's page (owner only, below). Then its `npm run dev:promote` (the first on the
-   flow), and `remy-auth-test` from the template. What the move found is item 3a.
+   flow), and `remy-auth-test` from the template. What the move found is item 3a. `npm run upgrade` leaves
+   an app's scripts as they are (remy-auth-app's say `remy status`, which answers by alias since the flow
+   became `remy flow <step>`, 2026-10-11); refreshing them from the blank app is the upgrade's next piece.
    - a. ~~**0.15.1**~~ released 2026-10-11 (tag `v0.15.1` on `af07ece`; remy-ui 0.15.1, remy-showcase 0.1.1,
      the contract 0.4.1; the release's full run passed on the fourth try: the notes checks clicked before
      hydration under a full run's load, fixed): `remy docs publish` in TypeScript (the three `.mjs` gone)

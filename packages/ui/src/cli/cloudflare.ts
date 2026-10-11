@@ -1,5 +1,5 @@
-// Cloudflare, as functions of the steps (`remy land` deploys staging, `remy promote` production and
-// the docs; `remy status` asks what each deployment runs): the deploy, the check that nothing would be
+// Cloudflare, as functions of the steps (`remy flow land` deploys staging, `remy flow promote` production and
+// the docs; `remy flow status` asks what each deployment runs): the deploy, the check that nothing would be
 // created by it, the wait for the new version, what runs where, and an app's page URLs. By hand, the
 // same through `remy cloudflare <deploy|staging|versions|urls|docs-deploy>`. Wrangler does the work.
 import { execFileSync, spawnSync } from 'node:child_process';

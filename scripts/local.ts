@@ -1,4 +1,4 @@
-// remy-auth's local state before it runs (package.json "local"; remy app dev|build and remy start run it):
+// remy-auth's local state before it runs (package.json "local"; remy app dev|build and remy flow start run it):
 // .dev.vars with a local secret when missing, the local D1 databases migrated, and the guard's oRPC v1
 // fixture installed. Nothing to remember.
 import { execFileSync, spawnSync } from 'node:child_process';
