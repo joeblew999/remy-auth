@@ -47,7 +47,8 @@ export function live(origin?: string): void { playwright(['--project=ours', '--g
 /** The other repositories this one serves, tested as they get it: the app's "test:consumers" script, when it has one. */
 export function consumers(): void {
   gate('project:test:consumers');
-  const result = spawnSync('npm', ['run', '--if-present', '--silent', 'test:consumers'], { stdio: 'inherit', env: { ...process.env, REMY_FLOW: process.env.REMY_FLOW ?? 'hand' } });
+  // Not silent: npm would hand loglevel=silent to every nested npm in the fixture (its publish dry run reads a 404 from npm's output).
+  const result = spawnSync('npm', ['run', '--if-present', 'test:consumers'], { stdio: 'inherit', env: { ...process.env, REMY_FLOW: process.env.REMY_FLOW ?? 'hand' } });
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
 /** Google's Core Web Vitals (level 2, speed) on a throwaway Cloudflare Worker of this commit, deleted whatever happens. */

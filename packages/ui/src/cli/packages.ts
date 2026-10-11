@@ -115,11 +115,12 @@ export function publish(options: { release?: string; dryRun?: boolean } = {}): v
       writeFileSync(npmrc, `//${host}/:_authToken=${token}\n`);
       const withRc = { ...env, NPM_CONFIG_USERCONFIG: npmrc };
       // The token npm will publish with is accepted (a registry answers "not found" for a new name whatever the token).
-      if (!quiet('npm', ['whoami', '--registry', item.registry], withRc)) fail(`publish: ${item.registry} refuses the token npm would publish ${item.name} with (check the app's .npmrc).`);
+      // An explicit log level: under an npm run --silent, npm hands loglevel=silent to every nested npm, and a 404 would answer with nothing (GitHub's consumer job, 2026-10-11).
+      if (!quiet('npm', ['whoami', '--loglevel=error', '--registry', item.registry], withRc)) fail(`publish: ${item.registry} refuses the token npm would publish ${item.name} with (check the app's .npmrc).`);
       // Only "not found" means not published: any other answer stops here, before a publish that would fail the same way after the tag is pushed.
-      const view = spawnSync('npm', ['view', `${item.name}@${item.version}`, 'version', '--registry', item.registry], { encoding: 'utf8', env: { ...process.env, ...withRc } });
+      const view = spawnSync('npm', ['view', `${item.name}@${item.version}`, 'version', '--loglevel=error', '--registry', item.registry], { encoding: 'utf8', env: { ...process.env, ...withRc } });
       if (view.status === 0) console.log(`${item.name}@${item.version} is already published.`);
-      else if (/E404/.test(`${view.stdout}${view.stderr}`)) tool('npm', ['publish', '--workspace', item.name, '--ignore-scripts', ...(options.dryRun ? ['--dry-run'] : [])], { env: withRc });
+      else if (/E404/.test(`${view.stdout}${view.stderr}`)) tool('npm', ['publish', '--workspace', item.name, '--ignore-scripts', '--loglevel=error', ...(options.dryRun ? ['--dry-run'] : [])], { env: withRc });
       else fail(`publish: ${item.registry} did not answer for ${item.name}@${item.version}:\n${view.stdout}${view.stderr}`);
     }
     if (options.release && !options.dryRun) {
@@ -157,7 +158,8 @@ export async function release(): Promise<void> {
   if ((await translationGaps()).length) fail('release: translations are incomplete or stale (npx remy i18n check); land, which translates, first.');
   bumped();
   await verify();
-  tool('npm', ['run', '--if-present', '--silent', 'release-checks'], { what: 'release-checks' });
+  // Not silent: npm would hand loglevel=silent to every nested npm in the script.
+  tool('npm', ['run', '--if-present', 'release-checks'], { what: 'release-checks' });
   process.env.REMY_FLOW ??= 'release';
   await google();
   await cwv('release');
