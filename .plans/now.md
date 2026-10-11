@@ -94,9 +94,11 @@ Below this section is the history of how it got here.
      Worker, deleted, and wait on remy-auth's); GitHub's verdict from main's push runs only (Dependabot's
      run read as green on a red commit; a tag's run on the same commit held the promote); the showcase
      declares its dependencies (zod 3 at the top of remy-auth-app's grown lock broke `zod/mini`; a fresh
-     lock and the declaration fix it); the route tree part reruns on `src/start.ts`. Left: the promote of
-     this main (the tag-run pick is on main after the release, so the next push run is its verdict), and
-     remy-auth-app onto 0.15.1 with `npm run upgrade -- 0.15.1` (in flight).
+     lock and the declaration fix it); the route tree part reruns on `src/start.ts`. Promoted 2026-10-11:
+     production and the docs Worker on `db9e180` (the docs publish waited for the index's sync; five of the
+     six fixed questions rank first, where two had failed before the wait). remy-auth-app is on 0.15.1
+     (`c68874d`, through `npm run upgrade -- 0.15.1`, proved end to end: install, the workflow's tag, the
+     skills, the rules, the installation's checks); its production waits for the owner's grant (item 3).
 4. **Auth, next slices** ([auth-service](auth-service.md#next-slices)): the app-trust comparison
    (OAuth tokens verified locally against a service binding, each proved small); the relation
    engine's write half (`grant`, `revoke`); a rule for server functions and routes outside the oRPC
@@ -281,10 +283,13 @@ task logic, facts in several places), and their fixes in order. Waits for the ow
 
 ## Owner only
 
-- Release 0.14.0 (thin apps phase D and everything since: auth, relations, staging, the flow): prepared on
-  main 2026-10-09 (`ui:version 0.14.0`, the CHANGELOG section). One command: `npm run dev:release` (every
-  check, every language, Google, Core Web Vitals on a preview, then the tag and publish, ~6 min). Then
-  consumers move with `project:upgrade-ui -- 0.14.0`; create `remy-auth-test`; remy-auth-app later.
+- **remy-auth-app's CI and production** (2026-10-11): its workflow's `npm ci` gets 403 on
+  `@joeblew999/remy-showcase` from GitHub Packages. On the package's page (Packages → remy-showcase →
+  Package settings → "Manage Actions access"), add the `joeblew999/remy-auth-app` repository, as remy-ui
+  and the contract have it. No API offers this. Then `npm run dev:promote` in remy-auth-app puts 0.15.1 live
+  (the flow refuses a red commit until then).
+
+- ~~Release 0.14.0~~ shipped as 0.15.0 and 0.15.1 (2026-10-11, items 2 and 3a above).
 
 - One alert rule in the dashboard (no API for it): Workers & Pages → Observability → Alerts → Create,
   service `remy-auth`, `event = ask` and `outcome = failed`, count > 5 in 15 minutes.

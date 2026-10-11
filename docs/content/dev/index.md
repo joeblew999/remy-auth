@@ -63,6 +63,9 @@ Starting, resuming and reloading Codex or Claude Code, in VS Code or a terminal,
 
 ## Everyday commands
 
+The everyday commands, the same in every app on the platform (`package.json`'s scripts, run by the
+package's `remy` bin):
+
 | Task | Command |
 | --- | --- |
 | See what is going on | `npm run dev:status` |
