@@ -77,7 +77,7 @@ scripts; el resto son comandos `remy` (`npx remy <command>`), un módulo cada un
 | `npm run packages -- check\|upgrade\|pack\|notes\|bumped\|publish\|tag\|release` | Un repositorio que publica paquetes ([la línea de comandos](./tasks.md#a-repository-that-publishes-packages)) |
 | `npx remy cloudflare deploy\|staging\|docs-deploy\|versions\|urls\|preview\|preview-delete` | Despliegues, qué está ejecutando cada uno, las URL de las páginas de una app, un Worker de comprobación desechable ([la línea de comandos](./tasks.md#cloudflare)) |
 | `npm run logs`, `errors`, `wrangler`, `npm run observe -- events\|ai-usage\|ai-check\|gateway` | Logs en vivo, la CLI de Cloudflare, logs almacenados y el uso, la configuración y el gateway de la IA (más abajo) |
-| `npm run docs -- dev\|build\|check\|test [remote]\|preview\|answers on\|off\|publish\|provision\|init\|observe` | El Worker de documentación, de `@joeblew999/remy-ui`, sobre el `docs/` de una app ([escribir docs](./writing-docs.mdx)); solo remy-auth: `npm run docs:cli`, la CLI de Fumadocs en el paquete |
+| `npm run docs -- dev\|build\|check\|test [remote]\|preview\|answers on\|off\|publish\|questions\|provision\|init\|observe` | El Worker de documentación, de `@joeblew999/remy-ui`, sobre el `docs/` de una app ([escribir docs](./writing-docs.mdx)); solo remy-auth: `npm run docs:cli`, la CLI de Fumadocs en el paquete |
 | `npx remy i18n check [messages\|docs] [--list]`, `i18n translate` | Traducciones: las comprobaciones sin conexión (un aviso en el check, la puerta de control en un release), el único redactor que `dev:land` ejecuta en main ([un solo redactor](./how-we-work.md#translations-one-writer)) |
 | `npm run plans -- status\|check\|close\|park\|open` | La regla de los planes ([planes](./how-we-work.md#plans-few-short-closed)) |
 | `npx remy skills install\|list\|remove`, `npx remy mcp register\|verify\|status`, `npx remy rules` | Los skills de agentes fijados, el registro de MCP, el bloque de reglas en el `AGENTS.md` de una app (más abajo) |
@@ -331,7 +331,8 @@ localmente; las respuestas solo existen en Cloudflare (AI Search no tiene versi�
 Cada comando indica en su comentario de cabecera si es local o remoto (y si es de producción).
 
 ```sh
-npm run docs -- publish                          # REMOTE, PRODUCTION: bucket = docs pages, sync, fixed questions (dev:promote runs it)
+npm run docs -- publish                          # REMOTE, PRODUCTION: bucket = docs pages, the index's sync waited for, then the fixed questions (dev:promote runs it)
+npm run docs -- questions                        # REMOTE: the fixed questions alone (docs/content/questions.json), search only, no answer written
 CLOUDFLARE_ENV=ask npm run docs -- dev           # LOCAL docs Worker, answers from the live index
 npm run docs -- answers off                      # REMOTE, PRODUCTION: emergency stop, seconds, no build
 npm run docs -- answers on                       # REMOTE, PRODUCTION: resume
