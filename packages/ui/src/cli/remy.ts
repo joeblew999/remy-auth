@@ -1,9 +1,12 @@
 #!/usr/bin/env node
-// remy: the platform's command line, a Remy app's whole tooling in TypeScript that Node runs as it is
-// (no build), type-checked by the app's tsc. package.json's scripts are the entry, as in every
-// TypeScript project ("dev:land": "remy land"); owner, 2026-10-11: "strip away mise so that its all
-// typescript", "use the package.json as the entry point like all typescript projects do". The plan
-// that did it: .plans/done/tooling-in-typescript.md.
+// remy: the platform's command line, a Remy app's whole tooling, in TypeScript. Every app gets it by
+// installing @joeblew999/remy-ui: the package's bin is the JavaScript emitted from this directory
+// (packages/ui/cli, by `npm run generate` and prepack), because Node strips types from nothing under
+// node_modules; remy-auth alone runs this source as it is. package.json's scripts are the entry in every
+// app, as in every TypeScript project ("dev:land": "remy land"), and remy.config.ts holds what is the
+// app's own (origins, ports, the release package). Owner, 2026-10-11: "strip away mise so that its all
+// typescript", "use the package.json as the entry point like all typescript projects do". The plan that
+// did it: .plans/done/tooling-in-typescript.md; remy-auth-app is the first consumer on it.
 import { configure } from './config.ts';
 import { flowCommands } from './flow.ts';
 import type { Tool } from './commands.ts';
