@@ -75,5 +75,5 @@ test('an installation ends with the installation\'s checks, never the browser su
   expect(String(tasks['project:verify-setup'].run)).toContain('remy.ts verify setup');
   expect(String(tasks['project:verify'].run)).toContain('remy.ts verify;');
   expect(readFileSync('packages/ui/src/cli/packages.ts', 'utf8')).toMatch(/export async function upgrade\(\)[\s\S]*?await verifySetup\(\);/);
-  expect(readFileSync('tasks/project/upgrade-ui', 'utf8')).toContain('remy.ts verify setup');
+  expect(readFileSync('packages/ui/src/cli/upgrade.ts', 'utf8')).toMatch(/guard\(\[\]\);\n\s*await verifySetup\(\);/);
 });

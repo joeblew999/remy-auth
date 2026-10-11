@@ -78,8 +78,11 @@ already does, and the scripts list is the documentation of what exists.
    [remote]|preview|answers on|off|publish|provision|init|observe …`), `observe.ts` (events, AI usage,
    the AI check, the gateway; `fnox exec --` in front where the API token is needed), `shots.ts`,
    `api.ts`; the one-line tools are scripts (`npm run logs|errors|wrangler|browser|web|codex|claude`).
-   Left: remy-auth's own `ui:*` and `auth:*` as its scripts and `scripts/*.ts`, `template:check`,
-   `project:upgrade-ui` as `remy upgrade <version>`, `project:refresh-tasks` (goes with the include).
+   5e, done 2026-10-11: remy-auth's own tasks are its scripts (`npm run auth|auth:info|auth:generate|
+   auth:migrate|auth:mail|auth:provision|docs:cli|ui:components|ui:blocks|ui:theme|ui:verify|ui:version|
+   template:check|release-checks`, the logic in `scripts/*.ts`), `remy upgrade <version>` for an app;
+   `mise.toml`'s own tasks forward to the scripts. Left of 5: `project:refresh-tasks`, which goes with
+   the include in 7.
 6. **GitHub and the consumers:** the shared workflow on `actions/setup-node` (`.node-version`, the
    node pin from `mise.toml`) and `npm run`: `npm run check -- types`, `npm run check -- unit`, the
    matrix as `npm run test -- <level>`, the release job as `npm run packages -- publish --release`;

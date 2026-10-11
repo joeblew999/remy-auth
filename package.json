@@ -33,7 +33,7 @@
     "generate": "node packages/ui/paraglide.mjs && node packages/ui/skill.mjs && tsc -p packages/ui/src/cli",
     "setup": "node packages/ui/src/cli/remy.ts setup",
     "packages": "node packages/ui/src/cli/remy.ts packages",
-    "release-checks": "mise run template:check && mise run ui:verify",
+    "release-checks": "npm run template:check && npm run ui:verify",
     "dev": "node packages/ui/src/cli/remy.ts app dev",
     "build": "node packages/ui/src/cli/remy.ts app build",
     "preview": "node packages/ui/src/cli/remy.ts app preview",
@@ -54,6 +54,19 @@
     "codex": "codex",
     "codex:resume": "codex resume --last",
     "claude": "claude",
-    "claude:resume": "claude --continue"
+    "claude:resume": "claude --continue",
+    "auth": "auth",
+    "auth:info": "auth info",
+    "auth:generate": "node scripts/auth-generate.ts",
+    "auth:migrate": "wrangler d1 migrations apply DB --local && wrangler d1 migrations apply DEMO_DB --local",
+    "auth:mail": "node scripts/auth-mail.ts",
+    "auth:provision": "node scripts/auth-provision.ts",
+    "docs:cli": "cd packages/ui/src/docs && node ../../../../node_modules/@fumadocs/cli/dist/index.js",
+    "ui:components": "shadcn add button card input label badge alert field separator direction skeleton empty sidebar breadcrumb collapsible dropdown-menu avatar sheet tooltip navigation-menu use-mobile table spinner tabs --overwrite --yes",
+    "ui:blocks": "shadcn add @shadcn/sidebar-16 -c packages/ui --diff src/blocks/sidebar-16/components/app-sidebar.tsx && shadcn add @shadcn/sidebar-16 -c packages/ui --diff src/blocks/sidebar-16/components/nav-main.tsx && shadcn add @shadcn/sidebar-16 -c packages/ui --diff src/blocks/sidebar-16/components/site-header.tsx",
+    "ui:theme": "shadcn apply nova --only theme --yes",
+    "ui:verify": "npm run ui:theme && npm run ui:components && git diff --exit-code -- packages/ui/src/components packages/ui/src/styles src/lib",
+    "ui:version": "node scripts/version.ts",
+    "template:check": "node scripts/template-check.ts"
   }
 }

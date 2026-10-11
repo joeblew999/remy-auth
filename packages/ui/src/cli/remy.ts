@@ -36,6 +36,7 @@ const commands: Record<string, () => Promise<Command>> = {
   observe: () => import('./observe.ts'),
   shots: () => import('./shots.ts'),
   api: () => import('./api.ts'),
+  upgrade: () => import('./upgrade.ts'),
 };
 
 const [name = '', ...args] = process.argv.slice(2);
