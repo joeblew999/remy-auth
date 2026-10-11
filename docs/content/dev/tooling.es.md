@@ -16,7 +16,7 @@ mise run auth:info
 Todas las herramientas llegan a través de mise, hasta el nivel del sistema operativo. Node y fnox están fijados en
 el `[tools]` de `mise.toml`; las tareas compartidas fijan las herramientas que ejecutan como `tools` a nivel de tarea, de modo que cada app que
 las incluye obtiene las mismas versiones sin una entrada propia: `gh` (`project:setup`, `project:upgrade-ui`,
-`ui:release`), `jq`, `@lingual/i18n-check` y Claude Code (`i18n:*`). La CLI de Better Auth (`auth`), Wrangler,
+`dev:release`), `jq`, `@lingual/i18n-check` y Claude Code (`i18n:*`). La CLI de Better Auth (`auth`), Wrangler,
 Chrome DevTools y Modern Web Guidance están fijados en `package.json` y `package-lock.json`. `project:setup` ejecuta `npm ci`, instala los skills oficiales fijados
 para Codex y Claude, registra las herramientas MCP del proyecto y luego ejecuta `project:verify`. Se detiene ante cualquier
 paso fallido. Los comandos usan los binarios locales y aceptan los argumentos de la CLI original
@@ -55,7 +55,7 @@ niega a desplegar, porque de otro modo Wrangler la crearía por sí misma.
 
 Estas son herramientas para desarrolladores/operadores. El inicio de sesión de la CLI de Remy para usuarios finales y las llamadas
 delegadas a la API siguen siendo parte del hito del servicio. Ambas apps están en vivo en Cloudflare; `cf:deploy` sube a
-`DEPLOY_ORIGIN`, definido en [mise.toml](https://github.com/joeblew999/remy-auth/blob/main/mise.toml), y solo se ejecuta a petición del propietario.
+`DEPLOY_ORIGIN`, definido en [mise.toml](https://github.com/joeblew999/remy-auth/blob/main/mise.toml); `dev:promote` lo ejecuta, solo a petición del propietario.
 
 ### Actualizaciones de paquetes [#package-upgrades]
 
@@ -93,7 +93,7 @@ Las tareas de passthrough de la CLI aceptan directamente los flags originales, c
 | --- | --- |
 | `project:*` | Configuración, pipeline y verificación (valores predeterminados compartidos desde `tasks/project.toml`; `[env]` proporciona las entradas) y diagnóstico de herramientas |
 | `packages:*` | Comprueba y actualiza paquetes npm; empaqueta, publica y sube los propios paquetes del repositorio ([tareas](./tasks.md#a-repository-that-publishes-packages)) |
-| `ui:*` | Compila los catálogos compartidos (`ui:generate`), regenera los componentes y el tema de shadcn (`ui:components`, `ui:theme`), demuestra que no se han modificado (`ui:verify`), publica el paquete y las tareas (`ui:release`, la `packages:release` compartida) |
+| `ui:*` | Compila los catálogos compartidos (`ui:generate`), regenera los componentes y el tema de shadcn (`ui:components`, `ui:theme`), demuestra que no se han modificado (`ui:verify`), publica el paquete y las tareas (`ui:release`, un alias del `dev:release` del flujo) |
 | `skills:*` | Instala, lista y elimina los skills oficiales fijados |
 | `auth:*` | Better Auth: su CLI y diagnóstico (`auth:cli`, `auth:info`), migraciones para la D1 local (`auth:generate`, `auth:migrate`), el entorno local (`auth:local`), sus códigos de inicio de sesión capturados (`auth:mail`) y lo que necesita un despliegue (`auth:provision`, solo imprime) |
 | `cf:*` | CLI de Cloudflare, logs en vivo, despliegue (`cf:deploy` para producción, `cf:staging` para staging), qué está ejecutando cada despliegue (`cf:versions`), Workers de comprobación desechables (`cf:preview`, `cf:preview-delete`), logs almacenados y uso de IA (`cf:events`, `cf:ai-*`); tareas compartidas, listadas en el [README de tareas](./tasks.md#cloudflare-tasks) |
@@ -117,8 +117,7 @@ volver a usar `project:setup`; ningún rollback automático descarta tus cambios
 `project:setup` sigue reproduciendo el lockfile. Las dependencias del workspace también se actualizan; las referencias locales `@joeblew999/remy-ui` y `@joeblew999/remy-auth-contract` se excluyen
 de las actualizaciones del registro. Los pins de Node y de las fuentes de skills en
 `mise.toml` se gestionan por separado. El flujo de verificación incluye la comprobación de tipos de la GUI, una build del Worker y
-pruebas de navegador. La compatibilidad del runtime de auth
-necesitará sus propias pruebas cuando se integre Better Auth.
+pruebas de navegador.
 
 ### Verificación [#verification]
 
@@ -140,9 +139,11 @@ no aprovisiona recursos de Cloudflare. Las comprobaciones de skills cubren el in
 no el descubrimiento upstream ni los hashes de integridad de contenido.
 
 La comprobación de configuración de Wrangler usa su propio lector. Luego la verificación genera
-tipos, construye y simula (dry-run) el empaquetado de despliegue para la GUI/Worker, y ejecuta las
-comprobaciones de Playwright y Lighthouse contra el artefacto de producción en Workers locales usando el
-Chrome instalado. No se realiza ningún despliegue. Consulta [la prueba de la GUI](./gui.md) para el alcance y los comandos.
+tipos, construye y simula (dry-run) el empaquetado de despliegue para la GUI/Worker, y ejecuta cada
+comprobación de navegador propia en cada idioma (`project:test`) contra el artefacto de producción en
+Workers locales usando el Chrome instalado, y luego el fixture de consumidor. Las auditorías de Google
+no están incluidas: `project:test:google` y `project:test:cwv`, que `packages:release` ejecuta después.
+No se realiza ningún despliegue. Consulta [la prueba de la GUI](./gui.md) para el alcance y los comandos.
 
 
 ## Iniciar o recargar tu agente [#start-or-reload-your-agent]
@@ -331,7 +332,7 @@ para funciones más nuevas.
 salud de D1, registros de auditoría de auth duraderos, correlación, dashboards y alertas.
 `wrangler.jsonc` habilita los logs/trazas y la redacción de query de URL para el Worker de la GUI.
 Una entrada del Worker de la GUI ahora emite IDs de solicitud, estado y tiempos sin registrar URLs,
-cabeceras ni cookies. D1 y la autenticación no están implementados.
+cabeceras ni cookies. Los registros de auditoría duraderos del inicio de sesión no están implementados.
 
 ```sh
 mise run cf:logs -- --help
@@ -412,3 +413,4 @@ Un solo token lo hace todo (el token `dev` en <https://dash.cloudflare.com/profi
 Edit** (que incluye lectura) y **Workers Observability Read** son los que estas tareas necesitan; cambiar
 el gateway con `cf:ai-gateway` usa el mismo token, y cada cambio se lee de vuelta.
 </content>
+</invoke>

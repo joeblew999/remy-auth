@@ -68,7 +68,7 @@ Lo que tiene toda app basada en el paquete, para que las tareas y comprobaciones
   `cf:deploy` (`project:test:live`) lo ejecutan, y fallan con «No tests found» si no existe.
 - **`.plans/now.md`**, la única lista ordenada del trabajo pendiente (`plans:check`, en la comprobación).
 - **Instalaciones y actualizaciones mediante las tareas compartidas**, nunca a mano: `mise run project:setup` (instalar,
-  skills, MCP, verificar) y `mise run project:upgrade-ui <version>` (la versión exacta del paquete y el include de
+  skills, MCP, verificar) y `mise run project:upgrade-ui -- <version>` (la versión exacta del paquete y el include de
   tareas en el mismo tag, y después verificar). Ambas toman el token de GitHub Packages de `gh auth token`.
 
 ## Exportaciones [#exports]
@@ -146,8 +146,8 @@ polaco, turco y alemán) están escritos por un agente y sin revisar.
 ## Publicación [#publishing]
 
 El paquete es `@joeblew999/remy-ui` en GitHub Packages (ahí el scope debe coincidir con el
-propietario de GitHub). `mise run ui:release` hace toda la publicación desde esta máquina y se
-detiene en el primer fallo: traducciones completas y al día (`i18n:check`, estricto), todas
+propietario de GitHub). `mise run dev:release` (alias `release`) hace toda la publicación desde esta
+máquina y se detiene en el primer fallo: traducciones completas y al día (`i18n:check`, estricto), todas
 nuestras comprobaciones (`project:verify`), los archivos de shadcn exactamente como los escribe su CLI
 (`ui:verify`), las auditorías Lighthouse de Google y Core Web Vitals medidos en frío sobre un Worker de
 Cloudflare desechable (`project:test:cwv`: las primeras visitas tras un despliegue, que es donde una
@@ -194,11 +194,8 @@ listan por nombre (`"seo-routes"`); cualquier paquete puede ofrecer partes tambi
    sus propias rutas, o con las páginas de la app mediante sus opciones `app` (la miga de pan de la parte time-zones toma
    `parent`), nunca con una página que otra app pueda no tener: el fixture consumidor lista una parte de la demostración (showcase) y
    la tipa sin las páginas de la demostración (showcase).
-4. **Demuéstralo:** `mise run project:check` pasa con la parte listada, sin ella y con la lista
+4. **Demuéstralo:** `mise run dev:change` pasa con la parte listada, sin ella y con la lista
    vacía (ejecuta un build una vez tras editar `src/parts.json`, lo que regenera el árbol de rutas).
 
 Lo que en cambio sigue siendo un módulo normal del paquete: el código que toda app necesita (observabilidad), un hook
 que una app debe llamar siempre (leave-guard) o los controles propios de una página compartida (search-params).
-</content>
-</StructuredOutput>
-

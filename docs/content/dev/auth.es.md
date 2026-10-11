@@ -133,9 +133,10 @@ correo su código a una dirección real. La semilla es `src/auth/seed.ts` (IDs e
 semilla de una app sabe jamás sobre una persona. Nada de esto crea una sesión fuera de Better Auth.
 
 Staging es su propio Worker, con sus propias bases de datos y secreto (`env.staging` en
-`wrangler.jsonc`, desplegado con `mise run cf:staging`), de modo que nada de lo que se hace allí toca
-los datos de producción. Contiene fixtures y lo que escriben los visitantes. Nunca copies los datos
-de producción en él: quien lo encuentre puede iniciar sesión como una persona sembrada.
+`wrangler.jsonc`, desplegado por cada `dev:land` a través de `cf:staging`), de modo que nada de lo que
+se hace allí toca los datos de producción. Contiene fixtures y lo que escriben los visitantes. Nunca
+copies los datos de producción en él: quien lo encuentre puede iniciar sesión como una persona
+sembrada.
 
 Un Worker dice en `/healthz` cuál es su entorno, de modo que nada lo adivina a partir de un hostname:
 las comprobaciones se lo preguntan y esperan exactamente lo que la tabla da para ese entorno

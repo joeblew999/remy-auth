@@ -9,6 +9,11 @@ documento que es su dueño; esta página es el orden de lectura. El `AGENTS.md` 
 solo apuntan aquí ([dónde viven las reglas](./how-we-work.md#where-rules-live)). Lee los documentos de
 abajo antes de cambiar nada, y síguelos por encima de tus propios valores predeterminados.
 
+Cuando dos páginas no coinciden, gana [la tabla del flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest),
+y la página que no coincide es un error: corrígelo en la página en la que estás
+([si ves algo, corrígelo](./how-we-work.md#see-something-fix-it-or-write-it-down-in-the-same-landing)).
+Una contradicción entre páginas nunca es motivo para detenerse, ni para preguntarle al dueño cuál es correcta.
+
 En producción: la app <https://remy-auth.gedw99.workers.dev> (staging, con el inicio de sesión automático:
 <https://remy-auth-staging.gedw99.workers.dev>); los docs para desarrolladores
 <https://remy-auth-docs.gedw99.workers.dev/dev> (la guía de producto `/docs`, la referencia de API
@@ -35,4 +40,3 @@ Empieza con `mise run dev:status` (qué está pasando) y
 siguiendo [el flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest):
 `mise run dev:change` después de cada cambio, `mise run dev:land -- "<qué cambió>"` cuando el trabajo
 está terminado y la comprobación está en verde.
-</content>

@@ -194,7 +194,7 @@ choca y deja los idiomas a medio actualizar.
 - `i18n:check` solo lee, sin conexión, así que es seguro en cualquier lugar, en cualquier número de
   worktrees, y como `depends`. `i18n:translate` nunca es un `depends`.
 - Desactualizado o faltante es un aviso mientras se avanza (`project:check` lo imprime) y un error al
-  publicar (`ui:release` ejecuta `i18n:check` con `I18N_STRICT=1` primero).
+  publicar (`dev:release` ejecuta `i18n:check` con `I18N_STRICT=1` primero).
 - Comitea en un archivo de traducción solo cambios de traducción reales: cualquier commit sobre él lo
   marca como actual. Un cambio estructural (un renombrado, una barrida) que toca traducciones de
   documentación va seguido de `mise run i18n:docs:translate -- <archivo>…`, que vuelve a comprobar esos
@@ -216,8 +216,8 @@ ejecución de pruebas extra propia: agrupa el código en un único despliegue y 
 completa al final.
 Las tareas compartidas `plans:*` hacen los movimientos: `plans:status` lista lo que está abierto,
 `plans:close`, `plans:park` y `plans:open` (un plan aparcado que se retoma) añaden la línea, mueven el
-archivo y redirigen cada enlace, y `plans:check` (en el nivel 0) mantiene `.plans/` ordenado
-([tareas](./tasks.md#plans)).
+archivo y redirigen cada enlace, y `plans:check` (en el check, `dev:change`) mantiene `.plans/`
+ordenado ([tareas](./tasks.md#plans)).
 
 ## Cuando el propietario delega decisiones [#when-the-owner-delegates-decisions]
 
@@ -275,7 +275,7 @@ que cada app, desde las tareas compartidas; `project:setup` instala el guardián
 - **Estas páginas nunca dan un comando que las herramientas rechacen.** Una tarea pesada se escribe con
   `REMY_FLOW=hand` por delante o se nombra sin `mise run`; `tests/unit/dev-flow.unit.spec.ts` lee cada
   página en inglés y cada tarea en busca de una ejecución desnuda, en cada comprobación (2026-10-10:
-  ocho líneas en cinco páginas lo hacían, y `project:setup` terminó en el rechazo).
+  ocho líneas en seis páginas lo hacían, y `project:setup` terminó en el rechazo).
 - Una regla que puede ser una función pertenece a `tests/**/*.unit.spec.ts` (sin build, sin Worker, sin
   navegador), así se ejecuta en cada comprobación gratis. El navegador es para lo que solo un navegador
   muestra.
@@ -400,8 +400,9 @@ landing. Nada de esto se hace a mano.
   espera a ese landing; no comparte worktree.
 - **Haz un spike primero cuando el riesgo es desconocido**: un agente demuestra el punto arriesgado y
   aterriza o se detiene.
-- **Cada parte se demuestra a sí misma**: aterriza con su propia comprobación en `tests/`, en el nivel
-  de función simple cuando puede serlo, en el navegador cuando solo un navegador lo muestra.
+- **Cada parte se demuestra a sí misma**: aterriza con su propia comprobación en `tests/`, una función
+  simple (`tests/**/*.unit.spec.ts`) cuando puede serlo, en el navegador cuando solo un navegador lo
+  muestra.
 - **Los landings se serializan solos.** Dos agentes aterrizando a la vez: el `dev:land` del segundo ve
   que main se movió, lo mezcla, vuelve a comprobar y aterriza. El paso de traducción es un único
   escritor en todos los worktrees.
@@ -415,3 +416,5 @@ landing. Nada de esto se hace a mano.
   GitHub en rojo escribe en el commit, nombrándose a sí mismo; `dev:land` dice cuando main está en rojo;
   `dev:promote` escribe en el commit qué se publicó; `dev:status` muestra todo esto a quien lo pregunte,
   y cada sesión de agente lo pregunta primero.
+</content>
+</invoke>

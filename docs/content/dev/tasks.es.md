@@ -119,9 +119,10 @@ que la escribe en todos los lugares donde aparece (el paquete y los tres pines d
 
 ### Elegir la versión: publicada, de desarrollo o local [#choosing-the-version-released-development-or-local]
 
-Las tareas y el paquete se publican juntos: el `mise run ui:release` de remy-auth (el `packages:release`
-compartido) publica `@joeblew999/remy-ui` X.Y.Z y etiqueta ese mismo commit como `vX.Y.Z`. Por eso, quien
-consume el paquete fija ambos a un mismo número, y `project:upgrade-ui` los cambia a la vez:
+Las tareas y el paquete se publican juntos: el `mise run dev:release` de remy-auth (`ui:release` y
+`release` son sus alias; ejecuta el `packages:release` compartido) publica `@joeblew999/remy-ui` X.Y.Z y
+etiqueta ese mismo commit como `vX.Y.Z`. Por eso, quien consume el paquete fija ambos a un mismo número, y
+`project:upgrade-ui` los cambia a la vez:
 
 | Quieres | Cómo | Dónde |
 | --- | --- | --- |
@@ -152,7 +153,7 @@ El flujo de desarrollo es código, `tasks/dev/flow.ts`, con cuatro pasos y un gu
 | Paso | Tarea |
 | --- | --- |
 | Primero | `dev:status` (main con los veredictos de GitHub, los despliegues, los worktrees por delante y por detrás, las traducciones, las pull requests; un hook `SessionStart` lo ejecuta para los agentes) |
-| Un trabajo | `dev:start -- <name>` (un worktree propio desde main, `npm ci`, puertos en `mise.local.toml`, `dev:guard`); `dev:done` lo elimina una vez fusionado |
+| Un trabajo | `dev:start -- <name>` (un worktree propio desde main, `npm ci`, puertos en `mise.local.toml`, `dev:guard`); `dev:done` lo elimina cuando el trabajo termina y queda fusionado |
 | Cada cambio | `dev:change` (`project:check`: planes, `project:routes` cuando cambia un archivo de ruta, tipos con `project:typecheck-tasks`, `project:test:unit`, `i18n:check` como aviso, `project:check:docs` cuando cambia la documentación) |
 | Trabajo terminado | `dev:land -- "<message>"` (la comprobación, commit, main, push, `cf:staging`, y luego la traducción cuando está desactualizada; GitHub ejecuta entonces `project:test`, `project:test:google` y `project:test:consumers` en paralelo, y una ejecución en rojo comenta en el commit. Las mismas tres en local, a propósito: `REMY_FLOW=hand mise run <task>`) |
 | Producción | `dev:promote` (se niega ante un commit que GitHub no ha aprobado; luego `cf:deploy`, `docs:deploy`, `cf:versions`) |
@@ -215,7 +216,7 @@ herramientas, traducir con el agente Claude fijado y hacer commit.
 | `i18n:check` | Ambas comprobaciones en paralelo; un WARNING y salida 0 mientras se programa (`project:check` la ejecuta), salida 1 con `I18N_STRICT=1` (`packages:release`) |
 | `i18n:messages:check` | Los huecos de los catálogos, y los idiomas que difieren de los de la plataforma (`de unlisted`); `-- --list` una línea por hueco (`es missing nav_more`) |
 | `i18n:docs:check` | Los huecos de la documentación; `-- --list` una línea por hueco (`es stale docs/content/dev/gui.es.md`) |
-| `i18n:translate` | En main: mensajes y luego documentación, un commit para cada uno |
+| `i18n:translate` | En main: mensajes y luego documentación, un commit para cada uno; `dev:land` lo ejecuta, al final |
 | `i18n:messages:translate` | Los huecos de los catálogos, un idioma por llamada al agente |
 | `i18n:docs:translate [files]` | Los huecos de la documentación, una página por llamada al agente; los archivos de traducción indicados se rehacen por completo |
 
@@ -235,7 +236,7 @@ través de mise: fuera de una tarea, el shim de Node de mise vuelve a aplicar `[
 | `cf:urls` | Imprime las páginas y `/healthz` del origen de producción (o de uno dado), para informes |
 | `cf:staging` | `cf:deploy` para el entorno de staging: construye con `CLOUDFLARE_ENV=staging` (`env.staging` en la configuración de Wrangler) y sube su propio Worker en `STAGING_ORIGIN`; producción queda intacta. Lo que staging permite más allá de producción está en la [tabla de entornos](./auth.md#environments-one-table) de la app |
 | `cf:versions` | Pregunta a cada despliegue (`DEPLOY_ORIGIN`, `STAGING_ORIGIN` y `DOCS_ORIGIN`, o los orígenes dados) qué está ejecutando: servicio, entorno, commit, cuán lejos está eso de este checkout, cuándo se desplegó. [Se pregunta, nunca se recuerda](./gui.md#which-version-is-deployed) |
-| `project:test:remote` | El nivel 1 contra `TEST_BASE_URL` |
+| `project:test:remote` | El nivel 1 contra `TEST_BASE_URL`, solo a mano (`REMY_FLOW=hand`): los despliegues del flujo terminan con el smoke en vivo, y GitHub ejecuta la suite |
 | `cf:events`, `cf:ai-usage`, `cf:ai-check`, `cf:ai-gateway` | Workers Logs almacenados, uso de AI Gateway, comprobación de la configuración de IA, los ajustes del gateway ([herramientas](./tooling.md#the-docs-answers-on-cloudflare-ai-search-and-ai-gateway)) |
 | `project:upgrade-ui` | Mueve una app a una misma publicación compartida: versión del paquete y `ref` de las tareas juntos, y luego `project:verify` |
 

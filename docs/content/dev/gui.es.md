@@ -54,8 +54,9 @@ y una pulsación inicia sesión como una de ellas; contra producción nada de es
 remotas también puede apuntar a una preview local ya en ejecución para comprobar la ruta del servidor externo.
 
 Las tareas del pipeline son los valores por defecto compartidos de `tasks/project.toml`, controlados por las
-entradas `[env]` de este proyecto (`PREVIEW_PORT`, `DEPLOY_ORIGIN`); este repositorio solo sobrescribe
-`project:typecheck` y `project:verify` porque es dueño del paquete. La configuración de Playwright
+entradas `[env]` de este proyecto (`PREVIEW_PORT`, `DEPLOY_ORIGIN`); este repositorio solo sobrescribe los hooks
+pensados para él (`project:prepare`, `project:generate`, `project:release-checks`, `project:test:consumers`;
+[tareas](./tasks.md#choosing-the-version-released-development-or-local)). La configuración de Playwright
 es el `playwrightConfig()` del paquete.
 
 Existe una única configuración de Worker con un entorno con nombre, `staging` (`env.staging` en
@@ -242,7 +243,8 @@ las ejecuta sobre páginas renderizadas en servidor.
 
 ## Evidencia y límites [#evidence-and-limits]
 
-Lo que cubren las comprobaciones son las propias comprobaciones: `tests/` y el
+Dos niveles: el nivel 1 es cada comprobación nuestra en cada idioma (`project:test`); el nivel 2 es el de Google
+(`project:test:google`, `project:test:cwv`). Lo que cubren las comprobaciones son las propias comprobaciones: `tests/` y el
 `@joeblew999/remy-ui/checks` del paquete (el título de cada comprobación dice qué demuestra); los pasos del flujo que las ejecutan están en
 [cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). En resumen: cada página en cada
 idioma sin JavaScript (idioma, dirección, metadatos, enlaces), catálogos y plurales, los valores de formatos
