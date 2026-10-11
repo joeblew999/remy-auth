@@ -65,7 +65,9 @@ npm run packages -- upgrade          # Apply latest versions, including majors, 
 ### Los scripts y los comandos [#the-scripts-and-commands]
 
 Todas las apps que usan el paquete tienen los mismos scripts; `npm run` los lista. El flujo y las herramientas manuales son
-scripts; el resto son comandos `remy` (`npx remy <command>`), un módulo cada uno en `packages/ui/src/cli`.
+scripts; el resto son comandos `remy` (`npx remy <command>`), un módulo cada uno en `packages/ui/src/cli`:
+`npx remy help` lista todos los comandos, una línea cada uno, y un comando ejecutado sin argumentos dice
+cuáles son los suyos (`npx remy docs`).
 
 | Scripts y comandos | Propósito |
 | --- | --- |
