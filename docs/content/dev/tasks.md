@@ -59,18 +59,19 @@ Everything else is the package and the tasks, which one version bump upgrades.
 1. Prerequisites: mise >= 2026.9.12, `gh auth login` with a token that has `read:packages`, Google
    Chrome (the checks use it), and `wrangler login` before the first deploy.
 2. `npx -y giget@3.3.1 gh:joeblew999/remy-auth/template#vX.Y.Z <name>`, then `cd <name>` and `git init`
-   (the i18n and plans tasks read git history; `project:setup` says so if it is missing).
+   (the translation and plans tools read git history; `npm run setup` says so if it is missing).
 3. Name the app: replace `my-app` and `My app` (`grep -rn -i "my.app" --exclude-dir=node_modules .`):
    `package.json`, `wrangler.jsonc`, `src/service.ts`, `mise.toml`'s origins, `docs/docs.config.ts` (the
    product's name and source, which the app's frame reads too) and `messages/en.json`.
-4. `mise install`, then `GITHUB_TOKEN=$(gh auth token) npm install` once to write `package-lock.json`,
-   then `mise run project:setup` (npm ci, pinned skills and the `remy` skill, the `AGENTS.md` rules block,
-   MCP registration, `project:verify`).
+4. Node as `.node-version` says, then `GITHUB_TOKEN=$(gh auth token) npm install` once to write
+   `package-lock.json`, then `npm run setup` (npm ci, the pinned skills and the `remy` skill, the
+   `AGENTS.md` rules block, MCP registration, the flow's guard, the installation's checks).
 5. Commit everything, `package-lock.json`, `skills-lock.json` and `src/routeTree.gen.ts` included. The
    blank app's strings come translated; after the English changes (`messages/en.json`, the docs), commit it
-   and translate this once by hand, `REMY_FLOW=hand mise run i18n:translate`, which writes and commits the
-   other languages; from then on `dev:land` does it.
-6. The first deploy, by hand: `mise run cf:deploy`, and `mise run docs:deploy` for the docs. Once the
+   and translate this once by hand, `REMY_FLOW=hand npx remy i18n translate`, which writes and commits
+   the other languages; from then on `dev:land` does it.
+6. The first deploy, by hand: `npx remy cloudflare deploy`, and `npx remy cloudflare docs-deploy` for the
+   docs. Once the
    repository is on GitHub (step 7), work goes through [the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest):
    `dev:land` for every finished change, `dev:promote` for production and the docs.
 7. CI: `.github/workflows/google.yml` calls remy-auth's shared workflow at the same tag (every language, Google's
@@ -82,11 +83,9 @@ Then the app grows in its own files: pages in `src/routes/` (a page beside a par
 `videos`, which then needs an `<Outlet />`), their links in `src/remy-app.tsx`, strings in `messages/en.json`
 (`m` from `src/paraglide/messages.js`), an API as a contract package and `src/api/` (every procedure that
 takes input documents an error, or `apiChecks` fails: the package's `api/coverage` rule), docs in
-`docs/content/`. Move to a new release with `mise run project:upgrade-ui -- <version>` (package, tasks
-`ref` and the CI workflow's tag together). `ref=main` (`mise.dev.toml`) is cached and never refreshed
-on its own: `mise run project:refresh-tasks` after `main` moves. Two local browser runs at once share
-`PREVIEW_PORT` and the second fails to start its server: give each shell its own
-(`PREVIEW_PORT=4232 mise run …`).
+`docs/content/`. Move to a new release with `npm run upgrade -- <version>` (the package and the CI
+workflow's tag together). Two local browser runs at once share `PREVIEW_PORT` and the second fails to
+start its server: give each shell its own (`PREVIEW_PORT=4232 npm run …`).
 
 ### A repository that publishes packages
 

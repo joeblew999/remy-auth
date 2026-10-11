@@ -66,7 +66,7 @@ export function report(which: 'local' | 'remote' = 'local'): void { spawnSync(jo
 export async function main(args: string[]): Promise<void> {
   const [command, ...rest] = args;
   switch (command) {
-    case undefined: return every();
+    case undefined: case 'every': return every();
     case 'quick': return quick();
     case 'only': { if (!rest.length) { console.error('remy test only <words>'); process.exit(2); } return only(rest.join(' ')); }
     case 'smoke': return smoke();
@@ -76,6 +76,6 @@ export async function main(args: string[]): Promise<void> {
     case 'consumers': return consumers();
     case 'cwv': return cwv(rest[0]);
     case 'report': return report(rest[0] === 'remote' ? 'remote' : 'local');
-    default: console.error('remy test: (every language) | quick | only <words> | smoke | google | cwv [alias] | remote [origin] | live [origin] | consumers | report [remote]'); process.exit(2);
+    default: console.error('remy test: every (every language, the default) | quick | only <words> | smoke | google | cwv [alias] | remote [origin] | live [origin] | consumers | report [remote]'); process.exit(2);
   }
 }

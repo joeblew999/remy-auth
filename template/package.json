@@ -38,6 +38,8 @@
     "codex": "codex",
     "codex:resume": "codex resume --last",
     "claude": "claude",
-    "claude:resume": "claude --continue"
+    "claude:resume": "claude --continue",
+    "check": "remy check",
+    "upgrade": "remy upgrade"
   }
 }

@@ -83,7 +83,7 @@ already does, and the scripts list is the documentation of what exists.
    template:check|release-checks`, the logic in `scripts/*.ts`), `remy upgrade <version>` for an app;
    `mise.toml`'s own tasks forward to the scripts. Left of 5: `project:refresh-tasks`, which goes with
    the include in 7.
-6. **GitHub and the consumers:** the shared workflow on `actions/setup-node` (`.node-version`, the
+6. **GitHub and the consumers** (done 2026-10-11, proven by the run on its own landing): the shared workflow on `actions/setup-node` (`.node-version`, the
    node pin from `mise.toml`) and `npm run`: `npm run check -- types`, `npm run check -- unit`, the
    matrix as `npm run test -- <level>`, the release job as `npm run packages -- publish --release`;
    `template/mise.toml` goes, the template's `AGENTS.md` names `remy rules`; the consumer fixture runs

@@ -1,3 +1,3 @@
 # Agent instructions
 
-mise run agents:rules writes the platform's rules block here (project:setup runs it).
+`remy rules` writes the platform's rules block here (npm run setup runs it).

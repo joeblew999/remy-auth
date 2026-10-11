@@ -67,6 +67,7 @@
     "ui:theme": "shadcn apply nova --only theme --yes",
     "ui:verify": "npm run ui:theme && npm run ui:components && git diff --exit-code -- packages/ui/src/components packages/ui/src/styles src/lib",
     "ui:version": "node scripts/version.ts",
-    "template:check": "node scripts/template-check.ts"
+    "template:check": "node scripts/template-check.ts",
+    "check": "node packages/ui/src/cli/remy.ts check"
   }
 }
