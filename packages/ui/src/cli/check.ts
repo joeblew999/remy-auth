@@ -1,10 +1,10 @@
 // The check (STEP 1, `remy change`): what runs after every change, in seconds, and nothing that needs a
-// browser. Each part is a function here as its slice lands (.plans/tooling-in-typescript.md); the
-// parts still in mise are flow.ts's steps.change.tasks, run after these. `remy check <part>` runs one
-// part, for the mise tasks that forward to it until they go.
-import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+// browser. Every part is a function here (.plans/tooling-in-typescript.md, slice 2). `remy check
+// <part>` runs one part, for the mise tasks that forward to it until they go.
+import { execFileSync, spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { join, relative, sep } from 'node:path';
 import { run, steps } from './flow.ts';
 import { checkAll as translations } from './i18n.ts';
 import { check as plans } from './plans.ts';
@@ -29,11 +29,81 @@ export function singleCopies(): void {
   console.log(`single copies: one version each of ${remy?.singleCopy?.length ?? 0} packages.`);
 }
 
-/** The parts in TypeScript, in order; the rest follow from steps.change.tasks. Translations are a warning here. */
+/** A tool from this install, in the foreground; the check stops at its first failure. */
+function tool(name: string, args: string[], options: { cwd?: string; env?: Record<string, string> } = {}): void {
+  const bin = join(process.cwd(), 'node_modules', '.bin', name);
+  const result = spawnSync(bin, args, { cwd: options.cwd, stdio: 'inherit', env: { ...process.env, ...options.env } });
+  if (result.status !== 0) { console.error(`${name} ${args.join(' ')}: failed`); process.exit(result.status ?? 1); }
+}
+
+/**
+ * "Only when the sources changed since it last passed", as mise's sources/outputs did: a stamp under
+ * node_modules/.cache/remy holds a fingerprint (path, size, mtime) of every file the globs name; the
+ * part runs when it differs, and the stamp is written when the part passes.
+ */
+function fingerprint(patterns: string[]): string {
+  const hash = createHash('sha256');
+  const toRegExp = (glob: string) => new RegExp(`^${glob.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*\*\//g, '(?:.*/)?').replace(/\*/g, '[^/]*')}$`);
+  const walk = (dir: string): string[] => existsSync(dir) ? readdirSync(dir, { withFileTypes: true }).flatMap(entry => { const path = join(dir, entry.name); return entry.isDirectory() ? (entry.name === 'node_modules' ? [] : walk(path)) : [path]; }) : [];
+  for (const pattern of patterns) {
+    const fixed = pattern.split('/').filter(part => !part.includes('*'));
+    const base = pattern.includes('*') ? fixed.slice(0, pattern.split('/').findIndex(part => part.includes('*'))).join('/') || '.' : pattern;
+    const matches = toRegExp(pattern);
+    const files = pattern.includes('*') ? walk(base).map(file => relative(process.cwd(), file).split(sep).join('/')).filter(file => matches.test(file)) : (existsSync(pattern) ? [pattern] : []);
+    for (const file of files.sort()) { const info = statSync(file); hash.update(`${file} ${info.size} ${info.mtimeMs}\n`); }
+  }
+  return hash.digest('hex');
+}
+const stampFile = (name: string) => join(process.cwd(), 'node_modules', '.cache', 'remy', `${name}.stamp`);
+function whenChanged(name: string, patterns: string[], part: () => void): void {
+  const file = stampFile(name);
+  if (existsSync(file) && readFileSync(file, 'utf8') === fingerprint(patterns)) { console.log(`${name}: nothing changed since it last passed.`); return; }
+  part();
+  // The sources as they are after the pass: a part that writes among them (wrangler types) does not undo its own stamp.
+  mkdirSync(join(process.cwd(), 'node_modules', '.cache', 'remy'), { recursive: true });
+  writeFileSync(file, fingerprint(patterns));
+}
+
+/** What the app generates before type checking: its package.json's "generate" script, when it has one (remy-auth: the catalogs, the skill, this bin; an app: its own catalog). */
+export function generate(): void {
+  const result = spawnSync('npm', ['run', '--if-present', '--silent', 'generate'], { stdio: 'inherit' });
+  if (result.status !== 0) { console.error('generate: the package.json "generate" script failed'); process.exit(result.status ?? 1); }
+}
+
+/** src/routeTree.gen.ts, regenerated when a route file or the parts list changed (TanStack Start's plugin writes it during a build). */
+export const routes = (): void => whenChanged('routes', ['src/routes/**/*', 'src/parts.json'], () => tool('vite', ['build']));
+
+/** Generate, Worker types, the app's TypeScript, then the shared tasks' own while tasks/ exists. */
+export function types(): void {
+  generate();
+  tool('wrangler', ['types']);
+  tool('tsc', []);
+  // The shared tasks' own TypeScript, while there are mise tasks (in an app they sit in mise's cache; the task knows where).
+  if (existsSync('mise.toml')) run('project:typecheck-tasks', 'change');
+}
+
+/** The checks that are plain functions (the *.unit.spec.ts files under tests): no build, no Worker, no browser. */
+export const unit = (): void => tool('playwright', ['test', '--project=unit', '--pass-with-no-tests'], { env: { TEST_TARGET: 'unit' } });
+
+/** The docs Worker's check (build, binding types, types) when the app has docs and something in them changed since it last passed. */
+export function docs(): void {
+  if (!existsSync('docs')) return;
+  whenChanged('docs', ['docs/content/**/*', 'docs/*.ts', 'docs/*.json', 'packages/ui/src/docs/**/*.ts', 'packages/ui/src/docs/**/*.tsx', 'packages/ui/src/docs/**/*.js'], () => {
+    tool('vite', ['build'], { cwd: 'docs' });
+    tool('wrangler', ['types', '-c', '.remy-docs/wrangler.json'], { cwd: 'docs' });
+    tool('tsc', ['-p', '.'], { cwd: 'docs' });
+  });
+}
+
+/** The parts, in order; the rest (none now) follow from steps.change.tasks. Translations are a warning here. */
 export const parts: Record<string, () => void | Promise<unknown>> = {
   plans,
   'single-copies': singleCopies,
+  routes,
+  types,
+  unit,
   translations: () => translations(false),
+  docs,
 };
 
 /** The whole check: the parts here, then what is still a mise task. */

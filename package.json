@@ -29,6 +29,7 @@
     "dev:promote": "node packages/ui/src/cli/remy.ts promote",
     "dev:release": "node packages/ui/src/cli/remy.ts release",
     "dev:done": "node packages/ui/src/cli/remy.ts done",
-    "plans": "node packages/ui/src/cli/remy.ts plans"
+    "plans": "node packages/ui/src/cli/remy.ts plans",
+    "generate": "node packages/ui/paraglide.mjs && node packages/ui/skill.mjs && tsc -p packages/ui/src/cli"
   }
 }

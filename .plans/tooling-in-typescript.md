@@ -50,7 +50,9 @@ already does, and the scripts list is the documentation of what exists.
    plans and single copies (done 2026-10-11: `plans.ts`, `remy plans` as the hand tool, the two
    `.mjs` gone); the translation checks (done 2026-10-11: `i18n.ts`, `remy i18n check`, the two bash
    scripts, `jq`, `@lingual/i18n-check` and `plurals.mjs` gone; the land and status steps ask a
-   function); then routes, types, the unit checks, the docs build;
+   function); routes, types, the unit checks and the docs (done 2026-10-11: tool runs behind a stamp
+   under `node_modules/.cache/remy` where mise skipped unchanged sources; the app's generation step is
+   its `package.json` "generate" script, run if present). `remy change` runs no mise task now;
    `project:verify-setup` with them, as `remy setup`'s end.
 3. **Cloudflare:** `cf:deploy`, `cf:staging`, `cf:wait`, `cf:versions`, `cf:urls`, `cf:preview`,
    the provisioned check; `remy promote` and `remy land` call functions.

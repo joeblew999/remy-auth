@@ -17,10 +17,10 @@ export type Step = 'change' | 'land' | 'promote' | 'release';
  * running by hand or on GitHub; a step here is the only place it runs by default.
  */
 export const steps: Record<Step, { what: string; tasks: readonly string[] }> = {
-  // After every change, while coding: seconds. The parts in TypeScript first (check.ts: the plans list,
-  // single copies), then these, still mise tasks: a build when a route file changed, types (the tasks'
-  // own included), the plain-function checks, the docs when docs changed.
-  change: { what: 'the check, in seconds', tasks: ['project:routes', 'project:typecheck', 'project:test:unit', 'project:check:docs'] },
+  // After every change, while coding: seconds. check.ts, every part a function: the plans list, single
+  // copies, a build when a route file changed, types (the tasks' own included), the plain-function
+  // checks, translation status, the docs when docs changed. No mise task is left in it.
+  change: { what: 'the check, in seconds', tasks: [] },
   // The change leaves the machine: the check again, then commit, main, staging. GitHub runs every
   // language, Google's audits and the consumer fixture after the push, in parallel, while coding goes on.
   land: { what: 'the check, then commit, main and staging', tasks: ['project:check'] },

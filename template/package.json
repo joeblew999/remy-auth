@@ -16,6 +16,7 @@
     "dev:promote": "remy promote",
     "dev:release": "remy release",
     "dev:done": "remy done",
-    "plans": "remy plans"
+    "plans": "remy plans",
+    "generate": "node node_modules/@joeblew999/remy-ui/src/app-catalog.js"
   }
 }
