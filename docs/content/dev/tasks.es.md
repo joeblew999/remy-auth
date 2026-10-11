@@ -192,8 +192,10 @@ Una misma estructura en cada app, para que las mismas tareas `i18n:*` funcionen 
 | Docs | `docs/content/<site>/<page>.md` o `.mdx` (estructura de Fumadocs) | a su lado: `<page>.<locale>.md` o `.mdx` |
 | Catálogos de UI | el catálogo del idioma base de cada proyecto inlang (`<dir>/project.inlang`) | el catálogo de cada idioma, según el `pathPattern` propio del proyecto (p. ej. `messages/<locale>.json`) |
 
-Dos flujos, uno para cada tipo de texto, con el mismo patrón en ambos: detectar sin conexión con git y pequeñas
-herramientas, traducir con el agente Claude fijado y hacer commit.
+Dos flujos, uno para cada tipo de texto, con el mismo patrón en ambos: detectar sin conexión con git, traducir
+con el Claude Code de la máquina (headless, sin herramientas) y hacer commit. Ambos son TypeScript en el paquete
+(`packages/ui/src/cli/i18n.ts`, `translate.ts`: `remy i18n check`, `remy i18n translate`); las tareas de
+abajo les reenvían.
 
 - **Mensajes de UI** (Paraglide): los catálogos, los idiomas y el idioma base vienen del propio
   `settings.json` de inlang (`I18N_INLANG`, o si no, el único proyecto que git conoce). Se detectan: catálogos y claves
@@ -259,4 +261,3 @@ todos los proyectos: `.plans/now.md` es la única lista ordenada, `.plans/*.md` 
 | `plans:open -- <plan> "<por qué ahora>"` | Un plan aparcado que se retoma: lo mismo desde `parked/` de vuelta a `.plans/` con `Opened <hoy>: ...`; añade su elemento a `now.md` tú mismo |
 
 `close` y `park` cambian archivos y preparan el movimiento, pero nunca hacen commit: lee `git diff` y luego haz commit.
-</content>
