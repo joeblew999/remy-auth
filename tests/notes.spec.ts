@@ -206,9 +206,14 @@ test('the seeded people hold the seeded relations, and an administrator, by role
     const card = page.locator(`[data-note="${note.id}"]`);
     await expect(card).toBeVisible();
     expect(await offeredActions(card)).toEqual(['DELETE_NOTE']);
-    await card.getByRole('button', { name: m.notes_delete({}, o) }).click();
-    // Two round trips (the delete, then the page asks the server for everything again) over every note the
-    // administrator sees: in a full run, with six workers on one local Worker, that passed 5 s (2026-10-11).
+    // The server's answer to the delete, named when it is not the 200 the page expects (a full run, with six
+    // workers on one local Worker, left the card standing twice on 2026-10-11 while the check alone passed).
+    const [deleted] = await Promise.all([
+      page.waitForResponse(response => response.url().includes(`/api/notes/${note.id}/delete`)),
+      card.getByRole('button', { name: m.notes_delete({}, o) }).click(),
+    ]);
+    expect(deleted.status(), `delete answered ${deleted.status()}: ${await deleted.text()}`).toBe(200);
+    // Then the page asks the server for everything again, over every note the administrator sees.
     await expect(card).toHaveCount(0, { timeout: 20_000 });
     expect((await list(author)).notes).toEqual([]);
     expect(errors).toEqual([]);
