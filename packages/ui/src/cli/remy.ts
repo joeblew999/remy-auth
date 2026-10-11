@@ -19,6 +19,9 @@ const commands: Record<string, () => Promise<Command>> = {
   guard: () => import('./register.ts'),
   'guard-hook': () => import('./guard-hook.ts'),
   allowed: () => import('./allowed.ts'),
+  // The check's parts by name, and the plans rule: hand tools, and what the mise tasks forward to.
+  check: () => import('./check.ts'),
+  plans: () => import('./plans.ts'),
 };
 
 const [name = '', ...args] = process.argv.slice(2);

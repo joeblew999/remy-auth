@@ -28,6 +28,7 @@
     "dev:land": "node packages/ui/src/cli/remy.ts land",
     "dev:promote": "node packages/ui/src/cli/remy.ts promote",
     "dev:release": "node packages/ui/src/cli/remy.ts release",
-    "dev:done": "node packages/ui/src/cli/remy.ts done"
+    "dev:done": "node packages/ui/src/cli/remy.ts done",
+    "plans": "node packages/ui/src/cli/remy.ts plans"
   }
 }

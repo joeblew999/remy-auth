@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="In the check: the packages that break when installed twice (React, TanStack Router and Query, the MDX stringifier; @joeblew999/remy-ui's own list) have one version here; project:check runs it"
 #MISE dir="{{config_root}}"
-set -euo pipefail
-exec node "$(dirname "$0")/single-copies.mjs"
+# In TypeScript now (packages/ui/src/cli): this task forwards for whoever still types mise run, and goes with mise.
+if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts check single-copies "$@"; fi
+exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js check single-copies "$@"

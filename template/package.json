@@ -15,6 +15,7 @@
     "dev:land": "remy land",
     "dev:promote": "remy promote",
     "dev:release": "remy release",
-    "dev:done": "remy done"
+    "dev:done": "remy done",
+    "plans": "remy plans"
   }
 }
