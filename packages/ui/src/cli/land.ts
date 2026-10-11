@@ -1,6 +1,6 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import { ended, span, type Landing, type Part } from './feedback.ts';
-import { describeRun, latestRun, run, steps, where } from './flow.ts';
+import { describeRun, installed, latestRun, run, steps, where } from './flow.ts';
 import { internal } from './internal.ts';
 
 export async function main(args: string[]): Promise<void> {
@@ -62,7 +62,10 @@ else if (staging === 'none') console.log('dev:land: no STAGING_ORIGIN in [env]; 
 else console.error('dev:land: staging failed (the lines above say whether the deploy or the live smoke); main is pushed, so the translation runs now and the last line says the state.');
 
 // Translation, last: only when something is stale or missing (strict check: exit 1 says so), so a
-// second land after a green one costs nothing here. It commits on main and is pushed.
+// second land after a green one costs nothing here. It commits on main and is pushed. It runs in the
+// main checkout, whose install follows the lockfile first (a landing can move it: 2026-10-11, the
+// bin this landing added was not linked there, and the translation's gate found no remy).
+installed(root);
 const upToDate = internal('i18n:check', 'land', { cwd: root, silent: true, env: { I18N_STRICT: '1' } }) === 0;
 let translation: Landing['translation'] = 'up to date';
 if (upToDate) { lap('translation check'); console.log('dev:land: translations are up to date.'); }

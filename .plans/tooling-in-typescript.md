@@ -38,7 +38,9 @@ already does, and the scripts list is the documentation of what exists.
    commands (`remy status|start|change|land|promote|release|done|guard|guard-hook|allowed`), the
    seven `dev:*` scripts in `package.json` and the template's, `remy.config.ts` with the origins and
    ports (`config.ts` hands them to the tasks as the environment they read), the hooks registered as
-   the checkout's own bin, the mise `dev:*` tasks one-line forwards to it. What the steps still run
+   the checkout's own bin, the mise `dev:*` tasks one-line forwards to the package's source (not the
+   bin link: the main checkout's install can be behind the lock, so `remy land` brings it up to date
+   before the translation runs there). What the steps still run
    through mise goes through `internal.ts`, one call per task: `project:check`, `project:prepare`,
    `cf:staging`, `cf:deploy`, `docs:deploy`, `cf:versions`, `i18n:check`, `i18n:translate`,
    `packages:release`. Each later slice deletes one of those calls.
