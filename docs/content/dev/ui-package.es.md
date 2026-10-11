@@ -14,7 +14,7 @@ TanStack Start y las comprobaciones de Playwright que lo demuestran. Los consumi
 Todo lo que hay en `src/components`, `src/hooks` y `src/styles/globals.css` es lo que escribe la CLI
 de shadcn fijada en una versión concreta (diseño de monorepo: el `components.json` de la app
 encamina `shadcn add` hacia aquí), incluido `cn`, del propio paquete `cn` de shadcn; nada de eso se
-edita a mano. `mise run ui:components` y `mise run ui:theme` los regeneran, y `mise run ui:verify`
+edita a mano. `npm run ui:components` y `npm run ui:theme` los regeneran, y `npm run ui:verify`
 falla ante cualquier desviación (ver [docs/gui.md](./gui.md#shadcn-stock)). Los bloques son
 copias propias en `src/blocks`.
 
@@ -64,12 +64,13 @@ Lo que tiene toda app basada en el paquete, para que las tareas y comprobaciones
   `themeChecks` compartidas fallan sin él.
 - **Una ruta para cada path de `appPaths` y `sitePaths`**, cada una de pocas líneas sobre la página compartida (el
   Reloj de la demostración (showcase) propaga `clockRouteOptions` desde `@joeblew999/remy-showcase/clock-route`).
-- **`tests/smoke.spec.ts`**, una sola llamada a `smokeChecks(...)`: `project:test:smoke` y la comprobación tras cada
-  `cf:deploy` (`project:test:live`) lo ejecutan, y fallan con «No tests found» si no existe.
-- **`.plans/now.md`**, la única lista ordenada del trabajo pendiente (`plans:check`, en la comprobación).
-- **Instalaciones y actualizaciones mediante las tareas compartidas**, nunca a mano: `mise run project:setup` (instalar,
-  skills, MCP, verificar) y `mise run project:upgrade-ui -- <version>` (la versión exacta del paquete y el include de
-  tareas en el mismo tag, y después verificar). Ambas toman el token de GitHub Packages de `gh auth token`.
+- **`tests/smoke.spec.ts`**, una sola llamada a `smokeChecks(...)`: `npm run test -- smoke` y la prueba de humo en vivo tras
+  cada despliegue lo ejecutan, y fallan con «No tests found» si no existe.
+- **`.plans/now.md`**, la única lista ordenada del trabajo pendiente (`remy plans check`, en la comprobación).
+- **Instalaciones y actualizaciones mediante los comandos del paquete**, nunca a mano: `npm run setup` (instalar,
+  skills, MCP, las comprobaciones de la instalación) y `npm run upgrade -- <version>` (la versión exacta del paquete
+  y el workflow de CI en el mismo tag, y después las mismas comprobaciones). Ambos toman el token de GitHub Packages de
+  `gh auth token`.
 
 ## Exportaciones [#exports]
 
@@ -127,8 +128,8 @@ precisión: el framework (React, TanStack Start, Router y Query), la cadena de h
 Wrangler, Tailwind, TypeScript) y las herramientas que ejecutan las tareas y comprobaciones
 compartidas (Playwright, Lighthouse, el servidor MCP de DevTools, npm-check-updates). Una app solo
 nombra el paquete; `remy.singleCopy` en su `package.json` lista las que se rompen si se instalan dos
-veces, lo que comprueba `project:single-copies`
-([tareas](./tasks.md#choosing-the-version-released-development-or-local)).
+veces, lo que mantiene la parte de copias únicas de la comprobación
+([la línea de comandos](./tasks.md#choosing-the-version-released-development-or-local)).
 
 ## Idioma [#language]
 
@@ -147,10 +148,10 @@ polaco, turco y alemán) están escritos por un agente y sin revisar.
 
 El paquete es `@joeblew999/remy-ui` en GitHub Packages (ahí el scope debe coincidir con el
 propietario de GitHub). `npm run dev:release` (alias `release`) hace toda la publicación desde esta
-máquina y se detiene en el primer fallo: traducciones completas y al día (`i18n:check`, estricto), todas
-nuestras comprobaciones (`project:verify`), los archivos de shadcn exactamente como los escribe su CLI
-(`ui:verify`), las auditorías Lighthouse de Google y Core Web Vitals medidos en frío sobre un Worker de
-Cloudflare desechable (`project:test:cwv`: las primeras visitas tras un despliegue, que es donde una
+máquina y se detiene en el primer fallo: traducciones completas y al día (`remy i18n check`, estricto), todas
+nuestras comprobaciones (`remy verify`), los archivos de shadcn exactamente como los escribe su CLI
+(`npm run ui:verify`), las auditorías Lighthouse de Google y Core Web Vitals medidos en frío sobre un Worker de
+Cloudflare desechable (`npm run test -- cwv`: las primeras visitas tras un despliegue, que es donde una
 página lenta sale más cara). Después etiqueta `vX.Y.Z` a partir de `packages/ui/package.json`, hace
 push, publica con tu token de `gh` y crea el release de GitHub a partir de la sección correspondiente
 del CHANGELOG. CI (`.github/workflows/google.yml`) repite el nivel 2 sobre el tag.
@@ -167,7 +168,7 @@ Los consumidores añaden esto a su `.npmrc`:
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
-e instalan mediante `mise run project:setup`, que toma un token con `read:packages` de `gh auth token`
+e instalan mediante `npm run setup`, que toma un token con `read:packages` de `gh auth token`
 (o `GITHUB_TOKEN` en el shell). Las versiones publicadas están en el
 [registro de cambios](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
 

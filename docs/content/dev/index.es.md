@@ -42,16 +42,16 @@ Dos sitios en producción, cada uno con páginas de sitio para Google y páginas
 
 ## Primeros pasos [#get-started]
 
-Instala [mise](https://mise.jdx.dev/getting-started.html), y luego ejecuta desde este checkout:
+Node según indica `.node-version` (26), y luego, desde este checkout:
 
 ```sh
-mise install
-mise run project:setup
-mise run project:dev
+npm install          # once, for the lockfile and the remy bin
+npm run setup        # the pinned skills, MCP, the flow's guard, the installation's checks
+npm run dev          # http://127.0.0.1:5173/en
 ```
 
 Abre [localhost:5173/en](http://127.0.0.1:5173/en); cambia a español o prueba la demo.
-La configuración instala las dependencias y las skills, registra MCP, y luego ejecuta las comprobaciones de build y de navegador.
+La configuración instala las dependencias y las skills, registra MCP, y luego ejecuta las comprobaciones de la instalación (sin navegador).
 
 La configuración instala la **Codex CLI** fijada en su versión; autentícate cuando se te solicite. **Claude Code**
 es opcional y se instala aparte.
@@ -70,16 +70,16 @@ Cómo iniciar, reanudar y recargar Codex o Claude Code, en VS Code o en una term
 | Empezar una tarea, en un worktree propio | `npm run dev:start -- <name>` |
 | Comprobar, después de cada cambio | `npm run dev:change` |
 | Aterrizar el trabajo terminado: main, las comprobaciones de GitHub, staging | `npm run dev:land -- "<what changed>"` |
-| Explorar las tareas del proyecto | `mise tasks ls --local` |
-| Ejecutar la GUI local | `mise run project:dev` |
-| Probar el build de producción en local | `mise run project:preview` |
-| Diagnosticar mise | `mise doctor` |
-| Comprobar actualizaciones de paquetes | `mise run packages:check` |
-| Actualizar paquetes, incluidas las versiones mayores | `mise run packages:upgrade` |
-| Ayuda de la CLI de Better Auth | `mise run auth:cli -- --help` |
-| Ayuda de la CLI de Cloudflare | `mise run cf:cli -- --help` |
-| Inspeccionar las herramientas de navegador | `mise run browser:cli -- --help` |
-| Inspeccionar el estado de MCP en ambos clientes | `mise run mcp:status` |
+| Listar los scripts | `npm run` |
+| Ejecutar la GUI local | `npm run dev` |
+| Probar el build de producción en local | `npm run preview` |
+| Las versiones de las herramientas | `npx remy verify doctor` |
+| Comprobar actualizaciones de paquetes | `npm run packages -- check` |
+| Actualizar paquetes, incluidas las versiones mayores | `npm run packages -- upgrade` |
+| Ayuda de la CLI de Better Auth | `npm run auth -- --help` |
+| Ayuda de la CLI de Cloudflare | `npm run wrangler -- --help` |
+| Inspeccionar las herramientas de navegador | `npm run browser -- --help` |
+| Inspeccionar el estado de MCP en ambos clientes | `npx remy mcp status` |
 
 Las primeras cuatro son [el flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), que
 también dice quién ejecuta producción y una publicación. Las comprobaciones pesadas no son comandos cotidianos: GitHub las
@@ -89,18 +89,17 @@ La vista previa local y el despliegue remoto usan el mismo build y la misma conf
 Consulta los [comandos locales/remotos](./gui.md#one-scaffold-for-local-and-cloudflare)
 para el despliegue y para ejecutar las mismas pruebas contra una URL desplegada.
 
-Revisa los cambios de dependencias después de actualizar. Node está fijado en [mise.toml](https://github.com/joeblew999/remy-auth/blob/main/mise.toml); los
-commits de origen de las skills y las tareas compartidas de arranque del agente viven en
-[tasks/](./tasks.md), un archivo por espacio de nombres de tarea, que otros proyectos incluyen por referencia de git.
+Revisa los cambios de dependencias después de actualizar. Node está fijado en `.node-version` y en los
+`engines` de `package.json`; los commits de origen de las skills están en el paquete (`packages/ui/src/cli/skills.ts`), que todas las
+apps instalan ([la línea de comandos](./tasks.md)).
 
 ## Documentación del proyecto [#project-documentation]
 
 - [Agentes: empieza aquí](./agents.md): por dónde empiezan los agentes; el `AGENTS.md` y `CLAUDE.md` raíz solo apuntan a él.
 - [Principios de desarrollo](./development.md): qué debe ser el código, y cómo funcionan los planes.
 - [Cómo trabajamos](./how-we-work.md): cómo trabajan las personas y los agentes.
-- [Herramientas de desarrollo](./tooling.md): tareas de mise, skills, MCP y herramientas de navegador.
+- [Herramientas de desarrollo](./tooling.md): los scripts y comandos, skills, MCP y herramientas de navegador.
 - [Flujo de trabajo en tiempo de ejecución de la GUI](./gui.md): un Worker, objetivos de prueba locales y remotos.
-- [Tareas compartidas](./tasks.md): las tareas de mise que incluyen otros proyectos.
+- [La línea de comandos](./tasks.md): `remy`, las herramientas que toda app instala con el paquete.
 - [Paquete de UI compartido](./ui-package.md) y su [registro de cambios](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
 - [Planes](https://github.com/joeblew999/remy-auth/tree/main/.plans): [.plans/now.md](https://github.com/joeblew999/remy-auth/blob/main/.plans/now.md) es la única lista de lo que está abierto y en qué punto está.
-</content>

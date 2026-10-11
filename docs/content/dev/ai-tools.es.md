@@ -37,7 +37,7 @@ Las instrucciones de cada servidor indican para quién es, así que un asistente
 | VS Code | `.vscode/mcp.json`: `{"servers": {"remy-developer-docs": {"type": "http", "url": "https://remy-auth-docs.gedw99.workers.dev/api/mcp/dev"}}}` |
 
 Sustituye la URL y el nombre por los de otra fila para usar la guía de producto o la referencia de la API.
-`mise run docs:test:remote` lista las herramientas de cada servidor.
+`npm run docs -- test remote` lista las herramientas de cada servidor.
 
 ## Gemini y Google [#gemini-and-google]
 

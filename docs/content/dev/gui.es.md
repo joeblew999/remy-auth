@@ -4,8 +4,8 @@ description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en 
 ---
 
 ```sh
-mise run project:dev       # http://127.0.0.1:5173/en
-mise run project:preview   # Production build on local Workers, port 4173
+npm run dev                # http://127.0.0.1:5173/en
+npm run preview            # Production build on local Workers, port 4173
 npm run dev:change        # The check, in seconds (the flow's first step)
 ```
 
@@ -26,44 +26,43 @@ El desarrollo usa el mismo código fuente del Worker y el mismo runtime de Cloud
 
 | Tarea | Objetivo |
 | --- | --- |
-| `project:dev` | Workers local, hot reload, puerto 5173 |
-| `project:build` | Build y ensayo (dry run) del deployment de Wrangler; sin subida |
-| `project:preview` | Build y luego sirve el artefacto de producción en el host local de Cloudflare en `PREVIEW_PORT` (4173) |
+| `npm run dev` | Workers local, hot reload, puerto 5173 |
+| `npm run build` | Build y ensayo (dry run) del deployment de Wrangler; sin subida |
+| `npm run preview` | Build y luego sirve el artefacto de producción en el host local de Cloudflare en `PREVIEW_PORT` (4173) |
 | `dev:change`, `dev:land`, `dev:promote`, `dev:release` | El flujo ([cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), [tareas](./tasks.md)); sus comprobaciones se ejecutan en el mismo host local |
-| `project:test:google` / `project:test:cwv` | El nivel de Google: auditorías de Lighthouse en local; Core Web Vitals en un Worker de Cloudflare desechable |
-| `cf:deploy` | Build y luego sube producción a la cuenta de Cloudflare autenticada; `dev:promote` lo ejecuta |
-| `cf:staging` | Lo mismo para el entorno de staging: su propio Worker (`STAGING_ORIGIN`) y sus propios recursos |
-| `cf:preview` | Despliega este commit como un Worker desechable, ejecuta el nivel 1 contra él y lo elimina |
-| `project:test:remote` | Las mismas pruebas contra `TEST_BASE_URL`; sin servidor local ni deployment |
-| `project:report` / `project:report:remote` | Abre el informe HTML de la última ejecución local o remota, incluidos los informes de Lighthouse |
+| `npm run test -- google` / `npm run test -- cwv` | El nivel de Google: auditorías de Lighthouse en local; Core Web Vitals en un Worker de Cloudflare desechable |
+| `npx remy cloudflare deploy` | Build y luego sube producción a la cuenta de Cloudflare autenticada; `dev:promote` lo ejecuta |
+| `npx remy cloudflare staging` | Lo mismo para el entorno de staging: su propio Worker (`origins.staging`) y sus propios recursos; `dev:land` lo ejecuta |
+| `npx remy cloudflare preview` | Despliega este commit como un Worker desechable, ejecuta el nivel 1 contra él y lo elimina |
+| `npm run test -- remote [origin]` | Las mismas pruebas contra un deployment; sin servidor local ni deployment |
+| `npm run test -- report [remote]` | Abre el informe HTML de la última ejecución local o remota, incluidos los informes de Lighthouse |
 
-El flujo no ejecuta toda la suite contra un deployment: `cf:deploy` y `cf:staging` terminan con
-el smoke en vivo, y GitHub ejecuta la suite después de cada landing. Para ejecutarla toda contra una
-URL desplegada a propósito, una persona lo indica en una terminal (la tarea se niega sin ello, y el guard
-se niega a hacerlo desde un agente):
+El flujo no ejecuta toda la suite contra un deployment: los deploys terminan con el smoke en vivo,
+y GitHub ejecuta la suite después de cada landing. Para ejecutarla toda contra una URL desplegada a
+propósito, una persona lo indica en una terminal (el comando se niega sin ello, y el guard se niega a hacerlo desde un agente):
 
 ```sh
-REMY_FLOW=hand TEST_BASE_URL=https://your-worker.your-subdomain.workers.dev mise run project:test:remote
+REMY_FLOW=hand npm run test -- remote https://your-worker.your-subdomain.workers.dev
 ```
 
-La URL debe ser un origin, sin path ni query (`STAGING_ORIGIN` para staging). Las comprobaciones que
+La URL debe ser un origin, sin path ni query. Las comprobaciones que
 necesitan una persona nueva leen su código de la captura de correo local, así que solo se ejecutan contra
 el destino local. El resto le preguntan al Worker qué entorno es (`/healthz`) y esperan lo que
 [la tabla](./auth.md#environments-one-table) les dé: contra staging las personas precargadas están presentes
 y una pulsación inicia sesión como una de ellas; contra producción nada de eso existe. La tarea de pruebas
 remotas también puede apuntar a una preview local ya en ejecución para comprobar la ruta del servidor externo.
 
-Las tareas del pipeline son los valores por defecto compartidos de `tasks/project.toml`, controlados por las
-entradas `[env]` de este proyecto (`PREVIEW_PORT`, `DEPLOY_ORIGIN`); este repositorio solo sobrescribe los hooks
-pensados para él (`project:prepare`, `project:generate`, `project:release-checks`, `project:test:consumers`;
-[tareas](./tasks.md#choosing-the-version-released-development-or-local)). La configuración de Playwright
+Los comandos son los del paquete (`remy`), controlados por el `remy.config.ts` de este proyecto (los origins, los
+puertos); los propios de este repositorio son sus scripts de `package.json` (`local`, `generate`, `release-checks`,
+`test:consumers`; [la línea de comandos](./tasks.md#choosing-the-version-released-development-or-local)). La configuración de Playwright
 es el `playwrightConfig()` del paquete.
 
 Existe una única configuración de Worker con un entorno con nombre, `staging` (`env.staging` en
 `wrangler.jsonc`): el mismo código como su propio Worker, con sus propias bases de datos y secreto. Un entorno
 con nombre se selecciona con `CLOUDFLARE_ENV` en tiempo de build, tal como exige la
 [integración de Cloudflare con Vite](https://developers.cloudflare.com/workers/vite-plugin/reference/cloudflare-environments/);
-`mise run cf:staging` hace eso y luego todo lo que hace `cf:deploy`. Mantén la
+`remy cloudflare staging` (que `dev:land` ejecuta) hace eso y luego todo lo que hace el
+deploy de producción. Mantén la
 implementación compartida; varía solo los identificadores de recursos, los secretos y demás valores de entorno. Los
 bindings, las vars y los secretos requeridos no los hereda un entorno con nombre: cada uno se declara de nuevo ahí.
 No dupliques la aplicación ni uses bindings remotos para el desarrollo local habitual. Los secretos locales
@@ -130,15 +129,15 @@ según la intención; los cambios de idioma en las páginas de sitio son navegac
 Los componentes y el tema son lo que escribe la CLI de shadcn, en el diseño de monorepo de shadcn: el
 [`components.json`](https://github.com/joeblew999/remy-auth/blob/main/components.json) de esta app dirige `shadcn add` hacia el paquete
 ([`packages/ui/components.json`](https://github.com/joeblew999/remy-auth/blob/main/packages/ui/components.json)), y
-`packages/ui/src/styles/globals.css` también lo escribe la CLI. Nadie edita ninguno de los dos a mano; las
-tareas en [`mise.toml`](https://github.com/joeblew999/remy-auth/blob/main/mise.toml) son la única forma en que cambian:
+`packages/ui/src/styles/globals.css` también lo escribe la CLI. Nadie edita ninguno de los dos a mano; los
+scripts de [`package.json`](https://github.com/joeblew999/remy-auth/blob/main/package.json) son la única forma en que cambian:
 
 ```sh
-mise run ui:components     # Re-add every shadcn component (extend the list there to add one)
-mise run ui:theme          # Rewrite globals.css with shadcn's default theme
-mise run ui:blocks         # Diff each owned block against upstream, in place
-mise run ui:verify         # Re-run both and fail on any difference (runs before every release)
-mise run packages:pack     # Produce the package tarballs locally
+npm run ui:components       # Re-add every shadcn component (extend the list there to add one)
+npm run ui:theme            # Rewrite globals.css with shadcn's default theme
+npm run ui:blocks           # Diff each owned block against upstream, in place
+npm run ui:verify           # Re-run both and fail on any difference (runs before every release)
+npm run packages -- pack    # Produce the package tarballs locally
 ```
 
 Los bloques son copias propias, tal como shadcn pretende; el README de sidebar-16 explica qué se cambió. El
@@ -173,8 +172,8 @@ estuvo equivocado durante semanas).
   `defineRemyApp`) y los `deployments` que la app enumera ahí (staging junto a producción, un servicio al que llama), cada uno
   respondiendo por sí mismo, y luego los paquetes con los que se hizo este build. La página de Settings de
   remy-auth lo muestra, con su producción y su staging.
-- **`mise run cf:versions`** imprime una fila por deployment (`DEPLOY_ORIGIN`, `STAGING_ORIGIN` y `DOCS_ORIGIN`, o los
-  origins dados), situando cada commit respecto a este checkout: `= HEAD`, `3 behind HEAD`. Úsalo antes de
+- **`npm run dev:status`** (y `npx remy cloudflare versions`) imprime una fila por deployment (los origins de
+  `remy.config.ts`, o los origins dados), situando cada commit respecto a este checkout: `= HEAD`, `3 behind HEAD`. Úsalo antes de
   decir qué está en producción.
 
 Los conjuntos de comprobaciones compartidos lo demuestran en cada app: `/healthz` nombra el commit de este
@@ -243,8 +242,8 @@ las ejecuta sobre páginas renderizadas en servidor.
 
 ## Evidencia y límites [#evidence-and-limits]
 
-Dos niveles: el nivel 1 es cada comprobación nuestra en cada idioma (`project:test`); el nivel 2 es el de Google
-(`project:test:google`, `project:test:cwv`). Lo que cubren las comprobaciones son las propias comprobaciones: `tests/` y el
+Dos niveles: el nivel 1 es cada comprobación nuestra en cada idioma (`npm run test -- every`); el nivel 2 es el de Google
+(`npm run test -- google`, `npm run test -- cwv`). Lo que cubren las comprobaciones son las propias comprobaciones: `tests/` y el
 `@joeblew999/remy-ui/checks` del paquete (el título de cada comprobación dice qué demuestra); los pasos del flujo que las ejecutan están en
 [cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). En resumen: cada página en cada
 idioma sin JavaScript (idioma, dirección, metadatos, enlaces), catálogos y plurales, los valores de formatos
@@ -258,7 +257,7 @@ El nivel de Google cubre solo las páginas de sitio (las páginas de app son noi
 `lighthouse` fijado de Google, evalúan `/en` (móvil y escritorio) y `/en/formats`
 ([`tests/performance.spec.ts`](https://github.com/joeblew999/remy-auth/blob/main/tests/performance.spec.ts)) frente a los umbrales buenos de Google (LCP
 2.5 s, CLS 0.1, TBT 200 ms, Performance de al menos 0.9), en un Worker de Cloudflare desechable
-(`project:test:cwv`), no en localhost.
+(`npm run test -- cwv`), no en localhost.
 
 Límites: todavía no hay organizaciones, tokens OAuth ni inicio de sesión entre apps, así que solo las páginas propias de remy-auth saben quién ha iniciado sesión
 ([el plan de autenticación](https://github.com/joeblew999/remy-auth/blob/main/.plans/auth-service.md)). El sitio se sirve desde su dirección de workers.dev (`DEPLOY_ORIGIN`); el origin público de producción y

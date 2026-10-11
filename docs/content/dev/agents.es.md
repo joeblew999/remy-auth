@@ -23,8 +23,8 @@ las traducciones que están al lado (`*.es.md`).
 
 1. [Principios de desarrollo](./development.md): propiedad, única fuente de verdad, puertas de
    pruebas, código generado, decisiones del dueño.
-2. [Herramientas para desarrolladores](./tooling.md): tareas de mise, herramientas fijadas y
-   habilidades de agente. Ejecuta los comandos del proyecto a través de `mise run <namespace:action>`.
+2. [Herramientas para desarrolladores](./tooling.md): los scripts y comandos, herramientas fijadas y
+   habilidades de agente. Ejecuta los comandos del proyecto con `npm run <script>`.
 3. [Flujo de trabajo en tiempo de ejecución de la GUI](./gui.md): un solo Worker, objetivos de
    prueba locales y remotos.
 4. [Cómo trabajamos](./how-we-work.md): primero las herramientas del proyecto, encuestas antes de

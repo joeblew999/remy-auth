@@ -36,26 +36,25 @@ a ti mismo ni a los devs». Así que la regla es general, no solo para herramien
   abren con esto), así que lo que una persona vio llega a todos, y el siguiente landing toma lo primero
   de la lista.
 - **«Hecho» es el final de una barrida, no de una lista.** Antes de decirlo: ramas y worktrees, pull
-  requests abiertas, `cf:versions`, `plans:check`, una búsqueda de las palabras que el cambio retiró, la
+  requests abiertas, `remy cloudflare versions`, `remy plans check`, una búsqueda de las palabras que el cambio retiró, la
   documentación que el cambio tocó. Muestra la barrida.
 
 ## Usa primero las herramientas propias del proyecto [#use-the-projects-own-tools-first]
 
-- Empieza con `mise run project:setup`; [herramientas para desarrolladores](./tooling.md) explica qué
+- Empieza con `npm run setup`; [herramientas para desarrolladores](./tooling.md) explica qué
   instala.
 - Antes de hacer cualquier paso a mano (instalar, actualizar, publicar, desplegar, traducir), busca su
-  tarea: `mise tasks ls | grep <palabra>`, en cualquier repositorio en el que estés; una app también
-  tiene las tareas compartidas. Propietario, 2026-09-26, después de que una app fuera actualizada a mano
-  pasando por encima de `project:upgrade-ui`: «ya sabes que no reinventamos la rueda».
-- Ejecuta los comandos a través de las tareas de mise, comprueba la página real con las herramientas de
-  Chrome DevTools (tareas `browser:*`), y usa las skills instaladas antes de leer las fuentes
-  originales, buscar en `node_modules` o escribir scripts de un solo uso.
+  script: `npm run` los lista, en cualquier repositorio en el que estés; una app tiene los mismos.
+  Propietario, 2026-09-26, después de que una app fuera actualizada a mano pasando por encima de
+  `npm run upgrade`: «ya sabes que no reinventamos la rueda».
+- Ejecuta los comandos a través de los scripts de package.json, comprueba la página real con las
+  herramientas de Chrome DevTools (`npm run browser`), y usa las skills instaladas antes de leer las
+  fuentes originales, buscar en `node_modules` o escribir scripts de un solo uso.
 - Mira la página real con las herramientas del navegador antes de escribir una prueba para ella.
 - Una vez que las herramientas pueden responder una pregunta, deja de investigar y úsalas.
-- Indica cuánto tardará un paso antes de empezar cualquier cosa más lenta que unos segundos. Las
-  descripciones de las tareas (`mise tasks ls`) indican la duración de cada tarea y qué puede
-  ejecutarse al mismo tiempo; ejecuta las comprobaciones posteriores al despliegue en segundo plano y
-  sigue trabajando.
+- Indica cuánto tardará un paso antes de empezar cualquier cosa más lenta que unos segundos. El
+  comentario de cabecera de cada comando indica su duración y qué puede ejecutarse al mismo tiempo;
+  ejecuta las comprobaciones posteriores al despliegue en segundo plano y sigue trabajando.
 
 ## Elige herramientas por encuesta, no por el primer hallazgo [#choose-tools-by-survey-not-by-first-find]
 
@@ -91,8 +90,8 @@ La UI es difícil y nunca está terminada, así que tomamos lo que shadcn y TanS
 perfeccionando, y escribimos solo lo que ellos no ofrecen.
 
 - **La CLI de shadcn escribe cada componente y el tema.** Los componentes vienen de
-  `mise run ui:components`, el tema de `mise run ui:theme` (el estilo Nova por defecto de shadcn,
-  neutral, Geist: sin preset, sin marca propia). `mise run ui:verify` hace fallar la publicación ante
+  `npm run ui:components`, el tema de `npm run ui:theme` (el estilo Nova por defecto de shadcn,
+  neutral, Geist: sin preset, sin marca propia). `npm run ui:verify` hace fallar la publicación ante
   cualquier edición manual. El repositorio usa el layout de monorepo de shadcn, así que `shadcn add`
   ejecutado en la app escribe en el paquete compartido.
 - **Busca un bloque de shadcn antes de construir un layout o una pantalla:**
@@ -111,10 +110,10 @@ perfeccionando, y escribimos solo lo que ellos no ofrecen.
   es así, úsalo.
 
 - Mírala: antes de dar por terminado un trabajo de UI, haz capturas de las páginas que cambiaste con
-  `mise run browser:shots` (escritorio y móvil, claro y oscuro, inglés y árabe) y mira las capturas. Las
+  `npm run shots` (escritorio y móvil, claro y oscuro, inglés y árabe) y mira las capturas. Las
   comprobaciones demuestran el comportamiento; solo las capturas muestran el layout, el espaciado, el
   desbordamiento y el texto de dirección mixta; nombra las páginas que cambiaste
-  (`mise run browser:shots -- /formats --phone`), usa `--all` solo para una barrida completa
+  (`npm run shots -- /formats --phone`), usa `--all` solo para una barrida completa
   (propietario, 2026-09-26: «Es verdaderamente deprimente lo difícil que es ver bien el aspecto del
   sitio web»).
 
@@ -170,9 +169,9 @@ choca y deja los idiomas a medio actualizar.
 - Un agente de funcionalidad escribe solo en inglés: la documentación en inglés y el catálogo base
   (`messages/en.json`). Nunca edita una traducción (`<página>.<idioma>.md` en `docs/content`) ni el
   catálogo de otro locale.
-- La traducción es su propio paso, en `main` tras los merges: `dev:land` ejecuta `i18n:translate` ahí,
+- La traducción es su propio paso, en `main` tras los merges: `dev:land` ejecuta `remy i18n translate` ahí,
   al final, cuando algo está desactualizado; nadie la ejecuta por su cuenta. El agente Claude, fijado
-  en la tarea, traduce exactamente lo que lista `i18n:check`, y la tarea lo comitea; **el commit es la
+  en la tarea, traduce exactamente lo que lista `remy i18n check`, y la tarea lo comitea; **el commit es la
   marca** (git decide qué está desactualizado: una traducción está desactualizada cuando su inglés
   cambió después del último commit de la traducción). Se niega a ejecutarse en otras ramas, con inglés
   sin comitear, con traducciones sin comitear y en una segunda ejecución mientras otra mantiene el
@@ -191,18 +190,18 @@ choca y deja los idiomas a medio actualizar.
 - Una traducción que no es una página se borra, nunca se restaura a mano: una página que falta se
   traduce desde el inglés en el siguiente landing, y una restaurada a mano quedaría marcada como actual
   por su commit.
-- `i18n:check` solo lee, sin conexión, así que es seguro en cualquier lugar, en cualquier número de
-  worktrees, y como `depends`. `i18n:translate` nunca es un `depends`.
-- Desactualizado o faltante es un aviso mientras se avanza (`project:check` lo imprime) y un error al
-  publicar (`dev:release` ejecuta `i18n:check` con `I18N_STRICT=1` primero).
+- `remy i18n check` solo lee, sin conexión, así que es seguro en cualquier lugar, en cualquier número de
+  worktrees, y como `depends`. `remy i18n translate` nunca es un `depends`.
+- Desactualizado o faltante es un aviso mientras se avanza (`remy check` lo imprime) y un error al
+  publicar (`dev:release` ejecuta `remy i18n check` con `I18N_STRICT=1` primero).
 - Comitea en un archivo de traducción solo cambios de traducción reales: cualquier commit sobre él lo
   marca como actual. Un cambio estructural (un renombrado, una barrida) que toca traducciones de
-  documentación va seguido de `mise run i18n:docs:translate -- <archivo>…`, que vuelve a comprobar esos
+  documentación va seguido de `REMY_FLOW=hand npx remy i18n translate docs <archivo>…`, que vuelve a comprobar esos
   archivos contra el inglés por completo. Los catálogos no tienen ese rehacer: cambia la estructura de
   un catálogo (el archivo de cada locale) en el mismo commit que `en.json`, para que ninguna clave de
   inglés cambiada quede oculta.
 
-El layout y las tareas están en [tareas compartidas de mise](./tasks.md#translations).
+El layout y los comandos están en [la línea de comandos](./tasks.md#translations).
 
 ## Planes: pocos, cortos, cerrados [#plans-few-short-closed]
 
@@ -214,9 +213,9 @@ plan se cierra el día que su trabajo se publica: una línea de cierre, y luego 
 grandes funcionalidades esperan en `.plans/parked/`. Cerrar un plan no necesita un despliegue ni una
 ejecución de pruebas extra propia: agrupa el código en un único despliegue y una única ejecución
 completa al final.
-Las tareas compartidas `plans:*` hacen los movimientos: `plans:status` lista lo que está abierto,
-`plans:close`, `plans:park` y `plans:open` (un plan aparcado que se retoma) añaden la línea, mueven el
-archivo y redirigen cada enlace, y `plans:check` (en el check, `dev:change`) mantiene `.plans/`
+Las tareas compartidas `remy plans …` hacen los movimientos: `remy plans status` lista lo que está abierto,
+`remy plans close`, `remy plans park` y `remy plans open` (un plan aparcado que se retoma) añaden la línea, mueven el
+archivo y redirigen cada enlace, y `remy plans check` (en el check, `dev:change`) mantiene `.plans/`
 ordenado ([tareas](./tasks.md#plans)).
 
 ## Cuando el propietario delega decisiones [#when-the-owner-delegates-decisions]
@@ -238,16 +237,16 @@ el flujo es código, no una regla que recordar: `tasks/dev/flow.ts` es el único
 decisiones. Sus cuatro pasos son `dev:change`, `dev:land`, `dev:promote` y `dev:release` (el `Step` de
 `flow.ts`); `dev:start` y `dev:done` enmarcan un trozo de trabajo; `dev:status` mira; un guardián
 rechaza lo que no sea uno de ellos. Siete comandos, nada más. remy-auth lo obtiene de la misma forma
-que cada app, desde las tareas compartidas; `project:setup` instala el guardián.
+que cada app, desde las tareas compartidas; `npm run setup` instala el guardián.
 
 | Paso | Comando | Quién lo ejecuta, y cuándo | Qué ejecuta | Tiempo |
 | --- | --- | --- | --- | --- |
 | Mirar | `npm run dev:status` | todos, primero: cada sesión de agente se abre con esto (un hook), un desarrollador cuando se sienta a trabajar | los últimos commits de main con el veredicto de GitHub, qué ejecuta cada despliegue, cada worktree por delante y por detrás de main, traducciones, pull requests, lo primero de `.plans/now.md` | segundos |
 | Antes de un trozo de trabajo | `npm run dev:start -- <nombre>` | quien hace el trabajo, para cada trozo, incluida una edición de una línea | un worktree propio a partir de main, instalado, con sus propios puertos, el guardián | ~1 min |
-| Después de cada cambio | `npm run dev:change` | quien esté codificando; el único paso que se espera | la comprobación (`project:check`): planes, tipos con los de las propias tareas, las comprobaciones de funciones simples (`tests/**/*.unit.spec.ts`), el estado de las traducciones; una build solo cuando cambió un archivo de ruta, la documentación solo cuando cambió la documentación | ~6 s |
+| Después de cada cambio | `npm run dev:change` | quien esté codificando; el único paso que se espera | la comprobación (`remy check`): planes, tipos con los de las propias tareas, las comprobaciones de funciones simples (`tests/**/*.unit.spec.ts`), el estado de las traducciones; una build solo cuando cambió un archivo de ruta, la documentación solo cuando cambió la documentación | ~6 s |
 | El cambio deja la máquina | `npm run dev:land -- "<qué cambió>"` | quien hizo el trabajo, por su cuenta, en cuanto termina y la comprobación está en verde | la comprobación, commit, fast-forward de main, push, despliegue en staging, y luego la traducción al final cuando está desactualizada. GitHub entonces ejecuta cada idioma, las auditorías de Google y el fixture de consumer en paralelo, mientras sigues codificando (`gh run list`) | ~1 min hasta staging; la traducción después |
-| Producción | `npm run dev:promote` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `cf:deploy` y el Worker de documentación, a partir de un main ya empujado, sin puerta de control: staging y GitHub ya ejecutaron las comprobaciones | ~1 min |
-| Una publicación | `npm run dev:release` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `packages:release`: cada comprobación, cada idioma, localmente, a propósito, y luego la etiqueta | ~5 min |
+| Producción | `npm run dev:promote` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `remy cloudflare deploy` y el Worker de documentación, a partir de un main ya empujado, sin puerta de control: staging y GitHub ya ejecutaron las comprobaciones | ~1 min |
+| Una publicación | `npm run dev:release` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `remy packages release`: cada comprobación, cada idioma, localmente, a propósito, y luego la etiqueta | ~5 min |
 | Cuando está landed | `npm run dev:done` | quien hizo el landing, cuando el trozo de trabajo termina; un worktree sobrevive a tantos landings como el trabajo necesite | el worktree y la rama desaparecen | segundos |
 
 - **Quién ejecuta un paso está en la tabla, y nunca es una pregunta.** Un agente aterriza su propio
@@ -261,21 +260,21 @@ que cada app, desde las tareas compartidas; `project:setup` instala el guardián
 - Un área que parece mal: `npm run test -- only <palabras>` (las comprobaciones de navegador
   cuyo título coincide, en y ar, ~30 s). Es la única ejecución de navegador que no es propiedad de un
   paso.
-- **El guardián** (`dev:guard`, un hook de Claude Code en cada comando de shell que ejecuta un agente) se
-  niega a ejecutar `project:verify`, `project:test`, `project:test:quick`, `project:test:remote`,
-  `project:test:google`, `project:test:cwv`, `project:test:consumers`, `template:test`, un
-  `playwright test` desnudo e `i18n:translate` fuera del flujo, y en su lugar nombra el paso
+- **El guardián** (`remy guard`, un hook de Claude Code en cada comando de shell que ejecuta un agente) se
+  niega a ejecutar `remy verify`, `npm run test -- every`, `npm run test -- quick`, `npm run test -- remote`,
+  `npm run test -- google`, `npm run test -- cwv`, `npm run test -- consumers`, `npm run test -- consumers`, un
+  `playwright test` desnudo y `remy i18n translate` fuera del flujo, y en su lugar nombra el paso
   correspondiente. Todos ellos siguen pudiendo ejecutarse a mano desde una terminal, con
-  `REMY_FLOW=hand` por delante (`REMY_FLOW=hand mise run project:test`): la propia tarea pregunta quién
-  la está ejecutando (`dev:allowed`) y se niega ante un `mise run` desnudo, en cualquier máquina. Eso es
+  `REMY_FLOW=hand` por delante (`REMY_FLOW=hand npm run test -- every`): el propio comando pregunta quién
+  lo está ejecutando (la puerta de control) y se niega ante una ejecución desnuda, en cualquier máquina. Eso es
   una decisión de una persona; el guardián se niega a ejecutarlo desde un agente aun así, que es el
-  fallo para el que existe. Una tarea cuyo propio trabajo termina con la verificación (`project:setup`,
-  `packages:upgrade`, `project:upgrade-ui`) indica que está preguntando, así que esas se ejecutan tal
+  fallo para el que existe. Una tarea cuyo propio trabajo termina con la verificación (`npm run setup`,
+  `npm run packages -- upgrade`, `npm run upgrade`) indica que está preguntando, así que esas se ejecutan tal
   como están escritas.
-- **Estas páginas nunca dan un comando que las herramientas rechacen.** Una tarea pesada se escribe con
-  `REMY_FLOW=hand` por delante o se nombra sin `mise run`; `tests/unit/dev-flow.unit.spec.ts` lee cada
+- **Estas páginas nunca dan un comando que las herramientas rechacen.** Un comando pesado se escribe con
+  `REMY_FLOW=hand` por delante o se nombra sin `npm run`; `tests/unit/dev-flow.unit.spec.ts` lee cada
   página en inglés y cada tarea en busca de una ejecución desnuda, en cada comprobación (2026-10-10:
-  ocho líneas en seis páginas lo hacían, y `project:setup` terminó en el rechazo).
+  ocho líneas en seis páginas lo hacían, y `npm run setup` terminó en el rechazo).
 - Una regla que puede ser una función pertenece a `tests/**/*.unit.spec.ts` (sin build, sin Worker, sin
   navegador), así se ejecuta en cada comprobación gratis. El navegador es para lo que solo un navegador
   muestra.
@@ -284,7 +283,7 @@ que cada app, desde las tareas compartidas; `project:setup` instala el guardián
   propietario, y actúa cuando el harness diga que terminó. Iniciarlo en segundo plano y luego hacer
   polling de él en primer plano es el mismo fallo (propietario, 2026-10-09: «Acabas de hacerlo otra vez
   con 2 cosas de larga duración»). Solo `dev:change` (segundos) se ejecuta y se espera.
-- **Cada paso dice cuánto tardó.** mise imprime el tiempo de cada tarea; `dev:land` termina con sus
+- **Cada paso dice cuánto tardó.** `dev:land` termina con sus
   partes (la comprobación; commit, main y push; staging; traducción) y dice cuánto tardó staging en
   estar listo desde el inicio; el traductor dice, para cada llamada al agente, cuánto tardó Claude
   Code, cuánto de eso fue la API, y cuántos tokens escribió. Un paso lento es un número en el log, no
@@ -293,9 +292,9 @@ que cada app, desde las tareas compartidas; `project:setup` instala el guardián
 - **La respuesta de GitHub viene a ti.** Una ejecución en rojo comenta en el commit (GitHub se lo dice a
   su autor), nombrando la ejecución; `dev:change` empieza diciendo qué hizo la última ejecución en
   main; `dev:promote` se niega sobre un commit cuya ejecución no esté en verde o no haya terminado. Para
-  reproducir un job en rojo, una persona ejecuta `REMY_FLOW=hand mise run <su tarea>`, la misma tarea
-  que ejecutó GitHub, ya que el workflow no contiene lógica propia (`project:verify-tooling` comprueba
-  que exista cada tarea que un workflow nombra). Un agente lee el propio log de la ejecución
+  reproducir un job en rojo, una persona ejecuta `REMY_FLOW=hand npm run test -- <nivel>`, el mismo comando
+  que ejecutó GitHub, ya que el workflow no contiene lógica propia (`remy verify tooling` comprueba
+  que exista cada script que un workflow nombra). Un agente lee el propio log de la ejecución
   (`gh run view <id> --log-failed`) y ejecuta el área concreta (`npm run test -- only <palabras>`).
   Informa de qué se probó y qué no; nunca llames verificado a un trabajo no probado.
 - **Un landing que falla después del push aun así termina lo que puede, y dice dónde se detuvo.**
@@ -309,33 +308,33 @@ que cada app, desde las tareas compartidas; `project:setup` instala el guardián
   de salida. Una vez esto publicó una versión cuyas comprobaciones habían fallado, y el 2026-10-10
   ocultó un `dev:land` fallido.
 
-## El trabajo manual se convierte en tareas de mise sobre herramientas reales [#manual-work-becomes-mise-tasks-over-real-tools]
+## El trabajo manual se convierte en scripts sobre herramientas reales [#manual-work-becomes-scripts-over-real-tools]
 
 Propietario, 2026-09-26: «¡Necesitas llegar al punto en que tus comprobaciones usen mise y la
 herramienta subyacente!» y «asegúrate de tener algo en la documentación sobre usar tu criterio respecto
 a las cosas que haces manualmente y convertirlas en una tarea de mise que use una herramienta… Es vital
 porque todos nuestros repos van a usar esto».
 
-- Cada comprobación se ejecuta a través de una tarea de mise que envuelve la herramienta real: los
-  pasos del flujo y las comprobaciones (`project:test:*`, Playwright), `project:test:live` después de
-  un despliegue, `plans:check`, `i18n:check`, `browser:shots` para mirar. Nada de bucles de `curl`,
-  scripts de un solo uso o greps improvisados para decidir si algo funciona: no se pueden repetir, las
-  apps sobre el paquete no los reciben, y nadie los ve después.
+- Cada comprobación se ejecuta a través de un script o un comando de `remy` que envuelve la herramienta
+  real: los pasos del flujo y las comprobaciones (`npm run test`, Playwright), el smoke en vivo después
+  de un despliegue, `remy plans check`, `remy i18n check`, `npm run shots` para mirar. (Las palabras del
+  propietario de arriba dicen mise, que los scripts reemplazaron el 2026-10-11; la regla es la misma.)
+  Nada de bucles de `curl`, scripts de un solo uso o greps improvisados para decidir si algo funciona:
+  no se pueden repetir, las apps sobre el paquete no los reciben, y nadie los ve después.
 - Usa el criterio en todo lo que se hace a mano, no solo en las comprobaciones: la segunda vez que
-  escribes los mismos comandos o recurres a un script descartable, se convierte en una tarea compartida
-  (en `tasks/`, para que cada app la reciba) que llama a la herramienta que hace el trabajo: Wrangler,
-  Playwright, gh, npm, las propias funciones de mise.
+  escribes los mismos comandos o recurres a un script descartable, se convierte en un comando del
+  paquete (`packages/ui/src/cli`, para que cada app lo reciba) que llama a la herramienta que hace el
+  trabajo: Wrangler, Playwright, gh, npm.
 - ¿No se encuentra ninguna herramienta? No escribas un script y sigas adelante. Añade una línea a
   `.plans/now.md` para hacer una encuesta
   ([elige herramientas por encuesta](#choose-tools-by-survey-not-by-first-find)); si la búsqueda o el
   cambio es grande, escribe un plan en `.plans/` (o en `.plans/parked/`) tú mismo. Los agentes crean
   estas líneas y planes al encontrarse con tales cosas; el propietario no tiene que pedirlo.
-- Una tarea que es más que una línea de una herramienta es una tarea en archivo TypeScript
-  (`tasks/<namespace>/<nombre>.ts`; Node la ejecuta tal cual, `project:check` le hace type-check
-  dondequiera que estén las tareas, incluida la caché de include de un consumer), nunca lógica en bash
-  ni JavaScript sin tipos: lo que el compilador no puede ver, un agente se lo pierde (propietario,
-  issue #9). Donde varias tareas comparten lógica, se avanza hacia una única herramienta de línea de
-  comandos ([aparcado: remy-cli](https://github.com/joeblew999/remy-auth/blob/main/.plans/tooling-in-typescript.md)).
+- Todo lo que es más que una línea de una herramienta es TypeScript: un comando de `remy`
+  (`packages/ui/src/cli`, con type-check en cada comprobación) o, para lo que es propio de una app, un
+  `scripts/*.ts` de esa app, nunca lógica en bash ni JavaScript sin tipos: lo que el compilador no
+  puede ver, un agente se lo pierde (propietario, issue #9). Una herramienta de una línea es un script
+  de `package.json` ([el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/tooling-in-typescript.md)).
 
 ## Ramas: de vida corta, borradas tras el merge [#branches-short-lived-deleted-after-merge]
 
@@ -354,11 +353,11 @@ las comprobaciones sensibles al tiempo fallaron mucho antes de eso. Así que:
 - Un agente construye y prueba solo en su propio worktree de git, nunca en el checkout principal: las
   builds escriben en `dist/`, y dos builds en un mismo checkout se borran los archivos entre sí.
   `dev:start` crea el worktree.
-- Cada worktree tiene su propio `PREVIEW_PORT` y `DOCS_PREVIEW_PORT` (`dev:start` los escribe en
-  `mise.local.toml`, nunca 4190, que los navegadores bloquean).
+- Cada worktree tiene su propio `PREVIEW_PORT` y `DOCS_PREVIEW_PORT`, calculados a partir de su nombre
+  (nunca 4190, que los navegadores bloquean); `PREVIEW_PORT=4232 npm run …` los sobrescribe.
 - Como máximo tres agentes ejecutan pruebas al mismo tiempo; la investigación, la escritura y los
   spikes de prueba no cuentan. Cuando se necesitan más, pon `PLAYWRIGHT_WORKERS=2` para cada uno.
-- El nivel de Google (`project:test:google`, `project:test:cwv`) toma un lock de toda la máquina, así
+- El nivel de Google (`npm run test -- google`, `npm run test -- cwv`) toma un lock de toda la máquina, así
   que una segunda ejecución espera en lugar de distorsionar la primera.
 - Nunca encadenes un despliegue después de una comprobación con `;`: los pasos del flujo se ejecutan
   uno tras otro y se detienen en el primer fallo.
@@ -370,12 +369,12 @@ las comprobaciones sensibles al tiempo fallaron mucho antes de eso. Así que:
   app <https://remy-auth.gedw99.workers.dev>, su staging <https://remy-auth-staging.gedw99.workers.dev>, y
   para el Worker de documentación su guía <https://remy-auth-docs.gedw99.workers.dev/docs>,
   documentación para desarrolladores <https://remy-auth-docs.gedw99.workers.dev/dev> y referencia de la
-  API <https://remy-auth-docs.gedw99.workers.dev/reference>. `cf:deploy` y `docs:deploy` las imprimen al
+  API <https://remy-auth-docs.gedw99.workers.dev/reference>. `remy cloudflare deploy` y `remy cloudflare docs-deploy` las imprimen al
   final.
 - Todo informe sobre algo que el propietario pueda mirar da sus URL: los sitios en vivo, la vista previa
-  (`mise run cf:preview` la imprime) y un enlace directo a cada página o funcionalidad comentada.
+  (`npx remy cloudflare preview` la imprime) y un enlace directo a cada página o funcionalidad comentada.
 - Di qué se comprobó y qué no.
-- Lo que está en vivo se pregunta, no se recuerda: `mise run cf:versions` imprime qué está ejecutando
+- Lo que está en vivo se pregunta, no se recuerda: `npm run dev:status` imprime qué está ejecutando
   cada despliegue y cuán lejos está eso de tu checkout. Dilo a partir de ahí, no de lo que desplegaste
   la última vez.
 
@@ -388,8 +387,8 @@ landing. Nada de esto se hace a mano.
 
 | | Comando | Qué hace |
 | --- | --- | --- |
-| Mirar | `npm run dev:status` | qué está pasando, preguntado a los dueños de los hechos: los últimos commits de main con el veredicto de GitHub, qué ejecuta cada despliegue, cada worktree por delante y por detrás de main, traducciones, pull requests. Cada sesión de agente se abre con esto (un hook que registra `dev:guard`); un desarrollador lo ejecuta cuando se sienta a trabajar |
-| Empezar | `npm run dev:start -- <nombre>` | un worktree en la rama `<nombre>` a partir de main (`.claude/worktrees/<nombre>`), instalado (`npm ci`, `project:prepare`), con puertos propios (`mise.local.toml`) y el guardián del flujo. Los propios worktrees de Claude Code viven en el mismo lugar y son solo una carpeta: dentro de uno, `npm run dev:start` sin nombre lo prepara de la misma forma |
+| Mirar | `npm run dev:status` | qué está pasando, preguntado a los dueños de los hechos: los últimos commits de main con el veredicto de GitHub, qué ejecuta cada despliegue, cada worktree por delante y por detrás de main, traducciones, pull requests. Cada sesión de agente se abre con esto (un hook que registra `remy guard`); un desarrollador lo ejecuta cuando se sienta a trabajar |
+| Empezar | `npm run dev:start -- <nombre>` | un worktree en la rama `<nombre>` a partir de main (`.claude/worktrees/<nombre>`), instalado (`npm ci`, el script `local` de la app), con puertos propios y el guardián del flujo. Los propios worktrees de Claude Code viven en el mismo lugar y son solo una carpeta: dentro de uno, `npm run dev:start` sin nombre lo prepara de la misma forma |
 | Codificar | `npm run dev:change` | la comprobación, en segundos, después de cada cambio |
 | Aterrizar | `npm run dev:land -- "<qué cambió>"` | primero se mezcla main (un conflicto se detiene nombrando los archivos), la comprobación, commit, fast-forward de main, push, staging, y luego la traducción al final cuando está desactualizada (la suscripción de Claude en esta máquina, nunca GitHub). GitHub ejecuta las comprobaciones pesadas; una ejecución en rojo comenta en el commit |
 | Terminar | `npm run dev:done` | el worktree y la rama que ya aterrizaron desaparecen; se niega mientras algo quede sin aterrizar |

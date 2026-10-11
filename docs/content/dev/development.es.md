@@ -13,9 +13,9 @@ Este documento es el dueño de lo que el código debe ser. Cómo trabajan las pe
   Comprueba qué existe ya antes de escribir código a medida. Mantén los wrappers delgados; añade
   comportamiento personalizado solo para un requisito concreto no cubierto, y documenta la brecha.
 - Mantén el comportamiento local a su dueño y visible en el punto de entrada.
-- Usa mise para fijar herramientas y ejecutar los comandos del proyecto. No importes la
-  librería de tareas retirada `joeblew999/.github` ni controles otros repos mediante scripts compartidos.
-  Nombra cada tarea como `namespace:action`; mantén los alias también con espacio de nombres.
+- `package.json` es la entrada: sus scripts ejecutan cada comando del proyecto; Node se fija con
+  `.node-version`, y cada herramienta es una dependencia. No importes la librería de tareas retirada
+  `joeblew999/.github` ni controles otros repos mediante scripts compartidos.
 - El desarrollo usa almacenamiento local. El arranque no debe aprovisionar identidades de producción,
   importar datos de ejemplo ni cambiar silenciosamente los registros de apps.
 - Mantén una única implementación de Worker y una única configuración fuente de Wrangler para la ejecución
