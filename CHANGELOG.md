@@ -6,6 +6,10 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- GitHub's verdict on a commit is main's push run: a release tag's run on the same commit (the release
+  job's) no longer holds `dev:promote` as "still checking".
+
 ## [0.15.1] - 2026-10-11
 
 ### Changed

@@ -86,13 +86,17 @@ Below this section is the history of how it got here.
    refused the contract two weeks ago; the package's "Manage Actions access" must grant the repository, a
    setting on the package's page (owner only, below). Then its `npm run dev:promote` (the first on the
    flow), and `remy-auth-test` from the template. What the move found is item 3a.
-   - a. **0.15.1** (on main 2026-10-11, to release): `remy docs publish` in TypeScript (the three
-     `.mjs` gone) waiting for the sync before the questions, and `remy docs questions`; `remy.config.ts`
-     owns the origins (a shell still carrying remy-auth's mise-era `[env]` made remy-auth-app's landing
-     deploy a staging Worker, deleted, and wait on remy-auth's); GitHub's verdict from push runs only
-     (Dependabot's run read as green on a red commit); the showcase declares its dependencies (zod 3 at
-     the top of remy-auth-app's grown lock broke `zod/mini`; a fresh lock and the declaration fix it); the
-     route tree part reruns on `src/start.ts`. Then remy-auth-app onto 0.15.1 with `npm run upgrade -- 0.15.1`.
+   - a. ~~**0.15.1**~~ released 2026-10-11 (tag `v0.15.1` on `af07ece`; remy-ui 0.15.1, remy-showcase 0.1.1,
+     the contract 0.4.1; the release's full run passed on the fourth try: the notes checks clicked before
+     hydration under a full run's load, fixed): `remy docs publish` in TypeScript (the three `.mjs` gone)
+     waiting for the sync before the questions, and `remy docs questions`; `remy.config.ts` owns the origins
+     (a shell still carrying remy-auth's mise-era `[env]` made remy-auth-app's landing deploy a staging
+     Worker, deleted, and wait on remy-auth's); GitHub's verdict from main's push runs only (Dependabot's
+     run read as green on a red commit; a tag's run on the same commit held the promote); the showcase
+     declares its dependencies (zod 3 at the top of remy-auth-app's grown lock broke `zod/mini`; a fresh
+     lock and the declaration fix it); the route tree part reruns on `src/start.ts`. Left: the promote of
+     this main (the tag-run pick is on main after the release, so the next push run is its verdict), and
+     remy-auth-app onto 0.15.1 with `npm run upgrade -- 0.15.1` (in flight).
 4. **Auth, next slices** ([auth-service](auth-service.md#next-slices)): the app-trust comparison
    (OAuth tokens verified locally against a service binding, each proved small); the relation
    engine's write half (`grant`, `revoke`); a rule for server functions and routes outside the oRPC

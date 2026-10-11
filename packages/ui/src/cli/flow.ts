@@ -69,9 +69,10 @@ export type Run = { status: string; conclusion: string | null; url: string; head
  * gh cannot answer (not installed, not signed in, offline), `null` when GitHub has no run for it.
  */
 export function latestRun(commit?: string): Run | null | undefined {
-  const select = commit ? ['--commit', commit] : ['--branch', 'main'];
-  // Push runs only: Dependabot's run on a commit (event "dynamic") says nothing about the checks (on
-  // 2026-10-11 it read as a green verdict on a commit whose checks had failed).
+  // Main's push runs only: Dependabot's run on a commit (event "dynamic") says nothing about the checks (on
+  // 2026-10-11 it read as a green verdict on a commit whose checks had failed), and a release tag's run on
+  // the same commit is the release job's, not the verdict (the same day it held a promote as "still checking").
+  const select = commit ? ['--commit', commit, '--branch', 'main'] : ['--branch', 'main'];
   const result = spawnSync('gh', ['run', 'list', ...select, '--event', 'push', '--limit', '1', '--json', 'status,conclusion,url,headSha'], { encoding: 'utf8', timeout: 15_000 });
   if (result.status !== 0) return undefined;
   const [run] = JSON.parse(result.stdout || '[]') as Run[];
