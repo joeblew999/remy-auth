@@ -3,7 +3,8 @@
 // created by it, the wait for the new version, what runs where, and an app's page URLs. By hand, the
 // same through `remy cloudflare <deploy|staging|versions|urls|docs-deploy>`. Wrangler does the work.
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
+import { randomBytes } from 'node:crypto';
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -190,12 +191,14 @@ export async function urls(origin = process.env.DEPLOY_ORIGIN): Promise<void> {
 }
 
 /** The Worker's name in the Wrangler configuration. */
-async function workerName(): Promise<string> {
+async function workerConfig(): Promise<{ name: string; config: Record<string, unknown> }> {
   const { unstable_readConfig } = await import(pathToFileURL(createRequire(join(process.cwd(), 'package.json')).resolve('wrangler')).href) as typeof import('wrangler');
-  const name = unstable_readConfig({}).name;
+  const config = unstable_readConfig({}) as Record<string, unknown>;
+  const name = config.name as string | undefined;
   if (!name) fail('the Wrangler configuration has no Worker name');
-  return name;
+  return { name, config };
 }
+const workerName = async (): Promise<string> => (await workerConfig()).name;
 
 /**
  * Deploy this commit as a throwaway Worker <worker>-check-<alias> (production untouched), wait until it
@@ -204,7 +207,7 @@ async function workerName(): Promise<string> {
  * alias was public) and `wrangler delete` removes it completely. Answers the preview's origin.
  */
 export async function preview(alias?: string, keep = false): Promise<string> {
-  const worker = await workerName();
+  const { name: worker, config } = await workerConfig();
   const host = (process.env.DEPLOY_ORIGIN ?? '').replace(/^https:\/\//, '');
   if (!host.startsWith(`${worker}.`) || !host.endsWith('.workers.dev')) fail(`preview needs origins.production on workers.dev as https://${worker}.<subdomain>.workers.dev (got ${process.env.DEPLOY_ORIGIN})`);
   const part = (alias ?? execFileSync('git', ['rev-parse', '--short=7', 'HEAD'], { encoding: 'utf8' }).trim()).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/^-+|-+$/g, '').slice(0, 20);
@@ -218,7 +221,12 @@ export async function preview(alias?: string, keep = false): Promise<string> {
     const scratch = mkdtempSync(join(tmpdir(), 'remy-preview-'));
     try {
       const output = join(scratch, 'wrangler.ndjson');
-      tool('wrangler', ['deploy', '--name', name], { env: { WRANGLER_OUTPUT_FILE_PATH: output } });
+      // A Worker of its own has no secrets: each one the configuration requires gets a random value of its
+      // own, so the preview runs (a session made on it means nothing anywhere else).
+      const required = (config as { secrets?: { required?: string[] } }).secrets?.required ?? [];
+      const secrets = join(scratch, 'secrets.env');
+      writeFileSync(secrets, required.map(name => `${name}=${randomBytes(32).toString('base64')}`).join('\n') + '\n');
+      tool('wrangler', ['deploy', '--name', name, ...(required.length ? ['--secrets-file', secrets] : [])], { env: { WRANGLER_OUTPUT_FILE_PATH: output } });
       await waitFor(origin, output);
     } finally { rmSync(scratch, { recursive: true, force: true }); }
     // A brand-new workers.dev name answers 404 from some places for a while: wait for ten answers in a row.
