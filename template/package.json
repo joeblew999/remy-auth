@@ -23,6 +23,21 @@
     "dev": "remy app dev",
     "build": "remy app build",
     "preview": "remy app preview",
-    "test": "remy test"
+    "test": "remy test",
+    "docs": "remy docs",
+    "observe": "remy observe",
+    "shots": "remy shots",
+    "api": "remy api",
+    "logs": "wrangler tail --format json",
+    "errors": "wrangler tail --format json --status error",
+    "wrangler": "wrangler",
+    "browser": "chrome-devtools",
+    "browser:start": "chrome-devtools start --isolated --headless --no-usage-statistics --no-performance-crux",
+    "browser:stop": "chrome-devtools stop",
+    "web": "modern-web-guidance",
+    "codex": "codex",
+    "codex:resume": "codex resume --last",
+    "claude": "claude",
+    "claude:resume": "claude --continue"
   }
 }

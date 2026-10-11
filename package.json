@@ -39,6 +39,21 @@
     "preview": "node packages/ui/src/cli/remy.ts app preview",
     "test": "node packages/ui/src/cli/remy.ts test",
     "local": "node scripts/local.ts",
-    "test:consumers": "bash fixtures/consumer/run.sh"
+    "test:consumers": "bash fixtures/consumer/run.sh",
+    "docs": "node packages/ui/src/cli/remy.ts docs",
+    "observe": "node packages/ui/src/cli/remy.ts observe",
+    "shots": "node packages/ui/src/cli/remy.ts shots",
+    "api": "node packages/ui/src/cli/remy.ts api",
+    "logs": "wrangler tail --format json",
+    "errors": "wrangler tail --format json --status error",
+    "wrangler": "wrangler",
+    "browser": "chrome-devtools",
+    "browser:start": "chrome-devtools start --isolated --headless --no-usage-statistics --no-performance-crux",
+    "browser:stop": "chrome-devtools stop",
+    "web": "modern-web-guidance",
+    "codex": "codex",
+    "codex:resume": "codex resume --last",
+    "claude": "claude",
+    "claude:resume": "claude --continue"
   }
 }

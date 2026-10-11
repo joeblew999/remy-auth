@@ -74,12 +74,12 @@ already does, and the scripts list is the documentation of what exists.
    checks are its "release-checks" script). The same day, the checks and the hand tools (`test.ts`:
    `remy test` with every level, the throwaway preview and the speed measurement in `cloudflare.ts`;
    `dev.ts`: `remy app dev|build|preview`; an app's local state is its "local" script, remy-auth's
-   `scripts/local.ts`; `npm run dev|build|preview|test`). The steps run no mise task now. Left, as 5d: `docs:*` (dev, build, check, test, test:remote,
-   preview, answers on and off, init, publish, provision, observe, ai-gateway: one-liners become
-   scripts, the `.mjs` modules `remy docs …`), remy-auth's own `ui:*` and `auth:*` as its scripts and
-   `scripts/*.ts`, `template:check`, `browser:*` (the shots module as `remy shots`), `web:*`,
-   `codex:*` and `claude:*` (scripts), `api:spec`, `cf:logs|errors|events|ai-*|cli` and the observe and
-   gateway modules, `project:upgrade-ui` as `remy upgrade <version>`, `project:refresh-tasks` (goes).
+   `scripts/local.ts`; `npm run dev|build|preview|test`). The steps run no mise task now. 5d, done 2026-10-11: `docs.ts` (`remy docs dev|build|check|test
+   [remote]|preview|answers on|off|publish|provision|init|observe …`), `observe.ts` (events, AI usage,
+   the AI check, the gateway; `fnox exec --` in front where the API token is needed), `shots.ts`,
+   `api.ts`; the one-line tools are scripts (`npm run logs|errors|wrangler|browser|web|codex|claude`).
+   Left: remy-auth's own `ui:*` and `auth:*` as its scripts and `scripts/*.ts`, `template:check`,
+   `project:upgrade-ui` as `remy upgrade <version>`, `project:refresh-tasks` (goes with the include).
 6. **GitHub and the consumers:** the shared workflow on `actions/setup-node` (`.node-version`, the
    node pin from `mise.toml`) and `npm run`: `npm run check -- types`, `npm run check -- unit`, the
    matrix as `npm run test -- <level>`, the release job as `npm run packages -- publish --release`;
