@@ -4,7 +4,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { notesVocabulary, type Note, type NoteList } from '@joeblew999/remy-auth-contract';
 import { schemaProblems } from '@joeblew999/remy-ui/api/relations';
 import { allowedActions, offeredActions } from '@joeblew999/remy-ui/allowed.checks';
-import { collectErrors, localizedPath } from '@joeblew999/remy-ui/checks';
+import { collectErrors, hydrated, localizedPath } from '@joeblew999/remy-ui/checks';
 import { m } from '@joeblew999/remy-ui/messages';
 import { local, newEmail, signedIn, signedInAsSeeded, visitor } from './people';
 
@@ -150,6 +150,8 @@ test('the notes page offers each person exactly what the server allows them, and
   expect(await offeredActions(nobody.page.locator('main'))).toEqual([]);
 
   // Using what is offered works. The editor changes the note in their browser...
+  // Each page's first click waits for React to have hydrated it (a click before that sends nothing).
+  await hydrated(pages.editor.card.getByRole('button', { name: m.notes_edit({}, o) }));
   await pages.editor.card.getByRole('button', { name: m.notes_edit({}, o) }).click();
   await pages.editor.card.getByLabel(m.notes_body_label({}, o)).fill('Friday, 7 pm.');
   await pages.editor.card.getByRole('button', { name: m.notes_save({}, o) }).click();
@@ -159,6 +161,7 @@ test('the notes page offers each person exactly what the server allows them, and
   // ...and the author shares it once more, then deletes it, in theirs.
   await pages.author.page.reload();
   await expect(pages.author.card).toContainText(m.notes_shared_count({ count: 2 }, o));
+  await hydrated(pages.author.card.getByRole('button', { name: m.notes_share({}, o) }));
   await pages.author.card.getByRole('button', { name: m.notes_share({}, o) }).click();
   await pages.author.card.getByLabel(m.notes_share_email_label({}, o)).fill(outsider.email);
   await pages.author.card.getByRole('button', { name: m.notes_share_as_reader({}, o) }).click();
@@ -206,11 +209,15 @@ test('the seeded people hold the seeded relations, and an administrator, by role
     const card = page.locator(`[data-note="${note.id}"]`);
     await expect(card).toBeVisible();
     expect(await offeredActions(card)).toEqual(['DELETE_NOTE']);
-    // The server's answer to the delete, named when it is not the 200 the page expects (a full run, with six
-    // workers on one local Worker, left the card standing twice on 2026-10-11 while the check alone passed).
+    // A click before React has hydrated the button sends nothing: in a full run (six browsers on one local
+    // Worker) hydration of the administrator's page came after the click three times on 2026-10-11, and the
+    // card stood for 30 s with no delete ever sent; alone, the check passed. So: hydrated first, then the
+    // server's answer, named when it is not the 200 the page expects.
+    const remove = card.getByRole('button', { name: m.notes_delete({}, o) });
+    await hydrated(remove);
     const [deleted] = await Promise.all([
       page.waitForResponse(response => response.url().includes(`/api/notes/${note.id}/delete`)),
-      card.getByRole('button', { name: m.notes_delete({}, o) }).click(),
+      remove.click(),
     ]);
     expect(deleted.status(), `delete answered ${deleted.status()}: ${await deleted.text()}`).toBe(200);
     // Then the page asks the server for everything again, over every note the administrator sees.
