@@ -58,7 +58,7 @@ export const heavy: Record<string, string> = {
 const spelled: Record<string, RegExp> = {
   'remy test': /\bremy(?:\.[jt]s)?\s+test(?!\s+(?:only|report|live|smoke)\b)/,
   'npm test': /\bnpm\s+(?:run\s+)?test\b(?!:)(?!\s+--\s+(?:only|report|live|smoke)\b)/,
-  'test:consumers': /\b(?:npm\s+run\s+test:consumers|fixtures\/consumer\/run\.sh)\b/,
+  'test:consumers': /\bnpm\s+run\s+test:consumers\b|(?:^|[;&|(]\s*)(?:bash\s+|sh\s+|\.\/)fixtures\/consumer\/run\.sh\b/,
 };
 
 const git = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();

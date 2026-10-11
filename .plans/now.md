@@ -53,10 +53,11 @@ Below this section is the history of how it got here.
      (`project:setup` says ~1.5 min, the `project:verify` it ends with ~4.5 min in remy-auth): put the
      measured number in both at that run. Open with it: whether setup and an upgrade should end with
      every browser check in every language at all, when GitHub runs them after the landing.
-   - **The guard and a search.** The agent hook refuses any command that contains the words of a bare
-     browser-suite run, a `grep` for them included (seen 2026-10-10 while searching the docs for
-     exactly that). The safe direction, and the search is reworded in seconds; narrow it to a
-     command position only if it bites again. An agent also cannot reproduce a red job with the
+   - **The guard and a search.** The agent hook refused a `grep` for the words of a bare browser-suite
+     run (2026-10-10), then a `grep` of the consumer fixture's path (2026-10-11, twice, the second
+     time refusing the fix to that rule itself). Fixed: a script's path counts only in a command
+     position (at the start of a command or after a separator, with bash, sh or ./); naming it in a
+     search or a cat does not (`flow.ts`, `spelled`). An agent also cannot reproduce a red job with the
      task GitHub ran (the hook refuses `REMY_FLOW=hand` from an agent): its way is the run's log and
      `project:test:only`, now said in how-we-work.
    - **The `remy` skill's hash moves with the docs.** `skills-lock.json` records a hash of the `remy`

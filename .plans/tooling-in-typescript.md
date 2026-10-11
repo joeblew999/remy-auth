@@ -74,10 +74,20 @@ already does, and the scripts list is the documentation of what exists.
    checks are its "release-checks" script). The same day, the checks and the hand tools (`test.ts`:
    `remy test` with every level, the throwaway preview and the speed measurement in `cloudflare.ts`;
    `dev.ts`: `remy app dev|build|preview`; an app's local state is its "local" script, remy-auth's
-   `scripts/local.ts`; `npm run dev|build|preview|test`). The steps run no mise task now. Left: `docs:*`, `ui:*`, `template:*`, `browser:*`, `api:*`, `cf:preview` and the observe and
-   gateway modules, and remy-auth's own `auth:*` in its `package.json`.
-6. **GitHub and the consumers:** the workflow on `actions/setup-node` and `npm run`; the template
-   and remy-auth-app on the scripts (`project:upgrade-ui` becomes `npm install @joeblew999/remy-ui@x`).
+   `scripts/local.ts`; `npm run dev|build|preview|test`). The steps run no mise task now. Left, as 5d: `docs:*` (dev, build, check, test, test:remote,
+   preview, answers on and off, init, publish, provision, observe, ai-gateway: one-liners become
+   scripts, the `.mjs` modules `remy docs …`), remy-auth's own `ui:*` and `auth:*` as its scripts and
+   `scripts/*.ts`, `template:check`, `browser:*` (the shots module as `remy shots`), `web:*`,
+   `codex:*` and `claude:*` (scripts), `api:spec`, `cf:logs|errors|events|ai-*|cli` and the observe and
+   gateway modules, `project:upgrade-ui` as `remy upgrade <version>`, `project:refresh-tasks` (goes).
+6. **GitHub and the consumers:** the shared workflow on `actions/setup-node` (`.node-version`, the
+   node pin from `mise.toml`) and `npm run`: `npm run check -- types`, `npm run check -- unit`, the
+   matrix as `npm run test -- <level>`, the release job as `npm run packages -- publish --release`;
+   `template/mise.toml` goes, the template's `AGENTS.md` names `remy rules`; the consumer fixture runs
+   the blank app through its scripts (install, `npx remy skills install` with its cache, `verify
+   tooling`, `dev:change`, `test -- quick`, the docs test, `packages publish --dry-run`); remy-auth-app
+   moves with the release that carries all this (`npm install @joeblew999/remy-ui@<version>`, its
+   scripts, its `remy.config.ts`), which is item 2's release.
 7. **Delete mise:** `mise.toml`, `tasks/`, `mise.local.toml`, `template/mise.toml`, `mise.dev.toml`;
    the docs without a `mise run` in them; the hook regex and the doc check go.
 
