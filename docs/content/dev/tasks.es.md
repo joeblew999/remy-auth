@@ -61,20 +61,21 @@ las tareas, que un solo cambio de versión actualiza.
 1. Requisitos: mise >= 2026.9.12, `gh auth login` con un token que tenga `read:packages`, Google
    Chrome (lo usan las comprobaciones) y `wrangler login` antes del primer despliegue.
 2. `npx -y giget@3.3.1 gh:joeblew999/remy-auth/template#vX.Y.Z <name>`, luego `cd <name>` y `git init`
-   (las tareas de i18n y de planes leen el historial de git; `project:setup` lo indica si falta).
+   (las herramientas de traducción y de planes leen el historial de git; `npm run setup` lo indica si falta).
 3. Nombra la aplicación: sustituye `my-app` y `My app` (`grep -rn -i "my.app" --exclude-dir=node_modules .`):
    `package.json`, `wrangler.jsonc`, `src/service.ts`, los orígenes de `mise.toml`, `docs/docs.config.ts` (el
    nombre y la fuente del producto, que también lee el marco de la app) y `messages/en.json`.
-4. `mise install`, luego `GITHUB_TOKEN=$(gh auth token) npm install` una vez para escribir `package-lock.json`,
-   luego `mise run project:setup` (npm ci, las skills fijadas y la skill `remy`, el bloque de reglas de
-   `AGENTS.md`, registro MCP, `project:verify`).
+4. Node según indica `.node-version`, luego `GITHUB_TOKEN=$(gh auth token) npm install` una vez para
+   escribir `package-lock.json`, luego `npm run setup` (npm ci, las skills fijadas y la skill `remy`, el
+   bloque de reglas de `AGENTS.md`, el registro MCP, el guardián del flujo, las comprobaciones de la
+   instalación).
 5. Haz commit de todo, `package-lock.json`, `skills-lock.json` y `src/routeTree.gen.ts` incluidos. Las
    cadenas de la app en blanco ya vienen traducidas; cuando el inglés cambie (`messages/en.json`, la
-   documentación), haz commit de ello y traduce esto una vez a mano, `REMY_FLOW=hand mise run
-   i18n:translate`, que escribe y hace commit de los demás idiomas; a partir de entonces lo hace
+   documentación), haz commit de ello y traduce esto una vez a mano, `REMY_FLOW=hand npx remy i18n
+   translate`, que escribe y hace commit de los demás idiomas; a partir de entonces lo hace
    `dev:land`.
-6. El primer despliegue, a mano: `mise run cf:deploy`, y `mise run docs:deploy` para la documentación.
-   Una vez que el repositorio está en GitHub (paso 7), el trabajo pasa por [el flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest):
+6. El primer despliegue, a mano: `npx remy cloudflare deploy`, y `npx remy cloudflare docs-deploy` para la
+   documentación. Una vez que el repositorio está en GitHub (paso 7), el trabajo pasa por [el flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest):
    `dev:land` para cada cambio terminado, `dev:promote` para producción y la documentación.
 7. CI: `.github/workflows/google.yml` llama al flujo de trabajo compartido de remy-auth en la misma tag (todos los
    idiomas, las auditorías de Google en cada push a `main`). Da al repositorio nuevo acceso de lectura en la
@@ -86,11 +87,9 @@ padre, como `videos.$videoId` al lado de `videos`, es `videos_.$videoId.tsx`: Ta
 `src/remy-app.tsx`, cadenas en `messages/en.json` (`m` desde `src/paraglide/messages.js`), una API como
 paquete de contrato y `src/api/` (todo procedimiento que recibe entrada documenta un error, o `apiChecks`
 falla: la regla `api/coverage` del paquete), documentación en `docs/content/`. Pasa a una versión nueva con
-`mise run project:upgrade-ui -- <version>` (el paquete, el `ref` de las tareas y la tag del flujo de trabajo
-de CI, juntos). `ref=main` (`mise.dev.toml`) queda en caché y nunca se refresca solo: `mise run
-project:refresh-tasks` cuando `main` avance. Dos ejecuciones de navegador locales a la vez comparten
-`PREVIEW_PORT` y el segundo falla al iniciar su servidor: dale a cada shell el suyo (`PREVIEW_PORT=4232
-mise run …`).
+`npm run upgrade -- <version>` (el paquete y la tag del flujo de trabajo de CI, juntos). Dos ejecuciones de
+navegador locales a la vez comparten `PREVIEW_PORT` y la segunda falla al iniciar su servidor: dale a cada
+shell el suyo (`PREVIEW_PORT=4232 npm run …`).
 
 ### Un repositorio que publica paquetes [#a-repository-that-publishes-packages]
 
