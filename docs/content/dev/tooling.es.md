@@ -67,7 +67,7 @@ npm run packages -- upgrade          # Apply latest versions, including majors, 
 Todas las apps que usan el paquete tienen los mismos scripts; `npm run` los lista. El flujo y las herramientas manuales son
 scripts; el resto son comandos `remy` (`npx remy <command>`), un módulo cada uno en `packages/ui/src/cli`:
 `npx remy help` lista todos los comandos, una línea cada uno, y un comando ejecutado sin argumentos dice
-cuáles son los suyos (`npx remy docs`).
+cuáles son los suyos (`npx remy docs`). El flujo es uno de ellos, `remy flow <step>`, que los scripts `dev:<step>` invocan.
 
 | Scripts y comandos | Propósito |
 | --- | --- |

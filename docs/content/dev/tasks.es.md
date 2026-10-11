@@ -5,7 +5,7 @@ description: "remy, la herramienta que toda app de Remy instala con el paquete: 
 
 La herramienta es `remy`, el bin de `@joeblew999/remy-ui` (`packages/ui/src/cli`, un módulo de TypeScript por
 comando); una app la obtiene con el paquete (`npm install`, en la versión del paquete) y la nombra en los
-scripts de su `package.json`, los mismos en todas las apps (`"dev:change": "remy change"`). Una app indica una sola vez, en
+scripts de su `package.json`, los mismos en todas las apps (`"dev:change": "remy flow change"`). Una app indica una sola vez, en
 `remy.config.ts`, dónde está desplegada y cuáles son sus puertos:
 
 ```ts
@@ -137,7 +137,7 @@ El flujo de desarrollo es código, `packages/ui/src/cli/flow.ts`, con cuatro pas
 | --- | --- |
 | Primero | `dev:status` (main con los veredictos de GitHub, los despliegues, los worktrees por delante y por detrás, las traducciones, las pull requests; un hook `SessionStart` lo ejecuta para los agentes) |
 | Un trabajo | `dev:start -- <name>` (un worktree propio desde main, `npm ci`, puertos propios, el guardián); `dev:done` lo elimina cuando el trabajo termina y queda fusionado |
-| Cada cambio | `dev:change` (`remy change`, cada parte una función: planes, copias únicas, rutas cuando cambia un archivo de ruta, tipos, las comprobaciones unitarias, las traducciones como aviso, la documentación cuando cambia) |
+| Cada cambio | `dev:change` (`remy flow change`, cada parte una función: planes, copias únicas, rutas cuando cambia un archivo de ruta, tipos, las comprobaciones unitarias, las traducciones como aviso, la documentación cuando cambia) |
 | Trabajo terminado | `dev:land -- "<message>"` (la comprobación, commit, main, push, el despliegue en staging, y luego la traducción cuando está desactualizada; GitHub ejecuta entonces `npm run test -- every`, `google` y `consumers` en paralelo, y una ejecución en rojo comenta en el commit. Las mismas tres en local, a propósito, por una persona: `REMY_FLOW=hand npm run test -- <level>`) |
 | Producción | `dev:promote` (se niega ante un commit que GitHub no ha aprobado; luego el despliegue a producción, el despliegue de la documentación, lo que ejecuta cada despliegue) |
 | Un release | `dev:release` (`remy packages release`, que ejecuta `remy verify`) |
