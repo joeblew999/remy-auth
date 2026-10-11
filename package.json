@@ -22,12 +22,12 @@
     "docs"
   ],
   "scripts": {
-    "dev:status": "remy status",
-    "dev:start": "remy start",
-    "dev:change": "remy change",
-    "dev:land": "remy land",
-    "dev:promote": "remy promote",
-    "dev:release": "remy release",
-    "dev:done": "remy done"
+    "dev:status": "node packages/ui/src/cli/remy.ts status",
+    "dev:start": "node packages/ui/src/cli/remy.ts start",
+    "dev:change": "node packages/ui/src/cli/remy.ts change",
+    "dev:land": "node packages/ui/src/cli/remy.ts land",
+    "dev:promote": "node packages/ui/src/cli/remy.ts promote",
+    "dev:release": "node packages/ui/src/cli/remy.ts release",
+    "dev:done": "node packages/ui/src/cli/remy.ts done"
   }
 }

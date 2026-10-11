@@ -13,9 +13,13 @@
   },
   "files": [
     "src",
+    "cli",
     "skills",
     "README.md"
   ],
+  "scripts": {
+    "prepack": "[ -d cli ] || tsc -p src/cli"
+  },
   "exports": {
     "./button": "./src/components/button.tsx",
     "./globals.css": "./src/styles/globals.css",
@@ -90,7 +94,10 @@
     "./parts/virtual": {
       "types": "./src/parts/virtual.d.ts"
     },
-    "./project": "./src/cli/config.ts"
+    "./project": {
+      "types": "./src/cli/config.ts",
+      "default": "./cli/config.js"
+    }
   },
   "dependencies": {
     "@ai-sdk/react": "4.0.119",
@@ -178,6 +185,6 @@
     ]
   },
   "bin": {
-    "remy": "./src/cli/remy.ts"
+    "remy": "./cli/remy.js"
   }
 }

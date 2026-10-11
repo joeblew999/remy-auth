@@ -5,4 +5,6 @@
 # The flow is the package's command line (packages/ui/src/cli, the remy bin); npm run dev:<step> is
 # the entry. This task forwards for whoever still types mise run, and goes with mise
 # (.plans/tooling-in-typescript.md).
-exec node ./node_modules/@joeblew999/remy-ui/src/cli/remy.ts guard "$@"
+# remy-auth runs the platform's source; an app runs the package's emitted JavaScript (Node strips no types under node_modules).
+if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts guard "$@"; fi
+exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js guard "$@"

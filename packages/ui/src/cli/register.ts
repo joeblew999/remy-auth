@@ -1,14 +1,14 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { remyCommand } from './config.ts';
 
 // `remy guard`: register the flow's hooks for this checkout's agents (.claude/settings.json, not
 // committed): PreToolUse on Bash runs the guard (guard-hook.ts); SessionStart runs `remy status`, so
 // every session opens with what is going on. `--check` only says whether they are registered.
-// The commands name this checkout's own bin, so a worktree's hooks run in the worktree.
+// The commands name this checkout's own remy (remyCommand), so a worktree's hooks run in the worktree.
 export function main(args: string[]): void {
   const check = args.includes('--check') || process.env.usage_check === 'true';
-  const bin = join(process.cwd(), 'node_modules', '.bin', 'remy');
-  const command = (name: string) => `${JSON.stringify(bin)} ${name}`;
+  const command = (name: string) => `${remyCommand().map(part => JSON.stringify(part)).join(' ')} ${name}`;
   const hook = { type: 'command', command: command('guard-hook') };
   const start = { hooks: [{ type: 'command', command: command('status') }] };
   const file = '.claude/settings.json';

@@ -38,3 +38,5 @@ mise.local.toml
 /docs/playwright-report/
 /docs/.remy-docs/
 /packages/ui/skills/
+# The command line as an app runs it, emitted from packages/ui/src/cli by ui:generate (and prepack).
+/packages/ui/cli/

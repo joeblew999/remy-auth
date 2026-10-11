@@ -14,8 +14,10 @@ getting missed by Claude because it's not type safe."
   `npm run dev:land -- "<what changed>"`, `npm run dev`: about fifteen scripts, the flow's seven and
   the hand tools a person uses (the app, a preview, screenshots, logs, what is deployed). Nothing else
   is a command; what is not a script is a function the steps call.
-- **The tooling is `remy`,** the bin of `@joeblew999/remy-ui` (`packages/ui/src/cli/`): TypeScript that
-  Node runs as it is, type-checked by the app's `tsc` on every check. A consumer's `package.json` says
+- **The tooling is `remy`,** the bin of `@joeblew999/remy-ui` (`packages/ui/src/cli/`): TypeScript,
+  type-checked by the app's `tsc` on every check. remy-auth runs the source; an app runs the
+  JavaScript emitted from it (`packages/ui/cli`, by `ui:generate` and `prepack`), because Node strips
+  types from nothing under `node_modules` (GitHub's consumer job found it on the first landing). A consumer's `package.json` says
   `"dev:change": "remy change"` and gets the tooling with `npm install`, at the package's version: the
   git-ref include of `tasks/`, `project:upgrade-ui`'s ref dance and mise's include cache go.
 - **An app says once, in `remy.config.ts`,** where it is deployed and its ports (`defineRemyProject`).

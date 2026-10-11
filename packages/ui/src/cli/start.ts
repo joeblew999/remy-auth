@@ -2,7 +2,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { installed } from './flow.ts';
 import { existsSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
-import { portsFor } from './config.ts';
+import { portsFor, remyCommand } from './config.ts';
 import { internal } from './internal.ts';
 
 export function main(args: string[]): void {
@@ -44,7 +44,8 @@ installed(path);
 // The app's local state (remy-auth: .dev.vars, the local databases, the guard's oRPC v1 fixture).
 run('project:prepare');
 // The flow's hooks for this worktree's agents, through its own bin.
-const guard = spawnSync(join(path, 'node_modules', '.bin', 'remy'), ['guard'], { cwd: path, stdio: 'inherit' });
+const [remy, ...rest] = remyCommand(path);
+const guard = spawnSync(remy!, [...rest, 'guard'], { cwd: path, stdio: 'inherit' });
 if (guard.status !== 0) { console.error('dev:start: remy guard failed'); process.exit(guard.status ?? 1); }
 console.log(`dev:start: ${name} is ready at ${path} (ports ${port} and ${port + 1}).\nWork there: npm run dev:change after every change · npm run dev:land -- "<what changed>" to land · npm run dev:done when landed.`);
 }

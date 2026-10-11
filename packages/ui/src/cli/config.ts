@@ -42,6 +42,16 @@ export function worktreeName(cwd = process.cwd()): string | undefined {
   } catch { return undefined; }
 }
 
+/**
+ * How to run remy in a checkout, for a hook or a child: the platform's own source where it is
+ * (remy-auth), else the installed bin (an app; the package's emitted JavaScript, since Node strips
+ * types from nothing under node_modules).
+ */
+export function remyCommand(cwd = process.cwd()): string[] {
+  const source = join(cwd, 'packages', 'ui', 'src', 'cli', 'remy.ts');
+  return existsSync(source) ? [process.execPath, source] : [join(cwd, 'node_modules', '.bin', 'remy')];
+}
+
 /** The environment the steps and the tasks read, from the config, set where the shell did not. */
 export async function configure(cwd = process.cwd()): Promise<RemyProject> {
   const config = await project(cwd);
