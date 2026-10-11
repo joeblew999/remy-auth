@@ -21,6 +21,6 @@
   },
   {
     "question": "What are the everyday commands?",
-    "finds": "/dev#everyday-commands"
+    "finds": "/dev/tooling#the-scripts-and-commands"
   }
 ]
