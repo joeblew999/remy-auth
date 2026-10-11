@@ -1,11 +1,10 @@
 // The check (STEP 1, `remy change`): what runs after every change, in seconds, and nothing that needs a
 // browser. Every part is a function here (.plans/tooling-in-typescript.md, slice 2). `remy check
-// <part>` runs one part, for the mise tasks that forward to it until they go.
+// <part>` runs one part.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
-import { run, steps } from './flow.ts';
 import { checkAll as translations } from './i18n.ts';
 import { check as plans } from './plans.ts';
 
@@ -37,7 +36,7 @@ function tool(name: string, args: string[], options: { cwd?: string; env?: Recor
 }
 
 /**
- * "Only when the sources changed since it last passed", as mise's sources/outputs did: a stamp under
+ * "Only when the sources changed since it last passed": a stamp under
  * node_modules/.cache/remy holds a fingerprint (path, size, mtime) of every file the globs name; the
  * part runs when it differs, and the stamp is written when the part passes.
  */
@@ -93,7 +92,7 @@ export function docs(): void {
   });
 }
 
-/** The parts, in order; the rest (none now) follow from steps.change.tasks. Translations are a warning here. */
+/** The parts, in order. Translations are a warning here. */
 export const parts: Record<string, () => void | Promise<unknown>> = {
   plans,
   'single-copies': singleCopies,
@@ -104,10 +103,9 @@ export const parts: Record<string, () => void | Promise<unknown>> = {
   docs,
 };
 
-/** The whole check: the parts here, then what is still a mise task. */
+/** The whole check. */
 export async function check(): Promise<void> {
   for (const part of Object.values(parts)) await part();
-  for (const task of steps.change.tasks) run(task, 'change');
 }
 
 export async function main(args: string[]): Promise<void> {

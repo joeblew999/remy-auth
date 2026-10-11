@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="Upgrade this repository's own npm dependencies beyond their pins, majors included (packages:check's list), install, then project:verify. In remy-auth this is how the platform's pins move (packages/ui/package.json)"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli/packages.ts): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts packages upgrade "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js packages upgrade "$@"

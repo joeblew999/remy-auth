@@ -1,79 +1,35 @@
 import { test, expect } from '@playwright/test';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { parse } from 'smol-toml';
-import { heavy } from '../../packages/ui/src/cli/flow';
 
-// The flow's gate (tasks/dev/allowed.ts) refuses a heavy task that nobody said they were running. On
-// 2026-10-10, a day after the gate, eight lines on six pages still gave such a command bare, and
-// project:setup, packages:upgrade and project:upgrade-ui each ended in the refusal: GitHub runs none
-// of the three, so every check was green; ui:release (alias release) reached project:verify through
-// packages:release the same way. Reading the pages and the tasks is a plain function.
+// The flow's gate (allowed.ts) refuses a heavy command that nobody said they were running. The pages
+// never give one bare: in a fenced shell block, the suite, the release gate or the translator is
+// written with REMY_FLOW=hand in front (a person's decision at a terminal) or not as a command at all.
+// On 2026-10-10 eight lines on six pages did, and three installation tasks ended in the refusal.
 
-// A heavy task run through mise: `mise run project:test`, never `mise run project:test:only`.
-const names = Object.keys(heavy).filter(task => !task.includes(' ')).map(task => task.replace(/[:.]/g, '\\$&')).join('|');
-const runsHeavy = new RegExp(`\\bmise\\s+run\\s+(?:-\\S+\\s+)*(${names})(?![\\w:-])`);
+const heavy = /^(?:[A-Z_]+=\S+\s+)*(?:npm\s+run\s+test\s+--\s+(?:every|quick|google|cwv|remote|consumers)\b|npm\s+test\b|npx\s+remy\s+verify(?!\s+(?:setup|tooling|doctor)\b)|npx\s+remy\s+i18n\s+translate\b)/;
 const walk = (dir: string): string[] => readdirSync(dir).flatMap(name => { const path = `${dir}/${name}`; return statSync(path).isDirectory() ? walk(path) : [path]; });
 
-test('no English page gives a command the tooling refuses: a heavy task is run with REMY_FLOW=hand in front, or named without mise run', () => {
+test('no English page gives a heavy command bare in a shell block: REMY_FLOW=hand in front, or not as a command', () => {
   const translation = /\.[a-z]{2,3}(?:-[A-Za-z]{2,4})?\.mdx?$/;
-  const pages = [...walk('docs/content').filter(file => /\.mdx?$/.test(file) && !translation.test(file)), 'README.md', 'AGENTS.md', 'CLAUDE.md'].filter(file => existsSync(file));
+  const pages = [...walk('docs/content').filter(file => /\.mdx?$/.test(file) && !translation.test(file)), 'README.md', 'AGENTS.md'].filter(file => existsSync(file));
   expect(pages.length).toBeGreaterThan(5);
-  const bare = pages.flatMap(file => readFileSync(file, 'utf8').split('\n').flatMap((line, index) => {
-    const found = runsHeavy.exec(line);
-    return found && !/REMY_FLOW=hand\b/.test(line.slice(0, found.index)) ? [`${file}:${index + 1}: mise run ${found[1]}`] : [];
-  }));
-  expect(bare).toEqual([]);
-});
-
-test('no task runs a heavy task without saying who is asking: REMY_FLOW on the line, or the flow\'s own steps', () => {
-  // Scripts: every line that is not a comment or a description. The TypeScript steps set REMY_FLOW in
-  // flow.ts's run() and land.ts's task(), and name heavy tasks only in what they print.
-  const scripts = walk('tasks').filter(file => !/\.(ts|toml|md)$/.test(file));
-  const bare = scripts.flatMap(file => readFileSync(file, 'utf8').split('\n').flatMap((line, index) => {
-    if (/^\s*(#|\/\/)/.test(line) || /dev:allowed\s+--/.test(line)) return [];
-    const found = runsHeavy.exec(line);
-    return found && !/\bREMY_FLOW=/.test(line.slice(0, found.index)) ? [`${file}:${index + 1}: mise run ${found[1]}`] : [];
-  }));
-  expect(bare).toEqual([]);
-
-  // TOML tasks: a run list reaches a heavy task as a command or as { task = "…" }. A command says who
-  // is asking; a { task } is only from a task that is itself heavy (its caller was asked already).
-  // packages:release is heavy by what it runs (project:verify): only dev:release reaches it, with
-  // REMY_FLOW=release; a { task = "packages:release" } elsewhere is the same fault (ui:release had it).
-  const viaFlow = new Set(['packages:release']);
-  const tomls = [...walk('tasks').filter(file => file.endsWith('.toml')), 'mise.toml'].filter(file => existsSync(file));
-  const wrong = tomls.flatMap(file => {
-    const parsed = parse(readFileSync(file, 'utf8')) as Record<string, any>;
-    const tasks: Record<string, any> = file === 'mise.toml' ? parsed.tasks ?? {} : parsed;
-    return Object.entries(tasks).flatMap(([name, task]) => {
-      const run: unknown[] = Array.isArray(task?.run) ? task.run : task?.run ? [task.run] : [];
-      const asked = name in heavy || viaFlow.has(name);
-      return run.flatMap(entry => {
-        if (typeof entry === 'string') {
-          const found = /dev:allowed\s+--/.test(entry) ? null : runsHeavy.exec(entry);
-          return found && !/\bREMY_FLOW=/.test(entry.slice(0, found.index)) ? [`${file} ${name}: mise run ${found[1]} without REMY_FLOW`] : [];
-        }
-        const called = (entry as { task?: string })?.task;
-        return called && (called in heavy || viaFlow.has(called)) && !asked ? [`${file} ${name}: { task = "${called}" } from a task the flow does not run`] : [];
-      });
+  const bare = pages.flatMap(file => {
+    let fenced = false;
+    return readFileSync(file, 'utf8').split('\n').flatMap((line, index) => {
+      if (/^\s*(```|~~~)/.test(line)) { fenced = !fenced; return []; }
+      return fenced && heavy.test(line.trim()) && !/^REMY_FLOW=hand\b/.test(line.trim()) ? [`${file}:${index + 1}: ${line.trim()}`] : [];
     });
   });
-  expect(wrong).toEqual([]);
+  expect(bare).toEqual([]);
 });
 
 // An installation (setup, the upgrades) ends with its own checks, about a minute and no browser; the
 // browser suite is GitHub's after every landing and the release's (owner, 2026-10-11, of a setup that
-// ran it: "Setup takes 2 minutes. This is clearly wrong"). setup.ts ends with verifySetup; the mise
-// tasks forward to the commands; the upgrades still name the forward.
+// ran it: "Setup takes 2 minutes. This is clearly wrong").
 test('an installation ends with the installation\'s checks, never the browser suite; the release gate starts with them', () => {
   const setup = readFileSync('packages/ui/src/cli/setup.ts', 'utf8');
   expect(setup.indexOf('await verifySetup();')).toBeGreaterThan(setup.indexOf('guard([]);'));
-  const verify = readFileSync('packages/ui/src/cli/verify.ts', 'utf8');
-  expect(verify).toMatch(/gate\('project:verify'\);\n\s*await verifySetup\(\);/);
-  const tasks = parse(readFileSync('tasks/project.toml', 'utf8')) as Record<string, any>;
-  expect(String(tasks['project:setup'].run)).toContain('remy.ts setup');
-  expect(String(tasks['project:verify-setup'].run)).toContain('remy.ts verify setup');
-  expect(String(tasks['project:verify'].run)).toContain('remy.ts verify;');
+  expect(readFileSync('packages/ui/src/cli/verify.ts', 'utf8')).toMatch(/gate\('project:verify'\);\n\s*await verifySetup\(\);/);
   expect(readFileSync('packages/ui/src/cli/packages.ts', 'utf8')).toMatch(/export async function upgrade\(\)[\s\S]*?await verifySetup\(\);/);
   expect(readFileSync('packages/ui/src/cli/upgrade.ts', 'utf8')).toMatch(/guard\(\[\]\);\n\s*await verifySetup\(\);/);
 });

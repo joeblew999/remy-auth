@@ -41,7 +41,7 @@ Keep the file working, exactly:
 - MDX: keep components, their names, props and structure; translate only text people read (children, and
   props such as \`title\` or \`description\`). Keep \`<include>\` lines as they are.
 - Tables, lists, callouts, images: the same structure; translate the words.
-- Product and tool names (Remy, Cloudflare, mise, shadcn, TanStack, Paraglide, Fumadocs...) stay in English.
+- Product and tool names (Remy, Cloudflare, shadcn, TanStack, Paraglide, Fumadocs...) stay in English.
 - Drop any \`<!-- translated-from: ... -->\` line.
 
 When you are given the current translation and what changed in the English, change only what the English

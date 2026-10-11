@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="Publish each package this repository publishes whose version is not on its registry yet, after project:generate; with --release vX.Y.Z also check the tag is RELEASE_PACKAGE's version and create its GitHub release from CHANGELOG.md unless it exists. The token: NODE_AUTH_TOKEN (CI), else gh auth token. packages:tag runs it; so does the tag's CI job"
-#USAGE flag "--release <tag>" help="The release tag, e.g. v0.14.0"
-#USAGE flag "--dry-run" help="Ask each registry and run npm publish --dry-run; publish nothing, create no release"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli/packages.ts): this task forwards for whoever still types mise run, and goes with mise.
-args=(); [ -z "${usage_release:-}" ] || args+=(--release "$usage_release"); [ "${usage_dry_run:-false}" != true ] || args+=(--dry-run)
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts packages publish "${args[@]}"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js packages publish "${args[@]}"

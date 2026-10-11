@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="STEP 1 of the flow, after every change: the check, in seconds (project:check: plans, types with the tasks' own, the plain-function checks, translation status; a build or the docs only when their inputs changed). The one thing to run while coding; the flow is tasks/dev/flow.ts"
-#MISE dir="{{config_root}}"
-# The flow is the package's command line (packages/ui/src/cli, the remy bin); npm run dev:<step> is
-# the entry. This task forwards for whoever still types mise run, and goes with mise
-# (.plans/tooling-in-typescript.md).
-# remy-auth runs the platform's source; an app runs the package's emitted JavaScript (Node strips no types under node_modules).
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts change "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js change "$@"

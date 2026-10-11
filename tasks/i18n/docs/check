@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="LOCAL, offline: docs translations (Fumadocs, I18N_DOCS_DIR) against English: per site (its i18n.json languages) each page's <page>.<lang>.md(x) missing or stale (its English changed since the translation's last commit, git), orphans; Fumadocs' own UI text (ui/<lang>.json) missing or stale keys. Exit 1 on any gap; --list prints one line per gap"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli/i18n.ts): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts i18n check docs "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js i18n check docs "$@"

@@ -6,6 +6,6 @@
  * to refined C's registered clients when those exist.
  */
 export const registeredOrigins = [
-  // remy-auth-app: its status card reads GET /api/status (its mise.toml DEPLOY_ORIGIN).
+  // remy-auth-app: its status card reads GET /api/status (its remy.config.ts origins.production).
   'https://remy-auth-app.gedw99.workers.dev',
 ] as const;

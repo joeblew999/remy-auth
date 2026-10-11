@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="REMOTE: show or change the AI Gateway in front of the docs Worker's Ask AI (as cf:ai-gateway): show | rate-limit off | rate-limit <requests>/<seconds> | logs on|off; changes are read back. Through fnox"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts docs observe gateway "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js docs observe gateway "$@"

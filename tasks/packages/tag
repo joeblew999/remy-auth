@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="The release's last step, after packages:release's gates: on a clean main that is not behind origin, tag RELEASE_PACKAGE's version vX.Y.Z, push main and the tag, then packages:publish --release. Tag and push first: a failed push publishes nothing, and a failed publish is finished by the tag's CI job. Before it, in one commit: the versions in packages/*/package.json and CHANGELOG.md's section"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli/packages.ts): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts packages tag "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js packages tag "$@"

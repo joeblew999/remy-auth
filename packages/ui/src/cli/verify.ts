@@ -4,7 +4,7 @@
 // browser check in every language, then the other repositories this one serves; nobody runs it while
 // coding, and the gate refuses it outside the flow.
 import assert from 'node:assert/strict';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
@@ -76,11 +76,9 @@ export async function tooling(): Promise<void> {
   const workflows = existsSync('.github/workflows') ? readdirSync('.github/workflows').filter(name => /\.ya?ml$/.test(name)) : [];
   if (workflows.length) {
     const scripts = new Set(Object.keys(manifest.scripts ?? {}));
-    const tasks = existsSync('mise.toml') ? new Set((JSON.parse(execFileSync('mise', ['tasks', 'ls', '--json'], { encoding: 'utf8' })) as { name: string }[]).map(task => task.name)) : new Set<string>();
     for (const name of workflows) {
       const text = readFileSync(`.github/workflows/${name}`, 'utf8');
       for (const match of text.matchAll(/\bnpm run ([a-z0-9][a-z0-9:_-]*)/g)) assert.ok(scripts.has(match[1]!), `.github/workflows/${name} runs npm script ${match[1]}, which package.json does not have`);
-      for (const match of [...text.matchAll(/\bmise run ([a-z0-9][a-z0-9:_-]*)/g), ...text.matchAll(/^\s*-?\s*task:\s*([a-z0-9][a-z0-9:_-]*)\s*$/gm)]) assert.ok(tasks.has(match[1]!), `.github/workflows/${name} runs mise task ${match[1]}, which does not exist here`);
     }
     console.log(`The workflows name only commands that exist (${workflows.join(', ')}).`);
   }
@@ -114,7 +112,6 @@ export async function tooling(): Promise<void> {
 
 /** What an installation must satisfy, about a minute, no browser. */
 export async function verifySetup(): Promise<void> {
-  if (existsSync('mise.toml')) tool('mise', ['tasks', 'validate'], 'mise tasks validate');
   tool('npm', ['ls', '--depth=0'], 'npm ls');
   await register(true);
   guard(['--check']);

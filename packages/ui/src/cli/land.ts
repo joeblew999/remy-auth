@@ -1,6 +1,7 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import { ended, span, type Landing, type Part } from './feedback.ts';
-import { describeRun, installed, latestRun, run, steps, where } from './flow.ts';
+import { check } from './check.ts';
+import { describeRun, installed, latestRun, where } from './flow.ts';
 import { remyCommand } from './config.ts';
 import { translationGaps } from './i18n.ts';
 
@@ -33,7 +34,7 @@ if (!here.onMain) {
     here.clean = true;
   }
 }
-for (const name of steps.land.tasks) run(name, 'land');
+await check();
 lap('the check');
 if (!here.clean) { git('add', '-A'); git('commit', '-q', '-m', message); }
 else console.log('dev:land: nothing new to commit; landing what is committed.');

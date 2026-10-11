@@ -26,17 +26,17 @@ const rows = pages.map(page => {
 });
 writeFileSync(join(out, 'SKILL.md'), `---
 name: remy
-description: The Remy platform's rules and tools for working in any Remy repo (remy-auth, or an app on @joeblew999/remy-ui ${version}). Use before changing anything in a Remy repo, choosing a tool, adding a page, writing docs, running its mise tasks or releasing.
+description: The Remy platform's rules and tools for working in any Remy repo (remy-auth, or an app on @joeblew999/remy-ui ${version}). Use before changing anything in a Remy repo, choosing a tool, adding a page, writing docs, running its scripts or releasing.
 ---
 
 # Remy platform rules (@joeblew999/remy-ui ${version})
 
-Every Remy repo is a thin product on one platform: the package @joeblew999/remy-ui and remy-auth's shared
-mise tasks, released together under one version. These are that version's rules, generated from remy-auth's
+Every Remy repo is a thin product on one platform: the package @joeblew999/remy-ui, whose \`remy\` bin is
+its tooling, released as one version. These are that version's rules, generated from remy-auth's
 developer docs. Read "How we work" first; open the others when the task touches them.
 
 ${rows.join('\n')}
 
-Run project commands through \`mise run <namespace:action>\`; \`mise tasks ls\` lists them.
+Run project commands through \`npm run <script>\`; \`npm run\` lists them.
 `);
 console.log(`skills/remy: SKILL.md and ${pages.length} references (${version})`);

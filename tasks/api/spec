@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="Print the OpenAPI 3.1 document a Worker generates from its contract, from /api/openapi.json (about a second; network only, safe beside anything). Pass an origin (a preview, or http://127.0.0.1:$PREVIEW_PORT while project:preview runs); defaults to DEPLOY_ORIGIN"
-#USAGE arg "[origin]" help="Origin to ask; defaults to DEPLOY_ORIGIN"
-#USAGE flag "--urls" help="Print the reference page and one line per operation instead of the document"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts api spec "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js api spec "$@"

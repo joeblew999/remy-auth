@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="REMOTE, read only: ask each deployment what it is running and print one row each: service, environment, commit, how far that is from this checkout, when it was deployed (~1 s; safe beside anything). Asked, never remembered: each Worker answers at /healthz. Defaults to DEPLOY_ORIGIN, STAGING_ORIGIN and DOCS_ORIGIN; pass origins (a preview's, a local server's) to ask those instead"
-#MISE dir="{{config_root}}"
-#USAGE arg "[origins]..." help="Origins to ask; defaults to DEPLOY_ORIGIN, STAGING_ORIGIN and DOCS_ORIGIN"
-# In TypeScript now (packages/ui/src/cli/cloudflare.ts): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts cloudflare versions "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js cloudflare versions "$@"

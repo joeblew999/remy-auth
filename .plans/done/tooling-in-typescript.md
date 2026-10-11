@@ -1,5 +1,7 @@
 # No mise: package.json is the entry, and the tooling is one TypeScript command line
 
+Closed 2026-10-11: mise is gone: package.json scripts are the entry, remy (the package's bin, TypeScript) is the tooling, the workflow runs on npm, the blank app and the docs say so
+
 Owner, 2026-10-11, after a day in which the flow's gate refused `project:setup`, a release alias and
 a `grep`, and 122 runnable tasks needed three mechanisms and 4,200 lines of docs to say who runs
 which: "fuck this. strip away mise so that its all typescript", then "use the package.json as the

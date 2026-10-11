@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="What is going on, asked from whoever owns each fact and never stored (~3 s): main's last commits with GitHub's verdict on each, what every deployment runs, every worktree ahead and behind main, translations, pull requests. Every agent session starts with it (dev:guard registers the hook); run it when you sit down. The flow is tasks/dev/flow.ts; the plan .plans/dev-feedback.md"
-#MISE dir="{{config_root}}"
-# The flow is the package's command line (packages/ui/src/cli, the remy bin); npm run dev:<step> is
-# the entry. This task forwards for whoever still types mise run, and goes with mise
-# (.plans/tooling-in-typescript.md).
-# remy-auth runs the platform's source; an app runs the package's emitted JavaScript (Node strips no types under node_modules).
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts status "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js status "$@"

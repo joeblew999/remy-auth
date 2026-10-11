@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="REMOTE, PRODUCTION: build with DEPLOY_ORIGIN as the public origin, upload to the authenticated Cloudflare account, wait until production serves the new version, then its live smoke check (~1 min). No tests before it: the flow decides what ran (dev:promote runs this after dev:land's check, staging and GitHub's heavy checks). Builds into dist/: not alongside a local level. cf:staging does the same for the staging environment"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli/cloudflare.ts): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts cloudflare deploy "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js cloudflare deploy "$@"

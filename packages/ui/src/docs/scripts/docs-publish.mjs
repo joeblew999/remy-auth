@@ -57,7 +57,7 @@ console.log(`${bucket} holds exactly the ${wanted.size} docs pages (English and 
 
 try {
   wrangler('ai-search', 'jobs', 'create', instance);
-  console.log(`Sync started for ${instance}; answers use the new files once it finishes (mise run cf:cli -- ai-search jobs list ${instance}).`);
+  console.log(`Sync started for ${instance}; answers use the new files once it finishes (npm run cf:cli -- ai-search jobs list ${instance}).`);
 } catch (error) {
   // Usually a sync already running (the hourly one, or the first after creation): it picks up the files too.
   const reason = String(error.stderr ?? error.message).split('\n').find(line => /error|✘/i.test(line)) ?? 'unknown';

@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="LOCAL, the one writer (on main, one run at a time across worktrees): the pinned Claude agent translates the pages i18n:docs:check lists (missing: the English; stale: the English diff since the translation's last commit and the translation), one page per call in parallel (I18N_JOBS, 4), with no tools, and Fumadocs' UI text; a result that is not the page (page.ts: the English's frontmatter fields, and text) is not written and fails the run; one commit marks them current. Name translation files to redo them in full (mise run i18n:docs:translate -- docs/content/dev/gui.es.md). I18N_MODEL (sonnet), I18N_COMMIT=0 leaves the change for review"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli/translate.ts): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts i18n translate docs "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js i18n translate docs "$@"

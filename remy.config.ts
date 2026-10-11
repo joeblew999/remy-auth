@@ -1,7 +1,6 @@
 import type { RemyProject } from '@joeblew999/remy-ui/project';
 
-// Where remy-auth is deployed and its local ports: the one place the tooling reads them (npm run
-// dev:*). mise.toml's [env] says the same until mise goes (.plans/tooling-in-typescript.md).
+// Where remy-auth is deployed, its local ports and its release package: the one place the tooling reads them.
 export default {
   origins: {
     production: 'https://remy-auth.gedw99.workers.dev',

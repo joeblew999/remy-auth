@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="Every package this repository publishes whose files changed since the last release tag has a new version: packages:publish skips a version already on the registry, so an unbumped change would never ship (~1 s). packages:release runs it first"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli/packages.ts): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts packages bumped "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js packages bumped "$@"

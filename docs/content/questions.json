@@ -1,6 +1,6 @@
 [
   {
-    "question": "Which mise task streams Worker logs?",
+    "question": "Which script streams Worker logs?",
     "finds": "/dev/tooling#cloudflare-observability"
   },
   {

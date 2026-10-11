@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="Print CHANGELOG.md's section for a version; fails when it is missing or empty. The one notes check for both releases: packages:tag locally and the tag's CI job (packages:publish --release)"
-#USAGE arg "<version>" help="The version without the v, e.g. 0.14.0"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli/packages.ts): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts packages notes "${usage_version:?pass the version}"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js packages notes "${usage_version:?pass the version}"

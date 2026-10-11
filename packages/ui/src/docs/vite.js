@@ -41,7 +41,7 @@ export function docsWorkerConfig(docsConfig, srcDirectory) {
     assets: { directory: './dist/client' },
     preview_urls: false,
     ...askBindings(false),
-    // Working on answers (CLOUDFLARE_ENV=ask mise run docs:dev): the same Worker locally, AI Search remote. Never deployed.
+    // Working on answers (CLOUDFLARE_ENV=ask npm run docs -- dev): the same Worker locally, AI Search remote. Never deployed.
     ...(ask ? { env: { ask: { vars: { ENVIRONMENT: 'docs' }, version_metadata: { binding: 'CF_VERSION_METADATA' }, ...askBindings(true) } } } : {}),
     observability: {
       enabled: true,

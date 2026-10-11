@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="Pack every package this repository publishes (its workspaces that are not private) into a tarball here, after project:generate, for a scratch app to install before any release (~10 s)"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli/packages.ts): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts packages pack "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js packages pack "$@"

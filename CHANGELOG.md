@@ -6,6 +6,9 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- No mise. `package.json` is the entry: its scripts run every command (`npm run dev:status|start|change|land|promote|release|done`, `npm run dev|build|preview|test|setup|packages|docs|…`). The tooling is `remy`, the package's bin (`packages/ui/src/cli`, TypeScript; an app runs the JavaScript emitted from it), with `remy.config.ts` for an app's origins, ports and release package and `.node-version` for Node. The shared workflow runs on `setup-node` and `npm run`; the blank app has no `mise.toml`; an app moves to a release with `npm run upgrade -- <version>`. The deploy's wait ends only when the home page's every asset answers.
+
 ## [0.14.0] - 2026-10-09
 
 ### Added

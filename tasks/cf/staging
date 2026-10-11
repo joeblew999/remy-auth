@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="REMOTE, STAGING: cf:deploy for the staging environment (env.staging in the Wrangler configuration, built with CLOUDFLARE_ENV=staging) at STAGING_ORIGIN: its own Worker and its own resources, production untouched (~1 min). Builds into dist/: not alongside a local level, and the build left there is staging's"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli/cloudflare.ts): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts cloudflare staging "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js cloudflare staging "$@"

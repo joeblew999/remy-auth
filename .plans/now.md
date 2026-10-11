@@ -10,8 +10,8 @@ wait in [parked/](parked/). What broke along the way is in the [stability log](s
 Owner: "make plans for all the things left." Everything open, each with its plan and its command.
 Below this section is the history of how it got here.
 
-1. **No mise: package.json is the entry, the tooling one TypeScript command line**
-   ([plan](tooling-in-typescript.md); owner, 2026-10-11: "strip away mise so that its all typescript",
+1. ~~**No mise: package.json is the entry, the tooling one TypeScript command line**~~ closed 2026-10-11
+   ([plan](done/tooling-in-typescript.md); owner, 2026-10-11: "strip away mise so that its all typescript",
    "use the package.json as the entry point like all typescript projects do"). Slice 1 landed the same
    day: `npm run dev:<step>` is the flow, `remy` (the package's bin, `packages/ui/src/cli`) is its
    code, `remy.config.ts` the origins and ports. Next: the check (`project:check`) as functions, then
@@ -224,7 +224,7 @@ comment naming the job. Built in that order, each landed through the flow.
 
 ## The tooling in TypeScript (owner, 2026-10-09, issue #9)
 
-[tooling-in-typescript](tooling-in-typescript.md): the task layer is TypeScript, checked by
+[tooling-in-typescript](done/tooling-in-typescript.md): the task layer is TypeScript, checked by
 `project:check` wherever the tasks are (a consumer's include cache too). The flow, the deploy's two
 scripts and the tooling invariants are converted; the rest follow in the order a wrong one costs most.
 

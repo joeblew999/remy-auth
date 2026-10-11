@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="LOCAL, offline: UI messages (Paraglide catalogs, I18N_INLANG) against English: missing catalogs and keys (jq), placeholders (i18n-check), keys whose English changed since the locale was last translated (git), plural categories (Intl.PluralRules), the same languages as the platform. Exit 1 on any gap; --list prints one line per gap"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli/i18n.ts): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts i18n check messages "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js i18n check messages "$@"

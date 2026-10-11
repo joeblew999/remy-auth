@@ -25,7 +25,7 @@ export function playwrightConfig({ webServer, testDir = './tests', timezoneId = 
     // Two levels. "ours": the app's own checks, fast, gate every local release.
     // "google" and "google-cwv": Lighthouse audits and Core Web Vitals, slow, run in CI.
     // Core Web Vitals run after the Lighthouse audits so no other browser inflates the timings.
-    // "unit": what needs no Worker (mise run project:test:unit), in seconds, on every check.
+    // "unit": what needs no Worker (remy check unit), in seconds, on every check.
     projects: [
       { name: 'unit', testMatch: /\.unit\.spec\.[jt]s$/ },
       { name: 'ours', testIgnore: /(lighthouse|performance|\.unit)\.spec\.[jt]s$/ },

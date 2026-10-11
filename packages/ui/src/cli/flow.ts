@@ -7,7 +7,6 @@
 // of them. TypeScript, type-checked by project:check, so a wrong step fails before it runs.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { internal } from './internal.ts';
 
 /** The steps of development, in the order they happen (dev:start and dev:done bracket them for a worktree). */
 export type Step = 'change' | 'land' | 'promote' | 'release';
@@ -16,26 +15,25 @@ export type Step = 'change' | 'land' | 'promote' | 'release';
  * What each step runs, locally and on purpose, and nothing more. Every heavy task still exists for
  * running by hand or on GitHub; a step here is the only place it runs by default.
  */
-export const steps: Record<Step, { what: string; tasks: readonly string[] }> = {
+export const steps: Record<Step, { what: string }> = {
   // After every change, while coding: seconds. check.ts, every part a function: the plans list, single
   // copies, a build when a route file changed, types (the tasks' own included), the plain-function
-  // checks, translation status, the docs when docs changed. No mise task is left in it.
-  change: { what: 'the check, in seconds', tasks: [] },
+  // checks, translation status, the docs when docs changed.
+  change: { what: 'the check, in seconds' },
   // The change leaves the machine: the check again, then commit, main, staging. GitHub runs every
   // language, Google's audits and the consumer fixture after the push, in parallel, while coding goes on.
-  land: { what: 'the check, then commit, main and staging', tasks: ['project:check'] },
+  land: { what: 'the check, then commit, main and staging' },
   // Production, on purpose: what is on a pushed main, no gate (staging and GitHub ran the checks).
-  promote: { what: 'production from a pushed main', tasks: ['cf:deploy'] },
+  promote: { what: 'production from a pushed main' },
   // A release, on purpose, rarely: all of it, locally, then the tag (packages.ts's release does both).
-  release: { what: 'every check, every language, then the tag', tasks: [] },
+  release: { what: 'every check, every language, then the tag' },
 };
 
 /**
- * The tasks no step runs by default, and why: GitHub runs them after every push (project:test,
- * project:test:google, project:test:consumers, template:test), the release runs them
- * (project:verify), or they cost minutes for an answer the check already gave (project:test:quick,
- * project:test:remote, a bare playwright run). The hook refuses each outside its step and names the
- * step instead. Running one by hand stays possible: mise run <task> from a terminal is a decision.
+ * The heavy commands no step runs by default, and why: GitHub runs them after every push (the suite,
+ * Google's audits, the consumers), the release runs them (the gate), or they cost minutes for an
+ * answer the check already gave (quick, remote, a bare playwright run). The gate (allowed.ts) knows
+ * them by these names; the hook refuses each outside its step and names the step instead. Running one by hand stays possible: REMY_FLOW=hand in front, at a terminal, is a decision.
  */
 export const heavy: Record<string, string> = {
   'project:verify': 'the release gate: dev:release runs it; GitHub runs its parts after every push',
@@ -46,7 +44,7 @@ export const heavy: Record<string, string> = {
   'project:test:cwv': 'Core Web Vitals on a preview: on purpose only, before a release',
   'project:test:consumers': 'the consumer fixture: GitHub runs it after every push',
   'template:test': 'the consumer fixture: GitHub runs it after every push',
-  'playwright test': 'the browser suite by hand: dev:change runs the check; mise run project:test:only -- <words> runs one area',
+  'playwright test': 'the browser suite by hand: dev:change runs the check; npm run test -- only <words> runs one area',
   'i18n:translate': 'translation: dev:land runs it on main, once, after the merge',
   'i18n translate': 'translation: dev:land runs it on main, once, after the merge',
   'remy test': 'every language: GitHub runs it after every push (npm run dev:land); one area: npm run test -- only <words>',
@@ -94,29 +92,18 @@ export function installed(cwd = '.'): void {
 /** One line a person reads: what GitHub said about a commit. */
 export const describeRun = (run: Run) => `${run.status === 'completed' ? (run.conclusion ?? 'unknown') : 'still running'} on ${run.headSha.slice(0, 7)}: ${run.url}`;
 
-/**
- * Runs a task (still a mise task, through internal.ts) in the foreground as part of `step`; the step
- * stops at the first failure. REMY_FLOW is what the gate in every heavy task (allowed.ts) looks for:
- * a heavy task runs when a step called it, on GitHub, or by a hand that set REMY_FLOW=hand.
- */
-export function run(task: string, step: Step | 'hand', args: string[] = []): void {
-  const status = internal(task, step, { args });
-  if (status !== 0) { console.error(`dev:${step}: ${task} failed`); process.exit(status); }
-}
-
 /** Where the work is: the branch, whether it is main, whether the tree is clean. */
 export function where(): { branch: string; onMain: boolean; clean: boolean } {
   const branch = git('branch', '--show-current');
   return { branch, onMain: branch === 'main', clean: git('status', '--porcelain') === '' };
 }
 
-/** What a task is, as the hook sees a shell command: the task name a `mise run` names, or a bare tool. */
+/** What a command is, as the hook sees it: a spelled form (above), or a bare tool named with its words. */
 export function heavyIn(command: string): { task: string; why: string } | undefined {
   for (const [task, why] of Object.entries(heavy)) {
     if (spelled[task]) { if (spelled[task].test(command)) return { task, why }; continue; }
-    const asMise = new RegExp(`\\bmise\\s+run\\s+${task.replace(/[:.]/g, '\\$&')}(\\s|$)`);
     const asTool = task.includes(' ') ? new RegExp(`\\b${task.replace(/\s+/g, '\\s+')}\\b`) : undefined;
-    if (asMise.test(command) || asTool?.test(command)) return { task, why };
+    if (asTool?.test(command)) return { task, why };
   }
   return undefined;
 }

@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="LOCAL, the one writer (on main, one run at a time across worktrees): the pinned Claude agent translates exactly the gaps i18n:messages:check lists, one language per call in parallel (I18N_JOBS, 4), with no tools; jq merges each result into English key order; one commit marks them current. I18N_MODEL (sonnet), I18N_COMMIT=0 leaves the change for review"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli/translate.ts): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts i18n translate messages "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js i18n translate messages "$@"

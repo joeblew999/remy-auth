@@ -17,7 +17,7 @@ const checks = latestRun(head);
 if (checks === undefined) { console.error('dev:promote: cannot ask GitHub what its checks said (gh auth login); to deploy regardless, by hand: npx remy cloudflare deploy'); process.exit(1); }
 if (checks === null) console.log(`dev:promote: GitHub has no run for ${head.slice(0, 7)} (no checks workflow?); promoting on staging alone.`);
 else if (checks.status !== 'completed') { console.error(`dev:promote: GitHub is still checking ${head.slice(0, 7)}: ${checks.url} (gh run watch)`); process.exit(1); }
-else if (checks.conclusion !== 'success') { console.error(`dev:promote: GitHub's checks did not pass, ${describeRun(checks)}; fix that first (mise run <the failed task> reproduces it, with REMY_FLOW=hand)`); process.exit(1); }
+else if (checks.conclusion !== 'success') { console.error(`dev:promote: GitHub's checks did not pass, ${describeRun(checks)}; fix that first (REMY_FLOW=hand npm run test -- <level> reproduces it)`); process.exit(1); }
 else console.log(`dev:promote: GitHub's checks passed, ${describeRun(checks)}`);
 installed();
 await deploy();

@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { collectErrors, hydrated, localizedPath } from './checks.js';
 
 /**
- * Tier 1, smoke (mise project:test:smoke, seconds): the few things that break when something big
+ * Tier 1, smoke (npm run test -- smoke, seconds): the few things that break when something big
  * breaks, for any app on this package. In each language given (default English and Arabic: left to
  * right and right to left), every page answers 200, site pages with a heading in the server's HTML (app
  * pages are drawn in the browser), and the pages in `hydrate` hydrate without an error. The full checks

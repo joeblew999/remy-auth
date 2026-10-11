@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="REMOTE: deploy this commit as a throwaway Worker <worker>-check-<commit> (production untouched), wait until it serves this build, run level 1 against it, then delete the Worker (~2 min). KEEP_PREVIEW=1 keeps it (project:test:cwv; cf:preview-delete removes it). Builds into dist/: not alongside a local level"
-#USAGE arg "[alias]" help="Name part instead of the commit (lowercase letters, digits, dashes)"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts cloudflare preview "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js cloudflare preview "$@"

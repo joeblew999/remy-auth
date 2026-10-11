@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="Print the production URL, every site and app page (base language) and the health URL, for reports (instant, offline; safe beside anything). Pass a preview's origin to list that instead"
-#MISE dir="{{config_root}}"
-#USAGE arg "[origin]" help="Origin to list; defaults to DEPLOY_ORIGIN"
-# In TypeScript now (packages/ui/src/cli/cloudflare.ts): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts cloudflare urls "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js cloudflare urls "$@"

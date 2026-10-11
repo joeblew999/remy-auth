@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="Move an app to one shared release: install @joeblew999/remy-ui at <version> exactly, point mise.toml's tasks include and the shared CI workflow at ref=v<version>, then run project:verify with the new tasks (~20 s plus project:verify; uses dist/ and PREVIEW_PORT, so not alongside a local level). GITHUB_TOKEN comes from the shell or else from `gh auth token`"
-#USAGE arg "<version>" help="Released version without the v, e.g. 0.10.3"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli/upgrade.ts, remy upgrade <version>): forwards for whoever still types mise run, and goes with mise.
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js upgrade "${usage_version:?pass the version}"

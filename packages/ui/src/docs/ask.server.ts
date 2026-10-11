@@ -32,7 +32,7 @@ export const answerQuestion = createServerOnlyFn(async (site: SiteName, q: strin
   if (!question) return { status: 'empty' };
   const request = getRequest();
   const started = Date.now();
-  // One `ask` event per question (mise cf:events -- ask): its outcome, how long the model call took,
+  // One `ask` event per question (npm run observe -- events -- ask): its outcome, how long the model call took,
   // how many sources it cited and the page's language. Never the question itself.
   const log = (outcome: string, fields: Record<string, unknown> = {}, level: 'info' | 'error' = 'info') =>
     writeLog({ ...logContext(service, env, request.headers.get(requestIdHeader) ?? '', 'GET'), event: 'ask', level, outcome, site, locale, ...fields });
@@ -45,7 +45,7 @@ export const answerQuestion = createServerOnlyFn(async (site: SiteName, q: strin
   const { success } = await limit.limit({ key: request.headers.get('CF-Connecting-IP') ?? 'unknown' });
   if (!success) { log('rate-limited'); return { status: 'rate-limited' }; }
   if (question.length > askMaxLength) { log('too-long', { length: question.length }); return { status: 'too-long', length: question.length }; }
-  // The emergency stop (mise docs:answers:off): the secret ASK_PAUSED set means no model call at all.
+  // The emergency stop (npm run docs -- answers off): the secret ASK_PAUSED set means no model call at all.
   if ((env as { ASK_PAUSED?: string }).ASK_PAUSED) { log('paused'); return { status: 'no-answer' }; }
   try {
     const response = await search.chatCompletions({

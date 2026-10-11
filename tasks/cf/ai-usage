@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="REMOTE, read only: AI Gateway usage of this Worker's AI Search: calls, cache hits, failures, tokens, estimated cost and time, per day and per task. Read only; needs Cloudflare login and an ai_search binding in the Wrangler configuration (fails on an app without one)"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts observe ai-usage "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js observe ai-usage "$@"

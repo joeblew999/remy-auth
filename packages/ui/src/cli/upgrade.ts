@@ -1,7 +1,6 @@
 // `remy upgrade <version>` (an app, not remy-auth): move to one shared release. The package at that
-// exact version, the shared CI workflow at its tag (and, while an app still includes the mise tasks by
-// git reference, that reference too), then the skills of that release, the agents' rules block, the
-// guard, and the installation's checks.
+// exact version, the shared CI workflow at its tag, then the skills of that release, the agents' rules
+// block, the guard, and the installation's checks.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { register } from './mcp.ts';
@@ -18,10 +17,9 @@ export async function upgrade(version: string | undefined): Promise<void> {
   const token = process.env.GITHUB_TOKEN || (() => { try { return execFileSync('gh', ['auth', 'token'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return ''; } })();
   const install = spawnSync('npm', ['install', '--save-exact', `@joeblew999/remy-ui@${version}`], { stdio: 'inherit', env: { ...process.env, ...(token ? { GITHUB_TOKEN: token } : {}) } });
   if (install.status !== 0) fail('upgrade: npm install failed');
-  // The shared CI workflow at the same tag, when the app calls it; the mise include too, while it has one.
+  // The shared CI workflow at the same tag, when the app calls it.
   const retag = (file: string, pattern: RegExp) => { const text = readFileSync(file, 'utf8'); const next = text.replace(pattern, `$1v${version}`); if (next !== text) { writeFileSync(file, next); console.log(`upgrade: ${file} at v${version}`); } };
   if (existsSync('.github/workflows')) for (const name of readdirSync('.github/workflows').filter(name => /\.ya?ml$/.test(name))) retag(`.github/workflows/${name}`, /(joeblew999\/remy-auth\/\.github\/workflows\/[a-z-]+\.yml@)v\d+\.\d+\.\d+/g);
-  if (existsSync('mise.toml')) retag('mise.toml', /(remy-auth\.git\/\/tasks\?ref=)v\d+\.\d+\.\d+/g);
   installSkills();
   rules();
   await register(false);

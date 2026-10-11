@@ -1,6 +1,6 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import { installed } from './flow.ts';
-import { existsSync, writeFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { portsFor, remyCommand } from './config.ts';
 
@@ -30,10 +30,8 @@ if (!worktrees.includes(`worktree ${path}\n`)) {
   console.log(`dev:start: made ${path} on branch ${name} from main.`);
 } else console.log(`dev:start: preparing the worktree at ${path}.`);
 
-// Ports of this worktree's own, from its name (config.ts: the same name, the same ports). The steps
-// compute them; mise.local.toml says the same for whoever still types mise run, until mise goes.
+// Ports of this worktree's own, from its name (config.ts: the same name, the same ports), computed by every step.
 const { preview: port } = portsFor(name);
-writeFileSync(join(path, 'mise.local.toml'), `# Written by npm run dev:start (${name}): this worktree's own ports, never shared with another. Not committed.\n[env]\nPREVIEW_PORT = "${port}"\nDOCS_PREVIEW_PORT = "${port + 1}"\n`);
 
 installed(path);
 // The app's local state (its "local" script, when it has one: remy-auth's .dev.vars, local databases, the guard's fixture).

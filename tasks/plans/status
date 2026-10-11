@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="LOCAL, read only: open items in .plans/now.md, open plan files with their Status line and last commit (stale after 14 days), parked plans. --json for agents. Instant"
-#MISE dir="{{config_root}}"
-# In TypeScript now (packages/ui/src/cli): this task forwards for whoever still types mise run, and goes with mise.
-if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts plans status "$@"; fi
-exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js plans status "$@"
