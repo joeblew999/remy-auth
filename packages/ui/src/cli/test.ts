@@ -3,6 +3,7 @@
 // Google's. `only <words>` is the one browser run a step does not own: the checks whose title matches,
 // in the quick languages.
 import { spawnSync } from 'node:child_process';
+import { dispatch, type Subcommands } from './commands.ts';
 import { mkdirSync, rmSync, rmdirSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -70,19 +71,17 @@ export async function cwv(alias?: string): Promise<void> {
 /** Open the last local or remote run's HTML report. */
 export function report(which: 'local' | 'remote' = 'local'): void { spawnSync(join(process.cwd(), 'node_modules', '.bin', 'playwright'), ['show-report', `playwright-report/${which}`], { stdio: 'inherit' }); }
 
-export async function main(args: string[]): Promise<void> {
-  const [command, ...rest] = args;
-  switch (command) {
-    case undefined: case 'every': return every();
-    case 'quick': return quick();
-    case 'only': { if (!rest.length) { console.error('remy test only <words>'); process.exit(2); } return only(rest.join(' ')); }
-    case 'smoke': return smoke();
-    case 'google': return google();
-    case 'remote': return remoteSuite(rest[0]);
-    case 'live': return live(rest[0]);
-    case 'consumers': return consumers();
-    case 'cwv': return cwv(rest[0]);
-    case 'report': return report(rest[0] === 'remote' ? 'remote' : 'local');
-    default: console.error('remy test: every (every language, the default) | quick | only <words> | smoke | google | cwv [alias] | remote [origin] | live [origin] | consumers | report [remote]'); process.exit(2);
-  }
-}
+export const what = 'the browser checks, over a local build or a deployment';
+export const commands: Subcommands = {
+  every: { what: 'every check in every language over a local build; the default (GitHub runs it after every landing)', run: () => every() },
+  quick: { what: 'every check in a few languages (QUICK_LOCALES)', run: () => quick() },
+  only: { what: '<words>: the checks whose title matches, in a few languages; the one targeted run by hand', run: rest => { if (!rest.length) { console.error('remy test only <words>'); process.exit(2); } return only(rest.join(' ')); } },
+  smoke: { what: 'tier 1: every page answers, the home page hydrates', run: () => smoke() },
+  google: { what: "Google's Lighthouse audits (level 2; one run at a time on this machine)", run: () => google() },
+  cwv: { what: '[alias]: Core Web Vitals on a throwaway preview Worker', run: rest => cwv(rest[0]) },
+  remote: { what: '[origin]: the suite against a deployment (the production origin by default)', run: rest => remoteSuite(rest[0]) },
+  live: { what: '[origin]: the smoke against a deployment (every deploy ends with it)', run: rest => live(rest[0]) },
+  consumers: { what: 'the repositories this one serves: the blank app and the consumer fixture', run: () => consumers() },
+  report: { what: '[remote]: open the last HTML report, local or remote', run: rest => report(rest[0] === 'remote' ? 'remote' : 'local') },
+};
+export const main = dispatch('test', commands, 'every');

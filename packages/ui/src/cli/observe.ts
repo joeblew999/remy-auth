@@ -10,6 +10,7 @@
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
+import { dispatch, type Subcommands } from './commands.ts';
 
 type Json = Record<string, any>;
 function fail(message: string): never { console.error(message); process.exit(1); }
@@ -164,13 +165,11 @@ export async function gateway(args: string[]): Promise<void> {
   show((await api('GET', `/ai-gateway/gateways/${id}`, { token: apiToken })).result);
 }
 
-export async function main(args: string[]): Promise<void> {
-  const [command, ...rest] = args;
-  switch (command) {
-    case 'events': return events(rest);
-    case 'ai-usage': return aiUsage(rest);
-    case 'ai-check': return aiCheck();
-    case 'gateway': return gateway(rest);
-    default: fail('remy observe: events [event] [--since 24h] [--limit 10] | ai-usage [--since 7d] | ai-check | gateway [show | rate-limit off | rate-limit <requests>/<seconds> | logs on|off]');
-  }
-}
+export const what = "a Worker's logs and its AI Gateway";
+export const commands: Subcommands = {
+  events: { what: "[event] [--since 24h] [--limit 10]: the Worker's log events", run: rest => events(rest) },
+  'ai-usage': { what: "[--since 7d]: Ask AI's usage through the gateway", run: rest => aiUsage(rest) },
+  'ai-check': { what: 'Ask AI answers through its gateway', run: () => aiCheck() },
+  gateway: { what: "[show | rate-limit off | rate-limit <requests>/<seconds> | logs on|off]: the AI Gateway's settings", run: rest => gateway(rest) },
+};
+export const main = dispatch('observe', commands);

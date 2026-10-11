@@ -9,6 +9,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { main as observe } from './observe.ts';
+import { dispatch, type Subcommands } from './commands.ts';
 
 function fail(message: string): never { console.error(message); process.exit(1); }
 const docs = () => { if (!existsSync('docs')) fail('this app has no docs/ (remy docs init <ref> starts one)'); return join(process.cwd(), 'docs'); };
@@ -199,20 +200,18 @@ export function init(ref: string | undefined): void {
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
 
-export async function main(args: string[]): Promise<void> {
-  const [command, ...rest] = args;
-  switch (command) {
-    case 'dev': return dev();
-    case 'build': return build();
-    case 'check': return check();
-    case 'test': return rest[0] === 'remote' ? testRemote() : test();
-    case 'preview': return preview();
-    case 'answers': { if (rest[0] !== 'on' && rest[0] !== 'off') fail('remy docs answers on|off'); return answers(rest[0]); }
-    case 'publish': return publish();
-    case 'questions': return questions();
-    case 'provision': return provision();
-    case 'init': return init(rest[0]);
-    case 'observe': { generated(); process.env.REMY_WRANGLER_CONFIG = join(docs(), '.remy-docs', 'wrangler.json'); process.chdir(docs()); return observe(rest); }
-    default: fail('remy docs: dev | build | check | test [remote] | preview | answers on|off | publish | provision | init <ref> | observe …');
-  }
-}
+export const what = "the docs Worker, @joeblew999/remy-ui's, over this app's docs/";
+export const commands: Subcommands = {
+  dev: { what: 'the docs Worker with hot reload', run: () => dev() },
+  build: { what: 'the production build, which writes .remy-docs/', run: () => build() },
+  check: { what: 'build, binding types, types', run: () => check() },
+  test: { what: "[remote]: the docs' browser checks on a local build, or against the deployment with every MCP server's tools", run: rest => rest[0] === 'remote' ? testRemote() : test() },
+  preview: { what: 'a preview Worker of the docs, answers paused', run: () => preview() },
+  answers: { what: "on|off: Ask AI's answers resumed, or stopped in seconds", run: rest => { if (rest[0] !== 'on' && rest[0] !== 'off') fail('remy docs answers on|off'); return answers(rest[0]); } },
+  publish: { what: "the bucket holds exactly the live docs pages, the index's sync waited for, then the fixed questions (dev:promote runs it)", run: () => publish() },
+  questions: { what: 'the fixed questions (docs/content/questions.json) each find their page in the index; search only', run: () => questions() },
+  provision: { what: 'what Ask AI needs on Cloudflare, printed, created never', run: () => provision() },
+  init: { what: "<ref>: a docs/ for this app from remy-auth's template at that tag", run: rest => init(rest[0]) },
+  observe: { what: "…: the docs Worker's logs and its AI Gateway (remy observe, with the docs' configuration)", run: rest => { generated(); process.env.REMY_WRANGLER_CONFIG = join(docs(), '.remy-docs', 'wrangler.json'); process.chdir(docs()); return observe(rest); } },
+};
+export const main = dispatch('docs', commands);

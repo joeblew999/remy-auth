@@ -6,6 +6,7 @@ import { remyCommand } from './config.ts';
 // committed): PreToolUse on Bash runs the guard (guard-hook.ts); SessionStart runs `remy status`, so
 // every session opens with what is going on. `--check` only says whether they are registered.
 // The commands name this checkout's own remy (remyCommand), so a worktree's hooks run in the worktree.
+export const what = "register the flow's guard and the status hook with Claude (--check: is it registered)";
 export function main(args: string[]): void {
   const check = args.includes('--check') || process.env.usage_check === 'true';
   const command = (name: string) => `${remyCommand().map(part => JSON.stringify(part)).join(' ')} ${name}`;

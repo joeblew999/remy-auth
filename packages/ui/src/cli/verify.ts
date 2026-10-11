@@ -4,6 +4,7 @@
 // browser check in every language, then the other repositories this one serves; nobody runs it while
 // coding, and the gate refuses it outside the flow.
 import assert from 'node:assert/strict';
+import { dispatch, type Subcommands } from './commands.ts';
 import { spawnSync } from 'node:child_process';
 import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -129,12 +130,11 @@ export async function verify(): Promise<void> {
   consumers();
 }
 
-export async function main(args: string[]): Promise<void> {
-  switch (args[0]) {
-    case undefined: return verify();
-    case 'setup': return verifySetup();
-    case 'tooling': return tooling();
-    case 'doctor': return doctor();
-    default: console.error('remy verify: (the release gate) | setup | tooling | doctor'); process.exit(2);
-  }
-}
+export const what = "the installation's checks and the release gate";
+export const commands: Subcommands = {
+  all: { what: "everything: the installation's checks, every language, the consumers (the release gate; dev:release runs it); the default", run: () => verify() },
+  setup: { what: "the installation's checks: npm ls, MCP, the guard, doctor, tooling, the check (npm run setup ends with it)", run: () => verifySetup() },
+  tooling: { what: "the lockfile, wrangler.jsonc's observability and preview_urls, the workflows, the skill pins", run: () => tooling() },
+  doctor: { what: "the tooling's versions", run: () => doctor() },
+};
+export const main = dispatch('verify', commands, 'all');

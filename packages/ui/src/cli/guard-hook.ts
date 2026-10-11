@@ -5,6 +5,7 @@
 // what the agent reads.
 import { heavyIn } from './flow.ts';
 
+export const what = 'the Claude PreToolUse hook the guard registers: refuses a heavy check outside the flow, naming the step';
 export async function main(): Promise<void> {
   const input = JSON.parse(await new Promise<string>(resolve => {
     let text = '';

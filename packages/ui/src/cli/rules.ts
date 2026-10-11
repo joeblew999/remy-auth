@@ -37,4 +37,5 @@ ${end}`;
   else { writeFileSync('AGENTS.md', next); console.log(`rules: AGENTS.md points at the remy skill (${version}).`); }
 }
 
+export const what = "the platform's rules block in AGENTS.md, written or refreshed in place";
 export const main = (): void => rules();

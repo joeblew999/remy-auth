@@ -4,6 +4,7 @@
 // ones, .plans/stability-log.md optional. `check` is part of the check (check.ts). Node built-ins and
 // git only; no network.
 import { execFileSync } from 'node:child_process';
+import { dispatch, type Subcommands } from './commands.ts';
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, posix, relative, resolve, sep } from 'node:path';
 
@@ -244,13 +245,12 @@ function move(kind: Move, word: string, args: string[]): void {
   console.log('Review with git diff, then npm run dev:change.');
 }
 
-export function main(args: string[]): void {
-  const [command = '', ...rest] = args;
-  const commands: Record<string, (args: string[]) => void> = {
-    status, check: () => check(),
-    close: a => move('close', 'Closed', a), park: a => move('park', 'Parked', a), open: a => move('open', 'Opened', a),
-  };
-  const run = commands[command];
-  if (!run) fail(`remy plans: ${command ? `no command "${command}"` : 'a command is needed'}; one of ${Object.keys(commands).join(', ')}.`);
-  run(rest);
-}
+export const what = "the plans rule on this app's .plans/: few, short, closed";
+export const commands: Subcommands = {
+  status: { what: "the open plans and now.md's open items", run: rest => status(rest) },
+  check: { what: 'the rule holds (the check runs it)', run: () => check() },
+  close: { what: '<plan>: move a plan to done/ with its closing line', run: rest => move('close', 'Closed', rest) },
+  park: { what: '<plan>: move a plan to parked/', run: rest => move('park', 'Parked', rest) },
+  open: { what: '<plan>: take a parked plan up again', run: rest => move('open', 'Opened', rest) },
+};
+export const main = dispatch('plans', commands);

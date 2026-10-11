@@ -11,6 +11,7 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { publish } from './docs.ts';
 import { prepare } from './dev.ts';
+import { dispatch, type Subcommands } from './commands.ts';
 
 // A declaration, not a constant: tsc narrows after a call only to a function declared with its never type.
 function fail(message: string): never { console.error(message); process.exit(1); }
@@ -260,18 +261,16 @@ export async function previewDelete(name?: string): Promise<void> {
   tool('wrangler', ['delete', '--name', name, '--force']);
 }
 
-export async function main(args: string[]): Promise<void> {
-  const [command, ...rest] = args;
-  switch (command) {
-    case 'preview': { const keep = rest.includes('--keep'); await preview(rest.find(part => !part.startsWith('--')), keep); return; }
-    case 'preview-delete': return previewDelete(rest[0]);
-    case 'deploy': return deploy();
-    case 'staging': return deploy('staging');
-    case 'docs-deploy': return deployDocs();
-    case 'versions': { const { table, unanswered } = await versions(rest.length ? rest : undefined); console.log(table); if (unanswered) process.exit(1); return; }
-    case 'urls': return urls(rest[0]);
-    case 'wait': { const [origin, output] = rest; if (!origin || !output) fail('remy cloudflare wait <origin> <wrangler-output-file>'); return waitFor(origin, output); }
-    case 'provisioned': return provisioned();
-    default: console.error('remy cloudflare: deploy | staging | docs-deploy | versions [origins...] | urls [origin] | preview [alias] [--keep] | preview-delete [name] | wait <origin> <output> | provisioned'); process.exit(2);
-  }
-}
+export const what = 'Cloudflare: production and staging deploys, the docs Worker, throwaway previews, what each deployment runs';
+export const commands: Subcommands = {
+  deploy: { what: 'production from this checkout, then the live smoke (dev:promote runs it)', run: () => deploy() },
+  staging: { what: "the Wrangler configuration's env.staging to origins.staging (dev:land runs it)", run: () => deploy('staging') },
+  'docs-deploy': { what: "the docs Worker, then its pages to Ask AI's index (dev:promote runs it)", run: () => deployDocs() },
+  versions: { what: '[origins…]: a row per deployment, each commit placed against this checkout', run: async rest => { const { table, unanswered } = await versions(rest.length ? rest : undefined); console.log(table); if (unanswered) process.exit(1); } },
+  urls: { what: '[origin]: the URLs a deployment answers at', run: async rest => { await urls(rest[0]); } },
+  preview: { what: '[alias] [--keep]: a throwaway Worker <name>-check-<alias> with this build, deleted after its checks unless kept', run: async rest => { await preview(rest.find(part => !part.startsWith('--')), rest.includes('--keep')); } },
+  'preview-delete': { what: '[name]: delete a preview Worker', run: rest => previewDelete(rest[0]) },
+  wait: { what: '<origin> <wrangler-output-file>: until the origin serves the uploaded version, every home-page asset included', run: rest => { const [origin, output] = rest; if (!origin || !output) fail('remy cloudflare wait <origin> <wrangler-output-file>'); return waitFor(origin, output); } },
+  provisioned: { what: 'refuse when a D1, KV or R2 binding names no existing resource', run: () => provisioned() },
+};
+export const main = dispatch('cloudflare', commands);

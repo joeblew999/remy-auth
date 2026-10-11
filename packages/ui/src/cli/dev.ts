@@ -5,6 +5,7 @@
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { generate } from './check.ts';
+import { dispatch, type Subcommands } from './commands.ts';
 
 function tool(command: string, args: string[], env: Record<string, string> = {}): void {
   const result = spawnSync(command, args, { stdio: 'inherit', env: { ...process.env, ...env } });
@@ -29,11 +30,10 @@ export function build(): void { prepare(); tool(bin('vite'), ['build']); tool(bi
 /** Build, then serve the production artifact on Cloudflare's local host at PREVIEW_PORT. */
 export function preview(): void { build(); tool(bin('wrangler'), ['dev', '--ip', '127.0.0.1', '--port', process.env.PREVIEW_PORT ?? '4173']); }
 
-export function main(args: string[]): void {
-  switch (args[0]) {
-    case 'dev': return dev();
-    case 'build': return build();
-    case 'preview': return preview();
-    default: console.error('remy app: dev | build | preview'); process.exit(2);
-  }
-}
+export const what = 'the app itself: run it, build it, preview the build';
+export const commands: Subcommands = {
+  dev: { what: "Vite's dev server with hot reload (npm run dev)", run: () => dev() },
+  build: { what: "the production build, then Wrangler's deployment dry run; no upload (npm run build)", run: () => build() },
+  preview: { what: "build, then the production artifact on Cloudflare's local host at PREVIEW_PORT (npm run preview)", run: () => preview() },
+};
+export const main = dispatch('app', commands);

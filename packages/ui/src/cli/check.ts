@@ -108,6 +108,7 @@ export async function check(): Promise<void> {
   for (const part of Object.values(parts)) await part();
 }
 
+export const what = `the check (dev:change), or one part: ${Object.keys(parts).join(' · ')}`;
 export async function main(args: string[]): Promise<void> {
   const [name] = args;
   if (!name) { await check(); return; }

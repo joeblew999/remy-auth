@@ -20,6 +20,7 @@ export async function spec(args: string[]): Promise<void> {
   for (const [path, operations] of Object.entries(document.paths ?? {})) for (const [method, operation] of Object.entries(operations)) console.log(`  ${method.toUpperCase().padEnd(6)} ${new URL(path, origin).href}  ${operation.summary ?? ''}`);
 }
 
+export const what = 'spec [origin] [--urls]: the OpenAPI document a Worker generates from its contract';
 export async function main(args: string[]): Promise<void> {
   if (args[0] !== 'spec') fail('remy api: spec [origin] [--urls]');
   return spec(args.slice(1));

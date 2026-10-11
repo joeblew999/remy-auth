@@ -69,4 +69,5 @@ export async function shots(args: string[]): Promise<void> {
   await browser.close();
 }
 
+export const what = '[path] [--phone] [--dark] [--locale xx]: screenshots of a page as a visitor sees it (npm run shots)';
 export const main = (args: string[]): Promise<void> => shots(args);

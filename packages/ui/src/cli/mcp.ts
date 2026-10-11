@@ -3,6 +3,7 @@
 // format, unrelated settings and servers kept. Absolute paths make editor launches independent of the
 // shell's cwd; the generated files are gitignored, so re-register after moving the checkout.
 import assert from 'node:assert/strict';
+import { dispatch, type Subcommands } from './commands.ts';
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -50,11 +51,10 @@ export function status(): void {
   }
 }
 
-export async function main(args: string[]): Promise<void> {
-  switch (args[0]) {
-    case 'register': return register(false);
-    case 'verify': return register(true);
-    case 'status': return status();
-    default: console.error('remy mcp: register | verify | status'); process.exit(2);
-  }
-}
+export const what = 'the MCP servers for Claude and Codex, registered per machine';
+export const commands: Subcommands = {
+  register: { what: 'write .mcp.json and .codex/config.toml for this machine', run: () => register(false) },
+  verify: { what: 'the registration as it should be, written if not', run: () => register(true) },
+  status: { what: 'what each client has registered', run: () => status() },
+};
+export const main = dispatch('mcp', commands);

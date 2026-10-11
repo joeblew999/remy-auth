@@ -4,6 +4,7 @@
 // version tags a release, and its title. `remy release` (STEP 4) is `release` here: every gate, then
 // the tag, which publishes.
 import { execFileSync, spawnSync } from 'node:child_process';
+import { dispatch, type Subcommands } from './commands.ts';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -171,17 +172,15 @@ export async function release(): Promise<void> {
   tag();
 }
 
-export async function main(args: string[]): Promise<void> {
-  const [command, ...rest] = args;
-  switch (command) {
-    case 'check': return check();
-    case 'upgrade': return upgrade();
-    case 'pack': return pack();
-    case 'notes': { if (!rest[0]) fail('remy packages notes <version>'); process.stdout.write(notes(rest[0])); return; }
-    case 'bumped': return bumped();
-    case 'publish': { const at = rest.indexOf('--release'); return publish({ release: at >= 0 ? rest[at + 1] : undefined, dryRun: rest.includes('--dry-run') }); }
-    case 'tag': return tag();
-    case 'release': return release();
-    default: console.error('remy packages: check | upgrade | pack | notes <version> | bumped | publish [--release vX.Y.Z] [--dry-run] | tag | release'); process.exit(2);
-  }
-}
+export const what = 'a repository that publishes packages: updates, the pack, the notes, the publish, the tag, the release';
+export const commands: Subcommands = {
+  check: { what: 'package updates available (npm-check-updates); nothing changed', run: () => check() },
+  upgrade: { what: "upgrade every package, major versions included, then the installation's checks", run: () => upgrade() },
+  pack: { what: 'pack each published workspace, as the publish would', run: () => pack() },
+  notes: { what: "<version>: the CHANGELOG section of a version, as the GitHub release's notes", run: rest => { if (!rest[0]) fail('remy packages notes <version>'); process.stdout.write(notes(rest[0])); } },
+  bumped: { what: 'every published package whose files changed since the last release tag has a new version', run: () => bumped() },
+  publish: { what: '[--release vX.Y.Z] [--dry-run]: each registry accepts its token, then publish each workspace, then the GitHub release from its notes', run: rest => { const at = rest.indexOf('--release'); return publish({ release: at >= 0 ? rest[at + 1] : undefined, dryRun: rest.includes('--dry-run') }); } },
+  tag: { what: "on a clean main: the lead package's version as the tag, pushed with main, then the publish", run: () => tag() },
+  release: { what: 'the release: translations strict, bumped, the gate, Google, Core Web Vitals on a preview, the tag (dev:release runs it)', run: () => release() },
+};
+export const main = dispatch('packages', commands);

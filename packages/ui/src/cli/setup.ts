@@ -38,6 +38,7 @@ export async function setup(): Promise<void> {
   await verifySetup();
 }
 
+export const what = "npm ci, the pinned skills, the agents' rules, MCP registration, the guard, then the installation's checks (npm run setup); preconditions: those alone";
 export async function main(args: string[]): Promise<void> {
   if (args[0] === 'preconditions') return preconditions();
   return setup();

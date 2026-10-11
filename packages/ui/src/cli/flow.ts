@@ -30,6 +30,17 @@ export const steps: Record<Step, { what: string }> = {
 };
 
 /**
+ * The flow's commands as `remy help` lists them (status first, then the steps, then the worktree's end).
+ * The step modules are scripts, so the help never imports them: their lines live here.
+ */
+export const flowCommands: Record<'status' | 'start' | Step | 'done', { what: string }> = {
+  status: { what: "what is going on: main with GitHub's verdicts, the deployments, the worktrees, the translations" },
+  start: { what: '<name>: a worktree of your own from main, installed, its own ports, the guard' },
+  ...steps,
+  done: { what: 'the worktree removed once its work is on main' },
+};
+
+/**
  * The heavy commands no step runs by default, and why: GitHub runs them after every push (the suite,
  * Google's audits, the consumers), the release runs them (the gate), or they cost minutes for an
  * answer the check already gave (quick, remote, a bare playwright run). The gate (allowed.ts) knows

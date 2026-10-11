@@ -28,4 +28,5 @@ export async function upgrade(version: string | undefined): Promise<void> {
   console.log(`upgrade: on @joeblew999/remy-ui ${version}.`);
 }
 
+export const what = "<version>: this app onto a release of the platform: the package, the workflow's tag, the skills, the rules, the guard, the installation's checks (npm run upgrade)";
 export const main = (args: string[]): Promise<void> => upgrade(args[0]);

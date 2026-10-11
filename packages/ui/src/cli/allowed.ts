@@ -18,4 +18,5 @@ export function gate(task: string): void {
   process.exit(1);
 }
 
+export const what = '<task>: may this heavy task run now (the gate the flow sets; refused with exit 1 outside it)';
 export const main = (args: string[]): void => gate(args[0] ?? '');

@@ -7,8 +7,15 @@ package follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Changed
+- `remy help` lists every command, and the list is read from the commands themselves: each module exports
+  its one line and, where it has subcommands, their table (`commands.ts`), which its main dispatches on and
+  its own usage prints from (`remy docs` with no subcommand). A command cannot exist without its line; a
+  line cannot outlive its command. The flow's seven steps are listed from `flow.ts`'s table.
+- `remy verify all` names the release gate `remy verify` alone still runs; `remy skills remove` is listed.
 - GitHub's verdict on a commit is main's push run: a release tag's run on the same commit (the release
   job's) no longer holds `dev:promote` as "still checking".
+- Every build and deploy runs the app's `generate` script first (`prepare` in `dev.ts`), so Paraglide's
+  Vite plugin finds unchanged inputs at build start and rewrites nothing.
 
 ## [0.15.1] - 2026-10-11
 

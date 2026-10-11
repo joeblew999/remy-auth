@@ -195,6 +195,7 @@ export async function checkAll(strict = process.env.I18N_STRICT === '1', cwd = p
   return true;
 }
 
+export const what = "translations: check [messages|docs] [--list] (offline, read-only), translate [messages|docs] (the machine's Claude, on main, under a lock)";
 export async function main(args: string[]): Promise<void> {
   const [command, which, ...rest] = args;
   const list = args.includes('--list');

@@ -3,6 +3,7 @@
 // anything else. The platform's own `remy` skill comes from the installed package, which its version
 // pins (generated from the developer docs by the app's generate step).
 import { existsSync } from 'node:fs';
+import { dispatch, type Subcommands } from './commands.ts';
 import { spawnSync } from 'node:child_process';
 
 export const skillsCli = 'skills@1.7.0';
@@ -39,9 +40,10 @@ export function installSkills(): void {
 export const listSkills = (): void => skillsTool(['list', ...agents]);
 export const removeSkills = (): void => skillsTool(['remove', '--all']);
 
-export function main(args: string[]): void {
-  const commands: Record<string, () => void> = { install: installSkills, list: listSkills, remove: removeSkills };
-  const run = commands[args[0] ?? ''];
-  if (!run) { console.error('remy skills: install | list | remove'); process.exit(2); }
-  run();
-}
+export const what = 'the pinned official agent skills for Codex and Claude';
+export const commands: Subcommands = {
+  install: { what: "every pinned skill, and the platform's remy skill from the installed package", run: () => installSkills() },
+  list: { what: 'the pins and what is installed', run: () => listSkills() },
+  remove: { what: 'the installed skills removed', run: () => removeSkills() },
+};
+export const main = dispatch('skills', commands);
