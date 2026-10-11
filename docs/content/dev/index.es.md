@@ -66,10 +66,10 @@ Cómo iniciar, reanudar y recargar Codex o Claude Code, en VS Code o en una term
 
 | Tarea | Comando |
 | --- | --- |
-| Ver qué está pasando | `mise run dev:status` |
-| Empezar una tarea, en un worktree propio | `mise run dev:start -- <name>` |
-| Comprobar, después de cada cambio | `mise run dev:change` |
-| Aterrizar el trabajo terminado: main, las comprobaciones de GitHub, staging | `mise run dev:land -- "<what changed>"` |
+| Ver qué está pasando | `npm run dev:status` |
+| Empezar una tarea, en un worktree propio | `npm run dev:start -- <name>` |
+| Comprobar, después de cada cambio | `npm run dev:change` |
+| Aterrizar el trabajo terminado: main, las comprobaciones de GitHub, staging | `npm run dev:land -- "<what changed>"` |
 | Explorar las tareas del proyecto | `mise tasks ls --local` |
 | Ejecutar la GUI local | `mise run project:dev` |
 | Probar el build de producción en local | `mise run project:preview` |
@@ -103,3 +103,4 @@ commits de origen de las skills y las tareas compartidas de arranque del agente 
 - [Tareas compartidas](./tasks.md): las tareas de mise que incluyen otros proyectos.
 - [Paquete de UI compartido](./ui-package.md) y su [registro de cambios](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
 - [Planes](https://github.com/joeblew999/remy-auth/tree/main/.plans): [.plans/now.md](https://github.com/joeblew999/remy-auth/blob/main/.plans/now.md) es la única lista de lo que está abierto y en qué punto está.
+</content>

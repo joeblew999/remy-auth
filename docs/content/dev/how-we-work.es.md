@@ -242,13 +242,13 @@ que cada app, desde las tareas compartidas; `project:setup` instala el guardián
 
 | Paso | Comando | Quién lo ejecuta, y cuándo | Qué ejecuta | Tiempo |
 | --- | --- | --- | --- | --- |
-| Mirar | `mise run dev:status` | todos, primero: cada sesión de agente se abre con esto (un hook), un desarrollador cuando se sienta a trabajar | los últimos commits de main con el veredicto de GitHub, qué ejecuta cada despliegue, cada worktree por delante y por detrás de main, traducciones, pull requests, lo primero de `.plans/now.md` | segundos |
-| Antes de un trozo de trabajo | `mise run dev:start -- <nombre>` | quien hace el trabajo, para cada trozo, incluida una edición de una línea | un worktree propio a partir de main, instalado, con sus propios puertos, el guardián | ~1 min |
-| Después de cada cambio | `mise run dev:change` | quien esté codificando; el único paso que se espera | la comprobación (`project:check`): planes, tipos con los de las propias tareas, las comprobaciones de funciones simples (`tests/**/*.unit.spec.ts`), el estado de las traducciones; una build solo cuando cambió un archivo de ruta, la documentación solo cuando cambió la documentación | ~6 s |
-| El cambio deja la máquina | `mise run dev:land -- "<qué cambió>"` | quien hizo el trabajo, por su cuenta, en cuanto termina y la comprobación está en verde | la comprobación, commit, fast-forward de main, push, despliegue en staging, y luego la traducción al final cuando está desactualizada. GitHub entonces ejecuta cada idioma, las auditorías de Google y el fixture de consumer en paralelo, mientras sigues codificando (`gh run list`) | ~1 min hasta staging; la traducción después |
-| Producción | `mise run dev:promote` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `cf:deploy` y el Worker de documentación, a partir de un main ya empujado, sin puerta de control: staging y GitHub ya ejecutaron las comprobaciones | ~1 min |
-| Una publicación | `mise run dev:release` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `packages:release`: cada comprobación, cada idioma, localmente, a propósito, y luego la etiqueta | ~5 min |
-| Cuando está landed | `mise run dev:done` | quien hizo el landing, cuando el trozo de trabajo termina; un worktree sobrevive a tantos landings como el trabajo necesite | el worktree y la rama desaparecen | segundos |
+| Mirar | `npm run dev:status` | todos, primero: cada sesión de agente se abre con esto (un hook), un desarrollador cuando se sienta a trabajar | los últimos commits de main con el veredicto de GitHub, qué ejecuta cada despliegue, cada worktree por delante y por detrás de main, traducciones, pull requests, lo primero de `.plans/now.md` | segundos |
+| Antes de un trozo de trabajo | `npm run dev:start -- <nombre>` | quien hace el trabajo, para cada trozo, incluida una edición de una línea | un worktree propio a partir de main, instalado, con sus propios puertos, el guardián | ~1 min |
+| Después de cada cambio | `npm run dev:change` | quien esté codificando; el único paso que se espera | la comprobación (`project:check`): planes, tipos con los de las propias tareas, las comprobaciones de funciones simples (`tests/**/*.unit.spec.ts`), el estado de las traducciones; una build solo cuando cambió un archivo de ruta, la documentación solo cuando cambió la documentación | ~6 s |
+| El cambio deja la máquina | `npm run dev:land -- "<qué cambió>"` | quien hizo el trabajo, por su cuenta, en cuanto termina y la comprobación está en verde | la comprobación, commit, fast-forward de main, push, despliegue en staging, y luego la traducción al final cuando está desactualizada. GitHub entonces ejecuta cada idioma, las auditorías de Google y el fixture de consumer en paralelo, mientras sigues codificando (`gh run list`) | ~1 min hasta staging; la traducción después |
+| Producción | `npm run dev:promote` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `cf:deploy` y el Worker de documentación, a partir de un main ya empujado, sin puerta de control: staging y GitHub ya ejecutaron las comprobaciones | ~1 min |
+| Una publicación | `npm run dev:release` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `packages:release`: cada comprobación, cada idioma, localmente, a propósito, y luego la etiqueta | ~5 min |
+| Cuando está landed | `npm run dev:done` | quien hizo el landing, cuando el trozo de trabajo termina; un worktree sobrevive a tantos landings como el trabajo necesite | el worktree y la rama desaparecen | segundos |
 
 - **Quién ejecuta un paso está en la tabla, y nunca es una pregunta.** Un agente aterriza su propio
   trabajo terminado sin preguntar: staging forma parte del landing, GitHub comprueba cada landing, y
@@ -388,12 +388,12 @@ landing. Nada de esto se hace a mano.
 
 | | Comando | Qué hace |
 | --- | --- | --- |
-| Mirar | `mise run dev:status` | qué está pasando, preguntado a los dueños de los hechos: los últimos commits de main con el veredicto de GitHub, qué ejecuta cada despliegue, cada worktree por delante y por detrás de main, traducciones, pull requests. Cada sesión de agente se abre con esto (un hook que registra `dev:guard`); un desarrollador lo ejecuta cuando se sienta a trabajar |
-| Empezar | `mise run dev:start -- <nombre>` | un worktree en la rama `<nombre>` a partir de main (`.claude/worktrees/<nombre>`), instalado (`npm ci`, `project:prepare`), con puertos propios (`mise.local.toml`) y el guardián del flujo. Los propios worktrees de Claude Code viven en el mismo lugar y son solo una carpeta: dentro de uno, `mise run dev:start` sin nombre lo prepara de la misma forma |
-| Codificar | `mise run dev:change` | la comprobación, en segundos, después de cada cambio |
-| Aterrizar | `mise run dev:land -- "<qué cambió>"` | primero se mezcla main (un conflicto se detiene nombrando los archivos), la comprobación, commit, fast-forward de main, push, staging, y luego la traducción al final cuando está desactualizada (la suscripción de Claude en esta máquina, nunca GitHub). GitHub ejecuta las comprobaciones pesadas; una ejecución en rojo comenta en el commit |
-| Terminar | `mise run dev:done` | el worktree y la rama que ya aterrizaron desaparecen; se niega mientras algo quede sin aterrizar |
-| Producción | `mise run dev:promote` | a partir de main, solo un commit que GitHub aprobó, con la palabra del propietario |
+| Mirar | `npm run dev:status` | qué está pasando, preguntado a los dueños de los hechos: los últimos commits de main con el veredicto de GitHub, qué ejecuta cada despliegue, cada worktree por delante y por detrás de main, traducciones, pull requests. Cada sesión de agente se abre con esto (un hook que registra `dev:guard`); un desarrollador lo ejecuta cuando se sienta a trabajar |
+| Empezar | `npm run dev:start -- <nombre>` | un worktree en la rama `<nombre>` a partir de main (`.claude/worktrees/<nombre>`), instalado (`npm ci`, `project:prepare`), con puertos propios (`mise.local.toml`) y el guardián del flujo. Los propios worktrees de Claude Code viven en el mismo lugar y son solo una carpeta: dentro de uno, `npm run dev:start` sin nombre lo prepara de la misma forma |
+| Codificar | `npm run dev:change` | la comprobación, en segundos, después de cada cambio |
+| Aterrizar | `npm run dev:land -- "<qué cambió>"` | primero se mezcla main (un conflicto se detiene nombrando los archivos), la comprobación, commit, fast-forward de main, push, staging, y luego la traducción al final cuando está desactualizada (la suscripción de Claude en esta máquina, nunca GitHub). GitHub ejecuta las comprobaciones pesadas; una ejecución en rojo comenta en el commit |
+| Terminar | `npm run dev:done` | el worktree y la rama que ya aterrizaron desaparecen; se niega mientras algo quede sin aterrizar |
+| Producción | `npm run dev:promote` | a partir de main, solo un commit que GitHub aprobó, con la palabra del propietario |
 
 - **Divide por independencia.** Un orquestador divide el trabajo en partes que tocan archivos
   diferentes, y inicia un agente por parte con `dev:start`. Una parte que necesita el resultado de otra
@@ -417,4 +417,3 @@ landing. Nada de esto se hace a mano.
   `dev:promote` escribe en el commit qué se publicó; `dev:status` muestra todo esto a quien lo pregunte,
   y cada sesión de agente lo pregunta primero.
 </content>
-</invoke>

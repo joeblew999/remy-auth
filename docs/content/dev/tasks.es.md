@@ -119,7 +119,7 @@ que la escribe en todos los lugares donde aparece (el paquete y los tres pines d
 
 ### Elegir la versión: publicada, de desarrollo o local [#choosing-the-version-released-development-or-local]
 
-Las tareas y el paquete se publican juntos: el `mise run dev:release` de remy-auth (`ui:release` y
+Las tareas y el paquete se publican juntos: el `npm run dev:release` de remy-auth (`ui:release` y
 `release` son sus alias; ejecuta el `packages:release` compartido) publica `@joeblew999/remy-ui` X.Y.Z y
 etiqueta ese mismo commit como `vX.Y.Z`. Por eso, quien consume el paquete fija ambos a un mismo número, y
 `project:upgrade-ui` los cambia a la vez:
@@ -259,3 +259,4 @@ todos los proyectos: `.plans/now.md` es la única lista ordenada, `.plans/*.md` 
 | `plans:open -- <plan> "<por qué ahora>"` | Un plan aparcado que se retoma: lo mismo desde `parked/` de vuelta a `.plans/` con `Opened <hoy>: ...`; añade su elemento a `now.md` tú mismo |
 
 `close` y `park` cambian archivos y preparan el movimiento, pero nunca hacen commit: lee `git diff` y luego haz commit.
+</content>
