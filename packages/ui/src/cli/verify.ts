@@ -1,0 +1,142 @@
+// Verification. `remy verify setup` is what an installation must satisfy, about a minute, no browser:
+// the dependencies, MCP registration, the guard, the CLI versions, the tooling invariants, then the
+// check; `remy setup` and the upgrades end with it. `remy verify` is the release's gate: that, then every
+// browser check in every language, then the other repositories this one serves; nobody runs it while
+// coding, and the gate refuses it outside the flow.
+import assert from 'node:assert/strict';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { gate } from './allowed.ts';
+import { check } from './check.ts';
+import { run } from './flow.ts';
+import { register } from './mcp.ts';
+import { main as guard } from './register.ts';
+import { pins, remySkillPath } from './skills.ts';
+
+type Json = Record<string, any>;
+const readJson = (file: string): Json => JSON.parse(readFileSync(file, 'utf8'));
+
+function tool(command: string, args: string[], what = command): void {
+  const result = spawnSync(command, args, { stdio: 'inherit' });
+  if (result.status !== 0) { console.error(`${what}: failed`); process.exit(result.status ?? 1); }
+}
+
+/** The versions of the CLIs the tooling runs, without contacting a Cloudflare account. */
+export function doctor(): void {
+  console.log(`node ${process.version}`);
+  tool('npm', ['--version'], 'npm');
+  for (const bin of ['wrangler', 'chrome-devtools-mcp', 'modern-web-guidance', 'codex']) {
+    const path = join(process.cwd(), 'node_modules', '.bin', bin);
+    if (existsSync(path)) { process.stdout.write(`${bin} `); tool(path, ['--version'], bin); } else console.log(`${bin}: not installed`);
+  }
+}
+
+/**
+ * The invariants every Remy app keeps that npm, Wrangler and the agents' tools do not check
+ * themselves: every package.json matches the lockfile; the Worker's configuration keeps previews off
+ * and observability on; the workflows name only commands that exist; every installed skill comes
+ * from a pinned source, at its pin, with its Claude link.
+ */
+export async function tooling(): Promise<void> {
+  const manifest = readJson('package.json');
+  const lock = readJson('package-lock.json');
+  for (const section of ['dependencies', 'devDependencies', 'optionalDependencies']) {
+    assert.deepEqual(lock.packages?.['']?.[section] ?? {}, manifest[section] ?? {}, `${section}: package-lock.json differs from package.json; run npm install`);
+  }
+  for (const [location, locked] of Object.entries(lock.packages ?? {}) as [string, Json][]) {
+    if (!location || location.startsWith('node_modules/') || location.includes('/node_modules/')) continue;
+    if (!existsSync(`${location}/package.json`)) continue;
+    const workspace = readJson(`${location}/package.json`);
+    for (const section of ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']) {
+      assert.deepEqual(locked?.[section] ?? {}, workspace[section] ?? {}, `${location} ${section}: package-lock.json differs from its package.json; run npm install`);
+    }
+  }
+  console.log('Every package.json matches the lockfile.');
+
+  const { unstable_readConfig } = await import(pathToFileURL(createRequire(join(process.cwd(), 'package.json')).resolve('wrangler')).href) as typeof import('wrangler');
+  const config = unstable_readConfig({ config: 'wrangler.jsonc' }) as Json;
+  // Every uploaded version and alias would be public, old ones without the app's later fixes.
+  assert.equal(config.preview_urls, false, 'wrangler.jsonc: preview_urls must be false');
+  const observability = config.observability;
+  assert.equal(observability?.enabled, true, 'Worker observability must be enabled');
+  assert.equal(observability?.redact_query_string, true, 'Query-string redaction must be enabled');
+  for (const signal of ['logs', 'traces']) {
+    assert.equal(observability?.[signal]?.enabled, true, `${signal} must be enabled`);
+    assert.equal(observability?.[signal]?.persist, true, `${signal} must persist`);
+    const rate = observability?.[signal]?.head_sampling_rate;
+    assert.ok(Number.isFinite(rate) && rate > 0 && rate <= 1, `${signal}: invalid sampling rate`);
+  }
+  assert.equal(observability.logs.invocation_logs, true, 'Invocation logs must be enabled');
+  console.log('Wrangler parsed the configuration; observability requirements pass.');
+
+  // The workflows hold no logic of their own: every command they name is one a developer runs the same way.
+  const workflows = existsSync('.github/workflows') ? readdirSync('.github/workflows').filter(name => /\.ya?ml$/.test(name)) : [];
+  if (workflows.length) {
+    const scripts = new Set(Object.keys(manifest.scripts ?? {}));
+    const tasks = existsSync('mise.toml') ? new Set((JSON.parse(execFileSync('mise', ['tasks', 'ls', '--json'], { encoding: 'utf8' })) as { name: string }[]).map(task => task.name)) : new Set<string>();
+    for (const name of workflows) {
+      const text = readFileSync(`.github/workflows/${name}`, 'utf8');
+      for (const match of text.matchAll(/\bnpm run ([a-z0-9][a-z0-9:_-]*)/g)) assert.ok(scripts.has(match[1]!), `.github/workflows/${name} runs npm script ${match[1]}, which package.json does not have`);
+      for (const match of [...text.matchAll(/\bmise run ([a-z0-9][a-z0-9:_-]*)/g), ...text.matchAll(/^\s*-?\s*task:\s*([a-z0-9][a-z0-9:_-]*)\s*$/gm)]) assert.ok(tasks.has(match[1]!), `.github/workflows/${name} runs mise task ${match[1]}, which does not exist here`);
+    }
+    console.log(`The workflows name only commands that exist (${workflows.join(', ')}).`);
+  }
+
+  // The pins (skills.ts) are the single list of skill sources.
+  const skills: Record<string, Json> = readJson('skills-lock.json').skills;
+  const pinned = new Set(pins.map(pin => new URL(pin.source).pathname.split('/').slice(1, 3).join('/')));
+  for (const [name, skill] of Object.entries(skills)) {
+    if (skill.sourceType === 'local' && skill.source === remySkillPath) continue;
+    assert.ok(pinned.has(skill.source), `${name}: installed from ${skill.source}, which the pins do not name`);
+  }
+  for (const pin of pins) {
+    const source = new URL(pin.source);
+    const [owner, repo, tree, ref] = source.pathname.slice(1).split('/');
+    assert.ok(source.hostname === 'github.com' && tree === 'tree' && /^[a-f0-9]{40}$/.test(ref ?? ''), `Invalid pinned skill source: ${pin.source}`);
+    const entries = Object.entries(skills).filter(([, skill]) => skill.source === `${owner}/${repo}`);
+    assert.ok(entries.length > 0, `Missing skill pack: ${owner}/${repo}; npx remy skills install`);
+    for (const [name, skill] of entries) {
+      assert.match(name, /^[a-z0-9][a-z0-9-]*$/, 'Invalid skill directory name');
+      assert.equal(skill.ref, ref, `${name}: installed source differs from the pin`);
+      const canonical = `.agents/skills/${name}`;
+      const link = `.claude/skills/${name}`;
+      assert.ok(readFileSync(`${canonical}/SKILL.md`, 'utf8').trim(), `${name}: empty SKILL.md`);
+      assert.ok(lstatSync(link).isSymbolicLink(), `${name}: Claude path must be a symlink`);
+      assert.equal(realpathSync(link), realpathSync(canonical), `${name}: incorrect Claude target`);
+    }
+    console.log(`${owner}/${repo}: verified ${entries.length} locked skills and Claude links.`);
+  }
+  console.log('Tooling verified.');
+}
+
+/** What an installation must satisfy, about a minute, no browser. */
+export async function verifySetup(): Promise<void> {
+  if (existsSync('mise.toml')) tool('mise', ['tasks', 'validate'], 'mise tasks validate');
+  tool('npm', ['ls', '--depth=0'], 'npm ls');
+  await register(true);
+  guard(['--check']);
+  doctor();
+  await tooling();
+  await check();
+}
+
+/** The release's gate: the installation's checks, every browser check in every language, the other repositories this one serves. */
+export async function verify(): Promise<void> {
+  gate('project:verify');
+  await verifySetup();
+  run('project:test', 'release');
+  run('project:test:consumers', 'release');
+}
+
+export async function main(args: string[]): Promise<void> {
+  switch (args[0]) {
+    case undefined: return verify();
+    case 'setup': return verifySetup();
+    case 'tooling': return tooling();
+    case 'doctor': return doctor();
+    default: console.error('remy verify: (the release gate) | setup | tooling | doctor'); process.exit(2);
+  }
+}

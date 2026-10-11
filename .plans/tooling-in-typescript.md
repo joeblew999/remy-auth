@@ -65,8 +65,12 @@ already does, and the scripts list is the documentation of what exists.
    own, the one the subscription is logged into (not a devDependency: it is a developer-machine step,
    and the login lives there); the task had pinned 2.1.282, the machine has 2.1.296. The detached
    translation the flow's open gap asks for is still to do, on this code.
-5. **The rest of the namespaces:** `docs:*`, `packages:*`, `ui:*`, `template:*`, `skills:*`, `mcp:*`,
-   `agents:*`, `plans:*`, `browser:*`, `api:*`, and remy-auth's own `auth:*` in its `package.json`.
+5. **The rest of the namespaces.** Done 2026-10-11, the installation and the verification
+   (`setup.ts`, `verify.ts`, `skills.ts` with the pins as data, `mcp.ts` pointing the agent clients at
+   the app's own `chrome-devtools-mcp`, `rules.ts` in the npm wording): `npm run setup`, `remy verify
+   [setup|tooling|doctor]`, `remy skills`, `remy mcp`, `remy rules`. Left: `docs:*`, `packages:*`
+   (with the release), `ui:*`, `template:*`, `browser:*`, `api:*`, `cf:preview` and the observe and
+   gateway modules, and remy-auth's own `auth:*` in its `package.json`.
 6. **GitHub and the consumers:** the workflow on `actions/setup-node` and `npm run`; the template
    and remy-auth-app on the scripts (`project:upgrade-ui` becomes `npm install @joeblew999/remy-ui@x`).
 7. **Delete mise:** `mise.toml`, `tasks/`, `mise.local.toml`, `template/mise.toml`, `mise.dev.toml`;

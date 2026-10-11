@@ -63,13 +63,16 @@ test('no task runs a heavy task without saying who is asking: REMY_FLOW on the l
 
 // An installation (setup, the upgrades) ends with its own checks, about a minute and no browser; the
 // browser suite is GitHub's after every landing and the release's (owner, 2026-10-11, of a setup that
-// ran it: "Setup takes 2 minutes. This is clearly wrong").
-test('an installation ends with project:verify-setup, which runs nothing heavy; the release gate starts with it', () => {
+// ran it: "Setup takes 2 minutes. This is clearly wrong"). setup.ts ends with verifySetup; the mise
+// tasks forward to the commands; the upgrades still name the forward.
+test('an installation ends with the installation\'s checks, never the browser suite; the release gate starts with them', () => {
+  const setup = readFileSync('packages/ui/src/cli/setup.ts', 'utf8');
+  expect(setup.indexOf('await verifySetup();')).toBeGreaterThan(setup.indexOf('guard([]);'));
+  const verify = readFileSync('packages/ui/src/cli/verify.ts', 'utf8');
+  expect(verify).toMatch(/gate\('project:verify'\);\n\s*await verifySetup\(\);/);
   const tasks = parse(readFileSync('tasks/project.toml', 'utf8')) as Record<string, any>;
-  expect((tasks['project:setup'].run as unknown[]).at(-1)).toEqual({ task: 'project:verify-setup' });
+  expect(String(tasks['project:setup'].run)).toContain('remy.ts setup');
+  expect(String(tasks['project:verify-setup'].run)).toContain('remy.ts verify setup');
+  expect(String(tasks['project:verify'].run)).toContain('remy.ts verify;');
   for (const file of ['tasks/packages/upgrade', 'tasks/project/upgrade-ui']) expect(readFileSync(file, 'utf8'), file).toMatch(/^mise run project:verify-setup$/m);
-  const run = tasks['project:verify-setup'].run as unknown[];
-  const wrong = run.flatMap(entry => typeof entry === 'string' ? (runsHeavy.test(entry) ? [entry] : []) : ((entry as { task?: string }).task ?? '') in heavy ? [entry] : []);
-  expect(wrong).toEqual([]);
-  expect((tasks['project:verify'].run as unknown[])[1]).toEqual({ task: 'project:verify-setup' });
 });

@@ -3,9 +3,11 @@
 ["mcp:verify"]
 description = "Verify project MCP registration matches this checkout and mise installation"
 dir = "{{config_root}}"
-run = "mise run mcp:register -- --check"
+# In TypeScript now (packages/ui/src/cli, remy mcp verify): forwards for whoever still types mise run, and goes with mise.
+run = "if [ -f packages/ui/src/cli/remy.ts ]; then node packages/ui/src/cli/remy.ts mcp verify; else node ./node_modules/@joeblew999/remy-ui/cli/remy.js mcp verify; fi"
 
 ["mcp:status"]
 description = "Show Chrome DevTools registration in both installed agent clients"
 dir = "{{config_root}}"
-run = ["./node_modules/.bin/codex mcp get chrome-devtools", "claude mcp get chrome-devtools"]
+# In TypeScript now (packages/ui/src/cli, remy mcp status): forwards for whoever still types mise run, and goes with mise.
+run = "if [ -f packages/ui/src/cli/remy.ts ]; then node packages/ui/src/cli/remy.ts mcp status; else node ./node_modules/@joeblew999/remy-ui/cli/remy.js mcp status; fi"

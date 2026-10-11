@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="Register Chrome DevTools for this project in Codex and Claude (pass --check to verify)"
-# A shell wrapper so the module beside it loads as ESM wherever this directory is included from.
-set -euo pipefail
-exec node "$(dirname "$0")/register.mjs" "$@"
+#MISE dir="{{config_root}}"
+# In TypeScript now (packages/ui/src/cli): this task forwards for whoever still types mise run, and goes with mise.
+if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts mcp register "$@"; fi
+exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js mcp register "$@"

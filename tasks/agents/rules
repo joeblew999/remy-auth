@@ -1,5 +1,6 @@
-#!/usr/bin/env node
-//MISE description="Write or refresh the marked block in AGENTS.md that points this repo's agents at the platform's rules (the remy skill from the installed @joeblew999/remy-ui, with its version) and the flow's commands; project:setup and project:upgrade-ui run it"
-//MISE dir="{{config_root}}"
-// The logic is rules.ts beside this file: TypeScript, type-checked by project:check.
-import './rules.ts';
+#!/usr/bin/env bash
+#MISE description="Write or refresh the marked block in AGENTS.md that points this repo's agents at the platform's rules (the remy skill from the installed @joeblew999/remy-ui, with its version) and the flow's commands; project:setup and project:upgrade-ui run it"
+#MISE dir="{{config_root}}"
+# In TypeScript now (packages/ui/src/cli): this task forwards for whoever still types mise run, and goes with mise.
+if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts rules "$@"; fi
+exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js rules "$@"

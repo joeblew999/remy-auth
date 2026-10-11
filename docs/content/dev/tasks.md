@@ -146,7 +146,7 @@ The development flow is code, `tasks/dev/flow.ts`, with four steps and a guard
 | --- | --- |
 | First | `dev:status` (main with GitHub's verdicts, the deployments, worktrees ahead and behind, translations, pull requests; a `SessionStart` hook runs it for agents) |
 | A piece of work | `dev:start -- <name>` (a worktree of its own from main, `npm ci`, ports in `mise.local.toml`, `dev:guard`); `dev:done` removes it when the piece of work is over and landed |
-| Every change | `dev:change` (`project:check`: plans, `project:routes` when a route file changed, types with `project:typecheck-tasks`, `project:test:unit`, `i18n:check` as a warning, `project:check:docs` when docs changed) |
+| Every change | `dev:change` (`remy change`, every part a function: plans, single copies, routes when a route file changed, types, the unit checks, translations as a warning, the docs when docs changed) |
 | Finished work | `dev:land -- "<message>"` (the check, commit, main, push, `cf:staging`, then translation when stale; GitHub then runs `project:test`, `project:test:google` and `project:test:consumers` in parallel, and a red run comments on the commit. The same three locally, on purpose: `REMY_FLOW=hand mise run <task>`) |
 | Production | `dev:promote` (refuses a commit GitHub has not passed; then `cf:deploy`, `docs:deploy`, `cf:versions`) |
 | A release | `dev:release` (`packages:release`, which runs `project:verify`) |

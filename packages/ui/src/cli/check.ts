@@ -73,13 +73,11 @@ export function generate(): void {
 /** src/routeTree.gen.ts, regenerated when a route file or the parts list changed (TanStack Start's plugin writes it during a build). */
 export const routes = (): void => whenChanged('routes', ['src/routes/**/*', 'src/parts.json'], () => tool('vite', ['build']));
 
-/** Generate, Worker types, the app's TypeScript, then the shared tasks' own while tasks/ exists. */
+/** Generate, Worker types, then the app's TypeScript (the command line's included: it is in the package's src). */
 export function types(): void {
   generate();
   tool('wrangler', ['types']);
   tool('tsc', []);
-  // The shared tasks' own TypeScript, while there are mise tasks (in an app they sit in mise's cache; the task knows where).
-  if (existsSync('mise.toml')) run('project:typecheck-tasks', 'change');
 }
 
 /** The checks that are plain functions (the *.unit.spec.ts files under tests): no build, no Worker, no browser. */
