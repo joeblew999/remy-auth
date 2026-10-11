@@ -258,7 +258,7 @@ que cada app, desde las tareas compartidas; `project:setup` instala el guardián
   aun así pregunta si debe aterrizar ha dejado de usar el flujo (propietario, 2026-10-10, después de que
   uno lo hiciera: «¿Está absolutamente claro cuándo te corresponde ejecutar cada paso?»).
 
-- Un área que parece mal: `mise run project:test:only -- <palabras>` (las comprobaciones de navegador
+- Un área que parece mal: `npm run test -- only <palabras>` (las comprobaciones de navegador
   cuyo título coincide, en y ar, ~30 s). Es la única ejecución de navegador que no es propiedad de un
   paso.
 - **El guardián** (`dev:guard`, un hook de Claude Code en cada comando de shell que ejecuta un agente) se
@@ -296,8 +296,8 @@ que cada app, desde las tareas compartidas; `project:setup` instala el guardián
   reproducir un job en rojo, una persona ejecuta `REMY_FLOW=hand mise run <su tarea>`, la misma tarea
   que ejecutó GitHub, ya que el workflow no contiene lógica propia (`project:verify-tooling` comprueba
   que exista cada tarea que un workflow nombra). Un agente lee el propio log de la ejecución
-  (`gh run view <id> --log-failed`) y ejecuta el área concreta (`mise run project:test:only --
-  <palabras>`). Informa de qué se probó y qué no; nunca llames verificado a un trabajo no probado.
+  (`gh run view <id> --log-failed`) y ejecuta el área concreta (`npm run test -- only <palabras>`).
+  Informa de qué se probó y qué no; nunca llames verificado a un trabajo no probado.
 - **Un landing que falla después del push aun así termina lo que puede, y dice dónde se detuvo.**
   Main se empuja antes que staging; cuando el despliegue de staging o su smoke en vivo falla,
   `dev:land` igualmente ejecuta la traducción (está en main, se debe de todos modos), y luego termina
@@ -416,4 +416,3 @@ landing. Nada de esto se hace a mano.
   GitHub en rojo escribe en el commit, nombrándose a sí mismo; `dev:land` dice cuando main está en rojo;
   `dev:promote` escribe en el commit qué se publicó; `dev:status` muestra todo esto a quien lo pregunte,
   y cada sesión de agente lo pregunta primero.
-</content>
