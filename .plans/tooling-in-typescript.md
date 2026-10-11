@@ -54,8 +54,11 @@ already does, and the scripts list is the documentation of what exists.
    under `node_modules/.cache/remy` where mise skipped unchanged sources; the app's generation step is
    its `package.json` "generate" script, run if present). `remy change` runs no mise task now;
    `project:verify-setup` with them, as `remy setup`'s end.
-3. **Cloudflare:** `cf:deploy`, `cf:staging`, `cf:wait`, `cf:versions`, `cf:urls`, `cf:preview`,
-   the provisioned check; `remy promote` and `remy land` call functions.
+3. **Cloudflare** (done 2026-10-11, `cloudflare.ts`): the deploy (build, the provisioned check,
+   upload, the wait for the version and the assets, the live smoke), the docs Worker's deploy, what
+   each deployment runs, the page URLs; `remy promote` and `remy status` call the functions, `remy land`
+   runs the staging deploy as a child so a failure there still lets the landing finish; `cf:preview`
+   calls the bin for its two helpers until its own slice.
 4. **Translations:** `i18n:check` and `i18n:translate` (the writer's lock, the page rules already in
    `tasks/i18n/docs/page.ts`), with Claude Code as a devDependency; the detached translation the
    flow's open gap asks for comes with it.

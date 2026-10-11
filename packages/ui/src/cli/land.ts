@@ -1,6 +1,7 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import { ended, span, type Landing, type Part } from './feedback.ts';
 import { describeRun, installed, latestRun, run, steps, where } from './flow.ts';
+import { remyCommand } from './config.ts';
 import { translationGaps } from './i18n.ts';
 import { internal } from './internal.ts';
 
@@ -56,7 +57,8 @@ console.log(`dev:land: main is ${landed.slice(0, 7)} and pushed; GitHub runs eve
 // machine, minutes for a few pages) comes last and nobody waits for it. A staging failure (the deploy
 // or its live smoke) does not stop the landing: main is pushed already and the translation is owed
 // regardless; the last line says the whole state and the step ends non-zero.
-const staging: Landing['staging'] = !process.env.STAGING_ORIGIN ? 'none' : task('cf:staging') ? 'up' : 'failed';
+const [remy, ...remyArgs] = remyCommand();
+const staging: Landing['staging'] = !process.env.STAGING_ORIGIN ? 'none' : spawnSync(remy!, [...remyArgs, 'cloudflare', 'staging'], { stdio: 'inherit' }).status === 0 ? 'up' : 'failed';
 lap('staging');
 if (staging === 'up') console.log(`dev:land: staging is up, ${span(parts.reduce((sum, part) => sum + part.ms, 0))} after the start. Production: npm run dev:promote.`);
 else if (staging === 'none') console.log('dev:land: no STAGING_ORIGIN in [env]; nothing deployed.');

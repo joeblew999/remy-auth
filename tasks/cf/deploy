@@ -1,28 +1,6 @@
 #!/usr/bin/env bash
 #MISE description="REMOTE, PRODUCTION: build with DEPLOY_ORIGIN as the public origin, upload to the authenticated Cloudflare account, wait until production serves the new version, then its live smoke check (~1 min). No tests before it: the flow decides what ran (dev:promote runs this after dev:land's check, staging and GitHub's heavy checks). Builds into dist/: not alongside a local level. cf:staging does the same for the staging environment"
 #MISE dir="{{config_root}}"
-set -euo pipefail
-: "${DEPLOY_ORIGIN:?cf:deploy needs DEPLOY_ORIGIN in [env]}"
-
-# No tests here: what ran before a deploy is the flow's decision (tasks/dev/flow.ts), not this task's.
-# With CLOUDFLARE_ENV set (cf:staging), the Cloudflare Vite plugin builds that named environment of the
-# Wrangler configuration, and the upload below is that environment's Worker; DEPLOY_ORIGIN is then its origin.
-# Before anything slow: a binding with no resource behind it stops the deploy (provisioned.ts).
-node "$(dirname "$0")/provisioned.ts"
-
-export PUBLIC_ORIGIN="$DEPLOY_ORIGIN"
-./node_modules/.bin/vite build
-# Nothing is created by a deploy: every binding of the built configuration names a resource that exists.
-node "$(dirname "$0")/provisioned.ts"
-
-# Wrangler records the deployed version in its structured output file; cf:wait reads it.
-output="$(mktemp)"
-trap 'rm -f "$output"' EXIT
-export WRANGLER_OUTPUT_FILE_PATH="$output"
-./node_modules/.bin/wrangler deploy
-node "$(dirname "$0")/wait.ts" "$DEPLOY_ORIGIN" "$output"
-echo "Live${CLOUDFLARE_ENV:+ ($CLOUDFLARE_ENV)}: $DEPLOY_ORIGIN"
-
-# The deploy proves itself with the tools, not by hand: the smoke checks against the live site.
-TEST_BASE_URL="$DEPLOY_ORIGIN" mise run project:test:live
-
+# In TypeScript now (packages/ui/src/cli/cloudflare.ts): this task forwards for whoever still types mise run, and goes with mise.
+if [ -f packages/ui/src/cli/remy.ts ]; then exec node packages/ui/src/cli/remy.ts cloudflare deploy "$@"; fi
+exec node ./node_modules/@joeblew999/remy-ui/cli/remy.js cloudflare deploy "$@"

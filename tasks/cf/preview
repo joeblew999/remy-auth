@@ -6,6 +6,7 @@
 # and Cloudflare's Previews are served through that same switch. A Worker of its own has its own
 # workers.dev address, needs no preview URLs, and `wrangler delete` removes it completely.
 set -euo pipefail
+remy() { if [ -f packages/ui/src/cli/remy.ts ]; then node packages/ui/src/cli/remy.ts "$@"; else node ./node_modules/@joeblew999/remy-ui/cli/remy.js "$@"; fi; }
 worker="$(node --input-type=module -e "import { unstable_readConfig } from 'wrangler'; console.log(unstable_readConfig({}).name ?? '')")"
 [ -n "$worker" ] || { echo "cf:preview: the Wrangler configuration has no Worker name" >&2; exit 1; }
 host="${DEPLOY_ORIGIN#https://}"
@@ -25,11 +26,11 @@ remove() { "$(dirname "$0")/preview-delete" "$name"; }
 export PUBLIC_ORIGIN="$origin"
 ./node_modules/.bin/vite build
 # Nothing is created by a deploy: every binding of the built configuration names a resource that exists.
-node "$(dirname "$0")/provisioned.ts"
+remy cloudflare provisioned
 output="$(mktemp)"
 export WRANGLER_OUTPUT_FILE_PATH="$output"
 ./node_modules/.bin/wrangler deploy --name "$name"
-node "$(dirname "$0")/wait.ts" "$origin" "$output"
+remy cloudflare wait "$origin" "$output"
 rm -f "$output"
 # A brand-new workers.dev name answers 404 from some places for a while: wait for ten answers in a row.
 ok=0

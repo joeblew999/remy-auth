@@ -2,7 +2,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { compose, type BranchFact, type CommitFact, type RunFact } from './feedback.ts';
 import { translationGaps } from './i18n.ts';
-import { internalOutput } from './internal.ts';
+import { versions } from './cloudflare.ts';
 
 export async function main(): Promise<void> {
 
@@ -25,7 +25,7 @@ const branches: BranchFact[] = read('-C', root, 'worktree', 'list', '--porcelain
   const [ahead, behind] = counts.split(/\s+/).map(Number);
   return { branch, path, ahead: ahead ?? 0, behind: behind ?? 0, base };
 });
-const deployments = process.env.DEPLOY_ORIGIN ? internalOutput('cf:versions', 'status')?.split('\n').filter(line => /^(ORIGIN|https?:)/.test(line)).join('\n') : undefined;
+const deployments = process.env.DEPLOY_ORIGIN ? (await versions()).table.split('\n').filter(line => /^(ORIGIN|https?:)/.test(line)).join('\n') : undefined;
 const translations = (await translationGaps(root)).length === 0 ? 'complete and current' : 'stale or missing (dev:land translates on main)';
 const pulls = JSON.parse(ask('gh', ['pr', 'list', '--json', 'number,title,author']) ?? '[]').map((pull: { number: number; title: string; author: { login: string } }) => ({ number: pull.number, title: pull.title, author: pull.author.login }));
 

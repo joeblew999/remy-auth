@@ -23,6 +23,7 @@ const commands: Record<string, () => Promise<Command>> = {
   check: () => import('./check.ts'),
   plans: () => import('./plans.ts'),
   i18n: () => import('./i18n.ts'),
+  cloudflare: () => import('./cloudflare.ts'),
 };
 
 const [name = '', ...args] = process.argv.slice(2);

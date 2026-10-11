@@ -51,8 +51,9 @@ run = [
 
 ["docs:deploy"]
 description = "REMOTE, PRODUCTION: build and deploy the docs Worker to DOCS_ORIGIN (~1 min), then docs:publish"
-dir = "{{config_root}}/docs"
-run = [{ task = "docs:build" }, "../node_modules/.bin/wrangler deploy -c dist/server/wrangler.json", { task = "docs:publish" }, "echo \"Live: $DOCS_ORIGIN/docs (product guide), $DOCS_ORIGIN/dev (developer docs), $DOCS_ORIGIN/reference (API reference), $DOCS_ORIGIN/llms.txt (AI tools; MCP servers at $DOCS_ORIGIN/dev/ai-tools)\""]
+dir = "{{config_root}}"
+# In TypeScript now (packages/ui/src/cli/cloudflare.ts): forwards for whoever still types mise run, and goes with mise.
+run = "if [ -f packages/ui/src/cli/remy.ts ]; then node packages/ui/src/cli/remy.ts cloudflare docs-deploy; else node ./node_modules/@joeblew999/remy-ui/cli/remy.js cloudflare docs-deploy; fi"
 
 ["docs:publish"]
 description = "REMOTE, PRODUCTION: make Ask AI's R2 bucket hold exactly the pages the live docs Worker serves, start an AI Search sync, then check the fixed questions find their pages (docs/content/questions.json); nothing when docs.config.ts has no `ask` (~1 min)"
