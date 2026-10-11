@@ -3,7 +3,7 @@
 // Google's. `only <words>` is the one browser run a step does not own: the checks whose title matches,
 // in the quick languages.
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, rmdirSync } from 'node:fs';
+import { mkdirSync, rmSync, rmdirSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { gate } from './allowed.ts';
@@ -21,13 +21,20 @@ const remote = (origin = process.env.TEST_BASE_URL ?? process.env.DEPLOY_ORIGIN)
   return { TEST_TARGET: 'remote', TEST_BASE_URL: origin };
 };
 
-/** One speed measurement at a time on this machine (Google's level): a second run waits for the lock rather than skewing the first. */
+/**
+ * One speed measurement at a time on this machine (Google's level): a second run waits for the lock
+ * rather than skewing the first. The lock is a directory; a file at its path (the mise-era flock, which
+ * kept a release waiting 42 minutes on 2026-10-11) or a directory older than half an hour (a run that
+ * died) is stale and taken over, and the wait says so every minute.
+ */
 async function withLevel2Lock<T>(work: () => T): Promise<T> {
   const lock = join(tmpdir(), 'remy-level2.lock');
+  const stale = () => { try { const info = statSync(lock); return !info.isDirectory() || Date.now() - info.mtimeMs > 30 * 60_000; } catch { return false; } };
   for (let waited = 0; ; waited++) {
-    try { mkdirSync(lock); break; } catch { if (waited === 0) console.log('test: another speed measurement runs on this machine; waiting for it.'); await new Promise(resolve => setTimeout(resolve, 2000)); }
+    if (stale()) { console.log(`test: taking over a stale lock at ${lock}`); rmSync(lock, { recursive: true, force: true }); }
+    try { mkdirSync(lock); break; } catch { if (waited % 30 === 0) console.log(`test: another speed measurement runs on this machine (${lock}); waiting for it.`); await new Promise(resolve => setTimeout(resolve, 2000)); }
   }
-  try { return work(); } finally { try { rmdirSync(lock); } catch { /* gone */ } }
+  try { return await work(); } finally { try { rmdirSync(lock); } catch { /* gone */ } }
 }
 
 /** Every check of ours in every language (level 1), on the production artifact in local Workers. */

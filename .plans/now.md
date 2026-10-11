@@ -74,15 +74,14 @@ Below this section is the history of how it got here.
      ([stability log](stability-log.md)). The step and the translator say what each part and each
      agent call took.
 
-2. **Release 0.14.0** ([thin-apps, phase D](thin-apps.md#phase-d-prepared-2026-09-29-waiting-for-the-owner)):
-   prepared on main; the owner runs `npm run dev:release` (every check, every language, Google, Core
-   Web Vitals on a preview, the tag and publish, ~6 min). It is also the first run of the phone speed
-   measurement with applied throttling (`packages/ui/src/checks.js`).
-
-3. **Consumers onto 0.14.0**: remy-auth-app with `mise run project:upgrade-ui -- 0.14.0` (it gets the
-   flow, the guard, the stamp, the product name); create `remy-auth-test` from the template. Each is
-   one worktree through the flow.
-
+2. **Release 0.15.0** ([thin-apps, phase D](thin-apps.md#phase-d-prepared-2026-09-29-waiting-for-the-owner)):
+   the first package with the `remy` bin (0.14.0 was prepared on main and never published; its changes
+   ship in it). `npm run dev:release` from a clean main: every check, every language, Google, Core Web
+   Vitals on a preview, the tag and publish, ~6 min; the owner handed it over 2026-10-11 ("its all yours").
+3. **Consumers onto 0.15.0**: remy-auth-app with `npm run upgrade -- 0.15.0` (the package and its CI
+   workflow's tag; it gets the flow, the guard, the stamp, the product name), its scripts and
+   `remy.config.ts` from `template/`, its `mise.toml` and own workflow gone; create `remy-auth-test` from
+   the template. Each is one worktree through the flow.
 4. **Auth, next slices** ([auth-service](auth-service.md#next-slices)): the app-trust comparison
    (OAuth tokens verified locally against a service binding, each proved small); the relation
    engine's write half (`grant`, `revoke`); a rule for server functions and routes outside the oRPC
