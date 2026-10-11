@@ -30,6 +30,11 @@ test('an installation ends with the installation\'s checks, never the browser su
   const setup = readFileSync('packages/ui/src/cli/setup.ts', 'utf8');
   expect(setup.indexOf('await verifySetup();')).toBeGreaterThan(setup.indexOf('guard([]);'));
   expect(readFileSync('packages/ui/src/cli/verify.ts', 'utf8')).toMatch(/gate\('project:verify'\);\n\s*await verifySetup\(\);/);
-  expect(readFileSync('packages/ui/src/cli/packages.ts', 'utf8')).toMatch(/export async function upgrade\(\)[\s\S]*?await verifySetup\(\);/);
+  const packages = readFileSync('packages/ui/src/cli/packages.ts', 'utf8');
+  expect(packages).toMatch(/export async function upgrade\(\)[\s\S]*?await verifySetup\(\);/);
+  // The release marks itself before it runs the gate, or the gate refuses it.
+  const release = packages.slice(packages.indexOf('export async function release()'));
+  expect(release.indexOf("process.env.REMY_FLOW ??= 'release'")).toBeGreaterThan(0);
+  expect(release.indexOf("process.env.REMY_FLOW ??= 'release'")).toBeLessThan(release.indexOf('await verify();'));
   expect(readFileSync('packages/ui/src/cli/upgrade.ts', 'utf8')).toMatch(/guard\(\[\]\);\n\s*await verifySetup\(\);/);
 });

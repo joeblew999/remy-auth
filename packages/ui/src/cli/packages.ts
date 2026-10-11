@@ -155,12 +155,14 @@ export function tag(): void {
  * locally and Core Web Vitals on a Cloudflare preview), then the tag. About five minutes.
  */
 export async function release(): Promise<void> {
+  // The release is what runs the gated commands: said first, before the gate asks (2026-10-11, the first
+  // release refused itself with the marker set after it).
+  process.env.REMY_FLOW ??= 'release';
   if ((await translationGaps()).length) fail('release: translations are incomplete or stale (npx remy i18n check); land, which translates, first.');
   bumped();
   await verify();
   // Not silent: npm would hand loglevel=silent to every nested npm in the script.
   tool('npm', ['run', '--if-present', 'release-checks'], { what: 'release-checks' });
-  process.env.REMY_FLOW ??= 'release';
   await google();
   await cwv('release');
   tag();
