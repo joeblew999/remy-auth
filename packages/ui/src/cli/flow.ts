@@ -70,7 +70,9 @@ export type Run = { status: string; conclusion: string | null; url: string; head
  */
 export function latestRun(commit?: string): Run | null | undefined {
   const select = commit ? ['--commit', commit] : ['--branch', 'main'];
-  const result = spawnSync('gh', ['run', 'list', ...select, '--limit', '1', '--json', 'status,conclusion,url,headSha'], { encoding: 'utf8', timeout: 15_000 });
+  // Push runs only: Dependabot's run on a commit (event "dynamic") says nothing about the checks (on
+  // 2026-10-11 it read as a green verdict on a commit whose checks had failed).
+  const result = spawnSync('gh', ['run', 'list', ...select, '--event', 'push', '--limit', '1', '--json', 'status,conclusion,url,headSha'], { encoding: 'utf8', timeout: 15_000 });
   if (result.status !== 0) return undefined;
   const [run] = JSON.parse(result.stdout || '[]') as Run[];
   return run ?? null;

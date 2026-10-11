@@ -1,6 +1,6 @@
 {
   "name": "@joeblew999/remy-showcase",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "remy-auth's showcase pages on the Remy platform: the home and formats pages, the app pages (formats, clock, demo, location, settings, account), their navigation, the demo reservation and their checks. For the apps that show them; the platform (@joeblew999/remy-ui) knows nothing of it",
   "type": "module",
   "repository": {
@@ -34,6 +34,16 @@
     "./parts/time-zones/page": "./src/parts/time-zones/page.tsx"
   },
   "peerDependencies": {
-    "@joeblew999/remy-ui": ">=0.15.0"
+    "@joeblew999/remy-ui": ">=0.15.1"
+  },
+  "dependencies": {
+    "@playwright/test": "1.63.0",
+    "@tanstack/react-form": "1.33.5",
+    "@tanstack/react-query": "5.103.2",
+    "@tanstack/react-router": "1.170.39",
+    "@tanstack/react-start": "1.168.58",
+    "lucide-react": "1.48.0",
+    "react": "19.3.0",
+    "zod": "4.6.5"
   }
 }

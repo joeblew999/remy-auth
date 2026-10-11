@@ -17,7 +17,7 @@ spawnSync('git', ['-C', root, 'fetch', '-q', 'origin', 'main'], { timeout: 15_00
 const base = read('-C', root, 'rev-parse', '--verify', '-q', 'origin/main') ? 'origin/main' : 'main';
 
 const commits: CommitFact[] = read('-C', root, 'log', '-5', '--format=%H\t%s\t%an\t%cr', base).split('\n').filter(Boolean).map(line => { const [sha, subject, author, when] = line.split('\t'); return { sha: sha!, subject: subject!, author: author!, when: when! }; });
-const runs: RunFact[] = JSON.parse(ask('gh', ['run', 'list', '--branch', 'main', '--limit', '10', '--json', 'headSha,status,conclusion,url']) ?? '[]');
+const runs: RunFact[] = JSON.parse(ask('gh', ['run', 'list', '--branch', 'main', '--event', 'push', '--limit', '10', '--json', 'headSha,status,conclusion,url']) ?? '[]');
 const branches: BranchFact[] = read('-C', root, 'worktree', 'list', '--porcelain').split('\n\n').filter(Boolean).map(block => {
   const path = /^worktree (.+)$/m.exec(block)?.[1] ?? '';
   const branch = (/^branch refs\/heads\/(.+)$/m.exec(block)?.[1]) ?? '(detached)';

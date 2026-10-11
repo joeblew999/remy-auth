@@ -76,7 +76,7 @@ scripts; the rest are `remy` commands (`npx remy <command>`), one module each in
 | `npm run packages -- check\|upgrade\|pack\|notes\|bumped\|publish\|tag\|release` | A repository that publishes packages ([the command line](./tasks.md#a-repository-that-publishes-packages)) |
 | `npx remy cloudflare deploy\|staging\|docs-deploy\|versions\|urls\|preview\|preview-delete` | Deployments, what each is running, an app's page URLs, a throwaway check Worker ([the command line](./tasks.md#cloudflare)) |
 | `npm run logs`, `errors`, `wrangler`, `npm run observe -- events\|ai-usage\|ai-check\|gateway` | Live logs, the Cloudflare CLI, stored logs and the AI's usage, setup and gateway (below) |
-| `npm run docs -- dev\|build\|check\|test [remote]\|preview\|answers on\|off\|publish\|provision\|init\|observe` | The docs Worker, `@joeblew999/remy-ui`'s, over an app's `docs/` ([writing docs](./writing-docs.mdx)); remy-auth alone: `npm run docs:cli`, the Fumadocs CLI in the package |
+| `npm run docs -- dev\|build\|check\|test [remote]\|preview\|answers on\|off\|publish\|questions\|provision\|init\|observe` | The docs Worker, `@joeblew999/remy-ui`'s, over an app's `docs/` ([writing docs](./writing-docs.mdx)); remy-auth alone: `npm run docs:cli`, the Fumadocs CLI in the package |
 | `npx remy i18n check [messages\|docs] [--list]`, `i18n translate` | Translations: the offline checks (a warning in the check, the gate at a release), the one writer `dev:land` runs on main ([one writer](./how-we-work.md#translations-one-writer)) |
 | `npm run plans -- status\|check\|close\|park\|open` | The plans rule ([plans](./how-we-work.md#plans-few-short-closed)) |
 | `npx remy skills install\|list\|remove`, `npx remy mcp register\|verify\|status`, `npx remy rules` | The pinned agent skills, MCP registration, the rules block in an app's `AGENTS.md` (below) |
@@ -325,7 +325,8 @@ exist only on Cloudflare (AI Search has no local version). Every command says in
 whether it is local or remote (and production).
 
 ```sh
-npm run docs -- publish                          # REMOTE, PRODUCTION: bucket = docs pages, sync, fixed questions (dev:promote runs it)
+npm run docs -- publish                          # REMOTE, PRODUCTION: bucket = docs pages, the index's sync waited for, then the fixed questions (dev:promote runs it)
+npm run docs -- questions                        # REMOTE: the fixed questions alone (docs/content/questions.json), search only, no answer written
 CLOUDFLARE_ENV=ask npm run docs -- dev           # LOCAL docs Worker, answers from the live index
 npm run docs -- answers off                      # REMOTE, PRODUCTION: emergency stop, seconds, no build
 npm run docs -- answers on                       # REMOTE, PRODUCTION: resume

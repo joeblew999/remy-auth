@@ -10,6 +10,10 @@ const npm = (...args: string[]) => execFileSync('npm', args, { stdio: ['ignore',
 npm('pkg', 'set', `version=${version}`, '--workspace', '@joeblew999/remy-ui');
 npm('pkg', 'set', `peerDependencies.@joeblew999/remy-ui=>=${version}`, '--workspace', '@joeblew999/remy-showcase');
 npm('pkg', 'set', `peerDependencies.@joeblew999/remy-ui=>=${version}`, '--workspace', '@joeblew999/remy-auth-contract');
+// The showcase declares what it imports, at the platform's exact versions (tests/unit/showcase-deps.unit.spec.ts).
+const platform = JSON.parse(readFileSync('packages/ui/package.json', 'utf8')).dependencies as Record<string, string>;
+const showcase = JSON.parse(readFileSync('packages/showcase/package.json', 'utf8')).dependencies as Record<string, string>;
+for (const name of Object.keys(showcase)) if (platform[name] && platform[name] !== showcase[name]) npm('pkg', 'set', `dependencies.${name}=${platform[name]}`, '--workspace', '@joeblew999/remy-showcase');
 npm('install', '--package-lock-only', '--no-audit', '--no-fund', '--loglevel=error');
 execFileSync('npm', ['pkg', 'set', `dependencies.@joeblew999/remy-ui=${version}`], { cwd: 'template', stdio: ['ignore', 'ignore', 'inherit'] });
 const retag = (file: string, pattern: RegExp) => { if (!existsSync(file)) return; writeFileSync(file, readFileSync(file, 'utf8').replace(pattern, `$1v${version}`)); };

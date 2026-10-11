@@ -9,6 +9,7 @@ import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { publish } from './docs.ts';
 
 // A declaration, not a constant: tsc narrows after a call only to a function declared with its never type.
 function fail(message: string): never { console.error(message); process.exit(1); }
@@ -120,17 +121,14 @@ export async function deploy(environment?: 'staging'): Promise<void> {
 }
 
 /** The docs Worker: build, deploy, then publish the pages to Ask AI's index where the app has one. */
-export function deployDocs(): void {
+export async function deployDocs(): Promise<void> {
   if (!existsSync('docs')) return;
   const docsOrigin = process.env.DOCS_ORIGIN;
   if (!docsOrigin) fail('deploy docs: origins.docs is not in remy.config.ts');
-  const scripts = 'node_modules/@joeblew999/remy-ui/src/docs/scripts';
   tool('vite', ['build'], { cwd: 'docs' });
   tool('wrangler', ['deploy', '-c', 'dist/server/wrangler.json'], { cwd: 'docs' });
-  for (const script of ['docs-publish.mjs', 'docs-questions.mjs']) {
-    const result = spawnSync(process.execPath, [join(scripts, script)], { stdio: 'inherit' });
-    if (result.status !== 0) fail(`deploy docs: ${script} failed`);
-  }
+  // Ask AI's pages, from the Worker just deployed: the bucket, the index's sync waited for, the fixed questions (docs.ts).
+  await publish();
   console.log(`Live: ${docsOrigin}/docs (product guide), ${docsOrigin}/dev (developer docs), ${docsOrigin}/reference (API reference), ${docsOrigin}/llms.txt`);
 }
 

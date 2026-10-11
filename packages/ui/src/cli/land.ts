@@ -60,7 +60,7 @@ const [remy, ...remyArgs] = remyCommand();
 const staging: Landing['staging'] = !process.env.STAGING_ORIGIN ? 'none' : spawnSync(remy!, [...remyArgs, 'cloudflare', 'staging'], { stdio: 'inherit' }).status === 0 ? 'up' : 'failed';
 lap('staging');
 if (staging === 'up') console.log(`dev:land: staging is up, ${span(parts.reduce((sum, part) => sum + part.ms, 0))} after the start. Production: npm run dev:promote.`);
-else if (staging === 'none') console.log('dev:land: no STAGING_ORIGIN in [env]; nothing deployed.');
+else if (staging === 'none') console.log('dev:land: no origins.staging in remy.config.ts; nothing deployed.');
 else console.error('dev:land: staging failed (the lines above say whether the deploy or the live smoke); main is pushed, so the translation runs now and the last line says the state.');
 
 // Translation, last: only when something is stale or missing (strict check: exit 1 says so), so a

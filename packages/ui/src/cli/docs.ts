@@ -4,7 +4,8 @@
 // pages published to the index, what Ask AI needs on Cloudflare (printed, created never), its logs and
 // its gateway (observe.ts, with the docs Worker's generated configuration), and starting an app's docs.
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { main as observe } from './observe.ts';
@@ -12,6 +13,27 @@ import { main as observe } from './observe.ts';
 function fail(message: string): never { console.error(message); process.exit(1); }
 const docs = () => { if (!existsSync('docs')) fail('this app has no docs/ (remy docs init <ref> starts one)'); return join(process.cwd(), 'docs'); };
 const bin = (name: string) => join(process.cwd(), 'node_modules', '.bin', name);
+/** Wrangler's answer to a command, as text; throws with its stderr when it fails. */
+const wrangler = (...args: string[]): string => execFileSync(bin('wrangler'), args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+
+type DocsConfig = { repository: string; branch: string; service: string; ask?: { instance: string; bucket: string; gateway: string; rateLimitNamespace: string } };
+type Question = { question: string; finds: string };
+/**
+ * The app's docs as the publish and the questions read them from the file system: its docs/docs.config.ts
+ * (Node runs TypeScript itself), the docs table over its docs/content (the package's table-core, the one the
+ * docs Worker builds its pages and reads citations with) and its fixed Ask AI questions (docs/content/questions.json).
+ */
+async function appDocs(): Promise<{ docsConfig: DocsConfig; table: import('../docs/docs/table-core.js').DocsTable; questions: Question[] }> {
+  const root = process.cwd();
+  const json = (file: string) => JSON.parse(readFileSync(join(docs(), file), 'utf8'));
+  const { docsConfig } = await import(pathToFileURL(join(docs(), 'docs.config.ts')).href) as { docsConfig: DocsConfig };
+  const { docsTableOf } = await import(pathToFileURL(join(root, 'node_modules', '@joeblew999', 'remy-ui', 'src', 'docs', 'docs', 'table-core.js')).href) as typeof import('../docs/docs/table-core.js');
+  const table = docsTableOf({
+    users: { meta: json('content/users/meta.json'), i18n: json('content/users/i18n.json') },
+    dev: { meta: json('content/dev/meta.json'), i18n: json('content/dev/i18n.json') },
+  }, docsConfig);
+  return { docsConfig, table, questions: json('content/questions.json') as Question[] };
+}
 function tool(command: string, args: string[], options: { env?: Record<string, string>; input?: string } = {}): void {
   const result = spawnSync(command, args, { cwd: docs(), stdio: [options.input === undefined ? 'inherit' : 'pipe', 'inherit', 'inherit'], env: { ...process.env, ...options.env }, input: options.input });
   if (result.status !== 0) fail(`${command} ${args.join(' ')}: failed`);
@@ -48,12 +70,114 @@ export function answers(state: 'on' | 'off'): void {
   if (state === 'off') tool(bin('wrangler'), ['secret', 'put', 'ASK_PAUSED', '-c', '.remy-docs/wrangler.json'], { input: '1' });
   else tool(bin('wrangler'), ['secret', 'delete', 'ASK_PAUSED', '-c', '.remy-docs/wrangler.json']);
 }
-/** Make Ask AI's bucket hold exactly the pages the live docs Worker serves, start a sync, check the fixed questions find their pages; nothing without `ask`. */
-export function publish(): void {
-  for (const script of ['docs-publish.mjs', 'docs-questions.mjs']) {
-    const result = spawnSync(process.execPath, [join(process.cwd(), 'node_modules', '@joeblew999', 'remy-ui', 'src', 'docs', 'scripts', script)], { stdio: 'inherit' });
-    if (result.status !== 0) fail(`docs publish: ${script} failed`);
+/**
+ * Ask AI's pages (.plans/docs-ai-sync.md, route B): make the R2 bucket hold exactly the current docs, one
+ * file per page (<site>/<lang>/<page>.md, each fetched from the live docs Worker as Fumadocs renders it for
+ * tools: frontmatter out, includes resolved, in every language the page has its own text in), delete what
+ * is no longer a page (Wrangler cannot list a bucket: Cloudflare's R2 API does, with Wrangler's login), ask
+ * AI Search to sync now and wait for that sync (minutes), then check the fixed questions find their pages
+ * (questions). Nothing without `ask`. Production, after the docs deploy (dev:promote runs it).
+ */
+export async function publish(): Promise<void> {
+  const { docsConfig, table } = await appDocs();
+  if (!docsConfig.ask) { console.log('docs publish: Ask AI is off (docs.config.ts has no `ask`); nothing to publish.'); return; }
+  const { bucket, instance } = docsConfig.ask;
+  const origin = process.env.DOCS_ORIGIN;
+  if (!origin) fail('docs publish: DOCS_ORIGIN (origins.docs in remy.config.ts) is the live docs Worker whose .md pages it publishes');
+  const token = (JSON.parse(wrangler('auth', 'token', '--json')) as { token: string }).token;
+  const account = (JSON.parse(wrangler('whoami', '--json')) as { accounts: { id: string }[] }).accounts[0]!.id;
+  console.log(`Target: Cloudflare (remote), R2 bucket ${bucket} (PRODUCTION), then AI Search ${instance}`);
+  // Keys from the one rule the answer code reads back for citations (docsObjectKey): <site>/<lang>/<page>.md.
+  const { docsLangs, docsObjectKey, docsTable, docsUrl } = table;
+  const wanted = new Map(docsTable.flatMap(row => docsLangs(row, existsSync).map(lang =>
+    [docsObjectKey(row.site, row.slug, lang), `${origin}${docsUrl(row.site, row.slug || 'index', lang)}.md`] as const)));
+  const dir = mkdtempSync(join(tmpdir(), 'docs-publish-'));
+  for (const [key, url] of wanted) {
+    const response = await fetch(url);
+    if (!response.ok) fail(`docs publish: ${url}: ${response.status}`);
+    const file = join(dir, key.replaceAll('/', '_'));
+    writeFileSync(file, await response.text());
+    wrangler('r2', 'object', 'put', `${bucket}/${key}`, '--file', file, '--content-type', 'text/markdown', '--remote');
+    console.log(`  put     ${key} <- ${url}`);
   }
+  const listed: string[] = [];
+  for (let cursor: string | undefined; ;) {
+    const url = new URL(`https://api.cloudflare.com/client/v4/accounts/${account}/r2/buckets/${bucket}/objects`);
+    if (cursor) url.searchParams.set('cursor', cursor);
+    const body = await (await fetch(url, { headers: { Authorization: `Bearer ${token}` } })).json() as
+      { success: boolean; errors?: unknown; result: { key: string }[]; result_info?: { cursor?: string; is_truncated?: boolean } };
+    if (!body.success) fail(`docs publish: list ${bucket}: ${JSON.stringify(body.errors)}`);
+    listed.push(...body.result.map(object => object.key));
+    cursor = body.result_info?.cursor;
+    if (!body.result_info?.is_truncated) break;
+  }
+  for (const key of listed.filter(key => !wanted.has(key))) {
+    wrangler('r2', 'object', 'delete', `${bucket}/${key}`, '--remote');
+    console.log(`  deleted ${key} (no longer a docs page)`);
+  }
+  console.log(`${bucket} holds exactly the ${wanted.size} docs pages (English and translations).`);
+  await synced(instance);
+  await questions();
+}
+
+type SyncJob = { id: string; source: string; started_at: string; ended_at: string | null };
+const syncJobs = (instance: string): SyncJob[] => JSON.parse(wrangler('ai-search', 'jobs', 'list', instance, '--json')) as SyncJob[];
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+/**
+ * Ask AI Search to sync the bucket now, then wait until that sync has ended: answers and the questions
+ * check use the new files only once it has (a sync of remy-auth's docs takes three to four minutes; on
+ * 2026-10-11 the questions were asked seconds after the sync started, against the old index, and failed).
+ * When a sync is already running (the hourly one, or the first after creation) it picks the files up, so
+ * that one is waited for instead.
+ */
+async function synced(instance: string): Promise<void> {
+  const before = new Set(syncJobs(instance).map(job => job.id));
+  let created = true;
+  try {
+    wrangler('ai-search', 'jobs', 'create', instance);
+    console.log(`Sync started for ${instance}.`);
+  } catch (error) {
+    created = false;
+    const reason = String((error as { stderr?: string }).stderr ?? (error as Error).message).split('\n').find(line => /error|✘/i.test(line)) ?? 'unknown';
+    console.log(`No new sync started (${reason.replace(/\x1b\[[0-9;]*m/g, '').trim()}); waiting for the running one.`);
+  }
+  const deadline = Date.now() + 15 * 60_000;
+  for (let polls = 0; ; polls++) {
+    const jobs = syncJobs(instance);
+    const watched = created ? jobs.filter(job => !before.has(job.id)) : jobs.filter(job => !job.ended_at);
+    if (watched.length > 0 && watched.every(job => job.ended_at)) break;
+    if (!created && watched.length === 0) break;
+    if (Date.now() > deadline) fail(`docs publish: the sync of ${instance} is still running after 15 minutes (npm run wrangler -- ai-search jobs list ${instance})`);
+    if (polls % 6 === 0) console.log(`  waiting for the sync of ${instance} (${watched.length ? 'running' : 'not listed yet'})…`);
+    await sleep(10_000);
+  }
+  console.log(`Sync of ${instance} finished; answers use the new files.`);
+}
+
+/**
+ * The app's fixed questions (docs/content/questions.json): each must find its docs page among the top three
+ * results of the AI Search index. Search only (`wrangler ai-search search`): no answer is written, so this
+ * costs next to nothing and says whether retrieval is right. Results are R2 files (<site>/<lang>/<page>.md);
+ * the docs table maps each back to its page, as the answer code does. Nothing without `ask`.
+ */
+export async function questions(): Promise<void> {
+  const { docsConfig, table, questions: fixed } = await appDocs();
+  const instance = docsConfig.ask?.instance;
+  if (!instance) { console.log('docs questions: Ask AI is off (docs.config.ts has no `ask`).'); return; }
+  const { docsObjectForKey, docsUrl } = table;
+  const search = (query: string) => JSON.parse(wrangler('ai-search', 'search', instance, '--query', query, '--json')) as { chunks: { item: { key: string } }[] };
+  const pageOf = (chunk: { item: { key: string } }) => { const object = docsObjectForKey(chunk.item.key); return object ? docsUrl(object.row.site, object.row.slug, object.lang) : `(not a docs page: ${chunk.item.key})`; };
+  console.log(`Target: Cloudflare (remote), AI Search ${instance}: ${fixed.length} questions, search only (no answers written)`);
+  let failed = 0;
+  for (const { question, finds } of fixed) {
+    const page = finds.split('#')[0]!;
+    const pages = [...new Set(search(question).chunks.map(pageOf))];
+    const rank = pages.indexOf(page) + 1;
+    const ok = rank > 0 && rank <= 3;
+    if (!ok) failed++;
+    console.log(`  ${ok ? 'ok  ' : 'FAIL'}  ${question} -> ${page} ${rank ? `(rank ${rank})` : '(not found)'}${ok ? '' : `; top: ${pages.slice(0, 3).join(', ')}`}`);
+  }
+  if (failed) fail(`docs questions: ${failed} of ${fixed.length} questions did not find their page`);
 }
 /** What this app's Ask AI needs on Cloudflare, from docs.config.ts's `ask`, as the commands that create it. Creates nothing: that costs money and is the owner's. */
 export async function provision(): Promise<void> {
@@ -85,6 +209,7 @@ export async function main(args: string[]): Promise<void> {
     case 'preview': return preview();
     case 'answers': { if (rest[0] !== 'on' && rest[0] !== 'off') fail('remy docs answers on|off'); return answers(rest[0]); }
     case 'publish': return publish();
+    case 'questions': return questions();
     case 'provision': return provision();
     case 'init': return init(rest[0]);
     case 'observe': { generated(); process.env.REMY_WRANGLER_CONFIG = join(docs(), '.remy-docs', 'wrangler.json'); process.chdir(docs()); return observe(rest); }

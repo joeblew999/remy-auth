@@ -1,6 +1,6 @@
 {
   "name": "@joeblew999/remy-auth-contract",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "remy-auth's API contract: oRPC routes with Zod 4 input, output and error schemas, for the server that implements it and every client that calls it",
   "type": "module",
   "repository": {
@@ -21,7 +21,7 @@
   },
   "peerDependencies": {
     "@joeblew999/remy-showcase": ">=0.1.0",
-    "@joeblew999/remy-ui": ">=0.15.0"
+    "@joeblew999/remy-ui": ">=0.15.1"
   },
   "dependencies": {
     "@orpc/contract": "2.0.0-beta.42",

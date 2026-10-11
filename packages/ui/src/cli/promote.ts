@@ -21,7 +21,7 @@ else if (checks.conclusion !== 'success') { console.error(`dev:promote: GitHub's
 else console.log(`dev:promote: GitHub's checks passed, ${describeRun(checks)}`);
 installed();
 await deploy();
-deployDocs();
+await deployDocs();
 console.log((await versions()).table);
 // The commit page says what went live (GitHub tells the commit's author); cf:versions stays the truth of now.
 const origin = process.env.DEPLOY_ORIGIN;

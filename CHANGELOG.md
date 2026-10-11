@@ -6,6 +6,24 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.15.1] - 2026-10-11
+
+### Changed
+- `remy docs publish` is TypeScript in the command line (the three `docs/scripts/*.mjs` are gone) and
+  waits for the index's sync it started before asking the fixed questions; `remy docs questions` asks
+  them alone. On 2026-10-11 the questions ran seconds after the sync started, against the old index.
+- `remy.config.ts` alone sets the origins and the release (`DEPLOY_ORIGIN`, `STAGING_ORIGIN`,
+  `DOCS_ORIGIN`, their `VITE_*`, `RELEASE_*`): a value left in the shell by another project is removed,
+  where it used to win. The ports still take a value given in the shell.
+- GitHub's verdict on a commit (`dev:status`, `dev:change`, `dev:promote`) is its push run's; a
+  Dependabot run on the same commit no longer reads as green.
+- The check's route tree part also reruns when `src/start.ts` changes (the tree registers the Start
+  instance's types).
+- `@joeblew999/remy-showcase` 0.1.1 declares what it imports, at the platform's exact versions (a unit
+  check holds them equal; `ui:version` keeps them so): in an app whose lock put zod 3 at the top of
+  `node_modules`, `zod/mini` resolved to it and the build failed. `@joeblew999/remy-auth-contract` 0.4.1
+  (its peer floor).
+
 ## [0.15.0] - 2026-10-11
 
 0.14.0 was prepared on main and never published; its changes ship here.

@@ -57,11 +57,16 @@ export function remyCommand(cwd = process.cwd()): string[] {
 /** The environment the steps and the tasks read, from the config, set where the shell did not. */
 export async function configure(cwd = process.cwd()): Promise<RemyProject> {
   const config = await project(cwd);
-  const set = (name: string, value: string | number | undefined) => { if (value !== undefined && process.env[name] === undefined) process.env[name] = String(value); };
-  set('DEPLOY_ORIGIN', config.origins?.production); set('VITE_DEPLOY_ORIGIN', config.origins?.production);
-  set('STAGING_ORIGIN', config.origins?.staging); set('VITE_STAGING_ORIGIN', config.origins?.staging);
-  set('DOCS_ORIGIN', config.origins?.docs); set('VITE_DOCS_ORIGIN', config.origins?.docs);
-  set('RELEASE_PACKAGE', config.release?.package); set('RELEASE_TITLE', config.release?.title);
+  // The origins and the release are remy.config.ts's alone: set from it, or removed, so a value left in the
+  // shell by another project steers nothing here (on 2026-10-11 a shell still carrying remy-auth's
+  // mise-era [env] made remy-auth-app's landing deploy a staging Worker and wait on remy-auth's).
+  const own = (name: string, value: string | undefined) => { if (value === undefined) delete process.env[name]; else process.env[name] = value; };
+  own('DEPLOY_ORIGIN', config.origins?.production); own('VITE_DEPLOY_ORIGIN', config.origins?.production);
+  own('STAGING_ORIGIN', config.origins?.staging); own('VITE_STAGING_ORIGIN', config.origins?.staging);
+  own('DOCS_ORIGIN', config.origins?.docs); own('VITE_DOCS_ORIGIN', config.origins?.docs);
+  own('RELEASE_PACKAGE', config.release?.package); own('RELEASE_TITLE', config.release?.title);
+  // The ports: a worktree's own, else the config's; a port given in the shell wins (two checkouts on one machine).
+  const set = (name: string, value: number) => { if (process.env[name] === undefined) process.env[name] = String(value); };
   const name = worktreeName(cwd);
   const ports = name ? portsFor(name) : { preview: config.ports?.preview ?? 4173, docsPreview: config.ports?.docsPreview ?? 4174 };
   set('PREVIEW_PORT', ports.preview); set('DOCS_PREVIEW_PORT', ports.docsPreview);

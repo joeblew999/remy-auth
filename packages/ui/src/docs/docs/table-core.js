@@ -3,7 +3,7 @@
 // languages). The sites themselves read everything from the loaders (lib/source.ts). Layout (the app's
 // docs/content/<users|dev>/, paths from the repository root): <page>.md or .mdx in the site's default
 // language, a translation beside it as <page>.<lang>.md(x). Pure: the Worker gives it the app's files
-// through Vite (table.js), the Node scripts from the file system (scripts/app-table.mjs).
+// through Vite (table.js), the command line from the file system (cli/docs.ts: publish, questions).
 
 /** The docs table over one app's sites and config. */
 export function docsTableOf({ users, dev }, docsConfig) {

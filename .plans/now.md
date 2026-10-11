@@ -74,14 +74,25 @@ Below this section is the history of how it got here.
      ([stability log](stability-log.md)). The step and the translator say what each part and each
      agent call took.
 
-2. **Release 0.15.0** ([thin-apps, phase D](thin-apps.md#phase-d-prepared-2026-09-29-waiting-for-the-owner)):
-   the first package with the `remy` bin (0.14.0 was prepared on main and never published; its changes
-   ship in it). `npm run dev:release` from a clean main: every check, every language, Google, Core Web
-   Vitals on a preview, the tag and publish, ~6 min; the owner handed it over 2026-10-11 ("its all yours").
-3. **Consumers onto 0.15.0**: remy-auth-app with `npm run upgrade -- 0.15.0` (the package and its CI
-   workflow's tag; it gets the flow, the guard, the stamp, the product name), its scripts and
-   `remy.config.ts` from `template/`, its `mise.toml` and own workflow gone; create `remy-auth-test` from
-   the template. Each is one worktree through the flow.
+2. ~~**Release 0.15.0**~~ done 2026-10-11 ([thin-apps, phase D](thin-apps.md#phase-d-prepared-2026-09-29-waiting-for-the-owner)):
+   `npm run dev:release` (the owner handed it over: "its all yours"): tag `v0.15.0` on `0dbed8d`, the three
+   packages published, GitHub's run on the tag green on every job, then `npm run dev:promote`: production
+   and the docs Worker on `0dbed8d` (05:24). The promote's docs step ended red on the fixed questions,
+   asked seconds after the index's sync had started: item 3a.
+3. **Consumers onto the release**: remy-auth-app moved 2026-10-11 (`fc98a2d` on its main: the scripts,
+   `remy.config.ts`, the workflow at `v0.15.0`, mise gone, the showcase from `@joeblew999/remy-showcase`,
+   `defineRemyApp`, `remyApp()`, three check calls, dependencies down to the three packages). Its GitHub run
+   is red at `npm ci`: GitHub Packages refuses `@joeblew999/remy-showcase` to its workflow (403), as it
+   refused the contract two weeks ago; the package's "Manage Actions access" must grant the repository, a
+   setting on the package's page (owner only, below). Then its `npm run dev:promote` (the first on the
+   flow), and `remy-auth-test` from the template. What the move found is item 3a.
+   - a. **0.15.1** (on main 2026-10-11, to release): `remy docs publish` in TypeScript (the three
+     `.mjs` gone) waiting for the sync before the questions, and `remy docs questions`; `remy.config.ts`
+     owns the origins (a shell still carrying remy-auth's mise-era `[env]` made remy-auth-app's landing
+     deploy a staging Worker, deleted, and wait on remy-auth's); GitHub's verdict from push runs only
+     (Dependabot's run read as green on a red commit); the showcase declares its dependencies (zod 3 at
+     the top of remy-auth-app's grown lock broke `zod/mini`; a fresh lock and the declaration fix it); the
+     route tree part reruns on `src/start.ts`. Then remy-auth-app onto 0.15.1 with `npm run upgrade -- 0.15.1`.
 4. **Auth, next slices** ([auth-service](auth-service.md#next-slices)): the app-trust comparison
    (OAuth tokens verified locally against a service binding, each proved small); the relation
    engine's write half (`grant`, `revoke`); a rule for server functions and routes outside the oRPC

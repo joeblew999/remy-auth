@@ -69,8 +69,8 @@ export function generate(): void {
   if (result.status !== 0) { console.error('generate: the package.json "generate" script failed'); process.exit(result.status ?? 1); }
 }
 
-/** src/routeTree.gen.ts, regenerated when a route file or the parts list changed (TanStack Start's plugin writes it during a build). */
-export const routes = (): void => whenChanged('routes', ['src/routes/**/*', 'src/parts.json'], () => tool('vite', ['build']));
+/** src/routeTree.gen.ts, regenerated when a route file, the parts list or the Start instance (whose types it registers) changed (TanStack Start's plugin writes it during a build). */
+export const routes = (): void => whenChanged('routes', ['src/routes/**/*', 'src/parts.json', 'src/start.ts'], () => tool('vite', ['build']));
 
 /** Generate, Worker types, then the app's TypeScript (the command line's included: it is in the package's src). */
 export function types(): void {
