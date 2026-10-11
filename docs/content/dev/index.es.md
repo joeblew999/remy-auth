@@ -64,6 +64,9 @@ Cómo iniciar, reanudar y recargar Codex o Claude Code, en VS Code o en una term
 
 ## Comandos cotidianos [#everyday-commands]
 
+Los comandos cotidianos, iguales en todas las apps de la plataforma (los scripts de `package.json`,
+ejecutados por el bin `remy` del paquete):
+
 | Tarea | Comando |
 | --- | --- |
 | Ver qué está pasando | `npm run dev:status` |
