@@ -114,13 +114,16 @@ export function publish(options: { release?: string; dryRun?: boolean } = {}): v
       const npmrc = join(scratch, 'npmrc');
       writeFileSync(npmrc, `//${host}/:_authToken=${token}\n`);
       const withRc = { ...env, NPM_CONFIG_USERCONFIG: npmrc };
+      // As flags, not environment: under an npm run, the child inherits npm_config_userconfig (the user's
+      // ~/.npmrc) and loglevel from the parent npm, which beat the environment (2026-10-11: the first
+      // release's publish was refused its own token; GitHub's consumer job read a 404 as silence).
+      const rc = ['--userconfig', npmrc, '--loglevel=error'];
       // The token npm will publish with is accepted (a registry answers "not found" for a new name whatever the token).
-      // An explicit log level: under an npm run --silent, npm hands loglevel=silent to every nested npm, and a 404 would answer with nothing (GitHub's consumer job, 2026-10-11).
-      if (!quiet('npm', ['whoami', '--loglevel=error', '--registry', item.registry], withRc)) fail(`publish: ${item.registry} refuses the token npm would publish ${item.name} with (check the app's .npmrc).`);
+      if (!quiet('npm', ['whoami', ...rc, '--registry', item.registry], withRc)) fail(`publish: ${item.registry} refuses the token npm would publish ${item.name} with (check the app's .npmrc).`);
       // Only "not found" means not published: any other answer stops here, before a publish that would fail the same way after the tag is pushed.
-      const view = spawnSync('npm', ['view', `${item.name}@${item.version}`, 'version', '--loglevel=error', '--registry', item.registry], { encoding: 'utf8', env: { ...process.env, ...withRc } });
+      const view = spawnSync('npm', ['view', `${item.name}@${item.version}`, 'version', ...rc, '--registry', item.registry], { encoding: 'utf8', env: { ...process.env, ...withRc } });
       if (view.status === 0) console.log(`${item.name}@${item.version} is already published.`);
-      else if (/E404/.test(`${view.stdout}${view.stderr}`)) tool('npm', ['publish', '--workspace', item.name, '--ignore-scripts', '--loglevel=error', ...(options.dryRun ? ['--dry-run'] : [])], { env: withRc });
+      else if (/E404/.test(`${view.stdout}${view.stderr}`)) tool('npm', ['publish', '--workspace', item.name, '--ignore-scripts', ...rc, ...(options.dryRun ? ['--dry-run'] : [])], { env: withRc });
       else fail(`publish: ${item.registry} did not answer for ${item.name}@${item.version}:\n${view.stdout}${view.stderr}`);
     }
     if (options.release && !options.dryRun) {
