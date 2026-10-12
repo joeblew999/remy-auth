@@ -121,12 +121,11 @@ Every piece is used by remy-auth before any app takes it ([the four-places rule]
 
 Small, in order, each landed on its own. Slice 0 can stop the plan.
 
-**0. Spike: Cedar runs in a Worker.** Build the notes demo's Worker with `@cedar-policy/cedar-wasm` (its
-ESM build imports the `.wasm` as a module, which Wrangler bundles) and answer one check. Record the
-bundle size against `build-boundaries.checks` and the code-splitting check, the cold start, and the
-time of one `isAuthorized` with ten policies and five entities. The research measured 4.3 MB, 1.4 MB
-gzipped, about 32 ms to compile in Node; Workers allow 64 MiB and 1 s. If it does not fit, or a check
-costs more than a millisecond, the plan stops here and says why.
+**0. Spike: Cedar runs in a Worker.** Answered on 2026-10-10 in a throwaway Worker under Wrangler
+4.149 and workerd, outside the repo ([verified below](#verified-2026-10-10-outside-the-repo)). What is
+left for the repo: build remy-auth's own Worker with the package the way the spike shows, and confirm
+`build-boundaries.checks` and the code-splitting check accept the 4.2 MiB `.wasm`. The plan stops here
+only if those two checks refuse it and cannot honestly be made to accept it.
 
 **1. Generated policies, nothing changes.** `api/cedar` in the package: entities from the engine,
 `decide()`, `can` from the answer. The generator for `generated.cedar` and the schema. Level-1
@@ -141,11 +140,31 @@ the demo, proven with an old session. The account page shows the facts. When the
 [auth-service](auth-service.md#next-slices) lands, the same facts come from the token in another
 Worker, and the consumer fixture proves it there.
 
-**4. Proofs in CI.** `cedar symcc` in GitHub's heavy checks, with `cvc5`: one guardrail per app. If
-`cvc5` will not install on the runner, record that and close the slice.
+**4. Proofs in CI.** `cedar symcc` in GitHub's heavy checks, with `cvc5`: one guardrail per app, each
+written as the region that must never be allowed and proven with `disjoint` (verified below). `cvc5`
+is one `curl` of a static Linux binary from its GitHub releases; the CLI is
+`cargo install cedar-policy-cli --features analyze`. Cache both on the runner.
 
 **5. Other languages, and remy-sport.** The contract written in the docs: schema, policies, entity
 shapes, token. remy-sport's vocabulary generates its policies; its move is work in its own repository.
+
+## Verified 2026-10-10, outside the repo
+
+Run in a scratch directory with `@cedar-policy/cedar-wasm` 4.13.0, Wrangler 4.149.0, `cedar-policy-cli`
+4.13.0 and `cvc5` 1.4.2. The files are in [`.plans/cedar/`](cedar/): the schema, the generated and
+hand-written policies from this plan, the test file, the guardrail, and the spike Worker. Each is a
+starting point for its slice, not a finished piece.
+
+| Claim in this plan | Result | What to do in the repo |
+| --- | --- | --- |
+| The policies above are valid | Yes: `cedar validate` passes, at level 1 too | Use [`cedar/schema.cedarschema`](cedar/schema.cedarschema), [`generated.cedar`](cedar/generated.cedar), [`rules.cedar`](cedar/rules.cedar) as they are |
+| The test file proves them | Yes: 7 of 7 pass in [`cedar/notes.tests.json`](cedar/notes.tests.json), including fail closed (no sign-in time → deny by `notes-delete-fresh`) and the reasons | The request's `principal`, `action` and `resource` are strings, `Notes::User::"alice"`, not objects. Entities and context are JSON; a `datetime` is `{"__extn":{"fn":"datetime","arg":"…Z"}}` |
+| Wrangler bundles the WASM | Yes: 4223 KiB upload, 1413 KiB gzipped; `.cedar` files load through a `Text` module rule | Add the rule with `fallthrough: true` so Wrangler's default text rules still apply |
+| The package's ESM build runs in workerd | **No.** It fails at load: `__wbindgen_start is not a function`. It expects the bundler to instantiate the WASM; Wrangler hands over a `WebAssembly.Module` | Use the `web` build: `import * as cedar from '@cedar-policy/cedar-wasm/web'`, `import wasm from '@cedar-policy/cedar-wasm/web/cedar_wasm_bg.wasm'`, then `cedar.initSync({ module: wasm })` once at module load ([`cedar/spike-worker.ts`](cedar/spike-worker.ts)) |
+| One check costs under a millisecond | **Only with preparsing.** `isAuthorized` re-parses schema and policies every call: 3–5 ms. `preparseSchema` + `preparsePolicySet` once per isolate, then `statefulIsAuthorized`: 0.46–0.77 ms with request validation on | `api/cedar` preparses at module load and uses `statefulIsAuthorized` |
+| The deciding policy's `@id` comes back as the reason | **Only if policies are given as a map.** Text policies are named `policy0`, `policy1`… Split the text with `policySetTextToParts`, key each by its `@id`, pass `staticPolicies` as that record | The generator writes the map; `@reason` is read from the same policy text |
+| A proof runs in CI | Yes: `cvc5` installs from `https://github.com/cvc5/cvc5/releases/latest/download/cvc5-Linux-x86_64-static.zip` (44 MB); the proof takes under a second; removing the lock rule gives a counterexample naming an admin editing a locked note | A guardrail is the forbidden region as a `permit` ([`cedar/guardrail-locked.cedar`](cedar/guardrail-locked.cedar)), checked with `cedar symcc … disjoint --policies1 <app> --policies2 <guardrail>`. `implies` is the wrong tool for this: it asks whether set 2 allows everything set 1 allows |
+| Cold start fits | A first request answered in 166 ms end to end under `wrangler dev`, including the five checks and a 200-check loop | Measure once on the deployed Worker with the stamp; `performance.now()` reads 0 at module load in workerd, so time it from the request |
 
 ## Decisions (delegated 2026-10-10)
 
@@ -173,7 +192,8 @@ shapes, token. remy-sport's vocabulary generates its policies; its move is work 
 - Not a central policy store or one log for every app. Each app's policies live with its code. The
   research says that only matters at many apps in several languages; revisit at the second one.
 - Not an admin screen with live preview. Proofs run in CI.
-- Not free: about 4.3 MB of WASM in every app's Worker. Slice 0 decides whether that is acceptable.
+- Not free: 4.2 MiB of WASM in every app's Worker, 1.4 MiB over the wire. Measured; the repo's two
+  bundle checks decide whether that is acceptable.
 
 ## Definition of done
 
