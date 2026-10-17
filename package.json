@@ -32,7 +32,6 @@
     "logs": "wrangler tail --format json",
     "errors": "wrangler tail --format json --status error",
     "wrangler": "wrangler",
-    "browser": "chrome-devtools",
     "browser:start": "chrome-devtools start --isolated --headless --no-usage-statistics --no-performance-crux",
     "browser:stop": "chrome-devtools stop",
     "web": "modern-web-guidance",

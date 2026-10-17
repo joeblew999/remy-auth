@@ -11,7 +11,7 @@ const app = remyApp({ plugins: [paraglideVitePlugin(paraglide)], root: import.me
 // its inputs: a task that rewrites what it reads can never be skipped.
 const generated = ['!packages/ui/src/paraglide/**', '!packages/ui/cli/**', '!src/paraglide/**', '!src/routeTree.gen.ts',
   '!worker-configuration.d.ts', '!node_modules/**', '!.remy-docs/**', '!docs/.remy-docs/**', '!dist/**', '!docs/dist/**',
-  '!test-results/**', '!playwright-report/**', '!.wrangler/**', '!docs/.wrangler/**'];
+  '!test-results/**', '!playwright-report/**', '!**/.wrangler/**'];
 
 export default {
   ...app,
@@ -20,6 +20,11 @@ export default {
       build: {
         command: 'node packages/ui/src/cli/remy.ts app build',
         cache: { input: [{ auto: true }, ...generated], output: ['dist/**'] },
+      },
+      browser: {
+        command: 'node packages/ui/src/cli/remy.ts ci browser --everything',
+        dependsOn: ['build'],
+        cache: { input: [{ auto: true }, ...generated, '!.git/**'], untrackedEnv: ['REMY_FLOW', 'GITHUB_ACTIONS', 'PREVIEW_PORT'] },
       },
       check: {
         command: 'node packages/ui/src/cli/remy.ts check',
