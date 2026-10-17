@@ -1,7 +1,8 @@
-# The heavy checks, on GitHub after every push to main, on every pull request and on every version tag, in parallel, while
-# the developer keeps coding; then the release for tags. Every job is one part of `vp run ci`, and the same
-# command runs the same parts anywhere: `vp run ci` locally (each part the change can affect, in turn) gives a pull
-# request's answer, and `vp run ci --everything` main's.
+# The checks, on GitHub after every push to main, on every pull request and on every version tag, in parallel, while
+# the developer keeps coding; then the release for tags. Every job is one Vite Plus task, `vp run <task>`, the same
+# command anywhere: `vp run ci` locally runs them all in turn (the check, the browser checks, Google's audits, and in
+# remy-auth the new app). Vite Plus's task cache, kept between runs, replays what nothing changed; nothing of ours
+# decides what to skip.
 # Every Remy repo runs this same workflow (.plans/thin-apps.md, group 6): remy-auth through the triggers
 # below, any other repo by calling it at the tag its package is on, which `remy upgrade` moves with it:
 #
@@ -12,11 +13,11 @@
 #       uses: joeblew999/remy-auth/.github/workflows/ci.yml@vX.Y.Z
 #       permissions: { contents: write, packages: write }
 #
-# Every step is a package.json script, so the caller's own package.json decides what runs. The release
-# job runs only for a tag and publishes only what is new (remy packages publish), so a release already
-# made locally with vp run release is left alone; a repository that publishes no packages never
-# tags. npm ci reads @joeblew999/remy-ui from GitHub Packages with the run's token (the app's .npmrc),
-# once the package grants the repository read access ("Manage Actions access").
+# Every step is a task the caller defines (its vite.config.ts, from the package), so the caller decides what runs.
+# The release job runs only for a tag and publishes only what is new (remy packages publish), so a release already
+# made locally with vp run release is left alone; a repository that publishes no packages never tags. vp install
+# reads @joeblew999/remy-ui from GitHub Packages with the run's token (the app's .npmrc), once the package grants the
+# repository read access ("Manage Actions access").
 # Named for what it runs (`vp run ci`); called google.yml until 2026-10-17.
 name: CI
 
@@ -68,12 +69,27 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      # Vite Plus: the global vp, the Node .node-version pins and the npm package.json pins (managed, as on every
+      # machine), then vp install from the lockfile, its packages cached between runs.
+      - uses: voidzero-dev/setup-vp@68f39c78aaf39be468cabd2afb09c162574c84af # v1.21.2
         with:
-          node-version-file: .node-version
-          cache: npm
-      # Kept between runs: Playwright's Chromium (ci installs it when missing, keyed on the lockfile that
-      # pins Playwright) and the consumer fixture's skills download (keyed on the pinned list).
+          cache: true
+          run-install: |
+            - args: ['--frozen-lockfile']
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Vite Plus's task cache, restored after the install (which recreates node_modules): what an earlier run of
+      # this job already checked on the same inputs is replayed, not run again. Keyed per run, restored from the
+      # newest of this job's, then any job's.
+      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: node_modules/.vite/task-cache
+          key: vite-task-${{ runner.os }}-${{ runner.arch }}-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            vite-task-${{ runner.os }}-${{ runner.arch }}-${{ matrix.name }}-
+            vite-task-${{ runner.os }}-${{ runner.arch }}-
+      # Kept between runs: Playwright's Chromium (the browsers task installs it when missing, keyed on the lockfile
+      # that pins Playwright) and the consumer fixture's skills download (keyed on the pinned list).
       - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ~/.cache/ms-playwright
@@ -83,18 +99,26 @@ jobs:
         with:
           path: /tmp/remy-fixture-skills
           key: remy-fixture-skills-${{ hashFiles('packages/ui/src/cli/skills.ts', 'packages/ui/skills/**') }}
-      - run: npm ci
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: npx vp run ${{ matrix.task }}
+      # The new-app test is remy-auth's alone (it builds an app from template/); in an app that calls this workflow
+      # the job passes, saying so.
+      - if: matrix.task == 'new-app' && hashFiles('fixtures/consumer/run.sh') == ''
+        run: echo "There is no new-app test in this repository (it is remy-auth's), so nothing runs."
+      - if: matrix.task != 'new-app' || hashFiles('fixtures/consumer/run.sh') != ''
+        run: vp run ${{ matrix.task }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - if: success()
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: node_modules/.vite/task-cache
+          key: vite-task-${{ runner.os }}-${{ runner.arch }}-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
       - if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: report-${{ strategy.job-index }}
-          path: playwright-report/local
+          path: '**/playwright-report/local'
+
           retention-days: 14
           if-no-files-found: ignore
       # A red job reaches the person who pushed without anybody polling: a comment on the commit,
@@ -119,11 +143,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - uses: voidzero-dev/setup-vp@68f39c78aaf39be468cabd2afb09c162574c84af # v1.21.2
         with:
-          node-version-file: .node-version
-          cache: npm
-      - run: npm ci --ignore-scripts
+          cache: true
+          run-install: |
+            - args: ['--frozen-lockfile', '--ignore-scripts']
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # The tag is the release package's version, the notes are CHANGELOG.md's, each package is published
@@ -134,4 +158,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ github.ref_name }}
-        run: npx vp run publish --release "$TAG"
+        run: vp run publish --release "$TAG"

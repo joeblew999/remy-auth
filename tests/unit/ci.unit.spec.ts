@@ -8,7 +8,7 @@ import { githubJobs } from '../../packages/ui/src/tasks.js';
 
 test('the workflow runs exactly the jobs the tasks name, one vp run line each', () => {
   const workflow = readFileSync('.github/workflows/ci.yml', 'utf8');
-  expect(workflow).toContain('npx vp run ${{ matrix.task }}');
+  expect(workflow).toContain('run: vp run ${{ matrix.task }}');
   const listed = [...workflow.matchAll(/^\s+task: (.+)$/gm)].map((match) => match[1]!.trim());
   const jobs = [...githubJobs(), 'new-app'];
   expect([...listed].sort(), `ci.yml runs ${listed.join(', ')}; the tasks name ${jobs.join(', ')}`).toEqual(
