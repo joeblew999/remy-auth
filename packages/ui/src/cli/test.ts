@@ -114,7 +114,6 @@ async function withSpeedLock<T>(work: () => T): Promise<T> {
   }
 }
 
-/** The browser checks against a deployment. */
 /**
  * The suite against a deployment. Against production (the default) everything, Google's audits included; against
  * any other origin (a preview, staging) our checks only: those are hidden from search engines on purpose, which
@@ -149,14 +148,25 @@ export async function cwv(alias?: string): Promise<void> {
   }
 }
 
+/**
+ * Google's audits on the local production build, under the machine's speed lock (the test:audits task runs it: a
+ * lock is what Vite Plus has no tool for). Playwright's own options pass through.
+ */
+export const audits = (args: string[]): Promise<void> =>
+  withSpeedLock(() => playwright(['--project=google', ...args], {}));
+
 export const what =
-  'the browser checks against a deployment, which Vite Plus has no tool for: the suite, the smoke, Core Web Vitals on a preview (the local build: vp run test:browser)';
+  'the browser checks Vite Plus has no tool for: against a deployment (the suite, the smoke), Core Web Vitals on a preview, and the local audits under one lock (the local build: vp run test:browser)';
 export const commands: Subcommands = {
   remote: {
     what: "[origin]: the browser checks against a deployment: production by default, Google's audits included; any other origin (a preview, staging) our checks only",
     run: (rest) => remoteSuite(rest[0]),
   },
   live: { what: '[origin]: the smoke against a deployment (every deploy ends with it)', run: (rest) => live(rest[0]) },
+  audits: {
+    what: "[playwright options]: Google's audits on the local build, one speed measurement at a time on this machine (vp run test:audits runs it)",
+    run: (rest) => audits(rest),
+  },
   cwv: {
     what: '[alias]: Core Web Vitals on a throwaway preview Worker (the release runs it)',
     run: (rest) => cwv(rest[0]),

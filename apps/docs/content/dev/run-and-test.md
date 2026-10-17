@@ -25,11 +25,11 @@ preview on Cloudflare: [on Cloudflare](#on-cloudflare), below. The agent's own b
 (`npx chrome-devtools`, Chrome DevTools) is not CI: the checks never use it.
 
 The flow does not run the whole suite against a deployment: the deploys end with the live smoke,
-and GitHub runs the suite after every landing. To run all of it against a deployed URL on purpose, a
-person says so at a terminal (the command refuses without it, and the guard refuses it from an agent):
+and GitHub runs the suite on the production build after every landing. To run all of it against a
+deployed URL (a branch's preview, staging, production):
 
 ```sh
-REMY_FLOW=hand npx remy test remote https://your-worker.your-subdomain.workers.dev
+npx remy test remote https://your-worker.your-subdomain.workers.dev
 ```
 
 The URL must be an origin, without a path or query. The checks that
@@ -106,7 +106,7 @@ Every page exists in every locale (13 prefixes such as `/en`, `/ar`, `/ja`; the 
 
 Localized pages never redirect. When the visitor's preferred language differs from the page, a dismissible hint offers that version; choosing or dismissing is remembered in Paraglide's `PARAGLIDE_LOCALE` cookie, which only the entry URLs act on. Locale detection, the cookie, URL localisation and the redirect are Paraglide's own strategies and middleware (`packages/ui/paraglide.mjs` holds the one compiler configuration), wired as Paraglide's official TanStack Start integration: the middleware wraps the Worker entry, and the router's `rewrite` removes the locale before matching and adds it to every link, so routes carry no locale segment.
 
-TanStack Start runs through Cloudflare's Vite plugin ([`vite.config.ts`](https://github.com/joeblew999/remy-auth/blob/main/vite.config.ts)). Every
+TanStack Start runs through Cloudflare's Vite plugin ([`apps/remy-auth/vite.config.ts`](https://github.com/joeblew999/remy-auth/blob/main/apps/remy-auth/vite.config.ts), the package's `remyApp()`). Every
 route is server-rendered except the demo. In-app links preload their route's code and data on
 intent; language changes on site pages are full navigations.
 
@@ -132,7 +132,7 @@ So `ui:blocks` diffs them in place and upstream changes are merged by hand.
 
 Fonts live in [`packages/ui/src/fonts.css`](https://github.com/joeblew999/remy-auth/blob/main/packages/ui/src/fonts.css), imported after
 `globals.css` (see [`src/styles.css`](https://github.com/joeblew999/remy-auth/blob/main/apps/remy-auth/src/styles.css)); the file explains its rules. fontaine in
-[`vite.config.ts`](https://github.com/joeblew999/remy-auth/blob/main/vite.config.ts) generates the size-matched fallback faces it names.
+the app's Vite configuration (`remyApp()`) generates the size-matched fallback faces it names.
 `publicPageChecks` fails on any named family that is not loaded.
 
 ## On Cloudflare
@@ -140,13 +140,18 @@ Fonts live in [`packages/ui/src/fonts.css`](https://github.com/joeblew999/remy-a
 - **A preview of a branch**: push it, with no pull request (GitHub runs nothing for a branch without one).
   Cloudflare's Workers Builds builds it and serves it at `https://<branch>-remy-auth.gedw99.workers.dev`
   (a `/` in the branch becomes `-`); the connector's builds tools show the build and its log. Then check it:
-  `REMY_FLOW=hand npx remy test remote https://<branch>-remy-auth.gedw99.workers.dev` (our checks only: a
+  `npx remy test remote https://<branch>-remy-auth.gedw99.workers.dev` (our checks only: a
   preview is hidden from search engines on purpose, so Google's audits judge production). This is the way
   from Claude's cloud, which has no Cloudflare token; a machine signed in has `npx remy cloudflare preview` too.
 - **Cloudflare's build settings** live on Cloudflare, not in the repository, so they are written here and
-  changed only through the connector, to match: two build rules on the `remy-auth` Worker, both
-  `vp run build`, `NODE_VERSION` as in `.node-version`. `main`: deploy `npx wrangler versions upload` (a
-  new version; production moves only with `vp run promote`). Every other branch: deploy `npx wrangler preview`.
+  changed only through the connector, to match: two build rules on the `remy-auth` Worker, both with the
+  root directory `apps/remy-auth` (where its `wrangler.jsonc` is; Cloudflare's monorepo setup: npm installs
+  the whole workspace from there), the build command `npx vp run build`, and the build variable
+  `NODE_VERSION` as in `.node-version`. Cloudflare installs with its own npm (10.9.2, 2026-10-17; it honours no
+  npm pin), whose `npm ci` still installs exactly the lockfile or fails. `main`: deploy
+  `npx wrangler versions upload` (a new version; production moves only with `vp run promote`). Every other
+  branch: deploy `npx wrangler preview`. A build of a pushed branch can be started again without a push
+  (the connector's builds API, the trigger's `builds`).
 - **Speed far from the databases**: the Worker runs with Smart Placement (`wrangler.jsonc`, checked by
   `npx remy verify tooling`), and every request reads through its own D1 session, so reads come from the
   nearest copy (`@joeblew999/remy-ui/replicas`; a unit check refuses app code using a database binding raw).
@@ -219,6 +224,9 @@ bites); the platform's catalog names no product (`tests/product.spec.ts`).
 
 ## Structure and reuse
 
+The app is `apps/remy-auth/` (its paths below are from there); the packages beside it are `packages/*`,
+the docs `apps/docs/`, all one npm workspace whose root holds the repository's own checks.
+
 - `src/routes/`: TanStack file routes (loaders, `head`, per-route rendering) that render the package's pages, plus this app's extra formats rows (`src/formats-extras.tsx`), while `robots.txt` and `sitemap.xml` (the seo-routes part) and `/csp-report` (`app-routes`) are the package's server routes, mounted beside them; `src/routeTree.gen.ts` is generated by the router plugin during dev and build and committed.
 - `src/server.ts`: Worker entry through the package's `localizedWorker` (request IDs, structured status logs, `/healthz`, Paraglide's middleware, entry redirects). Start receives the original request, so server functions read Cloudflare's geolocation from the request's `cf` properties in a server-only module under Start's import protection (`packages/showcase/src/parts/deferred-place/place.server.ts`, the showcase's deferred-place part). The wrapper passes its request ID inward as `X-Request-ID`; Start's request middleware exposes it as `context.requestId`, and a function middleware logs one `server_fn` line per call (the package's `start`, registered in `src/start.ts`). A second request middleware there makes the per-request CSP nonce that the shared router (`router`) hands to TanStack Router, and the package's server route `/csp-report` (`app-routes`) logs the policy's reports ([security headers](https://github.com/joeblew999/remy-auth/blob/main/.plans/parked/gui-portal.md)). The service name has one home, `src/service.ts`.
 - `src/api/`: the contract's implementation (`router.ts`, behind the guard; no Workers imports so the checks load it in Node), each call's context, with the caller's session (`context.server.ts`), and the isomorphic client with its TanStack Query utilities (`client.ts`). The contract is `packages/contract/`; the shared mechanism is the package's `api/*` exports; [the contracts plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/openapi-contracts.md) owns the design.
@@ -226,8 +234,8 @@ bites); the platform's catalog names no product (`tests/product.spec.ts`).
 - `src/notes/`: the notes demo, which uses the relation engine as any app would: its data in its own D1 (`DEMO_DB`, `migrations-demo/`; a person is only an account ID there) through `store.ts`, the page (`page.tsx`) and the server function its loader asks (`state.ts`). The vocabulary and the shapes are the contract's (`packages/contract/src/notes.ts`).
 - `src/router.tsx`: the package's `remyRouter`, a new router and TanStack Query client per request, with Query's SSR integration. `src/routes/__root.tsx` is the package's `remyRoot` with this app's config; TanStack Devtools (Router and Query panels) is passed in there, in the app's own file, because its `devtools()` Vite plugin strips it from production builds only outside `node_modules`; the build-boundary check proves no devtools or server-only code reaches the browser.
 - `src/parts.json`: the package's [parts](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md) this app uses, one per line (the showcase's `@joeblew999/remy-showcase/time-zones`, `deferred-place` and `status-card`, and the platform's `seo-routes`); `remyParts()` in `vite.config.ts` mounts their routes and `partChecks()` in `tests/gui.spec.ts` runs their checks.
-- `packages/ui/`: everything both apps share; its [README](./remy-ui.md) lists the exports.
-- `tests/`: the package's shared checks (`@joeblew999/remy-ui/checks`, the showcase's `@joeblew999/remy-showcase/*.checks`) plus the checks only this repository owns (catalogs, concurrent server renders, hydration, its extra formats rows); `lighthouse.spec.ts` is `vp run ci`'s `audits` part and `performance.spec.ts` the release's Core Web Vitals.
+- `packages/ui/` (at the root): everything both apps share; its [README](./remy-ui.md) lists the exports.
+- `tests/`: the app's browser checks: the package's shared checks (`@joeblew999/remy-ui/checks`, the showcase's `@joeblew999/remy-showcase/*.checks`) plus the checks only this repository owns (catalogs, concurrent server renders, hydration, its extra formats rows); `lighthouse.spec.ts` is `vp run ci`'s `audits` part and `performance.spec.ts` the release's Core Web Vitals.
 
 Locale is passed explicitly into compiled message functions; concurrent requests share no
 mutable locale state. The catalogs are the `locales` in

@@ -1,8 +1,7 @@
 // Verification. `remy verify setup` is what an installation must satisfy, about a minute, no browser:
-// the dependencies, MCP registration, the guard, the CLI versions, the tooling invariants, then the
-// check; `remy setup` and the upgrades end with it. `remy verify` is the release's gate: that, then every
-// browser check in every language, then the other repositories this one serves; nobody runs it while
-// coding, and the gate refuses it outside the flow.
+// the dependencies, MCP registration, the guard, the CLI versions and the tooling invariants;
+// `remy setup` and the upgrades end with it (`remy verify` alone runs it). The gate before a landing or a
+// release is `vp run ci`, Vite Plus's, never a command of ours.
 import assert from 'node:assert/strict';
 import { dispatch, type Subcommands } from './commands.ts';
 import { spawnSync } from 'node:child_process';

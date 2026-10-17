@@ -19,16 +19,23 @@ export default {
 
 ### The layout
 
-Every Remy repo, remy-auth included, has the same files in the same places; what is inside the product's
-files differs. The layout is the paths the commands and the package read, so a file
-anywhere else is simply not found; no checker of its own keeps it.
+Every Remy app has the same files in the same places; what is inside the product's files differs. The
+layout is the paths the commands and the package read, so a file anywhere else is simply not found; no
+checker of its own keeps it. An app is one folder: in its own repository, the repository's root. remy-auth,
+which also owns the packages, is a workspace of the same pieces side by side: the app's files below are in
+`apps/remy-auth/`, the docs are `apps/docs/` (not `docs/`), the packages `packages/*`, and the root holds
+`package.json`'s workspaces, `remy.config.ts`, the root `vite.config.ts` (`remyWorkspace()`: the repository's
+checks, and the app's tasks by their own names) and the repository files (`.plans/`, `.github/`, `template/`).
+The commands find the app by its `wrangler.jsonc` and the docs by their `docs.config.ts`, so they run from
+the root either way.
 
 | Path | Read by | Holds |
 | --- | --- | --- |
-| `package.json`'s `scripts`, `remy.config.ts`, `.node-version` | npm, `remy` | the entry: every command; the origins, ports and release package; the Node version |
+| `package.json`'s `scripts`, `remy.config.ts`, `.node-version` | Vite Plus (`vp run`), `remy` | the flow's steps (the scripts; every other name is a task); the origins, ports and release package; the Node version |
 | `package.json`, `package-lock.json` | npm, `remy` (workspaces) | the app's dependencies; `workspaces` when it owns packages |
 | `wrangler.jsonc` | wrangler, the Cloudflare Vite plugin, `remy cloudflare` | the Worker's name, bindings and assets |
-| `vite.config.ts`, `tsconfig.json`, `playwright.config.ts` | Vite Plus (the tasks, `vp check`), Playwright (`vp run test:browser`) | the build, types and browser checks |
+| `vite.config.ts`, `tsconfig.json`, `playwright.config.ts` | Vite Plus (`remyApp()`'s tasks, `vp check`), Playwright (`vp run test:browser`) | the build, the tasks, types and browser checks |
+| `.vite-hooks/` (`pre-commit`, `pre-push`) | Git, through Vite Plus (`vp config`, the `prepare` script) | the hooks: `vp staged` before a commit, `vp run ci` before a push outside the flow; written by `remy upgrade` |
 | `fnox.toml`, `skills-lock.json` | fnox, `remy skills` | secret names; the pinned skills |
 | `src/routes/`, `src/routeTree.gen.ts` | TanStack Start (the tree is generated) | the product's pages |
 | `src/parts.json` | the package's `remyParts()` | the shared parts the app lists (none without the file; the blank app lists `seo-routes`) |
@@ -38,7 +45,7 @@ anywhere else is simply not found; no checker of its own keeps it.
 | `dist/` (`dist/client/assets`) | the deploys, the checks | build output, never committed |
 | `docs/` (`docs.config.ts`, `vite.config.ts`, `tsconfig.json`, `package.json`, `content/{users,dev,ui}/` with `i18n.json` and `meta.json`, `content/questions.json`; generated `.remy-docs/`, `dist/`) | `remy docs`, `remy i18n` (`I18N_DOCS_DIR`) | the app's docs: its identity and pages; the Worker is the package's |
 | `packages/<name>/` with `README.md` | `remy plans`, `remy packages` | packages the repo publishes, if any |
-| `messages/`, `project.inlang/` | the app preset, the app's `generate` script, `remy i18n` | the app's own strings, if any (compiled into `src/paraglide/`) |
+| `messages/`, `project.inlang/` | the app preset, the app's `generate` task, `remy i18n` | the app's own strings, if any (compiled into `src/paraglide/`) |
 | `.plans/` (`now.md`, `done/`, `parked/`) | `remy plans` | the repo's plans |
 | `AGENTS.md`, `.github/workflows/` | agents; GitHub | the agents' pointer at the docs; CI |
 | `packages/ui/src/cli/`, `template/`, `fixtures/consumer/` | the package; `giget`; `vp run ci new-app` | remy-auth only: the command line itself, the blank app a new repo starts from, and the consumer fixture that tests both as another repo gets them |
@@ -77,8 +84,9 @@ Then the app grows in its own files: pages in `src/routes/` (a page beside a par
 `videos`, which then needs an `<Outlet />`), their links in `src/remy-app.tsx`, strings in `messages/en.json`
 (`m` from `src/paraglide/messages.js`), an API as a contract package and `src/api/` (every procedure that
 takes input documents an error, or `apiChecks` fails: the package's `api/coverage` rule), docs in
-`docs/content/`. Move to a new release with `vp run upgrade <version>` (the package and the CI
-workflow's tag together). Two local browser runs at once share `PREVIEW_PORT` and the second fails to
+`docs/content/`. Move to a new release with `vp run upgrade <version>` (the package, the CI
+workflow's tag, the flow's scripts and the Git hooks together; it names Cloudflare's build command, which lives
+on Cloudflare). Two local browser runs at once share `PREVIEW_PORT` and the second fails to
 start its server: give each shell its own (`PREVIEW_PORT=4232 vp run …`).
 
 ### A repository that publishes packages
@@ -122,7 +130,7 @@ The development flow is code, `packages/ui/src/cli/flow.ts`, with four steps and
 template's `.npmrc`) and runs install, skills (installed once per pinned list, then reused), the tooling invariants, the check, the quick browser checks, the docs and a dry-run publish (~1.5 to 3 min, mostly the network).
 A change that would break another repository fails there, not in that repository. Tests are type-checked with
 the app (`tsconfig.json` includes `tests/`). Google's audits are
-`vp run ci audits` (Lighthouse, local; CI whenever a change can affect it, and on every push to main and every tag) and Core Web Vitals is
+`vp run test:audits` (Lighthouse, local; CI whenever a change can affect it, and on every push to main and every tag) and Core Web Vitals is
 `npx remy test cwv` (on a throwaway Cloudflare Worker); the release runs both.
 
 Where checks run: the shared package's own behaviour is proven once, in remy-auth, before each

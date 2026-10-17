@@ -167,9 +167,10 @@ function appTasks(root, { remy }) {
       },
     },
     // Google's Lighthouse audits on the production build. `vp run ci` runs them after the browser checks, never
-    // beside them: they measure speed.
+    // beside them: they measure speed, so `remy test audits` holds the machine's speed lock around Playwright (two
+    // agents' audits at once skew both).
     'test:audits': {
-      command: 'playwright test --project=google',
+      command: `${remy} test audits`,
       dependsOn: ['build', 'browsers'],
       cache: { untrackedEnv: ['PREVIEW_PORT', ...network], input: browserInputs, output: [] },
     },

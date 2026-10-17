@@ -10,7 +10,13 @@ export default {
         command: 'node paraglide.mjs',
         cache: { input: [{ auto: true }, '!src/paraglide/**'], untrackedEnv: network },
       },
-      cli: { command: 'tsc -p src/cli', cache: { input: [{ auto: true }, '!cli/**'] } },
+      // cli/ emptied first, every time: a cache hit restores the outputs over the folder and deletes nothing, so a
+      // command whose source is gone would otherwise stay in cli/ and ship (ci.js, 2026-10-17).
+      'clean:cli': {
+        command: "node -e \"require('node:fs').rmSync('cli', { recursive: true, force: true })\"",
+        cache: false,
+      },
+      cli: { command: 'tsc -p src/cli', dependsOn: ['clean:cli'], cache: { input: [{ auto: true }, '!cli/**'] } },
     },
   },
 };

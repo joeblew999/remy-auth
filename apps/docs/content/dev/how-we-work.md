@@ -146,7 +146,7 @@ English is the source; translations follow it, in the same change. A pull reques
 its translations together: one commit, one push, one run of the checks.
 
 - A feature agent writes English only: the English docs and the base catalog (`messages/en.json`).
-  It never edits a translation (`<page>.<lang>.md` in `docs/content`) or another locale's catalog by hand.
+  It never edits a translation (`<page>.<lang>.md` beside its page) or another locale's catalog by hand.
 - `vp run land` translates what the change made stale or missing, on the branch, before the check and
   the commit (`remy i18n translate`); nobody runs it by itself. The Claude agent translates exactly
   what `remy i18n check` lists: for a stale page, only the sections whose English changed; for a
@@ -218,9 +218,9 @@ tasks; `vp run setup` installs the guard.
 | --- | --- | --- | --- | --- |
 | Look | `vp run status` | everyone, first: every agent session opens with it (a hook), a developer when they sit down | main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests, the top of `.plans/now.md` | seconds |
 | After every change | `vp run check` | whoever is coding; the only step waited for | Vite Plus's tasks (`vite.config.ts`): everything generated, the app and the docs built, the project's own checks (plans, single copies, the commands list, page endings, translation status, the plain-function checks in `tests/**/*.unit.spec.ts`), then `vp check` (format, lint, types); what has not changed comes from Vite Plus's cache | ~4 s unchanged, ~50 s from nothing |
-| The change leaves the machine | `vp run land "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | main merged in first (a conflict stops, naming the files), the translations it made stale (seconds), the check, every part of `vp run ci` the change can affect (as its pull request will run them), one commit, push the branch, open its pull request (or update the open one), wait for GitHub's checks (they confirm what passed here), squash-merge, deploy staging, reset this checkout to the new main; a red check leaves the pull request open and names the job. GitHub is reached only through `packages/ui/src/cli/github.ts`, its REST API. Never straight to main; from main it moves the work to a branch of its own first. After the merge main's own run checks everything, every part in every language | a few minutes: the parts here, then GitHub's checks |
+| The change leaves the machine | `vp run land "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | main merged in first (a conflict stops, naming the files), the translations it made stale (seconds), then `vp run ci` (the check, the browser checks, the audits, a new app; what nothing touched comes from the cache), one commit, push the branch, open its pull request (or update the open one), wait for GitHub's checks (they confirm what passed here), squash-merge, deploy staging, reset this checkout to the new main; a red check leaves the pull request open and names the job. GitHub is reached only through `packages/ui/src/cli/github.ts`, its REST API. Never straight to main; from main it moves the work to a branch of its own first. After the merge main's own run checks everything, every part in every language | a few minutes: the parts here, then GitHub's checks |
 | Production | `vp run promote` | the owner, or an agent the owner asked in that session | `remy cloudflare deploy` and the docs Worker, from a pushed main, no gate: staging and GitHub already ran the checks | ~1 min |
-| A release | `vp run release` | the owner, or an agent the owner asked in that session | `remy packages release`: every check, every language, locally, on purpose, then the tag | ~5 min |
+| A release | `vp run release` | the owner, or an agent the owner asked in that session | on a clean main, the translations complete and every changed package bumped; `vp run ci` with the publish rehearsed; then `remy packages release`: the repository's `release-checks` script, Core Web Vitals on a throwaway Worker, the tag (GitHub publishes from it) | ~5 min |
 
 - **Who runs a step is in the table, and it is never a question.** An agent lands its own finished
   work without asking: staging is part of landing, GitHub checks every landing, and nothing reaches
@@ -232,10 +232,11 @@ tasks; `vp run setup` installs the guard.
 - One area that looks wrong: `vp run test:browser --grep <words>` (the browser checks whose title
   matches, en and ar, ~30 s). It is the only browser run a step does not own.
 - **The guard** (`remy guard`, a Claude Code hook on every shell command an agent runs, registered on each machine
-  by `vp run setup`) refuses the heavy checks outside the flow (the release gate, the browser checks against a
-  deployment, Core Web Vitals, a bare `playwright test`, `remy i18n translate`) and raw `wrangler dev`, naming
-  what to run instead (`COMMANDS.md`). Every one still runs by hand from a terminal, with `REMY_FLOW=hand` in
-  front (`REMY_FLOW=hand npx remy test remote`): the command itself
+  by `vp run setup`) refuses what costs more than time outside the flow (`remy i18n translate`, which spends Claude's tokens, and
+  Core Web Vitals, which make a throwaway Worker on Cloudflare) and raw `wrangler dev`, naming what to run instead
+  (`COMMANDS.md`); everything else is a Vite Plus task its cache makes cheap to rerun, so nothing refuses it
+  (`flow.ts`'s `heavy`). Each still runs by hand from a terminal, with `REMY_FLOW=hand` in
+  front (`REMY_FLOW=hand npx remy test cwv`): the command itself
   asks who is running it (the gate) and refuses a bare run, on every machine. That is a
   person's decision; the guard refuses it from an agent even so, which is the fault it exists for.
   A task whose own job ends with the verification (`vp run setup`, `npx remy packages upgrade`,
@@ -312,7 +313,7 @@ being turned into a mise task that uses a tool ... It's vital because all our re
 - Anything more than one line of a tool is TypeScript: a command of `remy` (`packages/ui/src/cli`,
   type-checked on every check) or, for what is one app's own, a `scripts/*.ts` of that app, never
   bash logic or untyped JavaScript: what the compiler cannot see, an agent misses (owner, issue #9).
-  A one-line tool is a `package.json` script ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/tooling-in-typescript.md)).
+  A one-line tool is a `package.json` script ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/tooling-in-typescript.md)).
 
 ## Branches: short-lived, deleted after merge
 
@@ -333,7 +334,7 @@ and timing-sensitive checks failed well before that. So:
   4190, which browsers block); `PREVIEW_PORT=4232 vp run …` overrides them.
 - At most three agents run tests at the same time; research, writing and scratch spikes do not
   count. When more are needed, set `PLAYWRIGHT_WORKERS=2` for each.
-- Google's audits (`vp run ci audits`) and Core Web Vitals (`npx remy test cwv`) take a machine-wide lock, so a second
+- Google's audits (`vp run test:audits`) and Core Web Vitals (`npx remy test cwv`) take a machine-wide lock, so a second
   run waits rather than skewing the first.
 - Never chain a deploy after a check with `;`: the flow's steps run each in turn and stop at the first failure.
 

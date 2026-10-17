@@ -17,7 +17,7 @@ A contradiction between pages is never a reason to stop, or to ask the owner whi
 Live: the app <https://remy-auth.gedw99.workers.dev> (staging, with the automatic sign-in:
 <https://remy-auth-staging.gedw99.workers.dev>); the developer docs <https://remy-auth-docs.gedw99.workers.dev/dev>
 (the product guide `/docs`, the API reference `/reference`; MCP servers `/api/mcp/dev`, `/api/mcp/reference`,
-`/api/mcp/docs`; everything for AI tools at `/llms.txt`). These pages' source is `docs/content/dev/*.md`:
+`/api/mcp/docs`; everything for AI tools at `/llms.txt`). These pages' source is `apps/docs/content/dev/*.md`:
 read those, not the translations beside them (`*.es.md`).
 
 1. [Development principles](./principles.md): ownership, single source of truth, test gates,

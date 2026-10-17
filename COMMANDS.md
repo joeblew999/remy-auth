@@ -11,7 +11,7 @@ Day to day, two: `vp run check` after every edit, `vp run land "<what changed>"`
 | `vp run preview` | the production build on Cloudflare's local host, at PREVIEW_PORT (4173 by default) |
 | `vp run check` | after every change: everything generated, both builds, the project's own checks, then vp check (format, lint, types) |
 | `vp run fix` | what the check only verifies, written: COMMANDS.md and each docs page's ending |
-| `vp run ci` | what GitHub runs, the same here: the check, then the browser checks, Google's audits and a new app (`vp run ci browser --shard 1/3` runs one part) |
+| `vp run ci` | what GitHub runs, the same here: the check, then the browser checks, Google's audits and a new app (each part is its own task: `vp run test:browser --shard 1/3`) |
 | `vp run status` | what is going on: main with GitHub's verdicts, the open pull requests, the deployments, the worktrees, the translations, the top of now.md |
 | `vp run land "<what changed>"` | after vp run ci: one commit, a pull request, merged when GitHub agrees, then staging |
 | `vp run promote` | production from a pushed main |
@@ -70,9 +70,10 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy packages publish` | [--release vX.Y.Z] [--dry-run]: each registry accepts its token, then each workspace whose version is new on its registry, then the GitHub release from its CHANGELOG notes; the tag's CI job runs the same |
 | `npx remy packages tag` | on a clean main: the lead package's version as the tag, pushed with main, then the publish |
 | `npx remy packages release` | the release, after vp run ci: the app's release-checks script, Core Web Vitals on a preview, the tag (vp run release runs it) |
-| `npx remy test` | the browser checks against a deployment, which Vite Plus has no tool for: the suite, the smoke, Core Web Vitals on a preview (the local build: vp run test:browser) |
+| `npx remy test` | the browser checks Vite Plus has no tool for: against a deployment (the suite, the smoke), Core Web Vitals on a preview, and the local audits under one lock (the local build: vp run test:browser) |
 | `npx remy test remote` | [origin]: the browser checks against a deployment: production by default, Google's audits included; any other origin (a preview, staging) our checks only |
 | `npx remy test live` | [origin]: the smoke against a deployment (every deploy ends with it) |
+| `npx remy test audits` | [playwright options]: Google's audits on the local build, one speed measurement at a time on this machine (vp run test:audits runs it) |
 | `npx remy test cwv` | [alias]: Core Web Vitals on a throwaway preview Worker (the release runs it) |
 | `npx remy browsers` | what a browser check needs on this machine: Playwright's Chromium, and on Linux a Han font |
 | `npx remy docs` | the docs Worker, @joeblew999/remy-ui's, over this app's docs/ |

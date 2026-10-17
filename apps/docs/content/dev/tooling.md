@@ -13,7 +13,7 @@ Codex CLI. `gh` is the machine's, and Claude Code (the translator) is the machin
 subscription is logged into. A script that is one tool is written as that tool (`"logs": "wrangler
 tail --format json"`); anything with logic is TypeScript, a `remy` command of the package
 (`packages/ui/src/cli`, type-checked on every check) or, for what is one app's own, a `scripts/*.ts` of
-that app ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/tooling-in-typescript.md)).
+that app ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/tooling-in-typescript.md)).
 `npx remy verify doctor` prints the versions of the CLIs the tooling runs.
 
 ### Vite Plus: the machine's `vp`, in managed mode
@@ -56,17 +56,17 @@ Vite Plus's own instructions for agents load in every Claude session from the in
 `node_modules/vite-plus/docs`: read those before changing how anything is built, checked or run.
 
 Better Auth runs in remy-auth's own Worker on a D1 database (`DB` in `wrangler.jsonc`), with its
-options in `src/auth/options.ts`. Its scripts are remy-auth's own, in `package.json`:
+options in `src/auth/options.ts` (both in `apps/remy-auth/`). Its scripts are the app's own, in
+`apps/remy-auth/package.json`; the `local` task is the package's, from the app's `scripts/local.ts`:
 
 ```sh
 vp run auth:generate <name>        # LOCAL: what the options need beyond migrations/, as the next numbered migration
-vp run local                   # LOCAL: apply migrations/ and migrations-demo/ to Wrangler's local D1 databases
-vp run local                          # LOCAL: .dev.vars when missing, the migrations, the guard's fixture (dev, build and start run it)
+vp run local                          # LOCAL: .dev.vars when missing, migrations/ and migrations-demo/ on Wrangler's local D1 databases, the guard's fixture
 vp run auth:mail you@example.com   # LOCAL: the sign-in codes captured for an address, from the running Worker
 vp run auth:provision                 # Prints what the deployed sign-in needs on Cloudflare; creates nothing
 ```
 
-`vp run local` (the app's "local" script, which `vp run dev` and `vp run build` run
+`vp run local` (the `local` task, which `vp run dev`, `vp run build` and everything after them run
 first) writes `.dev.vars`, applies the migrations and installs the guard's oRPC v1 fixture (`tests/guard/v1`),
 so dev, preview and every check start on the current schema with nothing to remember. `auth:generate`
 runs the pinned CLI through `src/auth/cli.ts`, which compares the options with a throwaway SQLite
@@ -87,10 +87,18 @@ remain part of the service milestone. Both apps are live on Cloudflare; the prod
 
 ### The scripts and commands
 
-Every app on the package has the same tasks and scripts; `vp run` lists them. The flow and the hand tools are
-scripts; the rest are `remy` commands (`npx remy <command>`), one module each in `packages/ui/src/cli`:
-`npx remy help` lists every command, one line each, and a command run without arguments says its own
-(`npx remy docs`). The flow is one of them, `remy flow <step>`, which the `dev:<step>` scripts call.
+Every app on the package has the same tasks and scripts; `vp run` lists them. Vite Plus decides what runs,
+in what order, and what a cache makes unnecessary: the tasks are the package's (`remyApp()` in an app's
+`vite.config.ts`, `remyWorkspace()` at remy-auth's root, both from `packages/ui/src/tasks.js`), each one
+tool: Vite, Wrangler, Playwright, `tsc`, `vp test`, `vp check`, or a `remy` command for a job Vite Plus has
+no tool for (the project's own checks, the browsers, the audits' lock). Nothing of ours runs `vp run`
+(a unit check refuses it): the flow's steps are the scripts (`land`, `release`, `setup`), which run their
+own part, then `vp run ci` or `vp run check`, then the rest. `vp run --last-details` says why each task
+ran or came from the cache; a task's inputs, outputs and environment are in its `cache` settings.
+
+The `remy` commands (`npx remy <command>`) are one module each in `packages/ui/src/cli`: `npx remy help`
+lists every command, one line each, and a command run without arguments says its own (`npx remy docs`).
+The flow is one of them, `remy flow <step>`, which the `status`, `land`, `promote` and `release` scripts call.
 
 Every script and command, with what each does, is on **[Commands](./commands.mdx)**, generated from the
 command line itself, so it cannot drift; no page lists them by hand. Where each area is explained:
@@ -118,15 +126,17 @@ from registry upgrades. Node and the skill-source pins are managed separately.
 
 The flow, its steps and who runs each: [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
 
-`npx remy verify` is the release's gate: `vp run release` runs it. An installation ends with
-`npx remy verify setup` (`vp run setup`, `npx remy packages upgrade` and `vp run upgrade` run it): about
-a minute, no browser. Nobody runs the gate while coding (`vp run check` is the check); by hand, on
-purpose, it is `REMY_FLOW=hand npx remy verify`. The installation's checks are the dependencies against the
-lockfile, MCP registration, the flow's guard, the CLI versions, the tooling invariants (`npx remy verify tooling`), then the check. They use the existing local installation and
-do not provision Cloudflare resources. The gate then runs every browser check of ours in every
-language (`vp run ci`'s `browser` part) against the production artifact in local Workers, then the new-app
-test. Google's audits are not in it: `vp run ci audits` and `npx remy test cwv`, which the release runs
-after it. No deployment is performed. See [the GUI proof](./run-and-test.md) for scope and commands.
+An installation ends with `npx remy verify` (its `setup` checks; `vp run setup`, `npx remy packages upgrade`
+and `vp run upgrade` run it): about a minute, no browser. Those are the dependencies against the lockfile,
+MCP registration, the flow's guard, the CLI versions and the tooling invariants (`npx remy verify tooling`);
+they use the existing local installation and provision nothing on Cloudflare. `vp run setup` runs
+`vp run check` after them.
+
+The gate before a landing or a release is `vp run ci`, the same here as on GitHub: the check, every browser
+check of ours in every language against the production build in local Workers (`vp run test:browser`),
+Google's audits (`vp run test:audits`) and, in remy-auth, a new app (`vp run new-app`). A release adds Core
+Web Vitals on a throwaway Worker (`npx remy test cwv`). No deployment is performed. See
+[the GUI proof](./run-and-test.md) for scope and commands.
 
 
 ## Start or reload your agent

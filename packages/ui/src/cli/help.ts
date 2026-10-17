@@ -25,7 +25,7 @@ async function frontDoor(): Promise<[string, string][]> {
     ['vp run fix', "what the check only verifies, written: COMMANDS.md and each docs page's ending"],
     [
       'vp run ci',
-      "what GitHub runs, the same here: the check, then the browser checks, Google's audits and a new app (`vp run ci browser --shard 1/3` runs one part)",
+      "what GitHub runs, the same here: the check, then the browser checks, Google's audits and a new app (each part is its own task: `vp run test:browser --shard 1/3`)",
     ],
     ['vp run status', step('status')],
     ['vp run land "<what changed>"', step('land').replace(/^"<what changed>": /, '')],
