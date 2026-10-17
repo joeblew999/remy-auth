@@ -32,10 +32,20 @@
   // newer Previews are served through this same switch, so cf:preview deploys a throwaway Worker instead.
   // On for Worker Previews: Workers Builds makes a throwaway Cloudflare Preview of every branch and pull request
   // (`wrangler preview`), each at https://<branch>-remy-auth.gedw99.workers.dev. This also gives every uploaded
-  // version a URL of its own (owner's choice, 2026-10-17). Previews inherit none of production's bindings; the
-  // `previews` block holds their own, empty for now.
+  // version a URL of its own (owner's choice, 2026-10-17).
   "preview_urls": true,
-  "previews": {},
+  // What every Preview gets instead of production's bindings, which it never inherits: databases of its own,
+  // shared by all Previews (migrations applied to both), and staging's policy, so the seeded people can sign
+  // in. BETTER_AUTH_SECRET is a Preview base-config secret (`wrangler preview base-config secret put`).
+  "previews": {
+    "vars": { "ENVIRONMENT": "staging", "EMAIL_FROM": "noreply@mail.ubuntusoftware.net" },
+    "d1_databases": [
+      { "binding": "DB", "database_name": "remy-auth-preview", "database_id": "4ecadfd4-b626-426b-8dd8-a414f38af61d", "migrations_dir": "migrations" },
+      { "binding": "DEMO_DB", "database_name": "remy-auth-demo-preview", "database_id": "624bb133-5e77-4995-b9c7-99ecf4c869cb", "migrations_dir": "migrations-demo" }
+    ],
+    "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["noreply@mail.ubuntusoftware.net"] }],
+    "version_metadata": { "binding": "CF_VERSION_METADATA" }
+  },
   // Staging (remy cloudflare staging, which builds with CLOUDFLARE_ENV=staging): the same code as its own
   // Worker, with its own two databases, so nothing a visitor does there touches production's. Its
   // environment gives it the automatic sign-in (the seeded people, one press each) beside the normal
