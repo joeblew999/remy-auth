@@ -16,6 +16,28 @@ tail --format json"`); anything with logic is TypeScript, a `remy` command of th
 that app ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/tooling-in-typescript.md)).
 `npx remy verify doctor` prints the versions of the CLIs the tooling runs.
 
+### Vite Plus: the machine's `vp`, in managed mode
+
+Every machine that works on the repo (your Mac, Claude's cloud, GitHub) runs Vite Plus's global `vp`, in
+**managed mode**. That is what makes `node` and `npm` the Node `.node-version` pins, rather than whatever Node
+the machine happens to have. The `vite-plus` package in the dependencies is the toolchain; it does not choose
+Node.
+
+```sh
+curl -fsSL https://vite.plus | bash   # once per machine: the global vp
+vp env on                             # managed mode: node and npm follow .node-version
+vp env current                        # must say: Source .node-version, Mode managed
+vp install                            # the dependencies, on that Node
+```
+
+The installer, run without a terminal (as an agent runs it), leaves `vp` in **system-first** mode. In that mode
+the pin is silently ignored and every check runs on the machine's Node, so check `vp env current` before
+trusting any result. Claude's cloud machines start empty, so run these steps at the start of every session
+there; on your own machine, once.
+Vite Plus's own instructions for agents load in every Claude session from the installed package
+(`CLAUDE.md` imports `node_modules/vite-plus/AGENTS.md`), and its docs for the installed version are in
+`node_modules/vite-plus/docs`: read those before changing how anything is built, checked or run.
+
 Better Auth runs in remy-auth's own Worker on a D1 database (`DB` in `wrangler.jsonc`), with its
 options in `src/auth/options.ts`. Its scripts are remy-auth's own, in `package.json`:
 
