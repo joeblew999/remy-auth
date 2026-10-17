@@ -8,5 +8,13 @@ const docs = remyDocs(docsConfig, { contract: '@joeblew999/remy-auth-contract', 
 // Worker's configuration), then the Worker's binding types.
 export default {
   ...docs,
-  run: { tasks: { generate: { command: ['vp build', 'wrangler types -c .remy-docs/wrangler.json'] } } },
+  run: {
+    tasks: {
+      generate: {
+        command: ['vp build', 'wrangler types -c .remy-docs/wrangler.json'],
+        // What the steps write (the build's .remy-docs/, dist/ and .wrangler/, the binding types) is their output, never their input.
+        cache: { input: [{ auto: true }, '!.remy-docs/**', '!dist/**', '!.wrangler/**', '!worker-configuration.d.ts'] },
+      },
+    },
+  },
 };

@@ -57,6 +57,11 @@ export default {
       generate: {
         command: ['node packages/ui/paraglide.mjs', 'tsc -p packages/ui/src/cli', 'wrangler types'],
         dependsOn: ['@joeblew999/remy-auth-docs#generate'],
+        // Each step reads the file it is about to rewrite: what it writes is its output (restored on a cache hit),
+        // never its input.
+        cache: {
+          input: [{ auto: true }, '!packages/ui/src/paraglide/**', '!packages/ui/cli/**', '!worker-configuration.d.ts'],
+        },
       },
       // Vite+'s check (format, lint, types) on everything generated first.
       check: { command: 'vp check', dependsOn: ['generate'] },
