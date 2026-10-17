@@ -1,7 +1,7 @@
 ---
 title: "Escribir la documentación"
 description: "Cómo se organiza y se escribe la documentación de una app de Remy con Fumadocs: carpetas, frontmatter, medios, componentes, traducciones y la CLI."
-translatedFrom: "51e67f5c 88dd9b0d 03b1de50 fadc7848 4aa38436 403283a8 661eaaac 93a4091e bdf98d1f 3ce796f4"
+translatedFrom: "51e67f5c 88dd9b0d 03b1de50 fadc7848 4aa38436 403283a8 14c6e29e dcbfb538 71f06248 e656bc82"
 ---
 
 Todas las apps de Remy guardan su documentación de la misma manera, de modo que las tareas compartidas y la CLI de Fumadocs funcionan en cada una.
@@ -93,7 +93,7 @@ el catálogo, la guía la sigue; el traductor deja los marcadores tal cual.
 
 :::note
 Captúralos con la herramienta del propio proyecto, para que muestren la app real:
-`npm run shots -- /formats --out docs/public/media` para una imagen, y añade `--video`
+`npx remy shots /formats --out docs/public/media` para una imagen, y añade `--video`
 para una grabación corta de la página.
 :::
 
@@ -115,7 +115,7 @@ para una grabación corta de la página.
 ## Componentes [#components]
 
 Una página es `.md` (simple, se lee igual en el sitio, por un agente y en la skill `remy`) a menos que use un componente;
-entonces es `.mdx` (solo el sitio las lee). Nadie lo elige: `npm run dev:change` renombra una página, sus traducciones y
+entonces es `.mdx` (solo el sitio las lee). Nadie lo elige: `vp run check` renombra una página, sus traducciones y
 los enlaces que apuntan a ella cuando su contenido necesita la otra extensión.
 
 En páginas `.mdx`: `<Callout>` (o `:::note`, `:::warning` en cualquier página), `<Cards>` y `<Card>`, `<Tabs>`
@@ -126,7 +126,7 @@ y `<Tab>`, `<Steps>` y `<Step>`, `<Accordions>` y `<Accordion>`, `<Files>`, `<Fo
 
 ## La CLI de Fumadocs [#the-fumadocs-cli]
 
-`npm run docs:cli -- feature <name>` (solo en remy-auth) ejecuta la CLI de Fumadocs fijada en el Worker
+`vp run docs:cli feature <name>` (solo en remy-auth) ejecuta la CLI de Fumadocs fijada en el Worker
 compartido de documentación, `packages/ui/src/docs`; su `cli.json` asigna las carpetas de allí, y lo que
 escribe es un cambio en el paquete, revisado como cualquier otro. Las apps toman el Worker del paquete y
 nunca lo ejecutan.
@@ -140,6 +140,6 @@ nunca lo ejecutan.
 
 ## Traducciones [#translations]
 
-Escribe solo en inglés. `dev:land` traduce lo que tu cambio dejó obsoleto, en el mismo commit
+Escribe solo en inglés. `vp run land` traduce lo que tu cambio dejó obsoleto, en el mismo commit
 ([traducciones: en el cambio](./how-we-work.md#translations-in-the-change)); `npx remy i18n check docs` enumera lo que aún
 necesita cada idioma.

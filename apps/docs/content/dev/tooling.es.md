@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "Las herramientas detrás de los comandos: dónde se explica cada área, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación. Todos los comandos están en Comandos."
-translatedFrom: "cccfd094 78f11071 226f2d81 82be72a9 6077bbda ec3067e7 caee390a e1b0dbc2 e6b13d48 844adefc e18bd963 7f8682df 4087c066 73b31a8d e8ab792f 2135ef72"
+translatedFrom: "cccfd094 113130b3 6571f238 f9b70434 5e5918fc f46ad939 ec3067e7 587898fa 26a45452 e6b13d48 74939670 e18bd963 15aa2d19 2b38612e db051b04 f3413842 bc4d7058"
 ---
 
 ## Las herramientas [#the-tooling]
@@ -14,27 +14,66 @@ CLI de Codex. `gh` es el de la máquina, y Claude Code (el traductor) es el prop
 está iniciada la sesión de la suscripción. Un script que es una sola herramienta se escribe como esa herramienta (`"logs": "wrangler
 tail --format json"`); todo lo que tenga lógica es TypeScript, un comando `remy` del paquete
 (`packages/ui/src/cli`, con comprobación de tipos en cada check) o, para lo que es propio de una sola app, un `scripts/*.ts` de
-esa app ([el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/tooling-in-typescript.md)).
+esa app ([el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/tooling-in-typescript.md)).
 `npx remy verify doctor` imprime las versiones de las CLI que ejecutan las herramientas.
 
-Better Auth se ejecuta en el propio Worker de remy-auth sobre una base de datos D1 (`DB` en `wrangler.jsonc`), con sus
-opciones en `src/auth/options.ts`. Sus scripts son propios de remy-auth, en `package.json`:
+### Vite Plus: el `vp` de la máquina, en modo gestionado [#vite-plus-the-machines-vp-in-managed-mode]
+
+Vite Plus es una sola herramienta, y su comando es siempre `vp`. Se instala en dos lugares, cada uno con su propio trabajo:
+
+| | En la máquina (global) | En el repositorio (local) |
+| --- | --- | --- |
+| Cómo llega | una vez por máquina: `curl -fsSL https://vite.plus \| bash` | el paquete `vite-plus` en `package.json`, en `node_modules` |
+| Qué hace | elige Node y npm: el Node que fija `.node-version` (26.10.0) | las herramientas: build, lint, formato, comprobación de tipos, tests, el ejecutor de tareas |
+| Quién fija la versión | quien lo instaló | el repositorio, así que todas las máquinas obtienen la misma |
+
+Tú solo escribes `vp`. El `vp` de la máquina pone en su sitio el Node fijado y luego ejecuta la versión de las herramientas que tiene el repositorio.
+Toda máquina que trabaja con el repositorio (tu Mac, la nube de Claude, GitHub) tiene ambos, con el `vp` de la máquina en
+**modo gestionado**; sin él, `node` y `npm` son los que la máquina tenga por casualidad, y nada lo avisa.
 
 ```sh
-npm run auth:generate -- <name>        # LOCAL: what the options need beyond migrations/, as the next numbered migration
-npm run auth:migrate                   # LOCAL: apply migrations/ and migrations-demo/ to Wrangler's local D1 databases
-npm run local                          # LOCAL: .dev.vars when missing, the migrations, the guard's fixture (dev, build and start run it)
-npm run auth:mail -- you@example.com   # LOCAL: the sign-in codes captured for an address, from the running Worker
-npm run auth:provision                 # Prints what the deployed sign-in needs on Cloudflare; creates nothing
+curl -fsSL https://vite.plus | bash   # una vez por máquina: el vp global (di que sí a que gestione Node)
+vp env on                             # modo gestionado: node y npm siguen a .node-version
+vp env current                        # debe decir: Version 26.10.0, Source .node-version, Mode managed
+vp install                            # las dependencias, sobre ese Node
 ```
 
-`npm run local` (el script "local" de la app, que `npm run dev`, `npm run build` y `dev:start` ejecutan
+El instalador, ejecutado sin terminal (como lo ejecuta un agente), deja `vp` en modo **system-first**. En ese modo
+el pin se ignora en silencio y cada comprobación se ejecuta con el Node de la máquina, así que revisa `vp env current` antes de
+fiarte de cualquier resultado.
+
+- **Las máquinas de la nube de Claude** empiezan vacías. El `.claude/settings.json` versionado ejecuta los cuatro pasos al
+  inicio de cada sesión allí e informa del Node que obtuvo, así que nadie los ejecuta a mano.
+- **Tu propia máquina (un Mac):** ejecutas los cuatro pasos una vez. Después, `node` pasa por `vp` en todos los
+  proyectos, no solo en este: un proyecto con su propio `.node-version` obtiene ese Node; uno sin él obtiene el predeterminado
+  de `vp` (la última LTS) en lugar del Node instalado antes. `vp env default <version>` fija ese predeterminado.
+  El paso de sesión de `.claude/settings.json` no hace nada allí.
+- **Un checkout hecho antes del 17 de octubre de 2026** tiene un `.claude/settings.json` escrito por `remy guard` (entonces no
+  se versionaba). Bórralo antes de hacer pull, o el pull se rechaza; luego `vp install` y `npx remy guard`.
+
+`remy guard` escribe sus hooks, con las rutas de esta máquina, en `.claude/settings.local.json`, que no se versiona.
+Las instrucciones propias de Vite Plus para agentes se cargan en cada sesión de Claude desde el paquete instalado
+(`CLAUDE.md` importa `node_modules/vite-plus/AGENTS.md`), y sus docs de la versión instalada están en
+`node_modules/vite-plus/docs`: léelas antes de cambiar cómo se construye, comprueba o ejecuta cualquier cosa.
+
+Better Auth se ejecuta en el propio Worker de remy-auth sobre una base de datos D1 (`DB` en `wrangler.jsonc`), con sus
+opciones en `src/auth/options.ts` (ambos en `apps/remy-auth/`). Sus scripts son propios de la app, en
+`apps/remy-auth/package.json`; la tarea `local` es del paquete, desde el `scripts/local.ts` de la app:
+
+```sh
+vp run auth:generate <name>        # LOCAL: lo que las opciones necesitan además de migrations/, como la siguiente migración numerada
+vp run local                          # LOCAL: .dev.vars si falta, migrations/ y migrations-demo/ en las bases D1 locales de Wrangler, el fixture del guard
+vp run auth:mail you@example.com   # LOCAL: los códigos de inicio de sesión capturados para una dirección, desde el Worker en ejecución
+vp run auth:provision                 # Imprime lo que el inicio de sesión desplegado necesita en Cloudflare; no crea nada
+```
+
+`vp run local` (la tarea `local`, que `vp run dev`, `vp run build` y todo lo posterior ejecutan
 primero) escribe `.dev.vars`, aplica las migraciones e instala el fixture de oRPC v1 del guard (`tests/guard/v1`),
 de modo que dev, preview y cada comprobación arrancan con el esquema actual sin nada que recordar.
 `auth:generate` ejecuta la CLI fijada a través de `src/auth/cli.ts`, que compara las opciones con una base
 de datos SQLite desechable construida a partir de `migrations/`, así que solo escribe lo que aún no está
 ahí; cambia las opciones y luego genera, nunca edites a mano las tablas de Better Auth. Para iniciar
-sesión localmente: `npm run dev`, abre `/en/app/account` y pulsa sobre una de las personas
+sesión localmente: `vp run dev`, abre `/en/app/account` y pulsa sobre una de las personas
 de ejemplo, o introduce cualquier dirección y lee su código con `auth:mail`. No se envía ningún correo
 localmente: el entorno local lo guarda en el buzón de salida del Worker en su lugar (la tabla de
 entornos en `src/auth/environment.ts`, [explicado](./auth.md#environments-one-table); staging también
@@ -42,18 +81,27 @@ tiene a las personas de ejemplo y envía correo de verdad; cualquier otro entorn
 el correo se envía a través de Cloudflare Email Service y no hay nadie de ejemplo). La base de datos
 desplegada, sus migraciones y el secreto de Worker `BETTER_AUTH_SECRET` solo se crean a petición del
 propietario: `auth:provision` imprime los pasos, y hasta que la base de datos exista, el despliegue se
-iega, porque de otro modo Wrangler la crearía por sí misma.
+niega, porque de otro modo Wrangler la crearía por sí misma.
 
 Estas son herramientas para desarrolladores/operadores. El inicio de sesión de la CLI de Remy para usuarios finales y las llamadas
 delegadas a la API siguen siendo parte del hito del servicio. Ambas apps están en vivo en Cloudflare; el despliegue a producción sube a
-`origins.production` en [remy.config.ts](https://github.com/joeblew999/remy-auth/blob/main/remy.config.ts), y `dev:promote` lo ejecuta, solo a petición del propietario.
+`origins.production` en [remy.config.ts](https://github.com/joeblew999/remy-auth/blob/main/remy.config.ts), y `vp run promote` lo ejecuta, solo a petición del propietario.
 
 ### Los scripts y los comandos [#the-scripts-and-commands]
 
-Todas las apps que usan el paquete tienen los mismos scripts; `npm run` los lista. El flujo y las herramientas manuales son
-scripts; el resto son comandos `remy` (`npx remy <command>`), un módulo cada uno en `packages/ui/src/cli`:
-`npx remy help` lista todos los comandos, una línea cada uno, y un comando ejecutado sin argumentos dice
-cuáles son los suyos (`npx remy docs`). El flujo es uno de ellos, `remy flow <step>`, que los scripts `dev:<step>` invocan.
+Todas las apps que usan el paquete tienen las mismas tareas y scripts; `vp run` los lista. Vite Plus decide qué se ejecuta,
+en qué orden y qué hace innecesario una caché: las tareas son las del paquete (`remyApp()` en el
+`vite.config.ts` de una app, `remyWorkspace()` en la raíz de remy-auth, ambos de `packages/ui/src/tasks.js`), cada una
+una herramienta: Vite, Wrangler, Playwright, `tsc`, `vp test`, `vp check`, o un comando `remy` para un trabajo para el que Vite Plus
+no tiene herramienta (las comprobaciones propias del proyecto, los navegadores, el bloqueo de las auditorías). Nada nuestro ejecuta `vp run`
+(una comprobación unitaria lo rechaza): los pasos del flujo son los scripts (`land`, `release`, `setup`), que ejecutan su
+propia parte, luego `vp run ci` o `vp run check`, y después el resto. `vp run --last-details` dice por qué cada tarea
+se ejecutó o vino de la caché; las entradas, salidas y entorno de una tarea están en su configuración `cache`.
+
+Los comandos `remy` (`npx remy <command>`) son un módulo cada uno en `packages/ui/src/cli`: `npx remy help`
+lista todos los comandos, una línea cada uno, y un comando ejecutado sin argumentos dice
+cuáles son los suyos (`npx remy docs`).
+El flujo es uno de ellos, `remy flow <step>`, que los scripts `status`, `land`, `promote` y `release` invocan.
 
 Todos los scripts y comandos, con lo que hace cada uno, están en **[Comandos](./commands.mdx)**, generada a partir de la
 propia línea de comandos, así que no puede quedar desactualizada; ninguna página los lista a mano. Dónde se explica cada área:
@@ -73,7 +121,7 @@ refresca `package-lock.json`, y luego ejecuta las comprobaciones de la instalaci
 Los conflictos de peer fallan visiblemente; el comando no usa `--force` ni `--legacy-peer-deps`
 de npm. Revisa el diff del manifiesto/lockfile y cualquier requisito de migración de versión mayor.
 Si la instalación falla tras actualizar el manifiesto, resuelve el conflicto reportado antes de
-usar `npm run setup`; ningún rollback automático descarta tus cambios.
+usar `vp run setup`; ningún rollback automático descarta tus cambios.
 Las dependencias del workspace también se actualizan; las referencias locales `@joeblew999/remy-ui` y `@joeblew999/remy-auth-contract` se excluyen
 de las actualizaciones del registro. Los pins de Node y de las fuentes de skills se gestionan por separado.
 
@@ -81,15 +129,17 @@ de las actualizaciones del registro. Los pins de Node y de las fuentes de skills
 
 El flujo, sus pasos y quién ejecuta cada uno: [cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
 
-`npx remy verify` es la puerta del release: `dev:release` lo ejecuta. Una instalación termina con
-`npx remy verify setup` (`npm run setup`, `npm run packages -- upgrade` y `npm run upgrade` lo ejecutan): alrededor de
-un minuto, sin navegador. Nadie ejecuta la puerta mientras programa (`dev:change` es la comprobación); a mano, a
-propósito, es `REMY_FLOW=hand npx remy verify`. Las comprobaciones de la instalación son las dependencias frente al
-lockfile, el registro de MCP, el guard del flujo, las versiones de las CLI, los invariantes de las herramientas (`npx remy verify tooling`), y luego el check. Usan la instalación local existente y
-no aprovisionan recursos de Cloudflare. Después la puerta ejecuta cada comprobación de navegador propia en cada
-idioma (la parte `browser` de `npm run ci`) contra el artefacto de producción en Workers locales,
-y luego la prueba de la app nueva. Las auditorías de Google no están incluidas: `npm run ci -- audits` y
-`npm run test -- cwv`, que el release ejecuta después. No se realiza ningún despliegue. Consulta [la prueba de la GUI](./run-and-test.md) para el alcance y los comandos.
+Una instalación termina con `npx remy verify` (sus comprobaciones de `setup`; `vp run setup`, `npx remy packages upgrade`
+y `vp run upgrade` lo ejecutan): alrededor de un minuto, sin navegador. Son las dependencias frente al lockfile,
+el registro de MCP, el guard del flujo, las versiones de las CLI y los invariantes de las herramientas (`npx remy verify tooling`);
+usan la instalación local existente y no aprovisionan nada en Cloudflare. `vp run setup` ejecuta
+`vp run check` después de ellas.
+
+La puerta antes de un aterrizaje o un release es `vp run ci`, la misma aquí que en GitHub: el check, cada comprobación
+de navegador propia en cada idioma contra el build de producción en Workers locales (`vp run test:browser`),
+las auditorías de Google (`vp run test:audits`) y, en remy-auth, una app nueva (`vp run new-app`). Un release añade Core
+Web Vitals en un Worker desechable (`npx remy test cwv`). No se realiza ningún despliegue. Consulta
+[la prueba de la GUI](./run-and-test.md) para el alcance y los comandos.
 
 
 ## Iniciar o recargar tu agente [#start-or-reload-your-agent]
@@ -111,28 +161,28 @@ Después de cambiar los skills o la configuración de MCP:
 3. Vuelve a abrir la barra lateral de Codex y continúa la conversación. Verifica que el agente
    pueda llamar a las herramientas recién configuradas; el registro por sí solo no demuestra una conexión.
 
-`npm run codex:resume` lanza una sesión de terminal; no recarga la extensión.
+`npx codex resume --last` lanza una sesión de terminal; no recarga la extensión.
 La CLI `code` instalada no tiene un flag documentado de reload-window, así que la recarga usa
 el comando integrado de VS Code en lugar de un wrapper de shell que simule reiniciarla.
 
 ### Agentes de terminal [#terminal-agents]
 
-Después de `npm run setup`, usa la CLI instalada de Codex o Claude Code:
+Después de `vp run setup`, usa la CLI instalada de Codex o Claude Code:
 
 ```sh
-npm run codex             # New Codex conversation
-npm run codex:resume      # Resume latest Codex conversation in this project
-npm run claude            # New Claude conversation
-npm run claude:resume     # Resume latest Claude conversation in this project
+npx codex             # Nueva conversación de Codex
+npx codex resume --last      # Retoma la última conversación de Codex en este proyecto
+claude            # Nueva conversación de Claude
+claude --continue     # Retoma la última conversación de Claude en este proyecto
 ```
 
 Para recargar los skills y la configuración de MCP, sal del agente actual con `/exit` y luego
 ejecuta su script `:resume` desde tu terminal. Usa `/mcp` dentro del agente para comprobar la
 conexión. Pasa opciones adicionales originales después de `--`, por ejemplo
-`npm run codex -- --help`. La configuración instala localmente la [`@openai/codex` CLI](https://learn.chatgpt.com/docs/codex/cli)
+`npx codex -- --help`. La configuración instala localmente la [`@openai/codex` CLI](https://learn.chatgpt.com/docs/codex/cli)
 oficial y fijada, y los scripts de Codex usan ese ejecutable directamente en lugar de
 depender del PATH de tu shell.
-`npm run packages -- upgrade` la actualiza junto con las demás dependencias. Autentícate cuando
+`npx remy packages upgrade` la actualiza junto con las demás dependencias. Autentícate cuando
 se te solicite. Claude Code se instala por separado; lanzar Codex no lo requiere.
 
 
@@ -164,13 +214,13 @@ las herramientas de IA (`/dev/llms.txt`, el `.md` de cada página: con los inclu
 cuando el paquete se empaqueta o se publica (nunca en la comprobación rápida). Así, el skill, `llms.txt`, el
 Markdown de cada página y los servidores MCP son un mismo texto de una misma fuente: una página no puede llegar a uno y faltar en otro. Los docs
 en vivo (`/dev/llms.txt`, `/api/mcp/dev`) siempre tienen lo más reciente; el skill lo indica. En una app, `npx remy rules` mantiene un bloque
-marcado en `AGENTS.md` que dirige a sus agentes hacia el skill y nombra la versión; `npm run setup` y
-`npm run upgrade` lo ejecutan, así que una actualización cambia las reglas que leen los agentes en el mismo paso.
+marcado en `AGENTS.md` que dirige a sus agentes hacia el skill y nombra la versión; `vp run setup` y
+`vp run upgrade` lo ejecutan, así que una actualización cambia las reglas que leen los agentes en el mismo paso.
 El propio `AGENTS.md` de remy-auth es un puntero a [Agentes: empieza aquí](./agents.md).
 El instalador registra la procedencia en `skills-lock.json`. Volver a ejecutar la instalación
 restaura los skills seleccionados desde las fuentes fijadas; actualiza sus commits de fuente deliberadamente
 para adoptar cambios upstream. Solo se hace commit de `skills-lock.json`; los skills instalados y sus
-enlaces de Claude están ignorados y se recrean con `npm run setup` o `npx remy skills install`.
+enlaces de Claude están ignorados y se recrean con `vp run setup` o `npx remy skills install`.
 `npx remy skills list` muestra lo que está instalado; [el plan de skills](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/agent-skills.md)
 hace seguimiento de las dependencias sin un skill oficial. Recarga una sesión de agente existente
 si los skills recién instalados aún no son visibles.
@@ -219,22 +269,22 @@ Las [herramientas de agente de Chrome DevTools](https://developer.chrome.com/doc
 ofrecen interacción con el navegador, capturas de pantalla, inspección de accesibilidad, depuración de
 red/cookies, Lighthouse y análisis de rendimiento. Instala Google Chrome por separado; la configuración
 del proyecto no instala el navegador. La CLI es experimental y está fijada junto con las demás herramientas
-npm, así que `npm run packages -- upgrade` también la actualiza.
+npm, así que `npx remy packages upgrade` también la actualiza.
 
 ```sh
-npm run browser:start                           # Isolated, headless Chrome session
-npm run browser -- new_page http://localhost:3000
-npm run browser -- list_pages
-npm run browser -- take_snapshot 1              # Use the returned page ID
-npm run browser -- click 1 "UID_FROM_SNAPSHOT"
-npm run browser:stop
+npx chrome-devtools start                           # Sesión de Chrome aislada y headless
+npx chrome-devtools -- new_page http://localhost:3000
+npx chrome-devtools -- list_pages
+npx chrome-devtools -- take_snapshot 1              # Usa el ID de página devuelto
+npx chrome-devtools -- click 1 "UID_FROM_SNAPSHOT"
+npx chrome-devtools stop
 ```
 
-Ejecuta `npm run browser:start -- --headless=false` para una ventana visible. Inícialo una vez
+Ejecuta `npx chrome-devtools start -- --headless=false` para una ventana visible. Inícialo una vez
 por sesión; las llamadas posteriores a la CLI reutilizan el daemon en segundo plano. Volver a iniciarlo
 reinicia ese daemon. Estas sesiones usan un perfil temporal de Chrome; el script de inicio deshabilita
 la telemetría de uso de herramientas y las subidas de URL a CrUX. Detén la sesión cuando termines.
-Usa `npm run browser -- --help` para los comandos originales.
+Usa `npx chrome-devtools -- --help` para los comandos originales.
 
 
 ## Guía de implementación web moderna [#modern-web-implementation-guidance]
@@ -246,13 +296,13 @@ principal `modern-web-guidance` está instalado para ambos agentes. El skill sep
 `chrome-extensions` se omite porque este proyecto es un servicio web y una UI.
 
 ```sh
-npm run web -- search "animate a dialog modal backdrop"
-npm run web -- retrieve "GUIDE_ID_FROM_SEARCH"
-npm run web -- list
+npx modern-web-guidance -- search "animate a dialog modal backdrop"
+npx modern-web-guidance -- retrieve "GUIDE_ID_FROM_SEARCH"
+npx modern-web-guidance -- list
 ```
 
 Usa el script `web` fijado localmente en este repo en lugar de los ejemplos
-`npx modern-web-guidance@latest` del skill original. `npm run packages -- upgrade` actualiza la CLI;
+`npx modern-web-guidance@latest` del skill original. `npx remy packages upgrade` actualiza la CLI;
 `npx remy skills install` restaura el skill fijado por commit. El instalador `skills` alternativo de Google
 mantiene nuestra estructura existente de `.agents` y `.claude` sin un segundo instalador ni
 actualizaciones automáticas de skills. Si una búsqueda no devuelve resultados, usa `list` para explorar los IDs de guías.
@@ -269,12 +319,12 @@ Una entrada del Worker de la GUI ahora emite IDs de solicitud, estado y tiempos 
 cabeceras ni cookies. Los registros de auditoría duraderos del inicio de sesión no están implementados.
 
 ```sh
-npm run logs -- --help
-npm run errors -- --help
+npx wrangler tail --format json -- --help
+npx wrangler tail --format json --status error -- --help
 ```
 
-Ambos usan el Worker configurado; `npm run logs` también acepta un nombre de Worker explícito.
-`npm run errors` filtra los fallos de invocación del Worker, no todas las respuestas de error HTTP. El almacenamiento
+Ambos usan el Worker configurado; `npx wrangler tail --format json` también acepta un nombre de Worker explícito.
+`npx wrangler tail --format json --status error` filtra los fallos de invocación del Worker, no todas las respuestas de error HTTP. El almacenamiento
 de auditoría duradero, los dashboards y la entrega de alertas son trabajo pendiente en el plan de observabilidad.
 
 ### Las respuestas de la documentación en Cloudflare: AI Search y AI Gateway [#the-docs-answers-on-cloudflare-ai-search-and-ai-gateway]
@@ -291,15 +341,15 @@ Dos productos de Cloudflare están detrás de Ask AI de la documentación (el Wo
   deja de estar en las respuestas.
 - **AI Gateway** es el medidor delante del modelo. Cada llamada al modelo que hace AI Search pasa por
   él (`remy-docs`), y registra cada una con su costo, tokens y tiempo (y la pregunta). No contiene
-  docs. Los límites de gasto y de tasa viven aquí; `npm run docs -- observe ai-usage` y `ai-check` lo leen.
+  docs. Los límites de gasto y de tasa viven aquí; `npx remy docs observe ai-usage` y `ai-check` lo leen.
 
 Local o remoto: las páginas de docs, la página de Ask AI y todas las comprobaciones se ejecutan
 localmente; las respuestas solo existen en Cloudflare (AI Search no tiene versión local).
 Cada comando indica en su comentario de cabecera si es local o remoto (y si es de producción).
 
-Los comandos de la documentación (`npm run docs -- …`: publish, questions, answers, observe) están en [Comandos](./commands.mdx).
+Los comandos de la documentación (`npx remy docs …`: publish, questions, answers, observe) están en [Comandos](./commands.mdx).
 Hay dos cosas que esa lista no puede decir: los comandos `observe` necesitan el token del gateway, así que ejecútalos como
-`fnox exec -- npm run docs -- observe …`; y `CLOUDFLARE_ENV=ask npm run docs -- dev` ejecuta el Worker de docs local
+`fnox exec -- npx remy docs observe …`; y `CLOUDFLARE_ENV=ask vp -C docs dev` ejecuta el Worker de docs local
 con respuestas del índice real.
 
 Tokens: consulta [secretos](#secrets-fnox) más abajo.
@@ -310,7 +360,7 @@ sin respuesta, casi nada; una respuesta entre $0.0001 y $0.0007, y $0 cuando la 
 Ask AI es una decisión de cada app: el `ask` de `docs.config.ts` nombra su instancia de AI Search, su
 bucket R2, su AI Gateway y su espacio de nombres de límite de tasa, y la configuración de Cloudflare del
 Worker de docs se genera a partir de él (`docs/.remy-docs/wrangler.json`). Sin `ask`, la documentación no
-tiene página, botón ni bindings de Ask AI. `npm run docs -- provision` imprime los comandos que crean los
+tiene página, botón ni bindings de Ask AI. `npx remy docs provision` imprime los comandos que crean los
 recursos de una app y no crea nada: eso cuesta dinero y es cosa del propietario.
 
 Historial almacenado y las respuestas de IA, de solo lectura, desde las propias APIs de Cloudflare. El
@@ -318,7 +368,7 @@ Worker, su instancia de AI Search y el AI Gateway de esa instancia provienen de 
 una app que lo incluya obtiene el suyo propio:
 
 Los comandos `observe` (en [Comandos](./commands.mdx)) leen Workers Logs y el AI Gateway; ejecútalos como
-`fnox exec -- npm run observe -- …`, para el token.
+`fnox exec -- npx remy observe …`, para el token.
 
 ### Secretos: fnox [#secrets-fnox]
 
@@ -328,7 +378,7 @@ otorgar acceso a AI Gateway ni a Workers Logs. Para eso, los comandos leen token
 - `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID`: el token y la cuenta de Cloudflare compartidos, los
   mismos elementos del llavero en todos los repositorios de joeblew999. [`fnox.toml`](https://github.com/joeblew999/remy-auth/blob/main/fnox.toml) los
   nombra (los valores se quedan en el llavero de macOS, nunca en el archivo); `fnox` es el de la máquina.
-  Ejecuta un comando con ellos: `fnox exec -- npm run observe -- ai-usage`. Guarda uno con
+  Ejecuta un comando con ellos: `fnox exec -- npx remy observe ai-usage`. Guarda uno con
   `fnox set -p keychain CLOUDFLARE_API_TOKEN <token>` (nunca omitas `-p keychain`: sin él el valor se
   escribe en `fnox.toml` en texto plano). Lee Workers Logs y AI Gateway, así que necesita
   **Workers Observability Read** y **AI Gateway Edit**; AI Search se lee con el login de Wrangler.

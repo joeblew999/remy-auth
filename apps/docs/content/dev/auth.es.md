@@ -1,7 +1,7 @@
 ---
 title: "Inicio de sesión y permisos"
 description: "Cómo una app de Remy obtiene el inicio de sesión, los roles y los permisos basados en relaciones de remy-auth y su paquete: el guard, el motor de relaciones, el componente Allowed, los entornos, el correo y las comprobaciones que aporta cada uno."
-translatedFrom: "e4a4893b 4209246f cf63a85f 532ce43c a23b4622 1f3c842d 321b0ff7 f5533007 a75b5026 32ebfb01 f2b3d098"
+translatedFrom: "e4a4893b 4209246f cf63a85f 532ce43c a23b4622 1f3c842d 321b0ff7 58276e8a a75b5026 32ebfb01 f2b3d098"
 ---
 
 remy-auth existe para que Better Auth funcione bien con TanStack y oRPC en cada app de Remy: una app
@@ -134,7 +134,7 @@ correo su código a una dirección real. La semilla es `src/auth/seed.ts` (IDs e
 semilla de una app sabe jamás sobre una persona. Nada de esto crea una sesión fuera de Better Auth.
 
 Staging es su propio Worker, con sus propias bases de datos y secreto (`env.staging` en
-`wrangler.jsonc`, desplegado por cada `dev:land` a través de `remy cloudflare staging`), de modo que nada de lo que
+`wrangler.jsonc`, desplegado por cada `vp run land` a través de `remy cloudflare staging`), de modo que nada de lo que
 se hace allí toca los datos de producción. Contiene fixtures y lo que escriben los visitantes. Nunca
 copies los datos de producción en él: quien lo encuentre puede iniciar sesión como una persona
 sembrada.

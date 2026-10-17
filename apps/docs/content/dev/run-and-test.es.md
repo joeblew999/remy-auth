@@ -1,7 +1,7 @@
 ---
 title: "Ejecutar, previsualizar y probar la app"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "633d518a 9addc553 5cbb94fc 20e32575 2dd62d59 8bb92a84 c01161f6 fdbfb49e fba690a6 73202548"
+translatedFrom: "633d518a 397ebf73 5cbb94fc 2bff6ee3 55966c34 7066b78a 3ef97f39 fdbfb49e dbc3fd29 3142b7b0"
 ---
 
 :::note
@@ -20,17 +20,17 @@ Tanto la preview local como el deployment de Wrangler consumen la build de produ
 El desarrollo usa el mismo código fuente del Worker y el mismo runtime de Cloudflare con hot reload.
 
 Todos los comandos de la aplicación, sus comprobaciones y sus deployments, con lo que hace cada uno: [Comandos](./commands.mdx).
-En resumen, la aplicación se ejecuta en local en el puerto 5173 con hot reload (`npm run dev`) y como build de producción en
-el 4173 (`npm run preview`), y las comprobaciones se ejecutan en ese mismo host local. Cada rama distinta de `main` obtiene una
+En resumen, la aplicación se ejecuta en local en el puerto 5173 con hot reload (`vp run dev`) y como build de producción en
+el 4173 (`vp run preview`), y las comprobaciones se ejecutan en ese mismo host local. Cada rama distinta de `main` obtiene una
 preview en Cloudflare: [en Cloudflare](#on-cloudflare), más abajo. El navegador propio del agente en un portátil
-(`npm run browser`, Chrome DevTools) no es CI: las comprobaciones nunca lo usan.
+(`npx chrome-devtools`, Chrome DevTools) no es CI: las comprobaciones nunca lo usan.
 
 El flujo no ejecuta toda la suite contra un deployment: los deploys terminan con el smoke en vivo,
-y GitHub ejecuta la suite después de cada landing. Para ejecutarla toda contra una URL desplegada a
-propósito, una persona lo indica en una terminal (el comando se niega sin ello, y el guard se niega a hacerlo desde un agente):
+y GitHub ejecuta la suite sobre la build de producción después de cada landing. Para ejecutarla toda contra una URL
+desplegada (la preview de una rama, staging, producción):
 
 ```sh
-REMY_FLOW=hand npm run test -- remote https://your-worker.your-subdomain.workers.dev
+npx remy test remote https://your-worker.your-subdomain.workers.dev
 ```
 
 La URL debe ser un origin, sin path ni query. Las comprobaciones que
@@ -49,7 +49,7 @@ Existe una única configuración de Worker con un entorno con nombre, `staging` 
 `wrangler.jsonc`): el mismo código como su propio Worker, con sus propias bases de datos y secreto. Un entorno
 con nombre se selecciona con `CLOUDFLARE_ENV` en tiempo de build, tal como exige la
 [integración de Cloudflare con Vite](https://developers.cloudflare.com/workers/vite-plugin/reference/cloudflare-environments/);
-`remy cloudflare staging` (que `dev:land` ejecuta) hace eso y luego todo lo que hace el
+`remy cloudflare staging` (que `vp run land` ejecuta) hace eso y luego todo lo que hace el
 deploy de producción. Mantén la
 implementación compartida; varía solo los identificadores de recursos, los secretos y demás valores de entorno. Los
 bindings, las vars y los secretos requeridos no los hereda un entorno con nombre: cada uno se declara de nuevo ahí.
@@ -108,23 +108,23 @@ Cada página existe en cada locale (13 prefijos como `/en`, `/ar`, `/ja`; las p�
 
 Las páginas localizadas nunca redirigen. Cuando el idioma preferido del visitante difiere del de la página, una sugerencia descartable ofrece esa versión; elegirla o descartarla se recuerda en la cookie `PARAGLIDE_LOCALE` de Paraglide, sobre la que solo actúan las URLs de entrada. La detección de locale, la cookie, la localización de URLs y la redirección son las propias estrategias y el middleware de Paraglide (`packages/ui/paraglide.mjs` contiene la única configuración del compilador), integrados como la integración oficial de Paraglide con TanStack Start: el middleware envuelve la entrada del Worker, y el `rewrite` del router elimina el locale antes de hacer el matching y lo añade a cada enlace, de modo que las rutas no llevan segmento de locale.
 
-TanStack Start se ejecuta a través del plugin de Vite de Cloudflare ([`vite.config.ts`](https://github.com/joeblew999/remy-auth/blob/main/vite.config.ts)). Todas las
+TanStack Start se ejecuta a través del plugin de Vite de Cloudflare ([`apps/remy-auth/vite.config.ts`](https://github.com/joeblew999/remy-auth/blob/main/apps/remy-auth/vite.config.ts), el `remyApp()` del paquete). Todas las
 rutas se renderizan en servidor excepto la demo. Los enlaces dentro de la app precargan el código y los datos de su ruta
 según la intención; los cambios de idioma en las páginas de sitio son navegaciones completas.
 
 ## shadcn, de fábrica [#shadcn-stock]
 
 Los componentes y el tema son lo que escribe la CLI de shadcn, en el diseño de monorepo de shadcn: el
-[`components.json`](https://github.com/joeblew999/remy-auth/blob/main/components.json) de esta app dirige `shadcn add` hacia el paquete
+[`apps/remy-auth/components.json`](https://github.com/joeblew999/remy-auth/blob/main/apps/remy-auth/components.json) de esta app dirige `shadcn add` hacia el paquete
 ([`packages/ui/components.json`](https://github.com/joeblew999/remy-auth/blob/main/packages/ui/components.json)), y
 `packages/ui/src/styles/globals.css` también lo escribe la CLI. Nadie edita ninguno de los dos a mano; los
 scripts de [`package.json`](https://github.com/joeblew999/remy-auth/blob/main/package.json) son la única forma en que cambian:
 
 ```sh
-npm run ui:components       # Re-add every shadcn component (extend the list there to add one)
-npm run ui:theme            # Rewrite globals.css with shadcn's default theme
-npm run ui:blocks           # Diff each owned block against upstream, in place
-npm run ui:verify           # Re-run both and fail on any difference (runs before every release)
+vp run ui:components       # Re-add every shadcn component (extend the list there to add one)
+vp run ui:theme            # Rewrite globals.css with shadcn's default theme
+vp run ui:blocks           # Diff each owned block against upstream, in place
+vp run ui:verify           # Re-run both and fail on any difference (runs before every release)
 ```
 
 Los bloques son copias propias, tal como shadcn pretende; el README de sidebar-16 explica qué se cambió. El
@@ -133,8 +133,8 @@ bloque cuando se ejecuta desde el paquete (`shadcn add <block> -c packages/ui`):
 Así, `ui:blocks` los compara en su sitio y los cambios de upstream se fusionan a mano.
 
 Las fuentes viven en [`packages/ui/src/fonts.css`](https://github.com/joeblew999/remy-auth/blob/main/packages/ui/src/fonts.css), importado después de
-`globals.css` (ver [`src/styles.css`](https://github.com/joeblew999/remy-auth/blob/main/apps/remy-auth/src/styles.css)); el archivo explica sus reglas. fontaine en
-[`vite.config.ts`](https://github.com/joeblew999/remy-auth/blob/main/vite.config.ts) genera las fuentes de respaldo ajustadas en tamaño que nombra.
+`globals.css` (ver [`src/styles.css`](https://github.com/joeblew999/remy-auth/blob/main/apps/remy-auth/src/styles.css)); el archivo explica sus reglas. fontaine, en
+la configuración de Vite de la app (`remyApp()`), genera las fuentes de respaldo ajustadas en tamaño que nombra.
 `publicPageChecks` falla ante cualquier familia nombrada que no esté cargada.
 
 ## En Cloudflare [#on-cloudflare]
@@ -142,13 +142,18 @@ Las fuentes viven en [`packages/ui/src/fonts.css`](https://github.com/joeblew999
 - **Una preview de una rama**: haz push de la rama, sin pull request (GitHub no ejecuta nada para una rama sin ella).
   Workers Builds de Cloudflare la compila y la sirve en `https://<branch>-remy-auth.gedw99.workers.dev`
   (una `/` en la rama se convierte en `-`); las herramientas de builds del conector muestran la build y su log. Después compruébala:
-  `REMY_FLOW=hand npm run test -- remote https://<branch>-remy-auth.gedw99.workers.dev` (solo nuestras comprobaciones: una
+  `npx remy test remote https://<branch>-remy-auth.gedw99.workers.dev` (solo nuestras comprobaciones: una
   preview se oculta a propósito de los buscadores, así que las auditorías de Google evalúan producción). Este es el camino
   desde la nube de Claude, que no tiene token de Cloudflare; una máquina con sesión iniciada dispone también de `npx remy cloudflare preview`.
 - **Los ajustes de build de Cloudflare** viven en Cloudflare, no en el repositorio, así que se escriben aquí y
-  solo se cambian a través del conector, para que coincidan: dos reglas de build en el Worker `remy-auth`, ambas
-  `npm run build`, con `NODE_VERSION` como en `.node-version`. `main`: deploy `npx wrangler versions upload` (una
-  versión nueva; producción solo se mueve con `dev:promote`). Cualquier otra rama: deploy `npx wrangler preview`.
+  solo se cambian a través del conector, para que coincidan: dos reglas de build en el Worker `remy-auth`, ambas con el
+  directorio raíz `apps/remy-auth` (donde está su `wrangler.jsonc`; la configuración de monorepo de Cloudflare: npm instala
+  allí todo el workspace), el comando de build `npx vp run build` y la variable de build
+  `NODE_VERSION` como en `.node-version`. Cloudflare instala con su propio npm (10.9.2, 2026-10-17; no respeta ningún
+  pin de npm), cuyo `npm ci` sigue instalando exactamente el lockfile o falla. `main`: deploy
+  `npx wrangler versions upload` (una versión nueva; producción solo se mueve con `vp run promote`). Cualquier otra
+  rama: deploy `npx wrangler preview`. La build de una rama ya subida puede volver a iniciarse sin un push
+  (la API de builds del conector, los `builds` del trigger).
 - **Velocidad lejos de las bases de datos**: el Worker se ejecuta con Smart Placement (`wrangler.jsonc`, comprobado por
   `npx remy verify tooling`), y cada petición lee a través de su propia sesión de D1, de modo que las lecturas vienen de la
   copia más cercana (`@joeblew999/remy-ui/replicas`; una comprobación unitaria rechaza el código de la app que use un binding de base de datos en bruto).
@@ -179,7 +184,7 @@ estuvo equivocado durante semanas).
   `defineRemyApp`) y los `deployments` que la app enumera ahí (staging junto a producción, un servicio al que llama), cada uno
   respondiendo por sí mismo, y luego los paquetes con los que se hizo este build. La página de Settings de
   remy-auth lo muestra, con su producción y su staging.
-- **`npm run dev:status`** (y `npx remy cloudflare versions`) imprime una fila por deployment (los origins de
+- **`vp run status`** (y `npx remy cloudflare versions`) imprime una fila por deployment (los origins de
   `remy.config.ts`, o los origins dados), situando cada commit respecto a este checkout: `= HEAD`, `3 behind HEAD`. Úsalo antes de
   decir qué está en producción.
 
@@ -226,6 +231,9 @@ muestra «Remy» (`productNameChecks`, en el conjunto compartido de cada app; el
 
 ## Estructura y reutilización [#structure-and-reuse]
 
+La app es `apps/remy-auth/` (sus rutas de abajo parten de ahí); los paquetes junto a ella son `packages/*`,
+los docs `apps/docs/`, todo un único workspace de npm cuya raíz contiene las comprobaciones propias del repositorio.
+
 - `src/routes/`: rutas de archivo de TanStack (loaders, `head`, renderizado por ruta) que renderizan las páginas del paquete, más las filas de formatos adicionales de esta app (`src/formats-extras.tsx`), mientras que `robots.txt` y `sitemap.xml` (la parte seo-routes) y `/csp-report` (`app-routes`) son las rutas de servidor del paquete, montadas junto a ellas; `src/routeTree.gen.ts` lo genera el plugin del router durante el dev y el build, y se versiona.
 - `src/server.ts`: entrada del Worker a través del `localizedWorker` del paquete (IDs de petición, logs de estado estructurados, `/healthz`, el middleware de Paraglide, redirecciones de entrada). Start recibe la petición original, así que las funciones de servidor leen la geolocalización de Cloudflare a partir de las propiedades `cf` de la petición en un módulo exclusivo de servidor bajo la protección de imports de Start (`packages/showcase/src/parts/deferred-place/place.server.ts`, la parte deferred-place del showcase). El wrapper pasa su ID de petición hacia dentro como `X-Request-ID`; el middleware de petición de Start lo expone como `context.requestId`, y un middleware de función registra una línea `server_fn` por cada llamada (el `start` del paquete, registrado en `src/start.ts`). Ahí mismo, un segundo middleware de petición genera el nonce de CSP por petición que el router compartido (`router`) entrega a TanStack Router, y la ruta de servidor `/csp-report` del paquete (`app-routes`) registra los reportes de la política ([cabeceras de seguridad](https://github.com/joeblew999/remy-auth/blob/main/.plans/parked/gui-portal.md)). El nombre del servicio tiene un único hogar, `src/service.ts`.
 - `src/api/`: la implementación del contrato (`router.ts`, tras el guard; sin imports de Workers para que las comprobaciones puedan cargarlo en Node), el contexto de cada llamada, con la sesión de quien llama (`context.server.ts`), y el cliente isomórfico con sus utilidades de TanStack Query (`client.ts`). El contrato es `packages/contract/`; el mecanismo compartido son las exportaciones `api/*` del paquete; [el plan de contratos](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/openapi-contracts.md) es dueño del diseño.
@@ -233,8 +241,8 @@ muestra «Remy» (`productNameChecks`, en el conjunto compartido de cada app; el
 - `src/notes/`: la demo de notas, que usa el motor de relaciones como lo haría cualquier app: sus datos en su propia D1 (`DEMO_DB`, `migrations-demo/`; ahí una persona es solo un ID de cuenta) a través de `store.ts`, la página (`page.tsx`) y la función de servidor que su loader consulta (`state.ts`). El vocabulario y las formas son los del contrato (`packages/contract/src/notes.ts`).
 - `src/router.tsx`: el `remyRouter` del paquete, un router y un cliente de TanStack Query nuevos por petición, con la integración SSR de Query. `src/routes/__root.tsx` es el `remyRoot` del paquete con la configuración de esta app; TanStack Devtools (paneles de Router y Query) se pasa ahí, en el propio archivo de la app, porque su plugin de Vite `devtools()` lo elimina de las builds de producción solo fuera de `node_modules`; la comprobación de frontera de build demuestra que ni devtools ni código exclusivo de servidor llegan al navegador.
 - `src/parts.json`: las [partes](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md) del paquete que usa esta app, una por línea (`@joeblew999/remy-showcase/time-zones`, `deferred-place` y `status-card` del showcase, y `seo-routes` de la plataforma); `remyParts()` en `vite.config.ts` monta sus rutas y `partChecks()` en `tests/gui.spec.ts` ejecuta sus comprobaciones.
-- `packages/ui/`: todo lo que comparten ambas apps; su [README](./remy-ui.md) enumera las exportaciones.
-- `tests/`: las comprobaciones compartidas del paquete (`@joeblew999/remy-ui/checks`, el `@joeblew999/remy-showcase/*.checks` del showcase) más las comprobaciones que solo posee este repositorio (catálogos, renderizados concurrentes en servidor, hidratación, sus filas de formatos adicionales); `lighthouse.spec.ts` es la parte `audits` de `npm run ci` y `performance.spec.ts` los Core Web Vitals de la release.
+- `packages/ui/` (en la raíz): todo lo que comparten ambas apps; su [README](./remy-ui.md) enumera las exportaciones.
+- `tests/`: las comprobaciones de navegador de la app: las comprobaciones compartidas del paquete (`@joeblew999/remy-ui/checks`, el `@joeblew999/remy-showcase/*.checks` del showcase) más las comprobaciones que solo posee este repositorio (catálogos, renderizados concurrentes en servidor, hidratación, sus filas de formatos adicionales); `lighthouse.spec.ts` es la parte `audits` de `vp run ci` y `performance.spec.ts` los Core Web Vitals de la release.
 
 El locale se pasa explícitamente a las funciones de mensaje compiladas; las peticiones concurrentes no comparten
 estado mutable de locale. Los catálogos son los `locales` en
@@ -249,24 +257,17 @@ las ejecuta sobre páginas renderizadas en servidor.
 
 ## Evidencia y límites [#evidence-and-limits]
 
-`npm run ci` ejecuta cuatro partes, las mismas cuatro que GitHub ejecuta como jobs: `check` (la comprobación de `dev:change`, completa; con `npm run ci` informa de lo que `dev:change` corregiría, como un `COMMANDS.md` desactualizado, y no escribe nada), `browser`
-(todas nuestras comprobaciones en un navegador), `audits` (Lighthouse de Google) y `new-app` (una app nueva sobre el
-paquete de este commit); los Core Web Vitals en un Worker de Cloudflare desechable son cosa de la release (`npm run test -- cwv`). No hay
-niveles que elegir: lo que incluye una ejecución es lo que su cambio puede afectar. Una comprobación de algo que depende del idioma (fuentes y
-escrituras, separación silábica, dirección, formatos, los catálogos) se ejecuta en cada idioma comprobado (`checkedLocales`); una comprobación
-de un comportamiento que no depende de él (la política de seguridad, noindex, los parámetros de búsqueda, el formulario de demo, las páginas de error, las respuestas de la API)
-se ejecuta en el idioma base y en el primero de derecha a izquierda (`behaviourLocales`; `BEHAVIOUR_LOCALES` lo sustituye).
-En una pull request, cada parte pregunta primero qué ha cambiado y se omite, indicándolo, cuando nada de lo que comprueba ha cambiado
-(`packages/ui/src/cli/unchanged.ts`, con sus comprobaciones unitarias): los planes, el contenido de los docs y el Markdown fuera de los
-paquetes no ejecutan ninguna; la app en blanco y el fixture ejecutan solo `new-app`. Los push a `main` y las etiquetas ejecutan
-todo. La parte `browser` pregunta además si lo que ha cambiado puede diferir según el idioma: los catálogos y los ajustes de idioma,
-las fuentes y cualquier CSS, el código que da formato según la configuración regional (por su nombre, o que llama a `Intl`, `toLocale…` o a una dirección de texto),
-las propias comprobaciones del navegador, el lockfile y la versión de Node. Cuando nada de eso puede diferir, se ejecuta solo en inglés y árabe
-y lo indica: el 2026-10-17 fueron 37 de los 49 commits recientes de `main` que necesitaron la parte `browser`, y una ejecución de
-1 min 39 s en lugar de 2 min 49 s. Las herramientas y las comprobaciones unitarias nunca cuentan. Todos los idiomas se siguen ejecutando en cada
-push a `main`, que `dev:promote` espera, así que una página que falla solo en un idioma se detecta ahí, como muy tarde.
-`npm run ci` en local decide exactamente igual que una pull request (`npm run ci -- --everything` ejecuta todo, como main; un `CHECK_LOCALES` fijado
-a mano prevalece). Lo que cubren las comprobaciones son las propias comprobaciones: `tests/` y el
+`vp run ci` ejecuta la comprobación (`check`), luego las comprobaciones de navegador (`test:browser`), después las auditorías de Lighthouse de Google
+(`test:audits`) y, en remy-auth, una app nueva sobre el paquete de este commit (`new-app`), una tras otra: las
+auditorías miden la velocidad, así que nunca se ejecutan junto a otra ejecución de navegador. GitHub ejecuta las mismas tareas como jobs en paralelo (las
+comprobaciones de navegador en tres fragmentos, `vp run test:browser --shard 1/3`). Los Core Web Vitals en un Worker de Cloudflare desechable
+son cosa de la release (`npx remy test cwv`). No hay niveles que elegir y ninguna parte decide omitirse: se ejecuta
+cada idioma, y lo que nada ha tocado sale de la caché de Vite Plus en lugar de ejecutarse de nuevo. Una comprobación de algo
+que depende del idioma (fuentes y escrituras, separación silábica, dirección, formatos, los catálogos) se ejecuta en cada idioma
+comprobado (`checkedLocales`); una comprobación de un comportamiento que no depende de él (la política de seguridad, noindex, los parámetros de búsqueda, el formulario
+de demo, las páginas de error, las respuestas de la API) se ejecuta en el idioma base y en el primero de derecha a izquierda (`behaviourLocales`;
+`BEHAVIOUR_LOCALES` lo sustituye). A mano, `CHECK_LOCALES=quick vp run test:browser` ejecuta solo inglés y árabe.
+Lo que cubren las comprobaciones son las propias comprobaciones: `tests/` y el
 `@joeblew999/remy-ui/checks` del paquete (el título de cada comprobación dice qué demuestra); los pasos del flujo que las ejecutan están en
 [cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). En resumen: cada página en cada
 idioma sin JavaScript (idioma, dirección, metadatos, enlaces), catálogos y plurales, los valores de formatos
@@ -280,7 +281,7 @@ Lo de Google cubre solo las páginas de sitio (las páginas de app son noindex p
 `lighthouse` fijado de Google, evalúan `/en` (móvil y escritorio) y `/en/formats`
 ([`tests/performance.spec.ts`](https://github.com/joeblew999/remy-auth/blob/main/apps/remy-auth/tests/performance.spec.ts)) frente a los umbrales buenos de Google (LCP
 2.5 s, CLS 0.1, TBT 200 ms, Performance de al menos 0.9), en un Worker de Cloudflare desechable
-(`npm run test -- cwv`), no en localhost.
+(`npx remy test cwv`), no en localhost.
 
 Límites: todavía no hay organizaciones, tokens OAuth ni inicio de sesión entre apps, así que solo las páginas propias de remy-auth saben quién ha iniciado sesión
 ([el plan de autenticación](https://github.com/joeblew999/remy-auth/blob/main/.plans/auth-service.md)). El sitio se sirve desde su dirección de workers.dev (`DEPLOY_ORIGIN`); el origin público de producción y

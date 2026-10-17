@@ -1,7 +1,7 @@
 ---
 title: "Arquitectura y principios de desarrollo"
 description: "Lo que el código debe ser: propiedad, una única fuente de verdad, gates de pruebas, código generado y decisiones del dueño."
-translatedFrom: "052958b0 56d210cf b2dee8c7"
+translatedFrom: "052958b0 44ce0926 b2dee8c7"
 ---
 
 Este documento es el dueño de lo que el código debe ser. Cómo trabajan las personas y los agentes día a día vive en
@@ -37,9 +37,9 @@ Este documento es el dueño de lo que el código debe ser. Cómo trabajan las pe
   (incluido `src/routeTree.gen.ts`) regenerándola. No edites a mano ni sobrescribas la salida generada en otro lugar.
 - Las decisiones que los planes dejan abiertas, o las correcciones que entran en conflicto con un plan, pertenecen al
   dueño. Pregunta; no elijas, a menos que el dueño las haya delegado
-  ([cómo trabajamos](./how-we-work.md#when-the-owner-delegates-decisions)). Producción (`dev:promote`), un release
-  (`dev:release`), aprovisionar y abrir issues upstream también esperan la solicitud explícita del dueño.
-  Hacer landing (`dev:land`, incluyendo staging) no: es el paso que da todo cambio terminado, por
+  ([cómo trabajamos](./how-we-work.md#when-the-owner-delegates-decisions)). Producción (`vp run promote`), un release
+  (`vp run release`), aprovisionar y abrir issues upstream también esperan la solicitud explícita del dueño.
+  Hacer landing (`vp run land`, incluyendo staging) no: es el paso que da todo cambio terminado, por
   quien lo haya hecho ([el flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)).
 - No mockees Better Auth, D1 ni el runtime de Workers. Las conveniencias de desarrollo (personas creadas mediante seed,
   un selector de inicio de sesión para ellas, un código de inicio de sesión fijo, correo capturado) solo se permiten detrás de una

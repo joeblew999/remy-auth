@@ -1,7 +1,7 @@
 ---
 title: "Los docs en tus herramientas de IA"
 description: "Todos los servidores MCP y archivos llms.txt disponibles, para quién es cada uno, cómo añadirlos a ChatGPT, Claude, Cursor, VS Code o Gemini, y cómo ve los docs el Modo IA de Google."
-translatedFrom: "2b9848fb 818b74ee 01a0c107 2a9203b0 74f22d99 e5922ed4 759edef8"
+translatedFrom: "2b9848fb 818b74ee 92717746 2a9203b0 74f22d99 e5922ed4 759edef8"
 ---
 
 La documentación tiene tres partes, cada una para un público distinto, y cada parte tiene su propio servidor MCP y sus propios archivos llms.
@@ -38,7 +38,7 @@ Las instrucciones de cada servidor indican para quién es, así que un asistente
 | VS Code | `.vscode/mcp.json`: `{"servers": {"remy-developer-docs": {"type": "http", "url": "https://remy-auth-docs.gedw99.workers.dev/api/mcp/dev"}}}` |
 
 Sustituye la URL y el nombre por los de otra fila para usar la guía de producto o la referencia de la API.
-`npm run docs -- test remote` lista las herramientas de cada servidor.
+`npx remy docs test remote` lista las herramientas de cada servidor.
 
 ## Gemini y Google [#gemini-and-google]
 

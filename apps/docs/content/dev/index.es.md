@@ -1,7 +1,7 @@
 ---
 title: "Desarrolladores: empieza aquí"
 description: "Para desarrolladores que construyen Remy o una app sobre él: autenticación compartida para las apps de Remy, Better Auth en Cloudflare Workers, el paquete compartido remy-ui y por dónde empezar."
-translatedFrom: "15c7d6a6 e881ac6c e7540b9e 88eb7fe7 c3e96873 c0d418f2"
+translatedFrom: "15c7d6a6 e881ac6c 6c6aa90b 88eb7fe7 c3e96873 c0d418f2"
 ---
 
 **Para desarrolladores** que construyen Remy, o una app sobre su paquete de UI compartido. ¿Usas la app? Lee la
@@ -47,8 +47,8 @@ Node según indica `.node-version` (26), y luego, desde este checkout:
 
 ```sh
 npm install          # once, for the lockfile and the remy bin
-npm run setup        # the pinned skills, MCP, the flow's guard, the installation's checks
-npm run dev          # http://127.0.0.1:5173/en
+vp run setup        # the pinned skills, MCP, the flow's guard, the installation's checks
+vp run dev          # http://127.0.0.1:5173/en
 ```
 
 Abre [localhost:5173/en](http://127.0.0.1:5173/en); cambia a español o prueba la demo.

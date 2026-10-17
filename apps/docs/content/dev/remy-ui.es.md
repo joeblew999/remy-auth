@@ -1,7 +1,7 @@
 ---
 title: "El paquete de UI (@joeblew999/remy-ui)"
 description: "La interfaz que comparten todas las apps de Remy: shadcn de fábrica, fuentes, catálogos de Paraglide, las páginas del sitio y de la app, el pegamento de TanStack Start y sus comprobaciones."
-translatedFrom: "f3f6cb00 ce14fe94 f759cfe1 59e743ca 62bc7837 3f747e59 b0dc1c9c"
+translatedFrom: "f3f6cb00 fc413994 aa3e15e4 59e743ca 62bc7837 4dcf0c05 e77fb7f1"
 ---
 
 La interfaz que comparten todas las apps de Remy: componentes y tema de shadcn de fábrica, fuentes,
@@ -15,7 +15,7 @@ TanStack Start y las comprobaciones de Playwright que lo demuestran. Los consumi
 Todo lo que hay en `src/components`, `src/hooks` y `src/styles/globals.css` es lo que escribe la CLI
 de shadcn fijada en una versión concreta (diseño de monorepo: el `components.json` de la app
 encamina `shadcn add` hacia aquí), incluido `cn`, del propio paquete `cn` de shadcn; nada de eso se
-edita a mano. `npm run ui:components` y `npm run ui:theme` los regeneran, y `npm run ui:verify`
+edita a mano. `vp run ui:components` y `vp run ui:theme` los regeneran, y `vp run ui:verify`
 falla ante cualquier desviación (ver [docs/gui.md](./run-and-test.md#shadcn-stock)). Los bloques son
 copias propias en `src/blocks`.
 
@@ -65,11 +65,11 @@ Lo que tiene toda app basada en el paquete, para que las tareas y comprobaciones
   `themeChecks` compartidas fallan sin él.
 - **Una ruta para cada path de `appPaths` y `sitePaths`**, cada una de pocas líneas sobre la página compartida (el
   Reloj de la demostración (showcase) propaga `clockRouteOptions` desde `@joeblew999/remy-showcase/clock-route`).
-- **`tests/smoke.spec.ts`**, una sola llamada a `smokeChecks(...)`: `npm run test -- smoke` y la prueba de humo en vivo tras
+- **`tests/smoke.spec.ts`**, una sola llamada a `smokeChecks(...)`: `vp run test:browser --grep smoke` y la prueba de humo en vivo tras
   cada despliegue lo ejecutan, y fallan con «No tests found» si no existe.
 - **`.plans/now.md`**, la única lista ordenada del trabajo pendiente (`remy plans check`, en la comprobación).
-- **Instalaciones y actualizaciones mediante los comandos del paquete**, nunca a mano: `npm run setup` (instalar,
-  skills, MCP, las comprobaciones de la instalación) y `npm run upgrade -- <version>` (la versión exacta del paquete
+- **Instalaciones y actualizaciones mediante los comandos del paquete**, nunca a mano: `vp run setup` (instalar,
+  skills, MCP, las comprobaciones de la instalación) y `vp run upgrade <version>` (la versión exacta del paquete
   y el workflow de CI en el mismo tag, y después las mismas comprobaciones). Ambos toman el token de GitHub Packages de
   `gh auth token`.
 
@@ -148,7 +148,7 @@ polaco, turco y alemán) están escritos por un agente y sin revisar.
 ## Publicación [#publishing]
 
 El paquete es `@joeblew999/remy-ui` en GitHub Packages (ahí el scope debe coincidir con el
-propietario de GitHub). `npm run dev:release` hace toda la publicación desde esta máquina y se
+propietario de GitHub). `vp run release` hace toda la publicación desde esta máquina y se
 detiene en el primer fallo; sus puertas, en orden, son `remy packages release` en
 [Comandos](./commands.mdx). Core Web Vitals se miden en frío sobre un Worker de Cloudflare
 desechable: las primeras visitas tras un despliegue, que es donde una página lenta sale más cara.
@@ -166,7 +166,7 @@ Los consumidores añaden esto a su `.npmrc`:
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
-e instalan mediante `npm run setup`, que toma un token con `read:packages` de `gh auth token`
+e instalan mediante `vp run setup`, que toma un token con `read:packages` de `gh auth token`
 (o `GITHUB_TOKEN` en el shell). Las versiones publicadas están en el
 [registro de cambios](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
 
@@ -193,8 +193,9 @@ listan por nombre (`"seo-routes"`); cualquier paquete puede ofrecer partes tambi
    sus propias rutas, o con las páginas de la app mediante sus opciones `app` (la miga de pan de la parte time-zones toma
    `parent`), nunca con una página que otra app pueda no tener: el fixture consumidor lista una parte de la demostración (showcase) y
    la tipa sin las páginas de la demostración (showcase).
-4. **Demuéstralo:** `npm run dev:change` pasa con la parte listada, sin ella y con la lista
+4. **Demuéstralo:** `vp run check` pasa con la parte listada, sin ella y con la lista
    vacía (ejecuta un build una vez tras editar `src/parts.json`, lo que regenera el árbol de rutas).
 
 Lo que en cambio sigue siendo un módulo normal del paquete: el código que toda app necesita (observabilidad), un hook
 que una app debe llamar siempre (leave-guard) o los controles propios de una página compartida (search-params).
+
