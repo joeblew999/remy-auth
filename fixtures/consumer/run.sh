@@ -13,6 +13,9 @@ step() { local now; now=$(date +%s); took="$took, $1 $((now - mark)) s"; mark=$n
 #    the showcase's peer range still holds), so npm can never substitute a published copy (it did once: the
 #    scratch tarball was 0.13.0, the published version).
 npm run --silent generate > /dev/null
+# What the package ships that is made from the docs (the remy skill), as every pack and publish makes it.
+node packages/ui/src/cli/remy.ts skills build
+step skill
 pack() { # <folder> <name> -> the tarball's path
   local v; v="$(node -p "require('./packages/$1/package.json').version")+dev.$sha"
   # tar, not rsync: every machine that runs ci has it (a cloud agent's container had no rsync, 2026-10-17).

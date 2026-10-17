@@ -30,7 +30,7 @@
     "dev:release": "node packages/ui/src/cli/remy.ts flow release",
     "dev:done": "node packages/ui/src/cli/remy.ts flow done",
     "plans": "node packages/ui/src/cli/remy.ts plans",
-    "generate": "node packages/ui/paraglide.mjs && node packages/ui/skill.mjs && tsc -p packages/ui/src/cli",
+    "generate": "node packages/ui/paraglide.mjs && tsc -p packages/ui/src/cli",
     "setup": "node packages/ui/src/cli/remy.ts setup",
     "packages": "node packages/ui/src/cli/remy.ts packages",
     "release-checks": "npm run template:check && npm run ui:verify",

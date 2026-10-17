@@ -51,6 +51,7 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy verify doctor` | the tooling's versions |
 | `npx remy skills` | the pinned official agent skills for Codex and Claude |
 | `npx remy skills install` | every pinned skill, and the platform's remy skill from the installed package |
+| `npx remy skills build` | remy-auth: the remy skill the package ships, from the developer docs as AI tools read them (llms.txt); packing runs it |
 | `npx remy skills list` | the pins and what is installed |
 | `npx remy skills remove` | the installed skills removed |
 | `npx remy mcp` | the MCP servers for Claude and Codex, registered per machine |

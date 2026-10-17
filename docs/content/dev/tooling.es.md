@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "La referencia de herramientas de desarrollo: los scripts de package.json y los comandos de remy, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación."
-translatedFrom: "e2a6bd75 afd520fb 0971c6b1 2ddd885f e9c16a40 ec3067e7 1ff06e1d 067ae0a5 e6b13d48 787388b0 35c0ad6b e58ce74e 4087c066 73b31a8d b2463d08 ab72ce36"
+translatedFrom: "e2a6bd75 afd520fb 0971c6b1 2ddd885f e9c16a40 ec3067e7 1ff06e1d 067ae0a5 e6b13d48 bdbd896f 35c0ad6b e58ce74e 4087c066 73b31a8d b2463d08 ab72ce36"
 ---
 
 ## Las herramientas [#the-tooling]
@@ -180,14 +180,15 @@ Skills viven en `.agents/skills/`; `.claude/skills/` enlaza a los mismos archivo
 ### El skill `remy`: las reglas de la plataforma para los agentes de cada repositorio [#the-remy-skill-the-platforms-rules-for-every-repos-agents]
 
 Además de los skills fijados, `remy skills install` instala `remy` desde el paquete instalado
-(`./node_modules/@joeblew999/remy-ui/skills`), así que su versión es la del paquete. Se
-genera a partir de estos docs de desarrollo (cómo trabajamos, los principios, las herramientas, la línea de
-comandos, el paquete de UI, cómo escribir docs, la GUI) mediante el script `generate` de remy-auth, que ejecuta cada
-empaquetado y publicación (`packages/ui/skill.mjs`); los docs siguen siendo la única fuente. En una app,
-`npx remy rules` mantiene un bloque marcado en `AGENTS.md` que dirige a sus agentes hacia el skill y
-nombra la versión; `npm run setup` y `npm run upgrade` lo ejecutan, así que una actualización cambia las
-reglas que leen los agentes en el mismo paso. El propio `AGENTS.md` de remy-auth es un puntero a
-[Agentes: empieza aquí](./agents.md).
+(`./node_modules/@joeblew999/remy-ui/skills`), así que su versión es la del paquete: las reglas de la
+versión que ejecuta una app, sin conexión. Es cada página de estos docs de desarrollo tal como el Worker de docs las sirve a
+las herramientas de IA (`/dev/llms.txt`, el `.md` de cada página: con los includes resueltos y los componentes como texto), generado por `remy skills build`
+cuando el paquete se empaqueta o se publica (nunca en la comprobación rápida). Así, el skill, `llms.txt`, el
+Markdown de cada página y los servidores MCP son un mismo texto de una misma fuente: una página no puede llegar a uno y faltar en otro. Los docs
+en vivo (`/dev/llms.txt`, `/api/mcp/dev`) siempre tienen lo más reciente; el skill lo indica. En una app, `npx remy rules` mantiene un bloque
+marcado en `AGENTS.md` que dirige a sus agentes hacia el skill y nombra la versión; `npm run setup` y
+`npm run upgrade` lo ejecutan, así que una actualización cambia las reglas que leen los agentes en el mismo paso.
+El propio `AGENTS.md` de remy-auth es un puntero a [Agentes: empieza aquí](./agents.md).
 El instalador registra la procedencia en `skills-lock.json`. Volver a ejecutar la instalación
 restaura los skills seleccionados desde las fuentes fijadas; actualiza sus commits de fuente deliberadamente
 para adoptar cambios upstream. Solo se hace commit de `skills-lock.json`; los skills instalados y sus

@@ -2,9 +2,10 @@
 // here are the only list of skill sources; the tooling check (verify.ts) rejects skills installed from
 // anything else. The platform's own `remy` skill comes from the installed package, which its version
 // pins (generated from the developer docs by the app's generate step).
-import { existsSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { dispatch, type Subcommands } from './commands.ts';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 
 export const skillsCli = 'skills@1.7.0';
 
@@ -43,7 +44,61 @@ export const removeSkills = (): void => skillsTool(['remove', '--all']);
 export const what = 'the pinned official agent skills for Codex and Claude';
 export const commands: Subcommands = {
   install: { what: "every pinned skill, and the platform's remy skill from the installed package", run: () => installSkills() },
+  build: { what: 'remy-auth: the remy skill the package ships, from the developer docs as AI tools read them (llms.txt); packing runs it', run: () => buildSkill() },
   list: { what: 'the pins and what is installed', run: () => listSkills() },
   remove: { what: 'the installed skills removed', run: () => removeSkills() },
 };
 export const main = dispatch('skills', commands);
+
+// --- The remy skill, made from the docs as AI tools read them ---------------------------------------------
+
+/**
+ * remy-auth only, when the package is packed (never in the quick check): the `remy` skill the package ships,
+ * from the developer docs exactly as the docs Worker serves them to AI tools: every page /dev/llms.txt lists,
+ * each as /dev/<page>.md (includes resolved, components as text). So the skill, llms.txt, each page's .md and the
+ * MCP servers are one text from one source, and a docs page cannot reach one and miss another (2026-10-17: the
+ * skill copied 8 hand-picked raw files, so the Commands page's include and every other page never reached
+ * other repos' agents). The skill is the rules of this package's version; the live docs have the newest.
+ */
+export async function buildSkill(): Promise<void> {
+  if (!existsSync('docs/content/dev') || !existsSync('packages/ui/package.json')) { console.log('skills build: only remy-auth makes the remy skill (from its developer docs).'); return; }
+  const { parts } = await import('./check.ts');
+  await parts.docs!();
+  const port = Number(process.env.SKILL_DOCS_PORT ?? 4178);
+  const server = spawn(join('..', 'node_modules', '.bin', 'wrangler'), ['dev', '-c', 'dist/server/wrangler.json', '--local', '--ip', '127.0.0.1', '--port', String(port)], { cwd: 'docs', stdio: 'ignore' });
+  const base = `http://127.0.0.1:${port}`;
+  const text = async (path: string) => { const response = await fetch(base + path); if (!response.ok) throw new Error(`skills build: ${path} answered ${response.status}`); return response.text(); };
+  try {
+    for (let tries = 0; ; tries++) {
+      if (await fetch(`${base}/dev/llms.txt`).then(response => response.ok, () => false)) break;
+      if (tries > 90) throw new Error('skills build: the docs Worker did not answer within 90 s');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    const pages = [...(await text('/dev/llms.txt')).matchAll(/^- \[([^\]]+)\]\(\/dev(?:\/([^)#\s]+))?\): (.*)$/gm)].map(([, title, slug, description]) => ({ title: title!, slug: slug ?? 'index', description: description! }));
+    if (pages.length < 5) throw new Error(`skills build: /dev/llms.txt lists ${pages.length} pages`);
+    const out = join('packages', 'ui', 'skills', 'remy');
+    rmSync(out, { recursive: true, force: true });
+    mkdirSync(join(out, 'references'), { recursive: true });
+    for (const page of pages) {
+      // The site's heading ids ("## Title [#id]") are the site's; a page's links to another (./x.md, ./x.mdx) name its file here.
+      const body = (await text(`/dev/${page.slug}.md`)).replace(/^(#{1,6} .*?) \[#[^\]]+\]$/gm, '$1').replace(/\]\(\.\/([\w-]+)\.mdx?(#[^)]*)?\)/g, '](./$1.md$2)');
+      writeFileSync(join(out, 'references', `${page.slug}.md`), body);
+    }
+    const { version } = JSON.parse(readFileSync('packages/ui/package.json', 'utf8')) as { version: string };
+    const live = process.env.DOCS_ORIGIN ? ` The newest docs, for any version: ${process.env.DOCS_ORIGIN}/dev/llms.txt (and its MCP server, ${process.env.DOCS_ORIGIN}/api/mcp/dev).` : '';
+    writeFileSync(join(out, 'SKILL.md'), `---
+name: remy
+description: The Remy platform's rules and tools for working in any Remy repo (remy-auth, or an app on @joeblew999/remy-ui ${version}). Use before changing anything in a Remy repo, choosing a tool, adding a page, writing docs, running its scripts or releasing.
+---
+
+# Remy platform rules (@joeblew999/remy-ui ${version})
+
+Every Remy repo is a thin product on one platform: the package @joeblew999/remy-ui, whose \`remy\` bin is its tooling,
+released as one version. These are that version's rules: remy-auth's developer docs, every page, as its docs serve
+them to AI tools.${live} Every command: \`COMMANDS.md\` at the repo root (CLAUDE.md imports it). Start with "Agents: start here".
+
+${pages.map(page => `- [${page.title}](references/${page.slug}.md): ${page.description}`).join('\n')}
+`);
+    console.log(`skills build: the remy skill, ${pages.length} pages from the docs as AI tools read them (${version}).`);
+  } finally { server.kill(); }
+}

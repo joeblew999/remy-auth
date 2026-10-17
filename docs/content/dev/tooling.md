@@ -177,10 +177,12 @@ Skills live in `.agents/skills/`; `.claude/skills/` links to the same files.
 ### The `remy` skill: the platform's rules for every repo's agents
 
 Beside the pinned skills, `remy skills install` installs `remy` from the installed package
-(`./node_modules/@joeblew999/remy-ui/skills`), so its version is the package's. It is
-generated from these developer docs (how we work, the principles, tooling, the command line, the UI
-package, writing docs, the GUI) by remy-auth's `generate` script, which every pack and release runs
-(`packages/ui/skill.mjs`); the docs stay the one source. In an app, `npx remy rules` keeps a marked
+(`./node_modules/@joeblew999/remy-ui/skills`), so its version is the package's: the rules of the
+version an app runs, offline. It is every page of these developer docs exactly as the docs Worker serves them to
+AI tools (`/dev/llms.txt`, each page's `.md`: includes resolved, components as text), made by `remy skills build`
+when the package is packed or published (never in the quick check). So the skill, `llms.txt`, each page's
+Markdown and the MCP servers are one text from one source: a page cannot reach one and miss another. The live
+docs (`/dev/llms.txt`, `/api/mcp/dev`) always have the newest; the skill says so. In an app, `npx remy rules` keeps a marked
 block in `AGENTS.md` pointing its agents at the skill and naming the version; `npm run setup` and
 `npm run upgrade` run it, so an upgrade changes the rules the agents read in the same step.
 remy-auth's own `AGENTS.md` is a pointer to [Agents: start here](./agents.md).
