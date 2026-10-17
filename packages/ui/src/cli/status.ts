@@ -1,3 +1,4 @@
+import { pulls as githubPulls, repo } from './github.ts';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { compose, type BranchFact, type CommitFact, type RunFact } from './feedback.ts';
@@ -27,7 +28,8 @@ const branches: BranchFact[] = read('-C', root, 'worktree', 'list', '--porcelain
 });
 const deployments = process.env.DEPLOY_ORIGIN ? (await versions()).table.split('\n').filter(line => /^(ORIGIN|https?:)/.test(line)).join('\n') : undefined;
 const translations = (await translationGaps(root)).length === 0 ? 'complete and current' : 'stale or missing (dev:land translates them in the change)';
-const pulls = JSON.parse(ask('gh', ['pr', 'list', '--json', 'number,title,author']) ?? '[]').map((pull: { number: number; title: string; author: { login: string } }) => ({ number: pull.number, title: pull.title, author: pull.author.login }));
+const slug = repo(root);
+const pulls = (slug ? githubPulls(slug) ?? [] : []).map(pull => ({ number: pull.number, title: pull.title, author: pull.user.login }));
 
 // The open list, as the repo keeps it: the numbered items of now.md's "What is left" section, first line
 // each; a struck item (~~closed~~) is not left.

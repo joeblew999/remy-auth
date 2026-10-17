@@ -1,14 +1,14 @@
 import { test, expect } from '@playwright/test';
-import { collectErrors, hydrated, localizedPath } from './checks.js';
+import { behaviourLocales, collectErrors, hydrated, localizedPath } from './checks.js';
 
 /**
  * Tier 1, smoke (npm run test -- smoke, seconds): the few things that break when something big
- * breaks, for any app on this package. In each language given (default English and Arabic: left to
+ * breaks, for any app on this package. In each language given (default `behaviourLocales`, English and Arabic here: left to
  * right and right to left), every page answers 200, site pages with a heading in the server's HTML (app
  * pages are drawn in the browser), and the pages in `hydrate` hydrate without an error. The full checks
  * stay in the package's other sets, for the quick tier, targeted runs and releases.
  */
-export function smokeChecks({ sitePaths, appPaths, hydrate = [''], locales = ['en', 'ar'] }) {
+export function smokeChecks({ sitePaths, appPaths, hydrate = [''], locales = behaviourLocales }) {
   for (const locale of locales) {
     test(`smoke ${locale}: every page answers 200, site pages with a heading in the server's HTML`, async ({ request }) => {
       for (const path of [...sitePaths, ...appPaths]) {

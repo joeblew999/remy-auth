@@ -1,7 +1,7 @@
 ---
 title: "La línea de comandos"
 description: "remy, la herramienta que toda app de Remy instala con el paquete: los scripts, la estructura que leen, una app nueva, la publicación de paquetes, las traducciones, Cloudflare y los planes."
-translatedFrom: "26693786 120aeace 7ee47dda 79fb3dca 52e4a3ff 6b54351a 465aa437 218b0959"
+translatedFrom: "26693786 120aeace 7ee47dda 79fb3dca f61ecbb5 6b54351a 465aa437 218b0959"
 ---
 
 La herramienta es `remy`, el bin de `@joeblew999/remy-ui` (`packages/ui/src/cli`, un módulo de TypeScript por
@@ -113,11 +113,10 @@ que la escribe en todos los lugares donde aparece (el paquete y los pines de la 
 
 ### Elegir la versión: publicada, de desarrollo o local [#choosing-the-version-released-development-or-local]
 
-La herramienta y el paquete son una sola cosa: el `npm run dev:release` de remy-auth publica
-`@joeblew999/remy-ui` X.Y.Z, bin incluido, y etiqueta ese mismo commit como `vX.Y.Z`. Quien consume el
-paquete fija ese único número en su `package.json` (y en la tag de su flujo de trabajo de CI), y
-`npm run upgrade -- X.Y.Z` cambia ambos. Para trabajar contra el checkout propio de remy-auth,
-`npm link ../remy-auth/packages/ui` (y `npm unlink` para volver).
+La herramienta y el paquete son una sola cosa: el `npm run dev:release` de remy-auth publica `@joeblew999/remy-ui`
+X.Y.Z, bin incluido, y etiqueta ese mismo commit como `vX.Y.Z`. Quien consume el paquete fija ese único número en su
+`package.json` (y en la tag de su flujo de trabajo de CI), y `npm run upgrade -- X.Y.Z` cambia ambos. Para trabajar contra
+el checkout propio de remy-auth, `npm link ../remy-auth/packages/ui` (y `npm unlink` para volver).
 
 La plataforma aporta todos los paquetes npm que necesitan la app y las tareas, en una sola versión: son
 dependencias propias de `@joeblew999/remy-ui` (el framework, la cadena de herramientas, las herramientas de
@@ -148,23 +147,23 @@ El flujo de desarrollo es código, `packages/ui/src/cli/flow.ts`, con cuatro pas
 `npm run test -- every` es cada una de nuestras comprobaciones en todos los idiomas (dentro de `remy verify`).
 `remy verify` y CI terminan con `remy test consumers`, los demás repositorios a los que este sirve,
 probados tal como los reciben: el script `test:consumers` de la app, nada por defecto; en remy-auth, el
-fixture de consumidor, que construye la app en
-blanco y un paquete propio a partir de la plataforma de este commit (el paquete desde un tarball con
-versión propia, las tareas desde una copia fuera de cualquier `node_modules`, el `.npmrc` de la plantilla)
-y ejecuta la instalación, las skills (instaladas una vez por lista fijada y luego reutilizadas), los
-invariantes de las herramientas, la comprobación, las comprobaciones rápidas de navegador, la documentación y una publicación
-de prueba (dry-run) (~1,5 a 3 min, sobre todo la red). Un cambio que rompería otro repositorio falla ahí, no
-en ese repositorio. Las pruebas se comprueban con tipos junto con la app (`tsconfig.json` incluye
-`tests/`). El nivel de Google es `npm run test -- google` (auditorías de Lighthouse, local; CI en cada push y
-tag) y `npm run test -- cwv` (Core Web Vitals en un Worker de Cloudflare desechable); el release
-ejecuta ambas.
+fixture de consumidor, que construye la app en blanco y un paquete propio a partir de la plataforma de este commit
+(el paquete desde un tarball con versión propia, las tareas desde una copia fuera de cualquier `node_modules`, el
+`.npmrc` de la plantilla) y ejecuta la instalación, las skills (instaladas una vez por lista fijada y luego
+reutilizadas), los invariantes de las herramientas, la comprobación, las comprobaciones rápidas de navegador, la
+documentación y una publicación de prueba (dry-run) (~1,5 a 3 min, sobre todo la red).
+Un cambio que rompería otro repositorio falla ahí, no en ese repositorio. Las pruebas se comprueban con tipos junto
+con la app (`tsconfig.json` incluye `tests/`). El nivel de Google es
+`npm run test -- google` (auditorías de Lighthouse, local; CI en cada push y tag) y `npm run test -- cwv`
+(Core Web Vitals en un Worker de Cloudflare desechable); el release ejecuta ambas.
 
 Dónde se ejecutan las comprobaciones: el comportamiento propio del paquete compartido se comprueba una vez, en remy-auth, antes de cada
 release. Una app construida sobre el paquete ejecuta un conjunto de contrato (sus páginas renderizan, las páginas de sitio y de app se mantienen
 separadas, sus propias funcionalidades funcionan) más el nivel de Google en sus propias páginas de sitio, no toda la suite del paquete
 de nuevo. Mantén las comprobaciones baratas en lugar de quitarlas (el reloj de Playwright en lugar de esperas
 reales, una página de navegador por comprobación, workers en paralelo). Las comprobaciones recorren `checkedLocales` de
-`@joeblew999/remy-ui/checks`, que respeta `CHECK_LOCALES`. Cada paso indica cuánto tardó.
+`@joeblew999/remy-ui/checks`, que respeta `CHECK_LOCALES` (una lista separada por comas, o `quick`: el idioma base
+y el primero de derecha a izquierda, que las propias comprobaciones determinan, así que ningún comando nombra idiomas). Cada paso indica cuánto tardó.
 
 ### Traducciones [#translations]
 

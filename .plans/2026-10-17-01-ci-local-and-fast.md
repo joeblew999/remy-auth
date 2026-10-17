@@ -164,10 +164,20 @@ In this change (branch `claude/ci`, not pushed until the owner says):
 What a pull request waits for locally (`npm run ci`), 2 cores: about 10 s for docs only, 1 min 39 s for a code change, 2 min 49 s when it can differ by language; on GitHub, check and
 level 1 in three parallel jobs.
 
+## The second change (owner, 2026-10-17: "I'm trusting you to do all the bits")
+
+- `dev:land` lands through a pull request: level 1 here first, one push of the branch, the pull request,
+  GitHub's checks waited for, a squash merge, staging. From main it moves the work to a branch first.
+- One module talks to GitHub (`github.ts`, REST only: GraphQL is refused in Claude's cloud sessions);
+  `promote.ts` and `status.ts` use it too.
+- One retry under CI (the "socket hang up" on PR #22), reported as flaky, the same locally.
+- The quick languages are named in one place: `checks.js` resolves `CHECK_LOCALES=quick` (the base language
+  and the first right-to-left one); the command line and the smoke checks no longer write `en,ar`.
+- The build-boundary crawl fetches eight at a time; the code-splitting check stays (only a browser shows it).
+
 ## Next, after this change (decided, not started)
 
-1. **The flow and the PR rule disagree**: `dev:land` fast-forwards main, the owner's rule is branch and
-   PR. `dev:land` becomes: `npm run ci`, push the branch, open or update the PR, merge when green.
+1. ~~**The flow and the PR rule disagree**~~: done in the second change (below).
 2. **Zero-JS site pages**: site pages still ship about 275 KB of JS. Recommended: keep the 321-byte
    inline theme script, drop the theme toggle from the site header, make "keep my language" a link to a
    server route, the device time zone only on `/app/formats`, and a check that a site page loads no JS

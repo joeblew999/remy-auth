@@ -1,7 +1,7 @@
 ---
 title: "Cómo trabajamos"
 description: "Cómo trabajan aquí las personas y los agentes: las herramientas del proyecto primero, encuestas antes de elegir herramientas, shadcn y TanStack, puertas de control, planes y traducciones."
-translatedFrom: "be9633b9 9d3c93f6 790e3737 0ed0ead4 d8386d74 94b8f1c6 4dca6b46 4aece31e f3262ad2 b2a387bd 2f9aba9e 2a2eaf1d c8f062fe f251d8d4 01c70038 d7ee26c1 0dd8a337 b5662e6a 6d2a6138"
+translatedFrom: "be9633b9 9d3c93f6 790e3737 0ed0ead4 d8386d74 94b8f1c6 4dca6b46 4aece31e f3262ad2 b2a387bd 2f9aba9e 2a2eaf1d c8f062fe cfedf838 01c70038 d7ee26c1 0dd8a337 b5662e6a c756fe69"
 ---
 
 Este documento es el dueño de cómo trabajan las personas y los agentes: los hábitos que ha pedido el
@@ -245,7 +245,7 @@ que cada app, desde las tareas compartidas; `npm run setup` instala el guardián
 | Mirar | `npm run dev:status` | todos, primero: cada sesión de agente se abre con esto (un hook), un desarrollador cuando se sienta a trabajar | los últimos commits de main con el veredicto de GitHub, qué ejecuta cada despliegue, cada worktree por delante y por detrás de main, traducciones, pull requests, lo primero de `.plans/now.md` | segundos |
 | Antes de un trozo de trabajo | `npm run dev:start -- <nombre>` | quien hace el trabajo, para cada trozo, incluida una edición de una línea | un worktree propio a partir de main, instalado, con sus propios puertos, el guardián | ~1 min |
 | Después de cada cambio | `npm run dev:change` | quien esté codificando; el único paso que se espera | la comprobación (`remy check`): planes, tipos con los de las propias tareas, las comprobaciones de funciones simples (`tests/**/*.unit.spec.ts`), el estado de las traducciones; una build solo cuando cambió un archivo de ruta, la documentación solo cuando cambió la documentación | ~6 s |
-| El cambio deja la máquina | `npm run dev:land -- "<qué cambió>"` | quien hizo el trabajo, por su cuenta, en cuanto termina y la comprobación está en verde | las traducciones que dejó desactualizadas (segundos), la comprobación, un commit, fast-forward de main, push, despliegue en staging. GitHub entonces ejecuta `npm run ci` como jobs en paralelo (tipos y unitarias, el nivel 1 en tres partes, las auditorías de Google, el fixture de consumer), mientras sigues codificando (`gh run list`); `npm run ci` ejecuta lo mismo en local | ~1 min hasta staging |
+| El cambio deja la máquina | `npm run dev:land -- "<qué cambió>"` | quien hizo el trabajo, por su cuenta, en cuanto termina y la comprobación está en verde | las traducciones que dejó desactualizadas (segundos), la comprobación, el nivel 1 tal como lo ejecutará la pull request, un commit, push de la rama, abrir su pull request, esperar las comprobaciones de GitHub (confirman lo que aquí pasó), merge, despliegue en staging. Nunca directo a main; desde main, primero mueve el trabajo a una rama propia. Tras el merge, la propia ejecución de main comprueba todo (también las auditorías de Google y el fixture de consumer) | unos minutos: el nivel 1 aquí, luego las comprobaciones de GitHub |
 | Producción | `npm run dev:promote` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `remy cloudflare deploy` y el Worker de documentación, a partir de un main ya empujado, sin puerta de control: staging y GitHub ya ejecutaron las comprobaciones | ~1 min |
 | Una publicación | `npm run dev:release` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `remy packages release`: cada comprobación, cada idioma, localmente, a propósito, y luego la etiqueta | ~5 min |
 | Cuando está landed | `npm run dev:done` | quien hizo el landing, cuando el trozo de trabajo termina; un worktree sobrevive a tantos landings como el trabajo necesite | el worktree y la rama desaparecen | segundos |
@@ -407,7 +407,7 @@ landing. Nada de esto se hace a mano.
 | Mirar | `npm run dev:status` | qué está pasando, preguntado a los dueños de los hechos: los últimos commits de main con el veredicto de GitHub, qué ejecuta cada despliegue, cada worktree por delante y por detrás de main, traducciones, pull requests. Cada sesión de agente se abre con esto (un hook que registra `remy guard`); un desarrollador lo ejecuta cuando se sienta a trabajar |
 | Empezar | `npm run dev:start -- <nombre>` | un worktree en la rama `<nombre>` a partir de main (`.claude/worktrees/<nombre>`), instalado (`npm ci`, el script `local` de la app), con puertos propios y el guardián del flujo. Los propios worktrees de Claude Code viven en el mismo lugar y son solo una carpeta: dentro de uno, `npm run dev:start` sin nombre lo prepara de la misma forma |
 | Codificar | `npm run dev:change` | la comprobación, en segundos, después de cada cambio |
-| Aterrizar | `npm run dev:land -- "<qué cambió>"` | primero se mezcla main (un conflicto se detiene nombrando los archivos), las traducciones que el cambio dejó desactualizadas (la suscripción de Claude en esta máquina, nunca GitHub), la comprobación, un commit, fast-forward de main, un push, staging. GitHub ejecuta las comprobaciones pesadas; una ejecución en rojo comenta en el commit |
+| Aterrizar | `npm run dev:land -- "<qué cambió>"` | primero se incorpora main (un conflicto se detiene nombrando los archivos), las traducciones que el cambio dejó desactualizadas (la suscripción de Claude en esta máquina, nunca GitHub), la comprobación, el nivel 1 tal como lo ejecuta la pull request (`npm run ci -- every`), un commit, un push de la rama, se abre su pull request (o se actualiza la abierta), se esperan las comprobaciones de GitHub, un squash merge, staging, y este checkout se restablece al nuevo main. Una comprobación en rojo deja la pull request abierta y nombra el job; `npm run ci -- <parte>` lo reproduce. Hablar con GitHub es solo cosa de `packages/ui/src/cli/github.ts`, mediante su API REST |
 | Terminar | `npm run dev:done` | el worktree y la rama que ya aterrizaron desaparecen; se niega mientras algo quede sin aterrizar |
 | Producción | `npm run dev:promote` | a partir de main, solo un commit que GitHub aprobó, con la palabra del propietario |
 
@@ -419,8 +419,10 @@ landing. Nada de esto se hace a mano.
 - **Cada parte se demuestra a sí misma**: aterriza con su propia comprobación en `tests/`, una función
   simple (`tests/**/*.unit.spec.ts`) cuando puede serlo, en el navegador cuando solo un navegador lo
   muestra.
-- **Los landings se serializan solos.** Dos agentes aterrizando a la vez: el `dev:land` del segundo ve
-  que main se movió, lo mezcla, traduce lo que la mezcla dejó desactualizado, vuelve a comprobar y aterriza.
+- **Los landings se serializan solos.** Dos agentes aterrizando a la vez: cada uno tiene su propia
+  pull request; GitHub rechaza el segundo merge solo cuando ambos entran en conflicto, y entonces el
+  segundo `dev:land` incorpora main, traduce lo que la mezcla dejó desactualizado, vuelve a comprobar y
+  aterriza.
 - **Revisión práctica antes de producción.** Pasar las comprobaciones no es el final: usa la pieza en
   staging en un navegador real, con el ancho de un móvil, y arregla lo que se sienta mal. Luego
   `dev:promote`.

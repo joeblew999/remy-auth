@@ -219,7 +219,7 @@ tasks; `npm run setup` installs the guard.
 | Look | `npm run dev:status` | everyone, first: every agent session opens with it (a hook), a developer when they sit down | main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests, the top of `.plans/now.md` | seconds |
 | Before a piece of work | `npm run dev:start -- <name>` | whoever does the work, for every piece, a one-line edit included | a worktree of its own from main, installed, its own ports, the guard | ~1 min |
 | After every change | `npm run dev:change` | whoever is coding; the only step waited for | the check (`remy check`): plans, types with the tasks' own, the plain-function checks (`tests/**/*.unit.spec.ts`), translation status; a build only when a route file changed, the docs only when docs changed | ~6 s |
-| The change leaves the machine | `npm run dev:land -- "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | the translations it made stale (seconds), the check, one commit, fast-forward main, push, deploy staging. GitHub then runs `npm run ci` as parallel jobs (types and unit, level 1 in three parts, Google's audits, the consumer fixture), while you keep coding (`gh run list`); `npm run ci` runs the same locally | ~1 min to staging |
+| The change leaves the machine | `npm run dev:land -- "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | the translations it made stale (seconds), the check, level 1 as the pull request will run it, one commit, push the branch, open its pull request, wait for GitHub's checks (they confirm what passed here), merge, deploy staging. Never straight to main; from main it moves the work to a branch of its own first. After the merge main's own run checks everything (Google's audits and the consumer fixture too) | a few minutes: level 1 here, then GitHub's checks |
 | Production | `npm run dev:promote` | the owner, or an agent the owner asked in that session | `remy cloudflare deploy` and the docs Worker, from a pushed main, no gate: staging and GitHub already ran the checks | ~1 min |
 | A release | `npm run dev:release` | the owner, or an agent the owner asked in that session | `remy packages release`: every check, every language, locally, on purpose, then the tag | ~5 min |
 | When landed | `npm run dev:done` | whoever landed, when the piece of work is over; a worktree lives through as many landings as the work takes | the worktree and branch go | seconds |
@@ -363,7 +363,7 @@ the only integrator, and GitHub checks every landing. Nothing here is done by ha
 | Look | `npm run dev:status` | what is going on, asked from the facts' owners: main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests. Every agent session opens with it (a hook `remy guard` registers); a developer runs it when they sit down |
 | Start | `npm run dev:start -- <name>` | a worktree on branch `<name>` from main (`.claude/worktrees/<name>`), installed (`npm ci`, the app's `local` script), with ports of its own and the flow's guard. Claude Code's own worktrees live at the same place and are only a folder: inside one, `npm run dev:start` with no name prepares it the same way |
 | Code | `npm run dev:change` | the check, in seconds, after every change |
-| Land | `npm run dev:land -- "<what changed>"` | main merged in first (a conflict stops with the files named), the translations the change made stale (the Claude subscription on this machine, never GitHub), the check, one commit, fast-forward main, one push, staging. GitHub runs the heavy checks; a red run comments on the commit |
+| Land | `npm run dev:land -- "<what changed>"` | main merged in first (a conflict stops with the files named), the translations the change made stale (the Claude subscription on this machine, never GitHub), the check, level 1 as the pull request runs it (`npm run ci -- every`), one commit, one push of the branch, its pull request opened (or the open one updated), GitHub's checks waited for, a squash merge, staging, this checkout reset to the new main. A red check leaves the pull request open and names the job; `npm run ci -- <part>` reproduces it. Talking to GitHub is `packages/ui/src/cli/github.ts` only, through its REST API |
 | Finish | `npm run dev:done` | the landed worktree and branch go; refuses while anything is unlanded |
 | Production | `npm run dev:promote` | from main, only a commit GitHub passed, on the owner's word |
 
@@ -373,8 +373,9 @@ the only integrator, and GitHub checks every landing. Nothing here is done by ha
 - **Spike first when the risk is unknown**: one agent proves the risky point and lands or stops.
 - **Every part proves itself**: it lands with its own check in `tests/`, a plain function
   (`tests/**/*.unit.spec.ts`) when it can be one, in the browser when only a browser shows it.
-- **Landings serialise themselves.** Two agents landing at once: the second's `dev:land` sees main
-  moved, merges it in, translates what the merge left stale, checks again and lands.
+- **Landings serialise themselves.** Two agents landing at once: each has its own pull request; GitHub
+  refuses the second merge only when the two conflict, and then the second `dev:land` brings main in,
+  translates what the merge left stale, checks again and lands.
 - **Hands-on pass before production.** Passing checks is not the end: use the piece on staging in a
   real browser, on a phone's width, and fix what feels bad. Then `dev:promote`.
 - **An agent never waits in the foreground** on `dev:land`, `dev:promote` or a GitHub run; it starts

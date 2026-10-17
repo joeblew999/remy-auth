@@ -61,7 +61,11 @@ function sourceText(source) {
 /** Script URLs a text references: module specifiers, dynamic imports, script src and modulepreload hrefs. */
 const references = text => [...text.matchAll(/["'`]((?:\.{1,2}\/|\/)[^"'`\s<>]*?\.m?js)(?:\?[^"'`\s<>]*)?["'`]/g)].map(match => match[1]);
 
-/** Fetches every same-origin script reachable from the pages, following imports transitively. */
+/**
+ * Fetches every same-origin script reachable from the pages, following imports transitively, eight
+ * requests at a time: one at a time it was some 300 requests in a row and the slowest check of all
+ * (8 s, 2026-10-17); what it checks is the same either way.
+ */
 async function crawl(request, baseURL, pages) {
   const origin = new URL(baseURL).origin;
   const scripts = new Map();
@@ -73,18 +77,19 @@ async function crawl(request, baseURL, pages) {
     scripts.set(url.href, '');
     queue.push(url.href);
   };
-  for (const path of pages) {
-    const response = await request.get(path);
-    expect(response.status(), path).toBe(200);
-    for (const reference of references(await response.text())) add(reference, response.url());
-  }
-  while (queue.length) {
-    const url = queue.shift();
+  const fetchText = async url => {
     const response = await request.get(url);
     expect(response.status(), url).toBe(200);
-    const text = await response.text();
-    scripts.set(url, text);
-    for (const reference of references(text)) add(reference, url);
+    return { text: await response.text(), at: response.url() };
+  };
+  const inTurn = async (items, work) => {
+    const left = [...items];
+    await Promise.all(Array.from({ length: Math.min(8, left.length) }, async () => { for (let item = left.shift(); item !== undefined; item = left.shift()) await work(item); }));
+  };
+  await inTurn(pages, async path => { const { text, at } = await fetchText(path); for (const reference of references(text)) add(reference, at); });
+  while (queue.length) {
+    const batch = queue.splice(0);
+    await inTurn(batch, async url => { const { text } = await fetchText(url); scripts.set(url, text); for (const reference of references(text)) add(reference, url); });
   }
   return scripts;
 }
