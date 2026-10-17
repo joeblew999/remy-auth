@@ -5,6 +5,9 @@
   // Shared source for local development, production preview and deployment.
   "main": "./src/server.ts",
   "compatibility_flags": ["nodejs_compat"],
+  // Smart Placement: Cloudflare runs the Worker near its databases when that is faster, so a page's
+  // queries are local and a visitor far from them pays one trip, not one per query.
+  "placement": { "mode": "smart" },
   // Release and environment for the shared log contract (@joeblew999/remy-ui/worker).
   "version_metadata": { "binding": "CF_VERSION_METADATA" },
   // "production" here, "staging" in env.staging below, and "local" where a local .dev.vars says so
@@ -40,8 +43,8 @@
   "previews": {
     "vars": { "ENVIRONMENT": "staging", "EMAIL_FROM": "noreply@mail.ubuntusoftware.net" },
     "d1_databases": [
-      { "binding": "DB", "database_name": "remy-auth-preview", "database_id": "4ecadfd4-b626-426b-8dd8-a414f38af61d", "migrations_dir": "migrations" },
-      { "binding": "DEMO_DB", "database_name": "remy-auth-demo-preview", "database_id": "624bb133-5e77-4995-b9c7-99ecf4c869cb", "migrations_dir": "migrations-demo" }
+      { "binding": "DB", "database_name": "remy-auth-preview", "database_id": "3e8017ac-fcbc-404b-8d74-dfe599b50747", "migrations_dir": "migrations" },
+      { "binding": "DEMO_DB", "database_name": "remy-auth-demo-preview", "database_id": "a2ea78c1-a910-4dab-ba55-ecf25eeb3eb3", "migrations_dir": "migrations-demo" }
     ],
     "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["noreply@mail.ubuntusoftware.net"] }],
     "version_metadata": { "binding": "CF_VERSION_METADATA" }

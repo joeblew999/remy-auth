@@ -9,7 +9,7 @@ export function playwrightConfig({ webServer, testDir = './tests', timezoneId = 
   const remote = process.env.TEST_TARGET === 'remote';
   // The checks that are plain functions (*.unit.spec.ts): no Worker, no build, no browser.
   const unit = process.env.TEST_TARGET === 'unit';
-  if (remote && !process.env.TEST_BASE_URL) throw new Error('Set TEST_BASE_URL to the deployed origin for project:test:remote.');
+  if (remote && !process.env.TEST_BASE_URL) throw new Error('Set TEST_BASE_URL to the deployed origin for npm run test -- remote.');
   const port = process.env.PREVIEW_PORT ?? '4173';
   const target = new URL(remote ? process.env.TEST_BASE_URL : `http://127.0.0.1:${port}`);
   if (!['http:', 'https:'].includes(target.protocol) || target.username || target.password || target.pathname !== '/' || target.search || target.hash) {

@@ -1,6 +1,6 @@
 # Publisher and consumers: check the approach after the big build-up
 
-Closed 2026-09-26: the new-consumer recipe (docs/content/dev/tasks.md), drift fixed and CI in remy-auth-app, package moves (tailwind.css, prerender, seo builders, app-checks) and the consumer contract set (`prerenderedAppChecks`) shipped in remy-ui 0.11.0 with both apps on it. Scripts reviewed ([analysis](publisher-consumer-analysis.md) §5): every script keeps a job no mise feature or upstream command does; the optional tidy-ups there (four wrappers, cwv log parsing, release via CI) are not pursued.
+Closed 2026-09-26: the new-consumer recipe (docs/content/dev/projects.md), drift fixed and CI in remy-auth-app, package moves (tailwind.css, prerender, seo builders, app-checks) and the consumer contract set (`prerenderedAppChecks`) shipped in remy-ui 0.11.0 with both apps on it. Scripts reviewed ([analysis](publisher-consumer-analysis.md) §5): every script keeps a job no mise feature or upstream command does; the optional tidy-ups there (four wrappers, cwv log parsing, release via CI) are not pursued.
 
 Status: plan for an agent to analyse, then do; 2026-09-25. Owner: "our whole publisher / consumer
 approach relies on this". It may turn out that little needs doing; the point is to check.
@@ -71,7 +71,7 @@ preview; remy-auth-app passes its gate and Core Web Vitals after any move; no ch
   there is no `usage_name` there (the analysis's "drop it" would break the cleanup).
 
 - 2026-09-25, recipe and consumer drift (analysis action list items 2 and 4, D2, D3, D6, D15,
-  D16): the new-consumer recipe has **one home**, [docs/content/dev/tasks.md](../../docs/content/dev/tasks.md#a-new-consumer)
+  D16): the new-consumer recipe has **one home**, [docs/content/dev/projects.md](../../docs/content/dev/projects.md#a-new-consumer)
   (docs/content/dev/tooling.md already links there); it starts from remy-auth-app as a GitHub template repository
   (`gh repo create --template`), no scaffolding script of ours. remy-auth-app (branch
   `consumer-drift-recipe`) now has `min_version`, `PREVIEW_PORT` from the shell with `PUBLIC_ORIGIN`

@@ -1,20 +1,20 @@
 ---
 title: "Cómo trabajamos"
 description: "Cómo trabajan aquí las personas y los agentes: las herramientas del proyecto primero, encuestas antes de elegir herramientas, shadcn y TanStack, puertas de control, planes y traducciones."
-translatedFrom: "be9633b9 9d3c93f6 790e3737 0ed0ead4 d8386d74 94b8f1c6 4dca6b46 4aece31e f3262ad2 b2a387bd 2f9aba9e 2a2eaf1d c8f062fe b970b8f3 01c70038 d7ee26c1 5cbd4b38 b5662e6a 80d26491"
+translatedFrom: "56df3445 04014f31 790e3737 0ed0ead4 d8386d74 94b8f1c6 4dca6b46 4aece31e f3262ad2 b2a387bd 7ccf075c 23e9a303 c8f062fe d17b438c 01c70038 d7ee26c1 5cbd4b38 b5662e6a 34b38603"
 ---
 
 Este documento es el dueño de cómo trabajan las personas y los agentes: los hábitos que ha pedido el
 propietario, tanto para desarrolladores como para agentes de IA. Lo que el código debe ser vive en
-[principios de desarrollo](./development.md).
+[principios de desarrollo](./principles.md).
 
 ## Dónde viven las reglas [#where-rules-live]
 
 - Escribe cómo trabajamos aquí, en el repositorio, no en la memoria privada de un agente. Cualquiera
   que abra el repositorio, persona o agente, debe encontrar las mismas reglas. La memoria del agente
-  es solo para cosas que concierne a un único agente, nunca para cómo funciona el proyecto.
+  es solo para cosas que conciernen a un único agente, nunca para cómo funciona el proyecto.
 - Cada hecho tiene un único hogar, como exigen los
-  [principios de desarrollo](./development.md#development-principles); eso también aplica a estas reglas.
+  [principios de desarrollo](./principles.md#development-principles); eso también aplica a estas reglas.
 - Los `AGENTS.md` y `CLAUDE.md` de la raíz son punteros a [Agentes: empieza aquí](./agents.md) y no
   contienen ninguna regla propia: `CLAUDE.md` es un `@import` de esa página, así que Claude Code la
   carga; `AGENTS.md` la nombra, para Codex y cualquier otra herramienta. Una regla escrita en
@@ -202,7 +202,7 @@ inglés y sus traducciones: un commit, un push, una ejecución de las comprobaci
   `REMY_FLOW=hand npx remy i18n translate docs <archivo>…`, que deja esos archivos totalmente alineados con el
   inglés. Cambia la estructura de un catálogo (el archivo de cada locale) en el mismo commit que `en.json`.
 
-El layout y los comandos están en [la línea de comandos](./tasks.md#translations).
+El layout y los comandos están en [proyectos](./projects.md#translations).
 
 ## Planes: pocos, cortos, cerrados [#plans-few-short-closed]
 
@@ -214,10 +214,8 @@ plan se cierra el día que su trabajo se publica: una línea de cierre, y luego 
 grandes funcionalidades esperan en `.plans/parked/`. Cerrar un plan no necesita un despliegue ni una
 ejecución de pruebas extra propia: agrupa el código en un único despliegue y una única ejecución
 completa al final.
-Las tareas compartidas `remy plans …` hacen los movimientos: `remy plans status` lista lo que está abierto,
-`remy plans close`, `remy plans park` y `remy plans open` (un plan aparcado que se retoma) añaden la línea, mueven el
-archivo y redirigen cada enlace, y `remy plans check` (en el check, `dev:change`) mantiene `.plans/`
-ordenado ([tareas](./tasks.md#plans)).
+Los comandos `remy plans` ([Comandos](./commands.mdx)) hacen los movimientos y mantienen `.plans/`
+ordenado; la comprobación ejecuta `remy plans check` en cada cambio ([proyectos](./projects.md#plans)).
 
 ## Cuando el propietario delega decisiones [#when-the-owner-delegates-decisions]
 
@@ -234,7 +232,7 @@ continuar así», «Es una cuestión de qué ejecutas localmente y qué ejecutas
 asíncrona», y «Las herramientas formalizan lo que pasa en el desarrollo… asegúrate de que el flujo del
 desarrollador también esté formalizado para que estas putadas estúpidas no puedan volver a pasar. Y
 para que tú y los desarrolladores usen ese mismo flujo para que quede arreglado para siempre». Así que
-el flujo es código, no una regla que recordar: `tasks/dev/flow.ts` es el único lugar donde viven sus
+el flujo es código, no una regla que recordar: `packages/ui/src/cli/flow.ts` es el único lugar donde viven sus
 decisiones. Sus cuatro pasos son `dev:change`, `dev:land`, `dev:promote` y `dev:release` (el `Step` de
 `flow.ts`); `dev:start` y `dev:done` enmarcan un trozo de trabajo; `dev:status` mira; un guardián
 rechaza lo que no sea uno de ellos. Siete comandos, nada más. remy-auth lo obtiene de la misma forma
@@ -243,18 +241,18 @@ que cada app, desde las tareas compartidas; `npm run setup` instala el guardián
 | Paso | Comando | Quién lo ejecuta, y cuándo | Qué ejecuta | Tiempo |
 | --- | --- | --- | --- | --- |
 | Mirar | `npm run dev:status` | todos, primero: cada sesión de agente se abre con esto (un hook), un desarrollador cuando se sienta a trabajar | los últimos commits de main con el veredicto de GitHub, qué ejecuta cada despliegue, cada worktree por delante y por detrás de main, traducciones, pull requests, lo primero de `.plans/now.md` | segundos |
-| Antes de un trozo de trabajo | `npm run dev:start -- <nombre>` | quien hace el trabajo, para cada trozo, incluida una edición de una línea | un worktree propio a partir de main, instalado, con sus propios puertos, el guardián | ~1 min |
+| Antes de un trozo de trabajo | `npm run dev:start -- <nombre>` | quien hace el trabajo, para cada trozo, incluida una edición de una línea | un worktree propio a partir de main (`.claude/worktrees/<nombre>`), instalado, con sus propios puertos, el guardián; dentro de uno de los propios worktrees de Claude Code (el mismo lugar), `npm run dev:start` sin nombre lo prepara de la misma forma | ~1 min |
 | Después de cada cambio | `npm run dev:change` | quien esté codificando; el único paso que se espera | la comprobación (`remy check`): planes, tipos con los de las propias tareas, las comprobaciones de funciones simples (`tests/**/*.unit.spec.ts`), el estado de las traducciones; una build solo cuando cambió un archivo de ruta, la documentación solo cuando cambió la documentación | ~6 s |
-| El cambio deja la máquina | `npm run dev:land -- "<qué cambió>"` | quien hizo el trabajo, por su cuenta, en cuanto termina y la comprobación está en verde | las traducciones que dejó desactualizadas (segundos), la comprobación, cada parte de `npm run ci` que el cambio pueda afectar (tal como las ejecutará su pull request), un commit, push de la rama, abrir su pull request, esperar las comprobaciones de GitHub (confirman lo que aquí pasó), merge, despliegue en staging. Nunca directo a main; desde main, primero mueve el trabajo a una rama propia. Tras el merge, la propia ejecución de main comprueba todo, cada parte en cada idioma | unos minutos: las partes aquí, luego las comprobaciones de GitHub |
+| El cambio deja la máquina | `npm run dev:land -- "<qué cambió>"` | quien hizo el trabajo, por su cuenta, en cuanto termina y la comprobación está en verde | primero se incorpora main (un conflicto se detiene nombrando los archivos), las traducciones que dejó desactualizadas (segundos), la comprobación, cada parte de `npm run ci` que el cambio pueda afectar (tal como las ejecutará su pull request), un commit, push de la rama, se abre su pull request (o se actualiza la abierta), se esperan las comprobaciones de GitHub (confirman lo que aquí pasó), squash merge, despliegue en staging, y este checkout se restablece al nuevo main; una comprobación en rojo deja la pull request abierta y nombra el job. Hablar con GitHub es solo cosa de `packages/ui/src/cli/github.ts`, su API REST. Nunca directo a main; desde main, primero mueve el trabajo a una rama propia. Tras el merge, la propia ejecución de main comprueba todo, cada parte en cada idioma | unos minutos: las partes aquí, luego las comprobaciones de GitHub |
 | Producción | `npm run dev:promote` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `remy cloudflare deploy` y el Worker de documentación, a partir de un main ya empujado, sin puerta de control: staging y GitHub ya ejecutaron las comprobaciones | ~1 min |
 | Una publicación | `npm run dev:release` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `remy packages release`: cada comprobación, cada idioma, localmente, a propósito, y luego la etiqueta | ~5 min |
-| Cuando está landed | `npm run dev:done` | quien hizo el landing, cuando el trozo de trabajo termina; un worktree sobrevive a tantos landings como el trabajo necesite | el worktree y la rama desaparecen | segundos |
+| Cuando está landed | `npm run dev:done` | quien hizo el landing, cuando el trozo de trabajo termina; un worktree sobrevive a tantos landings como el trabajo necesite | el worktree y la rama desaparecen; se niega mientras algo quede sin aterrizar | segundos |
 
 - **Quién ejecuta un paso está en la tabla, y nunca es una pregunta.** Un agente aterriza su propio
   trabajo terminado sin preguntar: staging forma parte del landing, GitHub comprueba cada landing, y
   nada llega a producción por ese camino. La palabra del propietario es para producción y para una
   publicación, los dos pasos cuya columna así lo dice, y para el aprovisionamiento
-  ([principios de desarrollo](./development.md#development-principles)). Un agente que lee la tabla y
+  ([principios de desarrollo](./principles.md#development-principles)). Un agente que lee la tabla y
   aun así pregunta si debe aterrizar ha dejado de usar el flujo (propietario, 2026-10-10, después de que
   uno lo hiciera: «¿Está absolutamente claro cuándo te corresponde ejecutar cada paso?»).
 
@@ -309,14 +307,14 @@ que cada app, desde las tareas compartidas; `npm run setup` instala el guardián
 - **La respuesta de GitHub viene a ti.** Una ejecución en rojo comenta en el commit (GitHub se lo dice a
   su autor), nombrando la ejecución; `dev:change` empieza diciendo qué hizo la última ejecución en
   main; `dev:promote` se niega sobre un commit cuya ejecución no esté en verde o no haya terminado. Para
-  reproducir un job en rojo, una persona ejecuta `REMY_FLOW=hand npm run test -- <nivel>`, el mismo comando
+  reproducir un job en rojo, una persona ejecuta `npm run ci -- <part>`, el mismo comando
   que ejecutó GitHub, ya que el workflow no contiene lógica propia (`remy verify tooling` comprueba
   que exista cada script que un workflow nombra). Un agente lee el propio log de la ejecución
   (`gh run view <id> --log-failed`) y ejecuta el área concreta (`npm run test -- only <palabras>`).
   Informa de qué se probó y qué no; nunca llames verificado a un trabajo no probado.
 - **Un landing que falla después del push aun así termina lo que puede, y dice dónde se detuvo.**
-  Main se empuja antes que staging; cuando el despliegue de staging o su smoke en vivo falla,
-  `dev:land` termina con código distinto de cero con el estado en una línea: en qué commit se empujó main,
+  La pull request se fusiona antes que staging; cuando el despliegue de staging o su smoke en vivo falla,
+  `dev:land` termina con código distinto de cero con el estado en una línea: en qué commit se fusionó,
   si staging se desplegó o no, qué smoke falló, si la traducción se hizo o no.
   No se deja nada a medias para que la siguiente persona lo descubra (propietario, 2026-10-10, después de que un landing se detuviera
   en el smoke con la traducción omitida en silencio: «ahora tú y los demás agentes estáis jodidos»).
@@ -401,14 +399,7 @@ agentes para usar el nuevo flujo de desarrollo». Cada trozo de trabajo, quienqu
 worktree a través de los mismos comandos; main es el único integrador, y GitHub comprueba cada
 landing. Nada de esto se hace a mano.
 
-| | Comando | Qué hace |
-| --- | --- | --- |
-| Mirar | `npm run dev:status` | qué está pasando, preguntado a los dueños de los hechos: los últimos commits de main con el veredicto de GitHub, qué ejecuta cada despliegue, cada worktree por delante y por detrás de main, traducciones, pull requests. Cada sesión de agente se abre con esto (un hook que registra `remy guard`); un desarrollador lo ejecuta cuando se sienta a trabajar |
-| Empezar | `npm run dev:start -- <nombre>` | un worktree en la rama `<nombre>` a partir de main (`.claude/worktrees/<nombre>`), instalado (`npm ci`, el script `local` de la app), con puertos propios y el guardián del flujo. Los propios worktrees de Claude Code viven en el mismo lugar y son solo una carpeta: dentro de uno, `npm run dev:start` sin nombre lo prepara de la misma forma |
-| Codificar | `npm run dev:change` | la comprobación, en segundos, después de cada cambio |
-| Aterrizar | `npm run dev:land -- "<qué cambió>"` | primero se incorpora main (un conflicto se detiene nombrando los archivos), las traducciones que el cambio dejó desactualizadas (la suscripción de Claude en esta máquina, nunca GitHub), la comprobación, cada parte de `npm run ci` que el cambio pueda afectar, tal como las ejecuta su pull request, un commit, un push de la rama, se abre su pull request (o se actualiza la abierta), se esperan las comprobaciones de GitHub, un squash merge, staging, y este checkout se restablece al nuevo main. Una comprobación en rojo deja la pull request abierta y nombra el job; `npm run ci -- <parte>` lo reproduce. Hablar con GitHub es solo cosa de `packages/ui/src/cli/github.ts`, mediante su API REST |
-| Terminar | `npm run dev:done` | el worktree y la rama que ya aterrizaron desaparecen; se niega mientras algo quede sin aterrizar |
-| Producción | `npm run dev:promote` | a partir de main, solo un commit que GitHub aprobó, con la palabra del propietario |
+Los pasos, qué ejecuta cada uno y quién lo ejecuta: [la tabla del flujo](#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
 
 - **Divide por independencia.** Un orquestador divide el trabajo en partes que tocan archivos
   diferentes, y inicia un agente por parte con `dev:start`. Una parte que necesita el resultado de otra

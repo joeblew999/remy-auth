@@ -2,7 +2,7 @@ import { environments } from '@joeblew999/remy-ui/environment';
 import { seededPerson } from './seed';
 
 /**
- * What each environment permits: the one policy table (docs/content/dev/development.md), in
+ * What each environment permits: the one policy table (docs/content/dev/principles.md), in
  * remy-sport's shape. The Worker's `ENVIRONMENT` is "production" in wrangler.jsonc and "staging" in
  * its staging environment; a local `.dev.vars` (`npm run local`) says "local"; anything absent
  * or unknown is production. Every convenience is listed in .plans/auth-service.md.

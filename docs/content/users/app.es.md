@@ -1,7 +1,7 @@
 ---
 title: "La app"
 description: "Las páginas de la app y cómo encontrarlas en un teléfono, una tableta o un ordenador."
-translatedFrom: "7dd6fbd2 cbec0a1c"
+translatedFrom: "7dd6fbd2 6bc8a613"
 ---
 
 La app se abre desde **Open the app** en la barra superior.
@@ -25,4 +25,4 @@ La app se abre desde **Open the app** en la barra superior.
 - **En una tableta o un ordenador**, la lista de páginas está en el lateral. El botón de la parte superior
   izquierda la reduce a iconos y la vuelve a ampliar.
 
-Para desarrolladores: cómo está construida la app se explica en [la documentación para desarrolladores](/dev/gui).
+Para desarrolladores: cómo está construida la app se explica en [la documentación para desarrolladores](/dev/run-and-test).

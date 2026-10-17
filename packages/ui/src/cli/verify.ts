@@ -63,6 +63,9 @@ export async function tooling(): Promise<void> {
   // Worker on Cloudflare's Worker Previews (a `previews` block, built by Workers Builds) turns it on, on purpose:
   // that is what gives each branch and pull request its preview URL (owner, 2026-10-17).
   if (config.previews === undefined) assert.equal(config.preview_urls, false, 'wrangler.jsonc: preview_urls must be false (true only with a previews block)');
+  // Smart Placement: without it, a visitor far from the databases waits one ocean crossing per query (the
+  // account page took 3.2 s from Asia, 2026-10-17). Inherited by every environment and Preview, so set once.
+  assert.equal(config.placement?.mode, 'smart', 'wrangler.jsonc: "placement": { "mode": "smart" } (run the Worker near its databases)');
   const observability = config.observability;
   assert.equal(observability?.enabled, true, 'Worker observability must be enabled');
   assert.equal(observability?.redact_query_string, true, 'Query-string redaction must be enabled');
@@ -125,7 +128,7 @@ export async function verifySetup(): Promise<void> {
 
 /** The release's gate: the installation's checks, every browser check in every language, the other repositories this one serves. */
 export async function verify(): Promise<void> {
-  gate('project:verify');
+  gate('verify');
   await verifySetup();
   process.env.REMY_FLOW ??= 'release';
   every();
@@ -136,7 +139,7 @@ export const what = "the installation's checks and the release gate";
 export const commands: Subcommands = {
   all: { what: "everything: the installation's checks, every language, the consumers (the release gate; dev:release runs it); the default", run: () => verify() },
   setup: { what: "the installation's checks: npm ls, MCP, the guard, doctor, tooling, the check (npm run setup ends with it)", run: () => verifySetup() },
-  tooling: { what: "the lockfile, wrangler.jsonc's observability and preview_urls, the workflows, the skill pins", run: () => tooling() },
+  tooling: { what: "the lockfile, wrangler.jsonc's observability, placement and preview_urls, the workflows, the skill pins", run: () => tooling() },
   doctor: { what: "the tooling's versions", run: () => doctor() },
 };
 export const main = dispatch('verify', commands, 'all');

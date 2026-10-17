@@ -54,7 +54,7 @@ export function docsTableOf({ users, dev }, docsConfig) {
     return row ? { row, lang } : undefined;
   };
 
-  /** The docs site and language of a URL path (/dev/es/gui → dev, es), or undefined outside the docs. */
+  /** The docs site and language of a URL path (/dev/es/run-and-test → dev, es), or undefined outside the docs. */
   const docsLangOfPath = pathname => {
     const [, first, second] = pathname.split('/');
     const site = docsSites[first];

@@ -1,4 +1,5 @@
 import { env } from 'cloudflare:workers';
+import { replicated } from '@joeblew999/remy-ui/replicas';
 import { notesVocabulary } from '@joeblew999/remy-auth-contract/notes';
 import { ensureSeededNotes } from '../notes/seed';
 import { notesStore } from '../notes/store';
@@ -11,6 +12,21 @@ export type OfferedPerson = { name: string; email: string; role: string; holds: 
 /** The seeded sign-in an environment offers: its people and the published code they sign in with. */
 export type SeededSignIn = { code: string; people: OfferedPerson[] };
 
+let seeding: Promise<void> | undefined;
+
+/**
+ * The seed, made to exist once per Worker instance rather than on every page that offers it: on a
+ * preview, whose database is a continent away, seeding on each load made the account page take
+ * three seconds (Cloudflare's logs, 2026-10-17). A seed that failed is tried again on the next ask.
+ */
+function seeded(request: Request): Promise<void> {
+  seeding ??= Promise.all([ensureSeededPeople(request), ensureSeededNotes(replicated(env.DEMO_DB, 'DEMO_DB'))]).then(() => undefined, error => {
+    seeding = undefined;
+    throw error;
+  });
+  return seeding;
+}
+
 /**
  * The seeded people this environment offers to sign in as, or null where it offers none (any
  * deployment). Asking makes them exist, with the notes demo's seed, so a fresh local database needs
@@ -21,9 +37,8 @@ export type SeededSignIn = { code: string; people: OfferedPerson[] };
 export async function seededSignIn(request: Request): Promise<SeededSignIn | null> {
   const code = fixedSignInCode(env);
   if (!permits(env, 'seededSignIn') || !code) return null;
-  await ensureSeededPeople(request);
-  await ensureSeededNotes(env.DEMO_DB);
-  const { relations } = notesStore(env.DEMO_DB);
+  await seeded(request);
+  const { relations } = notesStore(replicated(env.DEMO_DB, 'DEMO_DB'));
   const onObjects = notesVocabulary.relations.filter(relation => relation.via === 'table');
   const offered = seededPeople.filter(person => person.role !== 'admin' || permits(env, 'offersAdminSignIn'));
   return {

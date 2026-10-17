@@ -5,7 +5,7 @@ import { affects, inert } from '../../packages/ui/src/cli/unchanged';
 // file ran three five-minute jobs). The rule is a function, so a wrong path fails here in seconds.
 
 test('plans, the docs content and Markdown outside the packages change nothing any part checks', () => {
-  for (const file of ['.plans/now.md', '.plans/done/gui.md', 'docs/content/dev/gui.md', 'docs/content/users/index.mdx', 'README.md', 'CHANGELOG.md']) expect(inert(file), file).toBe(true);
+  for (const file of ['.plans/now.md', '.plans/done/gui.md', 'docs/content/dev/run-and-test.md', 'docs/content/users/index.mdx', 'README.md', 'CHANGELOG.md']) expect(inert(file), file).toBe(true);
   for (const file of ['src/routes/index.tsx', 'packages/ui/README.md', 'package.json', '.github/workflows/ci.yml']) expect(inert(file), file).toBe(false);
   for (const part of ['browser', 'audits', 'new-app'] as const) expect(affects(part, ['.plans/auth-service.md', 'README.md']), part).toBe(false);
 });

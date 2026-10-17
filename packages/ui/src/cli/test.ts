@@ -46,13 +46,13 @@ const remote = (origin = process.env.TEST_BASE_URL ?? process.env.DEPLOY_ORIGIN)
 };
 
 /**
- * One speed measurement at a time on this machine (Google's level): a second run waits for the lock
+ * One speed measurement at a time on this machine (Google's audits, Core Web Vitals): a second run waits for the lock
  * rather than skewing the first. The lock is a directory; a file at its path (the mise-era flock, which
  * kept a release waiting 42 minutes on 2026-10-11) or a directory older than half an hour (a run that
  * died) is stale and taken over, and the wait says so every minute.
  */
-async function withLevel2Lock<T>(work: () => T): Promise<T> {
-  const lock = join(tmpdir(), 'remy-level2.lock');
+async function withSpeedLock<T>(work: () => T): Promise<T> {
+  const lock = join(tmpdir(), 'remy-speed.lock');
   // Stale: a file (the mise-era flock), a directory older than half an hour, or one whose holder has gone
   // (its pid file names a process that no longer runs: a run stopped part-way, 2026-10-17).
   const holderGone = () => { try { const pid = Number(readFileSync(join(lock, 'pid'), 'utf8')); if (!pid) return false; process.kill(pid, 0); return false; } catch (error) { return (error as NodeJS.ErrnoException).code === 'ESRCH'; } };
@@ -68,21 +68,19 @@ async function withLevel2Lock<T>(work: () => T): Promise<T> {
 /** REMY_SHARD=<i>/<n> runs one part of the checks (GitHub splits the browser part across jobs; `npm run ci -- browser --shard 1/3`). */
 const shard = () => (process.env.REMY_SHARD ? [`--shard=${process.env.REMY_SHARD}`] : []);
 export function every(): void {
-  gate('project:test');
+  gate('test:browser');
   if (skip('browser')) return;
   // English and Arabic when nothing that changed can differ by language (unchanged.ts); CHECK_LOCALES set by hand wins.
   const languages = process.env.CHECK_LOCALES || allLanguages() ? {} : quickLocales();
   build();
   playwright(['--project=ours', ...shard()], { ...local, ...languages });
 }
-/** Every check in the quick languages. */
-export function quick(): void { gate('project:test:quick'); build(); playwright(['--project=ours'], { ...local, ...quickLocales() }); }
 /** The checks whose title matches, in the quick languages: the one browser run a step does not own. */
 export function only(words: string): void { build(); playwright(['--project=ours', '--grep', words], { ...local, ...quickLocales() }); }
 /** The smoke checks alone, on a local build. */
 export function smoke(): void { build(); playwright(['--project=ours', '--grep', 'smoke [a-zA-Z-]+:'], local); }
 /** Google's audits (ci's audits part), locally. */
-export async function google(): Promise<void> { gate('project:test:google'); if (skip('audits')) return; build(); await withLevel2Lock(() => playwright(['--project=google'], local)); }
+export async function google(): Promise<void> { gate('test:audits'); if (skip('audits')) return; build(); await withSpeedLock(() => playwright(['--project=google'], local)); }
 /** The browser checks against a deployment. */
 /**
  * The suite against a deployment. Against production (the default) everything, Google's audits included; against
@@ -90,7 +88,7 @@ export async function google(): Promise<void> { gate('project:test:google'); if 
  * Google's crawlability audit rightly reports (a branch preview, 2026-10-17).
  */
 export function remoteSuite(origin?: string): void {
-  gate('project:test:remote');
+  gate('test:remote');
   const production = !origin || origin === process.env.DEPLOY_ORIGIN;
   if (!production) console.log(`test remote: ${origin} is not production, so our checks only (Google's audits judge the production site).`);
   playwright(production ? [] : ['--project=ours'], remote(origin));
@@ -99,7 +97,7 @@ export function remoteSuite(origin?: string): void {
 export function live(origin?: string): void { playwright(['--project=ours', '--grep', 'smoke [a-zA-Z-]+:'], remote(origin)); }
 /** The other repositories this one serves, tested as they get it: the app's "test:consumers" script, when it has one. */
 export function consumers(): void {
-  gate('project:test:consumers');
+  gate('test:consumers');
   if (skip('new-app')) return;
   // Not silent: npm would hand loglevel=silent to every nested npm in the fixture (its publish dry run reads a 404 from npm's output).
   const result = spawnSync('npm', ['run', '--if-present', 'test:consumers'], { stdio: 'inherit', env: { ...process.env, REMY_FLOW: process.env.REMY_FLOW ?? 'hand' } });
@@ -107,10 +105,10 @@ export function consumers(): void {
 }
 /** Google's Core Web Vitals (speed) on a throwaway Cloudflare Worker of this commit, deleted whatever happens. */
 export async function cwv(alias?: string): Promise<void> {
-  gate('project:test:cwv');
+  gate('test:cwv');
   const origin = await preview(alias, true);
   const name = new URL(origin).hostname.split('.')[0]!;
-  try { await withLevel2Lock(() => playwright(['--project=google-cwv', '--no-deps'], { TEST_BASE_URL: origin, TEST_TARGET: 'remote' })); console.log(`Core Web Vitals passed on ${origin}`); }
+  try { await withSpeedLock(() => playwright(['--project=google-cwv', '--no-deps'], { TEST_BASE_URL: origin, TEST_TARGET: 'remote' })); console.log(`Core Web Vitals passed on ${origin}`); }
   finally { await previewDelete(name).catch(error => console.error(`test cwv: could not delete ${name}: ${error instanceof Error ? error.message : String(error)}`)); }
 }
 

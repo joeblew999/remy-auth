@@ -16,7 +16,7 @@ went live:
    way and show it off in Remy's own demo."
 
 Both are about what a deployment says it is. How they work, for developers and agents of every Remy
-repo: [the GUI page](../../docs/content/dev/gui.md#which-version-is-deployed).
+repo: [the GUI page](../../docs/content/dev/run-and-test.md#which-version-is-deployed).
 
 ## What was built
 

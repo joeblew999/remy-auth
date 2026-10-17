@@ -94,7 +94,7 @@ All seven are done; the evidence is in the [close-out](#close-out-2026-09-25).
 6. **Shared tasks.** `project.toml` swaps `react-router typegen`, `dev` and `build` for the
    TanStack/Vite equivalents; consumers pick it up by bumping the include.
 7. **Ship.** Both level-1 gates, local release, both deploys, live checks in the background,
-   CI level 2; update the done GUI plan, `docs/content/dev/gui.md`, `docs/content/dev/tooling.md`, the package README
+   CI level 2; update the done GUI plan, `docs/content/dev/run-and-test.md`, `docs/content/dev/tooling.md`, the package README
    and memory; merge both branches.
 
 Estimate: about a day for items 1 to 4, and another day for the showcase.
@@ -133,8 +133,8 @@ On the Cloudflare preview `https://tanstack-remy-auth.gedw99.workers.dev`, phone
 | 3 remy-auth | TanStack file routes in `src/routes`; live at https://remy-auth.gedw99.workers.dev/en on 0.10.2 |
 | 4 remy-auth-app | Prerendered on TanStack Start; live at https://remy-auth-app.gedw99.workers.dev/en on the 0.10 line |
 | 5 Showcase | Every row of the table above has its shared check in `packages/ui/src/showcase/`; both apps run them |
-| 6 Shared tasks | `tasks/project.toml` runs the TanStack/Vite dev and build; consumers include it by tag ([tasks README](../../docs/content/dev/tasks.md)) |
-| 7 Ship | 0.9.0 and 0.9.1 released, both apps deployed, then 0.10.0 to 0.10.2 on the same foundation; [`docs/content/dev/gui.md`](../../docs/content/dev/gui.md) and the [package README](../../docs/content/dev/ui-package.md) updated at close |
+| 6 Shared tasks | `tasks/project.toml` runs the TanStack/Vite dev and build; consumers include it by tag ([tasks README](../../docs/content/dev/projects.md)) |
+| 7 Ship | 0.9.0 and 0.9.1 released, both apps deployed, then 0.10.0 to 0.10.2 on the same foundation; [`docs/content/dev/run-and-test.md`](../../docs/content/dev/run-and-test.md) and the [package README](../../docs/content/dev/remy-ui.md) updated at close |
 | Hands-on pass | [Above](#hands-on-pass-2026-09-25), on the preview before the merge; its fixes are on main |
 
 Moved elsewhere: the formats page's speed (Google's simulated mobile LCP, live) is an item in

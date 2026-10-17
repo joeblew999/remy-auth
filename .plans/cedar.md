@@ -6,7 +6,7 @@ Status: proposed 2026-10-10. Not started. Owner: remy-auth.
 Comes from [cedar-research.md](cedar-research.md), the comparison of Better Auth and Rauthy with Cedar.
 The owner delegated the design ("The plan should be for what you think is best", 2026-10-10). Decisions are under
 [Decisions](#decisions-delegated-2026-10-10); the three things only the owner can settle are under [For the owner](#for-the-owner).
-Executor/Reviewer roles as in [plans and roles](../docs/content/dev/development.md#plans-and-roles). Each slice lands
+Executor/Reviewer roles as in [plans and roles](../docs/content/dev/principles.md#plans-and-roles). Each slice lands
 through [the flow](../docs/content/dev/how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
 
 ## In one paragraph

@@ -110,7 +110,7 @@ test('endonyms come from Intl', () => { expect(endonym('en')).toBe('English'); }
 // The docs moved to the docs Worker: each old address answers a permanent redirect to its page there,
 // in the same language (src/routes/docs.$.tsx), so links and search engines follow.
 test('the old docs addresses redirect to the docs Worker, keeping the language', async ({ request }) => {
-  for (const [from, to] of [['/en/docs', '/dev'], ['/en/docs/gui', '/dev/gui'], ['/es/docs/how-we-work', '/dev/es/how-we-work']]) {
+  for (const [from, to] of [['/en/docs', '/dev'], ['/en/docs/tooling', '/dev/tooling'], ['/es/docs/how-we-work', '/dev/es/how-we-work']]) {
     const response = await request.get(from!, { maxRedirects: 0 });
     expect(response.status(), from).toBe(301);
     expect(response.headers().location, from).toBe(`${process.env.DOCS_ORIGIN}${to}`);

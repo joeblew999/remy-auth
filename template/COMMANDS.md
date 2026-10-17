@@ -6,7 +6,7 @@ Day to day, three: `npm run dev:change` after every edit, `npm run dev:land -- "
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev:status` | what is going on: main with GitHub's verdicts, the deployments, the worktrees, the translations |
+| `npm run dev:status` | what is going on: main with GitHub's verdicts, the open pull requests, the deployments, the worktrees, the translations, the top of now.md |
 | `npm run dev:start` | &lt;name&gt;: a worktree of your own from main, installed, its own ports, the guard |
 | `npm run dev:change` | the check, in seconds |
 | `npm run dev:land` | "&lt;what changed&gt;": the check and the browser checks here, then a pull request, merged when GitHub agrees, and staging |
@@ -25,11 +25,11 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy allowed` | &lt;task&gt;: may this heavy task run now (the gate the flow sets; refused with exit 1 outside it) |
 | `npx remy check` | the check (dev:change), or one part: plans · single-copies · routes · types · commands · endings · unit · translations · docs |
 | `npx remy plans` | the plans rule on this app's .plans/: few, short, closed |
-| `npx remy plans status` | the open plans and now.md's open items |
-| `npx remy plans check` | the rule holds (the check runs it) |
-| `npx remy plans close` | &lt;plan&gt;: move a plan to done/ with its closing line |
-| `npx remy plans park` | &lt;plan&gt;: move a plan to parked/ |
-| `npx remy plans open` | &lt;plan&gt;: take a parked plan up again |
+| `npx remy plans status` | [--json]: now.md's open items, the open plans with their status line and last commit (STALE after 14 days), the parked ones |
+| `npx remy plans check` | now.md exists, every link under .plans/ resolves, every open plan is linked from now.md; instant (the check runs it) |
+| `npx remy plans close` | &lt;plan&gt; "&lt;what shipped&gt;": into done/ with its closing line, links to it repointed, its now.md item struck; staged, never committed |
+| `npx remy plans park` | &lt;plan&gt; "&lt;why&gt;": the same into parked/ |
+| `npx remy plans open` | &lt;plan&gt; "&lt;why now&gt;": a parked plan back into .plans/; its now.md item is yours to add |
 | `npx remy i18n` | translations: check [messages\|docs] [--list] (offline, read-only), translate [messages\|docs] (the machine's Claude; dev:land runs it in the change) |
 | `npx remy i18n check` | [messages\|docs] [--list]: the offline checks, read-only, no git history: a warning (exit 0) while coding and in npm run ci, exit 1 with I18N_STRICT=1 (the release); --list prints one line per gap |
 | `npx remy i18n translate` | [messages\|docs] [files…]: what the checks list, by the machine's Claude (I18N_MODEL, default sonnet; I18N_JOBS at a time, default 4): only the changed sections and keys, with their records; named translation files redone in full; dev:land runs it in the change |
@@ -42,12 +42,12 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy cloudflare preview` | [alias] [--keep]: this build as a throwaway Worker &lt;name&gt;-check-&lt;alias&gt; (production untouched), the browser checks against it, then deleted unless --keep (a machine signed in to Cloudflare; from Claude's cloud, push the branch instead) |
 | `npx remy cloudflare preview-delete` | [name]: list the throwaway check Workers, or delete one; never production |
 | `npx remy cloudflare wait` | &lt;origin&gt; &lt;wrangler-output-file&gt;: until the origin serves the uploaded version, every home-page asset included |
-| `npx remy cloudflare provisioned` | refuse when a D1, KV or R2 binding names no existing resource |
+| `npx remy cloudflare provisioned` | refuse when a D1, KV or R2 binding names no existing resource, or a D1 database (the Previews' included) keeps no read copies |
 | `npx remy setup` | npm ci, the pinned skills, the agents' rules, MCP registration, the guard, the pre-push hook (npm run ci), then the installation's checks (npm run setup); preconditions: those alone |
 | `npx remy verify` | the installation's checks and the release gate |
 | `npx remy verify all` | everything: the installation's checks, every language, the consumers (the release gate; dev:release runs it); the default |
 | `npx remy verify setup` | the installation's checks: npm ls, MCP, the guard, doctor, tooling, the check (npm run setup ends with it) |
-| `npx remy verify tooling` | the lockfile, wrangler.jsonc's observability and preview_urls, the workflows, the skill pins |
+| `npx remy verify tooling` | the lockfile, wrangler.jsonc's observability, placement and preview_urls, the workflows, the skill pins |
 | `npx remy verify doctor` | the tooling's versions |
 | `npx remy skills` | the pinned official agent skills for Codex and Claude |
 | `npx remy skills install` | every pinned skill, and the platform's remy skill from the installed package |
@@ -60,14 +60,14 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy mcp status` | what each client has registered |
 | `npx remy rules` | the platform's rules block in AGENTS.md, written or refreshed in place |
 | `npx remy packages` | a repository that publishes packages: updates, the pack, the notes, the publish, the tag, the release |
-| `npx remy packages check` | package updates available (npm-check-updates); nothing changed |
+| `npx remy packages check` | package updates available for the repository's own dependencies (npm-check-updates; never its own packages); nothing changed |
 | `npx remy packages upgrade` | upgrade every package, major versions included, then the installation's checks |
-| `npx remy packages pack` | pack each published workspace, as the publish would |
+| `npx remy packages pack` | pack each published workspace, as the publish would: a tarball a scratch app installs before any release |
 | `npx remy packages notes` | &lt;version&gt;: the CHANGELOG section of a version, as the GitHub release's notes |
 | `npx remy packages bumped` | every published package whose files changed since the last release tag has a new version |
-| `npx remy packages publish` | [--release vX.Y.Z] [--dry-run]: each registry accepts its token, then publish each workspace, then the GitHub release from its notes |
+| `npx remy packages publish` | [--release vX.Y.Z] [--dry-run]: each registry accepts its token, then each workspace whose version is new on its registry, then the GitHub release from its CHANGELOG notes; the tag's CI job runs the same |
 | `npx remy packages tag` | on a clean main: the lead package's version as the tag, pushed with main, then the publish |
-| `npx remy packages release` | the release: translations strict, bumped, the gate, Google, Core Web Vitals on a preview, the tag (dev:release runs it) |
+| `npx remy packages release` | the release: translations strict, bumped, the gate (remy verify), the app's release-checks script, Google, Core Web Vitals on a preview, the tag (dev:release runs it) |
 | `npx remy app` | the app itself: run it, build it, preview the build |
 | `npx remy app dev` | Vite's dev server on local Workers with hot reload, port 5173 (npm run dev) |
 | `npx remy app build` | the production build, then Wrangler's deployment dry run; no upload (npm run build) |
@@ -99,7 +99,7 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy observe ai-usage` | [--since 7d]: Ask AI's usage through the gateway |
 | `npx remy observe ai-check` | Ask AI answers through its gateway |
 | `npx remy observe gateway` | [show \| rate-limit off \| rate-limit &lt;requests&gt;/&lt;seconds&gt; \| logs on\|off]: the AI Gateway's settings |
-| `npx remy shots` | [path] [--phone] [--dark] [--locale xx]: screenshots of a page as a visitor sees it (npm run shots) |
+| `npx remy shots` | [path] [--phone] [--dark] [--locale en,ar] [--video] [--all] [--out dir] [--origin url]: screenshots (or a WebM) of a page as a visitor sees it; --all every page, desktop and phone, light and dark, en and ar (npm run shots) |
 | `npx remy api` | spec [origin] [--urls]: the OpenAPI document a Worker generates from its contract |
 | `npx remy upgrade` | &lt;version&gt;: this app onto a release of the platform: the package, the workflow's tag, the skills, the rules, the guard, the installation's checks (npm run upgrade) |
 

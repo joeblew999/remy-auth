@@ -1,7 +1,7 @@
 ---
 title: "Arquitectura y principios de desarrollo"
 description: "Lo que el código debe ser: propiedad, una única fuente de verdad, gates de pruebas, código generado y decisiones del dueño."
-translatedFrom: "052958b0 dff03b43 b2dee8c7"
+translatedFrom: "052958b0 d509de88 b2dee8c7"
 ---
 
 Este documento es el dueño de lo que el código debe ser. Cómo trabajan las personas y los agentes día a día vive en
@@ -22,7 +22,7 @@ Este documento es el dueño de lo que el código debe ser. Cómo trabajan las pe
 - Mantén una única implementación de Worker y una única configuración fuente de Wrangler para la ejecución
   local y desplegada. Prueba el artefacto de producción en local y reutiliza la misma
   suite de aceptación contra URLs desplegadas. Las diferencias de entorno pertenecen a los
-  bindings y secrets, no a código duplicado. Consulta [el flujo de trabajo en tiempo de ejecución](./gui.md).
+  bindings y secrets, no a código duplicado. Consulta [el flujo de trabajo en tiempo de ejecución](./run-and-test.md).
 - Las apps se integran mediante un protocolo/contrato versionado, nunca con acceso directo a la
   base de datos de este servicio. Los datos de la app y el aprovisionamiento de autenticación son operaciones separadas.
 - Los fallos permanecen visibles. Nunca concedas acceso porque la autenticación no esté disponible.

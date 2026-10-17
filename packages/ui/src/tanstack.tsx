@@ -5,6 +5,7 @@ import { deLocalizeUrl, localizeUrl, getLocale, getUrlOrigin, extractLocaleFromU
 import { preferredFromHeader, preferredFromNavigator } from './matching.js';
 import { alternates } from './seo';
 import { withObservability } from './worker';
+import { withReplicas } from './replicas';
 import { isAppPath } from './paths.js';
 import { pageTitle, registeredApp } from './app-config';
 
@@ -35,7 +36,7 @@ type StartFetch = (request: Request) => Response | Promise<Response>;
  */
 export function localizedWorker<E extends ObservedEnv>(service: string, start: { fetch: StartFetch },
   { entryPaths }: { entryPaths: readonly string[] }) {
-  return withObservability<E>(service, request => paraglideMiddleware(request, async () => {
+  return withObservability<E>(service, request => withReplicas(request, () => paraglideMiddleware(request, async () => {
     const entry = await entryRedirect(request, entryPaths);
     if (entry) return entry;
     const response = await start.fetch(request);
@@ -43,7 +44,7 @@ export function localizedWorker<E extends ObservedEnv>(service: string, start: {
     const out = new Response(response.body, response);
     out.headers.set('Cache-Control', 'no-store');
     return out;
-  }));
+  })));
 }
 
 /** A 302 to Paraglide's localized URL for an un-localized entry path, or undefined for anything else. */

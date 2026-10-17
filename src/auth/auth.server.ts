@@ -1,5 +1,6 @@
 import { env } from 'cloudflare:workers';
 import { betterAuth } from 'better-auth';
+import { replicated } from '@joeblew999/remy-ui/replicas';
 import { permits, publishedCodeFor } from './environment';
 import { codeSender } from './mail.server';
 import { authOptions } from './options';
@@ -8,7 +9,7 @@ import { seededPeople } from './seed';
 /** The code a seeded person signs in with where this environment publishes one (./environment.ts). */
 const fixedCode = (email: string) => publishedCodeFor(env, email);
 
-const build = (baseURL: string) => betterAuth(authOptions({ database: env.DB, secret: env.BETTER_AUTH_SECRET, baseURL, sendCode: codeSender(env), fixedCode }));
+const build = (baseURL: string) => betterAuth(authOptions({ database: replicated(env.DB, 'DB'), secret: env.BETTER_AUTH_SECRET, baseURL, sendCode: codeSender(env), fixedCode }));
 
 // One instance per origin this Worker answers on, built on first use and kept for the isolate's life:
 // the bindings do not change, and nothing is built at module scope, where a Worker has no request.
@@ -16,7 +17,8 @@ const instances = new Map<string, ReturnType<typeof build>>();
 
 /**
  * Better Auth for the origin `request` came to, which is its base URL (the issuer) and the only
- * origin it trusts. Better Auth's native D1 support takes the binding itself (`database: env.DB`).
+ * origin it trusts. Better Auth's native D1 support takes the database as it takes the binding: here the request's
+ * D1 session (`replicated`, @joeblew999/remy-ui/replicas), so reads come from the nearest copy.
  */
 export function auth(request: Request) {
   const { origin } = new URL(request.url);
@@ -39,8 +41,9 @@ export async function ensureSeededPeople(request: Request): Promise<void> {
   if (!permits(env, 'seededSignIn')) throw new Error('This environment has no seeded people.');
   const { adapter } = await auth(request).$context;
   const at = new Date();
-  for (const person of seededPeople) {
-    if (await adapter.findOne({ model: 'user', where: [{ field: 'id', value: person.id }] })) continue;
+  // Side by side: each lookup is a round trip to the database, which may be a continent away.
+  await Promise.all(seededPeople.map(async person => {
+    if (await adapter.findOne({ model: 'user', where: [{ field: 'id', value: person.id }] })) return;
     await adapter.create({ model: 'user', data: { ...person, emailVerified: true, createdAt: at, updatedAt: at }, forceAllowId: true });
-  }
+  }));
 }

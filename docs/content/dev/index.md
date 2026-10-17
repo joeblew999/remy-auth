@@ -50,7 +50,6 @@ npm run dev          # http://127.0.0.1:5173/en
 ```
 
 Open [localhost:5173/en](http://127.0.0.1:5173/en); switch to Spanish or try the demo.
-Setup installs dependencies and skills, registers MCP, then runs the installation's checks (no browser).
 
 Setup installs the pinned **Codex CLI**; authenticate when prompted. **Claude Code**
 is optional and installed separately.
@@ -63,45 +62,24 @@ Starting, resuming and reloading Codex or Claude Code, in VS Code or a terminal,
 
 ## Everyday commands
 
-The everyday commands, the same in every app on the platform (`package.json`'s scripts, run by the
-package's `remy` bin):
-
-| Task | Command |
-| --- | --- |
-| See what is going on | `npm run dev:status` |
-| Start a piece of work, in a worktree of its own | `npm run dev:start -- <name>` |
-| Check, after every change | `npm run dev:change` |
-| Land finished work: main, GitHub's checks, staging | `npm run dev:land -- "<what changed>"` |
-| List the scripts | `npm run` |
-| Run the local GUI | `npm run dev` |
-| Try the production build locally | `npm run preview` |
-| The tooling's versions | `npx remy verify doctor` |
-| Check for package updates | `npm run packages -- check` |
-| Upgrade packages, including major versions | `npm run packages -- upgrade` |
-| Better Auth CLI help | `npm run auth -- --help` |
-| Cloudflare CLI help | `npm run wrangler -- --help` |
-| Inspect browser tooling | `npm run browser -- --help` |
-| Inspect MCP status in both clients | `npx remy mcp status` |
-
-The first four are [the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), which
-also says who runs production and a release. The heavy checks are not everyday commands: GitHub runs
-them after every landing, and the tooling refuses them outside the flow.
+Every command, generated from the command line itself, is on [Commands](./commands.mdx). What you run day to
+day, and who runs production and a release, is [the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
 
 Local preview and remote deployment use the same build and Wrangler configuration.
-See [local/remote commands](./gui.md#one-scaffold-for-local-and-cloudflare)
+See [local/remote commands](./run-and-test.md#one-scaffold-for-local-and-cloudflare)
 for deployment and running the same tests against a deployed URL.
 
 Review dependency changes after upgrading. Node is pinned in `.node-version` and `package.json`'s
 `engines`; the skill-source commits are in the package (`packages/ui/src/cli/skills.ts`), which every
-app installs ([the command line](./tasks.md)).
+app installs ([projects](./projects.md)).
 
 ## Project documentation
 
 - [Agents: start here](./agents.md): where agents start; the root `AGENTS.md` and `CLAUDE.md` only point at it.
-- [Development principles](./development.md): what the code must be, and how plans work.
+- [Development principles](./principles.md): what the code must be, and how plans work.
 - [How we work](./how-we-work.md): how people and agents work.
-- [Developer tooling](./tooling.md): the scripts and commands, skills, MCP and browser tools.
-- [GUI runtime workflow](./gui.md): one Worker, local and remote test targets.
-- [The command line](./tasks.md): `remy`, the tooling every app installs with the package.
-- [Shared UI package](./ui-package.md) and its [changelog](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
+- [Developer tooling](./tooling.md): the pinned tools, secrets, agent skills, MCP and browser tools.
+- [Run, preview and test the app](./run-and-test.md): one Worker, local and remote test targets, Cloudflare.
+- [Projects](./projects.md): the layout every app keeps, a new app, publishing, translations, Cloudflare and plans.
+- [Shared UI package](./remy-ui.md) and its [changelog](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
 - [Plans](https://github.com/joeblew999/remy-auth/tree/main/.plans): [.plans/now.md](https://github.com/joeblew999/remy-auth/blob/main/.plans/now.md) is the only list of what is open and where it stands.

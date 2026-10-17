@@ -21,7 +21,7 @@ This document owns what the code must be. How people and agents work day to day 
 - Keep one Worker implementation and one source Wrangler configuration for local
   and deployed execution. Test the production artifact locally and reuse the same
   acceptance suite against deployed URLs. Environment differences belong in
-  bindings and secrets, not duplicate code. See [the runtime workflow](./gui.md).
+  bindings and secrets, not duplicate code. See [the runtime workflow](./run-and-test.md).
 - Apps integrate through a versioned protocol/contract, never direct access to this
   service's database. App data and auth provisioning are separate operations.
 - Failures remain visible. Never grant access because auth is unavailable.

@@ -3,7 +3,7 @@
 Status: closed 2026-09-26: released in 0.12.0, live in remy-auth and remy-auth-app. Owner: "find the best shadcn way for our app to have a bottom navigation for
 mobile ... I have no idea if we should retain the drawer for desktop users and use the bottom navigation
 for mobile users ... Our app needs some more pages too to help show the navigation working."
-Executor/Reviewer roles as in [plans and roles](../../docs/content/dev/development.md#plans-and-roles).
+Executor/Reviewer roles as in [plans and roles](../../docs/content/dev/principles.md#plans-and-roles).
 
 ## Words
 

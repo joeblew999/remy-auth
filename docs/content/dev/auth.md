@@ -26,7 +26,7 @@ own vocabulary of relations, and the guard in front of every operation.
 
 ## Who may call an endpoint: the guard
 
-An app's API is contract-first oRPC ([the UI package](./ui-package.md)). Every procedure declares who
+An app's API is contract-first oRPC ([the UI package](./remy-ui.md)). Every procedure declares who
 may call it, on the contract, and one root middleware enforces it. A procedure that declares nothing
 never runs, and the shared checks fail the build on it.
 
@@ -140,7 +140,7 @@ for Email Sending, or keeps the message in the outbox where the environment capt
 always has a plain-text part; a refused send says who it was for and why. A message to an address no
 mail can reach (`unreachable`: `.test`, `.example`, `example.com` and the like, which a seeded
 person's address is) is never sent: it could only bounce. The sign-in code's email
-is written in the reader's language and in [the product's name](./gui.md#the-products-name), with the
+is written in the reader's language and in [the product's name](./run-and-test.md#the-products-name), with the
 code and no link.
 
 ## What each piece is checked by

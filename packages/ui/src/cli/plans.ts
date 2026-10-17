@@ -247,10 +247,10 @@ function move(kind: Move, word: string, args: string[]): void {
 
 export const what = "the plans rule on this app's .plans/: few, short, closed";
 export const commands: Subcommands = {
-  status: { what: "the open plans and now.md's open items", run: rest => status(rest) },
-  check: { what: 'the rule holds (the check runs it)', run: () => check() },
-  close: { what: '<plan>: move a plan to done/ with its closing line', run: rest => move('close', 'Closed', rest) },
-  park: { what: '<plan>: move a plan to parked/', run: rest => move('park', 'Parked', rest) },
-  open: { what: '<plan>: take a parked plan up again', run: rest => move('open', 'Opened', rest) },
+  status: { what: "[--json]: now.md's open items, the open plans with their status line and last commit (STALE after 14 days), the parked ones", run: rest => status(rest) },
+  check: { what: 'now.md exists, every link under .plans/ resolves, every open plan is linked from now.md; instant (the check runs it)', run: () => check() },
+  close: { what: '<plan> "<what shipped>": into done/ with its closing line, links to it repointed, its now.md item struck; staged, never committed', run: rest => move('close', 'Closed', rest) },
+  park: { what: '<plan> "<why>": the same into parked/', run: rest => move('park', 'Parked', rest) },
+  open: { what: '<plan> "<why now>": a parked plan back into .plans/; its now.md item is yours to add', run: rest => move('open', 'Opened', rest) },
 };
 export const main = dispatch('plans', commands);
