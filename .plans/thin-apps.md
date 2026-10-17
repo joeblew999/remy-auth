@@ -6,7 +6,7 @@ not migrated (owner, 2026-09-29: "its so bad we will have to make a new one and 
 out of it later"). Phase D proves the platform with a new repo, `remy-auth-test` (owner, 2026-09-29: "for
 Phase D, just use remy-auth-test. dont worry about the video aspects for now"); the video repo comes
 later, outside this plan. Executor/Reviewer roles as in
-[plans and roles](../docs/content/dev/principles.md#plans-and-roles).
+[plans and roles](../apps/docs/content/dev/principles.md#plans-and-roles).
 
 ## Intent
 
@@ -55,7 +55,7 @@ tasks and tools expect certain paths too"). A first grep of `tasks/`, 2026-09-29
 
 Phase A turned this grep into the full inventory (tasks, their scripts and the package's own path
 reads, adding `src/parts.json` and `dist/client/assets`) and wrote it once in
-[tasks.md, "The layout"](../docs/content/dev/projects.md), the one home; the table above is the first
+[tasks.md, "The layout"](../apps/docs/content/dev/projects.md), the one home; the table above is the first
 grep, kept as history. The layout is kept by the tools, not by a checker of our own (the `project-layout` branch was
 not merged for that reason, now.md step 1): a file elsewhere is simply not found. remy-auth and
 remy-video already match it; remy-auth-app does not yet (`workers/` for its prerender Worker, no
@@ -119,7 +119,7 @@ Worker, no forks. But it proves less than it seems:
 - It is a second host of remy-auth's own showcase pages (formats, demo, clock, location, account,
   settings), rendered from the package's `pages`, `app-pages` and `showcase/*` exports and prerendered.
   Its routes are the ones the shell hardcodes, which is why it never met A6 to A8.
-- It is the starting point for every new repo ([tasks.md, "A new consumer"](../docs/content/dev/projects.md):
+- It is the starting point for every new repo ([tasks.md, "A new consumer"](../apps/docs/content/dev/projects.md):
   `gh repo create --template joeblew999/remy-auth-app`, then rename in six files). A new repo therefore
   starts with remy-auth's showcase pages and a rename checklist: remy-video began there.
 - Its `AGENTS.md` links remy-auth's `docs/development.md` and `docs/tooling.md` on GitHub `main`; both
@@ -461,7 +461,7 @@ Decisions (the Executor's, per the working rules):
   loosely typed list hid; `stripSearchParams` keeps the URL `/app/clock`.
 - Both `@joeblew999/remy-ui/*` tsconfig mappings are gone; remy-auth resolves the package through its
   exports like any repo.
-- The layout is in [tasks.md, "The layout"](../docs/content/dev/projects.md).
+- The layout is in [tasks.md, "The layout"](../apps/docs/content/dev/projects.md).
 - Not in phase A: `paths.js`'s remy-auth page lists stay as runtime defaults (every app passes its own
   today); group 5 takes them. The docs header and sidebar links (`src/docs/header-link.tsx`) stay
   remy-auth's until group 2 makes them the platform's.

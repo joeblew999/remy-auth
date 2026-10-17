@@ -5,7 +5,7 @@
 // so a machine without one draws empty boxes, which the font checks rightly refuse. GitHub's runners have none: Noto
 // CJK is installed where this process may (root, or sudo without a password); anywhere else it stops with the fix.
 import { spawnSync } from 'node:child_process';
-import { join } from 'node:path';
+import { bin } from './config.ts';
 
 const run = (command: string, args: string[], env: Record<string, string> = {}): void => {
   const result = spawnSync(command, args, { stdio: 'inherit', env: { ...process.env, ...env } });
@@ -33,6 +33,6 @@ function fonts(): void {
 
 export const what = "what a browser check needs on this machine: Playwright's Chromium, and on Linux a Han font";
 export function main(): void {
-  run(join(process.cwd(), 'node_modules', '.bin', 'playwright'), ['install', 'chromium']);
+  run(bin('playwright'), ['install', 'chromium']);
   fonts();
 }

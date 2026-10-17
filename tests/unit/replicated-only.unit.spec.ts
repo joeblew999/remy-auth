@@ -7,7 +7,7 @@ import { join } from 'node:path';
 // noticing. The binding names are wrangler.jsonc's, so a database added there is covered here.
 
 const bindings = [
-  ...readFileSync('wrangler.jsonc', 'utf8').matchAll(/"binding":\s*"([A-Z0-9_]+)",\s*"database_name"/g),
+  ...readFileSync('apps/remy-auth/wrangler.jsonc', 'utf8').matchAll(/"binding":\s*"([A-Z0-9_]+)",\s*"database_name"/g),
 ].map((match) => match[1]);
 const files = (dir: string): string[] =>
   readdirSync(dir).flatMap((name) => {
@@ -17,7 +17,7 @@ const files = (dir: string): string[] =>
 
 test('the app uses each database through replicated(), never the raw binding', () => {
   expect(bindings.length, 'wrangler.jsonc names its D1 databases').toBeGreaterThan(0);
-  const raw = files('src').flatMap((file) =>
+  const raw = files('apps/remy-auth/src').flatMap((file) =>
     readFileSync(file, 'utf8')
       .split('\n')
       .flatMap((line, index) =>

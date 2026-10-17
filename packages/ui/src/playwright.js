@@ -64,7 +64,7 @@ export function playwrightConfig({ webServer, testDir = './tests', timezoneId = 
     webServer: remote
       ? undefined
       : {
-          command: webServer ?? `./node_modules/.bin/wrangler dev --ip 127.0.0.1 --port ${port}`,
+          command: webServer ?? `wrangler dev --ip 127.0.0.1 --port ${port}`,
           url: localizeUrl(new URL('/', target.origin), { locale: baseLocale }).href,
           reuseExistingServer: false,
           timeout: 90_000,

@@ -6,6 +6,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node
 import { join } from 'node:path';
 import { dispatch, type Subcommands } from './commands.ts';
 import { spawnSync } from 'node:child_process';
+import { docsDir } from './config.ts';
 
 export const skillsCli = 'skills@1.7.0';
 
@@ -121,7 +122,7 @@ export const main = dispatch('skills', commands);
  * other repos' agents). The skill is the rules of this package's version; the live docs have the newest.
  */
 export async function buildSkill(): Promise<void> {
-  if (!existsSync('docs/content/dev') || !existsSync('packages/ui/package.json')) {
+  if (!existsSync(join(docsDir() ?? 'docs', 'content/dev')) || !existsSync('packages/ui/package.json')) {
     console.log('skills build: only remy-auth makes the remy skill (from its developer docs).');
     return;
   }

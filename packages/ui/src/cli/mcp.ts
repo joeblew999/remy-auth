@@ -8,6 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
+import { bin } from './config.ts';
 
 type Json = Record<string, unknown>;
 
@@ -68,7 +69,7 @@ export async function register(check = false, root = process.cwd()): Promise<voi
 /** What the clients see (Claude also checks connectivity for approved servers); needs both CLIs. */
 export function status(): void {
   for (const [command, args] of [
-    [join(process.cwd(), 'node_modules', '.bin', 'codex'), ['mcp', 'get', 'chrome-devtools']],
+    [bin('codex'), ['mcp', 'get', 'chrome-devtools']],
     ['claude', ['mcp', 'get', 'chrome-devtools']],
   ] as const) {
     const result = spawnSync(command, [...args], { stdio: 'inherit' });

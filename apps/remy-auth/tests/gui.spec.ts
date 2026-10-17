@@ -25,7 +25,7 @@ import { partChecks } from '@joeblew999/remy-ui/parts/checks';
 import { codeSplittingChecks } from '@joeblew999/remy-ui/code-splitting.checks';
 import { showcaseChecks } from '@joeblew999/remy-showcase/showcase.checks';
 import { buildBoundaryChecks } from '@joeblew999/remy-ui/build-boundaries.checks';
-import project from '../remy.config.ts';
+import project from '../../../remy.config.ts';
 
 // The shared checks cover what every app built on the package must satisfy: one call for a
 // server-rendered app (@joeblew999/remy-ui/app-checks), with this app's own pages beside the shared ones,
@@ -67,7 +67,7 @@ buildBoundaryChecks({
     {
       name: 'request.cf',
       pattern: /[\w$)\]]\.cf\b/,
-      source: 'packages/showcase/src/parts/deferred-place/place.server.ts',
+      source: '../../packages/showcase/src/parts/deferred-place/place.server.ts',
     },
     {
       name: 'TanStack Devtools (the shell hosting the panels)',
@@ -119,7 +119,7 @@ async function formatsExtra(page: Page, locale: string) {
 
 // Checks that belong to this repository: server rendering itself, in each catalog's language. The
 // catalogs' completeness, placeholders and plurals are i18n:messages:check (tasks/i18n).
-const settings = JSON.parse(readFileSync('packages/ui/project.inlang/settings.json', 'utf8'));
+const settings = JSON.parse(readFileSync('../../packages/ui/project.inlang/settings.json', 'utf8'));
 const catalogs: Record<string, Record<string, any>> = Object.fromEntries(
   (settings.locales as string[]).map((locale) => [
     locale,

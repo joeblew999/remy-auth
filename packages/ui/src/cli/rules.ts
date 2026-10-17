@@ -3,10 +3,15 @@
 // .agents/skills and .claude/skills), naming the version. Written or refreshed in place; the rest of
 // AGENTS.md is the app's. Not in remy-auth: its AGENTS.md is a pointer to the rules' source,
 // docs/content/dev/agents.md.
+import { join } from 'node:path';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { docsDir } from './config.ts';
 
 export function rules(): void {
-  if (existsSync('packages/ui/src/cli/remy.ts') && existsSync('docs/content/dev/how-we-work.md')) {
+  if (
+    existsSync('packages/ui/src/cli/remy.ts') &&
+    existsSync(join(docsDir() ?? 'docs', 'content/dev/how-we-work.md'))
+  ) {
     console.log(
       'rules: remy-auth owns the rules (docs/content/dev/agents.md, which AGENTS.md points at); nothing to write.',
     );

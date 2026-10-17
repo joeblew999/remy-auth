@@ -10,16 +10,15 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { main as observe } from './observe.ts';
 import { dispatch, type Subcommands } from './commands.ts';
+import { bin, docsDir } from './config.ts';
 
 function fail(message: string): never {
   console.error(message);
   process.exit(1);
 }
 const docs = () => {
-  if (!existsSync('docs')) fail('this app has no docs/ (remy docs init <ref> starts one)');
-  return join(process.cwd(), 'docs');
+  return docsDir() ?? fail('this app has no docs/ (remy docs init <ref> starts one)');
 };
-const bin = (name: string) => join(process.cwd(), 'node_modules', '.bin', name);
 /** Wrangler's answer to a command, as text; throws with its stderr when it fails. */
 const wrangler = (...args: string[]): string =>
   execFileSync(bin('wrangler'), args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });

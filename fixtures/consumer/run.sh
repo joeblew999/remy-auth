@@ -12,7 +12,7 @@ step() { local now; now=$(date +%s); took="$took, $1 $((now - mark)) s"; mark=$n
 # 1. The platform and the showcase as npm serves them, each with a version no registry has (build metadata, so
 #    the showcase's peer range still holds), so npm can never substitute a published copy (it did once: the
 #    scratch tarball was 0.13.0, the published version).
-vp run generate > /dev/null
+vp run @joeblew999/remy-ui#generate > /dev/null
 # What the package ships that is made from the docs (the remy skill), as every pack and publish makes it.
 node packages/ui/src/cli/remy.ts skills build
 step skill

@@ -9,6 +9,7 @@ import { join } from 'node:path';
 import { gate } from './allowed.ts';
 import { preview, previewDelete } from './cloudflare.ts';
 import { warn } from './timing.ts';
+import { bin } from './config.ts';
 
 function playwright(args: string[], env: Record<string, string>): void {
   const results = join(
@@ -17,7 +18,7 @@ function playwright(args: string[], env: Record<string, string>): void {
     `${env.TEST_TARGET === 'remote' ? 'remote' : 'local'}-results.json`,
   );
   rmSync(results, { force: true });
-  const result = spawnSync(join(process.cwd(), 'node_modules', '.bin', 'playwright'), ['test', ...args], {
+  const result = spawnSync(bin('playwright'), ['test', ...args], {
     stdio: 'inherit',
     env: { ...process.env, ...env },
   });

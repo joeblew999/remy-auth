@@ -104,9 +104,6 @@ The repository's own tools, as package.json defines them, each run as `vp run <s
 | `vp run prepare` | `vp config --no-agent` |
 | `vp run release-checks` | `vp run template:check && vp run ui:verify` |
 | `vp run test:consumers` | `bash fixtures/consumer/run.sh` |
-| `vp run auth:generate` | `node scripts/auth-generate.ts` |
-| `vp run auth:mail` | `node scripts/auth-mail.ts` |
-| `vp run auth:provision` | `node scripts/auth-provision.ts` |
 | `vp run docs:cli` | `cd packages/ui/src/docs && node ../../../../node_modules/@fumadocs/cli/dist/index.js` |
 | `vp run ui:components` | `shadcn add button card input label badge alert field separator direction skeleton empty sidebar breadcrumb collapsible dropdown-menu avatar sheet tooltip navigation-menu use-mobile table spinner tabs --overwrite --yes` |
 | `vp run ui:blocks` | `shadcn add @shadcn/sidebar-16 -c packages/ui --diff src/blocks/sidebar-16/components/app-sidebar.tsx && shadcn add @shadcn/sidebar-16 -c packages/ui --diff src/blocks/sidebar-16/components/nav-main.tsx && shadcn add @shadcn/sidebar-16 -c packages/ui --diff src/blocks/sidebar-16/components/site-header.tsx` |

@@ -1,8 +1,8 @@
 import { commentOnCommit, repo } from './github.ts';
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
 import { deploy, deployDocs, versions } from './cloudflare.ts';
 import { describeRun, installed, latestRun, where } from './flow.ts';
+import { docsDir } from './config.ts';
 
 export async function main(): Promise<void> {
   const read = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8' }).trim();
@@ -53,7 +53,7 @@ export async function main(): Promise<void> {
       .then((r) => r.json() as Promise<{ release?: string }>)
       .then((body) => body.release)
       .catch(() => undefined);
-    const body = `Promoted to production: ${origin} serves this commit (Worker version ${release ?? 'unknown'})${process.env.DOCS_ORIGIN && existsSync('docs') ? `; docs: ${process.env.DOCS_ORIGIN}/dev` : ''}. Live now: vp run status.`;
+    const body = `Promoted to production: ${origin} serves this commit (Worker version ${release ?? 'unknown'})${process.env.DOCS_ORIGIN && docsDir() ? `; docs: ${process.env.DOCS_ORIGIN}/dev` : ''}. Live now: vp run status.`;
     const slug = repo();
     const posted = slug ? commentOnCommit(slug, head, body) : false;
     console.log(

@@ -1,0 +1,22 @@
+{
+  "//": "remy-auth's app: its source, its browser checks, its own scripts and configs, with the Worker's binding types.",
+  "include": ["src/**/*", "tests/**/*", "scripts/**/*", "*.ts", "worker-configuration.d.ts"],
+  "compilerOptions": {
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "types": ["vite/client", "node"],
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "moduleDetection": "force"
+  }
+}

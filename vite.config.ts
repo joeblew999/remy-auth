@@ -1,32 +1,19 @@
-import { paraglideVitePlugin } from '@inlang/paraglide-js';
-import { remyApp } from '@joeblew999/remy-ui/app/vite';
-import { options as paraglide } from './packages/ui/paraglide.mjs';
+import { remyWorkspace } from '@joeblew999/remy-ui/workspace';
 
-// remy-auth's app: the shared app configuration (@joeblew999/remy-ui/app/vite), with every app's Vite Plus tasks
-// and style, plus what is remy-auth's alone: the Paraglide compiler for the shared catalogs this repository owns
-// (packages/ui/messages), the command line built as an installed app runs it, and the release's publish. Its folder
-// is this file's, never the folder a tool happened to start in (Vite Plus loads every workspace's config from the root).
-export default remyApp({
-  plugins: [paraglideVitePlugin(paraglide)],
+// remy-auth's workspace (apps/*, packages/*): the style, the workspace's tasks and the app's under the same names, from
+// the package (@joeblew999/remy-ui/workspace), plus what is remy-auth's alone: its unit checks run the command line
+// as an installed app does (the package's cli task), the new-app test, and the release's publish.
+export default remyWorkspace({
   root: import.meta.dirname,
+  ci: ['vp run new-app'],
   tasks: {
-    // The command line as an installed app runs it (JavaScript, packages/ui/cli): what the bin's unit check runs,
-    // and what the package ships.
-    cli: { command: 'tsc -p packages/ui/src/cli', cache: { input: [{ auto: true }, '!packages/ui/cli/**'] } },
-    // The plain-function checks, the bin's among them, which runs the built command line.
     'check:unit': {
       command: 'vp test',
-      dependsOn: ['cli', 'check:commands', 'generate'],
-      cache: { input: [{ auto: true }, '!node_modules/.*/**'], output: [{ auto: true }, '!node_modules/.*/**'] },
+      dependsOn: ['check:commands', 'remy-auth#generate', '@joeblew999/remy-ui#cli'],
+      cache: { input: [{ auto: true }, '!**/node_modules/.*/**'], output: [{ auto: true }, '!**/node_modules/.*/**'] },
     },
     // The new-app test: a brand-new app from template/ on this commit's packages, through its own tasks.
     'new-app': { command: 'bash fixtures/consumer/run.sh', cache: false },
-    // remy-auth's CI adds the new app, after the browser checks and Google's audits (each a browser run of its own).
-    ci: {
-      command: ['vp run test:browser', 'vp run test:audits', 'vp run new-app'],
-      dependsOn: ['check'],
-      cache: false,
-    },
     // The release's publish (GitHub's release job, for a version tag): each package whose version is new on its
     // registry, then the GitHub release (`vp run publish --release vX.Y.Z`).
     publish: { command: 'node packages/ui/src/cli/remy.ts packages publish', cache: false },

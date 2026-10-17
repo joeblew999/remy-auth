@@ -12,6 +12,7 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { publish } from './docs.ts';
 import { dispatch, type Subcommands } from './commands.ts';
+import { appDir, bin, docsDir } from './config.ts';
 
 // A declaration, not a constant: tsc narrows after a call only to a function declared with its never type.
 function fail(message: string): never {
@@ -21,8 +22,8 @@ function fail(message: string): never {
 
 /** A tool from this install, in the foreground; stops the step at its first failure. */
 function tool(name: string, args: string[], options: { cwd?: string; env?: Record<string, string> } = {}): void {
-  const result = spawnSync(join(process.cwd(), 'node_modules', '.bin', name), args, {
-    cwd: options.cwd,
+  const result = spawnSync(bin(name), args, {
+    cwd: options.cwd ?? appDir(),
     stdio: 'inherit',
     env: { ...process.env, ...options.env },
   });
@@ -39,7 +40,7 @@ export async function provisioned(environment = process.env.CLOUDFLARE_ENV || un
   const { unstable_readConfig } = (await import(
     pathToFileURL(createRequire(join(process.cwd(), 'package.json')).resolve('wrangler')).href
   )) as typeof import('wrangler');
-  const config = unstable_readConfig({ env: environment });
+  const config = unstable_readConfig({ config: join(appDir(), 'wrangler.jsonc'), env: environment });
   type Binding = { binding: string };
   type D1 = Binding & { database_name?: string; database_id?: string };
   type KV = Binding & { id?: string };
@@ -99,7 +100,8 @@ function databasesRight(production: Databases, deployed: Databases, environment?
   const unique = [...new Map(listed.map((db) => [db.database_id, db])).values()];
   const info = (id: string): DatabaseInfo =>
     JSON.parse(
-      execFileSync(join(process.cwd(), 'node_modules', '.bin', 'wrangler'), ['d1', 'info', id, '--json'], {
+      execFileSync(bin('wrangler'), ['d1', 'info', id, '--json'], {
+        cwd: appDir(),
         encoding: 'utf8',
       }),
     );
@@ -155,9 +157,8 @@ export async function waitFor(origin: string, output: string): Promise<void> {
       fail(`wait: ${origin}/healthz did not report version ${version} within ${attempts * 2} s (last: ${last})`);
     await sleep(2000);
   }
-  const asset = existsSync('dist/client/assets')
-    ? readdirSync('dist/client/assets').find((name) => /^index-[\w-]+\.js$/.test(name))
-    : undefined;
+  const assets = join(appDir(), 'dist/client/assets');
+  const asset = existsSync(assets) ? readdirSync(assets).find((name) => /^index-[\w-]+\.js$/.test(name)) : undefined;
   if (!asset) return;
   let streak = 0;
   for (let attempt = 1; attempt <= attempts; attempt++) {
@@ -230,11 +231,12 @@ export async function deploy(environment?: 'staging'): Promise<void> {
 
 /** The docs Worker: build, deploy, then publish the pages to Ask AI's index where the app has one. */
 export async function deployDocs(): Promise<void> {
-  if (!existsSync('docs')) return;
+  const docs = docsDir();
+  if (!docs) return;
   const docsOrigin = process.env.DOCS_ORIGIN;
   if (!docsOrigin) fail('deploy docs: origins.docs is not in remy.config.ts');
-  tool('vp', ['build', '.'], { cwd: 'docs' });
-  tool('wrangler', ['deploy', '-c', 'dist/server/wrangler.json'], { cwd: 'docs' });
+  tool('vp', ['build', '.'], { cwd: docs });
+  tool('wrangler', ['deploy', '-c', 'dist/server/wrangler.json'], { cwd: docs });
   // Ask AI's pages, from the Worker just deployed: the bucket, the index's sync waited for, the fixed questions (docs.ts).
   await publish();
   console.log(
@@ -368,7 +370,7 @@ async function workerConfig(): Promise<{ name: string; config: Record<string, un
   const { unstable_readConfig } = (await import(
     pathToFileURL(createRequire(join(process.cwd(), 'package.json')).resolve('wrangler')).href
   )) as typeof import('wrangler');
-  const config = unstable_readConfig({}) as Record<string, unknown>;
+  const config = unstable_readConfig({ config: join(appDir(), 'wrangler.jsonc') }) as Record<string, unknown>;
   const name = config.name as string | undefined;
   if (!name) fail('the Wrangler configuration has no Worker name');
   return { name, config };
@@ -444,7 +446,8 @@ export async function preview(alias?: string, keep = false): Promise<string> {
 export async function previewDelete(name?: string): Promise<void> {
   const worker = await workerName();
   const wrangler = (...args: string[]) =>
-    execFileSync(join(process.cwd(), 'node_modules', '.bin', 'wrangler'), args, {
+    execFileSync(bin('wrangler'), args, {
+      cwd: appDir(),
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
     });

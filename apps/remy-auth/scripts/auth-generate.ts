@@ -13,14 +13,14 @@ if (!name) {
   process.exit(2);
 }
 const sql = join(mkdtempSync(join(tmpdir(), 'auth-generate-')), 'schema.sql');
-execFileSync('./node_modules/.bin/auth', ['generate', '--config', 'src/auth/cli.ts', '--output', sql, '--yes'], {
+execFileSync('auth', ['generate', '--config', 'src/auth/cli.ts', '--output', sql, '--yes'], {
   stdio: 'inherit',
 });
 if (statSync(sql, { throwIfNoEntry: false })?.size === 0 || !statSync(sql, { throwIfNoEntry: false })) {
   console.log('auth:generate: migrations/ already holds the schema; nothing written.');
   process.exit(0);
 }
-execFileSync('./node_modules/.bin/wrangler', ['d1', 'migrations', 'create', 'DB', name], { stdio: 'ignore' });
+execFileSync('wrangler', ['d1', 'migrations', 'create', 'DB', name], { stdio: 'ignore' });
 const file = readdirSync('migrations')
   .filter((entry) => entry.endsWith(`_${name}.sql`))
   .sort()

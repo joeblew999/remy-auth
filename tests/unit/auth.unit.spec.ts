@@ -7,10 +7,10 @@ import {
   fixedSignInCode,
   policyFor,
   publishedCodeFor,
-} from '../../src/auth/environment';
-import { writableFieldProblems } from '../../src/auth/fields';
-import { authOptions, personMayEdit } from '../../src/auth/options';
-import { seededPeople } from '../../src/auth/seed';
+} from '../../apps/remy-auth/src/auth/environment';
+import { writableFieldProblems } from '../../apps/remy-auth/src/auth/fields';
+import { authOptions, personMayEdit } from '../../apps/remy-auth/src/auth/options';
+import { seededPeople } from '../../apps/remy-auth/src/auth/seed';
 
 // Sign-in's rules that are plain functions: the environment table, who gets the published code, the
 // mailer, which account fields a person may write. No Worker, no build, no browser: they run in a

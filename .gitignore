@@ -14,13 +14,12 @@ node_modules/
 /.mcp.json
 /.mcp.json.bak
 
-/dist/
-/docs/dist/
-/worker-configuration.d.ts
-/docs/worker-configuration.d.ts
+# What the builds, the generators and the browser runs write, in each app (apps/*).
+dist/
+worker-configuration.d.ts
 /packages/ui/src/paraglide/
-/test-results/
-/playwright-report/
+test-results/
+playwright-report/
 *.tsbuildinfo
 
 /*.tgz
@@ -32,11 +31,9 @@ node_modules/
 # Temporary git worktrees that agents create; machine-local.
 .claude/worktrees/
 
-/docs/test-results/
-/docs/playwright-report/
-/docs/.remy-docs/
+.remy-docs/
 /packages/ui/skills/
-# The command line as an app runs it, emitted from packages/ui/src/cli by ui:generate (and prepack).
+# The command line as an app runs it, emitted from packages/ui/src/cli by the cli task (and prepack).
 /packages/ui/cli/
 # Vite Plus's Git hook dispatcher, written by vp config (the prepare script); the hooks themselves are .vite-hooks/*.
 .vite-hooks/_/

@@ -131,7 +131,7 @@ files when run from the package (`shadcn add <block> -c packages/ui`): `blocks/<
 So `ui:blocks` diffs them in place and upstream changes are merged by hand.
 
 Fonts live in [`packages/ui/src/fonts.css`](https://github.com/joeblew999/remy-auth/blob/main/packages/ui/src/fonts.css), imported after
-`globals.css` (see [`src/styles.css`](https://github.com/joeblew999/remy-auth/blob/main/src/styles.css)); the file explains its rules. fontaine in
+`globals.css` (see [`src/styles.css`](https://github.com/joeblew999/remy-auth/blob/main/apps/remy-auth/src/styles.css)); the file explains its rules. fontaine in
 [`vite.config.ts`](https://github.com/joeblew999/remy-auth/blob/main/vite.config.ts) generates the size-matched fallback faces it names.
 `publicPageChecks` fails on any named family that is not loaded.
 
@@ -262,9 +262,9 @@ the docs, search and ask pages.
 
 Google's level covers site pages only (app pages are noindex by design): Lighthouse audits `/en`
 (mobile and desktop), `/es`, `/ar` and `/en/formats`
-([`tests/lighthouse.spec.ts`](https://github.com/joeblew999/remy-auth/blob/main/tests/lighthouse.spec.ts)); Core Web Vitals, from Google's pinned
+([`tests/lighthouse.spec.ts`](https://github.com/joeblew999/remy-auth/blob/main/apps/remy-auth/tests/lighthouse.spec.ts)); Core Web Vitals, from Google's pinned
 `lighthouse` package, judge `/en` (mobile and desktop) and `/en/formats`
-([`tests/performance.spec.ts`](https://github.com/joeblew999/remy-auth/blob/main/tests/performance.spec.ts)) against Google's good thresholds (LCP
+([`tests/performance.spec.ts`](https://github.com/joeblew999/remy-auth/blob/main/apps/remy-auth/tests/performance.spec.ts)) against Google's good thresholds (LCP
 2.5 s, CLS 0.1, TBT 200 ms, Performance at least 0.9), on a throwaway Cloudflare Worker
 (`npx remy test cwv`), not localhost.
 

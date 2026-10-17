@@ -10,6 +10,7 @@ import { check as plans } from './plans.ts';
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { docsDir } from './config.ts';
 
 /**
  * The packages that break when installed twice (React's hooks, TanStack's router and query types, the
@@ -49,7 +50,7 @@ const checks: Record<string, (write: boolean) => void | Promise<unknown>> = {
   },
   // Each docs page's ending: .mdx when it uses a component, .md otherwise (here and the blank app's).
   endings: (write) => {
-    const lines = rightEndings(['docs/content', 'template/docs/content'], !write);
+    const lines = rightEndings([join(docsDir() ?? 'docs', 'content'), 'template/docs/content'], !write);
     for (const line of lines) console.log(`endings: ${line}`);
     if (!write && lines.length) {
       console.error('endings: vp run fix renames them.');

@@ -32,7 +32,7 @@ test('what the agent returns is written only when it is the page: nothing, null 
 });
 
 test('every translated docs page in the repository is a page of its English', () => {
-  const root = 'docs/content';
+  const root = 'apps/docs/content';
   const files = existsSync(root)
     ? readdirSync(root, { recursive: true, encoding: 'utf8' }).map((file) => `${root}/${file}`)
     : [];

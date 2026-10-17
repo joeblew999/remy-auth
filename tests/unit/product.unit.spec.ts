@@ -1,7 +1,7 @@
 import { test, expect } from 'vite-plus/test';
 import { readFileSync } from 'node:fs';
-import { codeMail } from '../../src/auth/code-mail';
-import { product } from '../../src/product';
+import { codeMail } from '../../apps/remy-auth/src/auth/code-mail';
+import { product } from '../../apps/remy-auth/src/product';
 
 // The product's name where no page shows it: the catalog and the sign-in email. Plain functions, so
 // they run without a build (vp test). What the pages show is productNameChecks'.

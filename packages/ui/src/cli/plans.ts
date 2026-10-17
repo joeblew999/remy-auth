@@ -7,6 +7,7 @@ import { execFileSync } from 'node:child_process';
 import { dispatch, type Subcommands } from './commands.ts';
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, posix, relative, resolve, sep } from 'node:path';
+import { docsDir } from './config.ts';
 
 const root = process.cwd();
 const plansDir = join(root, '.plans');
@@ -118,7 +119,7 @@ function linkingFiles(): string[] {
   return [
     ...new Set([
       ...walk(plansDir, isMd),
-      ...walk(join(root, 'docs'), isMd),
+      ...walk(docsDir(root) ?? join(root, 'docs'), isMd),
       ...walk(join(root, 'tasks'), isMd),
       ...packages,
       ...mdIn(root),

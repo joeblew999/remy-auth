@@ -1,0 +1,20 @@
+{
+  "name": "remy-auth",
+  "private": true,
+  "description": "remy-auth's app: the Worker (site, app and API) on @joeblew999/remy-ui.",
+  "type": "module",
+  "scripts": {
+    "auth:generate": "node scripts/auth-generate.ts",
+    "auth:mail": "node scripts/auth-mail.ts",
+    "auth:provision": "node scripts/auth-provision.ts"
+  },
+  "dependencies": {
+    "@joeblew999/remy-auth-contract": "*",
+    "@joeblew999/remy-showcase": "*",
+    "@joeblew999/remy-ui": "*",
+    "better-auth": "1.7.6"
+  },
+  "devDependencies": {
+    "auth": "1.7.6"
+  }
+}

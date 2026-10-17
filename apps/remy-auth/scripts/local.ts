@@ -10,7 +10,7 @@ if (!existsSync('.dev.vars')) {
   console.log('local: wrote .dev.vars (local environment, a new local secret).');
 }
 for (const db of ['DB', 'DEMO_DB'])
-  execFileSync('./node_modules/.bin/wrangler', ['d1', 'migrations', 'apply', db, '--local'], { stdio: 'inherit' });
+  execFileSync('wrangler', ['d1', 'migrations', 'apply', db, '--local'], { stdio: 'inherit' });
 if (!existsSync('tests/guard/v1/node_modules')) {
   const result = spawnSync('npm', ['ci', '--prefix', 'tests/guard/v1', '--no-audit', '--no-fund', '--loglevel=error'], {
     stdio: 'inherit',

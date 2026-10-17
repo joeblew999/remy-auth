@@ -4,7 +4,7 @@ import type { Locale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
 import { defineRemyApp } from '@joeblew999/remy-ui/app-config';
 import { showcaseAppNav, showcaseSiteNav } from '@joeblew999/remy-showcase/app-nav';
-import { docsConfig } from '../docs/docs.config';
+import { docsConfig } from '../../docs/docs.config';
 import { docsOrigin } from './docs/origin';
 import { product } from './product';
 import { deployments } from './deployments';

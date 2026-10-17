@@ -21,7 +21,7 @@ import { remyParts } from './parts/vite.js';
 import { remyBuild } from './build-vite.js';
 import { remyOrigins } from './origins-vite.js';
 import { appCatalog } from './app-catalog.js';
-import { remyTasks, style } from './tasks.js';
+import { remyTasks, standalone, style } from './tasks.js';
 
 /**
  * The app's Vite configuration. `plugins`: the app's own, after TanStack Devtools (which must come first)
@@ -49,7 +49,8 @@ export function remyApp({
   // Node, and Cloudflare's plugin would move them into the Workers runtime.
   const testing = Boolean(process.env.VITEST);
   return defineConfig({
-    ...style,
+    // The style is the repository's: an app that is its own repository carries it; in a workspace, the root's.
+    ...(standalone(root) ? style : {}),
     run: { tasks: remyTasks({ root, tasks }) },
     plugins: testing
       ? []

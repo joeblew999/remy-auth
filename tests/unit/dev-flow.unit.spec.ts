@@ -16,7 +16,7 @@ const walk = (dir: string): string[] =>
 test('no English page gives a heavy command bare in a shell block: REMY_FLOW=hand in front, or not as a command', () => {
   const translation = /\.[a-z]{2,3}(?:-[A-Za-z]{2,4})?\.mdx?$/;
   const pages = [
-    ...walk('docs/content').filter((file) => /\.mdx?$/.test(file) && !translation.test(file)),
+    ...walk('apps/docs/content').filter((file) => /\.mdx?$/.test(file) && !translation.test(file)),
     'README.md',
     'AGENTS.md',
   ].filter((file) => existsSync(file));

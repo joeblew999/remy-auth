@@ -4,8 +4,8 @@
 // where the shell did not. A worktree's ports come from its name, so nothing is written for them.
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
-import { basename, join } from 'node:path';
+import { existsSync, readdirSync } from 'node:fs';
+import { basename, dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 export type RemyProject = {
@@ -86,4 +86,30 @@ export async function configure(cwd = process.cwd()): Promise<RemyProject> {
   set('PREVIEW_PORT', ports.preview);
   set('DOCS_PREVIEW_PORT', ports.docsPreview);
   return config;
+}
+
+/**
+ * Where a repository's app and docs are, from its folders (never set): an app that is its own repository is the
+ * folder itself (its wrangler.jsonc) and its docs are docs/; a workspace (remy-auth) has them as packages under apps/,
+ * the docs the one with a docs.config.ts. Absolute paths.
+ */
+function packageDirs(cwd: string): string[] {
+  const parent = join(cwd, 'apps');
+  return existsSync(parent) ? readdirSync(parent).map((name) => join(parent, name)) : [];
+}
+export function appDir(cwd = process.cwd()): string {
+  if (existsSync(join(cwd, 'wrangler.jsonc'))) return cwd;
+  return packageDirs(cwd).find((dir) => existsSync(join(dir, 'wrangler.jsonc'))) ?? cwd;
+}
+export function docsDir(cwd = process.cwd()): string | undefined {
+  if (existsSync(join(cwd, 'docs', 'docs.config.ts'))) return join(cwd, 'docs');
+  return packageDirs(cwd).find((dir) => existsSync(join(dir, 'docs.config.ts')));
+}
+
+/** An installed tool's binary: node_modules/.bin, from this folder up, as Node resolves packages (a workspace installs once, at its root). */
+export function bin(name: string, cwd = process.cwd()): string {
+  for (let dir = cwd; ; dir = dirname(dir)) {
+    const file = join(dir, 'node_modules', '.bin', name);
+    if (existsSync(file) || dir === dirname(dir)) return file;
+  }
 }

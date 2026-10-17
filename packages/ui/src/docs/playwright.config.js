@@ -20,7 +20,7 @@ export default defineConfig({
   webServer: remote
     ? undefined
     : {
-        command: `../node_modules/.bin/wrangler dev -c dist/server/wrangler.json --local --ip 127.0.0.1 --port ${process.env.PREVIEW_PORT ?? '4174'}`,
+        command: `wrangler dev -c dist/server/wrangler.json --local --ip 127.0.0.1 --port ${process.env.PREVIEW_PORT ?? '4174'}`,
         url: `${origin}/healthz`,
         cwd: process.cwd(),
         reuseExistingServer: false,

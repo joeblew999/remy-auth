@@ -13,6 +13,7 @@ import { pathToFileURL } from 'node:url';
 import { register } from './mcp.ts';
 import { main as guard } from './register.ts';
 import { pins, remySkillPath } from './skills.ts';
+import { appDir } from './config.ts';
 
 type Json = Record<string, any>;
 const readJson = (file: string): Json => JSON.parse(readFileSync(file, 'utf8'));
@@ -71,7 +72,7 @@ export async function tooling(): Promise<void> {
   const { unstable_readConfig } = (await import(
     pathToFileURL(createRequire(join(process.cwd(), 'package.json')).resolve('wrangler')).href
   )) as typeof import('wrangler');
-  const config = unstable_readConfig({ config: 'wrangler.jsonc' }) as Json;
+  const config = unstable_readConfig({ config: join(appDir(), 'wrangler.jsonc') }) as Json;
   // preview_urls makes every uploaded version and alias public, old ones without the app's later fixes. Only a
   // Worker on Cloudflare's Worker Previews (a `previews` block, built by Workers Builds) turns it on, on purpose:
   // that is what gives each branch and pull request its preview URL (owner, 2026-10-17).

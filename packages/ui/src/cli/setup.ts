@@ -2,6 +2,7 @@
 // vp config, Vite Plus's Git hooks), the pinned skills, the agents' rules block, MCP registration and the flow's
 // guard, then the installation's checks. About two minutes,
 // no browser: the browser suite is GitHub's after every landing, and the release's.
+import { join } from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { main as guard } from './register.ts';
@@ -9,6 +10,7 @@ import { register } from './mcp.ts';
 import { rules } from './rules.ts';
 import { installSkills } from './skills.ts';
 import { verifySetup } from './verify.ts';
+import { appDir } from './config.ts';
 
 /** What setup needs before it can start, each with where to go. */
 export function preconditions(): void {
@@ -20,7 +22,7 @@ export function preconditions(): void {
   if (!existsSync('package.json')) problems.push(`no package.json: start from the blank app (${recipe})`);
   else if (!existsSync('package-lock.json'))
     problems.push('no package-lock.json: run npm install once and commit it (setup runs npm ci, which needs it)');
-  if (!existsSync('wrangler.jsonc'))
+  if (!existsSync(join(appDir(), 'wrangler.jsonc')))
     problems.push(`no wrangler.jsonc: the Worker's name and bindings; the blank app has one (${recipe})`);
   if (problems.length) {
     console.error(`setup cannot start here:\n${problems.map((problem) => `  - ${problem}`).join('\n')}`);

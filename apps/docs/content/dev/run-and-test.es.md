@@ -133,7 +133,7 @@ bloque cuando se ejecuta desde el paquete (`shadcn add <block> -c packages/ui`):
 Así, `ui:blocks` los compara en su sitio y los cambios de upstream se fusionan a mano.
 
 Las fuentes viven en [`packages/ui/src/fonts.css`](https://github.com/joeblew999/remy-auth/blob/main/packages/ui/src/fonts.css), importado después de
-`globals.css` (ver [`src/styles.css`](https://github.com/joeblew999/remy-auth/blob/main/src/styles.css)); el archivo explica sus reglas. fontaine en
+`globals.css` (ver [`src/styles.css`](https://github.com/joeblew999/remy-auth/blob/main/apps/remy-auth/src/styles.css)); el archivo explica sus reglas. fontaine en
 [`vite.config.ts`](https://github.com/joeblew999/remy-auth/blob/main/vite.config.ts) genera las fuentes de respaldo ajustadas en tamaño que nombra.
 `publicPageChecks` falla ante cualquier familia nombrada que no esté cargada.
 
@@ -276,9 +276,9 @@ las páginas de docs, búsqueda y ask.
 
 Lo de Google cubre solo las páginas de sitio (las páginas de app son noindex por diseño): Lighthouse audita `/en`
 (móvil y escritorio), `/es`, `/ar` y `/en/formats`
-([`tests/lighthouse.spec.ts`](https://github.com/joeblew999/remy-auth/blob/main/tests/lighthouse.spec.ts)); Core Web Vitals, a partir del paquete
+([`tests/lighthouse.spec.ts`](https://github.com/joeblew999/remy-auth/blob/main/apps/remy-auth/tests/lighthouse.spec.ts)); Core Web Vitals, a partir del paquete
 `lighthouse` fijado de Google, evalúan `/en` (móvil y escritorio) y `/en/formats`
-([`tests/performance.spec.ts`](https://github.com/joeblew999/remy-auth/blob/main/tests/performance.spec.ts)) frente a los umbrales buenos de Google (LCP
+([`tests/performance.spec.ts`](https://github.com/joeblew999/remy-auth/blob/main/apps/remy-auth/tests/performance.spec.ts)) frente a los umbrales buenos de Google (LCP
 2.5 s, CLS 0.1, TBT 200 ms, Performance de al menos 0.9), en un Worker de Cloudflare desechable
 (`npm run test -- cwv`), no en localhost.
 

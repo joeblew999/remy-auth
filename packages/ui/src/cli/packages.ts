@@ -11,6 +11,7 @@ import { join } from 'node:path';
 import { translationGaps } from './i18n.ts';
 import { cwv } from './test.ts';
 import { verifySetup } from './verify.ts';
+import { bin } from './config.ts';
 
 function fail(message: string): never {
   console.error(message);
@@ -24,7 +25,6 @@ function tool(command: string, args: string[], options: { env?: Record<string, s
   const result = spawnSync(command, args, { stdio: 'inherit', env: { ...process.env, ...options.env } });
   if (result.status !== 0) fail(`${options.what ?? command}: failed`);
 }
-const bin = (name: string) => join(process.cwd(), 'node_modules', '.bin', name);
 
 export type Workspace = {
   name: string;

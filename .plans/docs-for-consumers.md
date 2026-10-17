@@ -7,7 +7,7 @@ should be a skill from the docs? It's a whole research area in itself?"
 ## Today
 
 remy-auth-app's `AGENTS.md` links to remy-auth's docs on GitHub `main`
-(`https://github.com/joeblew999/remy-auth/blob/main/docs/content/dev/how-we-work.md`, development, tooling). Two
+(`https://github.com/joeblew999/remy-auth/blob/main/apps/docs/content/dev/how-we-work.md`, development, tooling). Two
 faults: **unpinned** (the app runs remy-ui 0.11.0 and tasks `ref=v0.11.0`, but its agents read today's
 `main`, so the rules can run ahead of its code) and **web-only** (an agent must fetch the pages; nothing
 checks it did).
