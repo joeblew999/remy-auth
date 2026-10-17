@@ -1,5 +1,5 @@
 // The flow's guard: a Claude Code PreToolUse hook on Bash (registered by `remy guard` in the repo's
-// .claude/settings.json). It reads the command an agent is about to run; one that names a heavy
+// .claude/settings.local.json). It reads the command an agent is about to run; one that names a heavy
 // check outside the flow is refused, with the step to use instead. A developer at a terminal is not
 // an agent: a heavy task by hand stays a decision. Exit 2 is how a hook refuses; its stderr is
 // what the agent reads.

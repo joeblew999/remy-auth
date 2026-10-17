@@ -28,7 +28,7 @@ node_modules/
 .agents/skills/
 .claude/skills/
 # Written by npx remy guard (npm run setup): the flow's guard, with this machine's absolute paths, like .mcp.json.
-.claude/settings.json
+.claude/settings.local.json
 # Temporary git worktrees that agents create; machine-local.
 .claude/worktrees/
 

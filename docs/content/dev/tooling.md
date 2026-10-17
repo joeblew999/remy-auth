@@ -32,8 +32,9 @@ vp install                            # the dependencies, on that Node
 
 The installer, run without a terminal (as an agent runs it), leaves `vp` in **system-first** mode. In that mode
 the pin is silently ignored and every check runs on the machine's Node, so check `vp env current` before
-trusting any result. Claude's cloud machines start empty, so run these steps at the start of every session
-there; on your own machine, once.
+trusting any result. Claude's cloud machines start empty, so the committed `.claude/settings.json` runs these
+steps at the start of every session there and reports the Node it got; on your own machine you run them once.
+`remy guard` writes its hooks, with this machine's paths, to `.claude/settings.local.json`, which is not committed.
 Vite Plus's own instructions for agents load in every Claude session from the installed package
 (`CLAUDE.md` imports `node_modules/vite-plus/AGENTS.md`), and its docs for the installed version are in
 `node_modules/vite-plus/docs`: read those before changing how anything is built, checked or run.
