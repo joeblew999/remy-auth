@@ -5,12 +5,11 @@
     "packages/ui/src/**/*",
     "packages/showcase/src/**/*",
     "packages/contract/src/**/*",
+    "scripts/**/*",
     "*.ts",
     "worker-configuration.d.ts"
   ],
   "exclude": [
-    "packages/ui/src/parts/*/routes",
-    "packages/showcase/src/parts/*/routes",
     "packages/ui/src/docs"
   ],
   "compilerOptions": {
@@ -37,6 +36,7 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "moduleDetection": "force"
   }
 }

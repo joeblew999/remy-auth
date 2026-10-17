@@ -15,6 +15,9 @@ const generated = ['!packages/ui/src/paraglide/**', '!packages/ui/cli/**', '!src
 
 export default {
   ...app,
+  // Lint and Vite+'s type check (vp check). template/ and the fixture's files are other apps' source, with their own
+  // tsconfig and dependencies, never installed here: the new-app test checks them as an installed app.
+  lint: { options: { typeAware: true, typeCheck: true }, ignorePatterns: ['template/**', 'fixtures/**'] },
   run: {
     tasks: {
       build: {
