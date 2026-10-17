@@ -14,10 +14,15 @@ import { sitePaths } from './paths';
 // What the shared frame shows for this app (.plans/thin-apps.md, group 1): its name and source, the
 // showcase's pages (this app shows them; another app lists its own) with its own notes demo after
 // the account, and its docs Worker's origin.
-const account = showcaseAppNav.findIndex(item => item.link.to === '/app/account') + 1;
+const account = showcaseAppNav.findIndex((item) => item.link.to === '/app/account') + 1;
 const appNav = [
   ...showcaseAppNav.slice(0, account),
-  { link: linkOptions({ to: '/app/notes' }), label: (locale: Locale) => m.nav_notes({}, { locale }), icon: <NotebookPenIcon />, core: false },
+  {
+    link: linkOptions({ to: '/app/notes' }),
+    label: (locale: Locale) => m.nav_notes({}, { locale }),
+    icon: <NotebookPenIcon />,
+    core: false,
+  },
   ...showcaseAppNav.slice(account),
 ];
 

@@ -9,9 +9,10 @@ import { localizedPath, collectErrors, hydrated, behaviourLocales } from '@joebl
 /** Answers each dialog from `answers` in turn (true accepts) and records its type and message. */
 function dialogs(page, answers) {
   const seen = [];
-  page.on('dialog', async dialog => {
+  page.on('dialog', async (dialog) => {
     seen.push({ type: dialog.type(), message: dialog.message() });
-    if (answers.shift()) await dialog.accept(); else await dialog.dismiss();
+    if (answers.shift()) await dialog.accept();
+    else await dialog.dismiss();
   });
   return seen;
 }
@@ -22,7 +23,10 @@ export function navigationBlockingChecks() {
     const demo = localizedPath('/app/demo', locale);
     const home = localizedPath('/app', locale);
 
-    test(`${locale}: leaving the demo form with unsaved input asks first; after a reservation it does not`, async ({ page, baseURL }) => {
+    test(`${locale}: leaving the demo form with unsaved input asks first; after a reservation it does not`, async ({
+      page,
+      baseURL,
+    }) => {
       const errors = collectErrors(page);
       const answers = [false, true];
       const seen = dialogs(page, answers);

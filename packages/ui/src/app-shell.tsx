@@ -19,24 +19,41 @@ import { BuildStamp } from './versions';
  * Its footer says which version this is (BuildStamp, ./versions), and offers the reload when the
  * deployment has moved on under an open page.
  */
-export function AppShell({ locale, path = '/app', preferred, children }: { locale: Locale; path?: string; preferred?: Locale; children: React.ReactNode }) {
+export function AppShell({
+  locale,
+  path = '/app',
+  preferred,
+  children,
+}: {
+  locale: Locale;
+  path?: string;
+  preferred?: Locale;
+  children: React.ReactNode;
+}) {
   const offered = usePreferredLocale();
-  return <div className="[--header-height:calc(--spacing(14))]">
-    <SkipLink locale={locale} />
-    <SidebarProvider className="flex flex-col">
-      <SiteHeader locale={locale} />
-      <div className="flex flex-1">
-        <AppSidebar locale={locale} />
-        <SidebarInset>
-          {/* Room below the content for the phone's bottom bar (4rem and the home indicator). */}
-          <div className="flex flex-1 flex-col gap-4 p-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:p-8">
-            <LanguageHint locale={locale} path={path} preferred={preferred ?? offered} />
-            <main id="main" className="w-full flex-1">{children}</main>
-            <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2"><ZoneBadge locale={locale} app /><BuildStamp locale={locale} /></footer>
-          </div>
-        </SidebarInset>
-      </div>
-      <BottomNav locale={locale} />
-    </SidebarProvider>
-  </div>;
+  return (
+    <div className="[--header-height:calc(--spacing(14))]">
+      <SkipLink locale={locale} />
+      <SidebarProvider className="flex flex-col">
+        <SiteHeader locale={locale} />
+        <div className="flex flex-1">
+          <AppSidebar locale={locale} />
+          <SidebarInset>
+            {/* Room below the content for the phone's bottom bar (4rem and the home indicator). */}
+            <div className="flex flex-1 flex-col gap-4 p-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:p-8">
+              <LanguageHint locale={locale} path={path} preferred={preferred ?? offered} />
+              <main id="main" className="w-full flex-1">
+                {children}
+              </main>
+              <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                <ZoneBadge locale={locale} app />
+                <BuildStamp locale={locale} />
+              </footer>
+            </div>
+          </SidebarInset>
+        </div>
+        <BottomNav locale={locale} />
+      </SidebarProvider>
+    </div>
+  );
 }

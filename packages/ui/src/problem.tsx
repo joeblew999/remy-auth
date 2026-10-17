@@ -23,27 +23,50 @@ export function NotFound() {
 export function ErrorPage() {
   const router = useRouter();
   const locale = getLocale();
-  return <Problem missing={false}>
-    <Button variant="outline" onClick={() => router.invalidate()}>{m.retry({}, { locale })}</Button>
-  </Problem>;
+  return (
+    <Problem missing={false}>
+      <Button variant="outline" onClick={() => router.invalidate()}>
+        {m.retry({}, { locale })}
+      </Button>
+    </Problem>
+  );
 }
 
 /** A route's not-found and error components, for one spread line in each page route. */
 export const problemPages = { notFoundComponent: NotFound, errorComponent: ErrorPage };
 
 /** The page itself; `detail` replaces the default explanation, for example to name the missing resource. */
-export function Problem({ missing, detail, children }: { missing: boolean; detail?: string; children?: React.ReactNode }) {
+export function Problem({
+  missing,
+  detail,
+  children,
+}: {
+  missing: boolean;
+  detail?: string;
+  children?: React.ReactNode;
+}) {
   const locale = getLocale();
   const title = missing ? m.not_found({}, { locale }) : m.error_title({}, { locale });
-  return <Shell locale={locale}><Empty data-problem={missing ? 'not-found' : 'error'}><meta name="robots" content="noindex" />
-    <title>{title}</title>
-    <EmptyHeader>
-      <EmptyTitle><h1 className="text-2xl font-semibold tracking-tight">{title}</h1></EmptyTitle>
-      <EmptyDescription><p>{detail ?? (missing ? m.not_found_detail({}, { locale }) : m.error_detail({}, { locale }))}</p></EmptyDescription>
-    </EmptyHeader>
-    <EmptyContent className="flex-row flex-wrap justify-center">
-      {children}
-      <a className={buttonVariants({ variant: 'link' })} href={`/${locale}`}>{m.home_link({}, { locale })}</a>
-    </EmptyContent>
-  </Empty></Shell>;
+  return (
+    <Shell locale={locale}>
+      <Empty data-problem={missing ? 'not-found' : 'error'}>
+        <meta name="robots" content="noindex" />
+        <title>{title}</title>
+        <EmptyHeader>
+          <EmptyTitle>
+            <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+          </EmptyTitle>
+          <EmptyDescription>
+            <p>{detail ?? (missing ? m.not_found_detail({}, { locale }) : m.error_detail({}, { locale }))}</p>
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent className="flex-row flex-wrap justify-center">
+          {children}
+          <a className={buttonVariants({ variant: 'link' })} href={`/${locale}`}>
+            {m.home_link({}, { locale })}
+          </a>
+        </EmptyContent>
+      </Empty>
+    </Shell>
+  );
 }

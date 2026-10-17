@@ -23,18 +23,27 @@ export function routeTemplate(pathname: string, status: number): string {
 }
 
 /** The log contract's outcome and level for an HTTP status. */
-export const outcome = (status: number) => status >= 500 ? 'server_error' : status >= 400 ? 'client_error' : status >= 300 ? 'redirect' : 'ok';
-export const level = (status: number) => status >= 500 ? 'error' : status >= 400 ? 'warn' : 'info';
+export const outcome = (status: number) =>
+  status >= 500 ? 'server_error' : status >= 400 ? 'client_error' : status >= 300 ? 'redirect' : 'ok';
+export const level = (status: number) => (status >= 500 ? 'error' : status >= 400 ? 'warn' : 'info');
 
 /** The fields every line of the shared log contract starts with. */
 export function logContext(service: string, env: ObservedEnv, requestId: string, method: string) {
-  return { schemaVersion: 1, service, environment: env.ENVIRONMENT ?? 'production', release: env.CF_VERSION_METADATA?.id ?? 'local', requestId, method };
+  return {
+    schemaVersion: 1,
+    service,
+    environment: env.ENVIRONMENT ?? 'production',
+    release: env.CF_VERSION_METADATA?.id ?? 'local',
+    requestId,
+    method,
+  };
 }
 
 /** Writes one line of the shared log contract: error lines to console.error, the rest to console.log. */
 export function writeLog(line: { level: string } & Record<string, unknown>) {
   const text = JSON.stringify(line);
-  if (line.level === 'error') console.error(text); else console.log(text);
+  if (line.level === 'error') console.error(text);
+  else console.log(text);
 }
 
 /**
@@ -65,13 +74,32 @@ export function withObservability<E extends ObservedEnv>(service: string, handle
         out.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
         // HTTPS only, for five minutes while the rollout proves itself; raised later (.plans/gui-portal.md, item 7).
         out.headers.set('Strict-Transport-Security', 'max-age=31536000');
-        writeLog({ ...base, event, level: level(out.status), route, status: out.status, outcome: outcome(out.status), ...(reasonCode ? { reasonCode } : {}) });
+        writeLog({
+          ...base,
+          event,
+          level: level(out.status),
+          route,
+          status: out.status,
+          outcome: outcome(out.status),
+          ...(reasonCode ? { reasonCode } : {}),
+        });
         return out;
       };
       if (pathname === '/healthz') {
         const deployedAt = env.CF_VERSION_METADATA?.timestamp;
-        const body: Deployment = { status: 'ok', service, release: base.release, environment: base.environment, ...(deployedAt ? { deployedAt } : {}), build };
-        return finish(Response.json(body, { headers: { 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' } }), 'liveness', '/healthz');
+        const body: Deployment = {
+          status: 'ok',
+          service,
+          release: base.release,
+          environment: base.environment,
+          ...(deployedAt ? { deployedAt } : {}),
+          build,
+        };
+        return finish(
+          Response.json(body, { headers: { 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' } }),
+          'liveness',
+          '/healthz',
+        );
       }
       try {
         // Same URL, method, body and Cloudflare properties (`cf`); only the request ID header differs.
@@ -80,7 +108,12 @@ export function withObservability<E extends ObservedEnv>(service: string, handle
         const response = await handler(new Request(request, { headers }), env, ctx);
         return finish(response, 'http_request', routeTemplate(pathname, response.status));
       } catch {
-        return finish(new Response('Service unavailable', { status: 503, headers: { 'Cache-Control': 'no-store' } }), 'request_failed', routeTemplate(pathname, 503), 'unhandled_exception');
+        return finish(
+          new Response('Service unavailable', { status: 503, headers: { 'Cache-Control': 'no-store' } }),
+          'request_failed',
+          routeTemplate(pathname, 503),
+          'unhandled_exception',
+        );
       }
     },
   };

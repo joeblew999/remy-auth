@@ -8,6 +8,18 @@ import type { ReactNode } from 'react';
  * row carries type-checks. The wrapper names the action (`data-action`), so a check reads off a page
  * what it offers and compares it with what the server allows (`offeredActions`, ./allowed.checks.js).
  */
-export function Allowed<TAction extends string>({ can, action, children }: { can: Readonly<Record<TAction, boolean>>; action: NoInfer<TAction>; children: ReactNode }) {
-  return can[action] ? <span data-action={action} className="contents">{children}</span> : null;
+export function Allowed<TAction extends string>({
+  can,
+  action,
+  children,
+}: {
+  can: Readonly<Record<TAction, boolean>>;
+  action: NoInfer<TAction>;
+  children: ReactNode;
+}) {
+  return can[action] ? (
+    <span data-action={action} className="contents">
+      {children}
+    </span>
+  ) : null;
 }

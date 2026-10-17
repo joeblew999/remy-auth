@@ -11,7 +11,10 @@ export declare const catalog: Record<string, PartEntry>;
 export declare const partsFile: string;
 export declare function partAppFile(name: PartName): string;
 /** The app's listed parts by name, each with its folder and how it was listed. */
-export declare function listedParts(options?: { root?: string; file?: string }): Record<string, PartEntry & { dir: string; spec: string }>;
+export declare function listedParts(options?: {
+  root?: string;
+  file?: string;
+}): Record<string, PartEntry & { dir: string; spec: string }>;
 export declare function readParts(options?: { root?: string; file?: string }): PartName[];
 export declare function partSitePaths(listed: ReturnType<typeof listedParts>): string[];
 /** A part the app does not list: the platform's, or the first dependency offering it. */

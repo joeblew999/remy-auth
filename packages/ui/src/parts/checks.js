@@ -7,8 +7,14 @@ import { pathToFileURL } from 'node:url';
 import { listedParts } from './list.js';
 
 const listed = listedParts();
-const checks = Object.fromEntries(await Promise.all(Object.entries(listed).map(async ([name, part]) =>
-  [name, (await import(pathToFileURL(join(part.dir, 'checks.js')).href)).default])));
+const checks = Object.fromEntries(
+  await Promise.all(
+    Object.entries(listed).map(async ([name, part]) => [
+      name,
+      (await import(pathToFileURL(join(part.dir, 'checks.js')).href)).default,
+    ]),
+  ),
+);
 
 /** `options` maps a part's name to its checks' options. */
 export function partChecks({ options = {} } = {}) {

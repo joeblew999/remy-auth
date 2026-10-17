@@ -20,8 +20,18 @@
   // its data in its own database: the relation engine reads who may do what from those tables alone.
   // Its migrations are in migrations-demo/ (npm run auth:migrate applies both locally).
   "d1_databases": [
-    { "binding": "DB", "database_name": "remy-auth", "database_id": "4f420203-69a4-4173-9048-453002a4b8e6", "migrations_dir": "migrations" },
-    { "binding": "DEMO_DB", "database_name": "remy-auth-demo", "database_id": "c9bec7d1-4c5e-4502-8a82-ed2d016d9f7e", "migrations_dir": "migrations-demo" }
+    {
+      "binding": "DB",
+      "database_name": "remy-auth",
+      "database_id": "4f420203-69a4-4173-9048-453002a4b8e6",
+      "migrations_dir": "migrations",
+    },
+    {
+      "binding": "DEMO_DB",
+      "database_name": "remy-auth-demo",
+      "database_id": "c9bec7d1-4c5e-4502-8a82-ed2d016d9f7e",
+      "migrations_dir": "migrations-demo",
+    },
   ],
   // Sign-in codes leave through Cloudflare Email Service, from EMAIL_FROM: an address on a domain the
   // account has enabled for Email Sending (wrangler email sending list). A local Worker captures mail
@@ -43,11 +53,21 @@
   "previews": {
     "vars": { "ENVIRONMENT": "staging", "EMAIL_FROM": "noreply@mail.ubuntusoftware.net" },
     "d1_databases": [
-      { "binding": "DB", "database_name": "remy-auth-preview", "database_id": "3e8017ac-fcbc-404b-8d74-dfe599b50747", "migrations_dir": "migrations" },
-      { "binding": "DEMO_DB", "database_name": "remy-auth-demo-preview", "database_id": "a2ea78c1-a910-4dab-ba55-ecf25eeb3eb3", "migrations_dir": "migrations-demo" }
+      {
+        "binding": "DB",
+        "database_name": "remy-auth-preview",
+        "database_id": "3e8017ac-fcbc-404b-8d74-dfe599b50747",
+        "migrations_dir": "migrations",
+      },
+      {
+        "binding": "DEMO_DB",
+        "database_name": "remy-auth-demo-preview",
+        "database_id": "a2ea78c1-a910-4dab-ba55-ecf25eeb3eb3",
+        "migrations_dir": "migrations-demo",
+      },
     ],
     "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["noreply@mail.ubuntusoftware.net"] }],
-    "version_metadata": { "binding": "CF_VERSION_METADATA" }
+    "version_metadata": { "binding": "CF_VERSION_METADATA" },
   },
   // Staging (remy cloudflare staging, which builds with CLOUDFLARE_ENV=staging): the same code as its own
   // Worker, with its own two databases, so nothing a visitor does there touches production's. Its
@@ -62,12 +82,22 @@
       "version_metadata": { "binding": "CF_VERSION_METADATA" },
       "vars": { "ENVIRONMENT": "staging", "EMAIL_FROM": "noreply@mail.ubuntusoftware.net" },
       "d1_databases": [
-        { "binding": "DB", "database_name": "remy-auth-staging", "database_id": "3a5b3025-9bf7-418b-b923-8911b0437fbc", "migrations_dir": "migrations" },
-        { "binding": "DEMO_DB", "database_name": "remy-auth-demo-staging", "database_id": "ca900198-1d91-4ee9-b797-ee18b2c87e7e", "migrations_dir": "migrations-demo" }
+        {
+          "binding": "DB",
+          "database_name": "remy-auth-staging",
+          "database_id": "3a5b3025-9bf7-418b-b923-8911b0437fbc",
+          "migrations_dir": "migrations",
+        },
+        {
+          "binding": "DEMO_DB",
+          "database_name": "remy-auth-demo-staging",
+          "database_id": "ca900198-1d91-4ee9-b797-ee18b2c87e7e",
+          "migrations_dir": "migrations-demo",
+        },
       ],
       "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["noreply@mail.ubuntusoftware.net"] }],
-      "secrets": { "required": ["BETTER_AUTH_SECRET"] }
-    }
+      "secrets": { "required": ["BETTER_AUTH_SECRET"] },
+    },
   },
   "observability": {
     "enabled": true,
@@ -76,12 +106,12 @@
       "enabled": true,
       "invocation_logs": true,
       "persist": true,
-      "head_sampling_rate": 1
+      "head_sampling_rate": 1,
     },
     "traces": {
       "enabled": true,
       "persist": true,
-      "head_sampling_rate": 1
-    }
-  }
+      "head_sampling_rate": 1,
+    },
+  },
 }

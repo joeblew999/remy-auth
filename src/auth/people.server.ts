@@ -20,10 +20,13 @@ let seeding: Promise<void> | undefined;
  * three seconds (Cloudflare's logs, 2026-10-17). A seed that failed is tried again on the next ask.
  */
 function seeded(request: Request): Promise<void> {
-  seeding ??= Promise.all([ensureSeededPeople(request), ensureSeededNotes(replicated(env.DEMO_DB, 'DEMO_DB'))]).then(() => undefined, error => {
-    seeding = undefined;
-    throw error;
-  });
+  seeding ??= Promise.all([ensureSeededPeople(request), ensureSeededNotes(replicated(env.DEMO_DB, 'DEMO_DB'))]).then(
+    () => undefined,
+    (error) => {
+      seeding = undefined;
+      throw error;
+    },
+  );
   return seeding;
 }
 
@@ -39,13 +42,19 @@ export async function seededSignIn(request: Request): Promise<SeededSignIn | nul
   if (!permits(env, 'seededSignIn') || !code) return null;
   await seeded(request);
   const { relations } = notesStore(replicated(env.DEMO_DB, 'DEMO_DB'));
-  const onObjects = notesVocabulary.relations.filter(relation => relation.via === 'table');
-  const offered = seededPeople.filter(person => person.role !== 'admin' || permits(env, 'offersAdminSignIn'));
+  const onObjects = notesVocabulary.relations.filter((relation) => relation.via === 'table');
+  const offered = seededPeople.filter((person) => person.role !== 'admin' || permits(env, 'offersAdminSignIn'));
   return {
     code,
-    people: await Promise.all(offered.map(async ({ id, name, email, role }) => {
-      const held = await Promise.all(onObjects.map(async relation => (await relations.objectsHeldBy(relation.code, id)).sort().map(object => `${relation.code} ${object}`)));
-      return { name, email, role, holds: held.flat() };
-    })),
+    people: await Promise.all(
+      offered.map(async ({ id, name, email, role }) => {
+        const held = await Promise.all(
+          onObjects.map(async (relation) =>
+            (await relations.objectsHeldBy(relation.code, id)).sort().map((object) => `${relation.code} ${object}`),
+          ),
+        );
+        return { name, email, role, holds: held.flat() };
+      }),
+    ),
   };
 }

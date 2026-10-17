@@ -64,10 +64,7 @@
   ],
   "plain_date_value": [
     {
-      "declarations": [
-        "input date",
-        "local formatted = date: datetime dateStyle=long timeZone=UTC"
-      ],
+      "declarations": ["input date", "local formatted = date: datetime dateStyle=long timeZone=UTC"],
       "match": {
         "date=*": "{formatted}"
       }
@@ -75,10 +72,7 @@
   ],
   "relative_value": [
     {
-      "declarations": [
-        "input days",
-        "local formatted = days: relativetime unit=day numeric=auto"
-      ],
+      "declarations": ["input days", "local formatted = days: relativetime unit=day numeric=auto"],
       "match": {
         "days=*": "{formatted}"
       }
@@ -86,10 +80,7 @@
   ],
   "decimal_value": [
     {
-      "declarations": [
-        "input value",
-        "local formatted = value: number"
-      ],
+      "declarations": ["input value", "local formatted = value: number"],
       "match": {
         "value=*": "{formatted}"
       }
@@ -97,10 +88,7 @@
   ],
   "percent_value": [
     {
-      "declarations": [
-        "input value",
-        "local formatted = value: number style=percent"
-      ],
+      "declarations": ["input value", "local formatted = value: number style=percent"],
       "match": {
         "value=*": "{formatted}"
       }
@@ -108,10 +96,7 @@
   ],
   "currency_value": [
     {
-      "declarations": [
-        "input amount",
-        "local formatted = amount: number style=currency currency=EUR"
-      ],
+      "declarations": ["input amount", "local formatted = amount: number style=currency currency=EUR"],
       "match": {
         "amount=*": "{formatted}"
       }
@@ -119,14 +104,8 @@
   ],
   "apps_count": [
     {
-      "declarations": [
-        "input count",
-        "local countPlural = count: plural",
-        "local countText = count: number"
-      ],
-      "selectors": [
-        "countPlural"
-      ],
+      "declarations": ["input count", "local countPlural = count: plural", "local countText = count: number"],
+      "selectors": ["countPlural"],
       "match": {
         "countPlural=one": "{countText} app",
         "countPlural=*": "{countText} apps"
@@ -156,10 +135,7 @@
   "greeting": "Welcome, {name}.",
   "distance_value": [
     {
-      "declarations": [
-        "input km",
-        "local formatted = km: number style=unit unit=kilometer unitDisplay=long"
-      ],
+      "declarations": ["input km", "local formatted = km: number style=unit unit=kilometer unitDisplay=long"],
       "match": {
         "km=*": "{formatted}"
       }
@@ -167,10 +143,7 @@
   ],
   "compact_value": [
     {
-      "declarations": [
-        "input value",
-        "local formatted = value: number notation=compact"
-      ],
+      "declarations": ["input value", "local formatted = value: number notation=compact"],
       "match": {
         "value=*": "{formatted}"
       }
@@ -178,14 +151,8 @@
   ],
   "position_value": [
     {
-      "declarations": [
-        "input n",
-        "local ordinal = n: plural type=ordinal",
-        "local nText = n: number"
-      ],
-      "selectors": [
-        "ordinal"
-      ],
+      "declarations": ["input n", "local ordinal = n: plural type=ordinal", "local nText = n: number"],
+      "selectors": ["ordinal"],
       "match": {
         "ordinal=one": "{nText}st",
         "ordinal=two": "{nText}nd",
@@ -196,12 +163,8 @@
   ],
   "invite_status": [
     {
-      "declarations": [
-        "input status"
-      ],
-      "selectors": [
-        "status"
-      ],
+      "declarations": ["input status"],
+      "selectors": ["status"],
       "match": {
         "status=accepted": "Invitation accepted",
         "status=declined": "Invitation declined",
@@ -217,9 +180,7 @@
         "local countPlural = count: plural",
         "local countText = count: number"
       ],
-      "selectors": [
-        "countPlural"
-      ],
+      "selectors": ["countPlural"],
       "match": {
         "countPlural=one": "{name} reserved {countText} seat.",
         "countPlural=*": "{name} reserved {countText} seats."
@@ -350,13 +311,8 @@
   "notes_shared_with_you": "Shared with you",
   "notes_shared_count": [
     {
-      "declarations": [
-        "input count",
-        "local countPlural = count: plural"
-      ],
-      "selectors": [
-        "countPlural"
-      ],
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
       "match": {
         "countPlural=one": "Shared with {count} person",
         "countPlural=*": "Shared with {count} people"

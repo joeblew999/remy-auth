@@ -12,7 +12,7 @@ import { statusQuery as appStatusQuery } from 'virtual:remy-parts/status-card/ap
 
 /** The app's query, fresh for the card's interval; the app must provide it when it lists the part. */
 const statusQuery = () => {
-  if (!appStatusQuery) throw new Error('the status-card part needs the app\'s statusQuery (src/parts/status-card.ts)');
+  if (!appStatusQuery) throw new Error("the status-card part needs the app's statusQuery (src/parts/status-card.ts)");
   return { ...appStatusQuery, staleTime: statusRefreshMs };
 };
 

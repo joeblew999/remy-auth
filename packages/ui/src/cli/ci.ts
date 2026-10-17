@@ -30,10 +30,18 @@ const parts: Part[] = ['check', 'browser', 'audits', 'new-app'];
 /** GitHub splits the browser part across this many jobs. */
 export const shards = 3;
 /** The jobs GitHub's workflow must run, one `npm run ci -- <part>` each (tests/unit/ci.unit.spec.ts holds the workflow to it). */
-export const jobParts = (): string[] => ['check', ...Array.from({ length: shards }, (_, i) => `browser --shard ${i + 1}/${shards}`), 'audits', 'new-app'];
+export const jobParts = (): string[] => [
+  'check',
+  ...Array.from({ length: shards }, (_, i) => `browser --shard ${i + 1}/${shards}`),
+  'audits',
+  'new-app',
+];
 const browserParts: Part[] = ['browser', 'audits', 'new-app'];
 
-const fail = (message: string): never => { console.error(`ci: ${message}`); process.exit(1); };
+const fail = (message: string): never => {
+  console.error(`ci: ${message}`);
+  process.exit(1);
+};
 const onGitHub = process.env.GITHUB_ACTIONS === 'true';
 const root = process.getuid?.() === 0;
 
@@ -47,10 +55,12 @@ const quiet = (command: string, args: string[]) => spawnSync(command, args, { en
 /** Playwright's own Chromium, at the version @playwright/test pins; installed when this machine lacks it. */
 async function browser(): Promise<void> {
   const require = createRequire(join(process.cwd(), 'package.json'));
-  const loaded = await import(pathToFileURL(require.resolve('@playwright/test')).href) as typeof import('@playwright/test') & { default?: typeof import('@playwright/test') };
+  const loaded = (await import(
+    pathToFileURL(require.resolve('@playwright/test')).href
+  )) as typeof import('@playwright/test') & { default?: typeof import('@playwright/test') };
   const chromium = loaded.chromium ?? loaded.default!.chromium;
   if (existsSync(chromium.executablePath())) return;
-  console.log('ci: installing Playwright\'s Chromium (once per Playwright version)');
+  console.log("ci: installing Playwright's Chromium (once per Playwright version)");
   run(join(process.cwd(), 'node_modules', '.bin', 'playwright'), ['install', 'chromium']);
 }
 
@@ -79,7 +89,10 @@ export function fonts(): void {
 function node(): void {
   if (!existsSync('.node-version')) return;
   const pinned = readFileSync('.node-version', 'utf8').trim().replace(/^v/, '');
-  if (process.versions.node !== pinned) fail(`this is Node ${process.versions.node}; the repository pins ${pinned} (.node-version), which GitHub uses. Run with Node ${pinned} (install it from https://nodejs.org/dist/v${pinned}/), then run again.`);
+  if (process.versions.node !== pinned)
+    fail(
+      `this is Node ${process.versions.node}; the repository pins ${pinned} (.node-version), which GitHub uses. Run with Node ${pinned} (install it from https://nodejs.org/dist/v${pinned}/), then run again.`,
+    );
 }
 
 /**
@@ -101,7 +114,10 @@ const npm = (...args: string[]) => run('npm', ['run', ...args]);
 async function runPart(part: Part, shardOf?: string): Promise<void> {
   process.env.REMY_FLOW = process.env.REMY_FLOW ?? 'ci';
   // The check is dev:change's, whole (owner, 2026-10-17: one meaning of "check"); under ci it verifies instead of fixing.
-  if (part === 'check') { npm('check'); return; }
+  if (part === 'check') {
+    npm('check');
+    return;
+  }
   if (part === 'browser' && shardOf) process.env.REMY_SHARD = shardOf;
   const test = await import('./test.ts');
   if (part === 'browser') test.every();
@@ -120,38 +136,57 @@ export function installPrePush(): void {
   const hooks = join(common, 'hooks');
   mkdirSync(hooks, { recursive: true });
   const file = join(hooks, 'pre-push');
-  writeFileSync(file, '#!/bin/sh\n# Installed by npm run setup (remy ci): a push runs what its pull request will, first.\n[ -n "$REMY_FLOW" ] || [ -n "$REMY_SKIP_CI" ] && exit 0\nexec npm run --silent ci\n', { mode: 0o755 });
+  writeFileSync(
+    file,
+    '#!/bin/sh\n# Installed by npm run setup (remy ci): a push runs what its pull request will, first.\n[ -n "$REMY_FLOW" ] || [ -n "$REMY_SKIP_CI" ] && exit 0\nexec npm run --silent ci\n',
+    { mode: 0o755 },
+  );
   console.log(`ci: ${file} runs npm run ci before every push (REMY_SKIP_CI=1 to skip once).`);
 }
 
 export async function ci(args: string[]): Promise<void> {
-  let everything = false, shardOf: string | undefined;
+  let everything = false,
+    shardOf: string | undefined;
   const asked: string[] = [];
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--last') { console.log(lastRecord('ci')); return; }
-    else if (args[i] === '--everything') everything = true;
-    else if (args[i] === '--full' || args[i] === '--all') fail(`${args[i]} is gone: npm run ci runs what this change can affect; npm run ci -- --everything runs all of it, as main does.`);
+    if (args[i] === '--last') {
+      console.log(lastRecord('ci'));
+      return;
+    } else if (args[i] === '--everything') everything = true;
+    else if (args[i] === '--full' || args[i] === '--all')
+      fail(
+        `${args[i]} is gone: npm run ci runs what this change can affect; npm run ci -- --everything runs all of it, as main does.`,
+      );
     else if (args[i] === '--shard') shardOf = args[++i] ?? '';
     else asked.push(args[i]!);
   }
   if (shardOf !== undefined && !/^\d+\/\d+$/.test(shardOf)) fail(`--shard takes <i>/<n>, got ${shardOf}`);
   const chosen = (asked.length ? asked : parts) as Part[];
   for (const part of chosen) if (!parts.includes(part)) fail(`unknown part ${part}: ${parts.join(', ')}`);
-  if (shardOf && (chosen.length !== 1 || chosen[0] !== 'browser')) fail('--shard splits the browser part only: npm run ci -- browser --shard 1/3');
+  if (shardOf && (chosen.length !== 1 || chosen[0] !== 'browser'))
+    fail('--shard splits the browser part only: npm run ci -- browser --shard 1/3');
 
   // Run as on GitHub: tools that read CI behave alike (Playwright, for one, uses every core under it).
   process.env.CI = process.env.CI ?? '1';
   node();
   changesBase(everything);
-  if (chosen.some(part => browserParts.includes(part))) { await browser(); fonts(); lap('browser and fonts'); }
+  if (chosen.some((part) => browserParts.includes(part))) {
+    await browser();
+    fonts();
+    lap('browser and fonts');
+  }
   // The CLI times the run and records it (timing.ts); each part is a lap, and what a part runs records itself under it.
   for (const part of chosen) {
     console.log(`\nci: ${part}${shardOf ? ` (shard ${shardOf})` : ''}`);
     await runPart(part, shardOf);
     lap(shardOf ? `${part} ${shardOf}` : part);
   }
-  if (!onGitHub && !asked.length && !everything) console.log('ci: what a pull request runs: every part this change can affect. Main runs all of it: npm run ci -- --everything.');
+  if (!onGitHub && !asked.length && !everything)
+    console.log(
+      'ci: what a pull request runs: every part this change can affect. Main runs all of it: npm run ci -- --everything.',
+    );
 }
 
-export const what = "[check|browser|audits|new-app] [--shard i/n] [--everything] [--last]: what GitHub runs, the same here: no part runs every part this change can affect, as a pull request does; --everything runs all of it in every language, nothing skipped, as main does";
+export const what =
+  '[check|browser|audits|new-app] [--shard i/n] [--everything] [--last]: what GitHub runs, the same here: no part runs every part this change can affect, as a pull request does; --everything runs all of it in every language, nothing skipped, as main does';
 export const main = (args: string[]): Promise<void> => ci(args);

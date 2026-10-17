@@ -3,7 +3,7 @@
    where the package's own classes live. Tailwind resolves @source relative to the file that holds it,
    so this line finds the package's components wherever it is installed; the app adds its own
    `@source "../src"` next to the import. */
-@import "./styles/globals.css";
-@import "./fonts.css";
-@import "./text.css";
+@import './styles/globals.css';
+@import './fonts.css';
+@import './text.css';
 @source "./";

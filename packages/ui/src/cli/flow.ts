@@ -36,11 +36,17 @@ export const steps: Record<Step, { what: string }> = {
  * and `remy flow` print. A bare `remy <step>` still answers (remy.ts): the scripts of apps on 0.15 say it.
  */
 type Script = { main: (args: string[]) => void | Promise<void> };
-const step = (load: () => Promise<Script>) => (args: string[]) => load().then(module => module.main(args));
+const step = (load: () => Promise<Script>) => (args: string[]) => load().then((module) => module.main(args));
 export const what = 'the development flow: the four steps, and the two that bracket a worktree (npm run dev:<step>)';
 export const commands: Subcommands = {
-  status: { what: "what is going on: main with GitHub's verdicts, the open pull requests, the deployments, the worktrees, the translations, the top of now.md", run: step(() => import('./status.ts')) },
-  start: { what: '<name>: a worktree of your own from main, installed, its own ports, the guard', run: step(() => import('./start.ts')) },
+  status: {
+    what: "what is going on: main with GitHub's verdicts, the open pull requests, the deployments, the worktrees, the translations, the top of now.md",
+    run: step(() => import('./status.ts')),
+  },
+  start: {
+    what: '<name>: a worktree of your own from main, installed, its own ports, the guard',
+    run: step(() => import('./start.ts')),
+  },
   change: { what: steps.change.what, run: step(() => import('./change.ts')) },
   land: { what: `"<what changed>": ${steps.land.what}`, run: step(() => import('./land.ts')) },
   promote: { what: steps.promote.what, run: step(() => import('./promote.ts')) },
@@ -56,7 +62,7 @@ export const main = dispatch('flow', commands);
  * them by these names; the hook refuses each outside its step and names the step instead. Running one by hand stays possible: REMY_FLOW=hand in front, at a terminal, is a decision.
  */
 export const heavy: Record<string, string> = {
-  'verify': 'the release gate: dev:release runs it; GitHub runs its parts on every pull request',
+  verify: 'the release gate: dev:release runs it; GitHub runs its parts on every pull request',
   'test:browser': 'the browser checks: npm run ci runs them, and dev:land and GitHub with it',
   'test:remote': 'the suite against a deployment: GitHub runs the suite; every deploy ends with the live smoke',
   'test:audits': "Google's audits: npm run ci runs them, and dev:land and GitHub with it",
@@ -64,11 +70,14 @@ export const heavy: Record<string, string> = {
   'playwright test': 'the browser suite by hand: dev:change runs the check; npm run test -- only <words> runs one area',
   'i18n:translate': 'translation: dev:land runs it in the change, before its commit',
   'i18n translate': 'translation: dev:land runs it in the change, before its commit',
-  'remy test': 'the browser checks: npm run ci runs them, and dev:land and GitHub with it; one area: npm run test -- only <words>',
-  'npm test': 'the browser checks: npm run ci runs them, and dev:land and GitHub with it; one area: npm run test -- only <words>',
+  'remy test':
+    'the browser checks: npm run ci runs them, and dev:land and GitHub with it; one area: npm run test -- only <words>',
+  'npm test':
+    'the browser checks: npm run ci runs them, and dev:land and GitHub with it; one area: npm run test -- only <words>',
   'test:consumers': 'the consumer fixture: GitHub runs it after every push; remy test consumers is its gate',
   // Serving by hand with a raw tool call (an agent did, 2026-10-17): every way to serve has its command.
-  'wrangler dev': 'serving by hand: npx remy docs serve (the built docs, with llms.txt), npm run preview (the built app), npm run dev (hot reload); when no command does what you need, add one',
+  'wrangler dev':
+    'serving by hand: npx remy docs serve (the built docs, with llms.txt), npm run preview (the built app), npm run dev (hot reload); when no command does what you need, add one',
 };
 
 /** Where a key's spelling needs more than its words: the suite is refused, its light forms (only, report, live, smoke) are not. */
@@ -78,7 +87,8 @@ const spelled: Record<string, RegExp> = {
   'test:consumers': /\bnpm\s+run\s+test:consumers\b|(?:^|[;&|(]\s*)(?:bash\s+|sh\s+|\.\/)fixtures\/consumer\/run\.sh\b/,
 };
 
-const git = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+const git = (...args: string[]) =>
+  execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 
 /** A GitHub run of the checks workflow, as `gh run list` reports it. */
 export type Run = { status: string; conclusion: string | null; url: string; headSha: string };
@@ -92,7 +102,11 @@ export function latestRun(commit?: string): Run | null | undefined {
   // 2026-10-11 it read as a green verdict on a commit whose checks had failed), and a release tag's run on
   // the same commit is the release job's, not the verdict (the same day it held a promote as "still checking").
   const select = commit ? ['--commit', commit, '--branch', 'main'] : ['--branch', 'main'];
-  const result = spawnSync('gh', ['run', 'list', ...select, '--event', 'push', '--limit', '1', '--json', 'status,conclusion,url,headSha'], { encoding: 'utf8', timeout: 15_000 });
+  const result = spawnSync(
+    'gh',
+    ['run', 'list', ...select, '--event', 'push', '--limit', '1', '--json', 'status,conclusion,url,headSha'],
+    { encoding: 'utf8', timeout: 15_000 },
+  );
   if (result.status !== 0) return undefined;
   const [run] = JSON.parse(result.stdout || '[]') as Run[];
   return run ?? null;
@@ -104,7 +118,16 @@ export function latestRun(commit?: string): Run | null | undefined {
  * Nobody runs npm ci by hand; the steps that build (dev:start, dev:promote) call this first.
  */
 export function installed(cwd = '.'): void {
-  const same = (() => { try { return readFileSync(`${cwd}/package-lock.json`, 'utf8') === readFileSync(`${cwd}/node_modules/.package-lock.json`, 'utf8'); } catch { return false; } })();
+  const same = (() => {
+    try {
+      return (
+        readFileSync(`${cwd}/package-lock.json`, 'utf8') ===
+        readFileSync(`${cwd}/node_modules/.package-lock.json`, 'utf8')
+      );
+    } catch {
+      return false;
+    }
+  })();
   if (same) return;
   console.log(`${cwd === '.' ? '' : `${cwd}: `}node_modules is not what package-lock.json says; npm ci.`);
   const result = spawnSync('npm', ['ci', '--no-audit', '--no-fund', '--loglevel=error'], { cwd, stdio: 'inherit' });
@@ -112,7 +135,8 @@ export function installed(cwd = '.'): void {
 }
 
 /** One line a person reads: what GitHub said about a commit. */
-export const describeRun = (run: Run) => `${run.status === 'completed' ? (run.conclusion ?? 'unknown') : 'still running'} on ${run.headSha.slice(0, 7)}: ${run.url}`;
+export const describeRun = (run: Run) =>
+  `${run.status === 'completed' ? (run.conclusion ?? 'unknown') : 'still running'} on ${run.headSha.slice(0, 7)}: ${run.url}`;
 
 /** Where the work is: the branch, whether it is main, whether the tree is clean. */
 export function where(): { branch: string; onMain: boolean; clean: boolean } {
@@ -123,7 +147,10 @@ export function where(): { branch: string; onMain: boolean; clean: boolean } {
 /** What a command is, as the hook sees it: a spelled form (above), or a bare tool named with its words. */
 export function heavyIn(command: string): { task: string; why: string } | undefined {
   for (const [task, why] of Object.entries(heavy)) {
-    if (spelled[task]) { if (spelled[task].test(command)) return { task, why }; continue; }
+    if (spelled[task]) {
+      if (spelled[task].test(command)) return { task, why };
+      continue;
+    }
     const asTool = task.includes(' ') ? new RegExp(`\\b${task.replace(/\s+/g, '\\s+')}\\b`) : undefined;
     if (asTool?.test(command)) return { task, why };
   }

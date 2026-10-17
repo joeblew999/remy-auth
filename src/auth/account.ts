@@ -24,7 +24,8 @@ export const accountState = createServerFn({ method: 'GET' }).handler(async () =
   try {
     return { account: await client.me(), canSignIn, seeded: null };
   } catch (error) {
-    if (error instanceof ORPCError && error.code === 'UNAUTHORIZED') return { account: null, canSignIn, seeded: await seededSignIn(getRequest()) };
+    if (error instanceof ORPCError && error.code === 'UNAUTHORIZED')
+      return { account: null, canSignIn, seeded: await seededSignIn(getRequest()) };
     throw error;
   }
 });

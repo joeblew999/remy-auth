@@ -11,7 +11,16 @@ export type CapturedMail = Mail & { id: string; from: string; createdAt: string 
 export type Mailer = { send(mail: Mail): Promise<void> };
 
 /** The part of Cloudflare's `send_email` binding a mailer uses (the generated `SendEmail` type fits it). */
-export type EmailBinding = { send(message: { to: string; from: string; subject: string; text: string; html?: string; headers?: Record<string, string> }): Promise<unknown> };
+export type EmailBinding = {
+  send(message: {
+    to: string;
+    from: string;
+    subject: string;
+    text: string;
+    html?: string;
+    headers?: Record<string, string>;
+  }): Promise<unknown>;
+};
 
 /**
  * Captured mail is held in the isolate, not in a database: it is local state that should end with
@@ -24,7 +33,9 @@ const outbox = (): CapturedMail[] => ((globalThis as { [OUTBOX]?: CapturedMail[]
 /** The captured mail, newest first; only the mail to one address when `to` is given. */
 export function readOutbox(to?: string): CapturedMail[] {
   const wanted = to?.toLowerCase();
-  return outbox().filter(mail => !wanted || mail.to.toLowerCase() === wanted).reverse();
+  return outbox()
+    .filter((mail) => !wanted || mail.to.toLowerCase() === wanted)
+    .reverse();
 }
 
 export function clearOutbox(): void {
@@ -38,7 +49,10 @@ export function clearOutbox(): void {
  * or a bounce, and bounces are what a sending domain's reputation is judged by.
  */
 export function unreachable(address: string): boolean {
-  const domain = address.slice(address.lastIndexOf('@') + 1).toLowerCase().replace(/\.$/, '');
+  const domain = address
+    .slice(address.lastIndexOf('@') + 1)
+    .toLowerCase()
+    .replace(/\.$/, '');
   return /(^|\.)(test|example|invalid|localhost)$/.test(domain) || /(^|\.)example\.(com|net|org)$/.test(domain);
 }
 
@@ -50,7 +64,15 @@ export function unreachable(address: string): boolean {
  * The one message not sent is one to an address no mail can reach (`unreachable`): there is nobody
  * to receive it, on any environment that sends.
  */
-export function mailerFor({ capture, binding, from }: { capture: boolean; binding?: EmailBinding; from?: string }): Mailer {
+export function mailerFor({
+  capture,
+  binding,
+  from,
+}: {
+  capture: boolean;
+  binding?: EmailBinding;
+  from?: string;
+}): Mailer {
   return {
     async send(mail) {
       if (capture) {
@@ -58,12 +80,25 @@ export function mailerFor({ capture, binding, from }: { capture: boolean; bindin
         return;
       }
       if (unreachable(mail.to)) return;
-      if (!binding || !from) throw new Error(`mail: not configured (${binding ? 'no sender address' : 'no send_email binding'}); nothing was sent to ${mail.to}`);
+      if (!binding || !from)
+        throw new Error(
+          `mail: not configured (${binding ? 'no sender address' : 'no send_email binding'}); nothing was sent to ${mail.to}`,
+        );
       try {
-        await binding.send({ to: mail.to, from, subject: mail.subject, text: mail.text, ...(mail.html ? { html: mail.html } : {}), ...(mail.headers ? { headers: mail.headers } : {}) });
+        await binding.send({
+          to: mail.to,
+          from,
+          subject: mail.subject,
+          text: mail.text,
+          ...(mail.html ? { html: mail.html } : {}),
+          ...(mail.headers ? { headers: mail.headers } : {}),
+        });
       } catch (cause) {
         const code = (cause as { code?: string } | null)?.code;
-        throw new Error(`mail: ${from} to ${mail.to} was refused${code ? ` (${code})` : ''}: ${cause instanceof Error ? cause.message : String(cause)}`, { cause });
+        throw new Error(
+          `mail: ${from} to ${mail.to} was refused${code ? ` (${code})` : ''}: ${cause instanceof Error ? cause.message : String(cause)}`,
+          { cause },
+        );
       }
     },
   };

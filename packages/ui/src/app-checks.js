@@ -1,4 +1,13 @@
-import { zoneChecks, publicPageChecks, entryChecks, themeChecks, textChecks, fontChecks, observabilityChecks, cspChecks } from './checks.js';
+import {
+  zoneChecks,
+  publicPageChecks,
+  entryChecks,
+  themeChecks,
+  textChecks,
+  fontChecks,
+  observabilityChecks,
+  cspChecks,
+} from './checks.js';
 import { buildChecks, buildStampChecks, productNameChecks } from './versions.checks.js';
 import { existsSync } from 'node:fs';
 import { partsFile, readParts } from './parts/list.js';
@@ -11,7 +20,7 @@ import { partsFile, readParts } from './parts/list.js';
 // (.plans/parts.md): what a listed part owns runs with partChecks() instead, never twice.
 
 /** The app's listed parts: `parts` when given, else its src/parts.json when it has one, else none. */
-const listedParts = parts => parts ?? (existsSync(partsFile) ? readParts() : []);
+const listedParts = (parts) => parts ?? (existsSync(partsFile) ? readParts() : []);
 
 /** What the app is, to its reader: the build its Worker answers with, the stamp its app frame shows, and its own name on every page. */
 function identityChecks({ service, appPaths, every }) {

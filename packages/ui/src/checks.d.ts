@@ -22,8 +22,18 @@ export declare function hydrated(locator: Locator): Promise<void>;
 export type OneLanguage = { locale: string; paths: string[]; translations?: Record<string, string[]> };
 /** `sitemap: false` leaves the sitemap to the seo-routes part's checks (sitemapChecks). */
 /** The home page's own words, checked exactly when an app passes them; without them, only that they are there. */
-export type HomeContent = { title?: (locale: Locale) => string; description?: (locale: Locale) => string; brand?: string };
-export declare function publicPageChecks(options: { paths: string[]; prerendered?: boolean; oneLanguage?: OneLanguage; sitemap?: boolean; home?: HomeContent }): void;
+export type HomeContent = {
+  title?: (locale: Locale) => string;
+  description?: (locale: Locale) => string;
+  brand?: string;
+};
+export declare function publicPageChecks(options: {
+  paths: string[];
+  prerendered?: boolean;
+  oneLanguage?: OneLanguage;
+  sitemap?: boolean;
+  home?: HomeContent;
+}): void;
 /** The sitemap lists `paths` in every locale and `oneLanguage`'s pages, self-canonical with hreflang alternates; robots.txt names it. */
 export declare function sitemapChecks(options: { paths: string[]; oneLanguage?: OneLanguage }): void;
 export declare function entryChecks(options: { paths: string[]; mode: 'redirect' | 'static' }): void;
@@ -31,7 +41,11 @@ export declare function themeChecks(): void;
 /** Site pages work without JavaScript and are indexable; app pages are noindex and out of the sitemap. */
 export declare function zoneChecks(options: { sitePaths: string[]; appPaths: string[] }): void;
 export declare function lighthouseChecks(options: { pages: { path: string; device: 'mobile' | 'desktop' }[] }): void;
-export declare function performanceChecks(options: { pages: { path: string; device: 'mobile' | 'desktop' }[]; thresholds?: { score?: number; lcp?: number; cls?: number; tbt?: number }; runs?: number }): void;
+export declare function performanceChecks(options: {
+  pages: { path: string; device: 'mobile' | 'desktop' }[];
+  thresholds?: { score?: number; lcp?: number; cls?: number; tbt?: number };
+  runs?: number;
+}): void;
 /** The locale with its own calendar and digits named explicitly (fa → fa-u-ca-persian-nu-arabext). */
 export declare const formatTag: (locale: string) => string;
 /** Every page at 320 px in every language, hyphenation, casing by language and Japanese phrase breaks (text.css). */

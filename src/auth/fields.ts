@@ -11,18 +11,25 @@ const core = getAuthTables({});
  * `statusCode` was an additional field without `input: false`, so a referee awaiting approval
  * posted `{ statusCode: "ACTIVE" }` to /api/auth/update-user and approved themselves.
  */
-export function writableFieldProblems(options: BetterAuthOptions, mayEdit: Record<string, Record<string, string>>): string[] {
+export function writableFieldProblems(
+  options: BetterAuthOptions,
+  mayEdit: Record<string, Record<string, string>>,
+): string[] {
   const problems: string[] = [];
   const tables = getAuthTables(options);
   for (const [model, table] of Object.entries(core)) {
     for (const [name, field] of Object.entries(tables[model]?.fields ?? {})) {
       if (name in table.fields || field.input === false || mayEdit[model]?.[name]) continue;
-      problems.push(`${model}.${name}: a person can write it through Better Auth's endpoints; declare it input: false, or say in personMayEdit why it is theirs to change`);
+      problems.push(
+        `${model}.${name}: a person can write it through Better Auth's endpoints; declare it input: false, or say in personMayEdit why it is theirs to change`,
+      );
     }
   }
-  for (const [model, fields] of Object.entries(mayEdit)) for (const name of Object.keys(fields)) {
-    const field = tables[model]?.fields[name];
-    if (!field || field.input === false || name in (core[model]?.fields ?? {})) problems.push(`${model}.${name}: listed in personMayEdit, but it is not a writable additional field`);
-  }
+  for (const [model, fields] of Object.entries(mayEdit))
+    for (const name of Object.keys(fields)) {
+      const field = tables[model]?.fields[name];
+      if (!field || field.input === false || name in (core[model]?.fields ?? {}))
+        problems.push(`${model}.${name}: listed in personMayEdit, but it is not a writable additional field`);
+    }
   return problems;
 }

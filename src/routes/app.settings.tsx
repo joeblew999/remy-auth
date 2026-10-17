@@ -7,7 +7,12 @@ import { problemPages } from '@joeblew999/remy-ui/problem';
 
 // The app's settings page (the shared SettingsPage): language, appearance, and what the device tells the app.
 export const Route = createFileRoute('/app/settings')({
-  head: () => pageHead({ path: '/app/settings', title: locale => m.settings_title({}, { locale }), description: locale => m.settings_description({}, { locale }) }),
+  head: () =>
+    pageHead({
+      path: '/app/settings',
+      title: (locale) => m.settings_title({}, { locale }),
+      description: (locale) => m.settings_description({}, { locale }),
+    }),
   component: Settings,
   ...problemPages,
 });

@@ -13,5 +13,7 @@ test("a table's padding is not a change to the page", () => {
 });
 
 test('a changed word still is', () => {
-  expect(pagePrints(page('| A | B |\n| --- | --- |\n| one | two words |'))).not.toEqual(pagePrints(page('| A | B |\n| --- | --- |\n| one | three words |')));
+  expect(pagePrints(page('| A | B |\n| --- | --- |\n| one | two words |'))).not.toEqual(
+    pagePrints(page('| A | B |\n| --- | --- |\n| one | three words |')),
+  );
 });

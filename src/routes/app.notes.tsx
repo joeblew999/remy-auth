@@ -20,7 +20,12 @@ export const Route = createFileRoute('/app/notes')({
   // Who is signed in, and what is shared with them, can change at any moment: never from the router's cache.
   staleTime: 0,
   gcTime: 0,
-  head: () => pageHead({ path: '/app/notes', title: locale => m.notes_title({}, { locale }), description: locale => m.notes_description({}, { locale }) }),
+  head: () =>
+    pageHead({
+      path: '/app/notes',
+      title: (locale) => m.notes_title({}, { locale }),
+      description: (locale) => m.notes_description({}, { locale }),
+    }),
   component: Notes,
   ...problemPages,
 });
@@ -35,11 +40,26 @@ function Notes() {
   const share = useMutation(orpc.notes.share.mutationOptions());
   const remove = useMutation(orpc.notes.remove.mutationOptions());
   // After every action, allowed or refused, the page asks the server again: what it shows is what is so.
-  const then = <T,>(action: (input: T) => Promise<unknown>) => (input: T) => action(input).then(() => setFailed(false), () => setFailed(true)).then(() => invalidateEverything(router, queryClient));
-  return <NotesPage locale={getLocale()} state={state} failed={failed} actions={{
-    create: then(create.mutateAsync),
-    update: then(update.mutateAsync),
-    share: then(share.mutateAsync),
-    remove: then(remove.mutateAsync),
-  }} />;
+  const then =
+    <T,>(action: (input: T) => Promise<unknown>) =>
+    (input: T) =>
+      action(input)
+        .then(
+          () => setFailed(false),
+          () => setFailed(true),
+        )
+        .then(() => invalidateEverything(router, queryClient));
+  return (
+    <NotesPage
+      locale={getLocale()}
+      state={state}
+      failed={failed}
+      actions={{
+        create: then(create.mutateAsync),
+        update: then(update.mutateAsync),
+        share: then(share.mutateAsync),
+        remove: then(remove.mutateAsync),
+      }}
+    />
+  );
 }

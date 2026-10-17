@@ -17,18 +17,30 @@ export function ReferenceView({ page }: { page: NonNullable<Awaited<ReturnType<t
   const { pageTree } = useFumadocsLoader({ pageTree: page.pageTree });
   // next-themes' theme script needs the response's CSP nonce, as every script here does (the router's ssr.nonce).
   const nonce = useRouter().options.ssr?.nonce;
-  return <RootProvider theme={{ storageKey: 'theme', attribute: 'class', defaultTheme: 'system', enableSystem: true, nonce }}
-    search={{ options: { api: '/api/search/reference' } }}>
-    <DocsLayout tree={pageTree}
-      tabs={sectionTabs()}
-      tabMode="navbar" nav={{ title: docsConfig.product, url: '/', mode: 'top' }}
-      links={[{ text: 'Site', url: docsConfig.appUrl, external: true }, { text: 'App', url: `${docsConfig.appUrl}/app`, external: true }]}
-      sidebar={{ footer: <AiLinks section={'reference'} /> }}>
-      <DocsPage toc={page.toc} full>
-        <DocsTitle>{page.title}</DocsTitle>
-        {page.description && <DocsDescription>{page.description}</DocsDescription>}
-        <DocsBody><OpenAPIPage {...(JSON.parse(page.props) as OpenAPIPageProps)} /></DocsBody>
-      </DocsPage>
-    </DocsLayout>
-  </RootProvider>;
+  return (
+    <RootProvider
+      theme={{ storageKey: 'theme', attribute: 'class', defaultTheme: 'system', enableSystem: true, nonce }}
+      search={{ options: { api: '/api/search/reference' } }}
+    >
+      <DocsLayout
+        tree={pageTree}
+        tabs={sectionTabs()}
+        tabMode="navbar"
+        nav={{ title: docsConfig.product, url: '/', mode: 'top' }}
+        links={[
+          { text: 'Site', url: docsConfig.appUrl, external: true },
+          { text: 'App', url: `${docsConfig.appUrl}/app`, external: true },
+        ]}
+        sidebar={{ footer: <AiLinks section={'reference'} /> }}
+      >
+        <DocsPage toc={page.toc} full>
+          <DocsTitle>{page.title}</DocsTitle>
+          {page.description && <DocsDescription>{page.description}</DocsDescription>}
+          <DocsBody>
+            <OpenAPIPage {...(JSON.parse(page.props) as OpenAPIPageProps)} />
+          </DocsBody>
+        </DocsPage>
+      </DocsLayout>
+    </RootProvider>
+  );
 }

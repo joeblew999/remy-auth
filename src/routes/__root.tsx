@@ -10,9 +10,15 @@ import '../styles.css';
 // with this app's config, the language worth offering, the problem pages. TanStack Devtools (Router and Query
 // panels) stay here: the devtools() Vite plugin strips them from production builds only in the app's own
 // files, which build-boundaries.checks.js proves on every served script.
-export const Route = createRootRouteWithContext<RemyRouterContext>()(remyRoot(remyApp, {
-  devtools: <TanStackDevtools plugins={[
-    { name: 'TanStack Router', render: <TanStackRouterDevtoolsPanel /> },
-    { name: 'TanStack Query', render: <ReactQueryDevtoolsPanel /> },
-  ]} />,
-}));
+export const Route = createRootRouteWithContext<RemyRouterContext>()(
+  remyRoot(remyApp, {
+    devtools: (
+      <TanStackDevtools
+        plugins={[
+          { name: 'TanStack Router', render: <TanStackRouterDevtoolsPanel /> },
+          { name: 'TanStack Query', render: <ReactQueryDevtoolsPanel /> },
+        ]}
+      />
+    ),
+  }),
+);

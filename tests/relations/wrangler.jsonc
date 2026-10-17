@@ -5,5 +5,7 @@
   "main": "./worker.ts",
   "compatibility_date": "2026-09-24",
   "compatibility_flags": ["nodejs_compat"],
-  "d1_databases": [{ "binding": "DB", "database_name": "relations-fixture", "database_id": "00000000-0000-0000-0000-000000000000" }]
+  "d1_databases": [
+    { "binding": "DB", "database_name": "relations-fixture", "database_id": "00000000-0000-0000-0000-000000000000" },
+  ],
 }

@@ -2,7 +2,14 @@ import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { locales } from '@joeblew999/remy-ui/runtime';
 import { samples } from '@joeblew999/remy-ui/samples';
-import { checkedLocales, collectErrors, endonym, direction, localizedPath, formatTag } from '@joeblew999/remy-ui/checks';
+import {
+  checkedLocales,
+  collectErrors,
+  endonym,
+  direction,
+  localizedPath,
+  formatTag,
+} from '@joeblew999/remy-ui/checks';
 import { serverAppChecks } from '@joeblew999/remy-ui/app-checks';
 import { localeInfo } from '@joeblew999/remy-ui/locale-info';
 import { m } from '@joeblew999/remy-ui/messages';
@@ -29,16 +36,22 @@ serverAppChecks({
   sitePaths,
   appPaths: appPagePaths,
   // This app's home page words and brand: its own content, checked exactly.
-  home: { title: locale => m.home_title({ product }, { locale }), description: locale => m.home_description({ product }, { locale }), brand: product },
+  home: {
+    title: (locale) => m.home_title({ product }, { locale }),
+    description: (locale) => m.home_description({ product }, { locale }),
+    brand: product,
+  },
 });
 // It shows remy-auth's showcase pages, so their checks run too (the device place beside the network's: deferred-place).
 showcaseChecks({ product, formats: { extra: formatsExtra }, network: true });
 // Every part listed in src/parts.json brings its own checks: the sitemap (seo-routes), the streamed
 // place and its failing navigation (deferred-place), the status card, the time-zone pages.
-partChecks({ options: {
-  'seo-routes': { paths: sitePaths },
-  'status-card': { service: 'remy-auth', path: '/app', endpoint: '/api/status' },
-} });
+partChecks({
+  options: {
+    'seo-routes': { paths: sitePaths },
+    'status-card': { service: 'remy-auth', path: '/app', endpoint: '/api/status' },
+  },
+});
 // The demo reservation, the status card and the signed-in account are contract endpoints
 // (@joeblew999/remy-auth-contract), each behind the guard; signing in itself is tests/auth.spec.ts.
 apiChecks({ router, title: info.title, origins: registeredOrigins, errorStatuses, vocabulary: notesVocabulary });
@@ -46,10 +59,22 @@ reservationApiChecks();
 codeSplittingChecks({ paths: sitePaths });
 codeSplittingChecks({ paths: appPagePaths, home: '/app' });
 // The app mounts TanStack Devtools (src/routes/__root.tsx), whose shell must never ship either.
-buildBoundaryChecks({ paths: everyPath, deviceTimePath: '/formats', markers: [
-  { name: 'request.cf', pattern: /[\w$)\]]\.cf\b/, source: 'packages/showcase/src/parts/deferred-place/place.server.ts' },
-  { name: 'TanStack Devtools (the shell hosting the panels)', pattern: /tsd-(?:control|surface)\b/, source: { package: '@tanstack/devtools', from: '@tanstack/react-devtools' } },
-] });
+buildBoundaryChecks({
+  paths: everyPath,
+  deviceTimePath: '/formats',
+  markers: [
+    {
+      name: 'request.cf',
+      pattern: /[\w$)\]]\.cf\b/,
+      source: 'packages/showcase/src/parts/deferred-place/place.server.ts',
+    },
+    {
+      name: 'TanStack Devtools (the shell hosting the panels)',
+      pattern: /tsd-(?:control|surface)\b/,
+      source: { package: '@tanstack/devtools', from: '@tanstack/react-devtools' },
+    },
+  ],
+});
 // Rows only this server-rendered app has on the formats page: more Intl examples (Cloudflare's geolocation: the deferred-place part's checks).
 async function formatsExtra(page: Page, locale: string) {
   const messages = catalogs[locale];
@@ -59,18 +84,35 @@ async function formatsExtra(page: Page, locale: string) {
   const expected: Record<string, string> = {
     region: new Intl.DisplayNames([locale], { type: 'region' }).of(info.region)!,
     'currency-name': new Intl.DisplayNames([locale], { type: 'currency' }).of(info.currency)!,
-    range: new Intl.DateTimeFormat(format, { dateStyle: 'medium', timeZone: 'UTC' }).formatRange(samples.rangeStart, samples.rangeEnd),
-    distance: new Intl.NumberFormat(locale, { style: 'unit', unit: 'kilometer', unitDisplay: 'long' }).format(samples.km),
-    currencies: list.format(samples.currencies.map(currency => new Intl.NumberFormat(format, { style: 'currency', currency }).format(samples.amount))),
+    range: new Intl.DateTimeFormat(format, { dateStyle: 'medium', timeZone: 'UTC' }).formatRange(
+      samples.rangeStart,
+      samples.rangeEnd,
+    ),
+    distance: new Intl.NumberFormat(locale, { style: 'unit', unit: 'kilometer', unitDisplay: 'long' }).format(
+      samples.km,
+    ),
+    currencies: list.format(
+      samples.currencies.map((currency) =>
+        new Intl.NumberFormat(format, { style: 'currency', currency }).format(samples.amount),
+      ),
+    ),
     sorted: list.format([...samples.names].sort(new Intl.Collator(locale).compare)),
     greeting: messages.greeting.replace('{name}', samples.guest),
-    ...Object.fromEntries(samples.statuses.map(status => [`status-${status}`, messages.invite_status[0].match[`status=${status}`] ?? messages.invite_status[0].match['status=*']])),
+    ...Object.fromEntries(
+      samples.statuses.map((status) => [
+        `status-${status}`,
+        messages.invite_status[0].match[`status=${status}`] ?? messages.invite_status[0].match['status=*'],
+      ]),
+    ),
   };
-  for (const [sample, text] of Object.entries(expected)) await expect(page.locator(`[data-sample="${sample}"]`), sample).toHaveText(text);
-  if (info.otherCalendars.length === 0) await expect(page.locator('[data-sample="other-calendars"]')).toHaveText(messages.no_other_calendars);
+  for (const [sample, text] of Object.entries(expected))
+    await expect(page.locator(`[data-sample="${sample}"]`), sample).toHaveText(text);
+  if (info.otherCalendars.length === 0)
+    await expect(page.locator('[data-sample="other-calendars"]')).toHaveText(messages.no_other_calendars);
   for (const calendar of info.otherCalendars) {
     await expect(page.locator(`[data-calendar="${calendar}"]`), calendar).toHaveText(
-      `${new Intl.DisplayNames([locale], { type: 'calendar' }).of(calendar)}: ${new Intl.DateTimeFormat(format, { ...samples.calendarDate, calendar }).format(samples.date)}`);
+      `${new Intl.DisplayNames([locale], { type: 'calendar' }).of(calendar)}: ${new Intl.DateTimeFormat(format, { ...samples.calendarDate, calendar }).format(samples.date)}`,
+    );
   }
 }
 
@@ -78,39 +120,66 @@ async function formatsExtra(page: Page, locale: string) {
 // catalogs' completeness, placeholders and plurals are i18n:messages:check (tasks/i18n).
 const settings = JSON.parse(readFileSync('packages/ui/project.inlang/settings.json', 'utf8'));
 const catalogs: Record<string, Record<string, any>> = Object.fromEntries(
-  (settings.locales as string[]).map(locale => [locale, JSON.parse(readFileSync(`packages/ui/messages/${locale}.json`, 'utf8'))]));
+  (settings.locales as string[]).map((locale) => [
+    locale,
+    JSON.parse(readFileSync(`packages/ui/messages/${locale}.json`, 'utf8')),
+  ]),
+);
 test.use({ timezoneId: 'Asia/Tokyo' });
 
 test('concurrent server renders retain their requested language and direction', async ({ request }) => {
-  await Promise.all(Array.from({ length: 6 * locales.length }, async (_, index) => {
-    const locale = locales[index % locales.length];
-    const other = locales[(index + 1) % locales.length];
-    const response = await request.get(localizedPath('/formats', locale), { headers: { 'Accept-Language': other } });
-    expect(response.status()).toBe(200);
-    const html = await response.text();
-    expect(html).toContain(`<html lang="${locale}" dir="${direction(locale)}"`);
-    expect(html).toContain(catalogs[locale].formats_title);
-    expect(html).toContain(new Intl.NumberFormat(formatTag(locale), { style: 'currency', currency: localeInfo(locale as any).currency }).format(samples.amount));
-  }));
+  await Promise.all(
+    Array.from({ length: 6 * locales.length }, async (_, index) => {
+      const locale = locales[index % locales.length];
+      const other = locales[(index + 1) % locales.length];
+      const response = await request.get(localizedPath('/formats', locale), { headers: { 'Accept-Language': other } });
+      expect(response.status()).toBe(200);
+      const html = await response.text();
+      expect(html).toContain(`<html lang="${locale}" dir="${direction(locale)}"`);
+      expect(html).toContain(catalogs[locale].formats_title);
+      expect(html).toContain(
+        new Intl.NumberFormat(formatTag(locale), {
+          style: 'currency',
+          currency: localeInfo(locale as any).currency,
+        }).format(samples.amount),
+      );
+    }),
+  );
 });
 
 // One test per language, so the languages spread across the workers (one test for all of them took 13 s).
-for (const locale of checkedLocales) test(`${locale}: formats page hydrates without errors and fills the device time zone`, async ({ page }) => {
-  const errors = collectErrors(page);
-  await page.goto(localizedPath('/formats', locale));
-  await page.waitForLoadState('networkidle');
-  await expect(page.locator('html')).toHaveAttribute('dir', direction(locale));
-  await expect(page.locator('[data-sample="currency"]')).toHaveText(new Intl.NumberFormat(formatTag(locale), { style: 'currency', currency: localeInfo(locale as any).currency }).format(samples.amount));
-  await expect(page.locator('[data-sample="local"]')).toHaveText(new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'long', timeZone: 'Asia/Tokyo' }).format(samples.instant));
-  expect(errors).toEqual([]);
-});
+for (const locale of checkedLocales)
+  test(`${locale}: formats page hydrates without errors and fills the device time zone`, async ({ page }) => {
+    const errors = collectErrors(page);
+    await page.goto(localizedPath('/formats', locale));
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('html')).toHaveAttribute('dir', direction(locale));
+    await expect(page.locator('[data-sample="currency"]')).toHaveText(
+      new Intl.NumberFormat(formatTag(locale), {
+        style: 'currency',
+        currency: localeInfo(locale as any).currency,
+      }).format(samples.amount),
+    );
+    await expect(page.locator('[data-sample="local"]')).toHaveText(
+      new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'long', timeZone: 'Asia/Tokyo' }).format(
+        samples.instant,
+      ),
+    );
+    expect(errors).toEqual([]);
+  });
 
-test('endonyms come from Intl', () => { expect(endonym('en')).toBe('English'); });
+test('endonyms come from Intl', () => {
+  expect(endonym('en')).toBe('English');
+});
 
 // The docs moved to the docs Worker: each old address answers a permanent redirect to its page there,
 // in the same language (src/routes/docs.$.tsx), so links and search engines follow.
 test('the old docs addresses redirect to the docs Worker, keeping the language', async ({ request }) => {
-  for (const [from, to] of [['/en/docs', '/dev'], ['/en/docs/tooling', '/dev/tooling'], ['/es/docs/how-we-work', '/dev/es/how-we-work']]) {
+  for (const [from, to] of [
+    ['/en/docs', '/dev'],
+    ['/en/docs/tooling', '/dev/tooling'],
+    ['/es/docs/how-we-work', '/dev/es/how-we-work'],
+  ]) {
     const response = await request.get(from!, { maxRedirects: 0 });
     expect(response.status(), from).toBe(301);
     expect(response.headers().location, from).toBe(`${process.env.DOCS_ORIGIN}${to}`);

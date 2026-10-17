@@ -2,19 +2,16 @@
   "name": "@joeblew999/remy-showcase",
   "version": "0.1.1",
   "description": "remy-auth's showcase pages on the Remy platform: the home and formats pages, the app pages (formats, clock, demo, location, settings, account), their navigation, the demo reservation and their checks. For the apps that show them; the platform (@joeblew999/remy-ui) knows nothing of it",
-  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/joeblew999/remy-auth.git",
     "directory": "packages/showcase"
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "files": [
     "src",
     "README.md"
   ],
+  "type": "module",
   "exports": {
     "./tailwind.css": "./src/tailwind.css",
     "./pages": "./src/pages.tsx",
@@ -33,8 +30,8 @@
     "./parts/deferred-place/device-place": "./src/parts/deferred-place/device-place.tsx",
     "./parts/time-zones/page": "./src/parts/time-zones/page.tsx"
   },
-  "peerDependencies": {
-    "@joeblew999/remy-ui": ">=0.15.1"
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
     "@playwright/test": "1.63.0",
@@ -45,5 +42,8 @@
     "lucide-react": "1.48.0",
     "react": "19.3.1",
     "zod": "4.6.5"
+  },
+  "peerDependencies": {
+    "@joeblew999/remy-ui": ">=0.15.1"
   }
 }

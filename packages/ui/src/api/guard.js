@@ -29,7 +29,7 @@ export const noSession = { getSession: async () => null };
  */
 export function once(lookup) {
   let found;
-  return () => found ??= lookup();
+  return () => (found ??= lookup());
 }
 
 /** The signed-in person a "session" procedure runs for. Under any other policy there is none, and this refuses (401). */

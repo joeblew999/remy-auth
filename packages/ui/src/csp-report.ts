@@ -14,18 +14,37 @@ type Violation = { directive?: unknown; disposition?: unknown; document?: unknow
 
 function violations(body: unknown): Violation[] {
   if (Array.isArray(body)) {
-    return body.filter(report => report?.type === 'csp-violation' && report.body).map(({ body: report }) => ({
-      directive: report.effectiveDirective, disposition: report.disposition, document: report.documentURL, blocked: report.blockedURL }));
+    return body
+      .filter((report) => report?.type === 'csp-violation' && report.body)
+      .map(({ body: report }) => ({
+        directive: report.effectiveDirective,
+        disposition: report.disposition,
+        document: report.documentURL,
+        blocked: report.blockedURL,
+      }));
   }
   const report = (body as { 'csp-report'?: Record<string, unknown> } | null)?.['csp-report'];
-  return report ? [{ directive: report['effective-directive'] ?? report['violated-directive'], disposition: report.disposition,
-    document: report['document-uri'], blocked: report['blocked-uri'] }] : [];
+  return report
+    ? [
+        {
+          directive: report['effective-directive'] ?? report['violated-directive'],
+          disposition: report.disposition,
+          document: report['document-uri'],
+          blocked: report['blocked-uri'],
+        },
+      ]
+    : [];
 }
 
-const word = (value: unknown) => typeof value === 'string' && /^[a-z-]{1,40}$/.test(value) ? value : 'unknown';
-const blockedKind = (value: unknown) => typeof value === 'string' && /^[a-z-]{1,20}$/.test(value) ? value : 'external';
+const word = (value: unknown) => (typeof value === 'string' && /^[a-z-]{1,40}$/.test(value) ? value : 'unknown');
+const blockedKind = (value: unknown) =>
+  typeof value === 'string' && /^[a-z-]{1,20}$/.test(value) ? value : 'external';
 function route(document: unknown) {
-  try { return routeTemplate(new URL(String(document)).pathname, 200); } catch { return 'unknown'; }
+  try {
+    return routeTemplate(new URL(String(document)).pathname, 200);
+  } catch {
+    return 'unknown';
+  }
 }
 
 /** The /csp-report route's handlers for a Worker's service: put them in the route's `server.handlers`. */
@@ -34,10 +53,21 @@ export const cspReport = (service: string) => ({
     const text = await request.text();
     if (text.length > maxBytes) return new Response(null, { status: 413, headers: { 'Cache-Control': 'no-store' } });
     let body: unknown;
-    try { body = JSON.parse(text); } catch { return new Response(null, { status: 400, headers: { 'Cache-Control': 'no-store' } }); }
+    try {
+      body = JSON.parse(text);
+    } catch {
+      return new Response(null, { status: 400, headers: { 'Cache-Control': 'no-store' } });
+    }
     for (const violation of violations(body).slice(0, maxReports)) {
-      writeLog({ ...logContext(service, env, context.requestId, request.method), event: 'csp_report', level: 'warn',
-        directive: word(violation.directive), disposition: word(violation.disposition), route: route(violation.document), blocked: blockedKind(violation.blocked) });
+      writeLog({
+        ...logContext(service, env, context.requestId, request.method),
+        event: 'csp_report',
+        level: 'warn',
+        directive: word(violation.directive),
+        disposition: word(violation.disposition),
+        route: route(violation.document),
+        blocked: blockedKind(violation.blocked),
+      });
     }
     return new Response(null, { status: 204, headers: { 'Cache-Control': 'no-store' } });
   },

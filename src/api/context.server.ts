@@ -23,7 +23,9 @@ export const apiContext = (request: Request): ApiContext => {
   return {
     locale: getLocale(),
     release: env.CF_VERSION_METADATA?.id ?? 'local',
-    getSession: once(async () => (getSessionCookie(request) ? auth(request).api.getSession({ headers: request.headers }) : null)),
+    getSession: once(async () =>
+      getSessionCookie(request) ? auth(request).api.getSession({ headers: request.headers }) : null,
+    ),
     relations: notes.relations,
     notes,
   };

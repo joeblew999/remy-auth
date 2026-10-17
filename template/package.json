@@ -1,13 +1,10 @@
 {
   "name": "my-app",
   "private": true,
-  "type": "module",
-  "dependencies": {
-    "@joeblew999/remy-ui": "0.15.1"
-  },
   "workspaces": [
     "docs"
   ],
+  "type": "module",
   "scripts": {
     "dev:status": "remy flow status",
     "dev:start": "remy flow start",
@@ -42,5 +39,8 @@
     "claude:resume": "claude --continue",
     "check": "remy check",
     "upgrade": "remy upgrade"
+  },
+  "dependencies": {
+    "@joeblew999/remy-ui": "0.15.1"
   }
 }

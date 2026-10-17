@@ -5,7 +5,14 @@ export type HasEnvironment = { ENVIRONMENT?: string } | null | undefined;
  * An app's environment table. Every column holds the same capabilities; `production` is required,
  * and any environment the table does not list is production.
  */
-export declare function environments<const TTable extends { production: Record<string, unknown> } & Record<string, Record<keyof TTable['production'], unknown>>>(table: TTable): {
+export declare function environments<
+  const TTable extends { production: Record<string, unknown> } & Record<
+    string,
+    Record<keyof TTable['production'], unknown>
+  >,
+>(
+  table: TTable,
+): {
   table: TTable;
   /** The declared environment, or "production" for anything absent or unknown. */
   environmentOf: (env: HasEnvironment) => keyof TTable & string;

@@ -23,55 +23,102 @@ const model = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 /** The model's word for "the excerpts do not answer this": the route then says so itself, with no sources. */
 const noAnswer = 'NO_ANSWER';
 
-const instructions = `You answer questions about ${docsConfig.product} from its documentation excerpts only. ` +
+const instructions =
+  `You answer questions about ${docsConfig.product} from its documentation excerpts only. ` +
   'Answer in at most three short sentences, in the language of the question, as plain text without Markdown. ' +
   `If the excerpts do not answer the question, reply with exactly ${noAnswer} and nothing else.`;
 
-export const answerQuestion = createServerOnlyFn(async (site: SiteName, q: string, locale: string): Promise<AskResult> => {
-  const question = q.trim();
-  if (!question) return { status: 'empty' };
-  const request = getRequest();
-  const started = Date.now();
-  // One `ask` event per question (npm run observe -- events -- ask): its outcome, how long the model call took,
-  // how many sources it cited and the page's language. Never the question itself.
-  const log = (outcome: string, fields: Record<string, unknown> = {}, level: 'info' | 'error' = 'info') =>
-    writeLog({ ...logContext(service, env, request.headers.get(requestIdHeader) ?? '', 'GET'), event: 'ask', level, outcome, site, locale, ...fields });
-  // Ask AI is the app's choice (docs.config.ts, `ask`); an app without it has no AI Search or rate-limit
-  // binding, so they are optional here, whatever the app's generated Env says.
-  // Read by name (an app without Ask AI declares neither), each typed where it is read.
-  const search: AiSearchInstance | undefined = Reflect.get(env, 'DOCS_SEARCH');
-  const limit: RateLimit | undefined = Reflect.get(env, 'ASK_LIMIT');
-  if (!docsConfig.ask || !search || !limit) { log('off'); return { status: 'no-answer' }; }
-  const { success } = await limit.limit({ key: request.headers.get('CF-Connecting-IP') ?? 'unknown' });
-  if (!success) { log('rate-limited'); return { status: 'rate-limited' }; }
-  if (question.length > askMaxLength) { log('too-long', { length: question.length }); return { status: 'too-long', length: question.length }; }
-  // The emergency stop (npm run docs -- answers off): the secret ASK_PAUSED set means no model call at all.
-  if ((env as { ASK_PAUSED?: string }).ASK_PAUSED) { log('paused'); return { status: 'no-answer' }; }
-  try {
-    const response = await search.chatCompletions({
-      model,
-      max_tokens: 300,
-      messages: [{ role: 'system', content: instructions }, { role: 'user', content: question }],
-      // Only this site's files in the page's language (docsAnswerFolder): its own translation, else its default language.
-      ai_search_options: { retrieval: { max_num_results: 5, filters: { folder: docsAnswerFolder(site, locale) } }, cache: { enabled: true } },
-    });
-    const answer = response.choices[0]?.message.content?.trim();
-    // Each cited page or section once, in the order AI Search ranked them, on the page's language frame.
-    const cited = await Promise.all(response.chunks.map(chunk => citation(chunk, locale)));
-    const citations = [...new Map(cited.flatMap(item => (item ? [[item.url, item] as const] : []))).values()];
-    const answered = Boolean(answer) && !answer!.includes(noAnswer) && citations.length > 0;
-    log(answered ? 'answered' : 'no-answer', { durationMs: Date.now() - started, chunks: response.chunks.length, citations: citations.length });
-    return answered ? { status: 'answered', answer: answer!, citations } : { status: 'no-answer' };
-  } catch (error) {
-    // The error's message says what failed (binding, AI Search, model); it never contains the question.
-    log('failed', { durationMs: Date.now() - started, error: error instanceof Error ? `${error.name}: ${error.message}`.slice(0, 300) : 'unknown' }, 'error');
-    return { status: 'no-answer' };
-  }
-});
+export const answerQuestion = createServerOnlyFn(
+  async (site: SiteName, q: string, locale: string): Promise<AskResult> => {
+    const question = q.trim();
+    if (!question) return { status: 'empty' };
+    const request = getRequest();
+    const started = Date.now();
+    // One `ask` event per question (npm run observe -- events -- ask): its outcome, how long the model call took,
+    // how many sources it cited and the page's language. Never the question itself.
+    const log = (outcome: string, fields: Record<string, unknown> = {}, level: 'info' | 'error' = 'info') =>
+      writeLog({
+        ...logContext(service, env, request.headers.get(requestIdHeader) ?? '', 'GET'),
+        event: 'ask',
+        level,
+        outcome,
+        site,
+        locale,
+        ...fields,
+      });
+    // Ask AI is the app's choice (docs.config.ts, `ask`); an app without it has no AI Search or rate-limit
+    // binding, so they are optional here, whatever the app's generated Env says.
+    // Read by name (an app without Ask AI declares neither), each typed where it is read.
+    const search: AiSearchInstance | undefined = Reflect.get(env, 'DOCS_SEARCH');
+    const limit: RateLimit | undefined = Reflect.get(env, 'ASK_LIMIT');
+    if (!docsConfig.ask || !search || !limit) {
+      log('off');
+      return { status: 'no-answer' };
+    }
+    const { success } = await limit.limit({ key: request.headers.get('CF-Connecting-IP') ?? 'unknown' });
+    if (!success) {
+      log('rate-limited');
+      return { status: 'rate-limited' };
+    }
+    if (question.length > askMaxLength) {
+      log('too-long', { length: question.length });
+      return { status: 'too-long', length: question.length };
+    }
+    // The emergency stop (npm run docs -- answers off): the secret ASK_PAUSED set means no model call at all.
+    if ((env as { ASK_PAUSED?: string }).ASK_PAUSED) {
+      log('paused');
+      return { status: 'no-answer' };
+    }
+    try {
+      const response = await search.chatCompletions({
+        model,
+        max_tokens: 300,
+        messages: [
+          { role: 'system', content: instructions },
+          { role: 'user', content: question },
+        ],
+        // Only this site's files in the page's language (docsAnswerFolder): its own translation, else its default language.
+        ai_search_options: {
+          retrieval: { max_num_results: 5, filters: { folder: docsAnswerFolder(site, locale) } },
+          cache: { enabled: true },
+        },
+      });
+      const answer = response.choices[0]?.message.content?.trim();
+      // Each cited page or section once, in the order AI Search ranked them, on the page's language frame.
+      const cited = await Promise.all(response.chunks.map((chunk) => citation(chunk, locale)));
+      const citations = [...new Map(cited.flatMap((item) => (item ? [[item.url, item] as const] : []))).values()];
+      const answered = Boolean(answer) && !answer!.includes(noAnswer) && citations.length > 0;
+      log(answered ? 'answered' : 'no-answer', {
+        durationMs: Date.now() - started,
+        chunks: response.chunks.length,
+        citations: citations.length,
+      });
+      return answered ? { status: 'answered', answer: answer!, citations } : { status: 'no-answer' };
+    } catch (error) {
+      // The error's message says what failed (binding, AI Search, model); it never contains the question.
+      log(
+        'failed',
+        {
+          durationMs: Date.now() - started,
+          error: error instanceof Error ? `${error.name}: ${error.message}`.slice(0, 300) : 'unknown',
+        },
+        'error',
+      );
+      return { status: 'no-answer' };
+    }
+  },
+);
 
 /** A heading line's text as the page shows it: no explicit [#id], link targets, code or emphasis marks, no Markdown escapes. */
-const headingText = (line: string) => line.match(/^#{1,6}\s+(.+?)\s*#*\s*$/)?.[1]
-  .replace(/\s*\[#[^\]]+\]$/, '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[`*_]/g, '').replace(/\\([!-/:-@[-`{-~])/g, '$1').replace(/\s+/g, ' ').trim();
+const headingText = (line: string) =>
+  line
+    .match(/^#{1,6}\s+(.+?)\s*#*\s*$/)?.[1]
+    .replace(/\s*\[#[^\]]+\]$/, '')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/[`*_]/g, '')
+    .replace(/\\([!-/:-@[-`{-~])/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim();
 
 /**
  * A chunk as a citation. The instance remy-docs-pages reads one Markdown object per docs page and
@@ -85,9 +132,18 @@ async function citation(chunk: AiSearchSearchResponse['chunks'][number], locale:
   if (!object) return undefined;
   const splat = (lang: string) => [lang === 'en' ? '' : lang, object.row.slug].filter(Boolean).join('/');
   const target = object.lang === 'en' ? locale : object.lang;
-  const [source, page] = await Promise.all([docsPage(object.row.site, splat(object.lang)), docsPage(object.row.site, splat(target))]);
+  const [source, page] = await Promise.all([
+    docsPage(object.row.site, splat(object.lang)),
+    docsPage(object.row.site, splat(target)),
+  ]);
   if (!source || !page) return undefined;
-  const id = chunk.text.split('\n').map(headingText).flatMap(text => source.headings.filter(item => item.text === text)).at(0)?.id;
-  const heading = page.headings.find(item => item.id === id);
-  return heading ? { url: `${page.url}#${heading.id}`, title: `${page.title}: ${heading.text}` } : { url: page.url, title: page.title };
+  const id = chunk.text
+    .split('\n')
+    .map(headingText)
+    .flatMap((text) => source.headings.filter((item) => item.text === text))
+    .at(0)?.id;
+  const heading = page.headings.find((item) => item.id === id);
+  return heading
+    ? { url: `${page.url}#${heading.id}`, title: `${page.title}: ${heading.text}` }
+    : { url: page.url, title: page.title };
 }

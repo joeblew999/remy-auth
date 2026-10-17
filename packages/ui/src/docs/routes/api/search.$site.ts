@@ -6,8 +6,12 @@ import { isSiteName, referenceSearch, sites } from '../../lib/source';
 export const Route = createFileRoute('/api/search/$site')({
   server: {
     handlers: {
-      GET: ({ params, request }) => (params.site === 'reference' ? referenceSearch.GET(request)
-        : isSiteName(params.site) ? sites[params.site].search.GET(request) : new Response(undefined, { status: 404 })),
+      GET: ({ params, request }) =>
+        params.site === 'reference'
+          ? referenceSearch.GET(request)
+          : isSiteName(params.site)
+            ? sites[params.site].search.GET(request)
+            : new Response(undefined, { status: 404 }),
     },
   },
 });

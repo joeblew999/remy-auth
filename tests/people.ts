@@ -41,17 +41,27 @@ export const visitorAddress = () => `2001:db8:${randomBytes(2).toString('hex')}:
  * The header that gives a visitor an address of their own, on a local Worker only. A deployment is
  * behind Cloudflare, which sets the header itself and refuses a request that arrives with one.
  */
-export const ownAddress = (address = visitorAddress()): Record<string, string> => (local ? { 'CF-Connecting-IP': address } : {});
+export const ownAddress = (address = visitorAddress()): Record<string, string> =>
+  local ? { 'CF-Connecting-IP': address } : {};
 
 /** A visitor with their own cookies and (locally) address: nobody is signed in yet. */
 export const visitor = (playwright: Playwright, baseURL: string | undefined, address = visitorAddress()) =>
   playwright.request.newContext({ baseURL, extraHTTPHeaders: { ...ownAddress(address), Origin: baseURL! } });
 
-export const sendCode = (who: APIRequestContext, email: string) => who.post('/api/auth/email-otp/send-verification-otp', { data: { email, type: 'sign-in' } });
-export const signIn = (who: APIRequestContext, email: string, otp: string) => who.post('/api/auth/sign-in/email-otp', { data: { email, otp } });
+export const sendCode = (who: APIRequestContext, email: string) =>
+  who.post('/api/auth/email-otp/send-verification-otp', { data: { email, type: 'sign-in' } });
+export const signIn = (who: APIRequestContext, email: string, otp: string) =>
+  who.post('/api/auth/sign-in/email-otp', { data: { email, otp } });
 
 /** A mail the local environment kept instead of sending. */
-export type CapturedMail = { to: string; from: string; subject: string; text: string; html?: string; createdAt: string };
+export type CapturedMail = {
+  to: string;
+  from: string;
+  subject: string;
+  text: string;
+  html?: string;
+  createdAt: string;
+};
 
 /** The mail captured for `email`, newest first. */
 export async function capturedMail(who: APIRequestContext, email: string): Promise<CapturedMail[]> {
@@ -69,7 +79,10 @@ export async function latestCode(who: APIRequestContext, email: string): Promise
 export async function seededSignIn(who: APIRequestContext) {
   const response = await who.get('/dev/people');
   expect(response.status()).toBe(200);
-  return await response.json() as { code: string; people: { name: string; email: string; role: string; holds: string[] }[] };
+  return (await response.json()) as {
+    code: string;
+    people: { name: string; email: string; role: string; holds: string[] }[];
+  };
 }
 
 /** A visitor signed in as `email` (a new account the first time), through Better Auth's own endpoints. */

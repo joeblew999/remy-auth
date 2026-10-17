@@ -10,7 +10,12 @@ import { clockDefaults, clockRouteOptions, clockZones } from '@joeblew999/remy-s
 export const Route = createFileRoute('/app/clock')({
   ...clockRouteOptions,
   search: { middlewares: [stripSearchParams(clockDefaults)] },
-  head: () => pageHead({ path: '/app/clock', title: locale => m.clock_title({}, { locale }), description: locale => m.clock_description({}, { locale }) }),
+  head: () =>
+    pageHead({
+      path: '/app/clock',
+      title: (locale) => m.clock_title({}, { locale }),
+      description: (locale) => m.clock_description({}, { locale }),
+    }),
   component: Clock,
   ...problemPages,
 });
@@ -18,6 +23,11 @@ export const Route = createFileRoute('/app/clock')({
 function Clock() {
   const navigate = Route.useNavigate();
   const zones = clockZones(Route.useSearch());
-  return <ClockPage locale={getLocale()} zones={zones}
-    onZonesChange={next => navigate({ search: { zones: next.join(',') }, replace: true })} />;
+  return (
+    <ClockPage
+      locale={getLocale()}
+      zones={zones}
+      onZonesChange={(next) => navigate({ search: { zones: next.join(',') }, replace: true })}
+    />
+  );
 }

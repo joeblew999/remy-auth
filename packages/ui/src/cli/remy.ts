@@ -12,12 +12,19 @@ import { begin } from './timing.ts';
 import { tools } from './tools.ts';
 import { help, writeCommands } from './help.ts';
 
-
 const [name = '', ...args] = process.argv.slice(2);
-if (name === 'help' || name === '--help' || name === '-h') { if (args.includes('--write')) await writeCommands(); else await help(console.log); process.exit(0); }
+if (name === 'help' || name === '--help' || name === '-h') {
+  if (args.includes('--write')) await writeCommands();
+  else await help(console.log);
+  process.exit(0);
+}
 // A bare step name is the flow's (the scripts of apps on 0.15: "dev:land": "remy land").
 const steps = ['status', 'start', 'change', 'land', 'promote', 'release', 'done'];
-const load = tools[name] ?? (steps.includes(name) ? () => import('./flow.ts').then(flow => ({ main: (rest: string[]) => flow.main([name, ...rest]) })) : undefined);
+const load =
+  tools[name] ??
+  (steps.includes(name)
+    ? () => import('./flow.ts').then((flow) => ({ main: (rest: string[]) => flow.main([name, ...rest]) }))
+    : undefined);
 if (!load) {
   console.error(`remy: ${name ? `no command "${name}".` : 'a command is needed.'}`);
   await help(console.error);
@@ -25,7 +32,11 @@ if (!load) {
 }
 // Every command is timed here, so none has to time itself (timing.ts): named by its first word and its
 // subcommand ("i18n translate", "ci", "flow land"); `remy last` reads the records and is not one.
-const sub = args.findIndex(arg => !arg.startsWith('-'));
-if (name !== 'last') begin(sub === -1 ? name : `${name} ${args[sub]}`, args.filter((_, index) => index !== sub));
+const sub = args.findIndex((arg) => !arg.startsWith('-'));
+if (name !== 'last')
+  begin(
+    sub === -1 ? name : `${name} ${args[sub]}`,
+    args.filter((_, index) => index !== sub),
+  );
 await configure();
 await (await load()).main(args);

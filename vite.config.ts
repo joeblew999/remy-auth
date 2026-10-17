@@ -9,12 +9,32 @@ const app = remyApp({ plugins: [paraglideVitePlugin(paraglide)], root: import.me
 
 // Trial: the tasks Vite+ runs and caches (vp run <task>). Files the tooling generates are its outputs, never
 // its inputs: a task that rewrites what it reads can never be skipped.
-const generated = ['!packages/ui/src/paraglide/**', '!packages/ui/cli/**', '!src/paraglide/**', '!src/routeTree.gen.ts',
-  '!worker-configuration.d.ts', '!node_modules/**', '!.remy-docs/**', '!docs/.remy-docs/**', '!dist/**', '!docs/dist/**',
-  '!test-results/**', '!playwright-report/**', '!**/.wrangler/**'];
+const generated = [
+  '!packages/ui/src/paraglide/**',
+  '!packages/ui/cli/**',
+  '!src/paraglide/**',
+  '!src/routeTree.gen.ts',
+  '!worker-configuration.d.ts',
+  '!node_modules/**',
+  '!.remy-docs/**',
+  '!docs/.remy-docs/**',
+  '!dist/**',
+  '!docs/dist/**',
+  '!test-results/**',
+  '!playwright-report/**',
+  '!**/.wrangler/**',
+];
 
 export default {
   ...app,
+  // The formatter (vp fmt), set to the style this code was written in: single quotes, 120 columns. Code and config only:
+  // Markdown is prose whose layout is its author's, and the translations are fingerprinted from it. Generated files
+  // are their generator's.
+  fmt: {
+    singleQuote: true,
+    printWidth: 120,
+    ignorePatterns: ['**/*.md', '**/*.mdx', '**/routeTree.gen.ts', '**/worker-configuration.d.ts', '**/paraglide/**'],
+  },
   // Lint and Vite+'s type check (vp check). template/ and the fixture's files are other apps' source, with their own
   // tsconfig and dependencies, never installed here: the new-app test checks them as an installed app.
   lint: { options: { typeAware: true, typeCheck: true }, ignorePatterns: ['template/**', 'fixtures/**'] },
@@ -27,7 +47,10 @@ export default {
       browser: {
         command: 'node packages/ui/src/cli/remy.ts ci browser --everything',
         dependsOn: ['build'],
-        cache: { input: [{ auto: true }, ...generated, '!.git/**'], untrackedEnv: ['REMY_FLOW', 'GITHUB_ACTIONS', 'PREVIEW_PORT'] },
+        cache: {
+          input: [{ auto: true }, ...generated, '!.git/**'],
+          untrackedEnv: ['REMY_FLOW', 'GITHUB_ACTIONS', 'PREVIEW_PORT'],
+        },
       },
       check: {
         command: 'node packages/ui/src/cli/remy.ts check',

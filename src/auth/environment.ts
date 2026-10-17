@@ -55,7 +55,8 @@ export const { environmentOf, policyFor, permits } = environments({
 export const DEMO_SIGN_IN_CODE = '424242';
 
 /** The fixed sign-in code for seeded people here, or undefined where every code is random. */
-export const fixedSignInCode = (env: { ENVIRONMENT?: string }): string | undefined => (permits(env, 'signInCode') === 'derived' ? DEMO_SIGN_IN_CODE : undefined);
+export const fixedSignInCode = (env: { ENVIRONMENT?: string }): string | undefined =>
+  permits(env, 'signInCode') === 'derived' ? DEMO_SIGN_IN_CODE : undefined;
 
 /**
  * The code `email` signs in with when this environment publishes one for them, or undefined for a

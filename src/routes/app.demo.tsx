@@ -12,19 +12,27 @@ import { problemPages } from '@joeblew999/remy-ui/problem';
 // An app page rendered in the browser only: the server sends the document and its metadata.
 export const Route = createFileRoute('/app/demo')({
   ssr: false,
-  head: () => pageHead({ path: '/app/demo', title: locale => m.demo_title({}, { locale }), description: locale => m.demo_description({}, { locale }) }),
+  head: () =>
+    pageHead({
+      path: '/app/demo',
+      title: (locale) => m.demo_title({}, { locale }),
+      description: (locale) => m.demo_description({}, { locale }),
+    }),
   component: Demo,
   ...problemPages,
 });
-
 
 function Demo() {
   // The form's own checks run first; POST /api/reservations checks again and answers in the page's
   // language. Its typed INVALID_RESERVATION error carries field errors, which the form shows like its own.
   const reservation = useMutation(orpc.reservations.create.mutationOptions());
-  const reserve = (data: { name: string; guests: number }) => reservation.mutateAsync(data).then(({ message }) => ({ message }), (error: typeof reservation.error) => {
-    if (isDefinedError(error) && error.code === 'INVALID_RESERVATION') return { errors: error.data };
-    throw error;
-  });
+  const reserve = (data: { name: string; guests: number }) =>
+    reservation.mutateAsync(data).then(
+      ({ message }) => ({ message }),
+      (error: typeof reservation.error) => {
+        if (isDefinedError(error) && error.code === 'INVALID_RESERVATION') return { errors: error.data };
+        throw error;
+      },
+    );
   return <DemoPage locale={getLocale()} onReserve={reserve} onDirtyChange={useLeaveGuard()} />;
 }

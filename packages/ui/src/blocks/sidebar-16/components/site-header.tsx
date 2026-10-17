@@ -17,18 +17,32 @@ export function SiteHeader({ locale }: { locale: Locale }) {
   return (
     <header className="site-header sticky top-0 z-50 flex w-full items-center border-b bg-background">
       <div className="flex h-(--header-height) w-full items-center gap-2 px-4">
-        <Button className="hidden h-8 w-8 md:inline-flex" variant="ghost" size="icon" onClick={toggleSidebar} aria-label={m.toggle_sidebar({}, { locale })}>
+        <Button
+          className="hidden h-8 w-8 md:inline-flex"
+          variant="ghost"
+          size="icon"
+          onClick={toggleSidebar}
+          aria-label={m.toggle_sidebar({}, { locale })}
+        >
           <PanelLeftIcon className="rtl:rotate-180" />
         </Button>
         <Separator orientation="vertical" className="me-2 hidden md:block data-vertical:h-4 data-vertical:self-auto" />
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink className="brand" render={app.app ? <Link {...app.app.home} preload="intent" /> : <Link to="/" preload="intent" />}>{app.brand}</BreadcrumbLink>
+              <BreadcrumbLink
+                className="brand"
+                render={app.app ? <Link {...app.app.home} preload="intent" /> : <Link to="/" preload="intent" />}
+              >
+                {app.brand}
+              </BreadcrumbLink>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="ms-auto flex items-center gap-1"><LanguageMenu locale={locale} /><ModeToggle locale={locale} /></div>
+        <div className="ms-auto flex items-center gap-1">
+          <LanguageMenu locale={locale} />
+          <ModeToggle locale={locale} />
+        </div>
       </div>
     </header>
   );

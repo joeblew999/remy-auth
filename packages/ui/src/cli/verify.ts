@@ -22,7 +22,10 @@ const readJson = (file: string): Json => JSON.parse(readFileSync(file, 'utf8'));
 
 function tool(command: string, args: string[], what = command): void {
   const result = spawnSync(command, args, { stdio: 'inherit' });
-  if (result.status !== 0) { console.error(`${what}: failed`); process.exit(result.status ?? 1); }
+  if (result.status !== 0) {
+    console.error(`${what}: failed`);
+    process.exit(result.status ?? 1);
+  }
 }
 
 /** The versions of the CLIs the tooling runs, without contacting a Cloudflare account. */
@@ -31,7 +34,10 @@ export function doctor(): void {
   tool('npm', ['--version'], 'npm');
   for (const bin of ['wrangler', 'chrome-devtools-mcp', 'modern-web-guidance', 'codex']) {
     const path = join(process.cwd(), 'node_modules', '.bin', bin);
-    if (existsSync(path)) { process.stdout.write(`${bin} `); tool(path, ['--version'], bin); } else console.log(`${bin}: not installed`);
+    if (existsSync(path)) {
+      process.stdout.write(`${bin} `);
+      tool(path, ['--version'], bin);
+    } else console.log(`${bin}: not installed`);
   }
 }
 
@@ -45,27 +51,46 @@ export async function tooling(): Promise<void> {
   const manifest = readJson('package.json');
   const lock = readJson('package-lock.json');
   for (const section of ['dependencies', 'devDependencies', 'optionalDependencies']) {
-    assert.deepEqual(lock.packages?.['']?.[section] ?? {}, manifest[section] ?? {}, `${section}: package-lock.json differs from package.json; run npm install`);
+    assert.deepEqual(
+      lock.packages?.['']?.[section] ?? {},
+      manifest[section] ?? {},
+      `${section}: package-lock.json differs from package.json; run npm install`,
+    );
   }
   for (const [location, locked] of Object.entries(lock.packages ?? {}) as [string, Json][]) {
     if (!location || location.startsWith('node_modules/') || location.includes('/node_modules/')) continue;
     if (!existsSync(`${location}/package.json`)) continue;
     const workspace = readJson(`${location}/package.json`);
     for (const section of ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']) {
-      assert.deepEqual(locked?.[section] ?? {}, workspace[section] ?? {}, `${location} ${section}: package-lock.json differs from its package.json; run npm install`);
+      assert.deepEqual(
+        locked?.[section] ?? {},
+        workspace[section] ?? {},
+        `${location} ${section}: package-lock.json differs from its package.json; run npm install`,
+      );
     }
   }
   console.log('Every package.json matches the lockfile.');
 
-  const { unstable_readConfig } = await import(pathToFileURL(createRequire(join(process.cwd(), 'package.json')).resolve('wrangler')).href) as typeof import('wrangler');
+  const { unstable_readConfig } = (await import(
+    pathToFileURL(createRequire(join(process.cwd(), 'package.json')).resolve('wrangler')).href
+  )) as typeof import('wrangler');
   const config = unstable_readConfig({ config: 'wrangler.jsonc' }) as Json;
   // preview_urls makes every uploaded version and alias public, old ones without the app's later fixes. Only a
   // Worker on Cloudflare's Worker Previews (a `previews` block, built by Workers Builds) turns it on, on purpose:
   // that is what gives each branch and pull request its preview URL (owner, 2026-10-17).
-  if (config.previews === undefined) assert.equal(config.preview_urls, false, 'wrangler.jsonc: preview_urls must be false (true only with a previews block)');
+  if (config.previews === undefined)
+    assert.equal(
+      config.preview_urls,
+      false,
+      'wrangler.jsonc: preview_urls must be false (true only with a previews block)',
+    );
   // Smart Placement: without it, a visitor far from the databases waits one ocean crossing per query (the
   // account page took 3.2 s from Asia, 2026-10-17). Inherited by every environment and Preview, so set once.
-  assert.equal(config.placement?.mode, 'smart', 'wrangler.jsonc: "placement": { "mode": "smart" } (run the Worker near its databases)');
+  assert.equal(
+    config.placement?.mode,
+    'smart',
+    'wrangler.jsonc: "placement": { "mode": "smart" } (run the Worker near its databases)',
+  );
   const observability = config.observability;
   assert.equal(observability?.enabled, true, 'Worker observability must be enabled');
   assert.equal(observability?.redact_query_string, true, 'Query-string redaction must be enabled');
@@ -79,19 +104,25 @@ export async function tooling(): Promise<void> {
   console.log('Wrangler parsed the configuration; observability requirements pass.');
 
   // The workflows hold no logic of their own: every command they name is one a developer runs the same way.
-  const workflows = existsSync('.github/workflows') ? readdirSync('.github/workflows').filter(name => /\.ya?ml$/.test(name)) : [];
+  const workflows = existsSync('.github/workflows')
+    ? readdirSync('.github/workflows').filter((name) => /\.ya?ml$/.test(name))
+    : [];
   if (workflows.length) {
     const scripts = new Set(Object.keys(manifest.scripts ?? {}));
     for (const name of workflows) {
       const text = readFileSync(`.github/workflows/${name}`, 'utf8');
-      for (const match of text.matchAll(/\bnpm run ([a-z0-9][a-z0-9:_-]*)/g)) assert.ok(scripts.has(match[1]!), `.github/workflows/${name} runs npm script ${match[1]}, which package.json does not have`);
+      for (const match of text.matchAll(/\bnpm run ([a-z0-9][a-z0-9:_-]*)/g))
+        assert.ok(
+          scripts.has(match[1]!),
+          `.github/workflows/${name} runs npm script ${match[1]}, which package.json does not have`,
+        );
     }
     console.log(`The workflows name only commands that exist (${workflows.join(', ')}).`);
   }
 
   // The pins (skills.ts) are the single list of skill sources.
   const skills: Record<string, Json> = readJson('skills-lock.json').skills;
-  const pinned = new Set(pins.map(pin => new URL(pin.source).pathname.split('/').slice(1, 3).join('/')));
+  const pinned = new Set(pins.map((pin) => new URL(pin.source).pathname.split('/').slice(1, 3).join('/')));
   for (const [name, skill] of Object.entries(skills)) {
     if (skill.sourceType === 'local' && skill.source === remySkillPath) continue;
     assert.ok(pinned.has(skill.source), `${name}: installed from ${skill.source}, which the pins do not name`);
@@ -99,7 +130,10 @@ export async function tooling(): Promise<void> {
   for (const pin of pins) {
     const source = new URL(pin.source);
     const [owner, repo, tree, ref] = source.pathname.slice(1).split('/');
-    assert.ok(source.hostname === 'github.com' && tree === 'tree' && /^[a-f0-9]{40}$/.test(ref ?? ''), `Invalid pinned skill source: ${pin.source}`);
+    assert.ok(
+      source.hostname === 'github.com' && tree === 'tree' && /^[a-f0-9]{40}$/.test(ref ?? ''),
+      `Invalid pinned skill source: ${pin.source}`,
+    );
     const entries = Object.entries(skills).filter(([, skill]) => skill.source === `${owner}/${repo}`);
     assert.ok(entries.length > 0, `Missing skill pack: ${owner}/${repo}; npx remy skills install`);
     for (const [name, skill] of entries) {
@@ -137,9 +171,18 @@ export async function verify(): Promise<void> {
 
 export const what = "the installation's checks and the release gate";
 export const commands: Subcommands = {
-  all: { what: "everything: the installation's checks, every language, the consumers (the release gate; dev:release runs it); the default", run: () => verify() },
-  setup: { what: "the installation's checks: npm ls, MCP, the guard, doctor, tooling, the check (npm run setup ends with it)", run: () => verifySetup() },
-  tooling: { what: "the lockfile, wrangler.jsonc's observability, placement and preview_urls, the workflows, the skill pins", run: () => tooling() },
+  all: {
+    what: "everything: the installation's checks, every language, the consumers (the release gate; dev:release runs it); the default",
+    run: () => verify(),
+  },
+  setup: {
+    what: "the installation's checks: npm ls, MCP, the guard, doctor, tooling, the check (npm run setup ends with it)",
+    run: () => verifySetup(),
+  },
+  tooling: {
+    what: "the lockfile, wrangler.jsonc's observability, placement and preview_urls, the workflows, the skill pins",
+    run: () => tooling(),
+  },
   doctor: { what: "the tooling's versions", run: () => doctor() },
 };
 export const main = dispatch('verify', commands, 'all');

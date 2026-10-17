@@ -9,9 +9,16 @@ import { permits } from '../auth/environment';
 // alone; anywhere else mail is really sent, there is nothing to read, and this answers 404, like a
 // path that was never built.
 export const Route = createFileRoute('/dev/mail')({
-  server: { handlers: { GET: ({ request }) => {
-    if (!permits(env, 'capturesMail')) return new Response('Not found', { status: 404 });
-    const recipient = new URL(request.url).searchParams.get('recipient') ?? '';
-    return Response.json({ recipient, mail: readOutbox(recipient).slice(0, 5) }, { headers: { 'Cache-Control': 'no-store' } });
-  } } },
+  server: {
+    handlers: {
+      GET: ({ request }) => {
+        if (!permits(env, 'capturesMail')) return new Response('Not found', { status: 404 });
+        const recipient = new URL(request.url).searchParams.get('recipient') ?? '';
+        return Response.json(
+          { recipient, mail: readOutbox(recipient).slice(0, 5) },
+          { headers: { 'Cache-Control': 'no-store' } },
+        );
+      },
+    },
+  },
 });

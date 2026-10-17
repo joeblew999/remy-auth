@@ -24,15 +24,19 @@ export type Build = z.infer<typeof stamp>;
 export const deployment = z.object({
   status: z.literal('ok'),
   service: z.string().describe('The Worker that answered'),
-  release: z.string().describe("Cloudflare's ID of the deployed version, or \"local\""),
-  environment: z.string().optional().describe('The environment the Worker declares (ENVIRONMENT); production when it declares none'),
+  release: z.string().describe('Cloudflare\'s ID of the deployed version, or "local"'),
+  environment: z
+    .string()
+    .optional()
+    .describe('The environment the Worker declares (ENVIRONMENT); production when it declares none'),
   deployedAt: z.string().optional().describe('When Cloudflare was given this version; absent locally'),
   build: stamp.optional(),
 });
 export type Deployment = z.infer<typeof deployment>;
 
 /** Whether two builds are the same code: the same commit with the same uncommitted changes. */
-export const sameBuild = (a: Pick<Build, 'commit' | 'changes'>, b: Pick<Build, 'commit' | 'changes'>) => a.commit === b.commit && a.changes === b.changes;
+export const sameBuild = (a: Pick<Build, 'commit' | 'changes'>, b: Pick<Build, 'commit' | 'changes'>) =>
+  a.commit === b.commit && a.changes === b.changes;
 
 /** A commit as people quote it. */
 export const shortCommit = (commit: string) => commit.slice(0, 7);
@@ -48,10 +52,11 @@ export async function askDeployment(origin = ''): Promise<Deployment> {
 }
 
 /** TanStack Query options for a deployment: asked in the browser, again every five minutes and when the tab is looked at again. */
-export const deploymentQuery = (origin = '') => queryOptions({
-  queryKey: ['remy', 'deployment', origin],
-  queryFn: () => askDeployment(origin),
-  staleTime: deploymentRefreshMs,
-  refetchInterval: deploymentRefreshMs,
-  retry: false,
-});
+export const deploymentQuery = (origin = '') =>
+  queryOptions({
+    queryKey: ['remy', 'deployment', origin],
+    queryFn: () => askDeployment(origin),
+    staleTime: deploymentRefreshMs,
+    refetchInterval: deploymentRefreshMs,
+    retry: false,
+  });

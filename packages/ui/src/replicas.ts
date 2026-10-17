@@ -18,7 +18,11 @@ import type { AsyncLocalStorage } from 'node:async_hooks';
 
 /** The parts of a D1 session and binding this uses: structural, so this module needs no Workers types. */
 type Statement = unknown;
-type Session = { prepare(query: string): Statement; batch(statements: Statement[]): Promise<unknown[]>; getBookmark(): string | null };
+type Session = {
+  prepare(query: string): Statement;
+  batch(statements: Statement[]): Promise<unknown[]>;
+  getBookmark(): string | null;
+};
 type Database = {
   prepare(query: string): Statement;
   batch(statements: Statement[]): Promise<unknown[]>;
@@ -49,15 +53,16 @@ export function replicated<D extends object>(binding: D, name: string): D {
     const store = current?.getStore();
     if (!store) return database;
     let open = store.sessions.get(name);
-    if (!open) store.sessions.set(name, open = database.withSession(store.bookmarks.get(name) ?? 'first-unconstrained'));
+    if (!open)
+      store.sessions.set(name, (open = database.withSession(store.bookmarks.get(name) ?? 'first-unconstrained')));
     return open;
   };
   const standIn: Database = {
-    prepare: query => session().prepare(query),
-    batch: statements => session().batch(statements),
+    prepare: (query) => session().prepare(query),
+    batch: (statements) => session().batch(statements),
     // exec runs statements as written (migrations, never a request's reads): the primary, as always.
-    exec: query => database.exec(query),
-    withSession: constraint => database.withSession(constraint),
+    exec: (query) => database.exec(query),
+    withSession: (constraint) => database.withSession(constraint),
   };
   standIns.set(binding, standIn);
   return standIn as unknown as D;
@@ -68,7 +73,11 @@ function bookmarksOf(request: Request): URLSearchParams {
   for (const part of request.headers.get('Cookie')?.split(';') ?? []) {
     const [key, ...value] = part.trim().split('=');
     if (key === bookmarkCookie) {
-      try { return new URLSearchParams(decodeURIComponent(value.join('='))); } catch { return new URLSearchParams(); }
+      try {
+        return new URLSearchParams(decodeURIComponent(value.join('=')));
+      } catch {
+        return new URLSearchParams();
+      }
     }
   }
   return new URLSearchParams();
@@ -86,10 +95,16 @@ export async function withReplicas(request: Request, handle: () => Promise<Respo
   let moved = false;
   for (const [name, session] of store.sessions) {
     const bookmark = session.getBookmark();
-    if (bookmark && bookmark !== store.bookmarks.get(name)) { store.bookmarks.set(name, bookmark); moved = true; }
+    if (bookmark && bookmark !== store.bookmarks.get(name)) {
+      store.bookmarks.set(name, bookmark);
+      moved = true;
+    }
   }
   if (!moved) return response;
   const out = new Response(response.body, response);
-  out.headers.append('Set-Cookie', `${bookmarkCookie}=${encodeURIComponent(store.bookmarks.toString())}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=3600`);
+  out.headers.append(
+    'Set-Cookie',
+    `${bookmarkCookie}=${encodeURIComponent(store.bookmarks.toString())}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=3600`,
+  );
   return out;
 }

@@ -20,5 +20,7 @@ test('the emitted command line runs from under node_modules, where a .ts bin can
     expect(result.stderr, result.stderr).not.toContain('TYPE_STRIPPING');
     expect(result.stderr).toContain('a command is needed');
     expect(result.status).toBe(2);
-  } finally { rmSync(scratch, { recursive: true, force: true }); }
+  } finally {
+    rmSync(scratch, { recursive: true, force: true });
+  }
 });

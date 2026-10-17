@@ -13,10 +13,24 @@ import './zod-csp';
  * frame reads, so no page passes it. An app's root renders its pages inside it:
  * `<AppProviders locale={locale} app={remyApp} preferred={preferred}>`.
  */
-export function AppProviders({ locale, app, preferred, children }: { locale: Locale; app: RemyApp; preferred?: Locale; children: React.ReactNode }) {
-  return <DirectionProvider direction={direction(locale)}>
-    <ThemeProvider defaultTheme="system" storageKey="theme">
-      <RemyAppProvider value={app}><PreferredProvider value={preferred}>{children}</PreferredProvider></RemyAppProvider>
-    </ThemeProvider>
-  </DirectionProvider>;
+export function AppProviders({
+  locale,
+  app,
+  preferred,
+  children,
+}: {
+  locale: Locale;
+  app: RemyApp;
+  preferred?: Locale;
+  children: React.ReactNode;
+}) {
+  return (
+    <DirectionProvider direction={direction(locale)}>
+      <ThemeProvider defaultTheme="system" storageKey="theme">
+        <RemyAppProvider value={app}>
+          <PreferredProvider value={preferred}>{children}</PreferredProvider>
+        </RemyAppProvider>
+      </ThemeProvider>
+    </DirectionProvider>
+  );
 }

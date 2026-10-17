@@ -10,9 +10,12 @@ const sorted = (values: Iterable<string>) => [...values].sort();
 
 export default {
   async fetch(_request: Request, env: { DB: D1Database }) {
-    await env.DB.batch(statements().map(statement => env.DB.prepare(statement)));
+    await env.DB.batch(statements().map((statement) => env.DB.prepare(statement)));
     const engine = relationEngine(vocabulary, env.DB);
-    const events = ['e_cup', 'e_camp'], games = ['g_cup', 'g_camp'], teams = ['t_red', 't_blue'], players = ['p_now', 'p_left', 'p_soon', 'p_guest'];
+    const events = ['e_cup', 'e_camp'],
+      games = ['g_cup', 'g_camp'],
+      teams = ['t_red', 't_blue'],
+      players = ['p_now', 'p_left', 'p_soon', 'p_guest'];
     const many = [...Array.from({ length: 240 }, (_, index) => `missing_${index}`), 't_red'];
 
     return Response.json({

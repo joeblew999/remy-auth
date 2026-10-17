@@ -7,11 +7,16 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
 export function rules(): void {
   if (existsSync('packages/ui/src/cli/remy.ts') && existsSync('docs/content/dev/how-we-work.md')) {
-    console.log('rules: remy-auth owns the rules (docs/content/dev/agents.md, which AGENTS.md points at); nothing to write.');
+    console.log(
+      'rules: remy-auth owns the rules (docs/content/dev/agents.md, which AGENTS.md points at); nothing to write.',
+    );
     return;
   }
   const pkg = 'node_modules/@joeblew999/remy-ui/package.json';
-  if (!existsSync(pkg)) { console.error('rules: @joeblew999/remy-ui is not installed (npm run setup)'); process.exit(1); }
+  if (!existsSync(pkg)) {
+    console.error('rules: @joeblew999/remy-ui is not installed (npm run setup)');
+    process.exit(1);
+  }
   const { version } = JSON.parse(readFileSync(pkg, 'utf8')) as { version: string };
   const begin = '<!-- BEGIN:remy-rules (written by remy rules; edit around it, not in it) -->';
   const end = '<!-- END:remy-rules -->';
@@ -28,10 +33,15 @@ into \`.plans/now.md\` in that landing; \`dev:status\` shows that list to everyo
 of a sweep (branches, pull requests, deployments, plans, retired words, touched docs), not of a list.
 ${end}`;
   const current = existsSync('AGENTS.md') ? readFileSync('AGENTS.md', 'utf8') : '# Agent instructions\n';
-  const marked = new RegExp(`(?:${begin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|<!-- BEGIN:remy-rules[^>]*-->)[\\s\\S]*?${end}`);
+  const marked = new RegExp(
+    `(?:${begin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|<!-- BEGIN:remy-rules[^>]*-->)[\\s\\S]*?${end}`,
+  );
   const next = marked.test(current) ? current.replace(marked, block) : `${current.trimEnd()}\n\n${block}\n`;
   if (next === current) console.log(`rules: AGENTS.md already points at the remy skill (${version}).`);
-  else { writeFileSync('AGENTS.md', next); console.log(`rules: AGENTS.md points at the remy skill (${version}).`); }
+  else {
+    writeFileSync('AGENTS.md', next);
+    console.log(`rules: AGENTS.md points at the remy skill (${version}).`);
+  }
 }
 
 export const what = "the platform's rules block in AGENTS.md, written or refreshed in place";

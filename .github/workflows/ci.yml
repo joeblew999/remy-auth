@@ -105,7 +105,7 @@ jobs:
       - if: failure() && github.event_name == 'push'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BODY: "The checks failed on this commit, job \"${{ matrix.name }}\" (npm run ci -- ${{ matrix.part }}): ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Locally the same command reproduces it: npm run ci -- ${{ matrix.part }}."
+          BODY: 'The checks failed on this commit, job "${{ matrix.name }}" (npm run ci -- ${{ matrix.part }}): ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Locally the same command reproduces it: npm run ci -- ${{ matrix.part }}.'
         run: gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/comments" -f body="$BODY" > /dev/null
 
   # (A red job writes on the commit itself, in its own last step above, naming itself.)

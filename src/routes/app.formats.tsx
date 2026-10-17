@@ -12,7 +12,12 @@ import { problemPages } from '@joeblew999/remy-ui/problem';
 export const Route = createFileRoute('/app/formats')({
   ...formatsRouteOptions,
   search: { middlewares: [stripSearchParams(searchDefaults)] },
-  head: () => pageHead({ path: '/app/formats', title: locale => m.formats_title({}, { locale }), description: (locale, product) => m.formats_description({ product }, { locale }) }),
+  head: () =>
+    pageHead({
+      path: '/app/formats',
+      title: (locale) => m.formats_title({}, { locale }),
+      description: (locale, product) => m.formats_description({ product }, { locale }),
+    }),
   component: Formats,
   ...problemPages,
 });
@@ -20,6 +25,12 @@ export const Route = createFileRoute('/app/formats')({
 function Formats() {
   const { info, place } = Route.useLoaderData();
   const locale = getLocale();
-  return <AppFormatsPage locale={locale} info={info}
-    extras={formatsExtras({ locale, info, place })} controls={choiceCards({ locale, search: Route.useSearch(), to: '/app/formats' })} />;
+  return (
+    <AppFormatsPage
+      locale={locale}
+      info={info}
+      extras={formatsExtras({ locale, info, place })}
+      controls={choiceCards({ locale, search: Route.useSearch(), to: '/app/formats' })}
+    />
+  );
 }

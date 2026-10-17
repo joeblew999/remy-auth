@@ -27,14 +27,42 @@ export function cacheDir(): string {
 /** A fingerprint (path, size, modification time) of every file the globs name, node_modules excluded. */
 function fingerprint(patterns: string[]): string {
   const hash = createHash('sha256');
-  const toRegExp = (glob: string) => new RegExp(`^${glob.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*\*\//g, '(?:.*/)?').replace(/\*/g, '[^/]*')}$`);
-  const walk = (dir: string): string[] => existsSync(dir) ? readdirSync(dir, { withFileTypes: true }).flatMap(entry => { const path = join(dir, entry.name); return entry.isDirectory() ? (entry.name === 'node_modules' ? [] : walk(path)) : [path]; }) : [];
+  const toRegExp = (glob: string) =>
+    new RegExp(
+      `^${glob
+        .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+        .replace(/\*\*\//g, '(?:.*/)?')
+        .replace(/\*/g, '[^/]*')}$`,
+    );
+  const walk = (dir: string): string[] =>
+    existsSync(dir)
+      ? readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+          const path = join(dir, entry.name);
+          return entry.isDirectory() ? (entry.name === 'node_modules' ? [] : walk(path)) : [path];
+        })
+      : [];
   for (const pattern of patterns) {
-    const fixed = pattern.split('/').filter(part => !part.includes('*'));
-    const base = pattern.includes('*') ? fixed.slice(0, pattern.split('/').findIndex(part => part.includes('*'))).join('/') || '.' : pattern;
+    const fixed = pattern.split('/').filter((part) => !part.includes('*'));
+    const base = pattern.includes('*')
+      ? fixed
+          .slice(
+            0,
+            pattern.split('/').findIndex((part) => part.includes('*')),
+          )
+          .join('/') || '.'
+      : pattern;
     const matches = toRegExp(pattern);
-    const files = pattern.includes('*') ? walk(base).map(file => relative(process.cwd(), file).split(sep).join('/')).filter(file => matches.test(file)) : (existsSync(pattern) ? [pattern] : []);
-    for (const file of files.sort()) { const info = statSync(file); hash.update(`${file} ${info.size} ${info.mtimeMs}\n`); }
+    const files = pattern.includes('*')
+      ? walk(base)
+          .map((file) => relative(process.cwd(), file).split(sep).join('/'))
+          .filter((file) => matches.test(file))
+      : existsSync(pattern)
+        ? [pattern]
+        : [];
+    for (const file of files.sort()) {
+      const info = statSync(file);
+      hash.update(`${file} ${info.size} ${info.mtimeMs}\n`);
+    }
   }
   return hash.digest('hex');
 }
@@ -42,7 +70,10 @@ function fingerprint(patterns: string[]): string {
 /** Runs `step` unless the files `patterns` name are as they were when it last passed; stamps it when it passes. */
 export function whenChanged(name: string, patterns: string[], step: () => void): void {
   const file = join(cacheDir(), `${name}.stamp`);
-  if (existsSync(file) && readFileSync(file, 'utf8') === fingerprint(patterns)) { console.log(`${name}: nothing changed since it last passed.`); return; }
+  if (existsSync(file) && readFileSync(file, 'utf8') === fingerprint(patterns)) {
+    console.log(`${name}: nothing changed since it last passed.`);
+    return;
+  }
   step();
   // The files as they are after the pass: a step that writes among them (wrangler types) does not undo its own stamp.
   writeFileSync(file, fingerprint(patterns));
@@ -69,14 +100,16 @@ const consumerOnly = (file: string) => file.startsWith('template/') || file.star
 
 /** What the consumer fixture depends on: the packages it packs, the blank app, its files, and what decides how anything installs or runs. */
 const consumerInputs = (file: string) =>
-  file.startsWith('packages/') || consumerOnly(file) || file.startsWith('.github/workflows/')
-  || ['package.json', 'package-lock.json', '.node-version'].includes(file);
+  file.startsWith('packages/') ||
+  consumerOnly(file) ||
+  file.startsWith('.github/workflows/') ||
+  ['package.json', 'package-lock.json', '.node-version'].includes(file);
 
 /** Whether `part` must run for these changed files. Unknown paths count for browser and audits; new-app runs only for its inputs. */
 export function affects(part: Part, files: readonly string[]): boolean {
-  const live = files.filter(file => !inert(file));
+  const live = files.filter((file) => !inert(file));
   if (part === 'new-app') return live.some(consumerInputs);
-  return live.some(file => !consumerOnly(file));
+  return live.some((file) => !consumerOnly(file));
 }
 
 /**
@@ -93,12 +126,27 @@ export function changedFiles(): string[] | undefined {
   // files) with where the branch left the base. On 2026-10-17 `${base}...HEAD`, commits only, told a branch
   // whose every change was uncommitted that nothing changed, and the browser part was skipped.
   const since = base ? spawnSync('git', ['merge-base', base, 'HEAD'], { encoding: 'utf8' }).stdout?.trim() : undefined;
-  if (base && !since) { console.log(`could not tell what changed (no common commit with ${base}): running everything.`); return undefined; }
+  if (base && !since) {
+    console.log(`could not tell what changed (no common commit with ${base}): running everything.`);
+    return undefined;
+  }
   const range = since ? [since] : ['HEAD^1', 'HEAD'];
   const result = spawnSync('git', ['diff', '--name-only', ...range], { encoding: 'utf8' });
-  if (result.status !== 0) { console.log(`could not tell what changed (git diff ${range.join(' ')}): running everything.`); return undefined; }
-  const added = since ? spawnSync('git', ['ls-files', '--others', '--exclude-standard'], { encoding: 'utf8' }).stdout ?? '' : '';
-  return [...new Set(`${result.stdout}\n${added}`.split('\n').map(line => line.trim()).filter(Boolean))];
+  if (result.status !== 0) {
+    console.log(`could not tell what changed (git diff ${range.join(' ')}): running everything.`);
+    return undefined;
+  }
+  const added = since
+    ? (spawnSync('git', ['ls-files', '--others', '--exclude-standard'], { encoding: 'utf8' }).stdout ?? '')
+    : '';
+  return [
+    ...new Set(
+      `${result.stdout}\n${added}`
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean),
+    ),
+  ];
 }
 
 /**
@@ -109,7 +157,10 @@ export function changedFiles(): string[] | undefined {
  * Not the tooling (packages/ui/src/cli, tasks) or the unit checks: they render no page.
  * `read` gives a file's current text, undefined when it is gone (then its name alone decides, as above).
  */
-export function languageInput(file: string, read: (file: string) => string | undefined = path => existsSync(path) ? readFileSync(path, 'utf8') : undefined): boolean {
+export function languageInput(
+  file: string,
+  read: (file: string) => string | undefined = (path) => (existsSync(path) ? readFileSync(path, 'utf8') : undefined),
+): boolean {
   // The lockfile, not package.json: a version bump or a script is no new dependency (2026-10-17: counting
   // package.json sent 44 of the last 80 commits on main to every language).
   if (file === 'package-lock.json' || file === '.node-version') return true;
@@ -117,7 +168,8 @@ export function languageInput(file: string, read: (file: string) => string | und
   if (/(^|\/)(checks\.js|smoke\.js|playwright\.js)$|\.checks\.js$|^tests\//.test(file)) return true;
   // The tooling (the command line, task scripts) prints dates and runs translators, but renders no page.
   if (/^packages\/ui\/src\/cli\/|^tasks\/|\.sh$/.test(file)) return false;
-  if (/(^|\/)(messages|project\.inlang)\/|paraglide|locale|language|direction|i18n|intl|fonts?\b/i.test(file)) return true;
+  if (/(^|\/)(messages|project\.inlang)\/|paraglide|locale|language|direction|i18n|intl|fonts?\b/i.test(file))
+    return true;
   if (file.endsWith('.css')) return true;
   if (!/\.(tsx?|jsx?|mjs)$/.test(file)) return false;
   const text = read(file);
@@ -136,9 +188,16 @@ export function languageInput(file: string, read: (file: string) => string | und
 export function allLanguages(): boolean {
   const files = changedFiles();
   if (!files) return true;
-  const why = files.filter(file => !inert(file)).filter(file => languageInput(file));
-  if (why.length) { console.log(`browser: every language: what changed can differ by language (${why.slice(0, 5).join(', ')}${why.length > 5 ? `, and ${why.length - 5} more` : ''}).`); return true; }
-  console.log('browser: the quick languages only (the base language and the first right-to-left one: English and Arabic here): nothing that changed can differ by language. Every language runs on main; npm run ci -- --everything runs them here.');
+  const why = files.filter((file) => !inert(file)).filter((file) => languageInput(file));
+  if (why.length) {
+    console.log(
+      `browser: every language: what changed can differ by language (${why.slice(0, 5).join(', ')}${why.length > 5 ? `, and ${why.length - 5} more` : ''}).`,
+    );
+    return true;
+  }
+  console.log(
+    'browser: the quick languages only (the base language and the first right-to-left one: English and Arabic here): nothing that changed can differ by language. Every language runs on main; npm run ci -- --everything runs them here.',
+  );
   return false;
 }
 

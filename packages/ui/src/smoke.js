@@ -10,7 +10,9 @@ import { behaviourLocales, collectErrors, hydrated, localizedPath } from './chec
  */
 export function smokeChecks({ sitePaths, appPaths, hydrate = [''], locales = behaviourLocales }) {
   for (const locale of locales) {
-    test(`smoke ${locale}: every page answers 200, site pages with a heading in the server's HTML`, async ({ request }) => {
+    test(`smoke ${locale}: every page answers 200, site pages with a heading in the server's HTML`, async ({
+      request,
+    }) => {
       for (const path of [...sitePaths, ...appPaths]) {
         const url = localizedPath(path, locale);
         const response = await request.get(url);
@@ -19,7 +21,9 @@ export function smokeChecks({ sitePaths, appPaths, hydrate = [''], locales = beh
       }
     });
 
-    test(`smoke ${locale}: ${hydrate.map(path => path || '/').join(', ')} hydrate without errors`, async ({ page }) => {
+    test(`smoke ${locale}: ${hydrate.map((path) => path || '/').join(', ')} hydrate without errors`, async ({
+      page,
+    }) => {
       const errors = collectErrors(page);
       for (const path of hydrate) {
         await page.goto(localizedPath(path, locale));

@@ -22,15 +22,25 @@ export function deferredPlaceChecks({ path = '/formats', from = '' } = {}) {
     expect(html.indexOf('<h1')).toBeLessThan(html.indexOf('data-sample="country"'));
   });
 
-  test('a client navigation shows the page at once, the skeleton while the place is on its way, then the place', async ({ page }) => {
+  test('a client navigation shows the page at once, the skeleton while the place is on its way, then the place', async ({
+    page,
+  }) => {
     const errors = collectErrors(page);
     await page.goto(localizedPath(from, 'en'));
     await page.waitForLoadState('networkidle');
     // Hold every server-function call (the place is one) until the skeleton has been seen.
     let release;
-    const held = new Promise(resolve => { release = resolve; });
-    await page.route('**/_serverFn/**', async route => { await held; await route.continue(); });
-    await page.locator('#main').getByRole('link', { name: m.formats_link({}, { locale: 'en' }), exact: true }).click();
+    const held = new Promise((resolve) => {
+      release = resolve;
+    });
+    await page.route('**/_serverFn/**', async (route) => {
+      await held;
+      await route.continue();
+    });
+    await page
+      .locator('#main')
+      .getByRole('link', { name: m.formats_link({}, { locale: 'en' }), exact: true })
+      .click();
     // The navigation did not wait for the deferred data: the page and the skeleton are there, the rows are not.
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(m.formats_title({}, { locale: 'en' }));
     await expect(page.locator('.place-skeleton')).toBeVisible();
@@ -41,7 +51,9 @@ export function deferredPlaceChecks({ path = '/formats', from = '' } = {}) {
     await expect(page.locator('.place-skeleton')).toHaveCount(0);
     for (const row of rows) await expect(page.locator(`[data-sample="${row}"]`), row).toBeVisible();
     const zone = await page.locator('[data-sample="cf-timezone"]').getAttribute('data-timezone');
-    await expect(page.locator('[data-sample="cf-timezone"]')).toHaveText(zone || m.location_unknown({}, { locale: 'en' }));
+    await expect(page.locator('[data-sample="cf-timezone"]')).toHaveText(
+      zone || m.location_unknown({}, { locale: 'en' }),
+    );
     await page.unroute('**/_serverFn/**');
     expect(errors).toEqual([]);
   });

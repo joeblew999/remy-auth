@@ -13,34 +13,55 @@ import { navLink, useRemyApp } from '../../app-config';
 // the server's HTML is right before any script runs. Material 3's navigation bar: labels always shown,
 // the active destination in a pill, above the home indicator.
 
-const tab = 'flex min-h-16 w-full flex-col items-center justify-center gap-1 px-1 text-xs outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
+const tab =
+  'flex min-h-16 w-full flex-col items-center justify-center gap-1 px-1 text-xs outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
 const pill = 'flex h-8 w-14 max-w-full items-center justify-center rounded-full [&_svg]:size-5';
 
 export function BottomNav({ locale }: { locale: Locale }) {
   const matchRoute = useMatchRoute();
   const { openMobile, setOpenMobile } = useSidebar();
   const items = useRemyApp().app?.nav ?? [];
-  return <nav aria-label={m.nav_bottom({}, { locale })} data-slot="bottom-nav"
-    className="fixed inset-x-0 bottom-0 z-40 border-t bg-background pb-[env(safe-area-inset-bottom)] md:hidden">
-    <ul className="grid grid-cols-5">
-      {items.filter(item => item.core).map(item => {
-        const { link, match } = navLink(item);
-        const active = Boolean(matchRoute(match));
-        return <li key={String(link.to)}>
-          <Link {...link} preload="intent" aria-current={active ? 'page' : undefined}
-            className={cn(tab, active ? 'font-medium text-foreground' : 'text-muted-foreground')}>
-            <span className={cn(pill, active && 'bg-accent text-accent-foreground')}>{item.icon}</span>
-            <span className="max-w-full truncate">{item.label(locale)}</span>
-          </Link>
-        </li>;
-      })}
-      <li>
-        <button type="button" onClick={() => setOpenMobile(true)} aria-expanded={openMobile} aria-haspopup="dialog"
-          className={cn(tab, openMobile ? 'font-medium text-foreground' : 'text-muted-foreground')}>
-          <span className={cn(pill, openMobile && 'bg-accent text-accent-foreground')}><MenuIcon /></span>
-          <span className="max-w-full truncate">{m.nav_more({}, { locale })}</span>
-        </button>
-      </li>
-    </ul>
-  </nav>;
+  return (
+    <nav
+      aria-label={m.nav_bottom({}, { locale })}
+      data-slot="bottom-nav"
+      className="fixed inset-x-0 bottom-0 z-40 border-t bg-background pb-[env(safe-area-inset-bottom)] md:hidden"
+    >
+      <ul className="grid grid-cols-5">
+        {items
+          .filter((item) => item.core)
+          .map((item) => {
+            const { link, match } = navLink(item);
+            const active = Boolean(matchRoute(match));
+            return (
+              <li key={String(link.to)}>
+                <Link
+                  {...link}
+                  preload="intent"
+                  aria-current={active ? 'page' : undefined}
+                  className={cn(tab, active ? 'font-medium text-foreground' : 'text-muted-foreground')}
+                >
+                  <span className={cn(pill, active && 'bg-accent text-accent-foreground')}>{item.icon}</span>
+                  <span className="max-w-full truncate">{item.label(locale)}</span>
+                </Link>
+              </li>
+            );
+          })}
+        <li>
+          <button
+            type="button"
+            onClick={() => setOpenMobile(true)}
+            aria-expanded={openMobile}
+            aria-haspopup="dialog"
+            className={cn(tab, openMobile ? 'font-medium text-foreground' : 'text-muted-foreground')}
+          >
+            <span className={cn(pill, openMobile && 'bg-accent text-accent-foreground')}>
+              <MenuIcon />
+            </span>
+            <span className="max-w-full truncate">{m.nav_more({}, { locale })}</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+  );
 }

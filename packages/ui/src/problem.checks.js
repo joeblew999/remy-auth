@@ -21,12 +21,17 @@ export function problemChecks({ failingNavigation, serverRoutes = [] } = {}) {
     const { from, link, fail, heading } = failingNavigation;
     for (const locale of behaviourLocales) {
       const o = { locale };
-      test(`${locale}: a loader that fails on the server shows the localized error page without the error, and retry recovers`, async ({ page }) => {
+      test(`${locale}: a loader that fails on the server shows the localized error page without the error, and retry recovers`, async ({
+        page,
+      }) => {
         await page.goto(localizedPath(from, locale));
         await page.waitForLoadState('networkidle');
         const secret = 'Error: loader exploded\n    at secretFunction (/src/secret.ts:12:34)';
-        await page.route(fail, route => route.fulfill({ status: 500, contentType: 'text/plain', body: secret }));
-        await page.locator('#main').getByRole('link', { name: m[link]({}, o), exact: true }).click();
+        await page.route(fail, (route) => route.fulfill({ status: 500, contentType: 'text/plain', body: secret }));
+        await page
+          .locator('#main')
+          .getByRole('link', { name: m[link]({}, o), exact: true })
+          .click();
         const problem = page.locator('[data-problem="error"]');
         await expect(problem.getByRole('heading', { level: 1 })).toHaveText(m.error_title({}, o));
         await expect(problem.locator('p')).toHaveText(m.error_detail({}, o));
@@ -44,7 +49,10 @@ export function problemChecks({ failingNavigation, serverRoutes = [] } = {}) {
   }
 
   if (serverRoutes.length) {
-    test('read-only server routes answer GET and HEAD with their type and caching, and 405 for other methods', async ({ request, baseURL }) => {
+    test('read-only server routes answer GET and HEAD with their type and caching, and 405 for other methods', async ({
+      request,
+      baseURL,
+    }) => {
       for (const { path, type, cache, origin } of serverRoutes) {
         const response = await request.get(path, { maxRedirects: 0 });
         expect(response.status(), path).toBe(200);

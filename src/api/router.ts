@@ -50,7 +50,9 @@ export const router = api.router({
     create: api.reservations.create.handler(({ input, context, errors }) => {
       const checked = reservationSchema(context.locale).safeParse(input);
       if (!checked.success) throw errors.INVALID_RESERVATION({ data: reservationErrors(checked.error) });
-      return { message: m.reserved({ name: checked.data.name, count: checked.data.guests }, { locale: context.locale }) };
+      return {
+        message: m.reserved({ name: checked.data.name, count: checked.data.guests }, { locale: context.locale }),
+      };
     }),
   },
 });

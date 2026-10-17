@@ -7,12 +7,19 @@ export type Alternate = { hrefLang: Locale | 'x-default'; href: string };
  * patterns. `x-default` is the un-localized entry URL, which redirects to the visitor's
  * language. Pure: usable in a request, at build time and in the browser.
  */
-export function alternates(origin: string, path: string, locale: Locale): { canonical: string; alternates: Alternate[] } {
+export function alternates(
+  origin: string,
+  path: string,
+  locale: Locale,
+): { canonical: string; alternates: Alternate[] } {
   const entry = new URL(path || '/', origin);
   const href = (value: Locale) => localizeUrl(entry, { locale: value }).href;
   return {
     canonical: href(locale),
-    alternates: [...locales.map(value => ({ hrefLang: value, href: href(value) })), { hrefLang: 'x-default', href: entry.href }],
+    alternates: [
+      ...locales.map((value) => ({ hrefLang: value, href: href(value) })),
+      { hrefLang: 'x-default', href: entry.href },
+    ],
   };
 }
 
@@ -21,10 +28,12 @@ export type SitemapEntry = { loc: string; alternates: { hrefLang: string; href: 
 
 /** Every given site page in every locale, self-canonical, with its hreflang alternates and x-default (`alternates`). */
 export function sitemapEntries(origin: string, paths: readonly string[]): SitemapEntry[] {
-  return locales.flatMap(locale => paths.map(path => {
-    const links = alternates(origin, path, locale);
-    return { loc: links.canonical, alternates: links.alternates };
-  }));
+  return locales.flatMap((locale) =>
+    paths.map((path) => {
+      const links = alternates(origin, path, locale);
+      return { loc: links.canonical, alternates: links.alternates };
+    }),
+  );
 }
 
 /**
@@ -32,9 +41,19 @@ export function sitemapEntries(origin: string, paths: readonly string[]): Sitema
  * noindex and never listed), then the app's own `extra` entries (remy-auth's docs). The app's
  * `/sitemap.xml` route answers it with `sitemapType`; a prerendered app writes it as a file.
  */
-export function sitemapXml({ origin, paths, extra = [] }: { origin: string; paths: readonly string[]; extra?: SitemapEntry[] }): string {
-  const urls = [...sitemapEntries(origin, paths), ...extra].map(({ loc, alternates: links }) =>
-    `<url><loc>${loc}</loc>${links.map(link => `<xhtml:link rel="alternate" hreflang="${link.hrefLang}" href="${link.href}"/>`).join('')}</url>`);
+export function sitemapXml({
+  origin,
+  paths,
+  extra = [],
+}: {
+  origin: string;
+  paths: readonly string[];
+  extra?: SitemapEntry[];
+}): string {
+  const urls = [...sitemapEntries(origin, paths), ...extra].map(
+    ({ loc, alternates: links }) =>
+      `<url><loc>${loc}</loc>${links.map((link) => `<xhtml:link rel="alternate" hreflang="${link.hrefLang}" href="${link.href}"/>`).join('')}</url>`,
+  );
   return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${urls.join('')}</urlset>`;
 }
 export const sitemapType = 'application/xml; charset=utf-8';

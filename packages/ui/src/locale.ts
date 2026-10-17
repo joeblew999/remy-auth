@@ -1,6 +1,16 @@
 // Paraglide's runtime owns the locale list, detection, direction and URL localisation.
-export { locales, isLocale, baseLocale, getLocale, setLocale, localizeHref, localizeUrl, deLocalizeHref, cookieName,
-  getTextDirection as direction } from './paraglide/runtime.js';
+export {
+  locales,
+  isLocale,
+  baseLocale,
+  getLocale,
+  setLocale,
+  localizeHref,
+  localizeUrl,
+  deLocalizeHref,
+  cookieName,
+  getTextDirection as direction,
+} from './paraglide/runtime.js';
 export type { Locale } from './paraglide/runtime.js';
 import type { Locale } from './paraglide/runtime.js';
 import { getLocale as platformLocale } from './paraglide/runtime.js';

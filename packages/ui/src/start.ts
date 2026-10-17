@@ -13,7 +13,8 @@ import { logContext, outcome, level, requestIdHeader, writeLog } from './worker'
  * client (withObservability replaces any client value), as `context.requestId`.
  */
 export const requestContext = createMiddleware().server(({ request, next }) =>
-  next({ context: { requestId: request.headers.get(requestIdHeader) ?? crypto.randomUUID() } }));
+  next({ context: { requestId: request.headers.get(requestIdHeader) ?? crypto.randomUUID() } }),
+);
 
 /**
  * Request middleware: a fresh nonce per request as `context.nonce`, which getRouter hands to
@@ -27,18 +28,21 @@ export const requestContext = createMiddleware().server(({ request, next }) =>
  * scripts carry the nonce too, went out with no policy at all. A response whose headers are
  * immutable (a redirect made with Response.redirect) runs no script and keeps its own.
  */
-export const cspNonce = ({ enforced, reportPath }: { enforced: boolean; reportPath: string }) => createMiddleware().server(async ({ next }) => {
-  const nonce = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))));
-  const result = await next({ context: { nonce } });
-  try {
-    result.response.headers.set('Reporting-Endpoints', `csp="${reportPath}"`);
-    result.response.headers.set(enforced ? 'Content-Security-Policy' : 'Content-Security-Policy-Report-Only',
-      `script-src 'nonce-${nonce}' 'strict-dynamic' 'report-sample'; object-src 'none'; base-uri 'none'; report-uri ${reportPath}; report-to csp`);
-  } catch (error) {
-    if (!(error instanceof TypeError)) throw error;
-  }
-  return result;
-});
+export const cspNonce = ({ enforced, reportPath }: { enforced: boolean; reportPath: string }) =>
+  createMiddleware().server(async ({ next }) => {
+    const nonce = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))));
+    const result = await next({ context: { nonce } });
+    try {
+      result.response.headers.set('Reporting-Endpoints', `csp="${reportPath}"`);
+      result.response.headers.set(
+        enforced ? 'Content-Security-Policy' : 'Content-Security-Policy-Report-Only',
+        `script-src 'nonce-${nonce}' 'strict-dynamic' 'report-sample'; object-src 'none'; base-uri 'none'; report-uri ${reportPath}; report-to csp`,
+      );
+    } catch (error) {
+      if (!(error instanceof TypeError)) throw error;
+    }
+    return result;
+  });
 
 /**
  * Function middleware (every server function call): one structured line per call in the shared
@@ -46,28 +50,41 @@ export const cspNonce = ({ enforced, reportPath }: { enforced: boolean; reportPa
  * as the Worker's `http_request` line. The ID also goes back to the caller with the result, so a
  * browser can quote it. Logs no arguments, results or error messages.
  */
-export const serverFnLog = (service: string) => createMiddleware({ type: 'function' })
-  .middleware([requestContext])
-  .server(async ({ next, context, method, serverFnMeta }) => {
-    const write = (status: number) => writeLog({ ...logContext(service, env, context.requestId, method),
-      event: 'server_fn', level: level(status), function: serverFnMeta.name, outcome: outcome(status) });
-    try {
-      const result = await next({ sendContext: { requestId: context.requestId } });
-      write(getResponseStatus());
-      return result;
-    } catch (error) {
-      const status = getResponseStatus();
-      write(status >= 400 ? status : 500);
-      throw error;
-    }
-  });
+export const serverFnLog = (service: string) =>
+  createMiddleware({ type: 'function' })
+    .middleware([requestContext])
+    .server(async ({ next, context, method, serverFnMeta }) => {
+      const write = (status: number) =>
+        writeLog({
+          ...logContext(service, env, context.requestId, method),
+          event: 'server_fn',
+          level: level(status),
+          function: serverFnMeta.name,
+          outcome: outcome(status),
+        });
+      try {
+        const result = await next({ sendContext: { requestId: context.requestId } });
+        write(getResponseStatus());
+        return result;
+      } catch (error) {
+        const status = getResponseStatus();
+        write(status >= 400 ? status : 500);
+        throw error;
+      }
+    });
 
 /** A Worker's Start middleware: pass the result's two lists to createStart. */
 /**
  * The Start middleware every app runs. `csp` defaults to what every app has: the policy enforced, reports to
  * the package's own /csp-report route (app-routes); an app passes its own to report only or report elsewhere.
  */
-export const startMiddleware = ({ service, csp = { enforced: true, reportPath: '/csp-report' } }: { service: string; csp?: { enforced: boolean; reportPath: string } }) => ({
+export const startMiddleware = ({
+  service,
+  csp = { enforced: true, reportPath: '/csp-report' },
+}: {
+  service: string;
+  csp?: { enforced: boolean; reportPath: string };
+}) => ({
   // Tuples, so Start infers each request's context (requestId, nonce) from them exactly.
   requestMiddleware: [requestContext, cspNonce(csp)] as const,
   functionMiddleware: [serverFnLog(service)] as const,

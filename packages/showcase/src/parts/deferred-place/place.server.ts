@@ -10,4 +10,5 @@ import { placeFromCloudflare, type Place } from '@joeblew999/remy-ui/cloudflare'
 export const requestPlace = createServerOnlyFn((): Place =>
   // Workers types `cf` as incoming or outgoing properties; an incoming request has the former,
   // whose fields placeFromCloudflare reads and validates.
-  placeFromCloudflare(getRequest().cf as Parameters<typeof placeFromCloudflare>[0]));
+  placeFromCloudflare(getRequest().cf as Parameters<typeof placeFromCloudflare>[0]),
+);

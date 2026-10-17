@@ -8,7 +8,12 @@ import { problemPages } from '@joeblew999/remy-ui/problem';
 
 // A site page: complete in the server's HTML without JavaScript.
 export const Route = createFileRoute('/')({
-  head: () => pageHead({ path: '', title: (locale, product) => m.home_title({ product }, { locale }), description: (locale, product) => m.home_description({ product }, { locale }) }),
+  head: () =>
+    pageHead({
+      path: '',
+      title: (locale, product) => m.home_title({ product }, { locale }),
+      description: (locale, product) => m.home_description({ product }, { locale }),
+    }),
   component: Home,
   ...problemPages,
 });

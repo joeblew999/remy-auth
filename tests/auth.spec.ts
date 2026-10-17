@@ -7,7 +7,19 @@ import { router } from '../src/api/router';
 import { DEMO_SIGN_IN_CODE } from '../src/auth/environment';
 import { seededPeople } from '../src/auth/seed';
 import { product } from '../src/product';
-import { capturedMail, latestCode, local, newEmail, ownAddress, permitted, seededSignIn, sendCode, signIn, signedInAsSeeded, visitor } from './people';
+import {
+  capturedMail,
+  latestCode,
+  local,
+  newEmail,
+  ownAddress,
+  permitted,
+  seededSignIn,
+  sendCode,
+  signIn,
+  signedInAsSeeded,
+  visitor,
+} from './people';
 
 // Signing in (.plans/auth-service.md), on the real Worker with Better Auth and the local D1: nothing is
 // mocked. The code is the one Better Auth made; the local environment writes it to its local_mail table
@@ -16,7 +28,10 @@ import { capturedMail, latestCode, local, newEmail, ownAddress, permitted, seede
 // the sign-in checks run against the local target only; against a deployment, that route must not exist.
 const accountPath = localizedPath('/app/account', 'en');
 
-test('a person signs in with an emailed code, and the session reaches the API over HTTP and the account page through the server\'s own client', async ({ playwright, baseURL }) => {
+test("a person signs in with an emailed code, and the session reaches the API over HTTP and the account page through the server's own client", async ({
+  playwright,
+  baseURL,
+}) => {
   test.skip(!local, 'reads the code from the local mail capture');
   const person = await visitor(playwright, baseURL);
   const stranger = await visitor(playwright, baseURL);
@@ -75,11 +90,15 @@ test('a person signs in with an emailed code, and the session reaches the API ov
   // Somebody else is still nobody, and nothing a stranger can read names the person who just signed in.
   expect((await stranger.get('/api/me')).status()).toBe(401);
   expect(await shown(stranger)).not.toContain(email);
-  const open = procedures(router).filter(({ procedure }) => policyOf(procedure) === 'public').map(({ procedure }) => routeOf(procedure)).filter(route => route.method === 'GET' && !route.path!.includes('{'));
+  const open = procedures(router)
+    .filter(({ procedure }) => policyOf(procedure) === 'public')
+    .map(({ procedure }) => routeOf(procedure))
+    .filter((route) => route.method === 'GET' && !route.path!.includes('{'));
   expect(open.length).toBeGreaterThan(0);
   for (const route of open) {
     const body = await (await stranger.get(route.path!)).text();
-    for (const value of [email, account.id]) expect(body, `GET ${route.path} names the signed-in person`).not.toContain(value);
+    for (const value of [email, account.id])
+      expect(body, `GET ${route.path} names the signed-in person`).not.toContain(value);
   }
 
   // Signing out ends the session on the server: the same cookie is nobody again, at once.
@@ -88,13 +107,15 @@ test('a person signs in with an emailed code, and the session reaches the API ov
   const old = await visitor(playwright, baseURL);
   expect((await old.get('/api/me', { headers: { Cookie: cookie.split(';')[0] } })).status()).toBe(401);
   expect(await shown(person)).toContain('data-sign-in="address"');
-  await Promise.all([person, stranger, old].map(context => context.dispose()));
+  await Promise.all([person, stranger, old].map((context) => context.dispose()));
 });
 
 test.describe('in the browser', () => {
   test.use({ extraHTTPHeaders: ownAddress() });
 
-  test('the account page signs a person in with the code, keeps them signed in on reload, and signs them out', async ({ page }) => {
+  test('the account page signs a person in with the code, keeps them signed in on reload, and signs them out', async ({
+    page,
+  }) => {
     test.skip(!local, 'reads the code from the local mail capture');
     const errors = collectErrors(page);
     const email = newEmail();
@@ -131,14 +152,16 @@ test.describe('in the browser', () => {
     await page.reload();
     await expect(page.getByLabel(m.account_email_label({}, o))).toBeVisible();
     // The refused sign-in is the one failed request the page made (Better Auth's 400).
-    expect(errors.filter(error => !/400/.test(error))).toEqual([]);
+    expect(errors.filter((error) => !/400/.test(error))).toEqual([]);
   });
 });
 
 test.describe('the seeded people, in the browser', () => {
   test.use({ extraHTTPHeaders: ownAddress() });
 
-  test('the sign-in form offers the seeded people with what they hold, and one press signs in as one of them', async ({ page }) => {
+  test('the sign-in form offers the seeded people with what they hold, and one press signs in as one of them', async ({
+    page,
+  }) => {
     const here = await permitted(page.request);
     test.skip(!here.seededSignIn, `${here.environment} offers no seeded people`);
     const errors = collectErrors(page);
@@ -147,10 +170,14 @@ test.describe('the seeded people, in the browser', () => {
     await page.waitForLoadState('networkidle');
     const people = page.locator('[data-seeded-people]');
     await expect(people).toContainText(m.account_people_intro({ code: DEMO_SIGN_IN_CODE }, o));
-    await expect(people.locator('[data-person]')).toHaveCount(seededPeople.filter(person => person.role !== 'admin' || here.offersAdminSignIn).length);
+    await expect(people.locator('[data-person]')).toHaveCount(
+      seededPeople.filter((person) => person.role !== 'admin' || here.offersAdminSignIn).length,
+    );
     const cleo = people.locator('[data-person="cleo@remy.test"]');
     await expect(cleo.locator('[data-person-holds]')).toContainText('NOTE_EDITOR note_squad');
-    await expect(people.locator('[data-person="eli@remy.test"] [data-person-holds]')).toHaveText(m.account_people_holds_nothing({}, o));
+    await expect(people.locator('[data-person="eli@remy.test"] [data-person-holds]')).toHaveText(
+      m.account_people_holds_nothing({}, o),
+    );
     await cleo.getByRole('button', { name: m.account_people_sign_in({ name: 'Cleo Tanaka' }, o) }).click();
     await expect(page.locator('[data-account="email"]')).toHaveText('cleo@remy.test');
     await expect(page.locator('[data-account="name"]')).toHaveText('Cleo Tanaka');
@@ -158,20 +185,26 @@ test.describe('the seeded people, in the browser', () => {
   });
 });
 
-test('a fourth code request from one address within a minute is refused, and another address is not', async ({ playwright, baseURL }) => {
+test('a fourth code request from one address within a minute is refused, and another address is not', async ({
+  playwright,
+  baseURL,
+}) => {
   test.skip(!local, 'names its own address, which only a local Worker believes');
   const one = await visitor(playwright, baseURL);
   const other = await visitor(playwright, baseURL);
   const email = newEmail();
-  for (let request = 1; request <= 3; request++) expect((await sendCode(one, email)).status(), `request ${request}`).toBe(200);
+  for (let request = 1; request <= 3; request++)
+    expect((await sendCode(one, email)).status(), `request ${request}`).toBe(200);
   const refused = await sendCode(one, email);
   expect(refused.status()).toBe(429);
   expect(Number(refused.headers()['x-retry-after'])).toBeGreaterThan(0);
   expect((await sendCode(other, email)).status()).toBe(200);
-  await Promise.all([one, other].map(context => context.dispose()));
+  await Promise.all([one, other].map((context) => context.dispose()));
 });
 
-test('the Worker under test has exactly what the table gives its environment, and nothing else', async ({ request }) => {
+test('the Worker under test has exactly what the table gives its environment, and nothing else', async ({
+  request,
+}) => {
   // On the Worker under test, which says what it is (/healthz): exactly what the table gives that
   // environment exists, and nothing else. A local run is never mistaken for a deployment, or the reverse.
   const here = await permitted(request);
@@ -181,8 +214,13 @@ test('the Worker under test has exactly what the table gives its environment, an
   expect(people.status()).toBe(here.seededSignIn ? 200 : 404);
   if (here.seededSignIn) {
     const offered: { email: string; role: string }[] = (await people.json()).people;
-    expect(offered.map(person => person.email)).toEqual(seededPeople.filter(person => person.role !== 'admin' || here.offersAdminSignIn).map(person => person.email));
-    expect(offered.some(person => person.role === 'admin'), 'the administrator is offered').toBe(here.offersAdminSignIn);
+    expect(offered.map((person) => person.email)).toEqual(
+      seededPeople.filter((person) => person.role !== 'admin' || here.offersAdminSignIn).map((person) => person.email),
+    );
+    expect(
+      offered.some((person) => person.role === 'admin'),
+      'the administrator is offered',
+    ).toBe(here.offersAdminSignIn);
   }
   // The normal way in is everywhere a code can be delivered: captured locally, mailed on a deployment.
   const account = await (await request.get(accountPath)).text();
@@ -190,17 +228,36 @@ test('the Worker under test has exactly what the table gives its environment, an
   expect(account.includes('data-seeded-people'), 'the seeded people').toBe(here.seededSignIn);
 });
 
-test('the sign-in code is one email: the code and nothing to click, written for the reader, from the configured sender', async ({ playwright, baseURL }) => {
+test('the sign-in code is one email: the code and nothing to click, written for the reader, from the configured sender', async ({
+  playwright,
+  baseURL,
+}) => {
   test.skip(!local, 'reads the local outbox');
   const reader = await visitor(playwright, baseURL);
   const email = newEmail('reader');
-  expect((await reader.post('/api/auth/email-otp/send-verification-otp', { data: { email, type: 'sign-in' }, headers: { 'Accept-Language': 'ar' } })).status()).toBe(200);
+  expect(
+    (
+      await reader.post('/api/auth/email-otp/send-verification-otp', {
+        data: { email, type: 'sign-in' },
+        headers: { 'Accept-Language': 'ar' },
+      })
+    ).status(),
+  ).toBe(200);
   const [mail, ...earlier] = await capturedMail(reader, email);
   expect(earlier).toEqual([]);
   const code = mail.text.match(/\b\d{6}\b/)![0];
-  expect(mail).toMatchObject({ to: email, from: 'noreply@mail.ubuntusoftware.net', subject: m.email_code_subject({ code, product }, { locale: 'ar' }) });
+  expect(mail).toMatchObject({
+    to: email,
+    from: 'noreply@mail.ubuntusoftware.net',
+    subject: m.email_code_subject({ code, product }, { locale: 'ar' }),
+  });
   // Plain text and HTML say the same; the HTML is in the reader's language and direction, and the code reads left to right.
-  for (const line of [m.email_code_intro({ product }, { locale: 'ar' }), m.email_code_expiry({}, { locale: 'ar' }), m.email_code_ignore({}, { locale: 'ar' })]) expect(mail.text).toContain(line);
+  for (const line of [
+    m.email_code_intro({ product }, { locale: 'ar' }),
+    m.email_code_expiry({}, { locale: 'ar' }),
+    m.email_code_ignore({}, { locale: 'ar' }),
+  ])
+    expect(mail.text).toContain(line);
   expect(mail.html).toContain('<html lang="ar" dir="rtl">');
   expect(mail.html).toContain(`<h1 dir="ltr"`);
   expect(mail.html).toContain(`>${code}</h1>`);
@@ -210,14 +267,19 @@ test('the sign-in code is one email: the code and nothing to click, written for 
   await reader.dispose();
 });
 
-test('the seeded people sign in with the published code, each with their role and what they hold; nobody else can use that code', async ({ playwright, baseURL }) => {
+test('the seeded people sign in with the published code, each with their role and what they hold; nobody else can use that code', async ({
+  playwright,
+  baseURL,
+}) => {
   test.skip(!local, 'only the local environment offers seeded people');
   const asker = await visitor(playwright, baseURL);
   const seeded = await seededSignIn(asker);
   // The people are the seed's, the administrator among them locally, and what each holds is read from the notes demo's data.
   expect(seeded.code).toBe(DEMO_SIGN_IN_CODE);
-  expect(seeded.people.map(({ name, email, role }) => ({ name, email, role }))).toEqual(seededPeople.map(({ name, email, role }) => ({ name, email, role })));
-  const holds = Object.fromEntries(seeded.people.map(person => [person.email, person.holds]));
+  expect(seeded.people.map(({ name, email, role }) => ({ name, email, role }))).toEqual(
+    seededPeople.map(({ name, email, role }) => ({ name, email, role })),
+  );
+  const holds = Object.fromEntries(seeded.people.map((person) => [person.email, person.holds]));
   expect(holds['ben@remy.test']).toContain('NOTE_AUTHOR note_squad');
   expect(holds['cleo@remy.test']).toEqual(expect.arrayContaining(['NOTE_AUTHOR note_camp', 'NOTE_EDITOR note_squad']));
   expect(holds['dev@remy.test']).toContain('NOTE_READER note_squad');
@@ -227,8 +289,19 @@ test('the seeded people sign in with the published code, each with their role an
   for (const person of seededPeople) {
     const who = await signedInAsSeeded(playwright, baseURL, person.email);
     const session = await (await who.get('/api/auth/get-session')).json();
-    expect(session.user, person.email).toMatchObject({ id: person.id, name: person.name, email: person.email, emailVerified: true, role: person.role });
-    expect(await (await who.get('/api/me')).json()).toEqual({ id: person.id, name: person.name, email: person.email, emailVerified: true });
+    expect(session.user, person.email).toMatchObject({
+      id: person.id,
+      name: person.name,
+      email: person.email,
+      emailVerified: true,
+      role: person.role,
+    });
+    expect(await (await who.get('/api/me')).json()).toEqual({
+      id: person.id,
+      name: person.name,
+      email: person.email,
+      emailVerified: true,
+    });
     await who.dispose();
   }
 
@@ -243,5 +316,5 @@ test('the seeded people sign in with the published code, each with their role an
   expect((await signIn(other, email, (await latestCode(other, email))!)).status()).toBe(200);
   expect((await other.post('/api/auth/update-user', { data: { role: 'admin' } })).status()).not.toBe(200);
   expect((await (await other.get('/api/auth/get-session')).json()).user.role).toBe('user');
-  await Promise.all([asker, other].map(context => context.dispose()));
+  await Promise.all([asker, other].map((context) => context.dispose()));
 });

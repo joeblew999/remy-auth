@@ -12,29 +12,49 @@ import { translationGaps } from './i18n.ts';
 import { cwv, google } from './test.ts';
 import { verify, verifySetup } from './verify.ts';
 
-function fail(message: string): never { console.error(message); process.exit(1); }
-const git = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
-const quiet = (command: string, args: string[], env: Record<string, string> = {}) => spawnSync(command, args, { stdio: 'ignore', env: { ...process.env, ...env } }).status === 0;
+function fail(message: string): never {
+  console.error(message);
+  process.exit(1);
+}
+const git = (...args: string[]) =>
+  execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+const quiet = (command: string, args: string[], env: Record<string, string> = {}) =>
+  spawnSync(command, args, { stdio: 'ignore', env: { ...process.env, ...env } }).status === 0;
 function tool(command: string, args: string[], options: { env?: Record<string, string>; what?: string } = {}): void {
   const result = spawnSync(command, args, { stdio: 'inherit', env: { ...process.env, ...options.env } });
   if (result.status !== 0) fail(`${options.what ?? command}: failed`);
 }
 const bin = (name: string) => join(process.cwd(), 'node_modules', '.bin', name);
 
-export type Workspace = { name: string; version: string; location: string; private?: boolean; publishConfig?: { registry?: string } };
+export type Workspace = {
+  name: string;
+  version: string;
+  location: string;
+  private?: boolean;
+  publishConfig?: { registry?: string };
+};
 
 /** Every workspace package.json declares, and the ones that are published (not private), with each one's registry. */
 export function workspaces(): { all: Workspace[]; published: (Workspace & { registry: string })[] } {
   const manifest = JSON.parse(readFileSync('package.json', 'utf8')) as { workspaces?: string[] };
-  const all: Workspace[] = manifest.workspaces?.length ? JSON.parse(execFileSync('npm', ['query', '.workspace'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] })) : [];
-  return { all, published: all.filter(item => !item.private).map(item => ({ ...item, registry: item.publishConfig?.registry ?? 'https://registry.npmjs.org' })) };
+  const all: Workspace[] = manifest.workspaces?.length
+    ? JSON.parse(
+        execFileSync('npm', ['query', '.workspace'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] }),
+      )
+    : [];
+  return {
+    all,
+    published: all
+      .filter((item) => !item.private)
+      .map((item) => ({ ...item, registry: item.publishConfig?.registry ?? 'https://registry.npmjs.org' })),
+  };
 }
 
 /** The lead package (remy.config.ts's release.package): the one whose version names a release. */
 function lead(): { name: string; version: string; title: string } {
   const name = process.env.RELEASE_PACKAGE;
   if (!name) fail('release.package is not in remy.config.ts: the package whose version names the release');
-  const found = workspaces().published.find(item => item.name === name);
+  const found = workspaces().published.find((item) => item.name === name);
   if (!found) fail(`${name} is not a published workspace here.`);
   return { name, version: found.version, title: process.env.RELEASE_TITLE ?? name };
 }
@@ -42,8 +62,22 @@ function lead(): { name: string; version: string; title: string } {
 /** npm-check-updates over this repository's own dependencies (the root's and every workspace's); its own workspaces and the platform package are never touched. */
 function ncu(...extra: string[]): void {
   const { all } = workspaces();
-  const reject = [...new Set(['@joeblew999/remy-ui', ...all.map(item => item.name)])].join(',');
-  tool(bin('ncu'), ['--target', 'latest', '--dep', 'prod,dev,optional', ...(all.length ? ['--workspaces', '--root'] : []), '--reject', reject, '--removeRange', ...extra], { what: 'npm-check-updates' });
+  const reject = [...new Set(['@joeblew999/remy-ui', ...all.map((item) => item.name)])].join(',');
+  tool(
+    bin('ncu'),
+    [
+      '--target',
+      'latest',
+      '--dep',
+      'prod,dev,optional',
+      ...(all.length ? ['--workspaces', '--root'] : []),
+      '--reject',
+      reject,
+      '--removeRange',
+      ...extra,
+    ],
+    { what: 'npm-check-updates' },
+  );
 }
 
 /** Preview the latest versions, changing nothing. */
@@ -58,23 +92,40 @@ export async function upgrade(): Promise<void> {
 
 const generate = (): void => tool('npm', ['run', '--if-present', '--silent', 'generate'], { what: 'generate' });
 /** What the package ships that is made from the docs: the remy skill (remy-auth only), before any pack or publish. */
-const shipped = async (): Promise<void> => { const { buildSkill } = await import('./skills.ts'); await buildSkill(); };
+const shipped = async (): Promise<void> => {
+  const { buildSkill } = await import('./skills.ts');
+  await buildSkill();
+};
 
 /** A tarball of each published package, here, for a scratch app to install before any release. */
 export async function pack(): Promise<void> {
   generate();
   await shipped();
   const { published } = workspaces();
-  if (!published.length) { console.log('pack: this repository publishes no packages (no workspace that is not private).'); return; }
+  if (!published.length) {
+    console.log('pack: this repository publishes no packages (no workspace that is not private).');
+    return;
+  }
   for (const item of published) tool('npm', ['pack', '--workspace', item.name]);
 }
 
 /** CHANGELOG.md's section for a version; fails when it is missing or empty. */
 export function notes(version: string): string {
-  const text = (() => { try { return readFileSync('CHANGELOG.md', 'utf8'); } catch { return ''; } })();
-  const lines = text.split('\n'); const out: string[] = []; let inside = false;
+  const text = (() => {
+    try {
+      return readFileSync('CHANGELOG.md', 'utf8');
+    } catch {
+      return '';
+    }
+  })();
+  const lines = text.split('\n');
+  const out: string[] = [];
+  let inside = false;
   for (const line of lines) {
-    if (line.startsWith(`## [${version}]`)) { inside = true; continue; }
+    if (line.startsWith(`## [${version}]`)) {
+      inside = true;
+      continue;
+    }
     if (line.startsWith('## [')) inside = false;
     if (inside) out.push(line);
   }
@@ -86,13 +137,27 @@ export function notes(version: string): string {
 /** Every published package whose files changed since the last release tag has a new version (publish skips a version already on the registry, so an unbumped change would never ship). */
 export function bumped(): void {
   let last = '';
-  try { last = git('describe', '--tags', '--abbrev=0', '--match', 'v[0-9]*'); } catch { /* no tag */ }
-  if (!last) { console.log('bumped: no release tag yet, nothing to compare.'); return; }
+  try {
+    last = git('describe', '--tags', '--abbrev=0', '--match', 'v[0-9]*');
+  } catch {
+    /* no tag */
+  }
+  if (!last) {
+    console.log('bumped: no release tag yet, nothing to compare.');
+    return;
+  }
   const problems: string[] = [];
   for (const item of workspaces().published) {
     let then: string | undefined;
-    try { then = (JSON.parse(git('show', `${last}:${item.location}/package.json`)) as { version: string }).version; } catch { continue; }
-    if (then === item.version && !quiet('git', ['diff', '--quiet', last, '--', item.location])) problems.push(`${item.name} is still ${item.version}, as at ${last}, but ${item.location} changed since: bump its version`);
+    try {
+      then = (JSON.parse(git('show', `${last}:${item.location}/package.json`)) as { version: string }).version;
+    } catch {
+      continue;
+    }
+    if (then === item.version && !quiet('git', ['diff', '--quiet', last, '--', item.location]))
+      problems.push(
+        `${item.name} is still ${item.version}, as at ${last}, but ${item.location} changed since: bump its version`,
+      );
   }
   if (problems.length) fail(`bumped: ${problems.join('\n')}`);
   console.log(`bumped: every changed package has a new version since ${last}.`);
@@ -105,10 +170,22 @@ export async function publish(options: { release?: string; dryRun?: boolean } = 
     let releaseNotes: string | undefined;
     if (options.release) {
       const { name, version } = lead();
-      if (options.release !== `v${version}`) fail(`publish: tag ${options.release} is not ${name}'s version v${version}.`);
+      if (options.release !== `v${version}`)
+        fail(`publish: tag ${options.release} is not ${name}'s version v${version}.`);
       releaseNotes = notes(version);
     }
-    const token = process.env.NODE_AUTH_TOKEN || (() => { try { return execFileSync('gh', ['auth', 'token'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return ''; } })();
+    const token =
+      process.env.NODE_AUTH_TOKEN ||
+      (() => {
+        try {
+          return execFileSync('gh', ['auth', 'token'], {
+            encoding: 'utf8',
+            stdio: ['ignore', 'pipe', 'ignore'],
+          }).trim();
+        } catch {
+          return '';
+        }
+      })();
     if (!token) fail('publish: no token (NODE_AUTH_TOKEN, or gh auth login)');
     // An app's own .npmrc (the blank app's) reads ${GITHUB_TOKEN} and outranks the user config written below.
     const env = { GITHUB_TOKEN: token, NODE_AUTH_TOKEN: token };
@@ -124,21 +201,50 @@ export async function publish(options: { release?: string; dryRun?: boolean } = 
       // release's publish was refused its own token; GitHub's consumer job read a 404 as silence).
       const rc = ['--userconfig', npmrc, '--loglevel=error'];
       // The token npm will publish with is accepted (a registry answers "not found" for a new name whatever the token).
-      if (!quiet('npm', ['whoami', ...rc, '--registry', item.registry], withRc)) fail(`publish: ${item.registry} refuses the token npm would publish ${item.name} with (check the app's .npmrc).`);
+      if (!quiet('npm', ['whoami', ...rc, '--registry', item.registry], withRc))
+        fail(
+          `publish: ${item.registry} refuses the token npm would publish ${item.name} with (check the app's .npmrc).`,
+        );
       // Only "not found" means not published: any other answer stops here, before a publish that would fail the same way after the tag is pushed.
-      const view = spawnSync('npm', ['view', `${item.name}@${item.version}`, 'version', ...rc, '--registry', item.registry], { encoding: 'utf8', env: { ...process.env, ...withRc } });
+      const view = spawnSync(
+        'npm',
+        ['view', `${item.name}@${item.version}`, 'version', ...rc, '--registry', item.registry],
+        { encoding: 'utf8', env: { ...process.env, ...withRc } },
+      );
       if (view.status === 0) console.log(`${item.name}@${item.version} is already published.`);
-      else if (/E404/.test(`${view.stdout}${view.stderr}`)) tool('npm', ['publish', '--workspace', item.name, '--ignore-scripts', ...rc, ...(options.dryRun ? ['--dry-run'] : [])], { env: withRc });
-      else fail(`publish: ${item.registry} did not answer for ${item.name}@${item.version}:\n${view.stdout}${view.stderr}`);
+      else if (/E404/.test(`${view.stdout}${view.stderr}`))
+        tool(
+          'npm',
+          ['publish', '--workspace', item.name, '--ignore-scripts', ...rc, ...(options.dryRun ? ['--dry-run'] : [])],
+          { env: withRc },
+        );
+      else
+        fail(
+          `publish: ${item.registry} did not answer for ${item.name}@${item.version}:\n${view.stdout}${view.stderr}`,
+        );
     }
     if (options.release && !options.dryRun) {
-      if (quiet('gh', ['release', 'view', options.release])) { console.log(`${options.release} is already released.`); return; }
+      if (quiet('gh', ['release', 'view', options.release])) {
+        console.log(`${options.release} is already released.`);
+        return;
+      }
       const { title } = lead();
-      const notesFile = join(scratch, 'notes.md'); writeFileSync(notesFile, releaseNotes!);
-      tool('gh', ['release', 'create', options.release, '--title', `${title} ${options.release.slice(1)}`, '--notes-file', notesFile]);
+      const notesFile = join(scratch, 'notes.md');
+      writeFileSync(notesFile, releaseNotes!);
+      tool('gh', [
+        'release',
+        'create',
+        options.release,
+        '--title',
+        `${title} ${options.release.slice(1)}`,
+        '--notes-file',
+        notesFile,
+      ]);
       console.log(`Released ${options.release}.`);
     }
-  } finally { rmSync(scratch, { recursive: true, force: true }); }
+  } finally {
+    rmSync(scratch, { recursive: true, force: true });
+  }
 }
 
 /** The release's last step, after the gates: on a clean main that is not behind origin, tag the lead's version, push main and the tag, then publish with the release. */
@@ -147,8 +253,10 @@ export async function tag(): Promise<void> {
   if (git('branch', '--show-current') !== 'main') fail('Release from main.');
   if (git('status', '--porcelain')) fail('Commit everything before releasing.');
   execFileSync('git', ['fetch', '-q', '--tags', 'origin', 'main']);
-  if (!quiet('git', ['merge-base', '--is-ancestor', 'origin/main', 'HEAD'])) fail('main is behind origin/main; pull and re-run the gates.');
-  if (quiet('git', ['rev-parse', '-q', '--verify', `refs/tags/v${version}`])) fail(`v${version} is already tagged; bump ${name}'s version.`);
+  if (!quiet('git', ['merge-base', '--is-ancestor', 'origin/main', 'HEAD']))
+    fail('main is behind origin/main; pull and re-run the gates.');
+  if (quiet('git', ['rev-parse', '-q', '--verify', `refs/tags/v${version}`]))
+    fail(`v${version} is already tagged; bump ${name}'s version.`);
   notes(version);
   bumped();
   execFileSync('git', ['tag', '-a', `v${version}`, '-m', `${title} ${version}`]);
@@ -168,7 +276,8 @@ export async function release(): Promise<void> {
   process.env.REMY_FLOW ??= 'release';
   // Only a release has a token the registry accepts, so only a release rehearses the consumer fixture's publish.
   process.env.REMY_REHEARSE_PUBLISH = '1';
-  if ((await translationGaps()).length) fail('release: translations are incomplete or stale (npx remy i18n check); land, which translates, first.');
+  if ((await translationGaps()).length)
+    fail('release: translations are incomplete or stale (npx remy i18n check); land, which translates, first.');
   bumped();
   await verify();
   // Not silent: npm would hand loglevel=silent to every nested npm in the script.
@@ -178,15 +287,46 @@ export async function release(): Promise<void> {
   await tag();
 }
 
-export const what = 'a repository that publishes packages: updates, the pack, the notes, the publish, the tag, the release';
+export const what =
+  'a repository that publishes packages: updates, the pack, the notes, the publish, the tag, the release';
 export const commands: Subcommands = {
-  check: { what: "package updates available for the repository's own dependencies (npm-check-updates; never its own packages); nothing changed", run: () => check() },
-  upgrade: { what: "upgrade every package, major versions included, then the installation's checks", run: () => upgrade() },
-  pack: { what: 'pack each published workspace, as the publish would: a tarball a scratch app installs before any release', run: () => pack() },
-  notes: { what: "<version>: the CHANGELOG section of a version, as the GitHub release's notes", run: rest => { if (!rest[0]) fail('remy packages notes <version>'); process.stdout.write(notes(rest[0])); } },
-  bumped: { what: 'every published package whose files changed since the last release tag has a new version', run: () => bumped() },
-  publish: { what: '[--release vX.Y.Z] [--dry-run]: each registry accepts its token, then each workspace whose version is new on its registry, then the GitHub release from its CHANGELOG notes; the tag\'s CI job runs the same', run: rest => { const at = rest.indexOf('--release'); return publish({ release: at >= 0 ? rest[at + 1] : undefined, dryRun: rest.includes('--dry-run') }); } },
-  tag: { what: "on a clean main: the lead package's version as the tag, pushed with main, then the publish", run: () => tag() },
-  release: { what: "the release: translations strict, bumped, the gate (remy verify), the app's release-checks script, Google, Core Web Vitals on a preview, the tag (dev:release runs it)", run: () => release() },
+  check: {
+    what: "package updates available for the repository's own dependencies (npm-check-updates; never its own packages); nothing changed",
+    run: () => check(),
+  },
+  upgrade: {
+    what: "upgrade every package, major versions included, then the installation's checks",
+    run: () => upgrade(),
+  },
+  pack: {
+    what: 'pack each published workspace, as the publish would: a tarball a scratch app installs before any release',
+    run: () => pack(),
+  },
+  notes: {
+    what: "<version>: the CHANGELOG section of a version, as the GitHub release's notes",
+    run: (rest) => {
+      if (!rest[0]) fail('remy packages notes <version>');
+      process.stdout.write(notes(rest[0]));
+    },
+  },
+  bumped: {
+    what: 'every published package whose files changed since the last release tag has a new version',
+    run: () => bumped(),
+  },
+  publish: {
+    what: "[--release vX.Y.Z] [--dry-run]: each registry accepts its token, then each workspace whose version is new on its registry, then the GitHub release from its CHANGELOG notes; the tag's CI job runs the same",
+    run: (rest) => {
+      const at = rest.indexOf('--release');
+      return publish({ release: at >= 0 ? rest[at + 1] : undefined, dryRun: rest.includes('--dry-run') });
+    },
+  },
+  tag: {
+    what: "on a clean main: the lead package's version as the tag, pushed with main, then the publish",
+    run: () => tag(),
+  },
+  release: {
+    what: "the release: translations strict, bumped, the gate (remy verify), the app's release-checks script, Google, Core Web Vitals on a preview, the tag (dev:release runs it)",
+    run: () => release(),
+  },
 };
 export const main = dispatch('packages', commands);

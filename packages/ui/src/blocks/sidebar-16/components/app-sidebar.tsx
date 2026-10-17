@@ -2,7 +2,15 @@ import { Link } from '@tanstack/react-router';
 import { ArrowLeftIcon, BookOpenIcon, GalleryVerticalEndIcon } from 'lucide-react';
 import { getTextDirection, type Locale } from '../../../paraglide/runtime.js';
 import { m } from '../../../paraglide/messages.js';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../../../components/sidebar';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '../../../components/sidebar';
 import { NavMain } from './nav-main';
 import { useRemyApp } from '../../../app-config';
 
@@ -15,11 +23,18 @@ export function AppSidebar({ locale }: { locale: Locale }) {
   const o = { locale };
   const app = useRemyApp();
   return (
-    <Sidebar collapsible="icon" side={getTextDirection(locale) === 'rtl' ? 'right' : 'left'} className="top-(--header-height) h-[calc(100svh-var(--header-height))]!">
+    <Sidebar
+      collapsible="icon"
+      side={getTextDirection(locale) === 'rtl' ? 'right' : 'left'}
+      className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
+    >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={app.app ? <Link {...app.app.home} preload="intent" /> : <Link to="/" preload="intent" />}>
+            <SidebarMenuButton
+              size="lg"
+              render={app.app ? <Link {...app.app.home} preload="intent" /> : <Link to="/" preload="intent" />}
+            >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                 <GalleryVerticalEndIcon className="size-4" />
               </div>
@@ -36,12 +51,14 @@ export function AppSidebar({ locale }: { locale: Locale }) {
       {/* In the footer, which stays in view however short the screen (a phone in landscape). */}
       <SidebarFooter>
         <SidebarMenu>
-          {app.docs && <SidebarMenuItem>
-            <SidebarMenuButton render={<a href={`${app.docs}/docs`} />}>
-              <BookOpenIcon />
-              <span>{m.nav_guide({}, o)}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>}
+          {app.docs && (
+            <SidebarMenuItem>
+              <SidebarMenuButton render={<a href={`${app.docs}/docs`} />}>
+                <BookOpenIcon />
+                <span>{m.nav_guide({}, o)}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           {app.app?.links?.(locale)}
           <SidebarMenuItem>
             <SidebarMenuButton render={<Link to="/" />}>

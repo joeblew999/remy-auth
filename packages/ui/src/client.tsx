@@ -20,8 +20,14 @@ export function useSuggestedLocale(page: Locale): Locale | undefined {
 }
 
 /** A moment in the device's own time zone, which only the browser knows; empty until hydration. */
-export function DeviceTime({ locale, instant, ...rest }: { locale: Locale; instant: Date } & React.HTMLAttributes<HTMLSpanElement>) {
+export function DeviceTime({
+  locale,
+  instant,
+  ...rest
+}: { locale: Locale; instant: Date } & React.HTMLAttributes<HTMLSpanElement>) {
   const [text, setText] = useState('');
-  useEffect(() => { setText(new Intl.DateTimeFormat(formatLocale(locale), { dateStyle: 'full', timeStyle: 'long' }).format(instant)); }, [locale, instant]);
+  useEffect(() => {
+    setText(new Intl.DateTimeFormat(formatLocale(locale), { dateStyle: 'full', timeStyle: 'long' }).format(instant));
+  }, [locale, instant]);
   return <span {...rest}>{text}</span>;
 }

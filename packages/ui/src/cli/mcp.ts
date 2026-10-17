@@ -13,17 +13,35 @@ type Json = Record<string, unknown>;
 
 /** The server as this install runs it: Google's Chrome DevTools MCP over stdio, isolated and headless, telemetry off. */
 function server(root: string): { command: string; args: string[] } {
-  return { command: join(root, 'node_modules', '.bin', 'chrome-devtools-mcp'), args: ['--isolated', '--headless', '--no-usage-statistics', '--no-performance-crux'] };
+  return {
+    command: join(root, 'node_modules', '.bin', 'chrome-devtools-mcp'),
+    args: ['--isolated', '--headless', '--no-usage-statistics', '--no-performance-crux'],
+  };
 }
 
 /** Write (or with `check`, only verify) both clients' registration. */
 export async function register(check = false, root = process.cwd()): Promise<void> {
-  const { parse, stringify } = createRequire(join(root, 'package.json'))('smol-toml') as { parse: (text: string) => Json; stringify: (value: Json) => string };
+  const { parse, stringify } = createRequire(join(root, 'package.json'))('smol-toml') as {
+    parse: (text: string) => Json;
+    stringify: (value: Json) => string;
+  };
   const { command, args } = server(root);
   assert.ok(existsSync(command), `${command}: chrome-devtools-mcp is not installed (npm ci)`);
   const targets = [
-    { file: '.codex/config.toml', decode: parse, encode: stringify, key: 'mcp_servers', server: { command, args, startup_timeout_sec: 30 } as Json },
-    { file: '.mcp.json', decode: JSON.parse as (text: string) => Json, encode: (value: Json) => JSON.stringify(value, null, 2) + '\n', key: 'mcpServers', server: { type: 'stdio', command, args } as Json },
+    {
+      file: '.codex/config.toml',
+      decode: parse,
+      encode: stringify,
+      key: 'mcp_servers',
+      server: { command, args, startup_timeout_sec: 30 } as Json,
+    },
+    {
+      file: '.mcp.json',
+      decode: JSON.parse as (text: string) => Json,
+      encode: (value: Json) => JSON.stringify(value, null, 2) + '\n',
+      key: 'mcpServers',
+      server: { type: 'stdio', command, args } as Json,
+    },
   ];
   for (const target of targets) {
     const path = join(root, target.file);
@@ -32,7 +50,11 @@ export async function register(check = false, root = process.cwd()): Promise<voi
     assert.ok(config && typeof config === 'object', `${target.file}: invalid config`);
     const servers = (config[target.key] ??= {}) as Json;
     const same = JSON.stringify(servers['chrome-devtools']) === JSON.stringify(target.server);
-    if (check) assert.ok(same, `${target.file}: Chrome DevTools is not registered as this install runs it; npx remy mcp register`);
+    if (check)
+      assert.ok(
+        same,
+        `${target.file}: Chrome DevTools is not registered as this install runs it; npx remy mcp register`,
+      );
     else if (!same) {
       if (original !== undefined) writeFileSync(`${path}.bak`, original);
       servers['chrome-devtools'] = target.server;
@@ -45,7 +67,10 @@ export async function register(check = false, root = process.cwd()): Promise<voi
 
 /** What the clients see (Claude also checks connectivity for approved servers); needs both CLIs. */
 export function status(): void {
-  for (const [command, args] of [[join(process.cwd(), 'node_modules', '.bin', 'codex'), ['mcp', 'get', 'chrome-devtools']], ['claude', ['mcp', 'get', 'chrome-devtools']]] as const) {
+  for (const [command, args] of [
+    [join(process.cwd(), 'node_modules', '.bin', 'codex'), ['mcp', 'get', 'chrome-devtools']],
+    ['claude', ['mcp', 'get', 'chrome-devtools']],
+  ] as const) {
     const result = spawnSync(command, [...args], { stdio: 'inherit' });
     if (result.status !== 0) process.exit(result.status ?? 1);
   }

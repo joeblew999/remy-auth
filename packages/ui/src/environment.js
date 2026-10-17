@@ -11,8 +11,12 @@
  * `permits(env, 'capability')` (one capability, typed by the table).
  */
 export function environments(table) {
-  if (!Object.hasOwn(table, 'production')) throw new Error('environments: the table needs a production column, which is what an unknown environment resolves to');
-  const environmentOf = env => (typeof env?.ENVIRONMENT === 'string' && Object.hasOwn(table, env.ENVIRONMENT) ? env.ENVIRONMENT : 'production');
-  const policyFor = env => table[environmentOf(env)];
+  if (!Object.hasOwn(table, 'production'))
+    throw new Error(
+      'environments: the table needs a production column, which is what an unknown environment resolves to',
+    );
+  const environmentOf = (env) =>
+    typeof env?.ENVIRONMENT === 'string' && Object.hasOwn(table, env.ENVIRONMENT) ? env.ENVIRONMENT : 'production';
+  const policyFor = (env) => table[environmentOf(env)];
   return { table, environmentOf, policyFor, permits: (env, capability) => policyFor(env)[capability] };
 }

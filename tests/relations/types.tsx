@@ -26,9 +26,15 @@ export async function typed() {
   // @ts-expect-error a note's permissions hold a note's actions only: creating one is about no note
   can.CREATE_NOTE satisfies boolean;
 
-  return <>
-    <Allowed can={note.can} action="EDIT_NOTE">an action the note carries</Allowed>
-    {/* @ts-expect-error a page cannot offer an action the row does not carry */}
-    <Allowed can={note.can} action="CREATE_NOTE">not one</Allowed>
-  </>;
+  return (
+    <>
+      <Allowed can={note.can} action="EDIT_NOTE">
+        an action the note carries
+      </Allowed>
+      {/* @ts-expect-error a page cannot offer an action the row does not carry */}
+      <Allowed can={note.can} action="CREATE_NOTE">
+        not one
+      </Allowed>
+    </>
+  );
 }

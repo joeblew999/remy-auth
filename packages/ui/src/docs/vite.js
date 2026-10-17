@@ -5,7 +5,7 @@ import { cloudflare } from '@cloudflare/vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import viteReact from '@vitejs/plugin-react';
-import { defineConfig,                 } from 'vite';
+import { defineConfig } from 'vite';
 import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import remarkDirective from 'remark-directive';
 import { remarkUiWords } from './remark-ui-words.js';
@@ -28,10 +28,13 @@ const packageDocs = fileURLToPath(new URL('.', import.meta.url));
 /** The Worker's Cloudflare configuration: its name, the assets, observability and, when the app has Ask AI, its bindings. */
 export function docsWorkerConfig(docsConfig, srcDirectory) {
   const { ask } = docsConfig;
-  const askBindings = (remote) => ask ? {
-    ai_search: [{ binding: 'DOCS_SEARCH', instance_name: ask.instance, ...(remote ? { remote: true } : {}) }],
-    ratelimits: [{ name: 'ASK_LIMIT', namespace_id: ask.rateLimitNamespace, simple: { limit: 10, period: 60 } }],
-  } : {};
+  const askBindings = (remote) =>
+    ask
+      ? {
+          ai_search: [{ binding: 'DOCS_SEARCH', instance_name: ask.instance, ...(remote ? { remote: true } : {}) }],
+          ratelimits: [{ name: 'ASK_LIMIT', namespace_id: ask.rateLimitNamespace, simple: { limit: 10, period: 60 } }],
+        }
+      : {};
   return {
     name: docsConfig.service,
     compatibility_date: '2026-09-24',
@@ -43,7 +46,17 @@ export function docsWorkerConfig(docsConfig, srcDirectory) {
     preview_urls: false,
     ...askBindings(false),
     // Working on answers (CLOUDFLARE_ENV=ask npm run docs -- dev): the same Worker locally, AI Search remote. Never deployed.
-    ...(ask ? { env: { ask: { vars: { ENVIRONMENT: 'docs' }, version_metadata: { binding: 'CF_VERSION_METADATA' }, ...askBindings(true) } } } : {}),
+    ...(ask
+      ? {
+          env: {
+            ask: {
+              vars: { ENVIRONMENT: 'docs' },
+              version_metadata: { binding: 'CF_VERSION_METADATA' },
+              ...askBindings(true),
+            },
+          },
+        }
+      : {}),
     observability: {
       enabled: true,
       redact_query_string: true,
@@ -64,9 +77,15 @@ export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
   const srcDirectory = relative(root, packageDocs).replace(/\/$/, '');
   const generated = join(root, '.remy-docs');
   mkdirSync(generated, { recursive: true });
-  writeFileSync(join(generated, 'collections.ts'), readFileSync(join(packageDocs, 'lib/collections.source.ts'), 'utf8'));
+  writeFileSync(
+    join(generated, 'collections.ts'),
+    readFileSync(join(packageDocs, 'lib/collections.source.ts'), 'utf8'),
+  );
   writeFileSync(join(generated, 'app.json'), `${JSON.stringify({ api })}\n`);
-  writeFileSync(join(generated, 'wrangler.json'), `${JSON.stringify({ ...docsWorkerConfig(docsConfig, `../${srcDirectory}`), assets: { directory: '../dist/client' } }, null, 2)}\n`);
+  writeFileSync(
+    join(generated, 'wrangler.json'),
+    `${JSON.stringify({ ...docsWorkerConfig(docsConfig, `../${srcDirectory}`), assets: { directory: '../dist/client' } }, null, 2)}\n`,
+  );
   return defineConfig({
     plugins: [
       // What this build is (`virtual:remy-build`): the docs Worker's /healthz answers with it, as an app's does.
@@ -77,7 +96,11 @@ export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
         name: 'remy-docs-headers',
         generateBundle() {
           if (this.environment?.name !== 'client') return;
-          this.emitFile({ type: 'asset', fileName: '_headers', source: '/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n' });
+          this.emitFile({
+            type: 'asset',
+            fileName: '_headers',
+            source: '/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n',
+          });
         },
       },
       // Fumadocs MDX compiles content/ for the collections (.remy-docs/collections.ts); before Start's plugin.
@@ -85,13 +108,26 @@ export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
       // Paraglide catalog: remark-ui-words.js), callouts (:::note), Mermaid
       // (```mermaid), type tables from TypeScript (<auto-type-table>) and steps. GitHub's "default" code
       // themes keep 4.5:1 comment contrast on both backgrounds, which Lighthouse's accessibility audit requires.
-      fumadocsMdx({ macro: { include: ['**/.remy-docs/collections.ts'] }, globalOptions: { mdxOptions: {
-        remarkPlugins: plugins => [remarkDirective, remarkUiWords({ root: join(root, '..') }), remarkDirectiveAdmonition, remarkMdxMermaid, remarkAutoTypeTable, ...plugins, remarkSteps],
-        rehypeCodeOptions: { themes: { light: 'github-light-default', dark: 'github-dark-default' } },
-        // Pictures and videos live in public/media and are referenced by URL (Fumadocs' stock option), so the
-        // Markdown that llms.txt, the .md pages and MCP serve keeps their real addresses.
-        remarkImageOptions: { useImport: false, publicDir: 'public' },
-      } } }),
+      fumadocsMdx({
+        macro: { include: ['**/.remy-docs/collections.ts'] },
+        globalOptions: {
+          mdxOptions: {
+            remarkPlugins: (plugins) => [
+              remarkDirective,
+              remarkUiWords({ root: join(root, '..') }),
+              remarkDirectiveAdmonition,
+              remarkMdxMermaid,
+              remarkAutoTypeTable,
+              ...plugins,
+              remarkSteps,
+            ],
+            rehypeCodeOptions: { themes: { light: 'github-light-default', dark: 'github-dark-default' } },
+            // Pictures and videos live in public/media and are referenced by URL (Fumadocs' stock option), so the
+            // Markdown that llms.txt, the .md pages and MCP serve keeps their real addresses.
+            remarkImageOptions: { useImport: false, publicDir: 'public' },
+          },
+        },
+      }),
       cloudflare({ viteEnvironment: { name: 'ssr' }, configPath: join(generated, 'wrangler.json') }),
       tailwindcss(),
       tanstackStart({ srcDirectory, server: { build: { inlineCss: true } } }),

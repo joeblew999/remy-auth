@@ -8,7 +8,9 @@ import { product } from '../../src/product';
 
 test("no message in the platform's catalog names a product: a message that says the name takes it as {product}", () => {
   const catalog: Record<string, unknown> = JSON.parse(readFileSync('packages/ui/messages/en.json', 'utf8'));
-  const naming = Object.entries(catalog).filter(([, message]) => /\bRemy\b/.test(JSON.stringify(message))).map(([key]) => key);
+  const naming = Object.entries(catalog)
+    .filter(([, message]) => /\bRemy\b/.test(JSON.stringify(message)))
+    .map(([key]) => key);
   expect(naming).toEqual([]);
 });
 

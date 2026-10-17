@@ -7,8 +7,15 @@ export const docsConfig = defineDocsConfig({
   product: 'My app',
   titles: { docs: 'My app guide', dev: 'My app developer docs', reference: 'My app API reference' },
   mcp: {
-    docs: { name: 'my-app-guide', audience: "My app's guide, for people using the app. Not for developers: the developer docs are my-app-developer-docs." },
-    dev: { name: 'my-app-developer-docs', audience: "My app's developer docs, for people building it. The API itself is my-app-api-reference." },
+    docs: {
+      name: 'my-app-guide',
+      audience:
+        "My app's guide, for people using the app. Not for developers: the developer docs are my-app-developer-docs.",
+    },
+    dev: {
+      name: 'my-app-developer-docs',
+      audience: "My app's developer docs, for people building it. The API itself is my-app-api-reference.",
+    },
     reference: { name: 'my-app-api-reference', audience: "My app's API reference, for developers calling its API." },
   },
   appUrl: 'https://my-app.example.workers.dev',

@@ -58,7 +58,10 @@ export type ActionCode<V extends Vocabulary> = V['actions'][number]['code'];
 export type RelationCode<V extends Vocabulary> = V['relations'][number]['code'];
 export type ObjectTypeCode<V extends Vocabulary> = V['objectTypes'][number]['code'];
 /** The actions the vocabulary declares on one object type. */
-export type ActionOn<V extends Vocabulary, T extends string> = Extract<V['actions'][number], { objectTypeCode: T }>['code'];
+export type ActionOn<V extends Vocabulary, T extends string> = Extract<
+  V['actions'][number],
+  { objectTypeCode: T }
+>['code'];
 /** What a row of this type carries for its viewer: each of its actions, allowed or not. */
 export type Can<V extends Vocabulary, T extends string> = Record<ActionOn<V, T>, boolean>;
 
@@ -66,7 +69,9 @@ export type Can<V extends Vocabulary, T extends string> = Record<ActionOn<V, T>,
 export type Viewer = { id: string; role?: string | null } | null | undefined;
 
 /** The part of D1's API the engine uses. */
-export type RelationsDatabase = { prepare(query: string): { bind(...values: unknown[]): { all(): Promise<{ results: any[] }> } } };
+export type RelationsDatabase = {
+  prepare(query: string): { bind(...values: unknown[]): { all(): Promise<{ results: any[] }> } };
+};
 
 export type RelationEngine<V extends Vocabulary> = {
   vocabulary: V;
@@ -86,9 +91,18 @@ export type RelationEngine<V extends Vocabulary> = {
   /** May this user take this action on this object (null: a platform action)? `context` names the narrowing object for an action about a pair. */
   can(action: ActionCode<V>, user: Viewer, objectId: string | null, context?: string | null): Promise<boolean>;
   /** Which of these objects the user may take the action on. */
-  canAll(action: ActionCode<V>, user: Viewer, objectIds: readonly string[], context?: string | null): Promise<Set<string>>;
+  canAll(
+    action: ActionCode<V>,
+    user: Viewer,
+    objectIds: readonly string[],
+    context?: string | null,
+  ): Promise<Set<string>>;
   /** For a whole list: each row's actions, allowed or not. What a screen receives with its data. */
-  canFor<T extends ObjectTypeCode<V>>(objectType: T, user: Viewer, objectIds: readonly string[]): Promise<Map<string, Can<V, T>>>;
+  canFor<T extends ObjectTypeCode<V>>(
+    objectType: T,
+    user: Viewer,
+    objectIds: readonly string[],
+  ): Promise<Map<string, Can<V, T>>>;
   /** The actions a row of this type answers. */
   actionsOn<T extends ObjectTypeCode<V>>(objectType: T): ActionOn<V, T>[];
   platformRelations(user: Viewer): Set<RelationCode<V>>;
@@ -97,7 +111,13 @@ export type RelationEngine<V extends Vocabulary> = {
 export declare const MAX_IN: number;
 export declare function vocabularyProblems(vocabulary: Vocabulary): string[];
 /** What the vocabulary names that the database lacks; `columnsOf` answers a table's columns, or nothing for no such table. */
-export declare function schemaProblems(vocabulary: Vocabulary, columnsOf: (table: string) => readonly string[] | undefined): string[];
+export declare function schemaProblems(
+  vocabulary: Vocabulary,
+  columnsOf: (table: string) => readonly string[] | undefined,
+): string[];
 /** The vocabulary itself, typed by its own codes, refused when it does not hold together. */
 export declare function defineVocabulary<const V extends Vocabulary>(vocabulary: V): V;
-export declare function relationEngine<const V extends Vocabulary>(vocabulary: V, db: RelationsDatabase): RelationEngine<V>;
+export declare function relationEngine<const V extends Vocabulary>(
+  vocabulary: V,
+  db: RelationsDatabase,
+): RelationEngine<V>;

@@ -1,17 +1,11 @@
 {
   "//": "The command line's own TypeScript project: emitted to packages/ui/cli (JavaScript and declarations) by ui:generate and by prepack, because Node strips types from nothing under node_modules, so an app that installs the package runs the JavaScript; remy-auth runs the source. The app's tsc checks the source with the rest of src.",
-  "include": [
-    "./*.ts"
-  ],
+  "include": ["./*.ts"],
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "../../cli",
-    "lib": [
-      "ES2022"
-    ],
-    "types": [
-      "node"
-    ],
+    "lib": ["ES2022"],
+    "types": ["node"],
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",

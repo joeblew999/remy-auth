@@ -10,5 +10,9 @@ import { getLocale } from '@joeblew999/remy-ui/locale';
  */
 export const authClient = createAuthClient({
   plugins: [emailOTPClient()],
-  fetchOptions: { onRequest: context => { context.headers.set('accept-language', getLocale()); } },
+  fetchOptions: {
+    onRequest: (context) => {
+      context.headers.set('accept-language', getLocale());
+    },
+  },
 });

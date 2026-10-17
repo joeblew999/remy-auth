@@ -9,8 +9,5 @@ import type { AnyRouter } from '@tanstack/react-router';
  * `invalidateEverything(useRouter(), useQueryClient())`.
  */
 export async function invalidateEverything(router: AnyRouter, queryClient: QueryClient): Promise<void> {
-  await Promise.all([
-    queryClient.invalidateQueries(),
-    router.invalidate({ sync: true }),
-  ]);
+  await Promise.all([queryClient.invalidateQueries(), router.invalidate({ sync: true })]);
 }

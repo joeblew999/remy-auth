@@ -38,7 +38,8 @@ export function docsHead(page: (DocsPageData & { ask?: boolean }) | undefined) {
   if (!page) return {};
   const { origin } = page;
   // The Ask AI page: its own title, kept out of search (its answers are generated, not documents).
-  if (page.ask) return { meta: [{ title: `Ask AI | ${docsConfig.titles[page.site]}` }, { name: 'robots', content: 'noindex' }] };
+  if (page.ask)
+    return { meta: [{ title: `Ask AI | ${docsConfig.titles[page.site]}` }, { name: 'robots', content: 'noindex' }] };
   const image = `${origin}/og${page.url}/image.webp`;
   return {
     meta: [
@@ -52,10 +53,16 @@ export function docsHead(page: (DocsPageData & { ask?: boolean }) | undefined) {
     ],
     links: [
       { rel: 'canonical', href: `${origin}${page.url}` },
-      ...(page.langs.length > 1 ? [
-        ...page.langs.map(lang => ({ rel: 'alternate', hrefLang: lang, href: `${origin}${docsUrl(page.site, page.slug, lang)}` })),
-        { rel: 'alternate', hrefLang: 'x-default', href: `${origin}${docsUrl(page.site, page.slug)}` },
-      ] : []),
+      ...(page.langs.length > 1
+        ? [
+            ...page.langs.map((lang) => ({
+              rel: 'alternate',
+              hrefLang: lang,
+              href: `${origin}${docsUrl(page.site, page.slug, lang)}`,
+            })),
+            { rel: 'alternate', hrefLang: 'x-default', href: `${origin}${docsUrl(page.site, page.slug)}` },
+          ]
+        : []),
       { rel: 'alternate', type: 'text/markdown', href: `${origin}${page.markdownUrl}` },
     ],
   };

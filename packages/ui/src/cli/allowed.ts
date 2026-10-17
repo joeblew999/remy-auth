@@ -14,7 +14,9 @@ export function gate(task: string): void {
   const onGitHub = process.env.GITHUB_ACTIONS === 'true';
   if (by || onGitHub) return;
   const why = heavy[task] ?? 'a heavy check';
-  console.error(`${task}: not in the flow (${why}).\nThe steps, and what each runs: COMMANDS.md (npm run dev:change after every change; npm run dev:land -- "<what changed>" when the work is finished). One area: npm run test -- only <words>.\nBy hand, on purpose, at a terminal: REMY_FLOW=hand in front of the command.`);
+  console.error(
+    `${task}: not in the flow (${why}).\nThe steps, and what each runs: COMMANDS.md (npm run dev:change after every change; npm run dev:land -- "<what changed>" when the work is finished). One area: npm run test -- only <words>.\nBy hand, on purpose, at a terminal: REMY_FLOW=hand in front of the command.`,
+  );
   process.exit(1);
 }
 

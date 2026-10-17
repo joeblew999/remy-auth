@@ -9,9 +9,7 @@
   ],
   "compilerOptions": {
     "paths": {
-      "@remy-docs-app/*": [
-        "../../../../docs/*"
-      ]
+      "@remy-docs-app/*": ["../../../../docs/*"]
     }
   }
 }

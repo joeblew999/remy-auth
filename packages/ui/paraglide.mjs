@@ -18,10 +18,12 @@ export const options = {
   // zh-Hant-HK, which preferredLanguage's whole-tag-then-language match cannot.
   strategy: ['url', 'cookie', 'custom-chinese', 'preferredLanguage', 'baseLocale'],
   // Every locale, including the base locale, lives under its own prefix (/en, /es, /ar).
-  urlPatterns: [{
-    pattern: ':protocol://:domain(.*)::port?/:path(.*)?',
-    localized: locales.map(locale => [locale, `:protocol://:domain(.*)::port?/${locale}/:path(.*)?`]),
-  }],
+  urlPatterns: [
+    {
+      pattern: ':protocol://:domain(.*)::port?/:path(.*)?',
+      localized: locales.map((locale) => [locale, `:protocol://:domain(.*)::port?/${locale}/:path(.*)?`]),
+    },
+  ],
   trailingSlash: 'never',
   // The contract API (/api, .plans/openapi-contracts.md) is not a page: no locale in its URLs, no
   // redirect, no cookie. A call answers in the language its Accept-Language asks for (the app's

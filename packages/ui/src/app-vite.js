@@ -25,7 +25,14 @@ import { appCatalog } from './app-catalog.js';
  * shared ones; `cloudflare`: more Cloudflare Vite plugin options; `port`: the dev server's; `build`:
  * the build stamp's options (`packages`: more packages whose versions it lists).
  */
-export function remyApp({ plugins = [], start = {}, cloudflare: cloudflareOptions = {}, port = 5173, root = process.cwd(), build = {} } = {}) {
+export function remyApp({
+  plugins = [],
+  start = {},
+  cloudflare: cloudflareOptions = {},
+  port = 5173,
+  root = process.cwd(),
+  build = {},
+} = {}) {
   // The shared package's parts the app lists in src/parts.json (.plans/parts.md): their routes and the
   // package's own (the CSP report endpoint) mount beside src/routes, and `virtual:remy-parts` says which.
   const parts = remyParts({ root });
@@ -47,7 +54,11 @@ export function remyApp({ plugins = [], start = {}, cloudflare: cloudflareOption
       FontaineTransform.vite({ fallbacks: { 'Geist Variable': ['Arial'] } }),
       tailwindcss(),
       // The stylesheet inlined in the HTML, so the first paint needs no CSS fetch.
-      tanstackStart({ ...start, server: { build: { inlineCss: true }, ...start.server }, router: { virtualRouteConfig: parts.routes, ...start.router } }),
+      tanstackStart({
+        ...start,
+        server: { build: { inlineCss: true }, ...start.server },
+        router: { virtualRouteConfig: parts.routes, ...start.router },
+      }),
       viteReact(),
     ],
     server: { host: '127.0.0.1', port, strictPort: true },

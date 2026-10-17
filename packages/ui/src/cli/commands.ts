@@ -12,8 +12,11 @@ export type Tool = { what: string; commands?: Subcommands; main: (args: string[]
 
 /** The usage a command prints without a subcommand, from its table. */
 export function usage(name: string, commands: Subcommands): string {
-  const width = Math.max(...Object.keys(commands).map(key => key.length));
-  return [`remy ${name} <subcommand>`, ...Object.entries(commands).map(([key, { what }]) => `  ${key.padEnd(width)}  ${what}`)].join('\n');
+  const width = Math.max(...Object.keys(commands).map((key) => key.length));
+  return [
+    `remy ${name} <subcommand>`,
+    ...Object.entries(commands).map(([key, { what }]) => `  ${key.padEnd(width)}  ${what}`),
+  ].join('\n');
 }
 
 /**
@@ -21,11 +24,15 @@ export function usage(name: string, commands: Subcommands): string {
  * command has one (test: every), else prints the usage, as an unknown subcommand does.
  */
 export function dispatch(name: string, commands: Subcommands, fallback?: string): (args: string[]) => Promise<void> {
-  return async args => {
+  return async (args) => {
     const [key = fallback, ...rest] = args;
     const command = key === undefined ? undefined : commands[key];
     if (!command) {
-      console.error(key === undefined || key === fallback ? usage(name, commands) : `remy ${name}: no subcommand "${key}".\n${usage(name, commands)}`);
+      console.error(
+        key === undefined || key === fallback
+          ? usage(name, commands)
+          : `remy ${name}: no subcommand "${key}".\n${usage(name, commands)}`,
+      );
       process.exit(2);
     }
     await command.run(rest);

@@ -16,11 +16,12 @@ export function docsTableOf({ users, dev }, docsConfig) {
     dev: { dir: 'docs/content/dev', meta: dev.meta, ...dev.i18n },
   };
 
-  const isPage = page => !page.startsWith('[') && !page.startsWith('---');
+  const isPage = (page) => !page.startsWith('[') && !page.startsWith('---');
 
   /** Every page of both sites in meta.json's order: its site, file path without extension, and slug ('' for the index). */
   const docsTable = Object.entries(docsSites).flatMap(([site, { dir, meta }]) =>
-    meta.pages.filter(isPage).map(page => ({ site, base: `${dir}/${page}`, slug: page === 'index' ? '' : page })));
+    meta.pages.filter(isPage).map((page) => ({ site, base: `${dir}/${page}`, slug: page === 'index' ? '' : page })),
+  );
 
   /** A page's URL in a language: the site's base, the language unless it is the default, the slug. */
   const docsUrl = (site, slug, lang = docsSites[site].defaultLanguage) =>
@@ -28,7 +29,8 @@ export function docsTableOf({ users, dev }, docsConfig) {
 
   /** A page's file in a language as `exists` finds it (.md or .mdx): its translation, else the default language's. */
   const docsFile = (row, lang, exists) => {
-    const own = lang === docsSites[row.site].defaultLanguage ? [] : [`${row.base}.${lang}.md`, `${row.base}.${lang}.mdx`];
+    const own =
+      lang === docsSites[row.site].defaultLanguage ? [] : [`${row.base}.${lang}.md`, `${row.base}.${lang}.mdx`];
     return [...own, `${row.base}.md`, `${row.base}.mdx`].find(exists) ?? `${row.base}.md`;
   };
 
@@ -36,8 +38,12 @@ export function docsTableOf({ users, dev }, docsConfig) {
    * The languages a page has its own text in, the default first: its hreflang alternates. None for an entry
    * with no file (the API reference, whose pages fumadocs-openapi makes from the contract).
    */
-  const docsLangs = (row, exists) => (![`${row.base}.md`, `${row.base}.mdx`].some(exists) ? [] : docsSites[row.site].languages.filter(lang =>
-    lang === docsSites[row.site].defaultLanguage || docsFile(row, lang, exists).includes(`.${lang}.`)));
+  const docsLangs = (row, exists) =>
+    ![`${row.base}.md`, `${row.base}.mdx`].some(exists)
+      ? []
+      : docsSites[row.site].languages.filter(
+          (lang) => lang === docsSites[row.site].defaultLanguage || docsFile(row, lang, exists).includes(`.${lang}.`),
+        );
 
   /**
    * A page's object in the R2 bucket AI Search reads (.plans/done/docs-ai-sync.md): <site>/<lang>/<slug>.md,
@@ -46,20 +52,31 @@ export function docsTableOf({ users, dev }, docsConfig) {
   const docsObjectKey = (site, slug, lang) => `${site}/${lang}/${slug || 'index'}.md`;
 
   /** The docs row and language for an object key, or undefined. */
-  const docsObjectForKey = key => {
+  const docsObjectForKey = (key) => {
     const match = key.match(/^([^/]+)\/([^/]+)\/(.+)\.md$/);
     if (!match) return undefined;
     const [, site, lang, name] = match;
-    const row = docsTable.find(item => item.site === site && (item.slug || 'index') === name);
+    const row = docsTable.find((item) => item.site === site && (item.slug || 'index') === name);
     return row ? { row, lang } : undefined;
   };
 
   /** The docs site and language of a URL path (/dev/es/run-and-test → dev, es), or undefined outside the docs. */
-  const docsLangOfPath = pathname => {
+  const docsLangOfPath = (pathname) => {
     const [, first, second] = pathname.split('/');
     const site = docsSites[first];
     if (!site) return undefined;
     return { site: first, lang: site.languages.includes(second) ? second : site.defaultLanguage };
   };
-  return { repository, branch, docsSites, docsTable, docsUrl, docsFile, docsLangs, docsObjectKey, docsObjectForKey, docsLangOfPath };
+  return {
+    repository,
+    branch,
+    docsSites,
+    docsTable,
+    docsUrl,
+    docsFile,
+    docsLangs,
+    docsObjectKey,
+    docsObjectForKey,
+    docsLangOfPath,
+  };
 }

@@ -13,15 +13,17 @@ type AppCheckOptions = {
 };
 
 /** The shared checks of a server-rendered app over its own pages: zones, public pages, text, fonts, redirecting entry URLs, the theme, observability, CSP, the build stamp and the product's name. */
-export declare function serverAppChecks(options: AppCheckOptions & {
-  oneLanguage?: { locale: string; paths: string[]; translations?: Record<string, string[]> };
-  /**
-   * The app's listed parts (default: its src/parts.json, or none without one). What a listed part owns
-   * runs with partChecks() instead: seo-routes the sitemap, deferred-place the network place.
-   */
-  parts?: readonly PartName[];
-  /** Whether the app enforces its nonce CSP (default true) or sends it report-only: the app's own switch, passed to cspChecks. */
-  cspEnforced?: boolean;
-}): void;
+export declare function serverAppChecks(
+  options: AppCheckOptions & {
+    oneLanguage?: { locale: string; paths: string[]; translations?: Record<string, string[]> };
+    /**
+     * The app's listed parts (default: its src/parts.json, or none without one). What a listed part owns
+     * runs with partChecks() instead: seo-routes the sitemap, deferred-place the network place.
+     */
+    parts?: readonly PartName[];
+    /** Whether the app enforces its nonce CSP (default true) or sends it report-only: the app's own switch, passed to cspChecks. */
+    cspEnforced?: boolean;
+  },
+): void;
 /** The shared checks of a fully prerendered app over its own pages: zones, public pages, static entry pages, the theme, text, observability, the build stamp and the product's name. */
 export declare function prerenderedAppChecks(options: AppCheckOptions): void;

@@ -16,7 +16,12 @@ export const Route = createFileRoute('/app/account')({
   // Whoever is signed in can change at any moment in another tab: never serve this from the router's cache.
   staleTime: 0,
   gcTime: 0,
-  head: () => pageHead({ path: '/app/account', title: locale => m.account_title({}, { locale }), description: (locale, product) => m.account_sign_in_description({ product }, { locale }) }),
+  head: () =>
+    pageHead({
+      path: '/app/account',
+      title: (locale) => m.account_title({}, { locale }),
+      description: (locale, product) => m.account_sign_in_description({ product }, { locale }),
+    }),
   component: Account,
   ...problemPages,
 });
@@ -25,6 +30,11 @@ function Account() {
   const { account, canSignIn, seeded } = Route.useLoaderData();
   const locale = getLocale();
   if (!account && !canSignIn) return <AccountPage locale={locale} />;
-  const signIn = <div className="flex flex-col gap-8"><SignIn locale={locale} />{seeded && <SeededPeople locale={locale} seeded={seeded} />}</div>;
+  const signIn = (
+    <div className="flex flex-col gap-8">
+      <SignIn locale={locale} />
+      {seeded && <SeededPeople locale={locale} seeded={seeded} />}
+    </div>
+  );
   return <AccountPage locale={locale} auth={{ account, signIn, signOut: <SignOut locale={locale} /> }} />;
 }

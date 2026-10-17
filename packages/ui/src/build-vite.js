@@ -12,7 +12,12 @@ const id = 'virtual:remy-build';
 
 const git = (root, ...args) => {
   try {
-    return execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 256 * 1024 * 1024 }).trim();
+    return execFileSync('git', args, {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+      maxBuffer: 256 * 1024 * 1024,
+    }).trim();
   } catch {
     return ''; // not a git checkout (a tarball, some CI): the stamp says so by naming no commit
   }
@@ -37,12 +42,25 @@ export function buildStamp({ root = process.cwd(), packages = [], scope = '@joeb
   const app = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
   const commit = git(root, 'rev-parse', 'HEAD');
   const uncommitted = commit ? git(root, 'status', '--porcelain') : '';
-  const changes = uncommitted ? createHash('sha256').update(uncommitted).update(git(root, 'diff', 'HEAD')).digest('hex').slice(0, 7) : '';
-  const named = [...Object.keys({ ...app.dependencies, ...app.devDependencies }).filter(name => name.startsWith(scope)), ...packages];
-  const versions = Object.fromEntries([...new Set(named)].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)).flatMap(name => {
-    const version = installedVersion(name, root);
-    return version ? [[name, version]] : [];
-  }));
+  const changes = uncommitted
+    ? createHash('sha256')
+        .update(uncommitted)
+        .update(git(root, 'diff', 'HEAD'))
+        .digest('hex')
+        .slice(0, 7)
+    : '';
+  const named = [
+    ...Object.keys({ ...app.dependencies, ...app.devDependencies }).filter((name) => name.startsWith(scope)),
+    ...packages,
+  ];
+  const versions = Object.fromEntries(
+    [...new Set(named)]
+      .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+      .flatMap((name) => {
+        const version = installedVersion(name, root);
+        return version ? [[name, version]] : [];
+      }),
+  );
   return { app: { name: app.name ?? '', version: app.version ?? '' }, commit, changes, packages: versions };
 }
 
@@ -54,7 +72,8 @@ export function remyBuild(options = {}) {
   let stamp;
   return {
     name: 'remy-build',
-    resolveId: source => source === id ? `\0${id}` : undefined,
-    load: loaded => loaded === `\0${id}` ? `export const build = ${JSON.stringify(stamp ??= buildStamp(options))};` : undefined,
+    resolveId: (source) => (source === id ? `\0${id}` : undefined),
+    load: (loaded) =>
+      loaded === `\0${id}` ? `export const build = ${JSON.stringify((stamp ??= buildStamp(options)))};` : undefined,
   };
 }

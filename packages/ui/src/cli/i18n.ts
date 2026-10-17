@@ -20,14 +20,22 @@ const gapLine = (gap: Gap) => `${gap.language} ${gap.kind} ${gap.what}`;
 
 /** git's list of files (never its history: this works in a shallow checkout). */
 function git(cwd: string, ...args: string[]): string | undefined {
-  try { return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return undefined; }
+  try {
+    return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  } catch {
+    return undefined;
+  }
 }
 const readJson = (file: string) => JSON.parse(readFileSync(file, 'utf8')) as Record<string, unknown>;
 
 // --- What a translation was made from ---------------------------------------------------------------------
 
 /** A short fingerprint of an English text or message: a translation made from it records this. */
-export const print = (value: unknown): string => createHash('sha256').update(typeof value === 'string' ? value : JSON.stringify(value)).digest('hex').slice(0, 8);
+export const print = (value: unknown): string =>
+  createHash('sha256')
+    .update(typeof value === 'string' ? value : JSON.stringify(value))
+    .digest('hex')
+    .slice(0, 8);
 
 /**
  * A page split at its "## " and "### " headings, outside fenced code: the part before the first heading
@@ -35,10 +43,15 @@ export const print = (value: unknown): string => createHash('sha256').update(typ
  * levels: a page of "###" sections alone (tasks.md) was otherwise one section, translated whole.
  */
 export function sections(text: string): string[] {
-  const found: string[] = []; let current: string[] = []; let fence = false;
+  const found: string[] = [];
+  let current: string[] = [];
+  let fence = false;
   for (const line of text.split('\n')) {
     if (/^\s*(```|~~~)/.test(line)) fence = !fence;
-    if (!fence && /^###? /.test(line)) { found.push(current.join('\n')); current = []; }
+    if (!fence && /^###? /.test(line)) {
+      found.push(current.join('\n'));
+      current = [];
+    }
     current.push(line);
   }
   found.push(current.join('\n'));
@@ -50,8 +63,10 @@ export function sections(text: string): string[] {
  * each new section keeps the English section's ending, so the blank line before the next heading stays.
  */
 export function splice(english: string, translation: string, fresh: Map<number, string>): string {
-  const englishParts = sections(english), translatedParts = sections(withoutRecord(translation));
-  for (const [index, text] of fresh) translatedParts[index] = text.replace(/\n+$/, '') + (/\n*$/.exec(englishParts[index] ?? '')?.[0] ?? '');
+  const englishParts = sections(english),
+    translatedParts = sections(withoutRecord(translation));
+  for (const [index, text] of fresh)
+    translatedParts[index] = text.replace(/\n+$/, '') + (/\n*$/.exec(englishParts[index] ?? '')?.[0] ?? '');
   return translatedParts.join('\n');
 }
 
@@ -61,14 +76,17 @@ export function splice(english: string, translation: string, fresh: Map<number, 
  * (vp fmt, which lines up a table's columns) never makes a translation look stale. Owner, 2026-10-17: Vite+ is
  * right; its formatting is applied everywhere, and spacing is not a change to what a page says.
  */
-const words = (section: string): string => section
-  .replace(/^[ \t]*\|.*\|[ \t]*$/gm, row => row.replace(/[ \t]*\|[ \t]*/g, '|').replace(/-{3,}/g, '---'))
-  .replace(/[ \t]+/g, ' ').replace(/ +$/gm, '');
-export const pagePrints = (english: string): string[] => sections(english).map(section => print(words(section)));
+const words = (section: string): string =>
+  section
+    .replace(/^[ \t]*\|.*\|[ \t]*$/gm, (row) => row.replace(/[ \t]*\|[ \t]*/g, '|').replace(/-{3,}/g, '---'))
+    .replace(/[ \t]+/g, ' ')
+    .replace(/ +$/gm, '');
+export const pagePrints = (english: string): string[] => sections(english).map((section) => print(words(section)));
 /** Each section's fingerprint as records made before 2026-10-17 took it, layout included: still accepted, so no page went stale. */
 const layoutPrints = (english: string): string[] => sections(english).map(print);
 /** Whether a recorded fingerprint is section `index`'s, today's or the older kind. */
-const same = (recorded: string | undefined, now: string[], layout: string[], index: number) => recorded === now[index] || recorded === layout[index];
+const same = (recorded: string | undefined, now: string[], layout: string[], index: number) =>
+  recorded === now[index] || recorded === layout[index];
 
 const recordLine = /^translatedFrom:.*\r?\n/m;
 /** The fingerprints a translated page records, or undefined when it records none. */
@@ -82,7 +100,9 @@ export const withoutRecord = (page: string): string => page.replace(recordLine, 
 export function withRecord(page: string, prints: string[]): string {
   const bare = withoutRecord(page);
   const end = /^---\r?\n[\s\S]*?\r?\n(?=---[ \t]*(?:\r?\n|$))/.exec(bare);
-  return end ? bare.slice(0, end[0].length) + `translatedFrom: "${prints.join(' ')}"\n` + bare.slice(end[0].length) : bare;
+  return end
+    ? bare.slice(0, end[0].length) + `translatedFrom: "${prints.join(' ')}"\n` + bare.slice(end[0].length)
+    : bare;
 }
 
 /**
@@ -91,8 +111,11 @@ export function withRecord(page: string, prints: string[]): string {
  * English or the translation has a different number of sections than the record): then the whole page.
  */
 export function changedSections(english: string, translation: string): number[] | undefined {
-  const recorded = madeFrom(translation), now = pagePrints(english), layout = layoutPrints(english);
-  if (!recorded || recorded.length !== now.length || sections(withoutRecord(translation)).length !== now.length) return undefined;
+  const recorded = madeFrom(translation),
+    now = pagePrints(english),
+    layout = layoutPrints(english);
+  if (!recorded || recorded.length !== now.length || sections(withoutRecord(translation)).length !== now.length)
+    return undefined;
   return now.flatMap((_, index) => (same(recorded[index], now, layout, index) ? [] : [index]));
 }
 
@@ -112,23 +135,37 @@ export function menuWords(meta: { title?: string; pages?: string[] }): Record<st
 }
 
 /** The menu in another language (meta.<lang>.json, which Fumadocs reads): the English menu with the translated words, and the record of what it was made from. */
-export function menuIn(meta: { title?: string; pages?: string[] } & Record<string, unknown>, words: Record<string, string>): Record<string, unknown> {
+export function menuIn(
+  meta: { title?: string; pages?: string[] } & Record<string, unknown>,
+  words: Record<string, string>,
+): Record<string, unknown> {
   const pages = (meta.pages ?? []).map((entry, index) => {
     const label = words[`pages.${index}`];
     if (!label) return entry;
     if (/^---.+---$/.test(entry)) return `---${label}---`;
     return entry.replace(/^\[[^\]]+\]/, `[${label}]`);
   });
-  return { ...meta, ...(meta.title && words.title ? { title: words.title } : {}), pages, translatedFrom: print(menuWords(meta)) };
+  return {
+    ...meta,
+    ...(meta.title && words.title ? { title: words.title } : {}),
+    pages,
+    translatedFrom: print(menuWords(meta)),
+  };
 }
 
 /** A catalog's record: `translated-from/<lang>.json` in the catalog's folder, key to fingerprint. */
-export const recordFile = (catalog: string): string => join(dirname(catalog), 'translated-from', catalog.slice(dirname(catalog).length + 1));
+export const recordFile = (catalog: string): string =>
+  join(dirname(catalog), 'translated-from', catalog.slice(dirname(catalog).length + 1));
 /** The record of a catalog, empty when it has none. */
-export const readRecord = (catalog: string): Record<string, string> => existsSync(recordFile(catalog)) ? readJson(recordFile(catalog)) as Record<string, string> : {};
+export const readRecord = (catalog: string): Record<string, string> =>
+  existsSync(recordFile(catalog)) ? (readJson(recordFile(catalog)) as Record<string, string>) : {};
 /** The keys of a catalog whose English differs from what the record says it was made from (or that it has no record of). */
-export function staleKeys(english: Record<string, unknown>, catalog: Record<string, unknown>, record: Record<string, string>): string[] {
-  return Object.keys(english).filter(key => catalog[key] != null && record[key] !== print(english[key]));
+export function staleKeys(
+  english: Record<string, unknown>,
+  catalog: Record<string, unknown>,
+  record: Record<string, string>,
+): string[] {
+  return Object.keys(english).filter((key) => catalog[key] != null && record[key] !== print(english[key]));
 }
 
 /** The {placeholders} of a plain message; a message with variants (an array) is the plural check's. */
@@ -152,11 +189,16 @@ export function pluralGaps(locale: string, english: Record<string, unknown>, cat
     if (!Array.isArray(value) || !Array.isArray(english[key])) continue;
     const { declarations = [], selectors = [], match = {} } = (value as Variants)[0] ?? {};
     for (const selector of selectors) {
-      const declaration = declarations.find(line => new RegExp(`^local ${selector} = \\w+: plural\\b`).test(line));
+      const declaration = declarations.find((line) => new RegExp(`^local ${selector} = \\w+: plural\\b`).test(line));
       if (!declaration) continue;
       const rules = new Intl.PluralRules(locale, { type: /type=ordinal/.test(declaration) ? 'ordinal' : 'cardinal' });
-      const have = new Set(Object.keys(match).flatMap(variant => variant.split(/\s+/)).filter(part => part.startsWith(`${selector}=`)).map(part => part.slice(selector.length + 1).replace(/^\*$/, 'other')));
-      const lacking = [...new Set(numbers.map(n => rules.select(n)))].filter(category => !have.has(category));
+      const have = new Set(
+        Object.keys(match)
+          .flatMap((variant) => variant.split(/\s+/))
+          .filter((part) => part.startsWith(`${selector}=`))
+          .map((part) => part.slice(selector.length + 1).replace(/^\*$/, 'other')),
+      );
+      const lacking = [...new Set(numbers.map((n) => rules.select(n)))].filter((category) => !have.has(category));
       if (lacking.length) gaps.push({ language: locale, kind: 'plural', what: `${key} ${lacking.join(',')}` });
     }
   }
@@ -170,36 +212,56 @@ export function pluralGaps(locale: string, english: Record<string, unknown>, cat
  * routes, so a catalog lists exactly those).
  */
 export async function messagesGaps(cwd = process.cwd()): Promise<{ gaps: Gap[]; english?: string; locales: number }> {
-  const inlang = process.env.I18N_INLANG ?? git(cwd, 'ls-files', '--', '*project.inlang/settings.json')?.split('\n').filter(Boolean)[0]?.replace(/\/settings\.json$/, '');
+  const inlang =
+    process.env.I18N_INLANG ??
+    git(cwd, 'ls-files', '--', '*project.inlang/settings.json')
+      ?.split('\n')
+      .filter(Boolean)[0]
+      ?.replace(/\/settings\.json$/, '');
   const settingsFile = inlang ? join(cwd, inlang, 'settings.json') : undefined;
   if (!settingsFile || !existsSync(settingsFile)) return { gaps: [], locales: 0 };
-  const settings = readJson(settingsFile) as { baseLocale: string; locales: string[]; 'plugin.inlang.messageFormat'?: { pathPattern: string } };
+  const settings = readJson(settingsFile) as {
+    baseLocale: string;
+    locales: string[];
+    'plugin.inlang.messageFormat'?: { pathPattern: string };
+  };
   const pattern = settings['plugin.inlang.messageFormat']?.pathPattern ?? './messages/{locale}.json';
   // The pattern is relative to the folder that holds project.inlang (inlang's own rule).
   const fileOf = (locale: string) => join(dirname(dirname(settingsFile)), pattern.replace('{locale}', locale));
   const englishFile = fileOf(settings.baseLocale);
   const english = readJson(englishFile);
   const gaps: Gap[] = [];
-  for (const locale of settings.locales.filter(locale => locale !== settings.baseLocale)) {
+  for (const locale of settings.locales.filter((locale) => locale !== settings.baseLocale)) {
     const file = fileOf(locale);
-    if (!existsSync(file)) { gaps.push({ language: locale, kind: 'catalog', what: relative(cwd, file) }); continue; }
+    if (!existsSync(file)) {
+      gaps.push({ language: locale, kind: 'catalog', what: relative(cwd, file) });
+      continue;
+    }
     const catalog = readJson(file);
-    for (const key of Object.keys(english)) if (!(key in catalog)) gaps.push({ language: locale, kind: 'missing', what: key });
-    for (const key of Object.keys(catalog)) if (!(key in english)) gaps.push({ language: locale, kind: 'extra', what: key });
-    for (const key of staleKeys(english, catalog, readRecord(file))) gaps.push({ language: locale, kind: 'stale', what: key });
+    for (const key of Object.keys(english))
+      if (!(key in catalog)) gaps.push({ language: locale, kind: 'missing', what: key });
+    for (const key of Object.keys(catalog))
+      if (!(key in english)) gaps.push({ language: locale, kind: 'extra', what: key });
+    for (const key of staleKeys(english, catalog, readRecord(file)))
+      gaps.push({ language: locale, kind: 'stale', what: key });
     for (const [key, value] of Object.entries(english)) {
       if (typeof value !== 'string' || typeof catalog[key] !== 'string') continue;
-      const want = placeholders(value), have = placeholders(catalog[key]);
-      if ([...want].some(name => !have.has(name)) || [...have].some(name => !want.has(name))) gaps.push({ language: locale, kind: 'placeholders', what: key });
+      const want = placeholders(value),
+        have = placeholders(catalog[key]);
+      if ([...want].some((name) => !have.has(name)) || [...have].some((name) => !want.has(name)))
+        gaps.push({ language: locale, kind: 'placeholders', what: key });
     }
     gaps.push(...pluralGaps(locale, english, catalog));
   }
   const runtime = join(cwd, 'node_modules/@joeblew999/remy-ui/src/paraglide/runtime.js');
   if (existsSync(runtime)) {
-    const { locales: platform } = await import(pathToFileURL(runtime).href) as { locales: readonly string[] };
+    const { locales: platform } = (await import(pathToFileURL(runtime).href)) as { locales: readonly string[] };
     const listed = new Set(settings.locales);
-    for (const locale of platform) if (!listed.has(locale)) gaps.push({ language: locale, kind: 'unlisted', what: '(the platform serves it)' });
-    for (const locale of settings.locales) if (!platform.includes(locale)) gaps.push({ language: locale, kind: 'unserved', what: '(the platform does not serve it)' });
+    for (const locale of platform)
+      if (!listed.has(locale)) gaps.push({ language: locale, kind: 'unlisted', what: '(the platform serves it)' });
+    for (const locale of settings.locales)
+      if (!platform.includes(locale))
+        gaps.push({ language: locale, kind: 'unserved', what: '(the platform does not serve it)' });
   }
   return { gaps, english: relative(cwd, englishFile), locales: settings.locales.length };
 }
@@ -212,25 +274,40 @@ export async function messagesGaps(cwd = process.cwd()): Promise<{ gaps: Gap[]; 
 export function docsGaps(cwd = process.cwd()): { gaps: Gap[]; sites: number } {
   const dir = process.env.I18N_DOCS_DIR ?? 'docs/content';
   const content = join(cwd, dir);
-  const sites = existsSync(content) ? readdirSync(content, { withFileTypes: true }).filter(entry => entry.isDirectory() && existsSync(join(content, entry.name, 'i18n.json'))).map(entry => join(content, entry.name)) : [];
+  const sites = existsSync(content)
+    ? readdirSync(content, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory() && existsSync(join(content, entry.name, 'i18n.json')))
+        .map((entry) => join(content, entry.name))
+    : [];
   if (!sites.length) return { gaps: [], sites: 0 };
   const language = /\.[a-z]{2,3}(-[A-Za-z]{2,4})?\.mdx?$/;
   // What git knows that is there now: a page deleted or renamed but not yet committed is still in git's index, and
   // counting it made a renamed page both missing and an orphan (2026-10-17, dev:change renaming .mdx to .md).
-  const files = (where: string) => (git(cwd, 'ls-files', '-co', '--exclude-standard', '--', relative(cwd, where)) ?? '').split('\n').filter(Boolean).filter(file => existsSync(join(cwd, file)));
+  const files = (where: string) =>
+    (git(cwd, 'ls-files', '-co', '--exclude-standard', '--', relative(cwd, where)) ?? '')
+      .split('\n')
+      .filter(Boolean)
+      .filter((file) => existsSync(join(cwd, file)));
   const stale = (english: string, translation: string) => {
     const recorded = madeFrom(readFileSync(join(cwd, translation), 'utf8'));
-    const text = readFileSync(join(cwd, english), 'utf8'), now = pagePrints(text), layout = layoutPrints(text);
-    return !recorded || recorded.length !== now.length || !now.every((_, index) => same(recorded[index], now, layout, index));
+    const text = readFileSync(join(cwd, english), 'utf8'),
+      now = pagePrints(text),
+      layout = layoutPrints(text);
+    return (
+      !recorded || recorded.length !== now.length || !now.every((_, index) => same(recorded[index], now, layout, index))
+    );
   };
   const gaps: Gap[] = [];
   const languages = new Set<string>();
   for (const site of sites) {
-    const { defaultLanguage, languages: list } = readJson(join(site, 'i18n.json')) as { defaultLanguage: string; languages: string[] };
-    const pages = files(site).filter(file => /\.mdx?$/.test(file));
-    for (const lang of list.filter(lang => lang !== defaultLanguage)) {
+    const { defaultLanguage, languages: list } = readJson(join(site, 'i18n.json')) as {
+      defaultLanguage: string;
+      languages: string[];
+    };
+    const pages = files(site).filter((file) => /\.mdx?$/.test(file));
+    for (const lang of list.filter((lang) => lang !== defaultLanguage)) {
       languages.add(lang);
-      for (const english of pages.filter(file => !language.test(file))) {
+      for (const english of pages.filter((file) => !language.test(file))) {
         const translation = english.replace(/\.(mdx?)$/, `.${lang}.$1`);
         if (!existsSync(join(cwd, translation))) gaps.push({ language: lang, kind: 'missing', what: translation });
         else if (stale(english, translation)) gaps.push({ language: lang, kind: 'stale', what: translation });
@@ -240,9 +317,10 @@ export function docsGaps(cwd = process.cwd()): { gaps: Gap[]; sites: number } {
       if (existsSync(menu)) {
         const translated = join(site, `meta.${lang}.json`);
         const made = existsSync(translated) ? (readJson(translated).translatedFrom as string | undefined) : undefined;
-        if (made !== print(menuWords(readJson(menu) as { title?: string; pages?: string[] }))) gaps.push({ language: lang, kind: 'menu', what: relative(cwd, translated) });
+        if (made !== print(menuWords(readJson(menu) as { title?: string; pages?: string[] })))
+          gaps.push({ language: lang, kind: 'menu', what: relative(cwd, translated) });
       }
-      for (const translation of pages.filter(file => file.endsWith(`.${lang}.md`) || file.endsWith(`.${lang}.mdx`))) {
+      for (const translation of pages.filter((file) => file.endsWith(`.${lang}.md`) || file.endsWith(`.${lang}.mdx`))) {
         const english = translation.replace(new RegExp(`\\.${lang}\\.(mdx?)$`), '.$1');
         if (!existsSync(join(cwd, english))) gaps.push({ language: lang, kind: 'orphan', what: translation });
       }
@@ -253,10 +331,15 @@ export function docsGaps(cwd = process.cwd()): { gaps: Gap[]; sites: number } {
     const english = readJson(uiEnglish);
     for (const lang of [...languages].sort()) {
       const file = join(content, 'ui', `${lang}.json`);
-      if (!existsSync(file)) { gaps.push({ language: lang, kind: 'missing', what: relative(cwd, file) }); continue; }
+      if (!existsSync(file)) {
+        gaps.push({ language: lang, kind: 'missing', what: relative(cwd, file) });
+        continue;
+      }
       const translation = readJson(file);
-      for (const key of Object.keys(english)) if (!(key in translation)) gaps.push({ language: lang, kind: 'ui-missing', what: key });
-      for (const key of staleKeys(english, translation, readRecord(file))) gaps.push({ language: lang, kind: 'ui-stale', what: key });
+      for (const key of Object.keys(english))
+        if (!(key in translation)) gaps.push({ language: lang, kind: 'ui-missing', what: key });
+      for (const key of staleKeys(english, translation, readRecord(file)))
+        gaps.push({ language: lang, kind: 'ui-stale', what: key });
     }
   }
   return { gaps, sites: sites.length };
@@ -271,25 +354,46 @@ export async function translationGaps(cwd = process.cwd()): Promise<Gap[]> {
 
 const summary = (gaps: Gap[]) => {
   const counts = new Map<string, number>();
-  for (const gap of gaps) counts.set(`${gap.language} ${gap.kind}`, (counts.get(`${gap.language} ${gap.kind}`) ?? 0) + 1);
-  return [...counts].sort(([a], [b]) => a.localeCompare(b)).map(([key, count]) => `  ${key}: ${count}`).join('\n');
+  for (const gap of gaps)
+    counts.set(`${gap.language} ${gap.kind}`, (counts.get(`${gap.language} ${gap.kind}`) ?? 0) + 1);
+  return [...counts]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, count]) => `  ${key}: ${count}`)
+    .join('\n');
 };
 
 /** The messages check as a person or a translator reads it; true when clean. */
 export async function checkMessages(list: boolean, cwd = process.cwd()): Promise<boolean> {
   const { gaps, english, locales } = await messagesGaps(cwd);
-  if (!english) { console.log('Messages: no inlang project, nothing to check.'); return true; }
-  if (!gaps.length) { console.log(`Messages: every catalog complete and current (${locales} locales).`); return true; }
+  if (!english) {
+    console.log('Messages: no inlang project, nothing to check.');
+    return true;
+  }
+  if (!gaps.length) {
+    console.log(`Messages: every catalog complete and current (${locales} locales).`);
+    return true;
+  }
   if (list) console.log(gaps.map(gapLine).join('\n'));
-  else console.log(`Messages: gaps against ${english} (npx remy i18n check messages --list for every key):\n${summary(gaps)}`);
+  else
+    console.log(
+      `Messages: gaps against ${english} (npx remy i18n check messages --list for every key):\n${summary(gaps)}`,
+    );
   return false;
 }
 
 /** The docs check the same way; true when clean. */
 export function checkDocs(list: boolean, cwd = process.cwd()): boolean {
   const { gaps, sites } = docsGaps(cwd);
-  if (!sites) { console.log(`Docs: no sites with an i18n.json under ${process.env.I18N_DOCS_DIR ?? 'docs/content'}, nothing to check.`); return true; }
-  if (!gaps.length) { console.log('Docs: every translation complete and current.'); return true; }
+  if (!sites) {
+    console.log(
+      `Docs: no sites with an i18n.json under ${process.env.I18N_DOCS_DIR ?? 'docs/content'}, nothing to check.`,
+    );
+    return true;
+  }
+  if (!gaps.length) {
+    console.log('Docs: every translation complete and current.');
+    return true;
+  }
   if (list) console.log(gaps.map(gapLine).join('\n'));
   else console.log(`Docs: gaps (npx remy i18n check docs --list for every file):\n${summary(gaps)}`);
   return false;
@@ -308,11 +412,18 @@ export async function checkAll(strict = process.env.I18N_STRICT === '1', cwd = p
   return true;
 }
 
-export const what = "translations: check [messages|docs] [--list] (offline, read-only), translate [messages|docs] (the machine's Claude; dev:land runs it in the change)";
+export const what =
+  "translations: check [messages|docs] [--list] (offline, read-only), translate [messages|docs] (the machine's Claude; dev:land runs it in the change)";
 /** The subcommands, for remy help and the Commands page; main dispatches on the same two words. */
 export const commands: Subcommands = {
-  check: { what: '[messages|docs] [--list]: the offline checks, read-only, no git history: a warning (exit 0) while coding and in npm run ci, exit 1 with I18N_STRICT=1 (the release); --list prints one line per gap', run: rest => main(['check', ...rest]) },
-  translate: { what: '[messages|docs] [files…]: what the checks list, by the machine\'s Claude (I18N_MODEL, default sonnet; I18N_JOBS at a time, default 4): only the changed sections and keys, with their records; named translation files redone in full; dev:land runs it in the change', run: rest => main(['translate', ...rest]) },
+  check: {
+    what: '[messages|docs] [--list]: the offline checks, read-only, no git history: a warning (exit 0) while coding and in npm run ci, exit 1 with I18N_STRICT=1 (the release); --list prints one line per gap',
+    run: (rest) => main(['check', ...rest]),
+  },
+  translate: {
+    what: "[messages|docs] [files…]: what the checks list, by the machine's Claude (I18N_MODEL, default sonnet; I18N_JOBS at a time, default 4): only the changed sections and keys, with their records; named translation files redone in full; dev:land runs it in the change",
+    run: (rest) => main(['translate', ...rest]),
+  },
 };
 export async function main(args: string[]): Promise<void> {
   const [command, which, ...rest] = args;
@@ -323,7 +434,10 @@ export async function main(args: string[]): Promise<void> {
     const { translate } = await import('./translate.ts');
     return translate([which, ...rest].filter((part): part is string => part !== undefined));
   }
-  if (command !== 'check') { console.error('remy i18n: check [messages|docs] [--list] | translate [messages|docs] [files...]'); process.exit(2); }
+  if (command !== 'check') {
+    console.error('remy i18n: check [messages|docs] [--list] | translate [messages|docs] [files...]');
+    process.exit(2);
+  }
   const ok = which === 'messages' ? await checkMessages(list) : which === 'docs' ? checkDocs(list) : await checkAll();
   if (!ok) process.exit(1);
 }

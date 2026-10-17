@@ -14,9 +14,12 @@ import { z } from 'zod';
 export const policies = ['public', 'session'];
 
 /** The action a policy names, when it is one the relation engine decides. */
-export const actionOf = policy => (policy && typeof policy === 'object' && typeof policy.action === 'string' && policy.action ? policy.action : undefined);
+export const actionOf = (policy) =>
+  policy && typeof policy === 'object' && typeof policy.action === 'string' && policy.action
+    ? policy.action
+    : undefined;
 
-const known = policy => policies.includes(policy) || Boolean(actionOf(policy));
+const known = (policy) => policies.includes(policy) || Boolean(actionOf(policy));
 
 /**
  * Property names that mark a response as naming a person: Better Auth's own for an account. An app
@@ -24,16 +27,20 @@ const known = policy => policies.includes(policy) || Boolean(actionOf(policy));
  */
 export const personFields = ['email', 'emailVerified', 'image', 'phoneNumber', 'userId'];
 
-const internals = procedure => procedure?.['~orpc'];
+const internals = (procedure) => procedure?.['~orpc'];
 
 /** The policy a procedure (or contract procedure) declares, on oRPC 1 and 2: `meta.policy` (./policy.js writes it on 2). */
-export const policyOf = procedure => internals(procedure)?.meta?.policy;
+export const policyOf = (procedure) => internals(procedure)?.meta?.policy;
 
 /** A procedure's middlewares, on oRPC 1 (`middlewares`) and 2 (`orderedMiddlewares`, entries holding one). */
-export const middlewaresOf = procedure => (internals(procedure)?.middlewares ?? internals(procedure)?.orderedMiddlewares ?? []).map(entry => entry?.middleware ?? entry);
+export const middlewaresOf = (procedure) =>
+  (internals(procedure)?.middlewares ?? internals(procedure)?.orderedMiddlewares ?? []).map(
+    (entry) => entry?.middleware ?? entry,
+  );
 
 /** A procedure's output schemas, on oRPC 1 (`outputSchema`) and 2 (`outputSchemas`). */
-export const outputSchemasOf = procedure => [internals(procedure)?.outputSchema, ...(internals(procedure)?.outputSchemas ?? [])].filter(Boolean);
+export const outputSchemasOf = (procedure) =>
+  [internals(procedure)?.outputSchema, ...(internals(procedure)?.outputSchemas ?? [])].filter(Boolean);
 
 /** Every procedure in a router or contract, with its dotted path. Reads no oRPC class, so it walks either major. */
 export function walk(router, path = []) {
@@ -51,7 +58,7 @@ export function markGuard(middleware) {
 }
 
 /** Whether the guard is among a procedure's middlewares. */
-export const isGuarded = procedure => middlewaresOf(procedure).some(middleware => middleware?.[GUARD] === true);
+export const isGuarded = (procedure) => middlewaresOf(procedure).some((middleware) => middleware?.[GUARD] === true);
 
 /**
  * The root middleware. `context.getSession()` answers the caller's session or null (the lazy lookup
@@ -68,7 +75,10 @@ export function guardMiddleware({ ORPCError }) {
     const policy = policyOf(procedure);
     if (policy === 'public') return next({ context: { user: null } });
     const action = actionOf(policy);
-    if (policy !== 'session' && !(action && context.relations)) throw new ORPCError('INTERNAL_SERVER_ERROR', { message: 'This procedure declares no policy the guard can enforce, so it is refused.' });
+    if (policy !== 'session' && !(action && context.relations))
+      throw new ORPCError('INTERNAL_SERVER_ERROR', {
+        message: 'This procedure declares no policy the guard can enforce, so it is refused.',
+      });
     const session = await context.getSession();
     const user = session?.user;
     if (!user) throw new ORPCError('UNAUTHORIZED', { message: 'Sign in to call this.' });
@@ -80,7 +90,8 @@ export function guardMiddleware({ ORPCError }) {
     if (!table) throw new ORPCError('FORBIDDEN', { message: 'You may not do this.' });
     // The guard wraps validation, so the input is as it arrived: only a plain string is an id.
     const objectId = input && typeof input === 'object' ? input[policy.id ?? 'id'] : undefined;
-    if (typeof objectId !== 'string' || !objectId || !(await relations.objectExists(table, objectId))) throw new ORPCError('NOT_FOUND', { message: 'There is no such thing here.' });
+    if (typeof objectId !== 'string' || !objectId || !(await relations.objectExists(table, objectId)))
+      throw new ORPCError('NOT_FOUND', { message: 'There is no such thing here.' });
     if (await relations.can(action, user, objectId)) return next({ context: { user } });
     throw new ORPCError('FORBIDDEN', { message: 'You may not do this.' });
   });
@@ -89,11 +100,12 @@ export function guardMiddleware({ ORPCError }) {
 /** Every property name a response (or an input) can carry, at any depth, read from its schema (Zod 4's JSON Schema). */
 function propertyNames(schema, io = 'output') {
   const names = new Set();
-  const visit = node => {
+  const visit = (node) => {
     if (!node || typeof node !== 'object') return;
     if (Array.isArray(node)) return node.forEach(visit);
     for (const [key, value] of Object.entries(node)) {
-      if (key === 'properties' && value && typeof value === 'object') for (const name of Object.keys(value)) names.add(name);
+      if (key === 'properties' && value && typeof value === 'object')
+        for (const name of Object.keys(value)) names.add(name);
       visit(value);
     }
   };
@@ -121,27 +133,41 @@ export function guardProblems(router, { personFields: fields = personFields, voc
     if (handler && !isGuarded(procedure)) problems.push(`${path}: the guard is not in front of it`);
     const action = actionOf(policy);
     if (action) {
-      const defined = vocabulary?.actions.find(row => row.code === action);
-      if (!vocabulary) problems.push(`${path}: its policy is the action ${action}, and the check was given no vocabulary to find it in`);
+      const defined = vocabulary?.actions.find((row) => row.code === action);
+      if (!vocabulary)
+        problems.push(
+          `${path}: its policy is the action ${action}, and the check was given no vocabulary to find it in`,
+        );
       else if (!defined) problems.push(`${path}: its policy names ${action}, which the vocabulary does not define`);
-      else if (vocabulary.objectTypes.find(type => type.code === defined.objectTypeCode)?.tableName) {
+      else if (vocabulary.objectTypes.find((type) => type.code === defined.objectTypeCode)?.tableName) {
         const key = policy.id ?? 'id';
         let inputs = new Set();
-        try { inputs = new Set([inputSchema, ...inputSchemas].filter(Boolean).flatMap(schema => [...propertyNames(schema, 'input')])); } catch { /* reported with the output below */ }
-        if (!inputs.has(key)) problems.push(`${path}: ${action} acts on a ${defined.objectTypeCode}, and its input has no "${key}" to say which`);
+        try {
+          inputs = new Set(
+            [inputSchema, ...inputSchemas].filter(Boolean).flatMap((schema) => [...propertyNames(schema, 'input')]),
+          );
+        } catch {
+          /* reported with the output below */
+        }
+        if (!inputs.has(key))
+          problems.push(
+            `${path}: ${action} acts on a ${defined.objectTypeCode}, and its input has no "${key}" to say which`,
+          );
       }
     }
     let names;
     try {
-      names = new Set(outputSchemasOf(procedure).flatMap(schema => [...propertyNames(schema)]));
+      names = new Set(outputSchemasOf(procedure).flatMap((schema) => [...propertyNames(schema)]));
     } catch {
       problems.push(`${path}: its output schema cannot be read, so what it answers is unknown`);
       continue;
     }
-    const named = fields.filter(field => names.has(field));
+    const named = fields.filter((field) => names.has(field));
     if (named.length === 0) continue;
-    if (policy !== 'session' && !action) problems.push(`${path}: reachable without a session, and its response carries ${named.join(', ')}`);
-    else if (typeof meta.personal !== 'string' || !meta.personal) problems.push(`${path}: its response carries ${named.join(', ')}; say who receives them (personal)`);
+    if (policy !== 'session' && !action)
+      problems.push(`${path}: reachable without a session, and its response carries ${named.join(', ')}`);
+    else if (typeof meta.personal !== 'string' || !meta.personal)
+      problems.push(`${path}: its response carries ${named.join(', ')}; say who receives them (personal)`);
   }
   return problems;
 }

@@ -23,7 +23,7 @@ export const defineRemyProject = (project: RemyProject): RemyProject => project;
 export async function project(cwd = process.cwd()): Promise<RemyProject> {
   const file = join(cwd, 'remy.config.ts');
   if (!existsSync(file)) return {};
-  const loaded = await import(pathToFileURL(file).href) as { default?: RemyProject };
+  const loaded = (await import(pathToFileURL(file).href)) as { default?: RemyProject };
   return loaded.default ?? {};
 }
 
@@ -37,11 +37,14 @@ export function portsFor(name: string): { preview: number; docsPreview: number }
 /** The worktree's name when the cwd is one; the main checkout has none. */
 export function worktreeName(cwd = process.cwd()): string | undefined {
   try {
-    const read = (...args: string[]) => execFileSync('git', ['-C', cwd, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    const read = (...args: string[]) =>
+      execFileSync('git', ['-C', cwd, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
     const root = read('rev-parse', '--path-format=absolute', '--git-common-dir').replace(/\/\.git$/, '');
     const top = read('rev-parse', '--show-toplevel');
     return top === root ? undefined : basename(top);
-  } catch { return undefined; }
+  } catch {
+    return undefined;
+  }
 }
 
 /**
@@ -60,15 +63,27 @@ export async function configure(cwd = process.cwd()): Promise<RemyProject> {
   // The origins and the release are remy.config.ts's alone: set from it, or removed, so a value left in the
   // shell by another project steers nothing here (on 2026-10-11 a shell still carrying remy-auth's
   // mise-era [env] made remy-auth-app's landing deploy a staging Worker and wait on remy-auth's).
-  const own = (name: string, value: string | undefined) => { if (value === undefined) delete process.env[name]; else process.env[name] = value; };
-  own('DEPLOY_ORIGIN', config.origins?.production); own('VITE_DEPLOY_ORIGIN', config.origins?.production);
-  own('STAGING_ORIGIN', config.origins?.staging); own('VITE_STAGING_ORIGIN', config.origins?.staging);
-  own('DOCS_ORIGIN', config.origins?.docs); own('VITE_DOCS_ORIGIN', config.origins?.docs);
-  own('RELEASE_PACKAGE', config.release?.package); own('RELEASE_TITLE', config.release?.title);
+  const own = (name: string, value: string | undefined) => {
+    if (value === undefined) delete process.env[name];
+    else process.env[name] = value;
+  };
+  own('DEPLOY_ORIGIN', config.origins?.production);
+  own('VITE_DEPLOY_ORIGIN', config.origins?.production);
+  own('STAGING_ORIGIN', config.origins?.staging);
+  own('VITE_STAGING_ORIGIN', config.origins?.staging);
+  own('DOCS_ORIGIN', config.origins?.docs);
+  own('VITE_DOCS_ORIGIN', config.origins?.docs);
+  own('RELEASE_PACKAGE', config.release?.package);
+  own('RELEASE_TITLE', config.release?.title);
   // The ports: a worktree's own, else the config's; a port given in the shell wins (two checkouts on one machine).
-  const set = (name: string, value: number) => { if (process.env[name] === undefined) process.env[name] = String(value); };
+  const set = (name: string, value: number) => {
+    if (process.env[name] === undefined) process.env[name] = String(value);
+  };
   const name = worktreeName(cwd);
-  const ports = name ? portsFor(name) : { preview: config.ports?.preview ?? 4173, docsPreview: config.ports?.docsPreview ?? 4174 };
-  set('PREVIEW_PORT', ports.preview); set('DOCS_PREVIEW_PORT', ports.docsPreview);
+  const ports = name
+    ? portsFor(name)
+    : { preview: config.ports?.preview ?? 4173, docsPreview: config.ports?.docsPreview ?? 4174 };
+  set('PREVIEW_PORT', ports.preview);
+  set('DOCS_PREVIEW_PORT', ports.docsPreview);
   return config;
 }

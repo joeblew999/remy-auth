@@ -19,9 +19,18 @@ export const docsConfig = defineDocsConfig({
    * (MCP's server instructions; ChatGPT and Claude show and use them). Say plainly: product or developers.
    */
   mcp: {
-    docs: { name: 'remy-product-guide', audience: `${product}'s product guide, for people using the ${product} app: signing in, languages, formats, questions. Not for developers: the developer docs are remy-developer-docs.` },
-    dev: { name: 'remy-developer-docs', audience: `${product}'s developer docs, for people building ${product} or an app on its shared UI package: principles, tooling, projects, the commands, the UI package. The API itself is remy-api-reference; using the app is remy-product-guide.` },
-    reference: { name: 'remy-api-reference', audience: `${product}'s API reference, for developers calling the ${product} API: every endpoint (OpenAPI), its parameters and responses. The developer docs are remy-developer-docs.` },
+    docs: {
+      name: 'remy-product-guide',
+      audience: `${product}'s product guide, for people using the ${product} app: signing in, languages, formats, questions. Not for developers: the developer docs are remy-developer-docs.`,
+    },
+    dev: {
+      name: 'remy-developer-docs',
+      audience: `${product}'s developer docs, for people building ${product} or an app on its shared UI package: principles, tooling, projects, the commands, the UI package. The API itself is remy-api-reference; using the app is remy-product-guide.`,
+    },
+    reference: {
+      name: 'remy-api-reference',
+      audience: `${product}'s API reference, for developers calling the ${product} API: every endpoint (OpenAPI), its parameters and responses. The developer docs are remy-developer-docs.`,
+    },
   },
   /** The live app this documents (the landing page links it). */
   appUrl: 'https://remy-auth.gedw99.workers.dev',

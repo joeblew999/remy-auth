@@ -13,7 +13,12 @@ import { problemPages } from '@joeblew999/remy-ui/problem';
 // (asked in the browser); without the part, the device's own alone, as in a prerendered app.
 export const Route = createFileRoute('/app/location')({
   loader: () => ({ place: getPlace?.() }),
-  head: () => pageHead({ path: '/app/location', title: locale => m.location_title({}, { locale }), description: locale => m.location_description({}, { locale }) }),
+  head: () =>
+    pageHead({
+      path: '/app/location',
+      title: (locale) => m.location_title({}, { locale }),
+      description: (locale) => m.location_description({}, { locale }),
+    }),
   component: Location,
   ...problemPages,
 });
@@ -21,7 +26,13 @@ export const Route = createFileRoute('/app/location')({
 function Location() {
   const { place } = Route.useLoaderData();
   const locale = getLocale();
-  return <LocationPage locale={locale}>
-    {DeferredPlace && place ? <DeferredPlace locale={locale} place={place} device /> : <DevicePlace locale={locale} />}
-  </LocationPage>;
+  return (
+    <LocationPage locale={locale}>
+      {DeferredPlace && place ? (
+        <DeferredPlace locale={locale} place={place} device />
+      ) : (
+        <DevicePlace locale={locale} />
+      )}
+    </LocationPage>
+  );
 }

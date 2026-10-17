@@ -22,7 +22,9 @@ function head() {
  * commit: a stamp left over from an earlier build fails here (remy-sport shipped one for weeks).
  */
 export function buildChecks({ service }) {
-  test(`/healthz says which deployment of ${service} answered: its environment and the build it was made from`, async ({ request }) => {
+  test(`/healthz says which deployment of ${service} answered: its environment and the build it was made from`, async ({
+    request,
+  }) => {
     const response = await request.get('/healthz');
     expect(response.status()).toBe(200);
     // It names nobody, and another deployment's page may read it to show what is deployed.

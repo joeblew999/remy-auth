@@ -14,9 +14,12 @@ function fakeD1() {
     exec: async () => ({}),
     withSession(from?: string) {
       opened.push(from);
-      let bookmark: string | null = from === 'first-unconstrained' ? null : from ?? null;
+      let bookmark: string | null = from === 'first-unconstrained' ? null : (from ?? null);
       return {
-        prepare: (query: string) => { if (query.startsWith('insert')) bookmark = `after:${query}`; return { via: 'session', query }; },
+        prepare: (query: string) => {
+          if (query.startsWith('insert')) bookmark = `after:${query}`;
+          return { via: 'session', query };
+        },
         batch: async () => [],
         getBookmark: () => bookmark,
       };
@@ -44,15 +47,24 @@ test('outside a request the stand-in is the binding; inside one, its session, op
 test('a write sets the bookmark cookie, and the next request opens its session from it', async () => {
   const { binding, opened } = fakeD1();
   const db = replicated(binding, 'DB');
-  const read = await withReplicas(request(), async () => { db.prepare('select 1'); return new Response('ok'); });
+  const read = await withReplicas(request(), async () => {
+    db.prepare('select 1');
+    return new Response('ok');
+  });
   expect(cookieOf(read), 'a read moves no bookmark').toBeNull();
 
-  const wrote = await withReplicas(request(), async () => { db.prepare('insert into note'); return new Response('ok'); });
+  const wrote = await withReplicas(request(), async () => {
+    db.prepare('insert into note');
+    return new Response('ok');
+  });
   const cookie = cookieOf(wrote)!;
   expect(cookie).toContain(`${bookmarkCookie}=`);
   expect(cookie).toContain('HttpOnly');
 
-  await withReplicas(request(cookie.split(';')[0]), async () => { db.prepare('select 1'); return new Response('ok'); });
+  await withReplicas(request(cookie.split(';')[0]), async () => {
+    db.prepare('select 1');
+    return new Response('ok');
+  });
   expect(opened.at(-1)).toBe('after:insert into note');
 });
 
@@ -61,9 +73,22 @@ test("each database keeps its own bookmark, and one left untouched keeps the vis
   const demo = fakeD1();
   const db = replicated(auth.binding, 'DB');
   const demoDb = replicated(demo.binding, 'DEMO_DB');
-  const first = await withReplicas(request(), async () => { db.prepare('insert into user'); demoDb.prepare('insert into note'); return new Response('ok'); });
-  const second = await withReplicas(request(cookieOf(first)!.split(';')[0]), async () => { demoDb.prepare('insert into share'); return new Response('ok'); });
-  const value = new URLSearchParams(decodeURIComponent(cookieOf(second)!.split(';')[0].slice(bookmarkCookie.length + 1)));
+  const first = await withReplicas(request(), async () => {
+    db.prepare('insert into user');
+    demoDb.prepare('insert into note');
+    return new Response('ok');
+  });
+  const second = await withReplicas(request(cookieOf(first)!.split(';')[0]), async () => {
+    demoDb.prepare('insert into share');
+    return new Response('ok');
+  });
+  const value = new URLSearchParams(
+    decodeURIComponent(
+      cookieOf(second)!
+        .split(';')[0]
+        .slice(bookmarkCookie.length + 1),
+    ),
+  );
   expect(value.get('DB')).toBe('after:insert into user');
   expect(value.get('DEMO_DB')).toBe('after:insert into share');
 });

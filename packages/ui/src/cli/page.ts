@@ -26,7 +26,7 @@ export function broken(english: string, translation: string): string | undefined
   if (!source) return translation.trim() ? undefined : 'it is empty';
   const page = parts(translation);
   if (!page) return 'it has no frontmatter, and its English page has one';
-  const lacking = Object.keys(source.fields).filter(key => !page.fields[key]);
+  const lacking = Object.keys(source.fields).filter((key) => !page.fields[key]);
   if (lacking.length) return `its frontmatter lacks ${lacking.join(', ')}`;
   if (source.text.trim() && !page.text.trim()) return 'it has no text after the frontmatter';
   return undefined;
@@ -59,21 +59,35 @@ export function needsMdx(page: string): boolean {
 export function rightEndings(dirs: string[], verify = false): string[] {
   const renamed: string[] = [];
   const translation = /\.[a-z]{2,3}(?:-[A-Za-z]{2,4})?\.mdx?$/;
-  for (const dir of dirs.filter(dir => existsSync(dir))) {
-    for (const folder of [dir, ...readdirSync(dir, { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => join(dir, entry.name))]) {
-      const files = readdirSync(folder).filter(name => /\.mdx?$/.test(name));
-      for (const name of files.filter(name => !translation.test(name))) {
+  for (const dir of dirs.filter((dir) => existsSync(dir))) {
+    for (const folder of [
+      dir,
+      ...readdirSync(dir, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => join(dir, entry.name)),
+    ]) {
+      const files = readdirSync(folder).filter((name) => /\.mdx?$/.test(name));
+      for (const name of files.filter((name) => !translation.test(name))) {
         const want = needsMdx(readFileSync(join(folder, name), 'utf8')) ? '.mdx' : '.md';
         if (name.endsWith(want)) continue;
-        if (verify) { renamed.push(`${join(folder, name)} should be ${name.replace(/\.mdx?$/, want)}`); continue; }
+        if (verify) {
+          renamed.push(`${join(folder, name)} should be ${name.replace(/\.mdx?$/, want)}`);
+          continue;
+        }
         const base = name.replace(/\.mdx?$/, '');
-        for (const file of files.filter(file => file === name || (translation.test(file) && file.startsWith(`${base}.`) && /^\.[a-z]{2,3}(?:-[A-Za-z]{2,4})?\.mdx?$/.test(file.slice(base.length))))) {
+        for (const file of files.filter(
+          (file) =>
+            file === name ||
+            (translation.test(file) &&
+              file.startsWith(`${base}.`) &&
+              /^\.[a-z]{2,3}(?:-[A-Za-z]{2,4})?\.mdx?$/.test(file.slice(base.length))),
+        )) {
           const next = file.replace(/\.mdx?$/, want);
           renameSync(join(folder, file), join(folder, next));
           renamed.push(`${join(folder, file)} -> ${next}`);
         }
         const from = new RegExp(`\\./${base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\.mdx?(?=[)"'#])`, 'g');
-        for (const other of readdirSync(folder).filter(file => /\.mdx?$/.test(file))) {
+        for (const other of readdirSync(folder).filter((file) => /\.mdx?$/.test(file))) {
           const text = readFileSync(join(folder, other), 'utf8');
           const fixed = text.replace(from, `./${base}${want}`);
           if (fixed !== text) writeFileSync(join(folder, other), fixed);

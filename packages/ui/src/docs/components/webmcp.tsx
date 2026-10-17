@@ -15,10 +15,7 @@ declare global {
   interface Document {
     /** WebMCP, see https://webmachinelearning.github.io/webmcp/ */
     modelContext?: {
-      registerTool: <Input>(
-        tool: ModelContextTool<Input>,
-        options?: { signal?: AbortSignal },
-      ) => Promise<void>;
+      registerTool: <Input>(tool: ModelContextTool<Input>, options?: { signal?: AbortSignal }) => Promise<void>;
     };
   }
 }

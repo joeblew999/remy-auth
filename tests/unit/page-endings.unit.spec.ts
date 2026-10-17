@@ -22,7 +22,9 @@ test('a page with the wrong ending is renamed with its translations, and the lin
   writeFileSync(join(dir, 'users', 'index.mdx'), '<Card href="./app.mdx">App</Card> [tabs](./tabs.md)\n');
   expect(rightEndings([dir]).length).toBe(3);
   expect(readdirSync(join(dir, 'users')).sort()).toEqual(['app.es.md', 'app.md', 'index.mdx', 'tabs.mdx']);
-  expect(readFileSync(join(dir, 'users', 'index.mdx'), 'utf8')).toBe('<Card href="./app.md">App</Card> [tabs](./tabs.mdx)\n');
+  expect(readFileSync(join(dir, 'users', 'index.mdx'), 'utf8')).toBe(
+    '<Card href="./app.md">App</Card> [tabs](./tabs.mdx)\n',
+  );
   expect(rightEndings([dir])).toEqual([]);
 });
 
