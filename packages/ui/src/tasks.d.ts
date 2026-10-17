@@ -5,6 +5,8 @@ export declare function remyTasks(options?: {
   root?: string;
   tasks?: Record<string, unknown>;
 }): Record<string, unknown>;
+/** The machine's network variables (proxy, certificates), untracked, for cached tasks that may download. */
+export declare const network: string[];
 /** GitHub's jobs, one `vp run <task>` each, in parallel. */
 export declare function githubJobs(shards?: number): string[];
 /** The formatter and the linter, one style for every app. */

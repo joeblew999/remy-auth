@@ -32,6 +32,24 @@ const browserInputs = [
   '!node_modules/.*/**',
 ];
 
+/**
+ * The machine's way to the network (its proxy and the certificates the proxy needs): what a cached task that may
+ * download needs to see, without it counting in what is cached. A cached task sees only the variables it names, and
+ * without these the catalogs' compiler cannot fetch its message-format plugin behind a proxy and compiles no messages,
+ * silently (a new app in a cloud container, 2026-10-17). An uncached task sees the whole environment already.
+ */
+export const network = [
+  'HTTPS_PROXY',
+  'https_proxy',
+  'HTTP_PROXY',
+  'http_proxy',
+  'NO_PROXY',
+  'no_proxy',
+  'NODE_EXTRA_CA_CERTS',
+  'SSL_CERT_FILE',
+  'REQUESTS_CA_BUNDLE',
+];
+
 /** GitHub's jobs, one `vp run <task>` each, in parallel (the workflow is held to this list by a unit check). */
 export const githubJobs = (shards = 3) => [
   'check',
@@ -66,7 +84,7 @@ export function remyTasks({ root = process.cwd(), tasks = {} } = {}) {
     generate: {
       command: [...catalog, 'wrangler types'],
       dependsOn: docs ? [`${docs}#generate`] : [],
-      cache: { input: [{ auto: true }, '!**/paraglide/**', '!worker-configuration.d.ts'] },
+      cache: { input: [{ auto: true }, '!**/paraglide/**', '!worker-configuration.d.ts'], untrackedEnv: network },
     },
     // vp dev, vp build and vp preview are Vite Plus's own; these are the app's, with what they need first.
     dev: { command: 'vp dev .', dependsOn: prepared, cache: false },
@@ -79,6 +97,7 @@ export function remyTasks({ root = process.cwd(), tasks = {} } = {}) {
       cache: {
         input: [{ auto: true }, ...generated, '.git/HEAD', '.git/refs/heads/**', '.git/packed-refs'],
         output: ['dist/**'],
+        untrackedEnv: network,
       },
     },
     // The production build on Cloudflare's local host, at PREVIEW_PORT (4173 unless a worktree has its own).
@@ -125,14 +144,14 @@ export function remyTasks({ root = process.cwd(), tasks = {} } = {}) {
     'test:browser': {
       command: 'playwright test --project=ours',
       dependsOn: ['build', 'browsers'],
-      cache: { env: ['CHECK_LOCALES'], untrackedEnv: ['PREVIEW_PORT'], input: browserInputs, output: [] },
+      cache: { env: ['CHECK_LOCALES'], untrackedEnv: ['PREVIEW_PORT', ...network], input: browserInputs, output: [] },
     },
     // Google's Lighthouse audits on the production build. `vp run ci` runs them after the browser checks, never
     // beside them: they measure speed.
     'test:audits': {
       command: 'playwright test --project=google',
       dependsOn: ['build', 'browsers'],
-      cache: { untrackedEnv: ['PREVIEW_PORT'], input: browserInputs, output: [] },
+      cache: { untrackedEnv: ['PREVIEW_PORT', ...network], input: browserInputs, output: [] },
     },
     // What the check only verifies, written: the commands list (COMMANDS.md) and each docs page's ending.
     fix: { command: [`${check} commands --write`, `${check} endings --write`], cache: false },
