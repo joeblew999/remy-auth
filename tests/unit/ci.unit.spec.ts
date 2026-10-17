@@ -1,16 +1,18 @@
 import { test, expect } from 'vite-plus/test';
 import { readFileSync } from 'node:fs';
-import { jobTasks } from '../../packages/ui/src/cli/ci';
+import { githubJobs } from '../../packages/ui/src/tasks.js';
 
-// ci is the one source of what GitHub runs (owner, 2026-10-17): each job is `vp run <task>`, and the workflow's
-// job list is held to the tasks and shards ci defines, so the two cannot drift apart.
+// The tasks are the one source of what GitHub runs (owner, 2026-10-17): each job is `vp run <task>`, and the
+// workflow's job list is held to githubJobs (packages/ui/src/tasks.js), plus remy-auth's new-app, so the two cannot
+// drift apart.
 
-test("the workflow runs exactly ci's jobs, one vp run line each", () => {
+test('the workflow runs exactly the jobs the tasks name, one vp run line each', () => {
   const workflow = readFileSync('.github/workflows/ci.yml', 'utf8');
   expect(workflow).toContain('npx vp run ${{ matrix.task }}');
   const listed = [...workflow.matchAll(/^\s+task: (.+)$/gm)].map((match) => match[1]!.trim());
-  expect([...listed].sort(), `ci.yml runs ${listed.join(', ')}; ci expects ${jobTasks().join(', ')}`).toEqual(
-    [...jobTasks()].sort(),
+  const jobs = [...githubJobs(), 'new-app'];
+  expect([...listed].sort(), `ci.yml runs ${listed.join(', ')}; the tasks name ${jobs.join(', ')}`).toEqual(
+    [...jobs].sort(),
   );
 });
 

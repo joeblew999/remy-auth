@@ -71,7 +71,7 @@ step 'skills and tooling'
 vp run check
 step vp run check
 # The new app's browser checks in the quick languages, through its own vp run ci (this run is inside ci's new-app part).
-REMY_FLOW="${REMY_FLOW:-land}" CHECK_LOCALES=quick PREVIEW_PORT=$((${PREVIEW_PORT:-4173} + 100)) vp run ci browser
+REMY_FLOW="${REMY_FLOW:-land}" CHECK_LOCALES=quick PREVIEW_PORT=$((${PREVIEW_PORT:-4173} + 100)) vp run test:browser
 step 'browser checks'
 DOCS_PREVIEW_PORT=$((${DOCS_PREVIEW_PORT:-4174} + 100)) npx remy docs test
 step 'docs checks'

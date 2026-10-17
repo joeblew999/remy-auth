@@ -80,6 +80,7 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy test live` | [origin]: the smoke against a deployment (every deploy ends with it) |
 | `npx remy test report` | [remote]: open the last HTML report, local or remote |
 | `npx remy ci` | [check\|browser\|audits\|new-app] [--shard i/n] [--everything] [--last]: what GitHub runs, the same here: no part runs every part this change can affect, as a pull request does; --everything runs all of it in every language, nothing skipped, as main does |
+| `npx remy browsers` | what a browser check needs on this machine: Playwright's Chromium, and on Linux a Han font |
 | `npx remy docs` | the docs Worker, @joeblew999/remy-ui's, over this app's docs/ |
 | `npx remy docs serve` | the built docs here at DOCS_PREVIEW_PORT (4174), as their checks and AI tools see them: llms.txt, each page's .md (preview is Cloudflare's) |
 | `npx remy docs test` | [remote]: the docs' browser checks on a local build, or against the deployment with every MCP server's tools |

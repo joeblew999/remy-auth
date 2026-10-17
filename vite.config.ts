@@ -19,6 +19,14 @@ export default remyApp({
       dependsOn: ['cli', 'check:commands', 'generate'],
       cache: { input: [{ auto: true }, '!node_modules/.*/**'], output: [{ auto: true }, '!node_modules/.*/**'] },
     },
+    // The new-app test: a brand-new app from template/ on this commit's packages, through its own tasks.
+    'new-app': { command: 'bash fixtures/consumer/run.sh', cache: false },
+    // remy-auth's CI adds the new app, after the browser checks and Google's audits (each a browser run of its own).
+    ci: {
+      command: ['vp run test:browser', 'vp run test:audits', 'vp run new-app'],
+      dependsOn: ['check'],
+      cache: false,
+    },
     // The release's publish (GitHub's release job, for a version tag): each package whose version is new on its
     // registry, then the GitHub release (`vp run publish --release vX.Y.Z`).
     publish: { command: 'node packages/ui/src/cli/remy.ts packages publish', cache: false },

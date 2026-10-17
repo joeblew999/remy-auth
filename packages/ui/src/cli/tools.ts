@@ -23,6 +23,7 @@ export const tools: Record<string, () => Promise<Tool>> = {
   packages: () => import('./packages.ts'),
   test: () => import('./test.ts'),
   ci: () => import('./ci.ts'),
+  browsers: () => import('./browsers.ts'),
   docs: () => import('./docs.ts'),
   observe: () => import('./observe.ts'),
   shots: () => import('./shots.ts'),

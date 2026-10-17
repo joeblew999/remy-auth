@@ -49,15 +49,15 @@ jobs:
           - name: check
             task: check
           - name: browser 1/3
-            task: ci browser --shard 1/3
+            task: test:browser --shard 1/3
           - name: browser 2/3
-            task: ci browser --shard 2/3
+            task: test:browser --shard 2/3
           - name: browser 3/3
-            task: ci browser --shard 3/3
+            task: test:browser --shard 3/3
           - name: audits
-            task: ci audits
+            task: test:audits
           - name: new-app
-            task: ci new-app
+            task: new-app
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     permissions:

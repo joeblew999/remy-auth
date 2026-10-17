@@ -23,6 +23,22 @@ export const generated = [
   '!**/.wrangler/**',
 ];
 
+/** What a browser run reads that is not what it tests: its own results, Wrangler's local state, tools' caches. */
+const browserInputs = [
+  { auto: true },
+  '!test-results/**',
+  '!playwright-report/**',
+  '!**/.wrangler/**',
+  '!node_modules/.*/**',
+];
+
+/** GitHub's jobs, one `vp run <task>` each, in parallel (the workflow is held to this list by a unit check). */
+export const githubJobs = (shards = 3) => [
+  'check',
+  ...Array.from({ length: shards }, (_, i) => `test:browser --shard ${i + 1}/${shards}`),
+  'test:audits',
+];
+
 /** The app's tasks, from its folder; `tasks` adds the app's own or replaces a shared one by name. */
 export function remyTasks({ root = process.cwd(), tasks = {} } = {}) {
   const has = (path) => existsSync(resolve(root, path));
@@ -54,11 +70,16 @@ export function remyTasks({ root = process.cwd(), tasks = {} } = {}) {
     },
     // vp dev, vp build and vp preview are Vite Plus's own; these are the app's, with what they need first.
     dev: { command: 'vp dev .', dependsOn: prepared, cache: false },
-    // The production build, then Wrangler's deployment dry run (no upload).
+    // The production build, then Wrangler's deployment dry run (no upload). Its stamp names the commit it was built
+    // from (build-vite.js, through git, which Vite Plus does not see): git's record of the current commit is an input
+    // too, so a new commit builds again.
     build: {
       command: ['vp build .', 'wrangler deploy --dry-run'],
       dependsOn: prepared,
-      cache: { input: [{ auto: true }, ...generated], output: ['dist/**'] },
+      cache: {
+        input: [{ auto: true }, ...generated, '.git/HEAD', '.git/refs/heads/**', '.git/packed-refs'],
+        output: ['dist/**'],
+      },
     },
     // The production build on Cloudflare's local host, at PREVIEW_PORT (4173 unless a worktree has its own).
     preview: {
@@ -96,11 +117,28 @@ export function remyTasks({ root = process.cwd(), tasks = {} } = {}) {
         'check:unit',
       ],
     },
+    // What a browser check needs on this machine: Playwright's Chromium and, on Linux, a Han font (remy browsers).
+    browsers: { command: `${remy} browsers`, cache: false },
+    // The browser checks on the production build, every language (CHECK_LOCALES=quick: a few), Playwright's own
+    // options passed through (`vp run test:browser --shard 1/3`, `--grep <words>`). The build they test is an
+    // input; Playwright's results and Wrangler's local state are neither input nor output.
+    'test:browser': {
+      command: 'playwright test --project=ours',
+      dependsOn: ['build', 'browsers'],
+      cache: { env: ['CHECK_LOCALES'], untrackedEnv: ['PREVIEW_PORT'], input: browserInputs, output: [] },
+    },
+    // Google's Lighthouse audits on the production build. `vp run ci` runs them after the browser checks, never
+    // beside them: they measure speed.
+    'test:audits': {
+      command: 'playwright test --project=google',
+      dependsOn: ['build', 'browsers'],
+      cache: { untrackedEnv: ['PREVIEW_PORT'], input: browserInputs, output: [] },
+    },
     // What the check only verifies, written: the commands list (COMMANDS.md) and each docs page's ending.
     fix: { command: [`${check} commands --write`, `${check} endings --write`], cache: false },
-    // What GitHub runs, the same here: the check, then the browser checks, Google's audits and a new app
-    // (`vp run ci browser --shard 1/3` runs one part, as one GitHub job does).
-    ci: { command: `${remy} ci`, dependsOn: ['check'], cache: false },
+    // What GitHub runs, the same here: the check, then the browser checks, then Google's audits, one after the other
+    // (each `vp run` inlined as its own cached task). GitHub runs each part as a job of its own (githubJobs).
+    ci: { command: ['vp run test:browser', 'vp run test:audits'], dependsOn: ['check'], cache: false },
     ...tasks,
   };
 }

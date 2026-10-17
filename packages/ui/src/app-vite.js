@@ -19,6 +19,7 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { remyParts } from './parts/vite.js';
 import { remyBuild } from './build-vite.js';
+import { remyOrigins } from './origins-vite.js';
 import { appCatalog } from './app-catalog.js';
 import { remyTasks, style } from './tasks.js';
 
@@ -60,6 +61,8 @@ export function remyApp({
           parts.plugin,
           // What this build is (`virtual:remy-build`): /healthz answers with it and the page carries it.
           remyBuild({ root, ...build }),
+          // Its origins, from remy.config.ts (origins-vite.js).
+          remyOrigins({ root }),
           cloudflare({ viteEnvironment: { name: 'ssr' }, ...cloudflareOptions }),
           // Fallback faces sized to the web fonts (size-adjust and ascent/descent overrides), so the swap to
           // Geist keeps the layout and LCP; fonts.css lists them. Before Tailwind.
