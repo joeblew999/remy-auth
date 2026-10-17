@@ -39,7 +39,7 @@ This document owns what the code must be. How people and agents work day to day 
   ([how we work](./how-we-work.md#when-the-owner-delegates-decisions)). Production (`vp run promote`), a release
   (`vp run release`), provisioning and filing upstream issues also wait for the owner's explicit request.
   Landing (`vp run land`, staging included) does not: it is the step every finished change takes, by
-  whoever made it ([the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)).
+  whoever made it ([the flow](./how-we-work.md#the-flow-four-steps-in-plain-sight)).
 - Do not mock Better Auth, D1 or the Workers runtime. Development conveniences (seeded people,
   a sign-in picker for them, a fixed sign-in code, captured mail) are allowed only behind one
   per-environment policy table ([remy-auth's](./auth.md#environments-one-table)) whose default, and whose value for any unknown environment, is

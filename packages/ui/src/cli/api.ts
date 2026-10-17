@@ -2,6 +2,7 @@
 // /api/openapi.json (about a second; network only). The document is never committed: the Worker
 // generates it from the contract in-process, so this asks the running Worker for it. With --urls, the
 // reference page and one line per operation instead of the document.
+import { origins } from './config.ts';
 function fail(message: string): never {
   console.error(message);
   process.exit(1);
@@ -9,7 +10,7 @@ function fail(message: string): never {
 
 export async function spec(args: string[]): Promise<void> {
   const urls = args.includes('--urls');
-  const origin = args.find((arg) => !arg.startsWith('--')) || process.env.DEPLOY_ORIGIN;
+  const origin = args.find((arg) => !arg.startsWith('--')) || origins().production;
   if (!origin) fail('api spec: pass an origin or put origins.production in remy.config.ts');
   const specUrl = new URL('/api/openapi.json', origin);
   const response = await fetch(specUrl, { headers: { Accept: 'application/json' } });

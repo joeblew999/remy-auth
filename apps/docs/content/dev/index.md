@@ -63,7 +63,7 @@ Starting, resuming and reloading Codex or Claude Code, in VS Code or a terminal,
 ## Everyday commands
 
 Every command, generated from the command line itself, is on [Commands](./commands.mdx). What you run day to
-day, and who runs production and a release, is [the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
+day, and who runs production and a release, is [the flow](./how-we-work.md#the-flow-four-steps-in-plain-sight).
 
 Local preview and remote deployment use the same build and Wrangler configuration.
 See [local/remote commands](./run-and-test.md#one-scaffold-for-local-and-cloudflare)

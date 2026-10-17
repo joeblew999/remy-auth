@@ -1,10 +1,11 @@
-// What an app tells its tooling, once: remy.config.ts at its root (defineRemyProject), where it is
-// deployed and its local ports. The steps read it here and hand it on as the environment the tasks
-// still expect (DEPLOY_ORIGIN, STAGING_ORIGIN, DOCS_ORIGIN, the VITE_ copies, the ports), set only
-// where the shell did not. A worktree's ports come from its name, so nothing is written for them.
+// What an app tells its tooling, once: remy.config.ts (defineRemyProject), where it is deployed, its local ports and
+// its release package. Each command asks for the value it needs (origins(), release(), ports()), read from the file
+// when asked: nothing is copied into the environment for others to read (configure() did, for every command, so a
+// value reached a child by a route no one could see; owner, 2026-10-17: "everything else underneath it should be
+// pretty dumb").
 import { existsSync, readdirSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { createRequire } from 'node:module';
+import { dirname, join, relative, resolve } from 'node:path';
 import { localPorts } from '@joeblew999/remy-ui/workspace';
 
 export type RemyProject = {
@@ -18,12 +19,32 @@ export type RemyProject = {
 
 export const defineRemyProject = (project: RemyProject): RemyProject => project;
 
-/** The app's remy.config.ts, or nothing. */
-export async function project(cwd = process.cwd()): Promise<RemyProject> {
-  const file = join(cwd, 'remy.config.ts');
-  if (!existsSync(file)) return {};
-  const loaded = (await import(pathToFileURL(file).href)) as { default?: RemyProject };
-  return loaded.default ?? {};
+/** The nearest remy.config.ts, from `cwd` up (an app's own, or its workspace's), or nothing. */
+export function remyProject(cwd = process.cwd()): RemyProject {
+  for (let dir = resolve(cwd); ; dir = dirname(dir)) {
+    const file = join(dir, 'remy.config.ts');
+    if (existsSync(file)) {
+      const loaded = createRequire(import.meta.url)(file) as { default?: RemyProject } & RemyProject;
+      return loaded.default ?? loaded;
+    }
+    if (dir === dirname(dir)) return {};
+  }
+}
+
+/** Where the app is deployed: production, staging, its docs Worker (remy.config.ts's origins). */
+export const origins = (cwd = process.cwd()): NonNullable<RemyProject['origins']> => remyProject(cwd).origins ?? {};
+
+/** The package whose version names a release, and the release's title. */
+export const releaseConfig = (cwd = process.cwd()): { package?: string; title?: string } =>
+  remyProject(cwd).release ?? {};
+
+/** This checkout's local ports (a worktree's own); PREVIEW_PORT or DOCS_PREVIEW_PORT given in the shell wins. */
+export function ports(cwd = process.cwd()): { preview: number; docsPreview: number } {
+  const own = localPorts(cwd);
+  return {
+    preview: Number(process.env.PREVIEW_PORT ?? own.preview),
+    docsPreview: Number(process.env.DOCS_PREVIEW_PORT ?? own.docsPreview),
+  };
 }
 
 // The ports, a worktree's own included: the tasks' one definition (tasks.js), which the command line uses too.
@@ -37,34 +58,6 @@ export { localPorts, portsFor, worktreeName } from '@joeblew999/remy-ui/workspac
 export function remyCommand(cwd = process.cwd()): string[] {
   const source = join(cwd, 'packages', 'ui', 'src', 'cli', 'remy.ts');
   return existsSync(source) ? [process.execPath, source] : [join(cwd, 'node_modules', '.bin', 'remy')];
-}
-
-/** The environment the steps and the tasks read, from the config, set where the shell did not. */
-export async function configure(cwd = process.cwd()): Promise<RemyProject> {
-  const config = await project(cwd);
-  // The origins and the release are remy.config.ts's alone: set from it, or removed, so a value left in the
-  // shell by another project steers nothing here (on 2026-10-11 a shell still carrying remy-auth's
-  // mise-era [env] made remy-auth-app's landing deploy a staging Worker and wait on remy-auth's).
-  const own = (name: string, value: string | undefined) => {
-    if (value === undefined) delete process.env[name];
-    else process.env[name] = value;
-  };
-  own('DEPLOY_ORIGIN', config.origins?.production);
-  own('VITE_DEPLOY_ORIGIN', config.origins?.production);
-  own('STAGING_ORIGIN', config.origins?.staging);
-  own('VITE_STAGING_ORIGIN', config.origins?.staging);
-  own('DOCS_ORIGIN', config.origins?.docs);
-  own('VITE_DOCS_ORIGIN', config.origins?.docs);
-  own('RELEASE_PACKAGE', config.release?.package);
-  own('RELEASE_TITLE', config.release?.title);
-  // The ports: a worktree's own, else the config's; a port given in the shell wins (two checkouts on one machine).
-  const set = (name: string, value: number) => {
-    if (process.env[name] === undefined) process.env[name] = String(value);
-  };
-  const ports = localPorts(cwd);
-  set('PREVIEW_PORT', ports.preview);
-  set('DOCS_PREVIEW_PORT', ports.docsPreview);
-  return config;
 }
 
 /**
@@ -86,11 +79,11 @@ export function docsDir(cwd = process.cwd()): string | undefined {
 }
 
 /**
- * The docs' content folder relative to cwd (I18N_DOCS_DIR wins): the translation tools read and name paths from the
+ * The docs' content folder relative to cwd: the translation tools read and name paths from the
  * repository's root. docsDir() is absolute, so never join it onto cwd (the docs check found nothing, 2026-10-17).
  */
 export function docsContent(cwd = process.cwd()): string {
-  return process.env.I18N_DOCS_DIR ?? relative(cwd, join(docsDir(cwd) ?? join(cwd, 'docs'), 'content'));
+  return relative(cwd, join(docsDir(cwd) ?? join(cwd, 'docs'), 'content'));
 }
 
 /** An installed tool's binary: node_modules/.bin, from this folder up, as Node resolves packages (a workspace installs once, at its root). */

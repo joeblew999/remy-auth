@@ -47,10 +47,11 @@ trusting any result.
   project, not only this one: a project with its own `.node-version` gets that Node; one without gets `vp`'s
   default (the latest LTS) rather than the Node installed before. `vp env default <version>` sets that default.
   The session step in `.claude/settings.json` does nothing there.
-- **A checkout made before 17 October 2026** has a `.claude/settings.json` written by `remy guard` (it was not
-  committed then). Delete it before pulling, or the pull refuses; then `vp install` and `npx remy guard`.
+- **A checkout made before 17 October 2026** has a `.claude/settings.json` written by the old `remy guard` (it was
+  not committed then). Delete it before pulling, or the pull refuses; then `vp install` and `npx remy hooks`.
 
-`remy guard` writes its hooks, with this machine's paths, to `.claude/settings.local.json`, which is not committed.
+`remy hooks` writes the status hook, with this machine's paths, to `.claude/settings.local.json`, which is not
+committed (and removes the old guard hook where a machine still has it).
 Vite Plus's own instructions for agents load in every Claude session from the installed package
 (`CLAUDE.md` imports `node_modules/vite-plus/AGENTS.md`), and its docs for the installed version are in
 `node_modules/vite-plus/docs`: read those before changing how anything is built, checked or run.
@@ -92,18 +93,20 @@ in what order, and what a cache makes unnecessary: the tasks are the package's (
 `vite.config.ts`, `remyWorkspace()` at remy-auth's root, both from `packages/ui/src/tasks.js`), each one
 tool: Vite, Wrangler, Playwright, `tsc`, `vp test`, `vp check`, or a `remy` command for a job Vite Plus has
 no tool for (the project's own checks, the browsers, the audits' lock). Nothing of ours runs `vp run`
-(a unit check refuses it): the flow's steps are the scripts (`land`, `release`, `setup`), which run their
-own part, then `vp run ci` or `vp run check`, then the rest. `vp run --last-details` says why each task
+(a unit check refuses it), and nothing of ours hands a value on through the environment: the flow's steps are the
+scripts (`land`, `promote`, `release`, `setup`), each a chain of `remy` leaves and Vite Plus tasks written out in order
+([Commands](./commands.mdx) prints each one's steps). `vp run --last-details` says why each task
 ran or came from the cache; a task's inputs, outputs and environment are in its `cache` settings.
 
 The `remy` commands (`npx remy <command>`) are one module each in `packages/ui/src/cli`: `npx remy help`
 lists every command, one line each, and a command run without arguments says its own (`npx remy docs`).
-The flow is one of them, `remy flow <step>`, which the `status`, `land`, `promote` and `release` scripts call.
+Each does the one job it names: `remy land start|finish`, `remy promote check|done` and `remy release check` are the
+ends of the flow's steps, never a sequence of other commands.
 
 Every script and command, with what each does, is on **[Commands](./commands.mdx)**, generated from the
 command line itself, so it cannot drift; no page lists them by hand. Where each area is explained:
 
-- The flow and who runs each step: [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)
+- The flow and who runs each step: [how we work](./how-we-work.md#the-flow-four-steps-in-plain-sight)
 - The app, local and remote checks, previews: [the GUI](./run-and-test.md)
 - The project layout, a new app, translations, a repository that publishes packages: [projects](./projects.md)
 - The docs Worker over an app's `docs/`: [writing docs](./writing-docs.mdx)
@@ -124,7 +127,7 @@ from registry upgrades. Node and the skill-source pins are managed separately.
 
 ### Verification
 
-The flow, its steps and who runs each: [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
+The flow, its steps and who runs each: [how we work](./how-we-work.md#the-flow-four-steps-in-plain-sight).
 
 An installation ends with `npx remy verify` (its `setup` checks; `vp run setup`, `npx remy packages upgrade`
 and `vp run upgrade` run it): about a minute, no browser. Those are the dependencies against the lockfile,

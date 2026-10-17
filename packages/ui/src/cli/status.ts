@@ -4,12 +4,15 @@ import { readFileSync } from 'node:fs';
 import { compose, type BranchFact, type CommitFact, type RunFact } from './feedback.ts';
 import { translationGaps } from './i18n.ts';
 import { versions } from './cloudflare.ts';
+import { origins } from './config.ts';
+
+// `remy status` (vp run status): what is going on, one screen, a report that changes nothing but git's copy of main.
 
 export async function main(): Promise<void> {
   // Everything asynchronous, answered by whoever owns the fact and never stored: GitHub (its runs,
   // pull requests), the Workers (what each runs), git (main, every worktree), the translation check.
   // One screen, a couple of seconds. Every agent session starts with it (the SessionStart hook
-  // `remy guard` registers); a developer runs it when they sit down. .plans/dev-feedback.md.
+  // `remy hooks` registers); a developer runs it when they sit down. .plans/dev-feedback.md.
   const read = (...args: string[]) =>
     execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
   const ask = (command: string, args: string[], timeout = 15_000) => {
@@ -17,7 +20,10 @@ export async function main(): Promise<void> {
     return r.status === 0 ? r.stdout : undefined;
   };
   const root = read('rev-parse', '--path-format=absolute', '--git-common-dir').replace(/\/\.git$/, '');
-  spawnSync('git', ['-C', root, 'fetch', '-q', 'origin', 'main'], { timeout: 15_000 });
+  // Main as GitHub has it, named in full (a clone's fetch rule may leave origin/main behind otherwise).
+  spawnSync('git', ['-C', root, 'fetch', '-q', 'origin', '+refs/heads/main:refs/remotes/origin/main'], {
+    timeout: 15_000,
+  });
   const base = read('-C', root, 'rev-parse', '--verify', '-q', 'origin/main') ? 'origin/main' : 'main';
 
   const commits: CommitFact[] = read('-C', root, 'log', '-5', '--format=%H\t%s\t%an\t%cr', base)
@@ -54,7 +60,7 @@ export async function main(): Promise<void> {
       const [ahead, behind] = counts.split(/\s+/).map(Number);
       return { branch, path, ahead: ahead ?? 0, behind: behind ?? 0, base };
     });
-  const deployments = process.env.DEPLOY_ORIGIN
+  const deployments = origins().production
     ? (await versions()).table
         .split('\n')
         .filter((line) => /^(ORIGIN|https?:)/.test(line))
@@ -92,4 +98,39 @@ export async function main(): Promise<void> {
     }
   })();
   console.log(compose({ commits, runs, branches, deployments, translations, pulls, left }).join('\n'));
+}
+
+export const what =
+  "what is going on: main with GitHub's verdicts, the open pull requests, the deployments, the worktrees, the translations, the top of now.md";
+
+/** A GitHub run of the checks workflow, as `gh run list` reports it. */
+export type Run = { status: string; conclusion: string | null; url: string; headSha: string };
+
+/**
+ * GitHub's run for `commit` (or the newest on main): what the checks said. `undefined` when gh cannot answer (not
+ * installed, not signed in, offline), `null` when GitHub has no run for it. Main's push runs only: Dependabot's run on
+ * a commit says nothing about the checks, and a release tag's run on the same commit is the release job's.
+ */
+export function latestRun(commit?: string): Run | null | undefined {
+  const select = commit ? ['--commit', commit, '--branch', 'main'] : ['--branch', 'main'];
+  const result = spawnSync(
+    'gh',
+    ['run', 'list', ...select, '--event', 'push', '--limit', '1', '--json', 'status,conclusion,url,headSha'],
+    { encoding: 'utf8', timeout: 15_000 },
+  );
+  if (result.status !== 0) return undefined;
+  const [run] = JSON.parse(result.stdout || '[]') as Run[];
+  return run ?? null;
+}
+
+/** One line a person reads: what GitHub said about a commit. */
+export const describeRun = (run: Run) =>
+  `${run.status === 'completed' ? (run.conclusion ?? 'unknown') : 'still running'} on ${run.headSha.slice(0, 7)}: ${run.url}`;
+
+/** Where the work is: the branch, whether it is main, whether the tree is clean. */
+export function where(): { branch: string; onMain: boolean; clean: boolean } {
+  const git = (...args: string[]) =>
+    execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+  const branch = git('branch', '--show-current');
+  return { branch, onMain: branch === 'main', clean: git('status', '--porcelain') === '' };
 }

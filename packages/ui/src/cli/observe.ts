@@ -2,8 +2,8 @@
 // events [event] [--since 24h] [--limit 10] | ai-usage [--since 7d] | ai-check | gateway [show |
 // rate-limit off | rate-limit <requests>/<seconds> | logs on|off]`): Workers Logs (the telemetry
 // query), AI Gateway logs and settings, the AI Search instance. Nothing is named here: the Worker and
-// its AI Search come from the Wrangler configuration (REMY_WRANGLER_CONFIG names the docs Worker's
-// generated one; else the nearest), and the gateway from the instance. Never prints a token.
+// its AI Search come from the Wrangler configuration (--config names one: remy docs observe names the docs Worker's
+// generated one; else the app's), and the gateway from the instance. Never prints a token.
 // Credentials: Wrangler's login reads AI Search, but it cannot ask for AI Gateway or Workers Logs
 // access, so those use CLOUDFLARE_API_TOKEN ("AI Gateway Edit", which includes reading, and "Workers
 // Observability Read"), from fnox (the macOS keychain): fnox exec -- npx remy observe …
@@ -26,6 +26,9 @@ const groupBy = <T>(items: T[], key: (item: T) => string): Record<string, T[]> =
   return groups;
 };
 
+/** The Wrangler configuration observed: the app's, unless --config names another (remy docs observe names the docs Worker's). */
+let configFile: string | undefined;
+
 /** Wrangler from this install, run with its login (never the API token, which it would use instead), and the configuration. */
 async function setup() {
   const requireHere = createRequire(`${process.cwd()}/package.json`);
@@ -45,9 +48,7 @@ async function setup() {
     pathToFileURL(requireHere.resolve('wrangler')).href
   )) as typeof import('wrangler');
   // The app's configuration unless one is named (the docs Worker's): the root of a workspace has none.
-  const config = unstable_readConfig({
-    config: process.env.REMY_WRANGLER_CONFIG ?? join(appDir(), 'wrangler.jsonc'),
-  }) as Json;
+  const config = unstable_readConfig({ config: configFile ?? join(appDir(), 'wrangler.jsonc') }) as Json;
   const login = (() => {
     try {
       return (JSON.parse(wrangler('auth', 'token', '--json')) as { token: string }).token;
@@ -340,4 +341,9 @@ export const commands: Subcommands = {
     run: (rest) => gateway(rest),
   },
 };
-export const main = dispatch('observe', commands);
+const dispatched = dispatch('observe', commands);
+export const main = (args: string[]): void | Promise<void> => {
+  const named = args.indexOf('--config');
+  if (named >= 0) configFile = args.splice(named, 2)[1];
+  return dispatched(args);
+};

@@ -5,7 +5,7 @@ description: "What every Remy project keeps in the same place, how to start a ne
 
 The tooling is `remy`, the bin of `@joeblew999/remy-ui` (`packages/ui/src/cli`, one TypeScript module per
 command); an app gets it with the package (`npm install`, at the package's version) and names it in its
-`package.json` scripts, the same ones in every app (`"`vp run check`": "remy flow change"`). An app says once, in
+`package.json` scripts, the same ones in every app (`"land": "remy land start && vp run translate && vp run ci && remy land finish"`), with Vite Plus's tasks between its steps. An app says once, in
 `remy.config.ts`, where it is deployed and its ports:
 
 ```ts
@@ -43,7 +43,7 @@ the root either way.
 | `tests/` (`smoke.spec.ts` by name) | `remy test`, the live smoke after a deploy | the shared checks with the app's settings, and its own |
 | `public/` | Vite | favicon, `_headers` |
 | `dist/` (`dist/client/assets`) | the deploys, the checks | build output, never committed |
-| `docs/` (`docs.config.ts`, `vite.config.ts`, `tsconfig.json`, `package.json`, `content/{users,dev,ui}/` with `i18n.json` and `meta.json`, `content/questions.json`; generated `.remy-docs/`, `dist/`) | `remy docs`, `remy i18n` (`I18N_DOCS_DIR`) | the app's docs: its identity and pages; the Worker is the package's |
+| `docs/` (`docs.config.ts`, `vite.config.ts`, `tsconfig.json`, `package.json`, `content/{users,dev,ui}/` with `i18n.json` and `meta.json`, `content/questions.json`; generated `.remy-docs/`, `dist/`) | `remy docs`, `remy i18n` | the app's docs: its identity and pages; the Worker is the package's |
 | `packages/<name>/` with `README.md` | `remy plans`, `remy packages` | packages the repo publishes, if any |
 | `messages/`, `project.inlang/` | the app preset, the app's `generate` task, `remy i18n` | the app's own strings, if any (compiled into `src/paraglide/`) |
 | `.plans/` (`now.md`, `done/`, `parked/`) | `remy plans` | the repo's plans |
@@ -66,14 +66,14 @@ Everything else is the package, which one version bump upgrades.
    product's name and source, which the app's frame reads too) and `messages/en.json`.
 4. Node as `.node-version` says, then `GITHUB_TOKEN=$(gh auth token) npm install` once to write
    `package-lock.json`, then `vp run setup` (npm ci, the pinned skills and the `remy` skill, the
-   `AGENTS.md` rules block, MCP registration, the flow's guard, the installation's checks).
+   `AGENTS.md` rules block, MCP registration, the status hook, the installation's checks).
 5. Commit everything, `package-lock.json`, `skills-lock.json` and `src/routeTree.gen.ts` included. The
    blank app's strings come translated; after the English changes (`messages/en.json`, the docs), commit it
-   and translate this once by hand, `REMY_FLOW=hand npx remy i18n translate`, which writes the other
+   and translate this once by hand, `npx remy i18n translate`, which writes the other
    languages (it never commits: commit them with the rest); from then on `vp run land` does it.
 6. The first deploy, by hand: `npx remy cloudflare deploy`, and `npx remy cloudflare docs-deploy` for the
    docs. Once the
-   repository is on GitHub (step 7), work goes through [the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest):
+   repository is on GitHub (step 7), work goes through [the flow](./how-we-work.md#the-flow-four-steps-in-plain-sight):
    `vp run land` for every finished change, `vp run promote` for production and the docs.
 7. CI: `.github/workflows/ci.yml` calls remy-auth's shared workflow at the same tag (every language, Google's
    audits on every push to `main`). Grant the new repository read access in the `@joeblew999/remy-ui`
@@ -99,8 +99,8 @@ In `remy.config.ts`: `release.package` (the package whose version names the rele
 `release.title`. A package's `exports` name every subpath its users import (`"./video": "./src/video.ts"`);
 anything else is refused at build time and in Playwright, whose message names the importing file, not the
 export map. A package's own strings are its own inlang project, compiled by its build, whose runtime
-follows the platform's language with one call, `followLocale(runtime)` (`locale`); the i18n tasks read it
-through `I18N_INLANG`. Checks the repository adds to a release are its `release-checks` task, in its `vite.config.ts`, which
+follows the platform's language with one call, `followLocale(runtime)` (`locale`); the translation tools find
+the repository's inlang project through git. Checks the repository adds to a release are its `release-checks` task, in its `vite.config.ts`, which
 `vp run release` runs after `vp run ci` (remy-auth: `template:check`, `ui:verify`). remy-auth sets a release's version with `vp run ui:version X.Y.Z`, which
 writes it everywhere it appears (the package and the blank app's pins).
 
@@ -115,19 +115,20 @@ The platform supplies every npm package the app and the tasks need, at one versi
 `@joeblew999/remy-ui`'s own dependencies (the framework, the toolchain, the checks' tools), so an app's
 `package.json` names the package, its own packages and whatever its product adds. `the check's single-copies part`
 (`vp run check`'s `check:single-copies`) fails when a package that breaks when installed twice (React, TanStack Router and
-Query, the MDX stringifier; the package's `remy.singleCopy` list) is: remove the app's own pin. The commands call an
-app's own hooks where it has them, as scripts of its `package.json`, run if present: `generate` (code
-generated before type checking; the blank app's compiles its own catalog), `local` (the local state an
-app needs before it runs, which `vp run dev` and `vp run build` run first; remy-auth writes its `.dev.vars`
-and migrates its local D1 there), `release-checks` and `test:consumers`.
+Query, the MDX stringifier; the package's `remy.singleCopy` list) is: remove the app's own pin. An app's own
+preparation is a file the shared tasks look for: `scripts/local.ts` (the local state it needs before it runs, its
+`local` task, which `vp run dev` and `vp run build` run first; remy-auth writes its `.dev.vars` and migrates its local
+D1 there) and `project.inlang` (its own catalog, compiled by its `generate` task). Its own release checks are its
+`release-checks` task.
 
-The development flow is code, `packages/ui/src/cli/flow.ts`, with four steps and a guard. The flow, step by step, and who runs each: [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest); every command: [Commands](./commands.mdx).
+The flow is the scripts and Vite Plus's tasks; each step, and who runs it: [how we work](./how-we-work.md#the-flow-four-steps-in-plain-sight); every command: [Commands](./commands.mdx).
 
-`remy verify` (the release gate) runs the browser checks in every language, then the new-app test, as `vp run ci`'s
-`browser` and `new-app` parts do: the other repositories this one serves tested as they get it: the app's
-`test:consumers` script, nothing by default; in remy-auth, the new-app test (`fixtures/consumer`), which builds the blank app and a package it owns from this commit's platform
-(the package from a tarball with a version of its own, the tasks from a copy outside any `node_modules`, the
-template's `.npmrc`) and runs install, skills (installed once per pinned list, then reused), the tooling invariants, the check, the quick browser checks, the docs and a dry-run publish (~1.5 to 3 min, mostly the network).
+`vp run ci` runs the browser checks, Google's audits and, in remy-auth, the new-app test (`vp run new-app`,
+`fixtures/consumer`): the other repositories this one serves, tested as they get it. It builds the blank app and a
+package it owns from this commit's platform (the package from a tarball with a version of its own, the tasks from a
+copy outside any `node_modules`, the template's `.npmrc`) and runs install, skills (installed once per pinned list,
+then reused), the tooling invariants, the check, the quick browser checks and the docs (~3 min, mostly the install);
+Vite Plus caches it on what a new app is made of, so a change to remy-auth's own app or product docs runs it no more.
 A change that would break another repository fails there, not in that repository. Tests are type-checked with
 the app (`tsconfig.json` includes `tests/`). Google's audits are
 `vp run test:audits` (Lighthouse, local; CI whenever a change can affect it, and on every push to main and every tag) and Core Web Vitals is
@@ -159,18 +160,18 @@ tools), write the translations and their records (the change commits them). Both
 forward to them.
 
 - **UI messages** (Paraglide): the catalogs, locales and base locale come from inlang's own
-  `settings.json` (`I18N_INLANG`, else the one project git knows). Detected: missing catalogs and keys
+  `settings.json` (the one project git knows). Detected: missing catalogs and keys
   (`jq`), lost or invented `{placeholders}` (`@lingual/i18n-check`), keys whose English differs from the
   catalog's record (`translated-from/<locale>.json` beside it), plural categories the locale needs (`Intl.PluralRules`,
   `tasks/i18n/messages/plurals.mjs`: no upstream tool checks them).
-- **Docs** (Fumadocs): the folder is `I18N_DOCS_DIR` (default `docs/content`); each site with an
+- **Docs** (Fumadocs): the folder is the docs package's `content/` (`docs/content`, or `apps/docs/content` in remy-auth); each site with an
   `i18n.json` translates every English page into each of its languages. Detected: missing pages, stale
   ones (their `translatedFrom` frontmatter: a fingerprint per English section), orphans, and Fumadocs UI's own text (`ui/<lang>.json` against `ui/en.json`).
 - **The translator** is the machine's Claude Code headless (`claude -p`), with no tools, no MCP
   servers, skills or project settings, and structured output: a catalog's keys come back as JSON and
   are merged in English key order; a stale page's changed sections come back and are spliced in (a page that no longer lines up with its
   record, or a missing one, comes back whole), and it is written only when it is a page (`page.ts`). The prompts are `packages/ui/src/cli/prompts.ts`. One call per language (messages) or per
-  page (docs), `I18N_JOBS` at a time.
+  page (docs), eight at a time (`--jobs`).
 - Checks need no key, no network and no git history (a shallow clone gives the same answer). Translating
   uses the Claude login on the machine.
 - An app with no inlang project and no docs sites gets "nothing to check" and exit 0.

@@ -175,9 +175,9 @@ its translations together: one commit, one push, one run of the checks.
 - `remy i18n check` only reads, offline, so it is safe anywhere and in any number of worktrees.
   `remy i18n translate` is never a `depends`.
 - Stale or missing is a warning while coding and in `vp run ci` (the check part), and an error at
-  release (`vp run release` runs `remy i18n check` with `I18N_STRICT=1` first).
+  release (`remy release check`, the release's first step).
 - A structural change (a rename, a sweep) that touches docs translations is followed by
-  `REMY_FLOW=hand npx remy i18n translate docs <file>…`, which brings those files fully in line with the
+  `npx remy i18n translate docs <file>…`, which brings those files fully in line with the
   English. Change a catalog's structure (every locale's file) in the same commit as `en.json`.
 
 The layout and the commands are in [projects](./projects.md#translations).
@@ -201,26 +201,25 @@ When the owner hands over decisions, for example to finish work unattended:
 - Keep every gate green; delegation never loosens a check.
 - Leave a full report: what was decided, what was done, what was checked and what was not.
 
-## The flow: four steps, and a guard that refuses the rest
+## The flow: four steps, in plain sight
 
 Owner, 2026-10-09: "95% of time has been checking and 5% coding. It can't go on", "It's a question of
-what you run locally and what you run in GitHub asynchronously", and "The tooling formalises what
-happens at development ... make sure the developer flow is also formalised so that this stupid
-fuckups can't happen. And so you and developers use that same flow so that it's fixed forever." So
-the flow is code, not a rule to remember: `packages/ui/src/cli/flow.ts` is the one place its decisions live.
-Its four steps are `vp run check`, `vp run land`, `vp run promote` and `vp run release` (`flow.ts`'s `Step`,
-and the check, Vite Plus's tasks); `vp run status` looks; a guard refuses what is not one of them. Five commands,
-nothing else. A piece of work runs in a worktree of its own: Claude Code's (`.claude/worktrees/<name>`), or
-`git worktree add` by hand; each worktree gets its own ports. remy-auth gets it the way every app does, from the shared
-tasks; `vp run setup` installs the guard.
+what you run locally and what you run in GitHub asynchronously", and "make sure the developer flow is also
+formalised so that this stupid fuckups can't happen". And 2026-10-17: "in that configuration file of VP, you see
+everything. Everything else underneath it should be pretty dumb". So the flow is the scripts and Vite Plus's tasks,
+written once in `packages/ui/src/tasks.js` (`flowScripts`, `remyApp()`, `remyWorkspace()`) and the same in every
+repository: they say what runs, in what order and when, and [Commands](./commands.mdx) prints each script's steps.
+Every `remy` command underneath is a leaf: it does the one job it names (GitHub, Cloudflare, the translator, git),
+reads only what it is given, and decides nothing else. A piece of work runs in a worktree of its own: Claude
+Code's (`.claude/worktrees/<name>`), or `git worktree add` by hand; each worktree gets its own ports.
 
 | Step | Command | Who runs it, and when | What runs | Time |
 | --- | --- | --- | --- | --- |
-| Look | `vp run status` | everyone, first: every agent session opens with it (a hook), a developer when they sit down | main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests, the top of `.plans/now.md` | seconds |
-| After every change | `vp run check` | whoever is coding; the only step waited for | Vite Plus's tasks (`vite.config.ts`): everything generated, the app and the docs built, the project's own checks (plans, single copies, the commands list, page endings, translation status, the plain-function checks in `tests/**/*.unit.spec.ts`), then `vp check` (format, lint, types); what has not changed comes from Vite Plus's cache | ~4 s unchanged, ~50 s from nothing |
-| The change leaves the machine | `vp run land "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | main merged in first (a conflict stops, naming the files), the translations it made stale (seconds), then `vp run ci` (the check, the browser checks, the audits, a new app; what nothing touched comes from the cache), one commit, push the branch, open its pull request (or update the open one), wait for GitHub's checks (they confirm what passed here), squash-merge, deploy staging, reset this checkout to the new main; a red check leaves the pull request open and names the job. GitHub is reached only through `packages/ui/src/cli/github.ts`, its REST API. Never straight to main; from main it moves the work to a branch of its own first. After the merge main's own run checks everything, every part in every language | a few minutes: the parts here, then GitHub's checks |
-| Production | `vp run promote` | the owner, or an agent the owner asked in that session | `remy cloudflare deploy` and the docs Worker, from a pushed main, no gate: staging and GitHub already ran the checks | ~1 min |
-| A release | `vp run release` | the owner, or an agent the owner asked in that session | on a clean main, the translations complete and every changed package bumped; `vp run ci` with the publish rehearsed; then `remy packages release`: the repository's `release-checks` script, Core Web Vitals on a throwaway Worker, the tag (GitHub publishes from it) | ~5 min |
+| Look | `vp run status` | everyone, first: every agent session opens with it (`remy hooks` registers the hook), a developer when they sit down | main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests, the top of `.plans/now.md` | seconds |
+| After every change | `vp run check` | whoever is coding; the only step waited for | Vite Plus's tasks: everything generated, the app and the docs built, Wrangler's deployment dry run, the project's own checks, the unit checks, then `vp check` (format, lint, types); what has not changed comes from Vite Plus's cache | ~8 s unchanged, ~50 s from nothing |
+| The change leaves the machine | `vp run land "<what changed>"` | whoever did the work, on their own, as soon as it is finished | `remy land start` (the work on a branch with main merged in; a conflict stops, naming the files) → `vp run translate` (what the change made stale) → `vp run ci` (what nothing touched comes from the cache) → `remy land finish` (one commit, the pull request, GitHub's checks, the squash merge, this checkout on the new main, then staging where this machine is signed in to Cloudflare). A red check leaves the pull request open and names the job | a few minutes: what changed here, then GitHub's checks |
+| Production | `vp run promote` | the owner, or an agent the owner asked in that session | `remy promote check` (a clean main, exactly GitHub's, whose checks passed) → `remy cloudflare deploy` → `remy cloudflare docs-deploy` → `remy promote done` (what is live, written on the commit) | ~1 min |
+| A release | `vp run release` | the owner, or an agent the owner asked in that session | `remy release check` (a clean main, translations complete, versions bumped) → `CHECK_LOCALES=all vp run ci` (every language) → `vp run release-checks` → `vp run publish:rehearse` → `remy test cwv` → `remy packages tag`; GitHub's release job publishes from the tag | ~5 min |
 
 - **Who runs a step is in the table, and it is never a question.** An agent lands its own finished
   work without asking: staging is part of landing, GitHub checks every landing, and nothing reaches
@@ -228,23 +227,16 @@ tasks; `vp run setup` installs the guard.
   so, and for provisioning ([development principles](./principles.md#development-principles)). An agent that
   reads the table and still asks whether to land has stopped using the flow (owner, 2026-10-10,
   after one did: "Is it absolutely clear when each should be run by you?").
-
+- **Nothing refuses a command for not being "in the flow".** The old guard (a hook that refused commands outside
+  the flow, and `REMY_FLOW`, the variable that told it who was asking) is gone: Vite Plus's cache makes rerunning a
+  check cheap, and what still costs something (the translator spends Claude's tokens; Core Web Vitals make a
+  throwaway Worker) runs by name from a script, where anyone can see it (owner, 2026-10-17).
+- **Nothing is handed on through the environment.** A `remy` command reads remy.config.ts itself for the value it
+  needs and passes a child only what that child needs; no command sets variables for others to find, and no hidden
+  switch changes what a command does (`tests/unit/dev-flow.unit.spec.ts` refuses both). The one setting a person
+  gives is `CHECK_LOCALES` (`all`, `quick` or a list).
 - One area that looks wrong: `vp run test:browser --grep <words>` (the browser checks whose title
-  matches, en and ar, ~30 s). It is the only browser run a step does not own.
-- **The guard** (`remy guard`, a Claude Code hook on every shell command an agent runs, registered on each machine
-  by `vp run setup`) refuses what costs more than time outside the flow (`remy i18n translate`, which spends Claude's tokens, and
-  Core Web Vitals, which make a throwaway Worker on Cloudflare) and raw `wrangler dev`, naming what to run instead
-  (`COMMANDS.md`); everything else is a Vite Plus task its cache makes cheap to rerun, so nothing refuses it
-  (`flow.ts`'s `heavy`). Each still runs by hand from a terminal, with `REMY_FLOW=hand` in
-  front (`REMY_FLOW=hand npx remy test cwv`): the command itself
-  asks who is running it (the gate) and refuses a bare run, on every machine. That is a
-  person's decision; the guard refuses it from an agent even so, which is the fault it exists for.
-  A task whose own job ends with the verification (`vp run setup`, `npx remy packages upgrade`,
-  `vp run upgrade`) says it is asking, so those run as written.
-- **These pages never give a command the tooling refuses.** A heavy command is written with
-  `REMY_FLOW=hand` in front or named without `vp run`; `tests/unit/dev-flow.unit.spec.ts` reads
-  every English page and every task for one run bare, on every check (2026-10-10: eight lines on six
-  pages did, and `vp run setup` ended in the refusal).
+  matches). It is the only browser run a step does not own.
 - A rule that can be a function belongs in `tests/**/*.unit.spec.ts` (no build, no Worker, no
   browser), so it runs on every check for free. The browser is for what only a browser shows.
 - **An agent never waits on a long-running step.** `vp run land`, `vp run promote`, `vp run release`, a
@@ -254,9 +246,10 @@ tasks; `vp run setup` installs the guard.
   things"). Only `vp run check` (seconds) is run and waited for.
 - **What runs again is Vite Plus's decision, never ours.** A task whose inputs did not change is replayed from
   Vite Plus's cache, so `vp run check` and `vp run ci` skip what nothing touched, here and (with the cache kept
-  between runs) on GitHub. No code of ours decides that something can be skipped (owner, 2026-10-17: "make sure we
-  don't have bits of code scattered all over the place"); a task that reruns when it should not has an input to
-  declare in its `cache` settings, which `vp run --last-details` names.
+  between runs) on GitHub. No code of ours decides that something can be skipped; a task that reruns when it should
+  not has an input to declare in its `cache` settings, which `vp run --last-details` names. What a task's command
+  starts counts too: a build that ran git read every changed file in the repository, so every change rebuilt it
+  (2026-10-17, traced); nothing of ours runs git inside a task now.
 - **Anything longer than a few seconds runs in the background, always.** `vp run ci` or any part of it,
   a build, a browser run, an install. A command running in the foreground is cancelled when the owner
   sends a message (the Claude app stops it), so the work silently never happens and the owner is blamed
@@ -264,30 +257,20 @@ tasks; `vp run setup` installs the guard.
   every message: the owner can talk to the agent at any time without breaking anything (owner,
   2026-10-17: "this bullshit between foreground and background kicking me in the ass all the bloody
   time").
-- **Every step says how long it took, without timing itself.** The command line times every `remy`
-  command (`packages/ui/src/cli/timing.ts`, called from `remy.ts`): its record, when it started, its parts
-  and its total, passed or failed, is `node_modules/.cache/remy/<command>-last.txt`, and `npx remy last
-  [command]` prints it. A command started inside another (`vp run ci` runs `check types` and `test
-  every`, `vp run land` runs `i18n translate`) writes into the outer run's record, indented, so one run
-  leaves one record of everything it ran. A command only marks its parts (`lap`) and adds what it measured
-  itself (`note`: each translator call, each step of the new-app test); it never writes a record or a
-  summary of its own (owner, 2026-10-17: "it should get it automatically because it's part of the CLI"). A slow step is a number in the log, not a feeling (owner,
-  2026-10-10, of a landing on staging after 40 seconds whose command ran six minutes: "how can it be
+- **Where the time goes is Vite Plus's to say.** `vp run --last-details` names each task, whether it came from the
+  cache and why it ran; a slow step is a number in that, not a feeling (owner, 2026-10-10: "how can it be
   6 minutes").
 - **GitHub's answer comes to you.** A red run comments on the commit (GitHub tells its author), naming
-  the run; `vp run land` and `vp run release` start by saying what the last run on main did; `vp run promote`
+  the run; `vp run land` starts by saying what the last run on main did; `vp run promote`
   refuses a commit whose run is not green or not finished. To reproduce a red job, a person runs
   `vp run <task>` (the job's name), the same command GitHub ran, since the workflow holds no
-  logic of its own (`remy verify tooling` checks every script a workflow names exists). An agent reads the
+  logic of its own (`remy verify tooling` checks every task a workflow names exists). An agent reads the
   run's own log (`gh run view <id> --log-failed`) and runs the one area
   (`vp run test:browser --grep <words>`). Report what was tested and what was not; never call
   untested work verified.
-- **A landing that fails after the push still finishes what it can, and says where it stopped.**
-  The pull request is merged before staging; when staging's deploy or its live smoke fails, `vp run land`
-  ends non-zero with the state in one line: merged at which commit, staging deployed or not, which
-  smoke failed, translation done or not.
-  Nothing half-done is left for the next person to discover (owner, 2026-10-10, after a landing stopped
-  at the smoke with the translation silently skipped: "now you and other agents are screwed").
+- **A landing whose staging fails is still landed, and says so.** The pull request is merged before staging; when
+  staging's deploy or its live smoke fails, `remy land finish` ends non-zero after the merge, naming what failed. A
+  failed translation stops the landing before anything is committed: nothing half-translated reaches main.
 - Never pipe a gating command through `grep` or `tail` in a chain: the pipe hides its exit code.
   This once released a version whose checks had failed, and on 2026-10-10 hid a failed `vp run land`.
 
@@ -358,7 +341,7 @@ Owner, 2026-10-09: "formalise the way we workflow the dev work in many agents to
 flow". Each piece of work, whoever does it, is one worktree through the same commands; main is
 the only integrator, and GitHub checks every landing. Nothing here is done by hand.
 
-The steps, what each runs and who runs it: [the flow's table](#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
+The steps, what each runs and who runs it: [the flow's table](#the-flow-four-steps-in-plain-sight).
 
 - **Split by independence.** An orchestrator splits work into parts that touch different files, and
   starts one agent per part, each in a worktree of its own. A part that needs another's result waits for that

@@ -1,5 +1,4 @@
 #!/bin/sh
-# Before a push: what its pull request will run, first. The flow's own steps (vp run land: REMY_FLOW is set) ran it
-# already; REMY_SKIP_CI=1 skips it once, on purpose.
-[ -n "$REMY_FLOW" ] || [ -n "$REMY_SKIP_CI" ] && exit 0
+# Before a push: what its pull request will run, first; what nothing touched comes from Vite Plus's cache (a landing
+# ran it just now). VP_GIT_HOOKS=0 skips every hook, Vite Plus's own switch.
 exec vp run ci
