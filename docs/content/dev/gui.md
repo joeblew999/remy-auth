@@ -146,6 +146,26 @@ Fonts live in [`packages/ui/src/fonts.css`](https://github.com/joeblew999/remy-a
 [`vite.config.ts`](https://github.com/joeblew999/remy-auth/blob/main/vite.config.ts) generates the size-matched fallback faces it names.
 `publicPageChecks` fails on any named family that is not loaded.
 
+## On Cloudflare
+
+- **A preview of a branch**: push it, with no pull request (GitHub runs nothing for a branch without one).
+  Cloudflare's Workers Builds builds it and serves it at `https://<branch>-remy-auth.gedw99.workers.dev`
+  (a `/` in the branch becomes `-`); the connector's builds tools show the build and its log. Then check it:
+  `REMY_FLOW=hand npm run test -- remote https://<branch>-remy-auth.gedw99.workers.dev` (our checks only: a
+  preview is hidden from search engines on purpose, so Google's audits judge production). This is the way
+  from Claude's cloud, which has no Cloudflare token; a machine signed in has `npx remy cloudflare preview` too.
+- **Cloudflare's build settings** live on Cloudflare, not in the repository, so they are written here and
+  changed only through the connector, to match: two build rules on the `remy-auth` Worker, both
+  `npm run build`, `NODE_VERSION` as in `.node-version`. `main`: deploy `npx wrangler versions upload` (a
+  new version; production moves only with `dev:promote`). Every other branch: deploy `npx wrangler preview`.
+- **Speed far from the databases**: the Worker runs with Smart Placement (`wrangler.jsonc`, checked by
+  `npx remy verify tooling`), and every request reads through its own D1 session, so reads come from the
+  nearest copy (`@joeblew999/remy-ui/replicas`; a unit check refuses app code using a database binding raw).
+- **Every D1 database keeps read copies and lives in production's region**: the platform's rule, which
+  `npx remy cloudflare provisioned` asks Cloudflare about before every deploy, the Previews' databases
+  included, and refuses on, naming the fix. Neither is a setting Wrangler's configuration can hold.
+- **Production, staging and the `npx remy cloudflare …` commands** run on the owner's Mac, which has the token.
+
 ## Which version is deployed
 
 Nothing records what is deployed: each deployment says what it is when asked, so the answer cannot be
