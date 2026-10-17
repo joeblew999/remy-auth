@@ -47,7 +47,7 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy verify` | the installation's checks and the release gate |
 | `npx remy verify all` | everything: the installation's checks, every language, the consumers (the release gate; dev:release runs it); the default |
 | `npx remy verify setup` | the installation's checks: npm ls, MCP, the guard, doctor, tooling, the check (npm run setup ends with it) |
-| `npx remy verify tooling` | the lockfile, wrangler.jsonc's observability and preview_urls, the workflows, the skill pins |
+| `npx remy verify tooling` | the lockfile, wrangler.jsonc's observability, placement and preview_urls, the workflows, the skill pins |
 | `npx remy verify doctor` | the tooling's versions |
 | `npx remy skills` | the pinned official agent skills for Codex and Claude |
 | `npx remy skills install` | every pinned skill, and the platform's remy skill from the installed package |
