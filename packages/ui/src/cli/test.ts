@@ -9,17 +9,19 @@ import { join } from 'node:path';
 import { gate } from './allowed.ts';
 import { preview, previewDelete } from './cloudflare.ts';
 import { warn } from './timing.ts';
-import { bin } from './config.ts';
+import { appDir, bin } from './config.ts';
 
+// Playwright from the app's folder, where its playwright.config.ts is (apps/remy-auth in remy-auth; an app's own root).
 function playwright(args: string[], env: Record<string, string>): void {
   const results = join(
-    process.cwd(),
+    appDir(),
     'playwright-report',
     `${env.TEST_TARGET === 'remote' ? 'remote' : 'local'}-results.json`,
   );
   rmSync(results, { force: true });
   const result = spawnSync(bin('playwright'), ['test', ...args], {
     stdio: 'inherit',
+    cwd: appDir(),
     env: { ...process.env, ...env },
   });
   flaky(results);

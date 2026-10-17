@@ -6,7 +6,7 @@
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, relative } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { main as observe } from './observe.ts';
 import { dispatch, type Subcommands } from './commands.ts';
@@ -126,6 +126,10 @@ async function serve(): Promise<void> {
   await new Promise(() => {});
 }
 
+/** The docs' Playwright configuration, in the installed package: node_modules found upward, as bin() finds tools (apps/docs in remy-auth, docs/ in an app). */
+const docsChecks = (): string =>
+  join(dirname(dirname(bin('playwright'))), '@joeblew999', 'remy-ui', 'src', 'docs', 'playwright.config.js');
+
 export function check(): void {
   build();
   tool(bin('wrangler'), ['types', '-c', '.remy-docs/wrangler.json']);
@@ -134,18 +138,16 @@ export function check(): void {
 /** The docs' browser checks on a local build, at the docs preview port. */
 export function test(): void {
   build();
-  tool(
-    bin('playwright'),
-    ['test', '-c', '../node_modules/@joeblew999/remy-ui/src/docs/playwright.config.js', '--project=ours'],
-    { env: { PREVIEW_PORT: process.env.DOCS_PREVIEW_PORT ?? '4174' } },
-  );
+  tool(bin('playwright'), ['test', '-c', docsChecks(), '--project=ours'], {
+    env: { PREVIEW_PORT: process.env.DOCS_PREVIEW_PORT ?? '4174' },
+  });
 }
 /** The docs' checks against their deployment (DOCS_TEST_URL, else the docs origin), then every MCP server's tools. */
 export function testRemote(): void {
   const origin = process.env.DOCS_TEST_URL ?? process.env.DOCS_ORIGIN;
   if (!origin) fail('docs test remote: DOCS_TEST_URL, or origins.docs in remy.config.ts');
   generated();
-  tool(bin('playwright'), ['test', '-c', '../node_modules/@joeblew999/remy-ui/src/docs/playwright.config.js'], {
+  tool(bin('playwright'), ['test', '-c', docsChecks()], {
     env: { TEST_TARGET: 'remote', TEST_BASE_URL: origin },
   });
   const hasApi = (JSON.parse(readFileSync(join(docs(), '.remy-docs', 'app.json'), 'utf8')) as { api?: unknown }).api;
