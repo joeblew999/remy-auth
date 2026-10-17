@@ -30,5 +30,10 @@ export type GuardOptions = {
   next: (options: { context: { user: unknown } }) => unknown;
 };
 /** The root middleware for the oRPC whose `ORPCError` is handed in. */
-export declare function guardMiddleware(orpc: { ORPCError: new (code: any, options?: any) => Error }): (options: GuardOptions, input?: unknown) => Promise<any>;
-export declare function guardProblems(router: unknown, options?: { personFields?: readonly string[]; vocabulary?: Vocabulary }): string[];
+export declare function guardMiddleware(orpc: {
+  ORPCError: new (code: any, options?: any) => Error;
+}): (options: GuardOptions, input?: unknown) => Promise<any>;
+export declare function guardProblems(
+  router: unknown,
+  options?: { personFields?: readonly string[]; vocabulary?: Vocabulary },
+): string[];

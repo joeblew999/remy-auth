@@ -1,46 +1,27 @@
 {
   "name": "my-app",
   "private": true,
-  "type": "module",
-  "dependencies": {
-    "@joeblew999/remy-ui": "0.15.1"
-  },
   "workspaces": [
     "docs"
   ],
+  "type": "module",
   "scripts": {
-    "dev:status": "remy flow status",
-    "dev:start": "remy flow start",
-    "dev:change": "remy flow change",
-    "dev:land": "remy flow land",
-    "dev:promote": "remy flow promote",
-    "dev:release": "remy flow release",
-    "dev:done": "remy flow done",
-    "plans": "remy plans",
-    "generate": "node node_modules/@joeblew999/remy-ui/src/app-catalog.js",
-    "setup": "remy setup",
-    "packages": "remy packages",
-    "dev": "remy app dev",
-    "build": "remy app build",
-    "preview": "remy app preview",
-    "test": "remy test",
-    "ci": "remy ci",
-    "docs": "remy docs",
-    "observe": "remy observe",
-    "shots": "remy shots",
-    "api": "remy api",
-    "logs": "wrangler tail --format json",
-    "errors": "wrangler tail --format json --status error",
-    "wrangler": "wrangler",
-    "browser": "chrome-devtools",
-    "browser:start": "chrome-devtools start --isolated --headless --no-usage-statistics --no-performance-crux",
-    "browser:stop": "chrome-devtools stop",
-    "web": "modern-web-guidance",
-    "codex": "codex",
-    "codex:resume": "codex resume --last",
-    "claude": "claude",
-    "claude:resume": "claude --continue",
-    "check": "remy check",
+    "prepare": "vp config --no-agent",
+    "status": "remy flow status",
+    "land": "remy flow prepare land && vp run ci && remy flow land",
+    "promote": "remy flow promote",
+    "release": "remy flow prepare release && REMY_REHEARSE_PUBLISH=1 CHECK_LOCALES=all vp run ci && vp run release-checks && remy flow release",
+    "setup": "remy setup && vp run check",
     "upgrade": "remy upgrade"
+  },
+  "dependencies": {
+    "@joeblew999/remy-ui": "0.15.1"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "npm",
+      "version": "11.19.1",
+      "onFail": "download"
+    }
   }
 }

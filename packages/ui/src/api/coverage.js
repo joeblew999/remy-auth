@@ -8,10 +8,10 @@ import { walk } from './guard-core.js';
 export const apiPrefix = '/api/';
 
 /** Every procedure in a contract or router, with its dotted path ("reservations.create"). */
-export const procedures = router => walk(router);
+export const procedures = (router) => walk(router);
 
 /** A procedure's HTTP route and document fields: its `openapi()` metadata (method, path, summary, tags). */
-export const routeOf = procedure => getOpenAPIMeta(procedure) ?? {};
+export const routeOf = (procedure) => getOpenAPIMeta(procedure) ?? {};
 
 /** The HTTP status each error code answers with: oRPC's common codes, then the API's own (`errorStatuses`). */
 export const statusesOf = (errorStatuses = {}) => ({ ...COMMON_ERROR_STATUS_MAP, ...errorStatuses });
@@ -41,7 +41,8 @@ export function coverageProblems(router, { errorStatuses } = {}) {
     const errors = Object.entries(errorMap).filter(([, error]) => error);
     if (inputSchemas.length > 0 && errors.length === 0) problems.push(`${path}: takes input but documents no error`);
     for (const [code, error] of errors) {
-      if (!(statuses[code] >= 400 && statuses[code] < 600)) problems.push(`${path}: error ${code} has no HTTP error status`);
+      if (!(statuses[code] >= 400 && statuses[code] < 600))
+        problems.push(`${path}: error ${code} has no HTTP error status`);
       if (!error.message) problems.push(`${path}: error ${code} has no message`);
     }
   }

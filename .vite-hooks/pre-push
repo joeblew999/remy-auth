@@ -1,0 +1,5 @@
+#!/bin/sh
+# Before a push: what its pull request will run, first. The flow's own steps (vp run land: REMY_FLOW is set) ran it
+# already; REMY_SKIP_CI=1 skips it once, on purpose.
+[ -n "$REMY_FLOW" ] || [ -n "$REMY_SKIP_CI" ] && exit 0
+exec vp run ci

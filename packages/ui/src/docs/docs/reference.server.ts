@@ -12,7 +12,12 @@ export const referencePage = createServerOnlyFn(async (splat: string) => {
     description: page.data.description ?? '',
     origin: new URL(getRequest().url).origin,
     url: page.url,
-    toc: page.data.toc.map(entry => ({ url: entry.url, depth: entry.depth, title: String(entry.title) })),
+    // fumadocs-openapi titles each heading with its operation's summary, a string; the TOC type allows any React node.
+    toc: page.data.toc.map((entry) => ({
+      url: entry.url,
+      depth: entry.depth,
+      title: typeof entry.title === 'string' ? entry.title : '',
+    })),
     // fumadocs-openapi's page props (the bundled spec is plain JSON), as JSON text for Start's serializer.
     props: JSON.stringify(page.data.getOpenAPIPageProps()),
     pageTree: await reference.serializePageTree(reference.getPageTree()),
@@ -20,4 +25,4 @@ export const referencePage = createServerOnlyFn(async (splat: string) => {
 });
 
 /** Every reference page's URL, for the sitemap. */
-export const referenceUrls = createServerOnlyFn(() => reference.getPages().map(page => page.url));
+export const referenceUrls = createServerOnlyFn(() => reference.getPages().map((page) => page.url));

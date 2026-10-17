@@ -2,7 +2,15 @@ import { ClientOnly, Link } from '@tanstack/react-router';
 import * as z from 'zod/mini';
 import type { Locale } from '@joeblew999/remy-ui/runtime';
 import { m } from '@joeblew999/remy-ui/messages';
-import { formatLocale, allChoices, choicesFor, choiceKinds, searchDefaults, maxCount, type ChoiceKind } from '@joeblew999/remy-ui/locale-info';
+import {
+  formatLocale,
+  allChoices,
+  choicesFor,
+  choiceKinds,
+  searchDefaults,
+  maxCount,
+  type ChoiceKind,
+} from '@joeblew999/remy-ui/locale-info';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { Badge } from '@joeblew999/remy-ui/components/badge';
 import { buttonVariants } from '@joeblew999/remy-ui/button';
@@ -37,10 +45,16 @@ const oneOf = (kind: 'currency' | 'calendar' | 'numbering', fallback: string) =>
  */
 export const formatsSearchSchema = z.object({
   currency: oneOf('currency', currency),
-  count: z.catch(z._default(z.pipe(
-    z.union([z.number(), z.pipe(z.string().check(z.regex(/^\d+$/)), z.transform(Number))]),
-    z.number().check(z.int(), z.minimum(0), z.maximum(maxCount)),
-  ), count), count),
+  count: z.catch(
+    z._default(
+      z.pipe(
+        z.union([z.number(), z.pipe(z.string().check(z.regex(/^\d+$/)), z.transform(Number))]),
+        z.number().check(z.int(), z.minimum(0), z.maximum(maxCount)),
+      ),
+      count,
+    ),
+    count,
+  ),
   calendar: oneOf('calendar', calendar),
   numbering: oneOf('numbering', numbering),
 });
@@ -55,19 +69,43 @@ const chosen = buttonVariants({ size: 'sm' });
  * page's language's own values come first, in the secondary look and described by the "This
  * language" badge under the list; then every other language's.
  */
-function Choices<T extends string | number>({ label, name, locale, render }: {
-  label: string; name: ChoiceKind; locale: Locale; render: (value: T, className: string) => React.ReactNode;
+function Choices<T extends string | number>({
+  label,
+  name,
+  locale,
+  render,
+}: {
+  label: string;
+  name: ChoiceKind;
+  locale: Locale;
+  render: (value: T, className: string) => React.ReactNode;
 }) {
   const { own: ownValues, others } = choicesFor(locale, name) as { own: T[]; others: T[] };
   const ownId = `choices-${name}-own`;
-  return <div className="flex flex-col gap-2" data-choices={name}>
-    <p id={`choices-${name}`} className="text-sm text-muted-foreground">{label}</p>
-    <ul aria-labelledby={`choices-${name}`} className="flex flex-wrap gap-2">
-      {ownValues.map(value => <li key={value} data-choice-value={value} data-own>{render(value, own)}</li>)}
-      {others.map(value => <li key={value} data-choice-value={value}>{render(value, choice)}</li>)}
-    </ul>
-    <p><Badge id={ownId} variant="secondary">{m.section_language({}, { locale })}</Badge></p>
-  </div>;
+  return (
+    <div className="flex flex-col gap-2" data-choices={name}>
+      <p id={`choices-${name}`} className="text-sm text-muted-foreground">
+        {label}
+      </p>
+      <ul aria-labelledby={`choices-${name}`} className="flex flex-wrap gap-2">
+        {ownValues.map((value) => (
+          <li key={value} data-choice-value={value} data-own>
+            {render(value, own)}
+          </li>
+        ))}
+        {others.map((value) => (
+          <li key={value} data-choice-value={value}>
+            {render(value, choice)}
+          </li>
+        ))}
+      </ul>
+      <p>
+        <Badge id={ownId} variant="secondary">
+          {m.section_language({}, { locale })}
+        </Badge>
+      </p>
+    </div>
+  );
 }
 
 type ChoiceProps = { locale: Locale; search: FormatsSearch; interactive?: boolean; to?: '/formats' | '/app/formats' };
@@ -79,68 +117,170 @@ type ChoiceProps = { locale: Locale; search: FormatsSearch; interactive?: boolea
  * preloads on intent); the current choice is the exactly active one. `to` is the page it sits on,
  * the site's /formats or the app's /app/formats.
  */
-export function ChoiceCard({ kind, locale, search, interactive = true, to = '/formats' }: ChoiceProps & { kind: ChoiceKind }) {
+export function ChoiceCard({
+  kind,
+  locale,
+  search,
+  interactive = true,
+  to = '/formats',
+}: ChoiceProps & { kind: ChoiceKind }) {
   const o = { locale };
   const format = formatLocale(locale);
   const number = new Intl.NumberFormat(format);
-  const inDigits = (numberingSystem: string, value: number) => new Intl.NumberFormat(format, { numberingSystem }).format(value);
+  const inDigits = (numberingSystem: string, value: number) =>
+    new Intl.NumberFormat(format, { numberingSystem }).format(value);
   const currencyName = new Intl.DisplayNames([locale], { type: 'currency' });
   const calendarName = new Intl.DisplayNames([locale], { type: 'calendar' });
-  const describedBy = (className: string) => className === own ? `choices-${kind}-own` : undefined;
-  const link = (className: string) => ({
-    from: to, to, resetScroll: false, activeOptions: { exact: true },
-    activeProps: { className: chosen }, inactiveProps: { className }, 'aria-describedby': describedBy(className),
-  }) as const;
+  const describedBy = (className: string) => (className === own ? `choices-${kind}-own` : undefined);
+  const link = (className: string) =>
+    ({
+      from: to,
+      to,
+      resetScroll: false,
+      activeOptions: { exact: true },
+      activeProps: { className: chosen },
+      inactiveProps: { className },
+      'aria-describedby': describedBy(className),
+    }) as const;
   // Static stand-ins with the same look, for HTML rendered without a request (see prerenderedChoiceCards).
-  const still = (selected: boolean, className: string, text: React.ReactNode) =>
-    <span className={selected ? chosen : className} aria-describedby={describedBy(className)}>{text}</span>;
+  const still = (selected: boolean, className: string, text: React.ReactNode) => (
+    <span className={selected ? chosen : className} aria-describedby={describedBy(className)}>
+      {text}
+    </span>
+  );
   const rows = 'grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-x-4 gap-y-3 text-sm';
   const body = {
-    calendar: <>
-      <Choices<string> name="calendar" locale={locale} label={m.calendar_label({}, o)} render={(calendar, className) => interactive
-        ? <Link {...link(className)} search={prev => ({ ...prev, calendar })} data-calendar-choice={calendar}>{calendarName.of(calendar)}</Link>
-        : still(calendar === search.calendar, className, calendarName.of(calendar))} />
-      <dl className={rows}><Row sample="chosen-calendar" label={calendarName.of(search.calendar) ?? search.calendar} data-value={search.calendar}>
-        <time dateTime={samples.date.toISOString().slice(0, 10)}>{new Intl.DateTimeFormat(format, { ...samples.calendarDate, calendar: search.calendar }).format(samples.date)}</time>
-      </Row></dl>
-    </>,
+    calendar: (
+      <>
+        <Choices<string>
+          name="calendar"
+          locale={locale}
+          label={m.calendar_label({}, o)}
+          render={(calendar, className) =>
+            interactive ? (
+              <Link {...link(className)} search={(prev) => ({ ...prev, calendar })} data-calendar-choice={calendar}>
+                {calendarName.of(calendar)}
+              </Link>
+            ) : (
+              still(calendar === search.calendar, className, calendarName.of(calendar))
+            )
+          }
+        />
+        <dl className={rows}>
+          <Row
+            sample="chosen-calendar"
+            label={calendarName.of(search.calendar) ?? search.calendar}
+            data-value={search.calendar}
+          >
+            <time dateTime={samples.date.toISOString().slice(0, 10)}>
+              {new Intl.DateTimeFormat(format, { ...samples.calendarDate, calendar: search.calendar }).format(
+                samples.date,
+              )}
+            </time>
+          </Row>
+        </dl>
+      </>
+    ),
     // Intl has no display name for a numbering system: each choice is its CLDR code and a number in its digits.
-    numbering: <>
-      <Choices<string> name="numbering" locale={locale} label={m.numbering_label({}, o)} render={(numbering, className) => {
-        const text = `${numbering} · ${inDigits(numbering, samples.days)}`;
-        return interactive
-          ? <Link {...link(className)} search={prev => ({ ...prev, numbering })} data-numbering-choice={numbering}>{text}</Link>
-          : still(numbering === search.numbering, className, text);
-      }} />
-      <dl className={rows}><Row sample="chosen-numbering" label={search.numbering} data-value={search.numbering}>{inDigits(search.numbering, samples.decimal)}</Row></dl>
-    </>,
-    currency: <>
-      <Choices<string> name="currency" locale={locale} label={m.currency_heading({}, o)} render={(currency, className) => interactive
-        ? <Link {...link(className)} search={prev => ({ ...prev, currency })} title={currencyName.of(currency)} data-currency-choice={currency}>{currency}</Link>
-        : still(currency === search.currency, className, currency)} />
-      <dl className={rows}><Row sample="chosen-currency" label={currencyName.of(search.currency) ?? search.currency} data-value={search.currency}>
-        {new Intl.NumberFormat(format, { style: 'currency', currency: search.currency }).format(samples.amount)}
-      </Row></dl>
-    </>,
-    count: <>
-      <Choices<number> name="count" locale={locale} label={m.plural_heading({}, o)} render={(count, className) => interactive
-        ? <Link {...link(className)} search={prev => ({ ...prev, count })} data-count-choice={count}>{number.format(count)}</Link>
-        : still(count === search.count, className, number.format(count))} />
-      <dl className={rows}><Row sample="chosen-count" label={number.format(search.count)} data-value={search.count}>{m.apps_count({ count: search.count }, o)}</Row></dl>
-    </>,
+    numbering: (
+      <>
+        <Choices<string>
+          name="numbering"
+          locale={locale}
+          label={m.numbering_label({}, o)}
+          render={(numbering, className) => {
+            const text = `${numbering} · ${inDigits(numbering, samples.days)}`;
+            return interactive ? (
+              <Link {...link(className)} search={(prev) => ({ ...prev, numbering })} data-numbering-choice={numbering}>
+                {text}
+              </Link>
+            ) : (
+              still(numbering === search.numbering, className, text)
+            );
+          }}
+        />
+        <dl className={rows}>
+          <Row sample="chosen-numbering" label={search.numbering} data-value={search.numbering}>
+            {inDigits(search.numbering, samples.decimal)}
+          </Row>
+        </dl>
+      </>
+    ),
+    currency: (
+      <>
+        <Choices<string>
+          name="currency"
+          locale={locale}
+          label={m.currency_heading({}, o)}
+          render={(currency, className) =>
+            interactive ? (
+              <Link
+                {...link(className)}
+                search={(prev) => ({ ...prev, currency })}
+                title={currencyName.of(currency)}
+                data-currency-choice={currency}
+              >
+                {currency}
+              </Link>
+            ) : (
+              still(currency === search.currency, className, currency)
+            )
+          }
+        />
+        <dl className={rows}>
+          <Row
+            sample="chosen-currency"
+            label={currencyName.of(search.currency) ?? search.currency}
+            data-value={search.currency}
+          >
+            {new Intl.NumberFormat(format, { style: 'currency', currency: search.currency }).format(samples.amount)}
+          </Row>
+        </dl>
+      </>
+    ),
+    count: (
+      <>
+        <Choices<number>
+          name="count"
+          locale={locale}
+          label={m.plural_heading({}, o)}
+          render={(count, className) =>
+            interactive ? (
+              <Link {...link(className)} search={(prev) => ({ ...prev, count })} data-count-choice={count}>
+                {number.format(count)}
+              </Link>
+            ) : (
+              still(count === search.count, className, number.format(count))
+            )
+          }
+        />
+        <dl className={rows}>
+          <Row sample="chosen-count" label={number.format(search.count)} data-value={search.count}>
+            {m.apps_count({ count: search.count }, o)}
+          </Row>
+        </dl>
+      </>
+    ),
   }[kind];
-  return <Card data-showcase="search-params" data-choice={kind}>
-    <CardHeader><CardTitle>{m.choices_heading({}, o)}</CardTitle></CardHeader>
-    <CardContent className="flex flex-col gap-5">
-      <p className="text-sm leading-relaxed text-muted-foreground">{m.choices_note({}, o)}</p>
-      {body}
-    </CardContent>
-  </Card>;
+  return (
+    <Card data-showcase="search-params" data-choice={kind}>
+      <CardHeader>
+        <CardTitle>{m.choices_heading({}, o)}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-5">
+        <p className="text-sm leading-relaxed text-muted-foreground">{m.choices_note({}, o)}</p>
+        {body}
+      </CardContent>
+    </Card>
+  );
 }
 
 /** The controls, one per kind, for FormatsContent's `controls`: each is placed in the section it changes. */
 export function choiceCards(props: ChoiceProps): Record<ChoiceKind, React.ReactNode> {
-  return Object.fromEntries(choiceKinds.map(kind => [kind, <ChoiceCard kind={kind} {...props} />])) as Record<ChoiceKind, React.ReactNode>;
+  return Object.fromEntries(choiceKinds.map((kind) => [kind, <ChoiceCard kind={kind} {...props} />])) as Record<
+    ChoiceKind,
+    React.ReactNode
+  >;
 }
 
 /**
@@ -149,8 +289,12 @@ export function choiceCards(props: ChoiceProps): Record<ChoiceKind, React.ReactN
  * the address's values replace them once hydrated, at the same size.
  */
 export function prerenderedChoiceCards({ search, ...props }: ChoiceProps): Record<ChoiceKind, React.ReactNode> {
-  return Object.fromEntries(choiceKinds.map(kind => [kind,
-    <ClientOnly fallback={<ChoiceCard kind={kind} {...props} search={searchDefaults} interactive={false} />}>
-      <ChoiceCard kind={kind} {...props} search={search} />
-    </ClientOnly>])) as Record<ChoiceKind, React.ReactNode>;
+  return Object.fromEntries(
+    choiceKinds.map((kind) => [
+      kind,
+      <ClientOnly fallback={<ChoiceCard kind={kind} {...props} search={searchDefaults} interactive={false} />}>
+        <ChoiceCard kind={kind} {...props} search={search} />
+      </ClientOnly>,
+    ]),
+  ) as Record<ChoiceKind, React.ReactNode>;
 }

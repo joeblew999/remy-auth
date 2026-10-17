@@ -8,4 +8,7 @@ export declare function docsWorkerConfig(docsConfig: RemyDocsConfig, srcDirector
  * The docs Worker's Vite configuration for the app whose docs/ it runs in. `contract`: the package of the
  * app's oRPC contract, which /reference documents; an app without an API leaves it out.
  */
-export declare function remyDocs(docsConfig: RemyDocsConfig, options?: { contract?: string; root?: string }): UserConfig;
+export declare function remyDocs(
+  docsConfig: RemyDocsConfig,
+  options?: { contract?: string; root?: string },
+): UserConfig;

@@ -15,7 +15,13 @@ export type GuardContext<TUser> = {
   relations?: GuardRelations;
 };
 
-export declare function guard<TUser>(): DecoratedMiddleware<GuardContext<TUser>, { user: TUser | null }, unknown, any, any>;
+export declare function guard<TUser>(): DecoratedMiddleware<
+  GuardContext<TUser>,
+  { user: TUser | null },
+  unknown,
+  any,
+  any
+>;
 export declare const noSession: GuardContext<never>;
 export declare function once<T>(lookup: () => Promise<T>): () => Promise<T>;
 export declare function signedIn<TUser>(context: { user: TUser | null }): TUser;

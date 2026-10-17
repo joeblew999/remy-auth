@@ -3,19 +3,36 @@ import { ownValues } from './locale-data.js';
 
 // Every language's own values and the formats page's choices (the union over all languages) come
 // from one plain-JavaScript module, which the shared checks read too.
-export { ownValues, allChoices, choicesFor, choiceKinds, searchDefaults, maxCount, type ChoiceKind, type OwnValues } from './locale-data.js';
+export {
+  ownValues,
+  allChoices,
+  choicesFor,
+  choiceKinds,
+  searchDefaults,
+  maxCount,
+  type ChoiceKind,
+  type OwnValues,
+} from './locale-data.js';
 
 /** A locale's own calendar, digit, clock, week, region, currency and plural conventions, derived from the locale. */
 export type LocaleInfo = {
-  calendar: string; otherCalendars: string[]; numberingSystem: string; hourCycle: string;
-  firstDay: number; weekend: number[]; region: string; currency: string; counts: number[];
+  calendar: string;
+  otherCalendars: string[];
+  numberingSystem: string;
+  hourCycle: string;
+  firstDay: number;
+  weekend: number[];
+  region: string;
+  currency: string;
+  counts: number[];
 };
 
 // Intl Locale Info (getCalendars, getNumberingSystems, getWeekInfo) is Baseline since 2026-07-21
 // and present in workerd; decided in .plans/hard-localisation.md: rely on it, no fallback. The
 // deprecated getters (weekInfo, calendars, ...) are never used.
 type LocaleWithInfo = Intl.Locale & {
-  getCalendars(): string[]; getNumberingSystems(): string[];
+  getCalendars(): string[];
+  getNumberingSystems(): string[];
   getWeekInfo(): { firstDay: number; weekend: number[] };
 };
 const withInfo = (locale: string) => new Intl.Locale(locale) as LocaleWithInfo;
@@ -29,7 +46,10 @@ const withInfo = (locale: string) => new Intl.Locale(locale) as LocaleWithInfo;
  */
 export function formatLocale(locale: Locale): string {
   const tag = withInfo(locale);
-  return new Intl.Locale(locale, { calendar: tag.getCalendars()[0], numberingSystem: tag.getNumberingSystems()[0] }).toString();
+  return new Intl.Locale(locale, {
+    calendar: tag.getCalendars()[0],
+    numberingSystem: tag.getNumberingSystems()[0],
+  }).toString();
 }
 
 export function localeInfo(locale: Locale): LocaleInfo {
@@ -38,11 +58,15 @@ export function localeInfo(locale: Locale): LocaleInfo {
   const { firstDay, weekend } = tag.getWeekInfo();
   const { region, currency, counts } = ownValues(locale);
   return {
-    calendar, otherCalendars,
+    calendar,
+    otherCalendars,
     numberingSystem: tag.getNumberingSystems()[0],
     hourCycle: new Intl.DateTimeFormat(formatLocale(locale), { hour: 'numeric' }).resolvedOptions().hourCycle ?? 'h23',
-    firstDay, weekend,
-    region, currency, counts,
+    firstDay,
+    weekend,
+    region,
+    currency,
+    counts,
   };
 }
 
@@ -59,5 +83,7 @@ export function weekOrder(firstDay: number): number[] {
 
 /** The words of `text` as this language divides them (Intl.Segmenter), for languages written without spaces too. */
 export function words(locale: Locale, text: string): string[] {
-  return [...new Intl.Segmenter(locale, { granularity: 'word' }).segment(text)].filter(part => part.isWordLike).map(part => part.segment);
+  return [...new Intl.Segmenter(locale, { granularity: 'word' }).segment(text)]
+    .filter((part) => part.isWordLike)
+    .map((part) => part.segment);
 }

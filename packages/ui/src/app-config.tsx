@@ -64,7 +64,7 @@ export type RemyApp = {
 };
 
 /** A page's title as the browser tab shows it: the page's own, then the app's name. */
-export const pageTitle = (title: string, brand?: string) => brand ? `${title} | ${brand}` : title;
+export const pageTitle = (title: string, brand?: string) => (brand ? `${title} | ${brand}` : title);
 
 let registered: RemyApp | undefined;
 

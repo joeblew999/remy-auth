@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ \"$CLAUDE_CODE_REMOTE\" = true ] || exit 0; [ -x \"$HOME/.local/share/vite-plus/bin/vp\" ] || curl -fsSL https://vite.plus | bash >/dev/null 2>&1 || exit 1; . \"$HOME/.config/vite-plus/env\" && vp env on >/dev/null && { [ -z \"$CLAUDE_ENV_FILE\" ] || echo \". \\\"$HOME/.config/vite-plus/env\\\"\" >> \"$CLAUDE_ENV_FILE\"; } && cd \"$CLAUDE_PROJECT_DIR\" && vp install --frozen-lockfile --silent && vp env current | grep -E '^ +(Version|Source|Mode)' | head -3",
+            "timeout": 900
+          }
+        ]
+      }
+    ]
+  }
+}

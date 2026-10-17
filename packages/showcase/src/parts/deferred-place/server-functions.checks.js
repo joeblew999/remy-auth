@@ -11,7 +11,7 @@ import { samples } from '@joeblew999/remy-ui/samples';
 import { collectErrors, localizedPath, checkedLocales } from '@joeblew999/remy-ui/checks';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-const isServerFn = url => new URL(url).pathname.startsWith('/_serverFn/');
+const isServerFn = (url) => new URL(url).pathname.startsWith('/_serverFn/');
 
 /** The encoded value stored under `key` anywhere in an RPC payload, to read (`.s`) or edit in place. */
 function valueNode(tree, key) {
@@ -35,27 +35,37 @@ function valueNode(tree, key) {
 export function serverFunctionChecks({ path = '/app/demo' } = {}) {
   for (const locale of checkedLocales) {
     const o = { locale };
-    test(`${locale}: the reservation server function validates again, answers in the page's language and keeps the request ID`, async ({ page }) => {
+    test(`${locale}: the reservation server function validates again, answers in the page's language and keeps the request ID`, async ({
+      page,
+    }) => {
       const errors = collectErrors(page);
       let tamper;
-      await page.route(url => isServerFn(url.href), async route => {
-        const call = route.request().postDataJSON();
-        tamper?.(call);
-        await route.continue({ postData: JSON.stringify(call) });
-      });
-      const submit = async () => (await Promise.all([
-        page.waitForResponse(response => isServerFn(response.url())),
-        page.getByRole('button', { name: m.submit({}, o), exact: true }).click(),
-      ]))[0];
+      await page.route(
+        (url) => isServerFn(url.href),
+        async (route) => {
+          const call = route.request().postDataJSON();
+          tamper?.(call);
+          await route.continue({ postData: JSON.stringify(call) });
+        },
+      );
+      const submit = async () =>
+        (
+          await Promise.all([
+            page.waitForResponse((response) => isServerFn(response.url())),
+            page.getByRole('button', { name: m.submit({}, o), exact: true }).click(),
+          ])
+        )[0];
       await page.goto(localizedPath(path, locale));
       // Another tab has since chosen another language: the answer must still follow this page, not Paraglide's cookie.
-      const other = locales.find(value => value !== locale);
+      const other = locales.find((value) => value !== locale);
       await page.context().addCookies([{ name: cookieName, value: other, url: new URL('/', page.url()).href }]);
       await page.getByLabel(m.name_label({}, o), { exact: true }).fill(samples.guest);
       await page.getByLabel(m.guests_label({}, o), { exact: true }).fill('3');
 
       // The browser accepted 3 guests; the server receives 21.
-      tamper = call => { valueNode(call, 'guests').s = 21; };
+      tamper = (call) => {
+        valueNode(call, 'guests').s = 21;
+      };
       let response = await submit();
       await expect(page.locator('#guests-error')).toHaveText(m.guests_invalid({}, o));
       await expect(page.locator('#name-error')).toHaveCount(0);
@@ -63,7 +73,9 @@ export function serverFunctionChecks({ path = '/app/demo' } = {}) {
       expect(valueNode(await response.json(), 'guests').s).toBe(m.guests_invalid({}, o));
 
       // The browser sent a name; the server receives only spaces, and trims them.
-      tamper = call => { valueNode(call, 'name').s = '   '; };
+      tamper = (call) => {
+        valueNode(call, 'name').s = '   ';
+      };
       response = await submit();
       await expect(page.locator('#name-error')).toHaveText(m.name_required({}, o));
       await expect(page.locator('#guests-error')).toHaveCount(0);
@@ -85,7 +97,9 @@ export function serverFunctionChecks({ path = '/app/demo' } = {}) {
       const malformed = response.request().postDataJSON();
       Object.assign(valueNode(malformed, 'guests'), { t: 1, s: '3' });
       const refused = await page.request.post(response.url(), {
-        headers: { 'Content-Type': 'application/json', 'x-tsr-serverFn': 'true' }, data: JSON.stringify(malformed) });
+        headers: { 'Content-Type': 'application/json', 'x-tsr-serverFn': 'true' },
+        data: JSON.stringify(malformed),
+      });
       expect(refused.status()).toBe(400);
       expect(refused.headers()['x-request-id']).toMatch(uuid);
       expect(refused.headers()['x-request-id']).not.toBe(id);

@@ -11,14 +11,30 @@ export const Route = createRootRoute({
   }),
   shellComponent: Document,
   component: Outlet,
-  notFoundComponent: () => <main className="p-8"><h1 className="text-2xl font-semibold">Page not found</h1><p className="mt-2"><a className="underline" href="/docs">The docs</a></p></main>,
+  notFoundComponent: () => (
+    <main className="p-8">
+      <h1 className="text-2xl font-semibold">Page not found</h1>
+      <p className="mt-2">
+        <a className="underline" href="/docs">
+          The docs
+        </a>
+      </p>
+    </main>
+  ),
 });
 
 function Document({ children }: { children: React.ReactNode }) {
-  const lang = docsLangOfPath(useRouterState({ select: state => state.location.pathname }))?.lang ?? 'en';
+  const lang = docsLangOfPath(useRouterState({ select: (state) => state.location.pathname }))?.lang ?? 'en';
   const dir = ['ar', 'fa', 'he', 'ur'].includes(lang) ? 'rtl' : 'ltr';
-  return <html lang={lang} dir={dir} suppressHydrationWarning>
-    <head><HeadContent /></head>
-    <body>{children}<Scripts /></body>
-  </html>;
+  return (
+    <html lang={lang} dir={dir} suppressHydrationWarning>
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        {children}
+        <Scripts />
+      </body>
+    </html>
+  );
 }

@@ -14,13 +14,22 @@ export function Mermaid({ chart }: { chart: string }) {
     if (import.meta.env.SSR) return;
     void import('mermaid').then(async ({ default: mermaid }) => {
       const dark = document.documentElement.classList.contains('dark');
-      mermaid.initialize({ startOnLoad: false, securityLevel: 'loose', fontFamily: 'inherit', theme: dark ? 'dark' : 'default' });
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: 'loose',
+        fontFamily: 'inherit',
+        theme: dark ? 'dark' : 'default',
+      });
       const { svg } = await mermaid.render(id.replaceAll(':', ''), chart.replaceAll('\\n', '\n'));
       if (!cancelled) setSvg(svg);
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [chart, id, theme]);
-  return svg
-    ? <div className="my-6 flex justify-center" dangerouslySetInnerHTML={{ __html: svg }} />
-    : <pre className="my-6 overflow-x-auto rounded-lg border p-4 text-sm">{chart}</pre>;
+  return svg ? (
+    <div className="my-6 flex justify-center" dangerouslySetInnerHTML={{ __html: svg }} />
+  ) : (
+    <pre className="my-6 overflow-x-auto rounded-lg border p-4 text-sm">{chart}</pre>
+  );
 }

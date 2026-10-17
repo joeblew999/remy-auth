@@ -6,8 +6,8 @@ Status: proposed 2026-10-10. Not started. Owner: remy-auth.
 Comes from [cedar-research.md](cedar-research.md), the comparison of Better Auth and Rauthy with Cedar.
 The owner delegated the design ("The plan should be for what you think is best", 2026-10-10). Decisions are under
 [Decisions](#decisions-delegated-2026-10-10); the three things only the owner can settle are under [For the owner](#for-the-owner).
-Executor/Reviewer roles as in [plans and roles](../docs/content/dev/principles.md#plans-and-roles). Each slice lands
-through [the flow](../docs/content/dev/how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
+Executor/Reviewer roles as in [plans and roles](../apps/docs/content/dev/principles.md#plans-and-roles). Each slice lands
+through [the flow](../apps/docs/content/dev/how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
 
 ## In one paragraph
 
@@ -105,7 +105,7 @@ one query per relation, the same cost `canFor` pays today.
 
 ## What remy-auth itself shows
 
-Every piece is used by remy-auth before any app takes it ([the four-places rule](../docs/content/dev/auth.md#adding-to-it)).
+Every piece is used by remy-auth before any app takes it ([the four-places rule](../apps/docs/content/dev/auth.md#adding-to-it)).
 
 | Piece | Shown in remy-auth | Checked by |
 | --- | --- | --- |
@@ -113,7 +113,7 @@ Every piece is used by remy-auth before any app takes it ([the four-places rule]
 | A deny with a reason | A locked note: Edit is missing and the page says why. An excluded person: the note shared with their group is not theirs | `tests/notes.spec.ts`: the reason in the 403 and in `can`; `offeredActions` still exact |
 | A rule about the sign-in | Deleting a note after 15 minutes asks for a fresh sign-in | `tests/notes.spec.ts`, with a session older than the limit |
 | The shared GUI | `<Allowed>` with `reason`; the account page shows when and how you signed in (the facts policies read) | The page's `offeredActions` check; `tests/auth.spec.ts` |
-| The docs | [Sign-in and permissions](../docs/content/dev/auth.md) gains "Rules: Cedar" with the five steps, and the contract for other languages | `docs:check`; the `remy` skill reads it |
+| The docs | [Sign-in and permissions](../apps/docs/content/dev/auth.md) gains "Rules: Cedar" with the five steps, and the contract for other languages | `docs:check`; the `remy` skill reads it |
 | Any app gets it | The consumer fixture, a blank app that only imports the package, keeps a policy file and its tests | The fixture's `project:check` |
 | The deploy | On staging and production, with the stamp | `project:test:live` |
 

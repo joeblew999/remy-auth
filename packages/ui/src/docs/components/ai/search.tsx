@@ -51,9 +51,7 @@ export function AISearchPanelHeader({ className, ...props }: ComponentProps<'div
       {/* Adapted: named like the button that opens it, and a Close button people can see and reach by keyboard. */}
       <div className="px-3 py-2 flex-1">
         <p className="text-sm font-medium mb-1">Ask AI</p>
-        <p className="text-xs text-fd-muted-foreground">
-          AI can be inaccurate, please verify the answers.
-        </p>
+        <p className="text-xs text-fd-muted-foreground">AI can be inaccurate, please verify the answers.</p>
       </div>
 
       <button
@@ -324,9 +322,7 @@ export function AISearch({ children, api = '/api/chat' }: { children: ReactNode;
     transport: new DefaultChatTransport({ api }),
   });
 
-  return (
-    <Context value={useMemo(() => ({ chat, open, setOpen }), [chat, open])}>{children}</Context>
-  );
+  return <Context value={useMemo(() => ({ chat, open, setOpen }), [chat, open])}>{children}</Context>;
 }
 
 export function AISearchTrigger({
@@ -424,7 +420,12 @@ export function AISearchPanel() {
   );
 }
 
-export function AISearchPanelList({ className, style, empty = 'Start a new chat below.', ...props }: ComponentProps<'div'> & { empty?: string }) {
+export function AISearchPanelList({
+  className,
+  style,
+  empty = 'Start a new chat below.',
+  ...props
+}: ComponentProps<'div'> & { empty?: string }) {
   const chat = useChatContext();
   const messages = chat.messages.filter((msg) => msg.role !== 'system');
 
@@ -432,8 +433,7 @@ export function AISearchPanelList({ className, style, empty = 'Start a new chat 
     <List
       className={cn('py-4 overscroll-contain', className)}
       style={{
-        maskImage:
-          'linear-gradient(to bottom, transparent, white 1rem, white calc(100% - 1rem), transparent 100%)',
+        maskImage: 'linear-gradient(to bottom, transparent, white 1rem, white calc(100% - 1rem), transparent 100%)',
         ...style,
       }}
       {...props}
@@ -447,9 +447,7 @@ export function AISearchPanelList({ className, style, empty = 'Start a new chat 
         <div className="flex flex-col px-3 gap-4">
           {chat.error && (
             <div className="p-2 bg-fd-secondary text-fd-secondary-foreground border rounded-lg">
-              <p className="text-xs text-fd-muted-foreground mb-1">
-                Request Failed: {chat.error.name}
-              </p>
+              <p className="text-xs text-fd-muted-foreground mb-1">Request Failed: {chat.error.name}</p>
               <p className="text-sm">{chat.error.message}</p>
             </div>
           )}

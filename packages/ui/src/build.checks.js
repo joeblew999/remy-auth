@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 
 // What a Worker built on the package says it is (worker.ts's /healthz, build-vite.js's stamp). In a
 // module of its own, with nothing of the app's pages in it, so the docs Worker's checks run it too.
@@ -22,7 +22,9 @@ function head() {
  * commit: a stamp left over from an earlier build fails here (remy-sport shipped one for weeks).
  */
 export function buildChecks({ service }) {
-  test(`/healthz says which deployment of ${service} answered: its environment and the build it was made from`, async ({ request }) => {
+  test(`/healthz says which deployment of ${service} answered: its environment and the build it was made from`, async ({
+    request,
+  }) => {
     const response = await request.get('/healthz');
     expect(response.status()).toBe(200);
     // It names nobody, and another deployment's page may read it to show what is deployed.
@@ -38,7 +40,15 @@ export function buildChecks({ service }) {
     expect(Object.keys(build.packages)).toContain('@joeblew999/remy-ui');
     for (const [name, version] of Object.entries(build.packages)) expect(version, name).toMatch(/^\d+\.\d+\.\d+/);
     if (local) {
-      expect(build.commit, 'the build under test was made from this checkout').toBe(head());
+      // This checkout's commit, or one before it: Vite Plus replays a build while nothing it reads has changed since.
+      // A stamp from elsewhere (another branch, a build that outlived its checkout) is neither.
+      // A local build names no commit (build-vite.js: only a deploy gives it one); one that does names this checkout's.
+      const commit = head();
+      if (commit && build.commit && build.commit !== commit)
+        expect(
+          spawnSync('git', ['merge-base', '--is-ancestor', build.commit, commit]).status,
+          `the build under test (${build.commit}) was made from this checkout (${commit}) or a commit before it`,
+        ).toBe(0);
     } else {
       // A deployment is a version Cloudflare knows, with the time it was given it.
       expect(body.release).toMatch(uuid);

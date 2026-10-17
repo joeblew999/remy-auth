@@ -1,17 +1,18 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cloudflare } from '@cloudflare/vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import viteReact from '@vitejs/plugin-react';
-import { defineConfig,                 } from 'vite';
+import { defineConfig } from 'vite';
 import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import remarkDirective from 'remark-directive';
 import { remarkUiWords } from './remark-ui-words.js';
 import { remarkAutoTypeTable } from 'fumadocs-typescript';
 import { remarkDirectiveAdmonition, remarkMdxMermaid, remarkSteps } from 'fumadocs-core/mdx-plugins';
 import { remyBuild } from '../build-vite.js';
+import { docsApp, network, platformGenerate, stampEnv, workspaceOf } from '../tasks.js';
 
 // An app's whole docs Worker from its docs.config.ts (.plans/thin-apps.md, group 2): its docs/vite.config.ts
 // is `export default remyDocs(docsConfig, { contract: '<its contract package>' })`. The Worker itself is this
@@ -28,10 +29,13 @@ const packageDocs = fileURLToPath(new URL('.', import.meta.url));
 /** The Worker's Cloudflare configuration: its name, the assets, observability and, when the app has Ask AI, its bindings. */
 export function docsWorkerConfig(docsConfig, srcDirectory) {
   const { ask } = docsConfig;
-  const askBindings = (remote) => ask ? {
-    ai_search: [{ binding: 'DOCS_SEARCH', instance_name: ask.instance, ...(remote ? { remote: true } : {}) }],
-    ratelimits: [{ name: 'ASK_LIMIT', namespace_id: ask.rateLimitNamespace, simple: { limit: 10, period: 60 } }],
-  } : {};
+  const askBindings = (remote) =>
+    ask
+      ? {
+          ai_search: [{ binding: 'DOCS_SEARCH', instance_name: ask.instance, ...(remote ? { remote: true } : {}) }],
+          ratelimits: [{ name: 'ASK_LIMIT', namespace_id: ask.rateLimitNamespace, simple: { limit: 10, period: 60 } }],
+        }
+      : {};
   return {
     name: docsConfig.service,
     compatibility_date: '2026-09-24',
@@ -42,8 +46,18 @@ export function docsWorkerConfig(docsConfig, srcDirectory) {
     assets: { directory: './dist/client' },
     preview_urls: false,
     ...askBindings(false),
-    // Working on answers (CLOUDFLARE_ENV=ask npm run docs -- dev): the same Worker locally, AI Search remote. Never deployed.
-    ...(ask ? { env: { ask: { vars: { ENVIRONMENT: 'docs' }, version_metadata: { binding: 'CF_VERSION_METADATA' }, ...askBindings(true) } } } : {}),
+    // Working on answers (CLOUDFLARE_ENV=ask vp -C docs dev): the same Worker locally, AI Search remote. Never deployed.
+    ...(ask
+      ? {
+          env: {
+            ask: {
+              vars: { ENVIRONMENT: 'docs' },
+              version_metadata: { binding: 'CF_VERSION_METADATA' },
+              ...askBindings(true),
+            },
+          },
+        }
+      : {}),
     observability: {
       enabled: true,
       redact_query_string: true,
@@ -51,6 +65,13 @@ export function docsWorkerConfig(docsConfig, srcDirectory) {
       traces: { enabled: true, persist: true, head_sampling_rate: 1 },
     },
   };
+}
+
+/** The docs package's folder from its repository's root (the nearest folder above it with a .git): docs, apps/docs. */
+function repositoryFolder(root) {
+  for (let dir = resolve(root); dir !== dirname(dir); dir = dirname(dir))
+    if (existsSync(join(dir, '.git'))) return relative(dir, resolve(root)) || '.';
+  return 'docs';
 }
 
 /**
@@ -62,12 +83,49 @@ export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
   const api = Boolean(contract);
   const app = root.endsWith('/') ? root : `${root}/`;
   const srcDirectory = relative(root, packageDocs).replace(/\/$/, '');
+  // Written while this configuration is evaluated, because Cloudflare's plugin reads wrangler.json then, before any
+  // task could make it; each file only when its text changed, so loading the configuration rewrites nothing.
   const generated = join(root, '.remy-docs');
   mkdirSync(generated, { recursive: true });
-  writeFileSync(join(generated, 'collections.ts'), readFileSync(join(packageDocs, 'lib/collections.source.ts'), 'utf8'));
-  writeFileSync(join(generated, 'app.json'), `${JSON.stringify({ api })}\n`);
-  writeFileSync(join(generated, 'wrangler.json'), `${JSON.stringify({ ...docsWorkerConfig(docsConfig, `../${srcDirectory}`), assets: { directory: '../dist/client' } }, null, 2)}\n`);
+  const write = (name, text) => {
+    const file = join(generated, name);
+    if (!existsSync(file) || readFileSync(file, 'utf8') !== text) writeFileSync(file, text);
+  };
+  write('collections.ts', readFileSync(join(packageDocs, 'lib/collections.source.ts'), 'utf8'));
+  write('app.json', `${JSON.stringify({ api })}\n`);
+  write(
+    'wrangler.json',
+    `${JSON.stringify({ ...docsWorkerConfig(docsConfig, `../${srcDirectory}`), assets: { directory: '../dist/client' } }, null, 2)}\n`,
+  );
+  const workspace = workspaceOf(root);
   return defineConfig({
+    // The docs package's Vite Plus tasks. Its generated files (.remy-docs/, above) are written when this configuration
+    // is loaded, which every vp command does; generate adds the Worker's binding types. build is the production build,
+    // which proves every page compiles, translations included. What each writes is its output, never its input.
+    run: {
+      tasks: {
+        generate: {
+          command: 'wrangler types -c .remy-docs/wrangler.json',
+          dependsOn: workspace ? platformGenerate(workspace) : [],
+          cache: { input: [{ auto: true }, '!worker-configuration.d.ts'] },
+        },
+        // Its folder emptied first: a cache hit restores the build over what is there and removes nothing.
+        clean: {
+          command: `node -e "require('node:fs').rmSync('dist', { recursive: true, force: true })"`,
+          cache: false,
+        },
+        build: {
+          command: 'vp build',
+          dependsOn: ['generate', 'clean'],
+          cache: {
+            input: [{ auto: true }, '!.remy-docs/**', '!dist/**', '!.wrangler/**'],
+            output: ['dist/**'],
+            env: stampEnv,
+            untrackedEnv: network,
+          },
+        },
+      },
+    },
     plugins: [
       // What this build is (`virtual:remy-build`): the docs Worker's /healthz answers with it, as an app's does.
       remyBuild({ root }),
@@ -77,7 +135,11 @@ export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
         name: 'remy-docs-headers',
         generateBundle() {
           if (this.environment?.name !== 'client') return;
-          this.emitFile({ type: 'asset', fileName: '_headers', source: '/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n' });
+          this.emitFile({
+            type: 'asset',
+            fileName: '_headers',
+            source: '/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n',
+          });
         },
       },
       // Fumadocs MDX compiles content/ for the collections (.remy-docs/collections.ts); before Start's plugin.
@@ -85,13 +147,26 @@ export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
       // Paraglide catalog: remark-ui-words.js), callouts (:::note), Mermaid
       // (```mermaid), type tables from TypeScript (<auto-type-table>) and steps. GitHub's "default" code
       // themes keep 4.5:1 comment contrast on both backgrounds, which Lighthouse's accessibility audit requires.
-      fumadocsMdx({ macro: { include: ['**/.remy-docs/collections.ts'] }, globalOptions: { mdxOptions: {
-        remarkPlugins: plugins => [remarkDirective, remarkUiWords({ root: join(root, '..') }), remarkDirectiveAdmonition, remarkMdxMermaid, remarkAutoTypeTable, ...plugins, remarkSteps],
-        rehypeCodeOptions: { themes: { light: 'github-light-default', dark: 'github-dark-default' } },
-        // Pictures and videos live in public/media and are referenced by URL (Fumadocs' stock option), so the
-        // Markdown that llms.txt, the .md pages and MCP serve keeps their real addresses.
-        remarkImageOptions: { useImport: false, publicDir: 'public' },
-      } } }),
+      fumadocsMdx({
+        macro: { include: ['**/.remy-docs/collections.ts'] },
+        globalOptions: {
+          mdxOptions: {
+            remarkPlugins: (plugins) => [
+              remarkDirective,
+              remarkUiWords({ root: docsApp(root) }),
+              remarkDirectiveAdmonition,
+              remarkMdxMermaid,
+              remarkAutoTypeTable,
+              ...plugins,
+              remarkSteps,
+            ],
+            rehypeCodeOptions: { themes: { light: 'github-light-default', dark: 'github-dark-default' } },
+            // Pictures and videos live in public/media and are referenced by URL (Fumadocs' stock option), so the
+            // Markdown that llms.txt, the .md pages and MCP serve keeps their real addresses.
+            remarkImageOptions: { useImport: false, publicDir: 'public' },
+          },
+        },
+      }),
       cloudflare({ viteEnvironment: { name: 'ssr' }, configPath: join(generated, 'wrangler.json') }),
       tailwindcss(),
       tanstackStart({ srcDirectory, server: { build: { inlineCss: true } } }),
@@ -104,7 +179,7 @@ export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
         { find: /^@remy-docs-app\//, replacement: app },
       ],
     },
-    define: { __REMY_DOCS_API__: JSON.stringify(api) },
+    define: { __REMY_DOCS_API__: JSON.stringify(api), __REMY_DOCS_FOLDER__: JSON.stringify(repositoryFolder(root)) },
     server: { host: '127.0.0.1', port: 5174, strictPort: true },
   });
 }

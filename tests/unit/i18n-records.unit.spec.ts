@@ -1,12 +1,24 @@
-import { test, expect } from '@playwright/test';
-import { changedSections, madeFrom, splice, pagePrints, print, sections, staleKeys, withRecord, withoutRecord } from '../../packages/ui/src/cli/i18n';
+import { test, expect } from 'vite-plus/test';
+import {
+  changedSections,
+  madeFrom,
+  splice,
+  pagePrints,
+  print,
+  sections,
+  staleKeys,
+  withRecord,
+  withoutRecord,
+} from '../../packages/ui/src/cli/i18n';
 
 // Each translation records what it was made from (i18n.ts): staleness is the record against the English,
 // with no git history, so a Mac, a cloud agent and GitHub's shallow checkout agree; and the record names
 // the sections to translate again, so a one-line change is not a whole page (owner, 2026-10-17).
 
-const english = '---\ntitle: "Guide"\n---\n\nIntro.\n\n## One\n\nFirst.\n\n```md\n## not a heading\n```\n\n## Two\n\nSecond.\n';
-const spanish = '---\ntitle: "Guía"\n---\n\nIntroducción.\n\n## Uno\n\nPrimero.\n\n```md\n## not a heading\n```\n\n## Dos\n\nSegundo.\n';
+const english =
+  '---\ntitle: "Guide"\n---\n\nIntro.\n\n## One\n\nFirst.\n\n```md\n## not a heading\n```\n\n## Two\n\nSecond.\n';
+const spanish =
+  '---\ntitle: "Guía"\n---\n\nIntroducción.\n\n## Uno\n\nPrimero.\n\n```md\n## not a heading\n```\n\n## Dos\n\nSegundo.\n';
 
 test('a page splits at its ## headings, never inside fenced code', () => {
   expect(sections(english)).toHaveLength(3);
@@ -40,7 +52,11 @@ test('a catalog key is stale when its English differs from its record, or it has
 
 test('a spliced section keeps the blank line before the next heading (it was lost on 2026-10-17)', () => {
   const recorded = withRecord(spanish, pagePrints(english));
-  const result = splice(english, recorded, new Map([[1, '## Uno\n\nPrimero, otra vez.\n\n```md\n## not a heading\n```']]));
+  const result = splice(
+    english,
+    recorded,
+    new Map([[1, '## Uno\n\nPrimero, otra vez.\n\n```md\n## not a heading\n```']]),
+  );
   expect(result).toBe(spanish.replace('Primero.', 'Primero, otra vez.'));
   expect(sections(result)).toHaveLength(3);
 });
@@ -50,5 +66,9 @@ test("a docs menu's words are its title and its separators' and links' labels, p
   const menu = { title: 'Remy product guide', pages: ['index', '---Help---', 'faq', '[API reference](/reference)'] };
   expect(menuWords(menu)).toEqual({ title: 'Remy product guide', 'pages.1': 'Help', 'pages.3': 'API reference' });
   const spanish = menuIn(menu, { title: 'Guía de Remy', 'pages.1': 'Ayuda', 'pages.3': 'Referencia de la API' });
-  expect(spanish).toEqual({ title: 'Guía de Remy', pages: ['index', '---Ayuda---', 'faq', '[Referencia de la API](/reference)'], translatedFrom: print(menuWords(menu)) });
+  expect(spanish).toEqual({
+    title: 'Guía de Remy',
+    pages: ['index', '---Ayuda---', 'faq', '[Referencia de la API](/reference)'],
+    translatedFrom: print(menuWords(menu)),
+  });
 });

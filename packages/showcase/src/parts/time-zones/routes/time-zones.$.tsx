@@ -15,11 +15,14 @@ export const Route = createFileRoute('/time-zones/$')({
     if (zone !== params._splat) throw redirect({ to: '/time-zones/$', params: { _splat: zone }, statusCode: 301 });
     return { zone };
   },
-  head: ({ loaderData }) => loaderData ? pageHead({
-    path: timeZonePath(loaderData.zone),
-    title: locale => timeZoneName(locale, loaderData.zone, 'longGeneric'),
-    description: locale => m.zone_description({}, { locale }),
-  }) : {},
+  head: ({ loaderData }) =>
+    loaderData
+      ? pageHead({
+          path: timeZonePath(loaderData.zone),
+          title: (locale) => timeZoneName(locale, loaderData.zone, 'longGeneric'),
+          description: (locale) => m.zone_description({}, { locale }),
+        })
+      : {},
   notFoundComponent: MissingZone,
   errorComponent: ErrorPage,
   component: TimeZone,

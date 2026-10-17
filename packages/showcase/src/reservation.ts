@@ -21,7 +21,8 @@ function digitMap() {
     const format = new Intl.NumberFormat('en', { numberingSystem: system, useGrouping: false });
     const digits = Array.from({ length: 10 }, (_, digit) => format.format(digit));
     // Decimal systems only: one character per digit (algorithmic systems such as Roman numerals are left out).
-    if (digits.every(digit => [...digit].length === 1)) digits.forEach((digit, value) => nativeDigits!.set(digit, String(value)));
+    if (digits.every((digit) => Array.from(digit).length === 1))
+      digits.forEach((digit, value) => nativeDigits!.set(digit, String(value)));
   }
   return nativeDigits;
 }
@@ -29,7 +30,7 @@ function digitMap() {
 /** `text` with every native digit replaced by its ASCII digit, so "۱۲" and "١٢" read as "12". */
 export function asciiDigits(text: string): string {
   const map = digitMap();
-  return [...text].map(character => map.get(character) ?? character).join('');
+  return Array.from(text, (character) => map.get(character) ?? character).join('');
 }
 
 /**
@@ -42,8 +43,9 @@ export function reservationSchema(locale: Locale) {
   const guests = m.guests_invalid({}, o);
   return z.object({
     name: z.string().trim().min(1, m.name_required({}, o)),
-    guests: z.union([z.number(), z.string().transform(asciiDigits)]).pipe(
-      z.coerce.number<string | number>({ error: guests }).int(guests).min(1, guests).max(20, guests)),
+    guests: z
+      .union([z.number(), z.string().transform(asciiDigits)])
+      .pipe(z.coerce.number<string | number>({ error: guests }).int(guests).min(1, guests).max(20, guests)),
   });
 }
 

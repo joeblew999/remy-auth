@@ -1,0 +1,143 @@
+---
+title: "Writing docs"
+description: "How a Remy app's docs are laid out and written with Fumadocs: folders, frontmatter, media, components, translations and the CLI."
+---
+
+Every Remy app keeps its docs the same way, so the shared tasks and the Fumadocs CLI work in each one.
+There are two docs sites, served by the docs Worker (the `docs/` app, apart from the app Worker): the guide
+for the app's users at `/docs`, and these developer docs at `/dev`.
+Each has its own languages, search, `llms.txt` and Ask AI folder.
+
+## Who each part is for
+
+The docs have three parts, and each is written from one reader's side. Google's AI Mode, Gemini and every
+other assistant tell them apart only by what the pages say, so keep them apart:
+
+| Part | Reader | Writes about | Never |
+| --- | --- | --- | --- |
+| Product guide, `content/users/` (`/docs`) | someone using the app | what they see and do in the app | code, tools, the repository, deploys |
+| Developer docs, `content/dev/` (`/dev`) | a developer building Remy or an app on it | code, tasks, tools, rules | how to use the app, beyond a link to the guide |
+| API reference (`/reference`) | a developer calling the API | endpoints, generated from the contract | prose; it is generated |
+
+- A page that needs the other side links to it in one line ("Building it? The developer docs.").
+- Each part's home page opens by saying who it is for; its titles end with the part's name (`docs.config.ts`,
+  `titles`), and so do its `llms.txt` and MCP server ([Docs in your AI tools](./ai-tools.md)).
+- The parts, their readers, llms files and MCP servers are one list, `src/lib/sections.ts`.
+
+## Layout
+
+<Files>
+  <Folder name="docs/content" defaultOpen>
+    <Folder name="users" defaultOpen>
+      <File name="i18n.json" />
+      <File name="meta.json" />
+      <File name="index.mdx" />
+      <File name="formats.mdx" />
+    </Folder>
+    <Folder name="dev">
+      <File name="i18n.json" />
+      <File name="meta.json" />
+      <File name="index.md" />
+      <File name="index.es.md" />
+      <File name="writing-docs.mdx" />
+    </Folder>
+  </Folder>
+</Files>
+
+- `i18n.json` is the site's languages: `defaultLanguage` and `languages`. The site's URLs, language menu,
+  search and translation tasks all read it. The two sites' lists differ: developer docs are translated
+  only into the languages we support developers in.
+- `meta.json` is the site's navigation: `pages` sets the order, `"---Heading---"` starts a section,
+  `"[Title](https://…)"` is a link out.
+- A translation sits beside its page: `index.es.md` beside `index.md`, at `/dev/es/`.
+- The guide's pictures and videos are in `docs/public/media`, referenced by URL (`/media/formats.png`); the developer docs have Mermaid diagrams and type tables;
+  the API reference is its own section at `/reference`, made from the oRPC contract.
+
+## How a page reaches the reader
+
+```mermaid
+flowchart LR
+  A["docs/content/*.md, *.mdx"] --> B["fumadocs-mdx macro"]
+  B --> C["loader: src/lib/source.ts"]
+  C --> D["Docs pages: /docs, /dev"]
+  C --> E["Search: /api/search/dev"]
+  C --> F["/dev/llms.txt and .md pages"]
+  C --> G["MCP server: /api/mcp/dev"]
+  C --> H["Social images: /og/dev/..."]
+  I["oRPC contract"] --> J["fumadocs-openapi"] --> K["API reference: /reference"]
+```
+
+## Frontmatter
+
+Every page starts with a title and a description. The description is the page's summary in search
+results, `llms.txt` and link previews.
+
+```md title="docs/content/users/formats.mdx"
+---
+title: "Formats"
+description: "How dates, numbers, currency and direction change with the language you choose."
+---
+```
+
+## The app's own words
+
+A page that names something in the app (a page, a button, a menu) writes `:ui[key]`, the key of that word in the
+app's Paraglide catalog (`packages/ui/messages/en.json`, or the app's own `messages/en.json`), never the word itself:
+`Open **:ui[nav_notes]** from the menu` reads "Open **Notes** from the menu" on an English page and "Notas" on a
+Spanish one. The word is filled in when the docs build (`remark-ui-words.js` in the docs Worker), so the site,
+each page's `.md` and `llms.txt` carry it; a key the catalog does not have stops the build. Rename a label in
+the catalog and the guide follows; the translator keeps the markers as they are.
+
+## Pictures and videos
+
+:::note
+Take them with the project's own tool, so they show the real app:
+`npx remy shots /formats --out docs/public/media` for a picture, and add `--video`
+for a short recording of the page.
+:::
+
+<Tabs items={['Picture', 'Video']}>
+  <Tab value="Picture">
+    ```md
+    ![The Formats page in English](/media/formats.png)
+    ```
+    Fumadocs sizes it, and a click enlarges it.
+  </Tab>
+  <Tab value="Video">
+    ```mdx
+    <video src="/media/formats-tour.webm" controls muted playsInline preload="metadata" />
+    ```
+    A video needs an `.mdx` page (it is a JSX element).
+  </Tab>
+</Tabs>
+
+## Components
+
+A page is `.md` (plain, read the same on the site, by an agent and in the `remy` skill) unless it uses a component,
+then `.mdx` (the site alone reads those). Nobody picks: `vp run check` renames a page, its translations and
+the links to it when its content needs the other ending.
+
+In `.mdx` pages: `<Callout>` (or `:::note`, `:::warning` in any page), `<Cards>` and `<Card>`, `<Tabs>`
+and `<Tab>`, `<Steps>` and `<Step>`, `<Accordions>` and `<Accordion>`, `<Files>`, `<Folder>` and
+`<File>`, a ` ```mermaid ` diagram, and a type table read from our TypeScript:
+
+<auto-type-table path="../../../../node_modules/@joeblew999/remy-ui/src/docs/docs/source.server.ts" name="DocsPageData" />
+
+## The Fumadocs CLI
+
+`vp run docs:cli feature <name>` (remy-auth only) runs the pinned Fumadocs CLI in the shared docs
+Worker, `packages/ui/src/docs`; its `cli.json` maps the folders there, and what it writes is a change to
+the package, reviewed like any other. Apps take the Worker from the package and never run it.
+
+| Feature | What it gave this site |
+| --- | --- |
+| `llms` | `/<site>/llms.txt`, `/<site>/<lang>/llms-full.txt`, `/<site>/<lang>/<page>.md` |
+| `mcp` | an MCP server per part, `/api/mcp/docs`, `/api/mcp/dev`, `/api/mcp/reference` ([Docs in your AI tools](./ai-tools.md)) |
+| `og` | a social image per page |
+| `webmcp` | the docs as tools for agents in the browser |
+
+## Translations
+
+Write English only. `vp run land` translates what your change made stale, in the same commit
+([translations: in the change](./how-we-work.md#translations-in-the-change)); `npx remy i18n check docs` lists what each
+language still needs.

@@ -1,28 +1,21 @@
 {
+  "//": "The workspace's TypeScript: the packages, the unit checks, the root's scripts and configs. The shared package's routing is typed by an app's registered routes, so the app's route tree and router come in (they bring the routes' modules). Each app has its own project too (apps/*/tsconfig.json), which Vite Plus's type check uses for the app's files.",
   "include": [
-    "src/**/*",
-    "tests/**/*",
     "packages/ui/src/**/*",
     "packages/showcase/src/**/*",
     "packages/contract/src/**/*",
+    "tests/**/*",
+    "scripts/**/*",
     "*.ts",
-    "worker-configuration.d.ts"
+    "packages/*/*.ts",
+    "apps/remy-auth/worker-configuration.d.ts",
+    "apps/remy-auth/src/routeTree.gen.ts",
+    "apps/remy-auth/src/router.tsx"
   ],
-  "exclude": [
-    "packages/ui/src/parts/*/routes",
-    "packages/showcase/src/parts/*/routes",
-    "packages/ui/src/docs"
-  ],
+  "exclude": ["packages/ui/src/docs"],
   "compilerOptions": {
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ES2022"
-    ],
-    "types": [
-      "vite/client",
-      "node"
-    ],
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "types": ["vite/client", "node"],
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",
@@ -33,10 +26,6 @@
     "skipLibCheck": true,
     "noEmit": true,
     "allowImportingTsExtensions": true,
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    }
+    "moduleDetection": "force"
   }
 }

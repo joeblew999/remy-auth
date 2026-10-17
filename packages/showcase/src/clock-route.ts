@@ -11,7 +11,9 @@ export const clockDefaults = { zones: 'Europe/London,Asia/Tokyo' };
  * schema: full Zod probes eval, which the Content-Security-Policy forbids, and it loads with every page.
  */
 export const clockRouteOptions = {
-  validateSearch: (search: Record<string, unknown>) => ({ zones: typeof search.zones === 'string' ? search.zones : clockDefaults.zones }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    zones: typeof search.zones === 'string' ? search.zones : clockDefaults.zones,
+  }),
 };
 
 /** The zones in a validated search, as a list. */

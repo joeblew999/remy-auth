@@ -1,7 +1,17 @@
 import type { LocationRewrite } from '@tanstack/react-router';
 import { paraglideMiddleware } from './paraglide/server.js';
-import { deLocalizeUrl, localizeUrl, getLocale, getUrlOrigin, extractLocaleFromUrl, extractLocaleFromRequest,
-  extractLocaleFromRequestWithStrategies, extractLocaleFromCookie, shouldRedirect, type Locale } from './paraglide/runtime.js';
+import {
+  deLocalizeUrl,
+  localizeUrl,
+  getLocale,
+  getUrlOrigin,
+  extractLocaleFromUrl,
+  extractLocaleFromRequest,
+  extractLocaleFromRequestWithStrategies,
+  extractLocaleFromCookie,
+  shouldRedirect,
+  type Locale,
+} from './paraglide/runtime.js';
 import { preferredFromHeader, preferredFromNavigator } from './matching.js';
 import { alternates } from './seo';
 import { withObservability } from './worker';
@@ -34,24 +44,32 @@ type StartFetch = (request: Request) => Response | Promise<Response>;
  * functions. Un-localized entry URLs (`entryPaths`) answer 302 to the visitor's language for
  * every other request type too, varying on Accept-Language and Cookie. HTML is never cached.
  */
-export function localizedWorker<E extends ObservedEnv>(service: string, start: { fetch: StartFetch },
-  { entryPaths }: { entryPaths: readonly string[] }) {
-  return withObservability<E>(service, request => withReplicas(request, () => paraglideMiddleware(request, async () => {
-    const entry = await entryRedirect(request, entryPaths);
-    if (entry) return entry;
-    const response = await start.fetch(request);
-    if (!response.headers.get('Content-Type')?.includes('text/html') || response.headers.has('Cache-Control')) return response;
-    const out = new Response(response.body, response);
-    out.headers.set('Cache-Control', 'no-store');
-    return out;
-  })));
+export function localizedWorker<E extends ObservedEnv>(
+  service: string,
+  start: { fetch: StartFetch },
+  { entryPaths }: { entryPaths: readonly string[] },
+) {
+  return withObservability<E>(service, (request) =>
+    withReplicas(request, () =>
+      paraglideMiddleware(request, async () => {
+        const entry = await entryRedirect(request, entryPaths);
+        if (entry) return entry;
+        const response = await start.fetch(request);
+        if (!response.headers.get('Content-Type')?.includes('text/html') || response.headers.has('Cache-Control'))
+          return response;
+        const out = new Response(response.body, response);
+        out.headers.set('Cache-Control', 'no-store');
+        return out;
+      }),
+    ),
+  );
 }
 
 /** A 302 to Paraglide's localized URL for an un-localized entry path, or undefined for anything else. */
 export async function entryRedirect(request: Request, entryPaths: readonly string[]): Promise<Response | undefined> {
   if (request.method !== 'GET' && request.method !== 'HEAD') return undefined;
   const url = new URL(request.url);
-  if (extractLocaleFromUrl(url) || !entryPaths.some(path => (path || '/') === url.pathname)) return undefined;
+  if (extractLocaleFromUrl(url) || !entryPaths.some((path) => (path || '/') === url.pathname)) return undefined;
   const decision = await shouldRedirect({ request });
   if (!decision.shouldRedirect || !decision.redirectUrl) return undefined;
   const { pathname, search } = decision.redirectUrl;
@@ -67,7 +85,11 @@ export function suggestedLocale(request: Request): Locale | undefined {
   const page = extractLocaleFromRequest(request);
   const header = preferredFromHeader(request);
   let remembered: Locale | undefined;
-  try { remembered = extractLocaleFromRequestWithStrategies(request, ['cookie']); } catch { remembered = undefined; }
+  try {
+    remembered = extractLocaleFromRequestWithStrategies(request, ['cookie']);
+  } catch {
+    remembered = undefined;
+  }
   return header && header !== page && remembered !== page ? header : undefined;
 }
 
@@ -97,16 +119,37 @@ type HeadOptions = {
  * The site home page, in every language, also names the site for search with schema.org's
  * WebSite (name and the site root), through TanStack's `script:ld+json` head entry.
  */
-export function pageHead({ path, title, description, locale = getLocale(), origin = getUrlOrigin(), brand = registeredApp()?.brand }: HeadOptions) {
+export function pageHead({
+  path,
+  title,
+  description,
+  locale = getLocale(),
+  origin = getUrlOrigin(),
+  brand = registeredApp()?.brand,
+}: HeadOptions) {
   const links = alternates(origin, path, locale);
   return {
-    meta: [{ title: pageTitle(title(locale, brand ?? ''), brand) }, { name: 'description', content: description(locale, brand ?? '') },
+    meta: [
+      { title: pageTitle(title(locale, brand ?? ''), brand) },
+      { name: 'description', content: description(locale, brand ?? '') },
       // App pages are for people using the app, not for search: kept out of the index (paths.js).
       ...(isAppPath(path) ? [{ name: 'robots', content: 'noindex' }] : []),
-      ...(path === '' && brand ? [{ 'script:ld+json': { '@context': 'https://schema.org', '@type': 'WebSite', name: brand, url: `${origin}/` } }] : [])],
+      ...(path === '' && brand
+        ? [
+            {
+              'script:ld+json': {
+                '@context': 'https://schema.org',
+                '@type': 'WebSite',
+                name: brand,
+                url: `${origin}/`,
+              },
+            },
+          ]
+        : []),
+    ],
     links: [
       { rel: 'canonical', href: links.canonical },
-      ...links.alternates.map(link => ({ rel: 'alternate', hrefLang: link.hrefLang, href: link.href })),
+      ...links.alternates.map((link) => ({ rel: 'alternate', hrefLang: link.hrefLang, href: link.href })),
     ],
   };
 }

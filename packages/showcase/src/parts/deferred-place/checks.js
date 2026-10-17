@@ -9,12 +9,20 @@ import { deferredPlaceChecks } from './place.checks.js';
 import { problemChecks } from '@joeblew999/remy-ui/problem.checks';
 
 /** `path` is the de-localized page with the place; `from` a page linking to it through `link` (a message key). */
-export function deferredPlacePartChecks({ path = '/formats', from = '', link = 'formats_link', heading = 'formats_title' } = {}) {
+export function deferredPlacePartChecks({
+  path = '/formats',
+  from = '',
+  link = 'formats_link',
+  heading = 'formats_title',
+} = {}) {
   deferredPlaceChecks({ path, from });
 
   for (const locale of checkedLocales) {
     const o = { locale };
-    test(`${locale}: Cloudflare's place on the formats page matches Intl without JavaScript`, async ({ browser, baseURL }) => {
+    test(`${locale}: Cloudflare's place on the formats page matches Intl without JavaScript`, async ({
+      browser,
+      baseURL,
+    }) => {
       const context = await browser.newContext({ javaScriptEnabled: false });
       const page = await context.newPage();
       expect((await page.goto(`${baseURL}${localizedPath(path, locale)}`))?.status()).toBe(200);
@@ -23,10 +31,17 @@ export function deferredPlacePartChecks({ path = '/formats', from = '', link = '
       const format = formatTag(locale);
       const zone = await page.locator('[data-sample="cf-timezone"]').getAttribute('data-timezone');
       await expect(page.locator('[data-sample="cf-timezone"]')).toHaveText(zone || unknown);
-      await expect(page.locator('[data-sample="cf-local"]')).toHaveText(zone
-        ? new Intl.DateTimeFormat(format, { dateStyle: 'full', timeStyle: 'long', timeZone: zone }).format(samples.instant) : unknown);
+      await expect(page.locator('[data-sample="cf-local"]')).toHaveText(
+        zone
+          ? new Intl.DateTimeFormat(format, { dateStyle: 'full', timeStyle: 'long', timeZone: zone }).format(
+              samples.instant,
+            )
+          : unknown,
+      );
       const country = await page.locator('[data-sample="country"]').getAttribute('data-country');
-      await expect(page.locator('[data-sample="country"]')).toHaveText(country ? new Intl.DisplayNames([locale], { type: 'region' }).of(country) : unknown);
+      await expect(page.locator('[data-sample="country"]')).toHaveText(
+        country ? new Intl.DisplayNames([locale], { type: 'region' }).of(country) : unknown,
+      );
       await context.close();
     });
   }
@@ -36,4 +51,4 @@ export function deferredPlacePartChecks({ path = '/formats', from = '', link = '
 }
 
 /** The part's checks, as partChecks() runs them. */
-export default options => deferredPlacePartChecks(options);
+export default (options) => deferredPlacePartChecks(options);

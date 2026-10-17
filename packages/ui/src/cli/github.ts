@@ -17,7 +17,13 @@ export function api<T>(path: string, args: string[] = []): T | undefined {
   return (result.stdout.trim() ? JSON.parse(result.stdout) : {}) as T;
 }
 
-export type Pull = { number: number; html_url: string; title: string; head: { ref: string; sha: string }; user: { login: string } };
+export type Pull = {
+  number: number;
+  html_url: string;
+  title: string;
+  head: { ref: string; sha: string };
+  user: { login: string };
+};
 
 /** The open pull requests, newest first. */
 export const pulls = (slug: string): Pull[] | undefined => api<Pull[]>(`repos/${slug}/pulls?state=open&per_page=50`);
@@ -29,8 +35,24 @@ export function pullFor(slug: string, branch: string): Pull | undefined {
 
 /** Opens a pull request from `branch` into main; fails the step when GitHub refuses. */
 export function openPull(slug: string, branch: string, title: string, body: string): Pull {
-  const result = spawnSync('gh', ['api', `repos/${slug}/pulls`, '-f', `title=${title}`, '-f', `head=${branch}`, '-f', 'base=main', '-f', `body=${body}`], { encoding: 'utf8' });
-  if (result.status !== 0) throw new Error(`GitHub refused the pull request from ${branch}: ${result.stderr.trim() || result.stdout.trim()}`);
+  const result = spawnSync(
+    'gh',
+    [
+      'api',
+      `repos/${slug}/pulls`,
+      '-f',
+      `title=${title}`,
+      '-f',
+      `head=${branch}`,
+      '-f',
+      'base=main',
+      '-f',
+      `body=${body}`,
+    ],
+    { encoding: 'utf8' },
+  );
+  if (result.status !== 0)
+    throw new Error(`GitHub refused the pull request from ${branch}: ${result.stderr.trim() || result.stdout.trim()}`);
   return JSON.parse(result.stdout) as Pull;
 }
 
@@ -42,28 +64,59 @@ export function checks(slug: string, sha: string): { done: boolean; failed: Chec
   const runs = api<{ workflow_runs: WorkflowRun[] }>(`repos/${slug}/actions/runs?head_sha=${sha}&per_page=20`);
   const all = api<{ check_runs: CheckRun[] }>(`repos/${slug}/commits/${sha}/check-runs?per_page=100&filter=latest`);
   if (!runs || !all) return undefined;
-  const failed = all.check_runs.filter(run => run.status === 'completed' && !['success', 'skipped', 'neutral'].includes(run.conclusion ?? ''));
+  const failed = all.check_runs.filter(
+    (run) => run.status === 'completed' && !['success', 'skipped', 'neutral'].includes(run.conclusion ?? ''),
+  );
   // Done once GitHub started the workflow for the commit and every check on it has finished.
-  const done = runs.workflow_runs.length > 0 && runs.workflow_runs.every(run => run.status === 'completed') && all.check_runs.every(run => run.status === 'completed');
+  const done =
+    runs.workflow_runs.length > 0 &&
+    runs.workflow_runs.every((run) => run.status === 'completed') &&
+    all.check_runs.every((run) => run.status === 'completed');
   return { done, failed, runs: runs.workflow_runs.length };
 }
 
 /** Waits for the checks on `sha`, saying so every minute: green, red (naming each failed job) or still running at the limit. */
-export async function waitForChecks(slug: string, sha: string, minutes = 20): Promise<{ state: 'green' | 'red' | 'waiting'; failed: CheckRun[] }> {
+export async function waitForChecks(
+  slug: string,
+  sha: string,
+  minutes = 20,
+): Promise<{ state: 'green' | 'red' | 'waiting'; failed: CheckRun[] }> {
   const started = Date.now();
   for (let polls = 0; Date.now() - started < minutes * 60_000; polls++) {
     const now = checks(slug, sha);
     if (now?.done) return now.failed.length ? { state: 'red', failed: now.failed } : { state: 'green', failed: [] };
     if (now?.failed.length) return { state: 'red', failed: now.failed };
-    if (polls % 4 === 0) console.log(`dev:land: GitHub is checking ${sha.slice(0, 7)} (${Math.round((Date.now() - started) / 1000)} s so far)...`);
-    await new Promise(resolve => setTimeout(resolve, 15_000));
+    if (polls % 4 === 0)
+      console.log(
+        `land: GitHub is checking ${sha.slice(0, 7)} (${Math.round((Date.now() - started) / 1000)} s so far)...`,
+      );
+    await new Promise((resolve) => setTimeout(resolve, 15_000));
   }
   return { state: 'waiting', failed: [] };
 }
 
 /** Squash-merges pull request `number` into main; the merge commit, or why GitHub refused (main moved and conflicts, checks required). */
-export function merge(slug: string, number: number, title: string, message = ''): { sha: string } | { refused: string } {
-  const result = spawnSync('gh', ['api', '-X', 'PUT', `repos/${slug}/pulls/${number}/merge`, '-f', 'merge_method=squash', '-f', `commit_title=${title}`, ...(message ? ['-f', `commit_message=${message}`] : [])], { encoding: 'utf8' });
+export function merge(
+  slug: string,
+  number: number,
+  title: string,
+  message = '',
+): { sha: string } | { refused: string } {
+  const result = spawnSync(
+    'gh',
+    [
+      'api',
+      '-X',
+      'PUT',
+      `repos/${slug}/pulls/${number}/merge`,
+      '-f',
+      'merge_method=squash',
+      '-f',
+      `commit_title=${title}`,
+      ...(message ? ['-f', `commit_message=${message}`] : []),
+    ],
+    { encoding: 'utf8' },
+  );
   if (result.status !== 0) return { refused: result.stderr.trim() || result.stdout.trim() };
   return { sha: (JSON.parse(result.stdout) as { sha: string }).sha };
 }
@@ -75,5 +128,10 @@ export function deleteBranch(slug: string, branch: string): void {
 
 /** Comments on a commit (GitHub tells its author); true when posted. */
 export function commentOnCommit(slug: string, sha: string, body: string): boolean {
-  try { execFileSync('gh', ['api', `repos/${slug}/commits/${sha}/comments`, '-f', `body=${body}`], { stdio: 'ignore' }); return true; } catch { return false; }
+  try {
+    execFileSync('gh', ['api', `repos/${slug}/commits/${sha}/comments`, '-f', `body=${body}`], { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
 }

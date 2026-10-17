@@ -2,7 +2,7 @@
 
 Status: agreed 2026-09-29; the owner delegated its decisions ("Stop asking me and use your brain"), recorded
 under "Decisions". Fix 1 and the tests half of fix 3 first. Owner: remy-auth.
-Executor/Reviewer roles as in [plans and roles](../docs/content/dev/principles.md#plans-and-roles).
+Executor/Reviewer roles as in [plans and roles](../apps/docs/content/dev/principles.md#plans-and-roles).
 
 Owner, 2026-09-29, after thin-apps phase C: "you are finding so many structural problems. I expect a plan
 after this to fix the structural problems that make this so fucking hard !!"

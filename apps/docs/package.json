@@ -1,0 +1,10 @@
+{
+  "name": "@joeblew999/remy-auth-docs",
+  "private": true,
+  "description": "This app's docs: content/ and docs.config.ts over @joeblew999/remy-ui's docs Worker.",
+  "type": "module",
+  "dependencies": {
+    "@joeblew999/remy-auth-contract": "*",
+    "@joeblew999/remy-ui": "*"
+  }
+}

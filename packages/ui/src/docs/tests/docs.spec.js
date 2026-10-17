@@ -27,35 +27,53 @@ const langOf = (path) => {
  * popover shows the active heading on the client only, React #418, live since before thin-apps), parked in
  * .plans/thin-apps.md ("Parked while running").
  */
-const hydratePaths = (['docs', 'dev']).flatMap(site => {
+const hydratePaths = ['docs', 'dev'].flatMap((site) => {
   const { pages } = content(`${folder[site]}/meta.json`);
   const { defaultLanguage, languages } = content(`${folder[site]}/i18n.json`);
-  const first = pages.find(page => page !== 'index' && !page.startsWith('[') && !page.startsWith('---'));
-  const translated = first && languages.find(lang => lang !== defaultLanguage &&
-    ['md', 'mdx'].some(ext => existsSync(join(process.cwd(), 'content', folder[site], `${first}.${lang}.${ext}`))));
-  return [...(first ? [`/${site}/${first}`] : [`/${site}`]), ...(translated ? [`/${site}/${translated}/${first}`] : [])];
+  const first = pages.find((page) => page !== 'index' && !page.startsWith('[') && !page.startsWith('---'));
+  const translated =
+    first &&
+    languages.find(
+      (lang) =>
+        lang !== defaultLanguage &&
+        ['md', 'mdx'].some((ext) =>
+          existsSync(join(process.cwd(), 'content', folder[site], `${first}.${lang}.${ext}`)),
+        ),
+    );
+  return [
+    ...(first ? [`/${site}/${first}`] : [`/${site}`]),
+    ...(translated ? [`/${site}/${translated}/${first}`] : []),
+  ];
 });
 const attr = (html, pattern) => pattern.exec(html)?.[1];
 
 // The docs Worker answers what it is, as every Worker on the package does (an app's page lists it: Versions).
 buildChecks({ service: docsConfig.service });
 
-test('every sitemap page answers in its own language, canonical to itself, with the sitemap\'s alternates', async ({ request }) => {
+test("every sitemap page answers in its own language, canonical to itself, with the sitemap's alternates", async ({
+  request,
+}) => {
   const xml = await (await request.get('/sitemap.xml')).text();
   const entries = [...xml.matchAll(/<url><loc>([^<]+)<\/loc>(.*?)<\/url>/g)];
   expect(entries.length).toBeGreaterThan(0);
   // In parallel: the pages are independent, and one after another over the network was most of the time.
-  await Promise.all(entries.map(async ([, loc, rest]) => {
-    const path = new URL(loc ).pathname;
-    const response = await request.get(path);
-    expect(response.status(), path).toBe(200);
-    const html = await response.text();
-    expect(attr(html, /<html[^>]*lang="([^"]+)"/), `${path} lang`).toBe(langOf(path));
-    expect(attr(html, /rel="canonical"[^>]*href="([^"]+)"/), `${path} canonical`).toBe(loc);
-    const alternates = [...rest .matchAll(/hreflang="([^"]+)" href="([^"]+)"/g)].map(([, lang, href]) => `${lang} ${href}`);
-    const onPage = [...html.matchAll(/rel="alternate" hrefLang="([^"]+)" href="([^"]+)"/g)].map(([, lang, href]) => `${lang} ${href}`);
-    expect(onPage, `${path} hreflang`).toEqual(alternates);
-  }));
+  await Promise.all(
+    entries.map(async ([, loc, rest]) => {
+      const path = new URL(loc).pathname;
+      const response = await request.get(path);
+      expect(response.status(), path).toBe(200);
+      const html = await response.text();
+      expect(attr(html, /<html[^>]*lang="([^"]+)"/), `${path} lang`).toBe(langOf(path));
+      expect(attr(html, /rel="canonical"[^>]*href="([^"]+)"/), `${path} canonical`).toBe(loc);
+      const alternates = [...rest.matchAll(/hreflang="([^"]+)" href="([^"]+)"/g)].map(
+        ([, lang, href]) => `${lang} ${href}`,
+      );
+      const onPage = [...html.matchAll(/rel="alternate" hrefLang="([^"]+)" href="([^"]+)"/g)].map(
+        ([, lang, href]) => `${lang} ${href}`,
+      );
+      expect(onPage, `${path} hreflang`).toEqual(alternates);
+    }),
+  );
 });
 
 for (const site of docsConfig.ask ? ['docs', 'dev'] : []) {
@@ -73,9 +91,11 @@ for (const site of docsConfig.ask ? ['docs', 'dev'] : []) {
 const { api } = JSON.parse(readFileSync(join(process.cwd(), '.remy-docs', 'app.json'), 'utf8'));
 for (const path of [...hydratePaths, ...(api ? ['/reference'] : []), ...(docsConfig.ask ? ['/docs/ask'] : [])]) {
   test(`${path} hydrates with no errors and no Content-Security-Policy violations`, async ({ page }) => {
-    const errors= [];
-    page.on('pageerror', error => errors.push(error.message));
-    page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    page.on('console', (message) => {
+      if (message.type() === 'error') errors.push(message.text());
+    });
     await page.goto(path, { waitUntil: 'networkidle' });
     await expect(page.locator('h1').first()).toBeVisible();
     expect(errors).toEqual([]);

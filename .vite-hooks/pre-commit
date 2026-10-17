@@ -1,0 +1,3 @@
+#!/bin/sh
+# Before a commit: the staged files formatted and their lint fixes applied (vite.config.ts, staged).
+vp staged

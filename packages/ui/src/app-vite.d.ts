@@ -15,4 +15,6 @@ export declare function remyApp(options?: {
   root?: string;
   /** The build stamp's options: `packages` names more packages whose installed versions it lists. */
   build?: Omit<BuildOptions, 'root'>;
+  /** The app's own Vite Plus tasks, added to the shared ones (tasks.js); one of the same name replaces it. */
+  tasks?: Record<string, unknown>;
 }): UserConfig;

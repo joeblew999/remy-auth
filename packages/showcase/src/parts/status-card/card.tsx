@@ -25,7 +25,11 @@ export const statusRefreshMs = 10_000;
  * `serverRendered` says whether the app's loader filled the query on the server; the note says
  * where the status came from.
  */
-export function StatusCard<TError, TKey extends QueryKey>({ locale, query, serverRendered = true }: {
+export function StatusCard<TError, TKey extends QueryKey>({
+  locale,
+  query,
+  serverRendered = true,
+}: {
   locale: Locale;
   query: UseQueryOptions<LiveStatus, TError, LiveStatus, TKey>;
   serverRendered?: boolean;
@@ -35,23 +39,39 @@ export function StatusCard<TError, TKey extends QueryKey>({ locale, query, serve
   const queryClient = useQueryClient();
   const { data, dataUpdatedAt, isFetching, isError } = useQuery({ ...query, refetchInterval: statusRefreshMs });
   const status = isError ? 'error' : data?.status;
-  return <aside aria-labelledby="live-status" className="status-card mt-6">
-    <Card data-status={status} data-updated={dataUpdatedAt || undefined} aria-busy={isFetching}>
-      <CardHeader><CardTitle><h2 id="live-status">{m.live_status_heading({}, o)}</h2></CardTitle></CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <dl className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-x-4 gap-y-3 text-sm">
-          <dt className="text-muted-foreground">{m.live_status_label({}, o)}</dt>
-          <dd data-live="status">{status === 'ok' ? m.live_status_ok({}, o) : status === 'error' ? m.error_title({}, o) : '…'}</dd>
-          <dt className="text-muted-foreground">{m.live_service_label({}, o)}</dt>
-          <dd data-live="service"><code>{status === 'ok' ? data?.service : '…'}</code></dd>
-          <dt className="text-muted-foreground">{m.live_release_label({}, o)}</dt>
-          <dd data-live="release" className="[overflow-wrap:anywhere]"><code>{status === 'ok' ? data?.release : '…'}</code></dd>
-        </dl>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs leading-relaxed text-muted-foreground">{serverRendered ? m.live_status_note({}, o) : m.live_status_note_browser({}, o)}</p>
-          <Button variant="outline" size="sm" onClick={() => invalidateEverything(router, queryClient)}>{m.live_refresh({}, o)}</Button>
-        </div>
-      </CardContent>
-    </Card>
-  </aside>;
+  return (
+    <aside aria-labelledby="live-status" className="status-card mt-6">
+      <Card data-status={status} data-updated={dataUpdatedAt || undefined} aria-busy={isFetching}>
+        <CardHeader>
+          <CardTitle>
+            <h2 id="live-status">{m.live_status_heading({}, o)}</h2>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <dl className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-x-4 gap-y-3 text-sm">
+            <dt className="text-muted-foreground">{m.live_status_label({}, o)}</dt>
+            <dd data-live="status">
+              {status === 'ok' ? m.live_status_ok({}, o) : status === 'error' ? m.error_title({}, o) : '…'}
+            </dd>
+            <dt className="text-muted-foreground">{m.live_service_label({}, o)}</dt>
+            <dd data-live="service">
+              <code>{status === 'ok' ? data?.service : '…'}</code>
+            </dd>
+            <dt className="text-muted-foreground">{m.live_release_label({}, o)}</dt>
+            <dd data-live="release" className="[overflow-wrap:anywhere]">
+              <code>{status === 'ok' ? data?.release : '…'}</code>
+            </dd>
+          </dl>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              {serverRendered ? m.live_status_note({}, o) : m.live_status_note_browser({}, o)}
+            </p>
+            <Button variant="outline" size="sm" onClick={() => invalidateEverything(router, queryClient)}>
+              {m.live_refresh({}, o)}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </aside>
+  );
 }

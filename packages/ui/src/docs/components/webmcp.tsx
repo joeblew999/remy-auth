@@ -1,4 +1,4 @@
-// Written by `npm run docs:cli -- feature webmcp`. Adapted: one per docs site (its search API and its
+// Written by `vp run docs:cli feature webmcp`. Adapted: one per docs site (its search API and its
 // language are props), and page URLs map to Markdown as the site serves it (/docs/es/formats.md).
 import { useEffect } from 'react';
 import { useRouter } from 'fumadocs-core/framework';
@@ -15,10 +15,7 @@ declare global {
   interface Document {
     /** WebMCP, see https://webmachinelearning.github.io/webmcp/ */
     modelContext?: {
-      registerTool: <Input>(
-        tool: ModelContextTool<Input>,
-        options?: { signal?: AbortSignal },
-      ) => Promise<void>;
+      registerTool: <Input>(tool: ModelContextTool<Input>, options?: { signal?: AbortSignal }) => Promise<void>;
     };
   }
 }
@@ -82,7 +79,8 @@ export function WebMCP({ site, lang: locale }: { site: string; lang: string }) {
           required: ['url'],
         },
         async execute({ url }: { url: string }) {
-          router.push(url);
+          // Awaited, so a navigation that fails reaches the agent as the tool's error, not as "opened".
+          await router.push(url);
           return `opened ${url}`;
         },
       },

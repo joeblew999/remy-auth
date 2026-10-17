@@ -7,9 +7,15 @@ import { remyApp } from '../remy-app';
 import '../styles.css';
 
 // TanStack Devtools stay in this file: its Vite plugin strips them from production builds only here.
-export const Route = createRootRouteWithContext<RemyRouterContext>()(remyRoot(remyApp, {
-  devtools: <TanStackDevtools plugins={[
-    { name: 'TanStack Router', render: <TanStackRouterDevtoolsPanel /> },
-    { name: 'TanStack Query', render: <ReactQueryDevtoolsPanel /> },
-  ]} />,
-}));
+export const Route = createRootRouteWithContext<RemyRouterContext>()(
+  remyRoot(remyApp, {
+    devtools: (
+      <TanStackDevtools
+        plugins={[
+          { name: 'TanStack Router', render: <TanStackRouterDevtoolsPanel /> },
+          { name: 'TanStack Query', render: <ReactQueryDevtoolsPanel /> },
+        ]}
+      />
+    ),
+  }),
+);

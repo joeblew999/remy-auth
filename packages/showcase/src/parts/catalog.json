@@ -3,21 +3,15 @@
     "routes": true,
     "requires": [],
     "entries": {},
-    "app": [
-      "parent"
-    ],
+    "app": ["parent"],
     "sitePaths": []
   },
   "deferred-place": {
     "routes": false,
     "requires": [],
     "entries": {
-      "place": [
-        "getPlace"
-      ],
-      "ui": [
-        "DeferredPlace"
-      ]
+      "place": ["getPlace"],
+      "ui": ["DeferredPlace"]
     },
     "app": [],
     "sitePaths": []
@@ -26,14 +20,9 @@
     "routes": false,
     "requires": [],
     "entries": {
-      "ui": [
-        "StatusCard",
-        "statusCardLoader"
-      ]
+      "ui": ["StatusCard", "statusCardLoader"]
     },
-    "app": [
-      "statusQuery"
-    ],
+    "app": ["statusQuery"],
     "sitePaths": []
   }
 }

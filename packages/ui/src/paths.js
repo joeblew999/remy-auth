@@ -5,4 +5,4 @@
  */
 
 /** Whether a de-localized path is an app page. */
-export const isAppPath = path => path === '/app' || path.startsWith('/app/');
+export const isAppPath = (path) => path === '/app' || path.startsWith('/app/');

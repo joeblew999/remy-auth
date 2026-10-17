@@ -3,11 +3,16 @@
 
 /** The actions offered inside `locator` (a row, a card, a page), sorted: the `data-action` of every <Allowed> that rendered. */
 export async function offeredActions(locator) {
-  const actions = await locator.locator('[data-action]').evaluateAll(nodes => nodes.map(node => node.getAttribute('data-action')));
-  return [...new Set(actions)].sort();
+  const actions = await locator
+    .locator('[data-action]')
+    .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-action')));
+  // Code-unit order, as sort() without a compare function orders strings.
+  return [...new Set(actions)].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
 /** The actions a `can` map allows, sorted, optionally only those among `offered` (the ones the page has a control for). */
 export function allowedActions(can, offered) {
-  return Object.keys(can).filter(action => can[action] && (!offered || offered.includes(action))).sort();
+  return Object.keys(can)
+    .filter((action) => can[action] && (!offered || offered.includes(action)))
+    .sort();
 }

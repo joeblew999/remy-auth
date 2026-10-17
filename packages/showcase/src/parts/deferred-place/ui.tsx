@@ -1,3 +1,4 @@
+// oxlint-disable-next-line typescript/triple-slash-reference -- a script of ambient virtual-module declarations cannot be imported, and the package ships as source to apps whose tsconfig does not include it
 /// <reference path="../virtual.d.ts" />
 import { Await, Link } from '@tanstack/react-router';
 import type { Locale } from '@joeblew999/remy-ui/locale';
@@ -23,11 +24,26 @@ import { hasPart } from 'virtual:remy-parts';
  * skeleton with the same labels holds its space. Crawlers get the whole document at once
  * (TanStack waits for everything when the user agent is a bot).
  */
-export function DeferredPlace({ locale, place, device = false }: { locale: Locale; place: Promise<Place>; device?: boolean }) {
+export function DeferredPlace({
+  locale,
+  place,
+  device = false,
+}: {
+  locale: Locale;
+  place: Promise<Place>;
+  device?: boolean;
+}) {
   // Cloudflare's note is the group's own footer; the device's own location follows it.
-  return <Await promise={place} fallback={<PlaceSkeleton locale={locale} />}>
-    {value => <><PlaceGroup locale={locale} place={value} />{device && <DevicePlace locale={locale} network={value} />}</>}
-  </Await>;
+  return (
+    <Await promise={place} fallback={<PlaceSkeleton locale={locale} />}>
+      {(value) => (
+        <>
+          <PlaceGroup locale={locale} place={value} />
+          {device && <DevicePlace locale={locale} network={value} />}
+        </>
+      )}
+    </Await>
+  );
 }
 
 function PlaceGroup({ locale, place }: { locale: Locale; place: Place }) {
@@ -35,31 +51,69 @@ function PlaceGroup({ locale, place }: { locale: Locale; place: Place }) {
   const regionName = new Intl.DisplayNames([locale], { type: 'region' });
   const unknown = m.location_unknown({}, o);
   const localTime = (() => {
-    try { return place.timeZone ? new Intl.DateTimeFormat(formatLocale(locale), { dateStyle: 'full', timeStyle: 'long', timeZone: place.timeZone }).format(samples.instant) : unknown; }
-    catch { return unknown; }
+    try {
+      return place.timeZone
+        ? new Intl.DateTimeFormat(formatLocale(locale), {
+            dateStyle: 'full',
+            timeStyle: 'long',
+            timeZone: place.timeZone,
+          }).format(samples.instant)
+        : unknown;
+    } catch {
+      return unknown;
+    }
   })();
-  return <Group title={m.location_heading({}, o)} note={m.location_note({}, o)}>
-    <Row sample="country" label={m.your_country_label({}, o)} data-country={place.country}>{place.country ? regionName.of(place.country) : unknown}</Row>
-    <Row sample="place" label={m.place_label({}, o)}>{[place.city, place.region].filter(Boolean).join(', ') || unknown}</Row>
-    <Row sample="cf-timezone" label={m.cf_timezone_label({}, o)} data-timezone={place.timeZone}>{place.timeZone && hasPart('time-zones')
-      ? <Link className="underline underline-offset-4" to={timeZonePath(place.timeZone)} preload="intent">{place.timeZone}</Link>
-      : place.timeZone || unknown}</Row>
-    <Row sample="cf-local" label={m.cf_local_time_label({}, o)}>{localTime}</Row>
-  </Group>;
+  return (
+    <Group title={m.location_heading({}, o)} note={m.location_note({}, o)}>
+      <Row sample="country" label={m.your_country_label({}, o)} data-country={place.country}>
+        {place.country ? regionName.of(place.country) : unknown}
+      </Row>
+      <Row sample="place" label={m.place_label({}, o)}>
+        {[place.city, place.region].filter(Boolean).join(', ') || unknown}
+      </Row>
+      <Row sample="cf-timezone" label={m.cf_timezone_label({}, o)} data-timezone={place.timeZone}>
+        {place.timeZone && hasPart('time-zones') ? (
+          <Link className="underline underline-offset-4" to={timeZonePath(place.timeZone)} preload="intent">
+            {place.timeZone}
+          </Link>
+        ) : (
+          place.timeZone || unknown
+        )}
+      </Row>
+      <Row sample="cf-local" label={m.cf_local_time_label({}, o)}>
+        {localTime}
+      </Row>
+    </Group>
+  );
 }
 
 /** The same group while the place is on its way: real labels, pulsing values, no data-sample (the checks read only real rows). */
 function PlaceSkeleton({ locale }: { locale: Locale }) {
   const o = { locale };
-  const labels = [m.your_country_label({}, o), m.place_label({}, o), m.cf_timezone_label({}, o), m.cf_local_time_label({}, o)];
-  return <div className="place-skeleton" aria-busy="true">
-    <Group title={m.location_heading({}, o)} note={m.location_note({}, o)}>
-      {labels.map(label => <Skeleton key={label} label={label} />)}
-    </Group>
-  </div>;
+  const labels = [
+    m.your_country_label({}, o),
+    m.place_label({}, o),
+    m.cf_timezone_label({}, o),
+    m.cf_local_time_label({}, o),
+  ];
+  return (
+    <div className="place-skeleton" aria-busy="true">
+      <Group title={m.location_heading({}, o)} note={m.location_note({}, o)}>
+        {labels.map((label) => (
+          <Skeleton key={label} label={label} />
+        ))}
+      </Group>
+    </div>
+  );
 }
 
 function Skeleton({ label }: { label: string }) {
-  return <><dt className="text-muted-foreground">{label}</dt>
-    <dd><Placeholder aria-hidden="true" className="h-4 w-3/4" /></dd></>;
+  return (
+    <>
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd>
+        <Placeholder aria-hidden="true" className="h-4 w-3/4" />
+      </dd>
+    </>
+  );
 }

@@ -7,7 +7,19 @@ import { locales, baseLocale } from '@joeblew999/remy-ui/runtime';
 import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { ownValues, choicesFor, choiceKinds } from '@joeblew999/remy-ui/locale-data';
-import { behaviourLocales, checkedLocales, collectErrors, digits, direction, endonym, foreignDigits, formatTag, hydrated, localizedPath, weekday } from '@joeblew999/remy-ui/checks';
+import {
+  behaviourLocales,
+  checkedLocales,
+  collectErrors,
+  digits,
+  direction,
+  endonym,
+  foreignDigits,
+  formatTag,
+  hydrated,
+  localizedPath,
+  weekday,
+} from '@joeblew999/remy-ui/checks';
 import { navigationBlockingChecks } from './navigation-blocking.checks.js';
 import { preloadChecks } from './preload.checks.js';
 import { searchParamsChecks } from './search-params.checks.js';
@@ -19,8 +31,15 @@ import { devicePlaceChecks } from './device-place.checks.js';
  * each request) or 'prerendered' (no server functions); `formats`: rows only this app's formats page has;
  * `devicePath`: where the device-place row is; `network`: the network place beside it (the deferred-place part).
  */
-export function showcaseChecks({ product, rendering = 'server', formats = {}, devicePath = '/app/location', network = false } = {}) {
-  if (!product) throw new Error("showcaseChecks: pass the app's name as `product` (its defineRemyApp `brand`); the pages say it");
+export function showcaseChecks({
+  product,
+  rendering = 'server',
+  formats = {},
+  devicePath = '/app/location',
+  network = false,
+} = {}) {
+  if (!product)
+    throw new Error("showcaseChecks: pass the app's name as `product` (its defineRemyApp `brand`); the pages say it");
   const server = rendering === 'server';
   demoChecks();
   appNavChecks();
@@ -39,10 +58,12 @@ export function showcaseChecks({ product, rendering = 'server', formats = {}, de
  */
 export function settingsChecks({ product }) {
   const o = { locale: baseLocale };
-  test("the Settings page shows where the product's name is used, and how another name would read", async ({ page }) => {
+  test("the Settings page shows where the product's name is used, and how another name would read", async ({
+    page,
+  }) => {
     await page.goto(localizedPath('/app/settings', baseLocale));
     const card = page.locator('[data-product-name]');
-    const sample = name => card.locator(`[data-product-sample="${name}"]`);
+    const sample = (name) => card.locator(`[data-product-sample="${name}"]`);
     const field = card.getByLabel(m.product_try_label({}, o), { exact: true });
     await hydrated(field);
     await expect(card).toHaveAttribute('data-product-name', product);
@@ -59,7 +80,10 @@ export function settingsChecks({ product }) {
     await field.fill('');
     await expect(sample('brand')).toHaveText(product);
   });
-  test('the Settings page says what is deployed: this app answers for itself, with the build the page was made from', async ({ page, request }) => {
+  test('the Settings page says what is deployed: this app answers for itself, with the build the page was made from', async ({
+    page,
+    request,
+  }) => {
     const deployment = await (await request.get('/healthz')).json();
     await page.goto(localizedPath('/app/settings', baseLocale));
     const own = page.locator('[data-versions] [data-deployment="own"]');
@@ -67,9 +91,11 @@ export function settingsChecks({ product }) {
     await expect(own.locator('[data-version="service"]')).toHaveText(deployment.service);
     await expect(own.locator('[data-version="environment"]')).toHaveText(deployment.environment);
     await expect(own.locator('[data-version="release"]')).toHaveText(deployment.release);
-    if (deployment.build.commit) await expect(own.locator('[data-version="commit"]')).toContainText(deployment.build.commit.slice(0, 7));
+    if (deployment.build.commit)
+      await expect(own.locator('[data-version="commit"]')).toContainText(deployment.build.commit.slice(0, 7));
     const packages = page.locator('[data-versions] [data-version="packages"]');
-    for (const [name, version] of Object.entries(deployment.build.packages)) await expect(packages).toContainText(`${name}${version}`);
+    for (const [name, version] of Object.entries(deployment.build.packages))
+      await expect(packages).toContainText(`${name}${version}`);
   });
 }
 
@@ -79,17 +105,27 @@ export function settingsChecks({ product }) {
  */
 export function appNavChecks() {
   const o = { locale: baseLocale };
-  const bar = page => page.getByRole('navigation', { name: m.nav_bottom({}, o), exact: true });
+  const bar = (page) => page.getByRole('navigation', { name: m.nav_bottom({}, o), exact: true });
   test('on a phone the bottom bar holds the core pages, and More opens every page', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(localizedPath('/app', baseLocale));
     await expect(bar(page).getByRole('link')).toHaveCount(4);
     await hydrated(bar(page).getByRole('button', { name: m.nav_more({}, o), exact: true }));
-    await bar(page).getByRole('link', { name: m.nav_clock({}, o), exact: true }).click();
+    await bar(page)
+      .getByRole('link', { name: m.nav_clock({}, o), exact: true })
+      .click();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(m.clock_title({}, o));
-    await expect(bar(page).getByRole('link', { name: m.nav_clock({}, o), exact: true })).toHaveAttribute('aria-current', 'page');
-    await bar(page).getByRole('button', { name: m.nav_more({}, o), exact: true }).click();
-    await page.getByRole('dialog').getByRole('link', { name: m.nav_settings({}, o), exact: true }).click();
+    await expect(bar(page).getByRole('link', { name: m.nav_clock({}, o), exact: true })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    await bar(page)
+      .getByRole('button', { name: m.nav_more({}, o), exact: true })
+      .click();
+    await page
+      .getByRole('dialog')
+      .getByRole('link', { name: m.nav_settings({}, o), exact: true })
+      .click();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(m.settings_title({}, o));
   });
   test('on a desktop the sidebar has every page and there is no bottom bar', async ({ page }) => {
@@ -114,7 +150,10 @@ export function appNavChecks() {
 export function demoChecks() {
   for (const locale of behaviourLocales) {
     const o = { locale };
-    test(`${locale}: demo counter, reservation form and language switch work after hydration`, async ({ page, context }) => {
+    test(`${locale}: demo counter, reservation form and language switch work after hydration`, async ({
+      page,
+      context,
+    }) => {
       const errors = collectErrors(page);
       await page.goto(localizedPath('/app/demo', locale));
       // Act once hydrated: before that a prerendered page's buttons have no handlers yet.
@@ -130,16 +169,26 @@ export function demoChecks() {
       await guests.fill('3');
       await page.getByRole('button', { name: m.submit({}, o), exact: true }).click();
       await expect(page.locator('.reserved')).toHaveText(m.reserved({ name: samples.guest, count: 3 }, o));
-      expect(foreignDigits(await page.locator('.reserved').innerText(), locale), 'the confirmation writes the seats in the language\'s digits').toEqual([]);
-      for (const [value, numberingSystem] of [[4, 'arabext'], [5, 'arab'], [12, 'arabext'], [7, new Intl.Locale(locale).getNumberingSystems()[0]]]) {
+      expect(
+        foreignDigits(await page.locator('.reserved').innerText(), locale),
+        "the confirmation writes the seats in the language's digits",
+      ).toEqual([]);
+      for (const [value, numberingSystem] of [
+        [4, 'arabext'],
+        [5, 'arab'],
+        [12, 'arabext'],
+        [7, new Intl.Locale(locale).getNumberingSystems()[0]],
+      ]) {
         await guests.fill(digits(value, numberingSystem));
         await page.getByRole('button', { name: m.submit({}, o), exact: true }).click();
-        await expect(page.locator('.reserved'), `${value} in ${numberingSystem} digits`).toHaveText(m.reserved({ name: samples.guest, count: value }, o));
+        await expect(page.locator('.reserved'), `${value} in ${numberingSystem} digits`).toHaveText(
+          m.reserved({ name: samples.guest, count: value }, o),
+        );
       }
       await guests.fill(digits(21, 'arabext'));
       await page.getByRole('button', { name: m.submit({}, o), exact: true }).click();
       await expect(page.locator('#guests-error')).toHaveText(m.guests_invalid({}, o));
-      const other = locales.find(value => value !== locale);
+      const other = locales.find((value) => value !== locale);
       // App pages switch language through the header's menu (shadcn's DropdownMenu with a radio group).
       await page.getByRole('button', { name: m.language_label({}, o), exact: true }).click();
       await page.getByRole('menuitemradio', { name: endonym(other), exact: true }).click();
@@ -164,11 +213,17 @@ const formatsAreas = ['language', 'time', 'numbers', 'money', 'words'];
 export function formatsChecks({ extra, product } = {}) {
   for (const locale of checkedLocales) {
     const o = { locale };
-    test(`${locale}: formats page matches this language's Intl output without JavaScript`, async ({ browser, baseURL }) => {
+    test(`${locale}: formats page matches this language's Intl output without JavaScript`, async ({
+      browser,
+      baseURL,
+    }) => {
       const context = await browser.newContext({ javaScriptEnabled: false });
       const page = await context.newPage();
       expect((await page.goto(`${baseURL}${localizedPath('/formats', locale)}`))?.status()).toBe(200);
-      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `${baseURL}${localizedPath('/formats', locale)}`);
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+        'href',
+        `${baseURL}${localizedPath('/formats', locale)}`,
+      );
       await expect(page.locator('link[hreflang="x-default"]')).toHaveAttribute('href', `${baseURL}/formats`);
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(m.formats_title({}, o));
       // Formatted with the explicit tag (the language's own calendar and digits): the rows written
@@ -180,7 +235,9 @@ export function formatsChecks({ extra, product } = {}) {
       const numbering = tag.getNumberingSystems()[0];
       const { firstDay, weekend } = tag.getWeekInfo();
       const list = new Intl.ListFormat(locale, { type: 'conjunction' });
-      const titleWords = [...new Intl.Segmenter(locale, { granularity: 'word' }).segment(m.home_title({ product }, o))].filter(part => part.isWordLike).map(part => part.segment);
+      const titleWords = [...new Intl.Segmenter(locale, { granularity: 'word' }).segment(m.home_title({ product }, o))]
+        .filter((part) => part.isWordLike)
+        .map((part) => part.segment);
       const expected = {
         tag: locale,
         name: endonym(locale),
@@ -188,48 +245,74 @@ export function formatsChecks({ extra, product } = {}) {
         languages: new Intl.ListFormat(locale, { type: 'conjunction' }).format(locales.map(endonym)),
         calendar: new Intl.DisplayNames([locale], { type: 'calendar' }).of(tag.getCalendars()[0]),
         numbering: `${numbering} · ${new Intl.NumberFormat(format).format(samples.decimal)}`,
-        'hour-cycle': ['h11', 'h12'].includes(resolved.hourCycle ?? '') ? m.hour_cycle_12({}, o) : m.hour_cycle_24({}, o),
+        'hour-cycle': ['h11', 'h12'].includes(resolved.hourCycle ?? '')
+          ? m.hour_cycle_12({}, o)
+          : m.hour_cycle_24({}, o),
         'week-start': weekday(locale, firstDay),
-        weekend: list.format(weekend.map(day => weekday(locale, day))),
-        instant: new Intl.DateTimeFormat(format, { dateStyle: 'full', timeStyle: 'long', timeZone: 'UTC' }).format(samples.instant),
+        weekend: list.format(weekend.map((day) => weekday(locale, day))),
+        instant: new Intl.DateTimeFormat(format, { dateStyle: 'full', timeStyle: 'long', timeZone: 'UTC' }).format(
+          samples.instant,
+        ),
         date: new Intl.DateTimeFormat(format, { dateStyle: 'long', timeZone: 'UTC' }).format(samples.date),
         relative: new Intl.RelativeTimeFormat(format, { numeric: 'auto' }).format(samples.days, 'day'),
         decimal: new Intl.NumberFormat(format).format(samples.decimal),
         percent: new Intl.NumberFormat(format, { style: 'percent' }).format(samples.share),
         compact: new Intl.NumberFormat(format, { notation: 'compact' }).format(samples.big),
-        currency: new Intl.NumberFormat(format, { style: 'currency', currency: ownValues(locale).currency }).format(samples.amount),
-        'plural-forms': list.format(ownValues(locale).counts.map(count => m.apps_count({ count }, o))),
+        currency: new Intl.NumberFormat(format, { style: 'currency', currency: ownValues(locale).currency }).format(
+          samples.amount,
+        ),
+        'plural-forms': list.format(ownValues(locale).counts.map((count) => m.apps_count({ count }, o))),
         casing: samples.casing,
         'word-count': new Intl.NumberFormat(format).format(titleWords.length),
         'long-word': samples.longWord,
       };
-      for (const [sample, text] of Object.entries(expected)) await expect(page.locator(`[data-sample="${sample}"]`), sample).toHaveText(text);
+      for (const [sample, text] of Object.entries(expected))
+        await expect(page.locator(`[data-sample="${sample}"]`), sample).toHaveText(text);
       // Each language name is isolated in its own language, so right-to-left names do not reorder the list.
       await expect(page.locator('[data-sample="languages"] bdi')).toHaveText(locales.map(endonym));
-      expect(await page.locator('[data-sample="languages"] bdi').evaluateAll(nodes => nodes.map(node => node.lang))).toEqual([...locales]);
-      for (const count of samples.counts) await expect(page.locator(`[data-count="${count}"]`)).toHaveText(m.apps_count({ count }, o));
-      for (const n of samples.positions) await expect(page.locator(`[data-position="${n}"]`)).toHaveText(m.position_value({ n }, o));
+      expect(
+        await page.locator('[data-sample="languages"] bdi').evaluateAll((nodes) => nodes.map((node) => node.lang)),
+      ).toEqual([...locales]);
+      for (const count of samples.counts)
+        await expect(page.locator(`[data-count="${count}"]`)).toHaveText(m.apps_count({ count }, o));
+      for (const n of samples.positions)
+        await expect(page.locator(`[data-position="${n}"]`)).toHaveText(m.position_value({ n }, o));
       // Counts and positions inside sentences use the language's own digits too, as the number rows do.
-      for (const node of await page.locator('[data-count], [data-position]').all()) expect(foreignDigits(await node.innerText(), locale), await node.innerText()).toEqual([]);
+      for (const node of await page.locator('[data-count], [data-position]').all())
+        expect(foreignDigits(await node.innerText(), locale), await node.innerText()).toEqual([]);
       // The week in this locale's order from its first day, its weekend marked (Intl Locale Info's getWeekInfo).
       const days = Array.from({ length: 7 }, (_, index) => ((firstDay - 1 + index) % 7) + 1);
-      await expect(page.locator('[data-weekday]')).toHaveText(days.map(day => weekday(locale, day, 'short')));
-      expect(await page.locator('[data-weekday]').evaluateAll(nodes => nodes.map(node => Number(node.dataset.weekday)))).toEqual(days);
-      expect(await page.locator('[data-weekend]').evaluateAll(nodes => nodes.map(node => Number(node.dataset.weekday)))).toEqual(days.filter(day => weekend.includes(day)));
+      await expect(page.locator('[data-weekday]')).toHaveText(days.map((day) => weekday(locale, day, 'short')));
+      expect(
+        await page.locator('[data-weekday]').evaluateAll((nodes) => nodes.map((node) => Number(node.dataset.weekday))),
+      ).toEqual(days);
+      expect(
+        await page.locator('[data-weekend]').evaluateAll((nodes) => nodes.map((node) => Number(node.dataset.weekday))),
+      ).toEqual(days.filter((day) => weekend.includes(day)));
       // Words as Intl.Segmenter divides them, also for languages written without spaces.
       await expect(page.locator('[data-word]')).toHaveText(titleWords);
       // Every section opens with its "for this language" card.
-      for (const area of formatsAreas) await expect(page.locator(`section#${area} > div.grid > :first-child`), area).toHaveAttribute('data-own-area', area);
+      for (const area of formatsAreas)
+        await expect(page.locator(`section#${area} > div.grid > :first-child`), area).toHaveAttribute(
+          'data-own-area',
+          area,
+        );
       // Every control: this language's own values first and marked, then every other locale's, as links (static labels on a prerendered page) without JavaScript.
       for (const kind of choiceKinds) {
         const { own, others } = choicesFor(locale, kind);
         const items = page.locator(`[data-choices="${kind}"] li`);
-        expect(await items.evaluateAll(nodes => nodes.map(node => node.dataset.choiceValue)), kind).toEqual([...own, ...others].map(String));
-        expect(await items.evaluateAll(nodes => nodes.filter(node => node.hasAttribute('data-own')).map(node => node.dataset.choiceValue)), kind).toEqual(own.map(String));
+        expect(await items.evaluateAll((nodes) => nodes.map((node) => node.dataset.choiceValue)), kind).toEqual(
+          [...own, ...others].map(String),
+        );
+        expect(
+          await items.evaluateAll((nodes) =>
+            nodes.filter((node) => node.hasAttribute('data-own')).map((node) => node.dataset.choiceValue),
+          ),
+          kind,
+        ).toEqual(own.map(String));
       }
       await extra?.(page, locale);
       await context.close();
     });
   }
 }
-

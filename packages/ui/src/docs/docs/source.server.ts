@@ -48,11 +48,15 @@ export const docsPage = createServerOnlyFn(async (name: SiteName, splat: string)
   const page = site.source.getPage(slugs, lang);
   if (!page) return undefined;
   const { toc, structuredData } = await page.data.load();
-  const text = new Map(structuredData.headings.map(heading => [heading.id, heading.content]));
+  const text = new Map(structuredData.headings.map((heading) => [heading.id, heading.content]));
   const lastModified = (page.data as { lastModified?: Date }).lastModified;
-  const own = (value: string) => value === site.config.defaultLanguage || Boolean(site.source.getPage(slugs, value)?.path.includes(`.${value}.`));
-  const links = Object.fromEntries(site.source.getPages(site.config.defaultLanguage)
-    .map(english => [english.path, site.source.getPage(english.slugs, lang)?.url ?? english.url]));
+  const own = (value: string) =>
+    value === site.config.defaultLanguage || Boolean(site.source.getPage(slugs, value)?.path.includes(`.${value}.`));
+  const links = Object.fromEntries(
+    site.source
+      .getPages(site.config.defaultLanguage)
+      .map((english) => [english.path, site.source.getPage(english.slugs, lang)?.url ?? english.url]),
+  );
   return {
     site: name,
     slug: slugs.join('/'),
@@ -62,9 +66,12 @@ export const docsPage = createServerOnlyFn(async (name: SiteName, splat: string)
     langs: site.config.languages.filter(own),
     title: page.data.title,
     // A translation without its own description (translation is frozen) borrows the default language's.
-    description: page.data.description ?? site.source.getPage(slugs, site.config.defaultLanguage)?.data.description ?? '',
+    description:
+      page.data.description ?? site.source.getPage(slugs, site.config.defaultLanguage)?.data.description ?? '',
     ...(lastModified ? { lastModified: lastModified.toISOString() } : {}),
-    headings: toc.filter(entry => entry.depth === 2).map(entry => ({ id: entry.url.slice(1), text: text.get(entry.url.slice(1)) ?? entry.url.slice(1) })),
+    headings: toc
+      .filter((entry) => entry.depth === 2)
+      .map((entry) => ({ id: entry.url.slice(1), text: text.get(entry.url.slice(1)) ?? entry.url.slice(1) })),
     pageTree: await site.source.serializePageTree(site.source.getPageTree(lang)),
     links,
     origin: new URL(getRequest().url).origin,
@@ -79,14 +86,28 @@ export const docsPage = createServerOnlyFn(async (name: SiteName, splat: string)
  * languages as hreflang alternates and the default as x-default, so search engines (and their AI answers)
  * index each language's page. A page only in the default language is its URL alone.
  */
-export const docsSitemap = createServerOnlyFn((origin: string) => Object.values(sites).flatMap(site =>
-  site.source.getPages(site.config.defaultLanguage).flatMap(english => {
-    const langs = site.config.languages.filter(lang => lang === site.config.defaultLanguage || site.source.getPage(english.slugs, lang)?.path.includes(`.${lang}.`));
-    const href = (lang: string) => `${origin}${site.url(english.slugs, lang)}`;
-    const alternates = langs.length > 1 ? [...langs.map(lang => ({ hrefLang: lang, href: href(lang) })), { hrefLang: 'x-default', href: href(site.config.defaultLanguage) }] : [];
-    return langs.map(lang => ({ loc: href(lang), alternates }));
-  })));
+export const docsSitemap = createServerOnlyFn((origin: string) =>
+  Object.values(sites).flatMap((site) =>
+    site.source.getPages(site.config.defaultLanguage).flatMap((english) => {
+      const langs = site.config.languages.filter(
+        (lang) =>
+          lang === site.config.defaultLanguage || site.source.getPage(english.slugs, lang)?.path.includes(`.${lang}.`),
+      );
+      const href = (lang: string) => `${origin}${site.url(english.slugs, lang)}`;
+      const alternates =
+        langs.length > 1
+          ? [
+              ...langs.map((lang) => ({ hrefLang: lang, href: href(lang) })),
+              { hrefLang: 'x-default', href: href(site.config.defaultLanguage) },
+            ]
+          : [];
+      return langs.map((lang) => ({ loc: href(lang), alternates }));
+    }),
+  ),
+);
 
 /** The R2 folder Ask AI answers from for a site and language: its own text when the site has the language, else the default's. */
-export const docsAnswerFolder = createServerOnlyFn((name: SiteName, lang: string) =>
-  `${name}/${sites[name].config.languages.includes(lang) ? lang : sites[name].config.defaultLanguage}/`);
+export const docsAnswerFolder = createServerOnlyFn(
+  (name: SiteName, lang: string) =>
+    `${name}/${sites[name].config.languages.includes(lang) ? lang : sites[name].config.defaultLanguage}/`,
+);

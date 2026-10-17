@@ -1,20 +1,15 @@
 {
-  "//": "An app's docs/tsconfig.json is one line, extends @joeblew999/remy-ui/docs/tsconfig.json: ${configDir} is the app's docs/.",
-  "include": ["./**/*", "${configDir}/*.ts", "${configDir}/.remy-docs/*.ts", "${configDir}/worker-configuration.d.ts"],
-  "exclude": ["./tests/**/*", "./scripts/**/*", "./template/**/*", "./playwright.config.js"],
+  "//": "remy-auth's own check of the docs Worker in this folder, the way an app checks it: against remy-auth's apps/docs/ (docs.config.ts, the generated collections and Worker types). Editors and Vite+'s type check find it as these files' nearest tsconfig. Never published (package.json files); apps extend tsconfig.base.json.",
+  "extends": "./tsconfig.base.json",
+  "include": [
+    "./**/*",
+    "../../../../apps/docs/*.ts",
+    "../../../../apps/docs/.remy-docs/*.ts",
+    "../../../../apps/docs/worker-configuration.d.ts"
+  ],
   "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "types": ["vite/client", "node"],
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "jsx": "react-jsx",
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "allowImportingTsExtensions": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "noEmit": true,
-    "paths": { "@remy-docs-app/*": ["${configDir}/*"] }
+    "paths": {
+      "@remy-docs-app/*": ["../../../../apps/docs/*"]
+    }
   }
 }

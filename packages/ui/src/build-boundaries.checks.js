@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { locales } from './paraglide/runtime.js';
 import { localizedPath, checkedLocales } from './checks.js';
 
-const own = file => new URL(`./${file}`, import.meta.url);
+const own = (file) => new URL(`./${file}`, import.meta.url);
 
 /**
  * Code that must only ever run in the Worker. Each marker is a string that survives minification,
@@ -17,17 +17,37 @@ const own = file => new URL(`./${file}`, import.meta.url);
  * renamed string cannot turn the check into a silent pass.
  */
 export const serverOnlyMarkers = [
-  { name: "Paraglide's server middleware (paraglideMiddleware)", pattern: /Sec-Fetch-Dest/, source: own('paraglide/server.js') },
+  {
+    name: "Paraglide's server middleware (paraglideMiddleware)",
+    pattern: /Sec-Fetch-Dest/,
+    source: own('paraglide/server.js'),
+  },
   { name: "Node's async context (async_hooks)", pattern: /\basync_hooks\b/, source: own('paraglide/server.js') },
-  { name: "Start's request context (getRequest)", pattern: /No StartEvent found in AsyncLocalStorage/, source: { package: '@tanstack/start-server-core', from: '@tanstack/react-start' } },
-  { name: "Cloudflare's request geolocation (placeFromCloudflare)", pattern: /\^\[A-Z\]\{2\}\$/, source: own('cloudflare.ts') },
+  {
+    name: "Start's request context (getRequest)",
+    pattern: /No StartEvent found in AsyncLocalStorage/,
+    source: { package: '@tanstack/start-server-core', from: '@tanstack/react-start' },
+  },
+  {
+    name: "Cloudflare's request geolocation (placeFromCloudflare)",
+    pattern: /\^\[A-Z\]\{2\}\$/,
+    source: own('cloudflare.ts'),
+  },
   { name: 'The observability wrapper (withObservability)', pattern: /unhandled_exception/, source: own('worker.ts') },
 ];
 
 /** Development-only tools that must never reach a production bundle. */
 export const devtoolsMarkers = [
-  { name: 'TanStack Router devtools', pattern: /--tsrd-|Devtools is (?:already|not) mounted/, source: { package: '@tanstack/router-devtools-core', from: '@tanstack/react-router-devtools' } },
-  { name: 'TanStack Query devtools', pattern: /Tanstack query devtools|tsqd-/, source: { package: '@tanstack/query-devtools', from: '@tanstack/react-query-devtools' } },
+  {
+    name: 'TanStack Router devtools',
+    pattern: /--tsrd-|Devtools is (?:already|not) mounted/,
+    source: { package: '@tanstack/router-devtools-core', from: '@tanstack/react-router-devtools' },
+  },
+  {
+    name: 'TanStack Query devtools',
+    pattern: /Tanstack query devtools|tsqd-/,
+    source: { package: '@tanstack/query-devtools', from: '@tanstack/react-query-devtools' },
+  },
 ];
 
 /** The installed package's root directory, resolved from the app (or through the package that depends on it). */
@@ -44,7 +64,7 @@ function packageRoot(name, from) {
 
 /** Every JavaScript file under `dir`, skipping nested node_modules and source maps. */
 function scriptsIn(dir) {
-  return readdirSync(dir).flatMap(entry => {
+  return readdirSync(dir).flatMap((entry) => {
     const path = join(dir, entry);
     if (entry === 'node_modules') return [];
     if (statSync(path).isDirectory()) return scriptsIn(path);
@@ -55,11 +75,14 @@ function scriptsIn(dir) {
 function sourceText(source) {
   if (source instanceof URL) return readFileSync(fileURLToPath(source), 'utf8');
   if (typeof source === 'string') return readFileSync(join(process.cwd(), source), 'utf8');
-  return scriptsIn(packageRoot(source.package, source.from)).map(path => readFileSync(path, 'utf8')).join('\n');
+  return scriptsIn(packageRoot(source.package, source.from))
+    .map((path) => readFileSync(path, 'utf8'))
+    .join('\n');
 }
 
 /** Script URLs a text references: module specifiers, dynamic imports, script src and modulepreload hrefs. */
-const references = text => [...text.matchAll(/["'`]((?:\.{1,2}\/|\/)[^"'`\s<>]*?\.m?js)(?:\?[^"'`\s<>]*)?["'`]/g)].map(match => match[1]);
+const references = (text) =>
+  [...text.matchAll(/["'`]((?:\.{1,2}\/|\/)[^"'`\s<>]*?\.m?js)(?:\?[^"'`\s<>]*)?["'`]/g)].map((match) => match[1]);
 
 /**
  * Fetches every same-origin script reachable from the pages, following imports transitively, eight
@@ -77,19 +100,30 @@ async function crawl(request, baseURL, pages) {
     scripts.set(url.href, '');
     queue.push(url.href);
   };
-  const fetchText = async url => {
+  const fetchText = async (url) => {
     const response = await request.get(url);
     expect(response.status(), url).toBe(200);
     return { text: await response.text(), at: response.url() };
   };
   const inTurn = async (items, work) => {
     const left = [...items];
-    await Promise.all(Array.from({ length: Math.min(8, left.length) }, async () => { for (let item = left.shift(); item !== undefined; item = left.shift()) await work(item); }));
+    await Promise.all(
+      Array.from({ length: Math.min(8, left.length) }, async () => {
+        for (let item = left.shift(); item !== undefined; item = left.shift()) await work(item);
+      }),
+    );
   };
-  await inTurn(pages, async path => { const { text, at } = await fetchText(path); for (const reference of references(text)) add(reference, at); });
+  await inTurn(pages, async (path) => {
+    const { text, at } = await fetchText(path);
+    for (const reference of references(text)) add(reference, at);
+  });
   while (queue.length) {
     const batch = queue.splice(0);
-    await inTurn(batch, async url => { const { text } = await fetchText(url); scripts.set(url, text); for (const reference of references(text)) add(reference, url); });
+    await inTurn(batch, async (url) => {
+      const { text } = await fetchText(url);
+      scripts.set(url, text);
+      for (const reference of references(text)) add(reference, url);
+    });
   }
   return scripts;
 }
@@ -104,14 +138,21 @@ async function crawl(request, baseURL, pages) {
 export function buildBoundaryChecks({ paths, markers = [], clientDir = 'dist/client', deviceTimePath }) {
   test('the browser never downloads server-only code or devtools', async ({ request, baseURL }) => {
     const all = [...serverOnlyMarkers, ...devtoolsMarkers, ...markers];
-    for (const { name, pattern, source } of all) expect(sourceText(source), `the "${name}" marker occurs in its source`).toMatch(pattern);
+    for (const { name, pattern, source } of all)
+      expect(sourceText(source), `the "${name}" marker occurs in its source`).toMatch(pattern);
 
-    const scripts = await crawl(request, baseURL, locales.flatMap(locale => paths.map(path => localizedPath(path, locale))));
+    const scripts = await crawl(
+      request,
+      baseURL,
+      locales.flatMap((locale) => paths.map((path) => localizedPath(path, locale))),
+    );
     expect(scripts.size, 'the pages load scripts').toBeGreaterThan(1);
     if (process.env.TEST_TARGET !== 'remote') {
-      const built = scriptsIn(join(process.cwd(), clientDir)).map(path => `/${path.slice(join(process.cwd(), clientDir).length + 1)}`);
+      const built = scriptsIn(join(process.cwd(), clientDir)).map(
+        (path) => `/${path.slice(join(process.cwd(), clientDir).length + 1)}`,
+      );
       expect(built.length, `${clientDir} holds the production client build`).toBeGreaterThan(0);
-      const crawled = new Set([...scripts.keys()].map(url => new URL(url).pathname));
+      const crawled = new Set([...scripts.keys()].map((url) => new URL(url).pathname));
       for (const path of built) expect(crawled.has(path), `${path} is reachable from a public page`).toBe(true);
     }
     for (const [url, text] of scripts) {
@@ -122,12 +163,13 @@ export function buildBoundaryChecks({ paths, markers = [], clientDir = 'dist/cli
 
   // The other direction: the device's own time is browser-only, so the server's HTML leaves it
   // empty and the browser fills it after hydration (the formats checks assert the filled value).
-  if (deviceTimePath) test('the device time is rendered by the browser only', async ({ request }) => {
-    for (const locale of checkedLocales) {
-      const path = localizedPath(deviceTimePath, locale);
-      const response = await request.get(path);
-      expect(response.status(), path).toBe(200);
-      expect(await response.text(), path).toMatch(/<span[^>]*data-sample="local"[^>]*><\/span>/);
-    }
-  });
+  if (deviceTimePath)
+    test('the device time is rendered by the browser only', async ({ request }) => {
+      for (const locale of checkedLocales) {
+        const path = localizedPath(deviceTimePath, locale);
+        const response = await request.get(path);
+        expect(response.status(), path).toBe(200);
+        expect(await response.text(), path).toMatch(/<span[^>]*data-sample="local"[^>]*><\/span>/);
+      }
+    });
 }

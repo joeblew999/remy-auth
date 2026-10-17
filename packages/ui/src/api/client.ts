@@ -15,7 +15,10 @@ import { getLocale } from '../paraglide/runtime.js';
  * Requests carry the page's language (Paraglide's getLocale) as Accept-Language, so the server
  * answers in it. Use it to call another Remy app through that app's published contract.
  */
-export function contractClient<C extends RouterContract>(contract: C, { origin }: { origin?: string | (() => string) } = {}): RouterContractClient<C> {
+export function contractClient<C extends RouterContract>(
+  contract: C,
+  { origin }: { origin?: string | (() => string) } = {},
+): RouterContractClient<C> {
   const link = new OpenAPILink(contract, {
     origin,
     url: '/',
@@ -31,7 +34,10 @@ export function contractClient<C extends RouterContract>(contract: C, { origin }
  * in createServerOnlyFn so the router never reaches the browser (no HTTP hop inside a loader);
  * in the browser `contractClient` against this page's origin.
  */
-export function isomorphicClient<C extends RouterContract>(contract: C, { server }: { server: () => RouterContractClient<C> }): RouterContractClient<C> {
+export function isomorphicClient<C extends RouterContract>(
+  contract: C,
+  { server }: { server: () => RouterContractClient<C> },
+): RouterContractClient<C> {
   return createIsomorphicFn()
     .server(server)
     .client(() => contractClient(contract))();

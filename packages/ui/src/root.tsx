@@ -41,13 +41,24 @@ type RootOptions = {
 export function remyRoot(app: RemyApp, { devtools, icon = '/favicon.svg' }: RootOptions = {}) {
   function Document({ children }: { children: React.ReactNode }) {
     const locale = getLocale();
-    const preferred = useLoaderData({ strict: false, select: data => (data as { preferred?: ReturnType<typeof preferredLocale> } | undefined)?.preferred });
-    return <html lang={locale} dir={direction(locale)} suppressHydrationWarning>
-      <head><HeadContent /></head>
-      <body><AppProviders locale={locale} app={app} preferred={preferred}>{children}</AppProviders>
-        {devtools}
-        <Scripts /></body>
-    </html>;
+    const preferred = useLoaderData({
+      strict: false,
+      select: (data) => (data as { preferred?: ReturnType<typeof preferredLocale> } | undefined)?.preferred,
+    });
+    return (
+      <html lang={locale} dir={direction(locale)} suppressHydrationWarning>
+        <head>
+          <HeadContent />
+        </head>
+        <body>
+          <AppProviders locale={locale} app={app} preferred={preferred}>
+            {children}
+          </AppProviders>
+          {devtools}
+          <Scripts />
+        </body>
+      </html>
+    );
   }
   return {
     // Cheap, so it reruns on every navigation.

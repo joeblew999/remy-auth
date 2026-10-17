@@ -49,23 +49,37 @@ export function generateSpec(router: AnyRouter, info: ApiInfo, errorStatuses?: E
  * answer. Empty by default. An answer to a request with a cookie or an Authorization header, and
  * every 401, is `no-store`.
  */
-export function apiHandlers<T extends Context>(router: Router<T>, { info, context, origins = [], errorStatuses }: {
-  info: ApiInfo;
-  context: (request: Request) => T | Promise<T>;
-  origins?: readonly string[];
-  errorStatuses?: ErrorStatuses;
-}) {
-  if (origins.some(origin => origin === '*' || new URL(origin).origin !== origin)) throw new Error(`apiHandlers: origins are exact origins like https://app.example, got ${origins.join(', ')}`);
-  const cors = origins.length ? [new CORSHandlerPlugin<T>({ origin: [...origins], allowMethods: ['GET', 'HEAD', 'POST'] })] : [];
+export function apiHandlers<T extends Context>(
+  router: Router<T>,
+  {
+    info,
+    context,
+    origins = [],
+    errorStatuses,
+  }: {
+    info: ApiInfo;
+    context: (request: Request) => T | Promise<T>;
+    origins?: readonly string[];
+    errorStatuses?: ErrorStatuses;
+  },
+) {
+  if (origins.some((origin) => origin === '*' || new URL(origin).origin !== origin))
+    throw new Error(`apiHandlers: origins are exact origins like https://app.example, got ${origins.join(', ')}`);
+  const cors = origins.length
+    ? [new CORSHandlerPlugin<T>({ origin: [...origins], allowMethods: ['GET', 'HEAD', 'POST'] })]
+    : [];
   const handler = new OpenAPIHandler<T>(router, {
     errorStatusMap: statusesOf(errorStatuses),
-    plugins: [...cors, new OpenAPIReferenceHandlerPlugin<T, 'scalar'>({
-      spec: () => generateSpec(router, info, errorStatuses),
-      specPath,
-      docsPath,
-      docsTitle: info.title,
-      providerScriptUrl: scalarScript,
-    })],
+    plugins: [
+      ...cors,
+      new OpenAPIReferenceHandlerPlugin<T, 'scalar'>({
+        spec: () => generateSpec(router, info, errorStatuses),
+        specPath,
+        docsPath,
+        docsTitle: info.title,
+        providerScriptUrl: scalarScript,
+      }),
+    ],
   });
   const handle = async ({ request }: { request: Request }) => {
     const { matched, response } = await handler.handle(request, { context: await context(request) });

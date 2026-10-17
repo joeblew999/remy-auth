@@ -3,7 +3,7 @@
 Closed 2026-09-26: the mechanism and four parts (time-zones, deferred-place, seo-routes, status-card) in remy-ui 0.11.0; leave-guard, search-params and observability stay package modules (reasons below); "Writing a part" is in docs/content/dev/remy-ui.md. remy-auth-app adopts parts when it wants them.
 
 Status: proposed 2026-09-25 under the owner's delegation. Owner: remy-auth. Executor/Reviewer roles
-as in [plans and roles](../../docs/content/dev/principles.md#plans-and-roles). Owner, 2026-09-25: parts of the GUI (some for operations,
+as in [plans and roles](../../apps/docs/content/dev/principles.md#plans-and-roles). Owner, 2026-09-25: parts of the GUI (some for operations,
 some for testing) will be wanted again and again; adding and removing them from any Remy app must
 be child's play.
 

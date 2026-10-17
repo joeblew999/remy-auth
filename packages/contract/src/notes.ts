@@ -8,16 +8,38 @@ import { defineVocabulary, type Can } from '@joeblew999/remy-ui/api/relations';
 
 /** The notes demo's vocabulary, as data, for the platform's relation engine (@joeblew999/remy-ui/api/relations). */
 export const notesVocabulary = defineVocabulary({
-  objectTypes: [
-    { code: 'NOTE', tableName: 'note' },
-    { code: 'PLATFORM' },
-  ],
+  objectTypes: [{ code: 'NOTE', tableName: 'note' }, { code: 'PLATFORM' }],
   relations: [
     // Whoever wrote it: a column on the note itself.
-    { code: 'NOTE_AUTHOR', objectTypeCode: 'NOTE', via: 'table', sourceTable: 'note', objectColumn: 'id', userColumn: 'author_id' },
+    {
+      code: 'NOTE_AUTHOR',
+      objectTypeCode: 'NOTE',
+      via: 'table',
+      sourceTable: 'note',
+      objectColumn: 'id',
+      userColumn: 'author_id',
+    },
     // Whoever it is shared with, by the role the author gave them.
-    { code: 'NOTE_EDITOR', objectTypeCode: 'NOTE', via: 'table', sourceTable: 'note_share', objectColumn: 'note_id', userColumn: 'user_id', filterColumn: 'role', filterValue: 'editor' },
-    { code: 'NOTE_READER', objectTypeCode: 'NOTE', via: 'table', sourceTable: 'note_share', objectColumn: 'note_id', userColumn: 'user_id', filterColumn: 'role', filterValue: 'reader' },
+    {
+      code: 'NOTE_EDITOR',
+      objectTypeCode: 'NOTE',
+      via: 'table',
+      sourceTable: 'note_share',
+      objectColumn: 'note_id',
+      userColumn: 'user_id',
+      filterColumn: 'role',
+      filterValue: 'editor',
+    },
+    {
+      code: 'NOTE_READER',
+      objectTypeCode: 'NOTE',
+      via: 'table',
+      sourceTable: 'note_share',
+      objectColumn: 'note_id',
+      userColumn: 'user_id',
+      filterColumn: 'role',
+      filterValue: 'reader',
+    },
     // The platform's administrators, by the role their account holds: they may see and remove any note.
     { code: 'PLATFORM_ADMIN', objectTypeCode: 'PLATFORM', via: 'role', roleCode: 'ADMIN' },
     { code: 'ANY_SIGNED_IN', objectTypeCode: 'PLATFORM', via: 'everyone' },
@@ -32,7 +54,12 @@ export const notesVocabulary = defineVocabulary({
   ],
   grants: {
     CREATE_NOTE: [{ relation: 'ANY_SIGNED_IN' }],
-    VIEW_NOTE: [{ relation: 'NOTE_AUTHOR' }, { relation: 'NOTE_EDITOR' }, { relation: 'NOTE_READER' }, { relation: 'PLATFORM_ADMIN' }],
+    VIEW_NOTE: [
+      { relation: 'NOTE_AUTHOR' },
+      { relation: 'NOTE_EDITOR' },
+      { relation: 'NOTE_READER' },
+      { relation: 'PLATFORM_ADMIN' },
+    ],
     EDIT_NOTE: [{ relation: 'NOTE_AUTHOR' }, { relation: 'NOTE_EDITOR' }],
     SHARE_NOTE: [{ relation: 'NOTE_AUTHOR' }],
     DELETE_NOTE: [{ relation: 'NOTE_AUTHOR' }, { relation: 'PLATFORM_ADMIN' }],
@@ -43,7 +70,12 @@ export const notesVocabulary = defineVocabulary({
 
 /** What a note carries for its viewer: each action on it, allowed or not, as the server answered. */
 export type NoteCan = Can<typeof notesVocabulary, 'NOTE'>;
-const noteCan = z.object({ VIEW_NOTE: z.boolean(), EDIT_NOTE: z.boolean(), SHARE_NOTE: z.boolean(), DELETE_NOTE: z.boolean() }) satisfies z.ZodType<NoteCan>;
+const noteCan = z.object({
+  VIEW_NOTE: z.boolean(),
+  EDIT_NOTE: z.boolean(),
+  SHARE_NOTE: z.boolean(),
+  DELETE_NOTE: z.boolean(),
+}) satisfies z.ZodType<NoteCan>;
 
 /** The roles a note is shared in. */
 export const shareRoles = ['reader', 'editor'] as const;

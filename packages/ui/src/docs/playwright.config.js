@@ -17,11 +17,13 @@ export default defineConfig({
     { name: 'ours', testIgnore: /lighthouse\.spec\.js$/ },
     { name: 'google', testMatch: /lighthouse\.spec\.js$/ },
   ],
-  webServer: remote ? undefined : {
-    command: `../node_modules/.bin/wrangler dev -c dist/server/wrangler.json --local --ip 127.0.0.1 --port ${process.env.PREVIEW_PORT ?? '4174'}`,
-    url: `${origin}/healthz`,
-    cwd: process.cwd(),
-    reuseExistingServer: false,
-    timeout: 90_000,
-  },
+  webServer: remote
+    ? undefined
+    : {
+        command: `wrangler dev -c dist/server/wrangler.json --local --ip 127.0.0.1 --port ${process.env.PREVIEW_PORT ?? '4174'}`,
+        url: `${origin}/healthz`,
+        cwd: process.cwd(),
+        reuseExistingServer: false,
+        timeout: 90_000,
+      },
 });

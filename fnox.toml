@@ -10,5 +10,5 @@ type = "keychain"
 service = "fnox"
 
 [secrets]
-CLOUDFLARE_API_TOKEN  = { provider = "keychain", value = "CLOUDFLARE_API_TOKEN" }
+CLOUDFLARE_API_TOKEN = { provider = "keychain", value = "CLOUDFLARE_API_TOKEN" }
 CLOUDFLARE_ACCOUNT_ID = { provider = "keychain", value = "CLOUDFLARE_ACCOUNT_ID" }

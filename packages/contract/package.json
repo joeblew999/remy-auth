@@ -2,29 +2,29 @@
   "name": "@joeblew999/remy-auth-contract",
   "version": "0.4.1",
   "description": "remy-auth's API contract: oRPC routes with Zod 4 input, output and error schemas, for the server that implements it and every client that calls it",
-  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/joeblew999/remy-auth.git",
     "directory": "packages/contract"
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "files": [
     "src",
     "README.md"
   ],
+  "type": "module",
   "exports": {
     ".": "./src/index.ts",
     "./notes": "./src/notes.ts"
   },
-  "peerDependencies": {
-    "@joeblew999/remy-showcase": ">=0.1.0",
-    "@joeblew999/remy-ui": ">=0.15.1"
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
     "@orpc/contract": "2.0.0-beta.42",
     "zod": "4.6.5"
+  },
+  "peerDependencies": {
+    "@joeblew999/remy-showcase": ">=0.1.0",
+    "@joeblew999/remy-ui": ">=0.15.1"
   }
 }

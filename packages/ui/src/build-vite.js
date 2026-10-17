@@ -3,6 +3,11 @@
 // page can tell when the deployment has moved on (build-stamp.tsx). Everything in it comes from the
 // sources: the same checkout builds the same stamp, so a bundle's hash moves only when its code does.
 // There is no build time in it for that reason; when a version was deployed is Cloudflare's to say.
+// The build itself never runs git: Vite Plus counts every file a task reads, a git status reads every changed file in
+// the repository and git's index changes with every commit, so a stamp worked out in the build made each change
+// anywhere, and each commit, a new build and all the browser checks again (2026-10-17, traced). The commit comes in
+// the environment instead: REMY_COMMIT and REMY_CHANGES, which a deploy works out (gitStamp, below), or Workers
+// Builds' WORKERS_CI_COMMIT_SHA. A local build names none: Vite Plus's cache is what keeps it current.
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
@@ -12,7 +17,12 @@ const id = 'virtual:remy-build';
 
 const git = (root, ...args) => {
   try {
-    return execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 256 * 1024 * 1024 }).trim();
+    return execFileSync('git', args, {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+      maxBuffer: 256 * 1024 * 1024,
+    }).trim();
   } catch {
     return ''; // not a git checkout (a tarball, some CI): the stamp says so by naming no commit
   }
@@ -33,16 +43,39 @@ function installedVersion(name, root) {
  * one commit with different edits differ), and the installed version of each package in `packages`
  * and of every dependency the app's package.json names in the platform's scope.
  */
-export function buildStamp({ root = process.cwd(), packages = [], scope = '@joeblew999/' } = {}) {
-  const app = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
+/**
+ * What a deploy hands its build (outside it, before it): the checkout's commit and a short hash of what was
+ * uncommitted, as REMY_COMMIT and REMY_CHANGES.
+ */
+export function gitStamp(root = process.cwd()) {
   const commit = git(root, 'rev-parse', 'HEAD');
   const uncommitted = commit ? git(root, 'status', '--porcelain') : '';
-  const changes = uncommitted ? createHash('sha256').update(uncommitted).update(git(root, 'diff', 'HEAD')).digest('hex').slice(0, 7) : '';
-  const named = [...Object.keys({ ...app.dependencies, ...app.devDependencies }).filter(name => name.startsWith(scope)), ...packages];
-  const versions = Object.fromEntries([...new Set(named)].sort().flatMap(name => {
-    const version = installedVersion(name, root);
-    return version ? [[name, version]] : [];
-  }));
+  const changes = uncommitted
+    ? createHash('sha256')
+        .update(uncommitted)
+        .update(git(root, 'diff', 'HEAD'))
+        .digest('hex')
+        .slice(0, 7)
+    : '';
+  return { REMY_COMMIT: commit, REMY_CHANGES: changes };
+}
+
+export function buildStamp({ root = process.cwd(), packages = [], scope = '@joeblew999/' } = {}) {
+  const app = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
+  const commit = process.env.REMY_COMMIT || process.env.WORKERS_CI_COMMIT_SHA || '';
+  const changes = process.env.REMY_CHANGES || '';
+  const named = [
+    ...Object.keys({ ...app.dependencies, ...app.devDependencies }).filter((name) => name.startsWith(scope)),
+    ...packages,
+  ];
+  const versions = Object.fromEntries(
+    [...new Set(named)]
+      .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+      .flatMap((name) => {
+        const version = installedVersion(name, root);
+        return version ? [[name, version]] : [];
+      }),
+  );
   return { app: { name: app.name ?? '', version: app.version ?? '' }, commit, changes, packages: versions };
 }
 
@@ -54,7 +87,8 @@ export function remyBuild(options = {}) {
   let stamp;
   return {
     name: 'remy-build',
-    resolveId: source => source === id ? `\0${id}` : undefined,
-    load: loaded => loaded === `\0${id}` ? `export const build = ${JSON.stringify(stamp ??= buildStamp(options))};` : undefined,
+    resolveId: (source) => (source === id ? `\0${id}` : undefined),
+    load: (loaded) =>
+      loaded === `\0${id}` ? `export const build = ${JSON.stringify((stamp ??= buildStamp(options)))};` : undefined,
   };
 }

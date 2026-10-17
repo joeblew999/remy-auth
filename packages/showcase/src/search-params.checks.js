@@ -1,7 +1,6 @@
 // Checks for the typed, validated search params on the formats page (./search-params.tsx).
 // Plain JavaScript like ../checks.js; Node's Intl is the oracle for the formatted text.
 import { test, expect } from '@playwright/test';
-import { locales } from '@joeblew999/remy-ui/runtime';
 import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { localizedPath, collectErrors, behaviourLocales, formatTag } from '@joeblew999/remy-ui/checks';
@@ -10,15 +9,21 @@ import { allChoices, choiceKinds, searchDefaults as defaults } from '@joeblew999
 // The defaults and choices come from the same derived module the page and its schema read
 // (../locale-data.js), so a new locale's calendar, digits, currency and plural forms need no edit here.
 /** A choice of each control other than its default: the last one over all locales. */
-const other = Object.fromEntries(choiceKinds.map(kind => [kind, allChoices(kind).findLast(value => value !== defaults[kind])]));
+const other = Object.fromEntries(
+  choiceKinds.map((kind) => [kind, allChoices(kind).findLast((value) => value !== defaults[kind])]),
+);
 
 /** What the chosen rows must show for these values in this locale. */
 function expected(locale, { currency, count, calendar, numbering }) {
   return {
     'chosen-currency': new Intl.NumberFormat(formatTag(locale), { style: 'currency', currency }).format(samples.amount),
     'chosen-count': m.apps_count({ count }, { locale }),
-    'chosen-calendar': new Intl.DateTimeFormat(formatTag(locale), { ...samples.calendarDate, calendar }).format(samples.date),
-    'chosen-numbering': new Intl.NumberFormat(formatTag(locale), { numberingSystem: numbering }).format(samples.decimal),
+    'chosen-calendar': new Intl.DateTimeFormat(formatTag(locale), { ...samples.calendarDate, calendar }).format(
+      samples.date,
+    ),
+    'chosen-numbering': new Intl.NumberFormat(formatTag(locale), { numberingSystem: numbering }).format(
+      samples.decimal,
+    ),
   };
 }
 
@@ -27,7 +32,8 @@ async function expectChosen(page, locale, values) {
     await expect(page.locator(`[data-sample="${sample}"]`), `${locale} ${sample}`).toHaveText(text);
   }
   const controls = page.locator('[data-showcase="search-params"]');
-  for (const kind of choiceKinds) await expect(controls.locator(`[data-${kind}-choice="${values[kind]}"]`)).toHaveAttribute('aria-current', 'page');
+  for (const kind of choiceKinds)
+    await expect(controls.locator(`[data-${kind}-choice="${values[kind]}"]`)).toHaveAttribute('aria-current', 'page');
   await expect(controls.locator('[aria-current="page"]')).toHaveCount(choiceKinds.length);
 }
 
@@ -39,9 +45,14 @@ async function expectChosen(page, locale, values) {
  */
 export function searchParamsChecks({ serverRendered = true } = {}) {
   const { currency, count, calendar, numbering } = other;
+  /** @type {[search: string, normalised: string, values: typeof defaults][]} */
   const cases = [
     ['?currency=XYZ&count=abc&calendar=nope&numbering=nope', '', defaults],
-    [`?currency=${defaults.currency}&count=${defaults.count}&calendar=${defaults.calendar}&numbering=${defaults.numbering}`, '', defaults],
+    [
+      `?currency=${defaults.currency}&count=${defaults.count}&calendar=${defaults.calendar}&numbering=${defaults.numbering}`,
+      '',
+      defaults,
+    ],
     [`?currency=${currency}&count=-1`, `?currency=${currency}`, { ...defaults, currency }],
     [`?count=2.5&calendar=${calendar}`, `?calendar=${calendar}`, { ...defaults, calendar }],
     [`?numbering=${numbering}&count=1001`, `?numbering=${numbering}`, { ...defaults, numbering }],
@@ -53,7 +64,11 @@ export function searchParamsChecks({ serverRendered = true } = {}) {
   for (const locale of behaviourLocales) {
     const path = localizedPath('/formats', locale);
 
-    test(`${locale}: invalid search params fall back to defaults and the URL is normalised`, async ({ page, request, baseURL }) => {
+    test(`${locale}: invalid search params fall back to defaults and the URL is normalised`, async ({
+      page,
+      request,
+      baseURL,
+    }) => {
       const errors = collectErrors(page);
       for (const [search, normalised, values] of cases) {
         if (serverRendered) {
@@ -74,7 +89,11 @@ export function searchParamsChecks({ serverRendered = true } = {}) {
       expect(errors).toEqual([]);
     });
 
-    test(`${locale}: controls set typed search params; the URL round-trips into a fresh browser`, async ({ page, browser, baseURL }) => {
+    test(`${locale}: controls set typed search params; the URL round-trips into a fresh browser`, async ({
+      page,
+      browser,
+      baseURL,
+    }) => {
       const errors = collectErrors(page);
       await page.goto(path);
       await page.waitForLoadState('networkidle');

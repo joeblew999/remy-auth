@@ -10,10 +10,10 @@ import { baseLocale, locales, localizeHref } from './paraglide/runtime.js';
  */
 export function prerenderPages({ notFoundPath, paths, files = ['/robots.txt', '/sitemap.xml'] }) {
   return [
-    ...paths.map(path => ({ path: path || '/' })),
-    ...locales.flatMap(locale => paths.map(path => ({ path: localizeHref(path || '/', { locale }) }))),
-    ...files.map(path => ({ path })),
-    ...locales.map(locale => ({
+    ...paths.map((path) => ({ path: path || '/' })),
+    ...locales.flatMap((locale) => paths.map((path) => ({ path: localizeHref(path || '/', { locale }) }))),
+    ...files.map((path) => ({ path })),
+    ...locales.map((locale) => ({
       path: localizeHref(notFoundPath, { locale }),
       prerender: { outputPath: locale === baseLocale ? '/404.html' : `/${locale}/404.html` },
     })),

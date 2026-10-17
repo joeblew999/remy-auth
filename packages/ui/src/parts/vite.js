@@ -12,10 +12,11 @@ const id = 'virtual:remy-parts';
 const here = dirname(fileURLToPath(import.meta.url));
 
 /** The file a module path names, trying the extensions a part or an app writes; undefined if none exists. */
-const withExtension = path => ['.ts', '.tsx', '.js'].map(extension => path + extension).find(file => existsSync(file));
+const withExtension = (path) =>
+  ['.ts', '.tsx', '.js'].map((extension) => path + extension).find((file) => existsSync(file));
 
 /** A module exporting each of `names` as `undefined`: what an unlisted part's entry is. */
-const absent = names => names.map(name => `export const ${name} = undefined;\n`).join('');
+const absent = (names) => names.map((name) => `export const ${name} = undefined;\n`).join('');
 
 /**
  * `const parts = remyParts()` in vite.config.ts, then `parts.plugin` among the plugins and
@@ -37,21 +38,27 @@ export function remyParts({ root = process.cwd(), file, routesDirectory = 'src/r
     physical('', '.'),
     // The routes every app has from the package (app-routes: the CSP report endpoint), then the listed parts'.
     physical('', relative(routesDir, join(here, '..', 'app-routes'))),
-    ...names.filter(name => listed[name].routes).map(name => physical('', relative(routesDir, join(listed[name].dir, 'routes')))),
+    ...names
+      .filter((name) => listed[name].routes)
+      .map((name) => physical('', relative(routesDir, join(listed[name].dir, 'routes')))),
   ]);
-  const code = source => {
-    if (source === id) return `export const parts = ${JSON.stringify(names)};\nexport const hasPart = name => parts.includes(name);\nexport const sitePaths = ${JSON.stringify(partSitePaths(listed))};\n`;
+  const code = (source) => {
+    if (source === id)
+      return `export const parts = ${JSON.stringify(names)};\nexport const hasPart = name => parts.includes(name);\nexport const sitePaths = ${JSON.stringify(partSitePaths(listed))};\n`;
     const [part, entry, ...rest] = source.slice(id.length + 1).split('/');
     // An unlisted part's modules are its catalog's export names, all undefined: the platform's catalog, or the
     // one of the package the app lists it from. A part neither lists nor offers is an error, as before.
     const known = listed[part] ?? offeredPart(part, { root });
-    if (!known || rest.length !== 0 || !(entry === 'app' || Object.hasOwn(known.entries, entry))) throw new Error(`${source}: no such parts module (see the parts catalogs)`);
+    if (!known || rest.length !== 0 || !(entry === 'app' || Object.hasOwn(known.entries, entry)))
+      throw new Error(`${source}: no such parts module (see the parts catalogs)`);
     const exports = entry === 'app' ? known.app : known.entries[entry];
     if (!names.includes(part)) return absent(exports);
     if (entry === 'app') {
       // The app's file may export only some of the options: read them from its namespace.
       const app = withExtension(resolve(root, partAppFile(part)));
-      return app ? `import * as app from ${JSON.stringify(app)};\n${exports.map(name => `export const ${name} = app.${name};\n`).join('')}` : absent(exports);
+      return app
+        ? `import * as app from ${JSON.stringify(app)};\n${exports.map((name) => `export const ${name} = app.${name};\n`).join('')}`
+        : absent(exports);
     }
     const module = withExtension(join(listed[part].dir, entry));
     if (!module) throw new Error(`${source}: the part's ${entry} module is missing`);
@@ -59,8 +66,8 @@ export function remyParts({ root = process.cwd(), file, routesDirectory = 'src/r
   };
   const plugin = {
     name: 'remy-parts',
-    resolveId: source => source === id || source.startsWith(`${id}/`) ? `\0${source}` : undefined,
-    load: loaded => loaded.startsWith(`\0${id}`) ? code(loaded.slice(1)) : undefined,
+    resolveId: (source) => (source === id || source.startsWith(`${id}/`) ? `\0${source}` : undefined),
+    load: (loaded) => (loaded.startsWith(`\0${id}`) ? code(loaded.slice(1)) : undefined),
   };
   return { names, routes, plugin };
 }

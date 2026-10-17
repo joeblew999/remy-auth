@@ -38,16 +38,26 @@ export function apiChecks({ router, title, origins = [], personFields, errorStat
     ]);
   });
 
-  test('every API procedure that needs a session refuses a caller without one, before answering anything', async ({ playwright, baseURL }) => {
+  test('every API procedure that needs a session refuses a caller without one, before answering anything', async ({
+    playwright,
+    baseURL,
+  }) => {
     // A caller of its own, with no cookies: the test's shared request context may hold a session.
     const stranger = await playwright.request.newContext({ baseURL });
     for (const { path, procedure } of procedures(router)) {
       if (policyOf(procedure) === 'public') continue;
       const { method, path: route } = routeOf(procedure);
-      const response = await stranger.fetch(route.replace(/\{[^}]+\}/g, 'x'), { method, ...(method === 'GET' ? {} : { data: {} }) });
+      const response = await stranger.fetch(route.replace(/\{[^}]+\}/g, 'x'), {
+        method,
+        ...(method === 'GET' ? {} : { data: {} }),
+      });
       expect(response.status(), `${path}: ${method} ${route} without a session`).toBe(401);
       expect(response.headers()['cache-control'], `${path}: a refusal is never cached`).toBe('no-store');
-      expect(await response.json(), path).toEqual({ defined: expect.any(Boolean), code: 'UNAUTHORIZED', message: expect.any(String) });
+      expect(await response.json(), path).toEqual({
+        defined: expect.any(Boolean),
+        code: 'UNAUTHORIZED',
+        message: expect.any(String),
+      });
     }
     await stranger.dispose();
   });
@@ -60,13 +70,22 @@ export function apiChecks({ router, title, origins = [], personFields, errorStat
       unmapped: oc.errors({ OUT_OF_STOCK: {} }).output(z.object({})),
     };
     expect(coverageProblems(bare)).toEqual([
-      'missing: no HTTP method', 'missing: no path under /api/', 'missing: no policy', 'missing: takes input but documents no error',
-      'unmapped: no HTTP method', 'unmapped: no path under /api/', 'unmapped: undefined undefined is also missing', 'unmapped: no policy',
-      'unmapped: error OUT_OF_STOCK has no HTTP error status', 'unmapped: error OUT_OF_STOCK has no message',
+      'missing: no HTTP method',
+      'missing: no path under /api/',
+      'missing: no policy',
+      'missing: takes input but documents no error',
+      'unmapped: no HTTP method',
+      'unmapped: no path under /api/',
+      'unmapped: undefined undefined is also missing',
+      'unmapped: no policy',
+      'unmapped: error OUT_OF_STOCK has no HTTP error status',
+      'unmapped: error OUT_OF_STOCK has no message',
     ]);
   });
 
-  test('the OpenAPI 3.1 document is generated from the router and served with its reference page', async ({ request }) => {
+  test('the OpenAPI 3.1 document is generated from the router and served with its reference page', async ({
+    request,
+  }) => {
     const response = await request.get('/api/openapi.json');
     expect(response.status()).toBe(200);
     expect(response.headers()['content-type']).toContain('application/json');
@@ -74,10 +93,15 @@ export function apiChecks({ router, title, origins = [], personFields, errorStat
     expect(spec.openapi).toMatch(/^3\.1\./);
     expect(spec.info.title).toBe(title);
     const expected = procedures(router).map(({ procedure }) => routeOf(procedure));
-    const served = Object.entries(spec.paths).flatMap(([path, operations]) => Object.keys(operations).map(method => `${method.toUpperCase()} ${path}`));
-    expect(served.sort()).toEqual(expected.map(route => `${route.method} ${route.path}`).sort());
+    const served = Object.entries(spec.paths).flatMap(([path, operations]) =>
+      Object.keys(operations).map((method) => `${method.toUpperCase()} ${path}`),
+    );
+    expect(served.sort()).toEqual(expected.map((route) => `${route.method} ${route.path}`).sort());
     // oRPC hoists each error's schema into components.schemas; a response names it by $ref.
-    const resolved = schema => JSON.stringify(schema ?? null, (_key, value) => (value?.$ref?.startsWith('#/components/schemas/') ? spec.components.schemas[value.$ref.split('/').pop()] : value));
+    const resolved = (schema) =>
+      JSON.stringify(schema ?? null, (_key, value) =>
+        value?.$ref?.startsWith('#/components/schemas/') ? spec.components.schemas[value.$ref.split('/').pop()] : value,
+      );
     for (const { path, procedure } of procedures(router)) {
       const route = routeOf(procedure);
       const operation = spec.paths[route.path][route.method.toLowerCase()];
@@ -95,7 +119,9 @@ export function apiChecks({ router, title, origins = [], personFields, errorStat
     expect(docs.headers()['content-type']).toContain('text/html');
     const html = await docs.text();
     expect(html).toContain(`<title>${title}</title>`);
-    expect(html).toMatch(/<script src="https:\/\/cdn\.jsdelivr\.net\/npm\/@scalar\/api-reference@\d+\.\d+\.\d+"><\/script>/);
+    expect(html).toMatch(
+      /<script src="https:\/\/cdn\.jsdelivr\.net\/npm\/@scalar\/api-reference@\d+\.\d+\.\d+"><\/script>/,
+    );
     // oRPC escapes the embedded document for HTML: every slash is \u002F.
     for (const route of expected) expect(html, route.path).toContain(route.path.replaceAll('/', '\\u002F'));
 
@@ -107,7 +133,9 @@ export function apiChecks({ router, title, origins = [], personFields, errorStat
   test('only the registered origins may call the API from their pages (CORS)', async ({ request }) => {
     const calls = procedures(router).map(({ procedure }) => routeOf(procedure));
     // A simple call needs an endpoint anyone may call: a stranger's GET of a public procedure.
-    const get = calls.find((route, index) => route.method === 'GET' && policyOf(procedures(router)[index].procedure) === 'public');
+    const get = calls.find(
+      (route, index) => route.method === 'GET' && policyOf(procedures(router)[index].procedure) === 'public',
+    );
     const other = 'https://not-registered.example';
     expect(origins, 'a registered origin is exact, never a wildcard').not.toContain('*');
     for (const origin of [...origins, other]) {
@@ -121,14 +149,24 @@ export function apiChecks({ router, title, origins = [], personFields, errorStat
         if (origins.length) expect(response.headers().vary, `${origin} GET ${get.path}`).toMatch(/\bOrigin\b/i);
       }
       // The preflight a page sends before a JSON POST.
-      for (const route of calls.filter(route => route.method !== 'GET')) {
-        const preflight = await request.fetch(route.path, { method: 'OPTIONS', headers: {
-          Origin: origin, 'Access-Control-Request-Method': route.method, 'Access-Control-Request-Headers': 'content-type',
-        } });
-        expect(preflight.headers()['access-control-allow-origin'], `${origin} preflight ${route.method} ${route.path}`).toBe(allowed);
+      for (const route of calls.filter((route) => route.method !== 'GET')) {
+        const preflight = await request.fetch(route.path, {
+          method: 'OPTIONS',
+          headers: {
+            Origin: origin,
+            'Access-Control-Request-Method': route.method,
+            'Access-Control-Request-Headers': 'content-type',
+          },
+        });
+        expect(
+          preflight.headers()['access-control-allow-origin'],
+          `${origin} preflight ${route.method} ${route.path}`,
+        ).toBe(allowed);
         if (allowed) {
           expect(preflight.status(), `${origin} preflight ${route.path}`).toBe(204);
-          expect(preflight.headers()['access-control-allow-methods'], `${origin} preflight ${route.path}`).toContain(route.method);
+          expect(preflight.headers()['access-control-allow-methods'], `${origin} preflight ${route.path}`).toContain(
+            route.method,
+          );
         }
       }
     }

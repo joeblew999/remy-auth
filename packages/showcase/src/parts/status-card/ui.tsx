@@ -1,3 +1,4 @@
+// oxlint-disable-next-line typescript/triple-slash-reference -- a script of ambient virtual-module declarations cannot be imported, and the package ships as source to apps whose tsconfig does not include it
 /// <reference path="../virtual.d.ts" />
 import type { QueryClient } from '@tanstack/react-query';
 import { getLocale } from '@joeblew999/remy-ui/locale';
@@ -11,7 +12,7 @@ import { statusQuery as appStatusQuery } from 'virtual:remy-parts/status-card/ap
 
 /** The app's query, fresh for the card's interval; the app must provide it when it lists the part. */
 const statusQuery = () => {
-  if (!appStatusQuery) throw new Error('the status-card part needs the app\'s statusQuery (src/parts/status-card.ts)');
+  if (!appStatusQuery) throw new Error("the status-card part needs the app's statusQuery (src/parts/status-card.ts)");
   return { ...appStatusQuery, staleTime: statusRefreshMs };
 };
 

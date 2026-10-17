@@ -18,10 +18,13 @@ const packageMessages = new URL('../../messages/', import.meta.url);
 /** The remark plugin, for an app whose root (the folder holding docs/) is `root`. */
 export function remarkUiWords({ root, baseLocale = 'en' }) {
   const cache = new Map();
-  const catalog = lang => {
+  const catalog = (lang) => {
     if (!cache.has(lang)) {
-      const read = file => (existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {});
-      cache.set(lang, { ...read(new URL(`${lang}.json`, packageMessages)), ...read(join(root, 'messages', `${lang}.json`)) });
+      const read = (file) => (existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {});
+      cache.set(lang, {
+        ...read(new URL(`${lang}.json`, packageMessages)),
+        ...read(join(root, 'messages', `${lang}.json`)),
+      });
     }
     return cache.get(lang);
   };
@@ -29,9 +32,13 @@ export function remarkUiWords({ root, baseLocale = 'en' }) {
     const lang = /\.([a-z]{2,3}(?:-[A-Za-z]+)?)\.mdx?$/.exec(file.path ?? '')?.[1] ?? baseLocale;
     visit(tree, 'textDirective', (node, index, parent) => {
       if (node.name !== 'ui' || !parent || index === undefined) return;
-      const key = node.children?.map(child => child.value ?? '').join('').trim();
+      const key = node.children
+        ?.map((child) => child.value ?? '')
+        .join('')
+        .trim();
       const word = catalog(lang)[key] ?? catalog(baseLocale)[key];
-      if (typeof word !== 'string') throw new Error(`${file.path}: :ui[${key}] names no word in the app's catalog (messages/${baseLocale}.json)`);
+      if (typeof word !== 'string')
+        throw new Error(`${file.path}: :ui[${key}] names no word in the app's catalog (messages/${baseLocale}.json)`);
       parent.children[index] = { type: 'text', value: word };
     });
   };

@@ -26,7 +26,7 @@ function pluralCounts(locale) {
 }
 
 /** Unicode's script for a CLDR script code: Japanese and both Chinese are written with Han digits. */
-const unicodeScript = script => ({ Jpan: 'Hani', Hans: 'Hani', Hant: 'Hani', Kore: 'Hang' })[script] ?? script;
+const unicodeScript = (script) => ({ Jpan: 'Hani', Hans: 'Hani', Hant: 'Hani', Kore: 'Hang' })[script] ?? script;
 
 /**
  * The digit systems written in a script: every numbering system the runtime formats with (Intl), whose
@@ -40,7 +40,7 @@ function scriptDigits(script) {
   // tested against each script: building them per language cost the page 0.7 s on a phone (release
   // 0.12.0's Core Web Vitals run).
   digitsBySystem ??= Intl.supportedValuesOf('numberingSystem')
-    .map(system => [system, new Intl.NumberFormat(`en-u-nu-${system}`, { useGrouping: false }).format(1234567890)])
+    .map((system) => [system, new Intl.NumberFormat(`en-u-nu-${system}`, { useGrouping: false }).format(1234567890)])
     .filter(([, digits]) => digits !== '1234567890');
   const own = new RegExp(`^\\p{Script_Extensions=${unicodeScript(script)}}+$`, 'u');
   return digitsBySystem.filter(([, digits]) => own.test(digits)).map(([system]) => system);
@@ -52,7 +52,8 @@ export function ownValues(locale) {
     const tag = new Intl.Locale(locale);
     const { region, script } = tag.maximize();
     cache.set(locale, {
-      region, script,
+      region,
+      script,
       currency: countryToCurrency[region],
       calendars: tag.getCalendars(),
       // Its default digits first, then the other digits written in its script.
@@ -67,15 +68,15 @@ export function ownValues(locale) {
 export const choiceKinds = ['calendar', 'numbering', 'currency', 'count'];
 
 const valuesOf = {
-  calendar: own => own.calendars,
-  numbering: own => own.numberingSystems,
-  currency: own => [own.currency],
-  count: own => own.counts,
+  calendar: (own) => own.calendars,
+  numbering: (own) => own.numberingSystems,
+  currency: (own) => [own.currency],
+  count: (own) => own.counts,
 };
 
 /** Every value of a control over all of Paraglide's locales, in locale order (counts ascending). */
 export function allChoices(kind) {
-  const all = [...new Set(locales.flatMap(locale => valuesOf[kind](ownValues(locale))))];
+  const all = [...new Set(locales.flatMap((locale) => valuesOf[kind](ownValues(locale))))];
   // The default count is always a choice, so the plain page has its count marked too.
   return kind === 'count' ? [...new Set([...all, searchDefaults.count])].sort((a, b) => a - b) : all;
 }
@@ -83,7 +84,7 @@ export function allChoices(kind) {
 /** A control's choices on this language's page: its own values first, then every other language's. */
 export function choicesFor(locale, kind) {
   const own = valuesOf[kind](ownValues(locale));
-  return { own, others: allChoices(kind).filter(value => !own.includes(value)) };
+  return { own, others: allChoices(kind).filter((value) => !own.includes(value)) };
 }
 
 const base = ownValues(baseLocale);
@@ -94,7 +95,9 @@ const baseRules = new Intl.PluralRules(baseLocale);
  */
 export const searchDefaults = {
   currency: base.currency,
-  count: Array.from({ length: maxCount - 1 }, (_, index) => index + 2).find(n => baseRules.select(n) === 'other') ?? maxCount,
+  count:
+    Array.from({ length: maxCount - 1 }, (_, index) => index + 2).find((n) => baseRules.select(n) === 'other') ??
+    maxCount,
   calendar: base.calendars[0],
   numbering: base.numberingSystems[0],
 };

@@ -5,6 +5,11 @@ out because it's now gotten into a huge mess." One list, in order. Close an item
 main and live where that applies; then move its plan to [done/](done/) with a closing line. Big features
 wait in [parked/](parked/). What broke along the way is in the [stability log](stability-log.md).
 
+## First: all the way in with Vite Plus (2026-10-17)
+
+[2026-10-17-02-vite-plus.md](2026-10-17-02-vite-plus.md): Vite Plus decides what runs, in what order and what is
+skipped; our code only does the jobs Vite Plus has no tool for. The names, the rules, the steps and the status.
+
 ## First: CI fast and the same locally (2026-10-17)
 
 [2026-10-17-01-ci-local-and-fast.md](2026-10-17-01-ci-local-and-fast.md): `npm run ci` runs what GitHub runs,
@@ -71,7 +76,7 @@ Below this section is the history of how it got here.
      stale until someone's `project:setup` rewrites it (seen 2026-10-10: setup dirtied the tree after the
      day's doc changes). Either the lock stops hashing a generated skill, or `dev:land` refreshes it
      when docs changed; decide in item 4's work on the tooling.
-   - **The new-app steps** in [tasks](../docs/content/dev/projects.md) were corrected by reading, not by
+   - **The new-app steps** in [tasks](../apps/docs/content/dev/projects.md) were corrected by reading, not by
      running (translate once by hand with `REMY_FLOW=hand`, the first deploy by hand, then the flow);
      creating `remy-auth-test` (item 3) is their first run.
    - Closed of it: `dev:land` deploys staging before it translates (05896d6, 2026-10-09). The word
@@ -238,7 +243,7 @@ Fixed the same day, for every app through the shared tasks: `project:check` is t
 (plans, types, the plain-function tier `tests/**/*.unit.spec.ts`, translation status; a build or the
 docs only when their inputs changed). The heavy checks (every language, Google's audits, the consumer
 fixture) run on GitHub after every push, in parallel; each still runs locally on purpose, and
-`project:verify` at a release. Then formalised as the flow: `dev:change`, `dev:land`, `dev:promote`, `dev:release`, with a guard in the tooling itself (every heavy task refuses outside a step, on any machine, for any agent) and a Claude hook that answers a step earlier. The rule: [how we work](../docs/content/dev/how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
+`project:verify` at a release. Then formalised as the flow: `dev:change`, `dev:land`, `dev:promote`, `dev:release`, with a guard in the tooling itself (every heavy task refuses outside a step, on any machine, for any agent) and a Claude hook that answers a step earlier. The rule: [how we work](../apps/docs/content/dev/how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
 
 ## Feedback from everything asynchronous (owner, 2026-10-09)
 

@@ -29,7 +29,7 @@ export const catalog = {
 export const partsFile = 'src/parts.json';
 
 /** Where an app keeps its options for a part (its `app` exports), relative to the app's root, without extension. */
-export const partAppFile = name => `src/parts/${name}`;
+export const partAppFile = (name) => `src/parts/${name}`;
 
 /**
  * The app's listed parts, in list order, by name (the part's own name, `time-zones` for
@@ -45,8 +45,15 @@ export function listedParts({ root = process.cwd(), file = partsFile } = {}) {
   const listed = {};
   const problems = [];
   for (const spec of specs) {
-    if (typeof spec !== 'string' || spec.split('/').length === 2 || (!spec.startsWith('@') && spec.includes('/')) || spec.split('/').length > 3) {
-      problems.push(`${JSON.stringify(spec)}: a part is the platform's name ("seo-routes") or "@<scope>/<package>/<name>"`);
+    if (
+      typeof spec !== 'string' ||
+      spec.split('/').length === 2 ||
+      (!spec.startsWith('@') && spec.includes('/')) ||
+      spec.split('/').length > 3
+    ) {
+      problems.push(
+        `${JSON.stringify(spec)}: a part is the platform's name ("seo-routes") or "@<scope>/<package>/<name>"`,
+      );
       continue;
     }
     const scoped = spec.startsWith('@');
@@ -55,19 +62,32 @@ export function listedParts({ root = process.cwd(), file = partsFile } = {}) {
     if (scoped) {
       const pkg = spec.split('/').slice(0, 2).join('/');
       let file;
-      try { file = fromApp.resolve(`${pkg}/parts/catalog.json`); } catch { problems.push(`"${spec}": ${pkg} offers no parts (no ${pkg}/parts/catalog.json)`); continue; }
+      try {
+        file = fromApp.resolve(`${pkg}/parts/catalog.json`);
+      } catch {
+        problems.push(`"${spec}": ${pkg} offers no parts (no ${pkg}/parts/catalog.json)`);
+        continue;
+      }
       entry = JSON.parse(readFileSync(file, 'utf8'))[name];
       dir = join(dirname(file), name);
-      if (!entry) { problems.push(`unknown part "${spec}"`); continue; }
+      if (!entry) {
+        problems.push(`unknown part "${spec}"`);
+        continue;
+      }
     } else {
       entry = catalog[name];
       dir = join(here, name);
-      if (!entry) { problems.push(`unknown part "${spec}" (the platform's: ${Object.keys(catalog).join(', ')})`); continue; }
+      if (!entry) {
+        problems.push(`unknown part "${spec}" (the platform's: ${Object.keys(catalog).join(', ')})`);
+        continue;
+      }
     }
     if (Object.hasOwn(listed, name)) problems.push(`"${name}" is listed twice`);
     else listed[name] = { ...entry, dir, spec };
   }
-  for (const [name, part] of Object.entries(listed)) for (const needed of part.requires) if (!Object.hasOwn(listed, needed)) problems.push(`"${name}" requires "${needed}"`);
+  for (const [name, part] of Object.entries(listed))
+    for (const needed of part.requires)
+      if (!Object.hasOwn(listed, needed)) problems.push(`"${name}" requires "${needed}"`);
   if (problems.length) throw new Error(`${file}: ${problems.join('; ')}`);
   return listed;
 }
@@ -82,7 +102,11 @@ export function offeredPart(name, { root = process.cwd() } = {}) {
   const fromApp = createRequire(join(resolve(root), 'package.json'));
   for (const dep of Object.keys({ ...manifest.dependencies, ...manifest.devDependencies })) {
     let file;
-    try { file = fromApp.resolve(`${dep}/parts/catalog.json`); } catch { continue; }
+    try {
+      file = fromApp.resolve(`${dep}/parts/catalog.json`);
+    } catch {
+      continue;
+    }
     const entry = JSON.parse(readFileSync(file, 'utf8'))[name];
     if (entry) return entry;
   }
@@ -90,7 +114,7 @@ export function offeredPart(name, { root = process.cwd() } = {}) {
 }
 
 /** The app's listed parts' names, in list order. */
-export const readParts = options => Object.keys(listedParts(options));
+export const readParts = (options) => Object.keys(listedParts(options));
 
 /** The site pages the listed parts add, in list order. */
-export const partSitePaths = listed => Object.values(listed).flatMap(part => part.sitePaths);
+export const partSitePaths = (listed) => Object.values(listed).flatMap((part) => part.sitePaths);
