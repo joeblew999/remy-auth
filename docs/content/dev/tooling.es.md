@@ -1,6 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "La referencia de herramientas de desarrollo: los scripts de package.json y los comandos de remy, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación."
+translatedFrom: "e2a6bd75 afd520fb 0971c6b1 ca2c7b9f e9c16a40 ec3067e7 1ff06e1d 067ae0a5 e6b13d48 787388b0 35c0ad6b e58ce74e 4087c066 73b31a8d b2463d08 ab72ce36"
 ---
 
 ## Las herramientas [#the-tooling]
@@ -80,8 +81,9 @@ cuáles son los suyos (`npx remy docs`). El flujo es uno de ellos, `remy flow <s
 | `npx remy cloudflare deploy\|staging\|docs-deploy\|versions\|urls\|preview\|preview-delete` | Despliegues, qué está ejecutando cada uno, las URL de las páginas de una app, un Worker de comprobación desechable ([la línea de comandos](./tasks.md#cloudflare)) |
 | `npm run logs`, `errors`, `wrangler`, `npm run observe -- events\|ai-usage\|ai-check\|gateway` | Logs en vivo, la CLI de Cloudflare, logs almacenados y el uso, la configuración y el gateway de la IA (más abajo) |
 | `npm run docs -- dev\|build\|check\|test [remote]\|preview\|answers on\|off\|publish\|questions\|provision\|init\|observe` | El Worker de documentación, de `@joeblew999/remy-ui`, sobre el `docs/` de una app ([escribir docs](./writing-docs.mdx)); solo remy-auth: `npm run docs:cli`, la CLI de Fumadocs en el paquete |
-| `npx remy i18n check [messages\|docs] [--list]`, `i18n translate` | Traducciones: las comprobaciones sin conexión (un aviso en el check, la puerta de control en un release), el único redactor que `dev:land` ejecuta en main ([un solo redactor](./how-we-work.md#translations-one-writer)) |
+| `npx remy i18n check [messages\|docs] [--list]`, `i18n translate` | Traducciones: las comprobaciones sin conexión (un aviso en el check, la puerta de control en un release), el traductor que `dev:land` ejecuta en el cambio ([en el cambio](./how-we-work.md#translations-in-the-change)) |
 | `npm run plans -- status\|check\|close\|park\|open` | La regla de los planes ([planes](./how-we-work.md#plans-few-short-closed)) |
+| `npx remy last [command]` | El registro de la última ejecución de un comando (o de lo último que se ejecutó): cuándo empezó, sus partes, su total; la propia línea de comandos mide el tiempo de cada comando `remy` ([el flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)) |
 | `npx remy skills install\|list\|remove`, `npx remy mcp register\|verify\|status`, `npx remy rules` | Los skills de agentes fijados, el registro de MCP, el bloque de reglas en el `AGENTS.md` de una app (más abajo) |
 | `npm run shots -- <page> [--phone] [--dark] [--all] [--video]`, `npm run browser`, `browser:start`, `browser:stop`, `npm run web` | Capturas de pantalla, la CLI y la sesión de Chrome DevTools, Modern Web Guidance (más abajo) |
 | `npm run api -- spec [origin] [--urls]` | El documento OpenAPI que sirve un Worker en ejecución |

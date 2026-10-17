@@ -12,7 +12,7 @@ export default defineConfig({
   outputDir: `${process.cwd()}/test-results`,
   fullyParallel: true,
   reporter: [['list']],
-  use: { baseURL: origin, ...devices['Desktop Chrome'], channel: 'chrome' },
+  use: { baseURL: origin, ...devices['Desktop Chrome'] },
   projects: [
     { name: 'ours', testIgnore: /lighthouse\.spec\.js$/ },
     { name: 'google', testMatch: /lighthouse\.spec\.js$/ },

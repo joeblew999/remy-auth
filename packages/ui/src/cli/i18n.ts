@@ -1,20 +1,96 @@
-// Translations, checked offline (`remy i18n check [messages|docs] [--list]`): read-only, no network,
-// safe in any number of worktrees at once. The commit is the mark: a translation is stale when its
-// English changed after the translation's last commit (git decides). A gap is one line, "<language>
-// <kind> <what>", which the translators read with --list; without it, counts per language and kind.
-// Exit 1 on any gap (the translation step and the release gate), a warning while coding (check.ts).
-import { execFileSync, spawnSync } from 'node:child_process';
+// Translations, checked offline (`remy i18n check [messages|docs] [--list]`): read-only, no network, no
+// git history, so the same answer on a Mac, in a cloud agent's container and in GitHub's shallow checkout.
+// Each translation records what it was made from: a translated page a fingerprint of each English section
+// (`translatedFrom` in its frontmatter), a catalog a fingerprint of each English message
+// (`translated-from/<lang>.json` beside it). A translation is stale where its record and the English
+// differ, and the record names exactly which sections or keys (owner, 2026-10-17: translating took ages;
+// it used to judge staleness from git history, which needed the whole history and one writer on main).
+// A gap is one line, "<language> <kind> <what>", which the translators read with --list; without it,
+// counts per language and kind. Exit 1 on any gap with I18N_STRICT (the release gate), a warning otherwise.
+import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { parts } from './page.ts';
 
 export type Gap = { language: string; kind: string; what: string };
 const gapLine = (gap: Gap) => `${gap.language} ${gap.kind} ${gap.what}`;
 
+/** git's list of files (never its history: this works in a shallow checkout). */
 function git(cwd: string, ...args: string[]): string | undefined {
   try { return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return undefined; }
 }
 const readJson = (file: string) => JSON.parse(readFileSync(file, 'utf8')) as Record<string, unknown>;
+
+// --- What a translation was made from ---------------------------------------------------------------------
+
+/** A short fingerprint of an English text or message: a translation made from it records this. */
+export const print = (value: unknown): string => createHash('sha256').update(typeof value === 'string' ? value : JSON.stringify(value)).digest('hex').slice(0, 8);
+
+/**
+ * A page split at its "## " and "### " headings, outside fenced code: the part before the first heading
+ * (the frontmatter and the introduction), then one part per section, each starting with its heading. Both
+ * levels: a page of "###" sections alone (tasks.md) was otherwise one section, translated whole.
+ */
+export function sections(text: string): string[] {
+  const found: string[] = []; let current: string[] = []; let fence = false;
+  for (const line of text.split('\n')) {
+    if (/^\s*(```|~~~)/.test(line)) fence = !fence;
+    if (!fence && /^###? /.test(line)) { found.push(current.join('\n')); current = []; }
+    current.push(line);
+  }
+  found.push(current.join('\n'));
+  return found;
+}
+
+/**
+ * A translated page with some sections replaced by new translations (by index), and the record dropped:
+ * each new section keeps the English section's ending, so the blank line before the next heading stays.
+ */
+export function splice(english: string, translation: string, fresh: Map<number, string>): string {
+  const englishParts = sections(english), translatedParts = sections(withoutRecord(translation));
+  for (const [index, text] of fresh) translatedParts[index] = text.replace(/\n+$/, '') + (/\n*$/.exec(englishParts[index] ?? '')?.[0] ?? '');
+  return translatedParts.join('\n');
+}
+
+/** What a translation of this English page records: one fingerprint per section. */
+export const pagePrints = (english: string): string[] => sections(english).map(print);
+
+const recordLine = /^translatedFrom:.*\r?\n/m;
+/** The fingerprints a translated page records, or undefined when it records none. */
+export function madeFrom(page: string): string[] | undefined {
+  const value = parts(page)?.fields.translatedFrom;
+  return value ? value.split(/\s+/) : undefined;
+}
+/** The page without its record: what the translator sees and returns. */
+export const withoutRecord = (page: string): string => page.replace(recordLine, '');
+/** The page recording these fingerprints, as the last line of its frontmatter. */
+export function withRecord(page: string, prints: string[]): string {
+  const bare = withoutRecord(page);
+  const end = /^---\r?\n[\s\S]*?\r?\n(?=---[ \t]*(?:\r?\n|$))/.exec(bare);
+  return end ? bare.slice(0, end[0].length) + `translatedFrom: "${prints.join(' ')}"\n` + bare.slice(end[0].length) : bare;
+}
+
+/**
+ * Which sections of a translated page to translate again: the indexes whose English fingerprint differs
+ * from the one recorded. Undefined when the page cannot be patched section by section (no record, or the
+ * English or the translation has a different number of sections than the record): then the whole page.
+ */
+export function changedSections(english: string, translation: string): number[] | undefined {
+  const recorded = madeFrom(translation), now = pagePrints(english);
+  if (!recorded || recorded.length !== now.length || sections(withoutRecord(translation)).length !== now.length) return undefined;
+  return now.flatMap((value, index) => (value === recorded[index] ? [] : [index]));
+}
+
+/** A catalog's record: `translated-from/<lang>.json` in the catalog's folder, key to fingerprint. */
+export const recordFile = (catalog: string): string => join(dirname(catalog), 'translated-from', catalog.slice(dirname(catalog).length + 1));
+/** The record of a catalog, empty when it has none. */
+export const readRecord = (catalog: string): Record<string, string> => existsSync(recordFile(catalog)) ? readJson(recordFile(catalog)) as Record<string, string> : {};
+/** The keys of a catalog whose English differs from what the record says it was made from (or that it has no record of). */
+export function staleKeys(english: Record<string, unknown>, catalog: Record<string, unknown>, record: Record<string, string>): string[] {
+  return Object.keys(english).filter(key => catalog[key] != null && record[key] !== print(english[key]));
+}
 
 /** The {placeholders} of a plain message; a message with variants (an array) is the plural check's. */
 function placeholders(value: unknown): Set<string> {
@@ -50,7 +126,7 @@ export function pluralGaps(locale: string, english: Record<string, unknown>, cat
 
 /**
  * UI messages (Paraglide catalogs) against English: missing catalogs and keys, extra keys, keys whose
- * English changed since the catalog's last commit, placeholders lost or invented, plural categories,
+ * English differs from what the catalog's record says it was made from, placeholders lost or invented, plural categories,
  * and the same languages as the platform (every page is served in each language the platform
  * routes, so a catalog lists exactly those).
  */
@@ -71,12 +147,7 @@ export async function messagesGaps(cwd = process.cwd()): Promise<{ gaps: Gap[]; 
     const catalog = readJson(file);
     for (const key of Object.keys(english)) if (!(key in catalog)) gaps.push({ language: locale, kind: 'missing', what: key });
     for (const key of Object.keys(catalog)) if (!(key in english)) gaps.push({ language: locale, kind: 'extra', what: key });
-    const commit = git(cwd, 'log', '-1', '--format=%H', '--', relative(cwd, file));
-    const before = commit ? git(cwd, 'show', `${commit}:${relative(cwd, englishFile)}`) : undefined;
-    if (before) {
-      const old = JSON.parse(before) as Record<string, unknown>;
-      for (const [key, value] of Object.entries(english)) if (old[key] != null && JSON.stringify(value) !== JSON.stringify(old[key]) && catalog[key] != null) gaps.push({ language: locale, kind: 'stale', what: key });
-    }
+    for (const key of staleKeys(english, catalog, readRecord(file))) gaps.push({ language: locale, kind: 'stale', what: key });
     for (const [key, value] of Object.entries(english)) {
       if (typeof value !== 'string' || typeof catalog[key] !== 'string') continue;
       const want = placeholders(value), have = placeholders(catalog[key]);
@@ -97,19 +168,18 @@ export async function messagesGaps(cwd = process.cwd()): Promise<{ gaps: Gap[]; 
 /**
  * Docs translations (Fumadocs) against English: per site (its i18n.json languages) each page's
  * <page>.<lang>.md(x) missing or stale, orphans; Fumadocs' own UI text (ui/<lang>.json) missing or
- * stale keys. Needs full git history: a shallow clone cannot tell what is stale.
+ * stale keys.
  */
-export function docsGaps(cwd = process.cwd()): { gaps: Gap[]; sites: number; shallow?: boolean } {
+export function docsGaps(cwd = process.cwd()): { gaps: Gap[]; sites: number } {
   const dir = process.env.I18N_DOCS_DIR ?? 'docs/content';
   const content = join(cwd, dir);
   const sites = existsSync(content) ? readdirSync(content, { withFileTypes: true }).filter(entry => entry.isDirectory() && existsSync(join(content, entry.name, 'i18n.json'))).map(entry => join(content, entry.name)) : [];
   if (!sites.length) return { gaps: [], sites: 0 };
-  if (git(cwd, 'rev-parse', '--is-shallow-repository') !== 'false') return { gaps: [], sites: sites.length, shallow: true };
   const language = /\.[a-z]{2,3}(-[A-Za-z]{2,4})?\.mdx?$/;
   const files = (where: string) => (git(cwd, 'ls-files', '-co', '--exclude-standard', '--', relative(cwd, where)) ?? '').split('\n').filter(Boolean);
   const stale = (english: string, translation: string) => {
-    const commit = git(cwd, 'log', '-1', '--format=%H', '--', translation);
-    return !!commit && spawnSync('git', ['diff', '--quiet', commit, '--', english], { cwd }).status !== 0;
+    const recorded = madeFrom(readFileSync(join(cwd, translation), 'utf8'));
+    return !recorded || recorded.join(' ') !== pagePrints(readFileSync(join(cwd, english), 'utf8')).join(' ');
   };
   const gaps: Gap[] = [];
   const languages = new Set<string>();
@@ -137,12 +207,7 @@ export function docsGaps(cwd = process.cwd()): { gaps: Gap[]; sites: number; sha
       if (!existsSync(file)) { gaps.push({ language: lang, kind: 'missing', what: relative(cwd, file) }); continue; }
       const translation = readJson(file);
       for (const key of Object.keys(english)) if (!(key in translation)) gaps.push({ language: lang, kind: 'ui-missing', what: key });
-      const commit = git(cwd, 'log', '-1', '--format=%H', '--', relative(cwd, file));
-      const before = commit ? git(cwd, 'show', `${commit}:${relative(cwd, uiEnglish)}`) : undefined;
-      if (before) {
-        const old = JSON.parse(before) as Record<string, unknown>;
-        for (const [key, value] of Object.entries(english)) if (old[key] != null && JSON.stringify(value) !== JSON.stringify(old[key])) gaps.push({ language: lang, kind: 'ui-stale', what: key });
-      }
+      for (const key of staleKeys(english, translation, readRecord(file))) gaps.push({ language: lang, kind: 'ui-stale', what: key });
     }
   }
   return { gaps, sites: sites.length };
@@ -173,9 +238,8 @@ export async function checkMessages(list: boolean, cwd = process.cwd()): Promise
 
 /** The docs check the same way; true when clean. */
 export function checkDocs(list: boolean, cwd = process.cwd()): boolean {
-  const { gaps, sites, shallow } = docsGaps(cwd);
+  const { gaps, sites } = docsGaps(cwd);
   if (!sites) { console.log(`Docs: no sites with an i18n.json under ${process.env.I18N_DOCS_DIR ?? 'docs/content'}, nothing to check.`); return true; }
-  if (shallow) { console.log('Docs: needs full git history (a shallow clone cannot tell what is stale).'); process.exit(2); }
   if (!gaps.length) { console.log('Docs: every translation complete and current.'); return true; }
   if (list) console.log(gaps.map(gapLine).join('\n'));
   else console.log(`Docs: gaps (npx remy i18n check docs --list for every file):\n${summary(gaps)}`);
@@ -191,11 +255,11 @@ export async function checkAll(strict = process.env.I18N_STRICT === '1', cwd = p
   const docs = checkDocs(false, cwd);
   if (messages && docs) return true;
   if (strict) return false;
-  console.log('WARNING: translations are incomplete or stale; the next npm run dev:land translates them, on main.');
+  console.log('WARNING: translations are incomplete or stale; npm run dev:land translates them, in this change.');
   return true;
 }
 
-export const what = "translations: check [messages|docs] [--list] (offline, read-only), translate [messages|docs] (the machine's Claude, on main, under a lock)";
+export const what = "translations: check [messages|docs] [--list] (offline, read-only), translate [messages|docs] (the machine's Claude; dev:land runs it in the change)";
 export async function main(args: string[]): Promise<void> {
   const [command, which, ...rest] = args;
   const list = args.includes('--list');

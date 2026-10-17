@@ -3,7 +3,7 @@
 // anywhere. Plain JavaScript, like ../checks.js.
 import { test, expect } from '@playwright/test';
 import { m } from '@joeblew999/remy-ui/messages';
-import { localizedPath, collectErrors, hydrated, checkedLocales } from '@joeblew999/remy-ui/checks';
+import { localizedPath, collectErrors, hydrated, behaviourLocales } from '@joeblew999/remy-ui/checks';
 
 const spot = { latitude: 13.7563, longitude: 100.5018, accuracy: 25 };
 const degrees = (locale, value) => new Intl.NumberFormat(locale, { style: 'unit', unit: 'degree', maximumFractionDigits: 4 }).format(value);
@@ -11,7 +11,7 @@ const metres = (locale, value) => new Intl.NumberFormat(locale, { style: 'unit',
 
 /** `path` is the de-localized page with the card; `network` is true where the page also knows Cloudflare's location. */
 export function devicePlaceChecks({ path = '/formats', network = false } = {}) {
-  for (const locale of checkedLocales) {
+  for (const locale of behaviourLocales) {
     const o = { locale };
     test(`${locale}: the device's location is asked for only on request, shown in this language, and never sent`, async ({ browser }) => {
       const context = await browser.newContext({ geolocation: spot, permissions: ['geolocation'] });

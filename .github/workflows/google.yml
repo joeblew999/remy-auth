@@ -1,6 +1,6 @@
 # The heavy checks, on GitHub after every push to main, on every pull request and on every version tag, in parallel, while
-# the developer keeps coding; then the release for tags. Locally the check is npm run dev:change (seconds);
-# each of these can still be run on purpose by a person (REMY_FLOW=hand npm run test -- every|google|consumers).
+# the developer keeps coding; then the release for tags. Every job is one part of `npm run ci`, and the same
+# command runs the same parts anywhere: `npm run ci` locally (all of them, in turn) gives GitHub's answer.
 # Every Remy repo runs this same workflow (.plans/thin-apps.md, group 6): remy-auth through the triggers
 # below, any other repo by calling it at the tag its package is on, which `remy upgrade` moves with it:
 #
@@ -36,19 +36,26 @@ concurrency:
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/tags/v') }}
 
 jobs:
-  # Three jobs, not one: each takes a few minutes and they share nothing, so the answer comes back in
-  # the time of the longest. Each is one level of `npm run test`, the same a person can run by hand.
+  # Parallel jobs that share nothing, so the answer comes back in the time of the longest. Each job is
+  # one part of `npm run ci`, the same command a person or an agent runs locally (ci.ts), and the workflow
+  # holds nothing else: what ci needs (Playwright's Chromium, the Han fonts) it installs itself.
   checks:
     strategy:
       fail-fast: false
       matrix:
         include:
-          - name: every language
-            level: every
+          - name: types and unit
+            part: check
+          - name: every language 1/3
+            part: every --shard 1/3
+          - name: every language 2/3
+            part: every --shard 2/3
+          - name: every language 3/3
+            part: every --shard 3/3
           - name: google
-            level: google
+            part: google
           - name: consumers
-            level: consumers
+            part: consumers
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     permissions:
@@ -59,28 +66,27 @@ jobs:
         with:
           persist-credentials: false
           # Two commits: on a pull request the checkout is the merge commit, and its first parent (the base
-          # branch) is what `remy test` compares against to skip a level nothing it checks changed (changes.ts).
+          # branch) is what ci compares against to skip a part nothing it checks changed (unchanged.ts).
           fetch-depth: 2
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version-file: .node-version
           cache: npm
-      # The consumer fixture downloads the pinned agent skills into this folder (fixtures/consumer/run.sh);
-      # kept between runs, keyed on the pinned list and the package's own skill, as on a developer's machine.
-      - if: matrix.level == 'consumers'
+      # Kept between runs: Playwright's Chromium (ci installs it when missing, keyed on the lockfile that
+      # pins Playwright) and the consumer fixture's skills download (keyed on the pinned list).
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - if: matrix.part == 'consumers'
         uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: /tmp/remy-fixture-skills
           key: remy-fixture-skills-${{ hashFiles('packages/ui/src/cli/skills.ts', 'packages/ui/skills/**') }}
-      # Han languages are drawn by the system's fonts on purpose (fonts.css); a runner has none, so the
-      # font checks see Liberation Sans for Japanese and Chinese alike. One package, as a visitor's machine has.
-      - run: sudo apt-get install -y --no-install-recommends fonts-noto-cjk
       - run: npm ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: npm run check -- types
-      - run: npm run check -- unit
-      - run: npm run test -- ${{ matrix.level }}
+      - run: npm run ci -- ${{ matrix.part }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -92,12 +98,12 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
       # A red job reaches the person who pushed without anybody polling: a comment on the commit,
-      # which GitHub sends to its author, naming this job and its level. dev:promote refuses a commit
+      # which GitHub sends to its author, naming this job and its part. dev:promote refuses a commit
       # whose run is not green; dev:status and dev:land say main is red.
       - if: failure() && github.event_name == 'push'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BODY: "The checks failed on this commit, job \"${{ matrix.name }}\" (npm run test -- ${{ matrix.level }}): ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Locally, a person reproduces it with REMY_FLOW=hand npm run test -- ${{ matrix.level }}; an agent reads the run's log and runs the one area (npm run test -- only <words>)."
+          BODY: "The checks failed on this commit, job \"${{ matrix.name }}\" (npm run ci -- ${{ matrix.part }}): ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Locally the same command reproduces it: npm run ci -- ${{ matrix.part }}."
         run: gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/comments" -f body="$BODY" > /dev/null
 
   # (A red job writes on the commit itself, in its own last step above, naming itself.)

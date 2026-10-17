@@ -162,6 +162,8 @@ export async function release(): Promise<void> {
   // The release is what runs the gated commands: said first, before the gate asks (2026-10-11, the first
   // release refused itself with the marker set after it).
   process.env.REMY_FLOW ??= 'release';
+  // Only a release has a token the registry accepts, so only a release rehearses the consumer fixture's publish.
+  process.env.REMY_REHEARSE_PUBLISH = '1';
   if ((await translationGaps()).length) fail('release: translations are incomplete or stale (npx remy i18n check); land, which translates, first.');
   bumped();
   await verify();

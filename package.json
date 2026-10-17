@@ -38,6 +38,7 @@
     "build": "node packages/ui/src/cli/remy.ts app build",
     "preview": "node packages/ui/src/cli/remy.ts app preview",
     "test": "node packages/ui/src/cli/remy.ts test",
+    "ci": "node packages/ui/src/cli/remy.ts ci",
     "local": "node scripts/local.ts",
     "test:consumers": "bash fixtures/consumer/run.sh",
     "docs": "node packages/ui/src/cli/remy.ts docs",

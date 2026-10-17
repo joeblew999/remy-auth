@@ -155,33 +155,34 @@ waits, one browser page per check, parallel workers). Checks loop over `checkedL
 ### Translations
 
 One layout in every app, so the same `remy i18n` commands work everywhere (the rule for who translates is
-[one writer](./how-we-work.md#translations-one-writer)):
+[in the change](./how-we-work.md#translations-in-the-change)):
 
 | What | English | Translation |
 | --- | --- | --- |
 | Docs | `docs/content/<site>/<page>.md` or `.mdx` (Fumadocs' layout) | beside it: `<page>.<locale>.md` or `.mdx` |
 | UI catalogs | the base locale's catalog of each inlang project (`<dir>/project.inlang`) | each locale's catalog, by the project's own `pathPattern` (e.g. `messages/<locale>.json`) |
 
-Two pipelines, one for each kind of text, the same pattern in both: detect offline with git, translate
-with the machine's Claude Code (headless, no tools), commit. Both are TypeScript in the package
+Two pipelines, one for each kind of text, the same pattern in both: detect offline from each
+translation's record of what it was made from, translate with the machine's Claude Code (headless, no
+tools), write the translations and their records (the change commits them). Both are TypeScript in the package
 (`packages/ui/src/cli/i18n.ts`, `translate.ts`: `remy i18n check`, `remy i18n translate`); the tasks below
 forward to them.
 
 - **UI messages** (Paraglide): the catalogs, locales and base locale come from inlang's own
   `settings.json` (`I18N_INLANG`, else the one project git knows). Detected: missing catalogs and keys
-  (`jq`), lost or invented `{placeholders}` (`@lingual/i18n-check`), keys whose English changed since
-  the catalog's last commit (`git`, `jq`), plural categories the locale needs (`Intl.PluralRules`,
+  (`jq`), lost or invented `{placeholders}` (`@lingual/i18n-check`), keys whose English differs from the
+  catalog's record (`translated-from/<locale>.json` beside it), plural categories the locale needs (`Intl.PluralRules`,
   `tasks/i18n/messages/plurals.mjs`: no upstream tool checks them).
 - **Docs** (Fumadocs): the folder is `I18N_DOCS_DIR` (default `docs/content`); each site with an
-  `i18n.json` translates every English page into each of its languages. Detected: missing and stale
-  pages (`git`), orphans, and Fumadocs UI's own text (`ui/<lang>.json` against `ui/en.json`).
+  `i18n.json` translates every English page into each of its languages. Detected: missing pages, stale
+  ones (their `translatedFrom` frontmatter: a fingerprint per English section), orphans, and Fumadocs UI's own text (`ui/<lang>.json` against `ui/en.json`).
 - **The translator** is the machine's Claude Code headless (`claude -p`), with no tools, no MCP
   servers, skills or project settings, and structured output: a catalog's keys come back as JSON and
-  are merged in English key order; a page comes back whole, and is written only when it is a page
-  (`page.ts`). The prompts are `packages/ui/src/cli/prompts.ts`. One call per language (messages) or per
+  are merged in English key order; a stale page's changed sections come back and are spliced in (a page that no longer lines up with its
+  record, or a missing one, comes back whole), and it is written only when it is a page (`page.ts`). The prompts are `packages/ui/src/cli/prompts.ts`. One call per language (messages) or per
   page (docs), `I18N_JOBS` at a time.
-- Checks need no key, no network and full git history (a shallow clone is refused). Translating uses
-  the Claude login on the machine.
+- Checks need no key, no network and no git history (a shallow clone gives the same answer). Translating
+  uses the Claude login on the machine.
 - An app with no inlang project and no docs sites gets "nothing to check" and exit 0.
 
 | Command | Does |
@@ -189,12 +190,11 @@ forward to them.
 | `remy i18n check` | Both checks; a WARNING and exit 0 while coding (the check runs it), exit 1 with `I18N_STRICT=1` (the release) |
 | `remy i18n check messages` | The catalogs' gaps, and languages that differ from the platform's (`de unlisted`); `--list` one line per gap (`es missing nav_more`) |
 | `remy i18n check docs` | The docs' gaps; `--list` one line per gap (`es stale docs/content/dev/gui.es.md`) |
-| `remy i18n translate` | On main: messages, then docs, one commit each; `dev:land` runs it, last; by hand, `REMY_FLOW=hand` in front |
+| `remy i18n translate` | Messages, then docs, written with their records and left for the change's commit; `dev:land` runs it before the check; by hand, `REMY_FLOW=hand` in front |
 | `remy i18n translate messages` | The catalogs' gaps, one language per agent call |
 | `remy i18n translate docs [files]` | The docs' gaps, one page per agent call; named translation files are redone in full |
 
-Settings: `I18N_MODEL` (default `sonnet`), `I18N_JOBS` (4), `I18N_COMMIT=0` (leave the change
-uncommitted for review), `I18N_BRANCH` (`main`).
+Settings: `I18N_MODEL` (default `sonnet`), `I18N_JOBS` (4).
 
 ### Cloudflare
 

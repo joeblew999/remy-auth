@@ -30,6 +30,8 @@ Development uses the same Worker source and Cloudflare runtime with hot reload.
 | `npm run build` | Build and Wrangler deployment dry run; no upload |
 | `npm run preview` | Build, then serve the production artifact on Cloudflare's local host at `PREVIEW_PORT` (4173) |
 | `dev:change`, `dev:land`, `dev:promote`, `dev:release` | The flow ([how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), [tasks](./tasks.md)); its checks run on the same local host |
+| `npm run ci` | What GitHub runs, the same way: types and unit, level 1, Google's audits and the consumers, each skipped when a branch's changes (against `origin/main`) cannot affect it (counting uncommitted work), level 1 in English and Arabic when nothing that changed can differ by language, then what each took (`npx remy last ci` prints the record). It installs Playwright's pinned Chromium and, on Linux, Noto CJK when missing. GitHub runs each part as its own job (`npm run ci -- every --shard 1/3` and so on), so `npm run ci -- <part>` reproduces any red job exactly; `--all` skips nothing |
+| `npm run browser` (Chrome DevTools MCP) | Not CI: the agent's own browser on a laptop, for looking at pages by hand. The checks never use it; Lighthouse runs directly in `npm run ci` |
 | `npm run test -- google` / `npm run test -- cwv` | Google's level: Lighthouse audits locally; Core Web Vitals on a throwaway Cloudflare Worker |
 | `npx remy cloudflare deploy` | Build, then upload production to the authenticated Cloudflare account; `dev:promote` runs it |
 | `npx remy cloudflare staging` | The same for the staging environment: its own Worker (`origins.staging`) and resources; `dev:land` runs it |
@@ -243,9 +245,16 @@ scripts, hyphenation, direction, formats, the catalogs) runs in every checked la
 of behaviour that does not (the security policy, noindex, search params, the demo form, error pages, API answers)
 runs in the base language and the first right-to-left one (`behaviourLocales`; `BEHAVIOUR_LOCALES` overrides).
 On a pull request each level first asks what changed and is skipped, saying so, when nothing it checks did
-(`packages/ui/src/cli/changes.ts`, with its unit checks): plans, the docs content and Markdown outside the
+(`packages/ui/src/cli/unchanged.ts`, with its unit checks): plans, the docs content and Markdown outside the
 packages run none; the blank app and the fixture run only the consumers level. Pushes to `main` and tags run
-everything. `REMY_FLOW=hand REMY_CHANGES_BASE=origin/main npm run test -- every` shows locally what a pull request would skip. What the checks cover is the checks themselves: `tests/` and the package's
+everything. Level 1 also asks whether what changed can differ by language: the catalogs and language settings,
+fonts and any CSS, code that formats by locale (named for it, or calling `Intl`, `toLocale…` or a text direction),
+the browser checks themselves, the lockfile and the Node version. When nothing can, it runs in English and Arabic
+only and says so: on 2026-10-17 that was 37 of the 49 recent commits on `main` that needed level 1, and a run in
+1 min 39 s instead of 2 min 49 s. The tooling and the unit checks never count. Every language still runs on every
+push to `main`, which `dev:promote` waits for, so a page that breaks in one language alone is caught there at the
+latest. `npm run ci` locally decides exactly as a pull request does (`--all` runs everything; `CHECK_LOCALES` set
+by hand wins). What the checks cover is the checks themselves: `tests/` and the package's
 `@joeblew999/remy-ui/checks` (each check's title says what it proves); the flow's steps that run them are in
 [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). In short: every page in every
 language without JavaScript (language, direction, metadata, links), catalogs and plurals, the formats
