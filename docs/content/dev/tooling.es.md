@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "Las herramientas detrás de los comandos: dónde se explica cada área, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación. Todos los comandos están en Comandos."
-translatedFrom: "cccfd094 afd520fb 0971c6b1 2ddd885f e9c16a40 ec3067e7 1ff06e1d 067ae0a5 e6b13d48 bdbd896f 35c0ad6b e58ce74e 4087c066 73b31a8d b2463d08 ab72ce36"
+translatedFrom: "cccfd094 afd520fb 0971c6b1 2ddd885f 436cda38 ec3067e7 1ff06e1d 067ae0a5 e6b13d48 bdbd896f 35c0ad6b e58ce74e 4087c066 73b31a8d b2463d08 ab72ce36"
 ---
 
 ## Las herramientas [#the-tooling]
@@ -109,8 +109,8 @@ tooling`: cada `package.json` coincide con el lockfile, la configuración de Wra
 observabilidad activada, los workflows nombran solo scripts que existen, cada skill instalado proviene de una
 fuente fijada con su enlace de Claude), y luego el check. Usan la instalación local existente y
 no aprovisionan recursos de Cloudflare. Después la puerta ejecuta cada comprobación de navegador propia en cada
-idioma (`npm run test -- every`) contra el artefacto de producción en Workers locales usando el Chrome instalado,
-y luego el fixture de consumidor. Las auditorías de Google no están incluidas: `npm run test -- google` y
+idioma (la parte `browser` de `npm run ci`) contra el artefacto de producción en Workers locales,
+y luego la prueba de la app nueva. Las auditorías de Google no están incluidas: `npm run ci -- audits` y
 `npm run test -- cwv`, que el release ejecuta después. No se realiza ningún despliegue. Consulta [la prueba de la GUI](./gui.md) para el alcance y los comandos.
 
 

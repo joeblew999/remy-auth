@@ -1,7 +1,7 @@
 // Every remy command is timed by the command line itself (remy.ts calls `begin`), not by the command
 // (owner, 2026-10-17: "it should get it automatically because it's part of the CLI"). A run writes its
 // record to node_modules/.cache/remy/<command>-last.txt: when it started, its parts, and its total with
-// passed or failed. A remy command started inside another (ci runs `check types` and `test every`, dev:land
+// passed or failed. A remy command started inside another (ci runs `check types` and `check unit`, dev:land
 // runs `i18n translate`, the consumer fixture's script) writes into the outer run's record, indented under
 // it, so one `npm run ci` leaves one record of everything it ran. A command only marks its parts (`lap`)
 // and adds detail it measured itself (`note`). `npx remy last [command]` prints a record; where the time

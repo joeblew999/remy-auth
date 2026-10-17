@@ -6,7 +6,7 @@
 // It owns its preconditions instead of leaving them to the machine: Playwright's pinned Chromium (the
 // browser every check uses), and on Linux a Han font, without which Japanese and Chinese are empty boxes. It skips what a change
 // cannot affect exactly as on a pull request (unchanged.ts): against origin/main on a branch, nothing
-// skipped on main itself or with --all.
+// skipped on main itself or with --everything.
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -14,24 +14,28 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { lap, lastRecord } from './timing.ts';
 
-type Part = 'check' | 'every' | 'google' | 'consumers';
-const parts: Part[] = ['check', 'every', 'google', 'consumers'];
+// The four parts, one name each everywhere (this list, GitHub's job names, the logs, COMMANDS.md): `check` (types,
+// unit, translations), `browser` (the browser checks on a local build), `audits` (Google's Lighthouse) and `new-app`
+// (a brand-new app on this commit's package). What a run includes is decided by what its change can affect
+// (unchanged.ts), so there are no levels to choose (owner, 2026-10-17: levels were a second vocabulary for these).
+type Part = 'check' | 'browser' | 'audits' | 'new-app';
+const parts: Part[] = ['check', 'browser', 'audits', 'new-app'];
 /**
- * What a pull request waits for, and what `npm run ci` runs by default: types and unit, and level 1. A pull
+ * What a pull request waits for, and what `npm run ci` runs by default: types and unit, and the browser checks. A pull
  * request waits for its slowest job, and Google's audits (about 2 minutes) and the consumer fixture (about
  * 4, a fresh install of a blank app) were the slowest by far, while what they catch (search and packaging)
  * is rarely what a change breaks. So they run after merge, on every push to main and every tag, where
- * dev:promote refuses a red main and a release runs them again; `npm run ci -- --full` runs them here
+ * dev:promote refuses a red main and a release runs them again; `npm run ci -- --everything` runs them here
  * (owner, 2026-10-17: "massively speed up CI").
  */
-const fast: Part[] = ['check', 'every'];
-/** GitHub splits level 1 across this many jobs. */
+const fast: Part[] = ['check', 'browser'];
+/** GitHub splits the browser part across this many jobs. */
 export const shards = 3;
 /** The jobs GitHub's workflow must run, one `npm run ci -- <part>` each (tests/unit/ci.unit.spec.ts holds the workflow to it). */
-export const jobParts = (): string[] => ['check', ...Array.from({ length: shards }, (_, i) => `every --shard ${i + 1}/${shards}`), 'google', 'consumers'];
-const afterMerge: Part[] = ['google', 'consumers'];
+export const jobParts = (): string[] => ['check', ...Array.from({ length: shards }, (_, i) => `browser --shard ${i + 1}/${shards}`), 'audits', 'new-app'];
+const afterMerge: Part[] = ['audits', 'new-app'];
 const pullRequest = process.env.GITHUB_EVENT_NAME === 'pull_request';
-const browserParts: Part[] = ['every', 'google', 'consumers'];
+const browserParts: Part[] = ['browser', 'audits', 'new-app'];
 
 const fail = (message: string): never => { console.error(`ci: ${message}`); process.exit(1); };
 const onGitHub = process.env.GITHUB_ACTIONS === 'true';
@@ -84,27 +88,30 @@ function node(): void {
 
 /**
  * Locally, compare against origin/main as a pull request would, so `npm run ci` on a branch skips what
- * GitHub would skip; on main, or with --all, nothing is skipped. On GitHub the workflow's event decides.
+ * GitHub would skip; on main, or with --everything, nothing is skipped. On GitHub the workflow's event decides.
  */
-function changesBase(all: boolean): void {
-  if (onGitHub || all || process.env.REMY_CHANGES_BASE) return;
+function changesBase(everything: boolean): void {
+  if (onGitHub || everything || process.env.REMY_CHANGES_BASE) return;
   const branch = quiet('git', ['rev-parse', '--abbrev-ref', 'HEAD']).stdout?.trim();
   if (!branch || branch === 'main' || branch === 'HEAD') return;
   if (quiet('git', ['rev-parse', '--verify', '--quiet', 'origin/main']).status !== 0) return;
   process.env.REMY_CHANGES_BASE = 'origin/main';
-  console.log('ci: comparing with origin/main, as a pull request would (--all runs everything)');
+  console.log('ci: comparing with origin/main, as a pull request would (--everything runs all of it)');
 }
 
 const npm = (...args: string[]) => run('npm', ['run', ...args]);
 
-/** Each part is the npm script a person would run; REMY_FLOW says the run is CI's, so the gate lets it pass. */
-function runPart(part: Part, shardOf?: string): void {
+/** Each part runs here, in this process; REMY_FLOW says the run is CI's, so the gate lets it pass. */
+async function runPart(part: Part, shardOf?: string): Promise<void> {
   process.env.REMY_FLOW = process.env.REMY_FLOW ?? 'ci';
-  // Translations too: offline and without git history since 2026-10-17, so GitHub's shallow checkout gives the
-  // same answer as a Mac; a warning, as in dev:change (the release is strict).
+  // Translations too: offline and without git history, so GitHub's shallow checkout gives the same answer as a
+  // Mac; a warning, as in dev:change (the release is strict).
   if (part === 'check') { for (const name of ['types', 'unit', 'translations']) npm('check', '--', name); return; }
-  if (part === 'every' && shardOf) process.env.REMY_SHARD = shardOf;
-  npm('test', '--', part);
+  if (part === 'browser' && shardOf) process.env.REMY_SHARD = shardOf;
+  const test = await import('./test.ts');
+  if (part === 'browser') test.every();
+  else if (part === 'audits') await test.google();
+  else test.consumers();
 }
 
 /**
@@ -123,19 +130,19 @@ export function installPrePush(): void {
 }
 
 export async function ci(args: string[]): Promise<void> {
-  let all = false, full = false, shardOf: string | undefined;
+  let everything = false, shardOf: string | undefined;
   const asked: string[] = [];
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--last') { console.log(lastRecord('ci')); return; }
-    else if (args[i] === '--all') all = true;
-    else if (args[i] === '--full') full = true;
+    else if (args[i] === '--everything') everything = true;
+    else if (args[i] === '--full' || args[i] === '--all') fail(`${args[i]} is gone: npm run ci runs what this change can affect; npm run ci -- --everything runs all of it, as main does.`);
     else if (args[i] === '--shard') shardOf = args[++i] ?? '';
     else asked.push(args[i]!);
   }
   if (shardOf !== undefined && !/^\d+\/\d+$/.test(shardOf)) fail(`--shard takes <i>/<n>, got ${shardOf}`);
-  const chosen = (asked.length ? asked : full ? parts : fast) as Part[];
+  const chosen = (asked.length ? asked : everything ? parts : fast) as Part[];
   for (const part of chosen) if (!parts.includes(part)) fail(`unknown part ${part}: ${parts.join(', ')}`);
-  if (shardOf && (chosen.length !== 1 || chosen[0] !== 'every')) fail('--shard splits the every part only: npm run ci -- every --shard 1/3');
+  if (shardOf && (chosen.length !== 1 || chosen[0] !== 'browser')) fail('--shard splits the browser part only: npm run ci -- browser --shard 1/3');
 
   // On a pull request GitHub still starts the after-merge jobs (one workflow for every event); they end here.
   if (pullRequest && chosen.every(part => afterMerge.includes(part))) {
@@ -145,16 +152,16 @@ export async function ci(args: string[]): Promise<void> {
   // Run as on GitHub: tools that read CI behave alike (Playwright, for one, uses every core under it).
   process.env.CI = process.env.CI ?? '1';
   node();
-  changesBase(all);
+  changesBase(everything);
   if (chosen.some(part => browserParts.includes(part))) { await browser(); fonts(); lap('browser and fonts'); }
   // The CLI times the run and records it (timing.ts); each part is a lap, and what a part runs records itself under it.
   for (const part of chosen) {
     console.log(`\nci: ${part}${shardOf ? ` (shard ${shardOf})` : ''}`);
-    runPart(part, shardOf);
+    await runPart(part, shardOf);
     lap(shardOf ? `${part} ${shardOf}` : part);
   }
-  if (!onGitHub && !asked.length && !full) console.log('ci: what a pull request runs. After merge GitHub also runs google and consumers: npm run ci -- --full runs them here.');
+  if (!onGitHub && !asked.length && !everything) console.log('ci: what a pull request runs, for what this change can affect. Main runs everything: npm run ci -- --everything.');
 }
 
-export const what = "[check|every|google|consumers] [--shard i/n] [--full] [--all] [--last]: what GitHub runs, the same here; no part runs what a pull request runs, --full adds what runs after merge";
+export const what = "[check|browser|audits|new-app] [--shard i/n] [--everything] [--last]: what GitHub runs, the same here: no part runs what a pull request runs for this change (what it can affect); --everything runs every part in every language, nothing skipped, as main does";
 export const main = (args: string[]): Promise<void> => ci(args);

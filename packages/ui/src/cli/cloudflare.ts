@@ -204,7 +204,7 @@ const workerName = async (): Promise<string> => (await workerConfig()).name;
 
 /**
  * Deploy this commit as a throwaway Worker <worker>-check-<alias> (production untouched), wait until it
- * serves this build, run level 1 against it in the quick languages, then delete it (or keep it, for
+ * serves this build, run the browser checks against it in the quick languages, then delete it (or keep it, for
  * the speed measurement). A Worker of its own, because preview URLs are off (every old version and
  * alias was public) and `wrangler delete` removes it completely. Answers the preview's origin.
  */
@@ -240,7 +240,7 @@ export async function preview(alias?: string, keep = false): Promise<string> {
     }
     if (ok < 10) fail(`preview: ${origin} did not answer steadily within 2 minutes`);
     tool('playwright', ['test', '--project=ours'], { env: { TEST_BASE_URL: origin, TEST_TARGET: 'remote', ...quickLocales() } });
-    console.log(`Preview passed level 1: ${origin}`);
+    console.log(`Preview passed the browser checks: ${origin}`);
     return origin;
   } finally { if (!keep) await remove(); }
 }

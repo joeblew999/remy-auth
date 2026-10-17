@@ -9,7 +9,7 @@ Day to day, three: `npm run dev:change` after every edit, `npm run dev:land -- "
 | `npm run dev:status` | what is going on: main with GitHub's verdicts, the deployments, the worktrees, the translations |
 | `npm run dev:start` | &lt;name&gt;: a worktree of your own from main, installed, its own ports, the guard |
 | `npm run dev:change` | the check, in seconds |
-| `npm run dev:land` | "&lt;what changed&gt;": the check and level 1 here, then a pull request, merged when GitHub agrees, and staging |
+| `npm run dev:land` | "&lt;what changed&gt;": the check and the browser checks here, then a pull request, merged when GitHub agrees, and staging |
 | `npm run dev:promote` | production from a pushed main |
 | `npm run dev:release` | every check, every language, then the tag |
 | `npm run dev:done` | the worktree removed once its work is on main |
@@ -72,22 +72,19 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy app dev` | Vite's dev server on local Workers with hot reload, port 5173 (npm run dev) |
 | `npx remy app build` | the production build, then Wrangler's deployment dry run; no upload (npm run build) |
 | `npx remy app preview` | build, then the production artifact on Cloudflare's local host at PREVIEW_PORT, 4173 by default; the browser checks run on the same (npm run preview) |
-| `npx remy test` | the browser checks, over a local build or a deployment |
-| `npx remy test every` | every check in every language over a local build; the default (GitHub runs it after every landing) |
-| `npx remy test quick` | every check in a few languages (QUICK_LOCALES) |
+| `npx remy test` | the browser checks by hand: one area, the smoke, against a deployment, Core Web Vitals, the report (what CI runs is npm run ci) |
 | `npx remy test only` | &lt;words&gt;: the checks whose title matches, in a few languages; the one targeted run by hand |
 | `npx remy test smoke` | tier 1: every page answers, the home page hydrates |
-| `npx remy test google` | Google's Lighthouse audits (level 2; one run at a time on this machine) |
 | `npx remy test cwv` | [alias]: Core Web Vitals on a throwaway preview Worker |
 | `npx remy test remote` | [origin]: the browser checks against a deployment: production by default, Google's audits included; any other origin (a preview, staging) our checks only |
 | `npx remy test live` | [origin]: the smoke against a deployment (every deploy ends with it) |
-| `npx remy test consumers` | the repositories this one serves: the blank app and the consumer fixture |
 | `npx remy test report` | [remote]: open the last HTML report, local or remote |
-| `npx remy ci` | [check\|every\|google\|consumers] [--shard i/n] [--full] [--all] [--last]: what GitHub runs, the same here; no part runs what a pull request runs, --full adds what runs after merge |
+| `npx remy ci` | [check\|browser\|audits\|new-app] [--shard i/n] [--everything] [--last]: what GitHub runs, the same here: no part runs what a pull request runs for this change (what it can affect); --everything runs every part in every language, nothing skipped, as main does |
 | `npx remy last` | [command]: the last run's record (when it started, its parts, its total), of a command or of whatever ran last |
 | `npx remy docs` | the docs Worker, @joeblew999/remy-ui's, over this app's docs/ |
 | `npx remy docs dev` | the docs Worker with hot reload |
 | `npx remy docs build` | the production build, which writes .remy-docs/ |
+| `npx remy docs serve` | the built docs here at DOCS_PREVIEW_PORT (4174), as their checks and AI tools see them: llms.txt, each page's .md (preview is Cloudflare's) |
 | `npx remy docs check` | build, binding types, types |
 | `npx remy docs test` | [remote]: the docs' browser checks on a local build, or against the deployment with every MCP server's tools |
 | `npx remy docs preview` | a preview Worker of the docs, answers paused |

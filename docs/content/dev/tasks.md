@@ -41,7 +41,7 @@ anywhere else is simply not found; no checker of its own keeps it.
 | `messages/`, `project.inlang/` | the app preset, the app's `generate` script, `remy i18n` | the app's own strings, if any (compiled into `src/paraglide/`) |
 | `.plans/` (`now.md`, `done/`, `parked/`) | `remy plans` | the repo's plans |
 | `AGENTS.md`, `.github/workflows/` | agents; GitHub | the agents' pointer at the docs; CI |
-| `packages/ui/src/cli/`, `template/`, `fixtures/consumer/` | the package; `giget`; `remy test consumers` | remy-auth only: the command line itself, the blank app a new repo starts from, and the consumer fixture that tests both as another repo gets them |
+| `packages/ui/src/cli/`, `template/`, `fixtures/consumer/` | the package; `giget`; `npm run ci -- new-app` | remy-auth only: the command line itself, the blank app a new repo starts from, and the consumer fixture that tests both as another repo gets them |
 
 ### A new consumer
 
@@ -121,29 +121,17 @@ generated before type checking; the blank app's compiles its own catalog), `loca
 app needs before it runs, which `dev`, `build` and `dev:start` run first; remy-auth writes its `.dev.vars`
 and migrates its local D1 there), `release-checks` and `test:consumers`.
 
-The development flow is code, `packages/ui/src/cli/flow.ts`, with four steps and a guard
-([how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)):
+The development flow is code, `packages/ui/src/cli/flow.ts`, with four steps and a guard. The flow, step by step, and who runs each: [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest); every command: [Commands](./commands.mdx).
 
-| Step | Script |
-| --- | --- |
-| First | `dev:status` (main with GitHub's verdicts, the deployments, worktrees ahead and behind, translations, pull requests; a `SessionStart` hook runs it for agents) |
-| A piece of work | `dev:start -- <name>` (a worktree of its own from main, `npm ci`, its own ports, the guard); `dev:done` removes it when the piece of work is over and landed |
-| Every change | `dev:change` (`remy flow change`, every part a function: plans, single copies, routes when a route file changed, types, the unit checks, translations as a warning, the docs when docs changed) |
-| Finished work | `dev:land -- "<message>"` (the check, commit, main, push, the staging deploy, then translation when stale; GitHub then runs `npm run test -- every`, `google` and `consumers` in parallel, and a red run comments on the commit. The same three locally, on purpose, by a person: `REMY_FLOW=hand npm run test -- <level>`) |
-| Production | `dev:promote` (refuses a commit GitHub has not passed; then the production deploy, the docs deploy, what each deployment runs) |
-| A release | `dev:release` (`remy packages release`, which runs `remy verify`) |
-| One area | `npm run test -- only <words>` |
-| The guard | `npx remy guard` registers it (`npm run setup` does); `npx remy guard --check` verifies it (the installation's checks do) |
-
-`npm run test -- every` is every check of ours in every language (inside `remy verify`). `remy verify` and CI end with
-`remy test consumers`, the other repositories this one serves tested as they get it: the app's `test:consumers`
-script, nothing by default; in remy-auth, the consumer fixture, which builds the blank app and a package it owns from this commit's platform
+`remy verify` (the release gate) runs the browser checks in every language, then the new-app test, as `npm run ci`'s
+`browser` and `new-app` parts do: the other repositories this one serves tested as they get it: the app's
+`test:consumers` script, nothing by default; in remy-auth, the new-app test (`fixtures/consumer`), which builds the blank app and a package it owns from this commit's platform
 (the package from a tarball with a version of its own, the tasks from a copy outside any `node_modules`, the
 template's `.npmrc`) and runs install, skills (installed once per pinned list, then reused), the tooling invariants, the check, the quick browser checks, the docs and a dry-run publish (~1.5 to 3 min, mostly the network).
 A change that would break another repository fails there, not in that repository. Tests are type-checked with
-the app (`tsconfig.json` includes `tests/`). Google's level is
-`npm run test -- google` (Lighthouse audits, local; CI on every push and tag) and `npm run test -- cwv`
-(Core Web Vitals on a throwaway Cloudflare Worker); the release runs both.
+the app (`tsconfig.json` includes `tests/`). Google's audits are
+`npm run ci -- audits` (Lighthouse, local; CI on every push to main and every tag) and Core Web Vitals is
+`npm run test -- cwv` (on a throwaway Cloudflare Worker); the release runs both.
 
 Where checks run: the shared package's own behaviour is proven once, in remy-auth, before each
 release. An app built on the package runs a contract set (its pages render, site and app pages stay

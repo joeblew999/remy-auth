@@ -1,7 +1,7 @@
 ---
 title: "La línea de comandos"
 description: "remy, la herramienta que toda app de Remy instala con el paquete: los scripts, la estructura que leen, una app nueva, la publicación de paquetes, las traducciones, Cloudflare y los planes."
-translatedFrom: "26693786 120aeace 9352ad42 79fb3dca f61ecbb5 4e9524a9 39363a65 218b0959"
+translatedFrom: "26693786 ffed0063 9352ad42 79fb3dca 1679c6b9 4e9524a9 39363a65 218b0959"
 ---
 
 La herramienta es `remy`, el bin de `@joeblew999/remy-ui` (`packages/ui/src/cli`, un módulo de TypeScript por
@@ -43,7 +43,7 @@ encuentra; ninguna comprobación propia lo mantiene.
 | `messages/`, `project.inlang/` | el preset de la app, el script `generate` de la app, `remy i18n` | las cadenas propias de la app, si las hay (compiladas en `src/paraglide/`) |
 | `.plans/` (`now.md`, `done/`, `parked/`) | `remy plans` | los planes del repositorio |
 | `AGENTS.md`, `.github/workflows/` | agentes; GitHub | el puntero de los agentes a la documentación; CI |
-| `packages/ui/src/cli/`, `template/`, `fixtures/consumer/` | el paquete; `giget`; `remy test consumers` | solo remy-auth: la propia línea de comandos, la app en blanco desde la que arranca un repositorio nuevo, y el fixture de consumidor que prueba ambos tal como los recibiría otro repositorio |
+| `packages/ui/src/cli/`, `template/`, `fixtures/consumer/` | el paquete; `giget`; `npm run ci -- new-app` | solo remy-auth: la propia línea de comandos, la app en blanco desde la que arranca un repositorio nuevo, y el fixture de consumidor que prueba ambos tal como los recibiría otro repositorio |
 
 ### Un consumidor nuevo [#a-new-consumer]
 
@@ -130,32 +130,15 @@ catálogo), `local` (el estado local que una app necesita antes de ejecutarse, q
 `dev:start` ejecutan primero; remy-auth escribe ahí su `.dev.vars` y migra su D1 local), `release-checks` y
 `test:consumers`.
 
-El flujo de desarrollo es código, `packages/ui/src/cli/flow.ts`, con cuatro pasos y un guardián
-([cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)):
+El flujo de desarrollo es código, `packages/ui/src/cli/flow.ts`, con cuatro pasos y un guardián. El flujo, paso a paso, y quién ejecuta cada uno: [cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest); todos los comandos: [Comandos](./commands.mdx).
 
-| Paso | Script |
-| --- | --- |
-| Primero | `dev:status` (main con los veredictos de GitHub, los despliegues, los worktrees por delante y por detrás, las traducciones, las pull requests; un hook `SessionStart` lo ejecuta para los agentes) |
-| Un trabajo | `dev:start -- <name>` (un worktree propio desde main, `npm ci`, puertos propios, el guardián); `dev:done` lo elimina cuando el trabajo termina y queda fusionado |
-| Cada cambio | `dev:change` (`remy flow change`, cada parte una función: planes, copias únicas, rutas cuando cambia un archivo de ruta, tipos, las comprobaciones unitarias, las traducciones como aviso, la documentación cuando cambia) |
-| Trabajo terminado | `dev:land -- "<message>"` (la comprobación, commit, main, push, el despliegue en staging, y luego la traducción cuando está desactualizada; GitHub ejecuta entonces `npm run test -- every`, `google` y `consumers` en paralelo, y una ejecución en rojo comenta en el commit. Las mismas tres en local, a propósito, por una persona: `REMY_FLOW=hand npm run test -- <level>`) |
-| Producción | `dev:promote` (se niega ante un commit que GitHub no ha aprobado; luego el despliegue a producción, el despliegue de la documentación, lo que ejecuta cada despliegue) |
-| Un release | `dev:release` (`remy packages release`, que ejecuta `remy verify`) |
-| Un área | `npm run test -- only <words>` |
-| El guardián | `npx remy guard` lo registra (`npm run setup` lo hace); `npx remy guard --check` lo verifica (las comprobaciones de la instalación lo hacen) |
-
-`npm run test -- every` es cada una de nuestras comprobaciones en todos los idiomas (dentro de `remy verify`).
-`remy verify` y CI terminan con `remy test consumers`, los demás repositorios a los que este sirve,
-probados tal como los reciben: el script `test:consumers` de la app, nada por defecto; en remy-auth, el
-fixture de consumidor, que construye la app en blanco y un paquete propio a partir de la plataforma de este commit
+`remy verify` (la puerta del release) ejecuta las comprobaciones de navegador en todos los idiomas y después la prueba de app nueva, igual que las partes `browser` y `new-app` de `npm run ci`: los demás repositorios a los que este sirve, probados tal como los reciben: el script `test:consumers` de la app, nada por defecto; en remy-auth, la prueba de app nueva (`fixtures/consumer`), que construye la app en blanco y un paquete propio a partir de la plataforma de este commit
 (el paquete desde un tarball con versión propia, las tareas desde una copia fuera de cualquier `node_modules`, el
-`.npmrc` de la plantilla) y ejecuta la instalación, las skills (instaladas una vez por lista fijada y luego
-reutilizadas), los invariantes de las herramientas, la comprobación, las comprobaciones rápidas de navegador, la
-documentación y una publicación de prueba (dry-run) (~1,5 a 3 min, sobre todo la red).
+`.npmrc` de la plantilla) y ejecuta la instalación, las skills (instaladas una vez por lista fijada y luego reutilizadas), los invariantes de las herramientas, la comprobación, las comprobaciones rápidas de navegador, la documentación y una publicación de prueba (dry-run) (~1,5 a 3 min, sobre todo la red).
 Un cambio que rompería otro repositorio falla ahí, no en ese repositorio. Las pruebas se comprueban con tipos junto
-con la app (`tsconfig.json` incluye `tests/`). El nivel de Google es
-`npm run test -- google` (auditorías de Lighthouse, local; CI en cada push y tag) y `npm run test -- cwv`
-(Core Web Vitals en un Worker de Cloudflare desechable); el release ejecuta ambas.
+con la app (`tsconfig.json` incluye `tests/`). Las auditorías de Google son
+`npm run ci -- audits` (Lighthouse, local; CI en cada push a main y en cada tag) y Core Web Vitals es
+`npm run test -- cwv` (en un Worker de Cloudflare desechable); el release ejecuta ambas.
 
 Dónde se ejecutan las comprobaciones: el comportamiento propio del paquete compartido se comprueba una vez, en remy-auth, antes de cada
 release. Una app construida sobre el paquete ejecuta un conjunto de contrato (sus páginas renderizan, las páginas de sitio y de app se mantienen

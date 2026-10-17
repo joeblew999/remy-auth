@@ -106,9 +106,9 @@ tooling`: every `package.json` matches the lockfile, the Wrangler configuration 
 observability on, the workflows name only scripts that exist, every installed skill comes from a
 pinned source with its Claude link), then the check. They use the existing local installation and
 do not provision Cloudflare resources. The gate then runs every browser check of ours in every
-language (`npm run test -- every`) against the production artifact in local Workers using installed
-Chrome, then the consumer fixture. Google's audits are not in it: `npm run test -- google` and
-`npm run test -- cwv`, which the release runs after it. No deployment is performed. See [the GUI proof](./gui.md) for scope and commands.
+language (`npm run ci`'s `browser` part) against the production artifact in local Workers, then the new-app
+test. Google's audits are not in it: `npm run ci -- audits` and `npm run test -- cwv`, which the release runs
+after it. No deployment is performed. See [the GUI proof](./gui.md) for scope and commands.
 
 
 ## Start or reload your agent

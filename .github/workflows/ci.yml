@@ -45,18 +45,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: types and unit
+          - name: check
             part: check
-          - name: every language 1/3
-            part: every --shard 1/3
-          - name: every language 2/3
-            part: every --shard 2/3
-          - name: every language 3/3
-            part: every --shard 3/3
-          - name: google
-            part: google
-          - name: consumers
-            part: consumers
+          - name: browser 1/3
+            part: browser --shard 1/3
+          - name: browser 2/3
+            part: browser --shard 2/3
+          - name: browser 3/3
+            part: browser --shard 3/3
+          - name: audits
+            part: audits
+          - name: new-app
+            part: new-app
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     permissions:
@@ -79,7 +79,7 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-      - if: matrix.part == 'consumers'
+      - if: matrix.part == 'new-app'
         uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: /tmp/remy-fixture-skills

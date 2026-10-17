@@ -1,7 +1,7 @@
 ---
 title: "Cómo trabajamos"
 description: "Cómo trabajan aquí las personas y los agentes: las herramientas del proyecto primero, encuestas antes de elegir herramientas, shadcn y TanStack, puertas de control, planes y traducciones."
-translatedFrom: "be9633b9 9d3c93f6 790e3737 0ed0ead4 d8386d74 94b8f1c6 4dca6b46 4aece31e f3262ad2 b2a387bd 2f9aba9e 2a2eaf1d c8f062fe cfedf838 01c70038 d7ee26c1 0dd8a337 b5662e6a c756fe69"
+translatedFrom: "be9633b9 9d3c93f6 790e3737 0ed0ead4 d8386d74 94b8f1c6 4dca6b46 4aece31e f3262ad2 b2a387bd 2f9aba9e 2a2eaf1d c8f062fe 29ceaab5 01c70038 d7ee26c1 5cbd4b38 b5662e6a c756fe69"
 ---
 
 Este documento es el dueño de cómo trabajan las personas y los agentes: los hábitos que ha pedido el
@@ -261,15 +261,15 @@ que cada app, desde las tareas compartidas; `npm run setup` instala el guardián
 - Un área que parece mal: `npm run test -- only <palabras>` (las comprobaciones de navegador
   cuyo título coincide, en y ar, ~30 s). Es la única ejecución de navegador que no es propiedad de un
   paso.
-- **El guardián** (`remy guard`, un hook de Claude Code en cada comando de shell que ejecuta un agente) se
-  niega a ejecutar `remy verify`, `npm run test -- every`, `npm run test -- quick`, `npm run test -- remote`,
-  `npm run test -- google`, `npm run test -- cwv`, `npm run test -- consumers`, `npm run test -- consumers`, un
-  `playwright test` desnudo y `remy i18n translate` fuera del flujo, y en su lugar nombra el paso
-  correspondiente. Todos ellos siguen pudiendo ejecutarse a mano desde una terminal, con
-  `REMY_FLOW=hand` por delante (`REMY_FLOW=hand npm run test -- every`): el propio comando pregunta quién
-  lo está ejecutando (la puerta de control) y se niega ante una ejecución desnuda, en cualquier máquina. Eso es
-  una decisión de una persona; el guardián se niega a ejecutarlo desde un agente aun así, que es el
-  fallo para el que existe. Una tarea cuyo propio trabajo termina con la verificación (`npm run setup`,
+- **El guardián** (`remy guard`, un hook de Claude Code en cada comando de shell que ejecuta un agente,
+  registrado en cada máquina por `npm run setup`) rechaza las comprobaciones pesadas fuera del flujo (la puerta
+  de control de la publicación, las comprobaciones de navegador contra un despliegue, Core Web Vitals, un
+  `playwright test` desnudo, `remy i18n translate`) y `wrangler dev` a secas, y nombra qué ejecutar en su lugar
+  (`COMMANDS.md`). Todas siguen pudiendo ejecutarse a mano desde una terminal, con `REMY_FLOW=hand` por
+  delante (`REMY_FLOW=hand npm run test -- remote`): el propio comando pregunta quién lo está ejecutando
+  (la puerta de control) y se niega ante una ejecución desnuda, en cualquier máquina. Eso es una decisión de
+  una persona; el guardián se niega a ejecutarlo desde un agente aun así, que es el fallo para el que
+  existe. Una tarea cuyo propio trabajo termina con la verificación (`npm run setup`,
   `npm run packages -- upgrade`, `npm run upgrade`) indica que está preguntando, así que esas se ejecutan tal
   como están escritas.
 - **Estas páginas nunca dan un comando que las herramientas rechacen.** Un comando pesado se escribe con
@@ -362,7 +362,7 @@ porque todos nuestros repos van a usar esto».
 - Una rama mezclada que queda suelta (local o en GitHub) es ruido, no historia: `main` y las etiquetas
   la contienen.
 
-## Compartir una máquina entre agentes [#sharing-one-machine-between-agents]
+## Sharing one machine between agents [#sharing-one-machine-between-agents]
 
 La máquina se cayó el 2026-09-25 con unos diez agentes construyendo y probando a la vez (carga 188), y
 las comprobaciones sensibles al tiempo fallaron mucho antes de eso. Así que:
@@ -374,8 +374,8 @@ las comprobaciones sensibles al tiempo fallaron mucho antes de eso. Así que:
   (nunca 4190, que los navegadores bloquean); `PREVIEW_PORT=4232 npm run …` los sobrescribe.
 - Como máximo tres agentes ejecutan pruebas al mismo tiempo; la investigación, la escritura y los
   spikes de prueba no cuentan. Cuando se necesitan más, pon `PLAYWRIGHT_WORKERS=2` para cada uno.
-- El nivel de Google (`npm run test -- google`, `npm run test -- cwv`) toma un lock de toda la máquina, así
-  que una segunda ejecución espera en lugar de distorsionar la primera.
+- Las auditorías de Google (`npm run ci -- audits`) y Core Web Vitals (`npm run test -- cwv`) toman un lock de toda la
+  máquina, así que una segunda ejecución espera en lugar de distorsionar la primera.
 - Nunca encadenes un despliegue después de una comprobación con `;`: los pasos del flujo se ejecutan
   uno tras otro y se detienen en el primer fallo.
 

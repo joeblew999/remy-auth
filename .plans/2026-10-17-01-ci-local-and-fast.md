@@ -18,6 +18,11 @@ CI that is fast, and that runs the same locally as on GitHub. Everything the own
 
 ## The design
 
+> **2026-10-17, later: no more levels.** "Level 1/2", `every`, `google`, `consumers`, `--full` and `--all`, used
+> below as they were at the time, are gone. `npm run ci` has four parts, the same four GitHub jobs: `check`,
+> `browser`, `audits`, `new-app`; what a run includes is what its change can affect, and
+> `npm run ci -- --everything` runs all of it, as main does.
+
 ### One command: `npm run ci`
 
 - `npm run ci` runs what a pull request runs: **types and unit, then level 1** (every browser check).

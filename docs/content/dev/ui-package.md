@@ -143,7 +143,7 @@ first failure: translations complete and current (`remy i18n check`, strict), ev
 and Core Web Vitals measured cold on a throwaway Cloudflare Worker (`npm run test -- cwv`: the first visits
 after a deploy, which is what a slow page costs most). Then it tags `vX.Y.Z` from
 `packages/ui/package.json`, pushes, publishes with your `gh` token and creates the GitHub release from the
-matching CHANGELOG section. CI (`.github/workflows/ci.yml`) repeats level 2 on the tag.
+matching CHANGELOG section. CI (`.github/workflows/ci.yml`) repeats Google's audits on the tag.
 
 Before releasing, one commit: the version in `packages/ui/package.json` (and in
 `packages/contract/package.json` when the contract changed) and the CHANGELOG section. No other file

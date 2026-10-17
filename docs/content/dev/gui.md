@@ -71,7 +71,7 @@ secrets are managed through Cloudflare. Local data is not uploaded by deployment
 each kind promises; the two are never mixed.
 
 - **Site pages** (`sitePaths`: the home and formats) are for Google: complete in the server's HTML
-  without JavaScript, indexed, in the sitemap with `hreflang` alternates, and judged by level 2.
+  without JavaScript, indexed, in the sitemap with `hreflang` alternates, and judged by Google's audits.
   Their frame is `SiteShell` in [`shell.tsx`](https://github.com/joeblew999/remy-auth/blob/main/packages/ui/src/shell.tsx), built from static
   shadcn parts.
 - **App pages** (`appPaths`, under `/app`) need JavaScript, carry `noindex` (added by `pageHead`)
@@ -233,21 +233,23 @@ runs them on server-rendered ones.
 
 ## Evidence and limits
 
-Two levels: level 1 is every check of ours in every language (`npm run test -- every`); level 2 is Google's
-(`npm run test -- google`, `npm run test -- cwv`). A check of something that depends on the language (fonts and
+`npm run ci` runs four parts, the same four GitHub runs as jobs: `check` (types, unit, translations), `browser`
+(every check of ours in a browser), `audits` (Google's Lighthouse) and `new-app` (a brand-new app on this commit's
+package); Core Web Vitals on a throwaway Cloudflare Worker is the release's (`npm run test -- cwv`). There are no
+levels to choose: what a run includes is what its change can affect. A check of something that depends on the language (fonts and
 scripts, hyphenation, direction, formats, the catalogs) runs in every checked language (`checkedLocales`); a check
 of behaviour that does not (the security policy, noindex, search params, the demo form, error pages, API answers)
 runs in the base language and the first right-to-left one (`behaviourLocales`; `BEHAVIOUR_LOCALES` overrides).
-On a pull request each level first asks what changed and is skipped, saying so, when nothing it checks did
+On a pull request each part first asks what changed and is skipped, saying so, when nothing it checks did
 (`packages/ui/src/cli/unchanged.ts`, with its unit checks): plans, the docs content and Markdown outside the
-packages run none; the blank app and the fixture run only the consumers level. Pushes to `main` and tags run
-everything. Level 1 also asks whether what changed can differ by language: the catalogs and language settings,
+packages run none; the blank app and the fixture run only `new-app`. Pushes to `main` and tags run
+everything. The browser part also asks whether what changed can differ by language: the catalogs and language settings,
 fonts and any CSS, code that formats by locale (named for it, or calling `Intl`, `toLocale…` or a text direction),
 the browser checks themselves, the lockfile and the Node version. When nothing can, it runs in English and Arabic
-only and says so: on 2026-10-17 that was 37 of the 49 recent commits on `main` that needed level 1, and a run in
+only and says so: on 2026-10-17 that was 37 of the 49 recent commits on `main` that needed the browser part, and a run in
 1 min 39 s instead of 2 min 49 s. The tooling and the unit checks never count. Every language still runs on every
 push to `main`, which `dev:promote` waits for, so a page that breaks in one language alone is caught there at the
-latest. `npm run ci` locally decides exactly as a pull request does (`--all` runs everything; `CHECK_LOCALES` set
+latest. `npm run ci` locally decides exactly as a pull request does (`npm run ci -- --everything` runs all of it, as main does; `CHECK_LOCALES` set
 by hand wins). What the checks cover is the checks themselves: `tests/` and the package's
 `@joeblew999/remy-ui/checks` (each check's title says what it proves); the flow's steps that run them are in
 [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). In short: every page in every

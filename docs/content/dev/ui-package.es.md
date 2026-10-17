@@ -1,7 +1,7 @@
 ---
 title: "@joeblew999/remy-ui"
 description: "La interfaz que comparten todas las apps de Remy: shadcn de fábrica, fuentes, catálogos de Paraglide, las páginas del sitio y de la app, el pegamento de TanStack Start y sus comprobaciones."
-translatedFrom: "5bd7d27a 8db87367 a0992f8d 97d920a0 62bc7837 53306b2b 6d53a8c9"
+translatedFrom: "5bd7d27a 8db87367 a0992f8d 97d920a0 62bc7837 e03f7604 6d53a8c9"
 ---
 
 La interfaz que comparten todas las apps de Remy: componentes y tema de shadcn de fábrica, fuentes,
@@ -155,7 +155,7 @@ nuestras comprobaciones (`remy verify`), los archivos de shadcn exactamente como
 Cloudflare desechable (`npm run test -- cwv`: las primeras visitas tras un despliegue, que es donde una
 página lenta sale más cara). Después etiqueta `vX.Y.Z` a partir de `packages/ui/package.json`, hace
 push, publica con tu token de `gh` y crea el release de GitHub a partir de la sección correspondiente
-del CHANGELOG. CI (`.github/workflows/ci.yml`) repite el nivel 2 sobre el tag.
+del CHANGELOG. CI (`.github/workflows/ci.yml`) repite las auditorías de Google sobre el tag.
 
 Antes de publicar, un solo commit: la versión en `packages/ui/package.json` (y en
 `packages/contract/package.json` cuando el contrato cambió) y la sección del CHANGELOG. Ningún otro

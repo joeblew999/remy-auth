@@ -59,19 +59,19 @@ else {
 }
 await check();
 lap('the check');
-// What the pull request's checks run, here first: level 1 as GitHub will run it for these changes (the check
+// What the pull request's checks run, here first: the browser checks as GitHub will run it for these changes (the check
 // above already covered types and unit). GitHub then confirms instead of finding out.
 const [remy, ...remyArgs] = remyCommand();
-if (spawnSync(remy!, [...remyArgs, 'ci', 'every'], { stdio: 'inherit', env: { ...process.env, REMY_FLOW: 'ci' } }).status !== 0) fail('level 1 failed here (above), so nothing was pushed. Fix it, then land again.');
-lap('level 1, as the pull request runs it');
+if (spawnSync(remy!, [...remyArgs, 'ci', 'browser'], { stdio: 'inherit', env: { ...process.env, REMY_FLOW: 'ci' } }).status !== 0) fail('the browser checks failed here (above), so nothing was pushed. Fix it, then land again.');
+lap('browser checks, as the pull request runs them');
 if (read('status', '--porcelain') !== '') { git('add', '-A'); git('commit', '-q', '-m', message); }
 if (read('rev-list', '--count', 'origin/main..HEAD') === '0') fail('nothing to land: this branch has nothing main does not.');
 
-// One push of the branch (the pre-push hook skips: REMY_FLOW is set, and level 1 just passed), then its pull request.
+// One push of the branch (the pre-push hook skips: REMY_FLOW is set, and the browser checks just passed), then its pull request.
 git('push', '-q', '-u', 'origin', `HEAD:refs/heads/${here.branch}`);
 const head = read('rev-parse', 'HEAD');
-// What level 1 took here, from this landing's own record (timing.ts: the ci run above wrote into it).
-const ran = lastRecord('flow land').split('\n').find(line => /ci every: passed/.test(line))?.trim() ?? 'level 1 passed';
+// What the browser checks took here, from this landing's own record (timing.ts: the ci run above wrote into it).
+const ran = lastRecord('flow land').split('\n').find(line => /ci browser: passed/.test(line))?.trim() ?? 'the browser checks passed';
 const pull = pullFor(slug, here.branch) ?? openPull(slug, here.branch, title, `${body ? `${body}\n\n` : ''}Landed with \`npm run dev:land\`. Here first: ${ran}`);
 lap('commit, push and pull request');
 console.log(`dev:land: ${pull.html_url} is open; GitHub checks ${head.slice(0, 7)} (what passed here, confirmed).`);

@@ -233,11 +233,11 @@ tasks; `npm run setup` installs the guard.
 
 - One area that looks wrong: `npm run test -- only <words>` (the browser checks whose title
   matches, en and ar, ~30 s). It is the only browser run a step does not own.
-- **The guard** (`remy guard`, a Claude Code hook on every shell command an agent runs) refuses
-  `remy verify`, `npm run test -- every`, `npm run test -- quick`, `npm run test -- remote`, `npm run test -- google`,
-  `npm run test -- cwv`, `npm run test -- consumers`, `npm run test -- consumers`, a bare `playwright test` and
-  `remy i18n translate` outside the flow, and names the step instead. Every one still runs by hand from a
-  terminal, with `REMY_FLOW=hand` in front (`REMY_FLOW=hand npm run test -- every`): the command itself
+- **The guard** (`remy guard`, a Claude Code hook on every shell command an agent runs, registered on each machine
+  by `npm run setup`) refuses the heavy checks outside the flow (the release gate, the browser checks against a
+  deployment, Core Web Vitals, a bare `playwright test`, `remy i18n translate`) and raw `wrangler dev`, naming
+  what to run instead (`COMMANDS.md`). Every one still runs by hand from a terminal, with `REMY_FLOW=hand` in
+  front (`REMY_FLOW=hand npm run test -- remote`): the command itself
   asks who is running it (the gate) and refuses a bare run, on every machine. That is a
   person's decision; the guard refuses it from an agent even so, which is the fault it exists for.
   A task whose own job ends with the verification (`npm run setup`, `npm run packages -- upgrade`,
@@ -270,7 +270,7 @@ tasks; `npm run setup` installs the guard.
   [command]` prints it. A command started inside another (`npm run ci` runs `check types` and `test
   every`, `dev:land` runs `i18n translate`) writes into the outer run's record, indented, so one run
   leaves one record of everything it ran. A command only marks its parts (`lap`) and adds what it measured
-  itself (`note`: each translator call, each step of the consumer fixture); it never writes a record or a
+  itself (`note`: each translator call, each step of the new-app test); it never writes a record or a
   summary of its own (owner, 2026-10-17: "it should get it automatically because it's part of the CLI"). A slow step is a number in the log, not a feeling (owner,
   2026-10-10, of a landing on staging after 40 seconds whose command ran six minutes: "how can it be
   6 minutes").
@@ -334,7 +334,7 @@ and timing-sensitive checks failed well before that. So:
   4190, which browsers block); `PREVIEW_PORT=4232 npm run …` overrides them.
 - At most three agents run tests at the same time; research, writing and scratch spikes do not
   count. When more are needed, set `PLAYWRIGHT_WORKERS=2` for each.
-- Google's level (`npm run test -- google`, `npm run test -- cwv`) takes a machine-wide lock, so a second
+- Google's audits (`npm run ci -- audits`) and Core Web Vitals (`npm run test -- cwv`) take a machine-wide lock, so a second
   run waits rather than skewing the first.
 - Never chain a deploy after a check with `;`: the flow's steps run each in turn and stop at the first failure.
 

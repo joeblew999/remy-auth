@@ -1,7 +1,7 @@
 ---
 title: "Ejecutar, previsualizar y probar la app"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "573a07f6 5d5de609 0e8ef4b6 2a9d9497 917db7e6 222ea1f3 655a09ab 1d2bc14b 6b0fddca"
+translatedFrom: "573a07f6 5d5de609 0bf2533c 2a9d9497 917db7e6 222ea1f3 655a09ab 1d2bc14b 1c401884"
 ---
 
 ```sh
@@ -73,7 +73,7 @@ datos locales no se suben con el deployment.
 promete cada tipo; los dos nunca se mezclan.
 
 - **Las páginas de sitio** (`sitePaths`: el home y los formatos) son para Google: completas en el HTML del servidor
-  sin JavaScript, indexadas, en el sitemap con alternativas `hreflang`, y evaluadas por el nivel 2.
+  sin JavaScript, indexadas, en el sitemap con alternativas `hreflang`, y evaluadas por las auditorías de Google.
   Su marco es `SiteShell` en [`shell.tsx`](https://github.com/joeblew999/remy-auth/blob/main/packages/ui/src/shell.tsx), construido con partes
   estáticas de shadcn.
 - **Las páginas de app** (`appPaths`, bajo `/app`) necesitan JavaScript, llevan `noindex` (añadido por `pageHead`)
@@ -240,21 +240,23 @@ las ejecuta sobre páginas renderizadas en servidor.
 
 ## Evidencia y límites [#evidence-and-limits]
 
-Dos niveles: el nivel 1 es cada comprobación nuestra en cada idioma (`npm run test -- every`); el nivel 2 es el de Google
-(`npm run test -- google`, `npm run test -- cwv`). Una comprobación de algo que depende del idioma (fuentes y
+`npm run ci` ejecuta cuatro partes, las mismas cuatro que GitHub ejecuta como jobs: `check` (tipos, unitarias, traducciones), `browser`
+(todas nuestras comprobaciones en un navegador), `audits` (Lighthouse de Google) y `new-app` (una app nueva sobre el
+paquete de este commit); los Core Web Vitals en un Worker de Cloudflare desechable son cosa de la release (`npm run test -- cwv`). No hay
+niveles que elegir: lo que incluye una ejecución es lo que su cambio puede afectar. Una comprobación de algo que depende del idioma (fuentes y
 escrituras, separación silábica, dirección, formatos, los catálogos) se ejecuta en cada idioma comprobado (`checkedLocales`); una comprobación
 de un comportamiento que no depende de él (la política de seguridad, noindex, los parámetros de búsqueda, el formulario de demo, las páginas de error, las respuestas de la API)
 se ejecuta en el idioma base y en el primero de derecha a izquierda (`behaviourLocales`; `BEHAVIOUR_LOCALES` lo sustituye).
-En una pull request, cada nivel pregunta primero qué ha cambiado y se omite, indicándolo, cuando nada de lo que comprueba ha cambiado
+En una pull request, cada parte pregunta primero qué ha cambiado y se omite, indicándolo, cuando nada de lo que comprueba ha cambiado
 (`packages/ui/src/cli/unchanged.ts`, con sus comprobaciones unitarias): los planes, el contenido de los docs y el Markdown fuera de los
-paquetes no ejecutan ninguno; la app en blanco y el fixture ejecutan solo el nivel de consumidores. Los push a `main` y las etiquetas ejecutan
-todo. El nivel 1 pregunta además si lo que ha cambiado puede diferir según el idioma: los catálogos y los ajustes de idioma,
+paquetes no ejecutan ninguna; la app en blanco y el fixture ejecutan solo `new-app`. Los push a `main` y las etiquetas ejecutan
+todo. La parte `browser` pregunta además si lo que ha cambiado puede diferir según el idioma: los catálogos y los ajustes de idioma,
 las fuentes y cualquier CSS, el código que da formato según la configuración regional (por su nombre, o que llama a `Intl`, `toLocale…` o a una dirección de texto),
 las propias comprobaciones del navegador, el lockfile y la versión de Node. Cuando nada de eso puede diferir, se ejecuta solo en inglés y árabe
-y lo indica: el 2026-10-17 fueron 37 de los 49 commits recientes de `main` que necesitaron el nivel 1, y una ejecución de
+y lo indica: el 2026-10-17 fueron 37 de los 49 commits recientes de `main` que necesitaron la parte `browser`, y una ejecución de
 1 min 39 s en lugar de 2 min 49 s. Las herramientas y las comprobaciones unitarias nunca cuentan. Todos los idiomas se siguen ejecutando en cada
 push a `main`, que `dev:promote` espera, así que una página que falla solo en un idioma se detecta ahí, como muy tarde.
-`npm run ci` en local decide exactamente igual que una pull request (`--all` ejecuta todo; un `CHECK_LOCALES` fijado
+`npm run ci` en local decide exactamente igual que una pull request (`npm run ci -- --everything` ejecuta todo, como main; un `CHECK_LOCALES` fijado
 a mano prevalece). Lo que cubren las comprobaciones son las propias comprobaciones: `tests/` y el
 `@joeblew999/remy-ui/checks` del paquete (el título de cada comprobación dice qué demuestra); los pasos del flujo que las ejecutan están en
 [cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). En resumen: cada página en cada
@@ -263,7 +265,7 @@ frente a Intl, las redirecciones de entrada y la sugerencia de idioma, la hidrat
 los estados HTTP, el sitemap y `hreflang`, las cabeceras de seguridad y el nonce de CSP, las pantallas estrechas, y
 las páginas de docs, búsqueda y ask.
 
-El nivel de Google cubre solo las páginas de sitio (las páginas de app son noindex por diseño): Lighthouse audita `/en`
+Lo de Google cubre solo las páginas de sitio (las páginas de app son noindex por diseño): Lighthouse audita `/en`
 (móvil y escritorio), `/es`, `/ar` y `/en/formats`
 ([`tests/lighthouse.spec.ts`](https://github.com/joeblew999/remy-auth/blob/main/tests/lighthouse.spec.ts)); Core Web Vitals, a partir del paquete
 `lighthouse` fijado de Google, evalúan `/en` (móvil y escritorio) y `/en/formats`
