@@ -121,6 +121,10 @@ function appTasks(root, { remy }) {
       dependsOn: [{ task: 'generate', from: 'dependencies' }],
       cache: { input: [{ auto: true }, '!**/paraglide/**', '!worker-configuration.d.ts'], untrackedEnv: network },
     },
+    // The build's folder emptied before the build runs or comes from the cache: a cache hit restores the build's files
+    // over what is there and removes nothing, so an earlier build's chunks would stay beside them (a browser check
+    // found one, 2026-10-17: a chunk no page loads).
+    clean: { command: `node -e "require('node:fs').rmSync('dist', { recursive: true, force: true })"`, cache: false },
     // vp dev, vp build and vp preview are Vite Plus's own; these are the app's, with what they need first.
     dev: { command: 'vp dev', dependsOn: prepared, cache: false },
     // The production build, then Wrangler's deployment dry run (no upload). Its stamp names the commit it was built
@@ -128,7 +132,7 @@ function appTasks(root, { remy }) {
     // too, so a new commit builds again.
     build: {
       command: ['vp build', 'wrangler deploy --dry-run'],
-      dependsOn: prepared,
+      dependsOn: [...prepared, 'clean'],
       cache: {
         input: [
           { auto: true },

@@ -100,9 +100,14 @@ export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
           command: 'wrangler types -c .remy-docs/wrangler.json',
           cache: { input: [{ auto: true }, '!worker-configuration.d.ts'] },
         },
+        // Its folder emptied first: a cache hit restores the build over what is there and removes nothing.
+        clean: {
+          command: `node -e "require('node:fs').rmSync('dist', { recursive: true, force: true })"`,
+          cache: false,
+        },
         build: {
           command: 'vp build',
-          dependsOn: ['generate'],
+          dependsOn: ['generate', 'clean'],
           cache: {
             input: [{ auto: true }, '!.remy-docs/**', '!dist/**', '!.wrangler/**'],
             output: ['dist/**'],

@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { unstable_startWorker } from 'wrangler';
+import { createRequire } from 'node:module';
+import { dirname } from 'node:path';
 
 // The guard (@joeblew999/remy-ui/api/guard-core) on both oRPC majors, in the Workers runtime. remy-auth and
 // the platform run the oRPC 2.0 beta; other Remy apps are still on 1.15, whose procedures keep their
@@ -40,7 +42,16 @@ const version = (folder: string): string => {
     return `? (${folder} is not installed: vp run local)`;
   }
 };
-const installed = { v1: version('tests/guard/v1/node_modules/@orpc/server'), v2: version('node_modules/@orpc/server') };
+// oRPC 2 is the app's own, wherever the install put it (a workspace installs it once, at its root): resolved as Node
+// resolves it from this file. oRPC 1 is the fixture's alone, installed beside it (tests/guard/v1).
+const orpc2 = (() => {
+  try {
+    return dirname(createRequire(import.meta.url).resolve('@orpc/server/package.json'));
+  } catch {
+    return 'node_modules/@orpc/server';
+  }
+})();
+const installed = { v1: version('tests/guard/v1/node_modules/@orpc/server'), v2: version(orpc2) };
 let results: Record<'v1' | 'v2', Major>;
 
 // One fixture Worker for the whole file: in one Playwright worker, in order.

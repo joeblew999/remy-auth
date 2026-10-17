@@ -123,7 +123,7 @@ const settings = JSON.parse(readFileSync('../../packages/ui/project.inlang/setti
 const catalogs: Record<string, Record<string, any>> = Object.fromEntries(
   (settings.locales as string[]).map((locale) => [
     locale,
-    JSON.parse(readFileSync(`packages/ui/messages/${locale}.json`, 'utf8')),
+    JSON.parse(readFileSync(`../../packages/ui/messages/${locale}.json`, 'utf8')),
   ]),
 );
 test.use({ timezoneId: 'Asia/Tokyo' });
