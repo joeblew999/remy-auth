@@ -42,8 +42,9 @@ export function buildChecks({ service }) {
     if (local) {
       // This checkout's commit, or one before it: Vite Plus replays a build while nothing it reads has changed since.
       // A stamp from elsewhere (another branch, a build that outlived its checkout) is neither.
+      // A local build names no commit (build-vite.js: only a deploy gives it one); one that does names this checkout's.
       const commit = head();
-      if (commit && build.commit !== commit)
+      if (commit && build.commit && build.commit !== commit)
         expect(
           spawnSync('git', ['merge-base', '--is-ancestor', build.commit, commit]).status,
           `the build under test (${build.commit}) was made from this checkout (${commit}) or a commit before it`,

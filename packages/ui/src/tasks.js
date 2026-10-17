@@ -9,9 +9,8 @@
 // the same names. What differs is read from the folders, never set: remy-auth runs the command line's source, an app
 // the installed `remy`; an app with project.inlang compiles its own strings; one with scripts/local.ts prepares its
 // local state; one with a docs package checks it too.
-import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -23,16 +22,17 @@ export function portsFor(name) {
   return { preview, docsPreview: preview + 1 };
 }
 
-/** The worktree's name when `cwd` is in one; the main checkout has none. */
+/**
+ * The worktree's name when `cwd` is in one; the main checkout has none. Read from the files, never by running git: the
+ * tasks are worked out each time Vite loads its configuration, inside the build too, where every file git reads would
+ * count among the build's inputs (git's HEAD changes with each commit). A worktree's `.git` is a file; the main
+ * checkout's, a folder.
+ */
 export function worktreeName(cwd = process.cwd()) {
-  try {
-    const read = (...args) =>
-      execFileSync('git', ['-C', cwd, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
-    const root = read('rev-parse', '--path-format=absolute', '--git-common-dir').replace(/\/\.git$/, '');
-    const top = read('rev-parse', '--show-toplevel');
-    return top === root ? undefined : basename(top);
-  } catch {
-    return undefined;
+  for (let dir = resolve(cwd); ; dir = dirname(dir)) {
+    const dotGit = join(dir, '.git');
+    if (existsSync(dotGit)) return statSync(dotGit).isFile() ? basename(dir) : undefined;
+    if (dir === dirname(dir)) return undefined;
   }
 }
 
@@ -109,7 +109,7 @@ export const githubJobs = (shards = 3) => [
 const json = (file) => JSON.parse(readFileSync(file, 'utf8'));
 
 /** The workspace an app folder belongs to: the nearest folder above it whose package.json lists workspaces. */
-function workspaceOf(root) {
+export function workspaceOf(root) {
   for (let dir = dirname(resolve(root)); dir !== dirname(dir); dir = dirname(dir)) {
     const manifest = join(dir, 'package.json');
     if (existsSync(manifest) && json(manifest).workspaces) return dir;
@@ -129,6 +129,26 @@ function commandLine(root, workspace = root) {
 export const standalone = (root) => !workspaceOf(root);
 
 /** The packages under a workspace's folders whose package.json says they are an app (has a wrangler config) or docs. */
+/**
+ * The platform package's own generate task, by name, when the workspace holds the package (remy-auth): what an app's
+ * and its docs' generate need first (the package's compiled catalogs). Named, not `{ task, from: 'dependencies' }`:
+ * Vite Plus 1.3 links no npm workspace package that way (`vp run -t remy-auth#generate` runs the app's alone), so on
+ * GitHub's fresh checkout the unit checks ran with no catalogs (2026-10-17, pull request #28). An app on the installed
+ * package has them compiled already.
+ */
+export function platformGenerate(workspace) {
+  const dirs = (json(join(workspace, 'package.json')).workspaces ?? []).flatMap((pattern) => {
+    if (!pattern.endsWith('/*')) return [join(workspace, pattern)];
+    const parent = join(workspace, pattern.slice(0, -2));
+    return existsSync(parent) ? readdirSync(parent).map((name) => join(parent, name)) : [];
+  });
+  return dirs.some(
+    (dir) => existsSync(join(dir, 'package.json')) && json(join(dir, 'package.json')).name === '@joeblew999/remy-ui',
+  )
+    ? ['@joeblew999/remy-ui#generate']
+    : [];
+}
+
 /**
  * The app whose strings a docs folder at `docsRoot` uses (its messages/): the folder holding docs/ in an app that is its
  * own repository, the workspace's app (the package with a wrangler.jsonc) in a workspace.
@@ -172,17 +192,8 @@ function members(workspace) {
  */
 const lockfile = { pattern: 'package-lock.json', base: 'workspace' };
 
-/** This checkout's commit, or "none" outside git. */
-function commit(root) {
-  try {
-    return execFileSync('git', ['-C', root, 'rev-parse', 'HEAD'], {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-  } catch {
-    return 'none';
-  }
-}
+/** What names a build's commit (build-vite.js): part of the build's cache key, so a deploy builds its own. */
+export const stampEnv = ['REMY_COMMIT', 'REMY_CHANGES', 'WORKERS_CI_COMMIT_SHA'];
 
 function appTasks(root, { remy }) {
   // This checkout's port (a worktree's own), unless the shell names one.
@@ -213,16 +224,16 @@ function appTasks(root, { remy }) {
     clean: { command: `node -e "require('node:fs').rmSync('dist', { recursive: true, force: true })"`, cache: false },
     // vp dev, vp build and vp preview are Vite Plus's own; these are the app's, with what they need first.
     dev: { command: 'vp dev .', dependsOn: prepared, cache: false },
-    // The production build. Its stamp names the commit it was built from (build-vite.js). Here and on GitHub a build
-    // is replayed while nothing it reads changes, across commits (a docs-only commit tests nothing again), so its stamp
-    // may name an earlier commit, which the stamp check allows. On Cloudflare (WORKERS_CI) the commit is in the command,
-    // part of Vite Plus's cache key, so a deployment always names its own commit.
+    // The production build, replayed while nothing it reads changes, across commits too. Its stamp names a commit only
+    // when one is given (a deploy's REMY_COMMIT, Workers Builds' WORKERS_CI_COMMIT_SHA: build-vite.js), and those are
+    // in the cache key, so a deployment never takes another commit's build.
     build: {
-      command: process.env.WORKERS_CI ? `REMY_COMMIT=${commit(root)} vp build .` : 'vp build .',
+      command: 'vp build .',
       dependsOn: [...prepared, 'clean'],
       cache: {
         input: [{ auto: true }, ...generated, lockfile],
         output: ['dist/**'],
+        env: stampEnv,
         untrackedEnv: network,
       },
     },
@@ -324,7 +335,10 @@ export function remyTasks({ root = process.cwd(), tasks = {} } = {}) {
   const workspace = workspaceOf(root);
   const commands = commandLine(root, workspace ?? root);
   const own = appTasks(root, commands);
-  if (workspace) return { ...own, ...tasks };
+  if (workspace) {
+    own.generate.dependsOn.push(...platformGenerate(workspace));
+    return { ...own, ...tasks };
+  }
   const docs = existsSync(resolve(root, 'docs/package.json'))
     ? json(resolve(root, 'docs/package.json')).name
     : undefined;

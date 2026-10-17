@@ -14,13 +14,13 @@ test('the emitted command line runs from under node_modules, where a .ts bin can
   expect(existsSync(emitted), `${emitted}: ui:generate emits it (tsc -p packages/ui/src/cli)`).toBe(true);
   const scratch = mkdtempSync(join(tmpdir(), 'remy-bin-'));
   try {
-    // The package as npm installs it, as far as the command line reads it: its manifest (the exports it imports
-    // itself by, @joeblew999/remy-ui/workspace), the task definitions it shares with Vite Plus (src/tasks.js), cli/.
+    // The package as npm installs it: its manifest (the exports the command line imports itself by), src/ (what those
+    // name: the tasks, the build stamp) and cli/. A hand-picked list broke with each new import (2026-10-17, twice).
     const pkg = join(scratch, 'node_modules', '@joeblew999', 'remy-ui');
     const installed = join(pkg, 'cli');
     cpSync('packages/ui/cli', installed, { recursive: true });
     cpSync('packages/ui/package.json', join(pkg, 'package.json'));
-    cpSync('packages/ui/src/tasks.js', join(pkg, 'src', 'tasks.js'));
+    cpSync('packages/ui/src', join(pkg, 'src'), { recursive: true });
     const result = spawnSync(process.execPath, [join(installed, 'remy.js')], { encoding: 'utf8', cwd: scratch });
     expect(result.stderr, result.stderr).not.toContain('TYPE_STRIPPING');
     expect(result.stderr).toContain('a command is needed');

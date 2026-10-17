@@ -12,7 +12,7 @@ import { remarkUiWords } from './remark-ui-words.js';
 import { remarkAutoTypeTable } from 'fumadocs-typescript';
 import { remarkDirectiveAdmonition, remarkMdxMermaid, remarkSteps } from 'fumadocs-core/mdx-plugins';
 import { remyBuild } from '../build-vite.js';
-import { docsApp, network } from '../tasks.js';
+import { docsApp, network, platformGenerate, stampEnv, workspaceOf } from '../tasks.js';
 
 // An app's whole docs Worker from its docs.config.ts (.plans/thin-apps.md, group 2): its docs/vite.config.ts
 // is `export default remyDocs(docsConfig, { contract: '<its contract package>' })`. The Worker itself is this
@@ -97,6 +97,7 @@ export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
     'wrangler.json',
     `${JSON.stringify({ ...docsWorkerConfig(docsConfig, `../${srcDirectory}`), assets: { directory: '../dist/client' } }, null, 2)}\n`,
   );
+  const workspace = workspaceOf(root);
   return defineConfig({
     // The docs package's Vite Plus tasks. Its generated files (.remy-docs/, above) are written when this configuration
     // is loaded, which every vp command does; generate adds the Worker's binding types. build is the production build,
@@ -105,6 +106,7 @@ export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
       tasks: {
         generate: {
           command: 'wrangler types -c .remy-docs/wrangler.json',
+          dependsOn: workspace ? platformGenerate(workspace) : [],
           cache: { input: [{ auto: true }, '!worker-configuration.d.ts'] },
         },
         // Its folder emptied first: a cache hit restores the build over what is there and removes nothing.
@@ -118,6 +120,7 @@ export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
           cache: {
             input: [{ auto: true }, '!.remy-docs/**', '!dist/**', '!.wrangler/**'],
             output: ['dist/**'],
+            env: stampEnv,
             untrackedEnv: network,
           },
         },

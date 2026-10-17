@@ -34,3 +34,9 @@ export function worktreeName(cwd?: string): string | undefined;
 export function localPorts(root?: string): { preview: number; docsPreview: number };
 /** The app whose strings a docs folder uses: the folder above docs/, or the workspace's app. */
 export function docsApp(docsRoot: string): string;
+/** What names a build's commit: part of the build's cache key. */
+export declare const stampEnv: string[];
+/** The workspace root above `root`, if it is in one. */
+export function workspaceOf(root: string): string | undefined;
+/** The platform package's generate task by name, when the workspace holds the package. */
+export function platformGenerate(workspace: string): string[];
