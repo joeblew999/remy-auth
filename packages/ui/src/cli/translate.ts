@@ -11,7 +11,7 @@ import { execFileSync, spawn } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
-import { changedSections, docsGaps, messagesGaps, pagePrints, print, readRecord, recordFile, sections, splice, withRecord, withoutRecord, type Gap } from './i18n.ts';
+import { changedSections, docsGaps, menuIn, menuWords, messagesGaps, pagePrints, print, readRecord, recordFile, sections, splice, withRecord, withoutRecord, type Gap } from './i18n.ts';
 import { pageFrom } from './page.ts';
 import { lap, note } from './timing.ts';
 import { docsPrompt, messagesPrompt } from './prompts.ts';
@@ -118,7 +118,8 @@ export async function translateDocs(redo: string[] = []): Promise<boolean> {
   for (const file of redo) { const match = suffix.exec(file); if (!match) refuse(`Not a translation file: ${file}`); list.push({ language: match[1]!, kind: 'redo', what: file }); }
   if (!list.length) { console.log('Docs: nothing to translate.'); return true; }
   const pages = list.filter(gap => ['missing', 'stale', 'redo'].includes(gap.kind) && !gap.what.endsWith('.json'));
-  const uiLanguages = [...new Set(list.filter(gap => gap.kind.startsWith('ui-') || gap.what.endsWith('.json')).map(gap => gap.language))].sort();
+  const uiLanguages = [...new Set(list.filter(gap => gap.kind.startsWith('ui-') || (gap.kind === 'missing' && gap.what.endsWith('.json'))).map(gap => gap.language))].sort();
+  const menus = list.filter(gap => gap.kind === 'menu');
   const schema = { type: 'object', properties: { content: { type: 'string' } }, required: ['content'], additionalProperties: false };
   const page = async (gap: Gap): Promise<boolean> => {
     const translation = gap.what; const lang = gap.language;
@@ -170,7 +171,19 @@ export async function translateDocs(redo: string[] = []): Promise<boolean> {
     console.log(`  ui ${file}`);
     return true;
   };
-  const units: (() => Promise<boolean>)[] = [...pages.map(gap => () => page(gap)), ...uiLanguages.map(lang => () => ui(lang))];
+  // A site's menu: its words as messages, back into the English menu's places (menuIn), with its record.
+  const menu = async (gap: Gap): Promise<boolean> => {
+    const englishFile = join(dirname(gap.what), 'meta.json');
+    const english = JSON.parse(readFileSync(englishFile, 'utf8')) as { title?: string; pages?: string[] } & Record<string, unknown>;
+    const entries = menuWords(english);
+    const got = await agent(messagesPrompt, { type: 'object', additionalProperties: { type: 'string' } }, JSON.stringify({ locale: gap.language, language: languageName(gap.language), plural: {}, entries }), gap.what) as Record<string, string>;
+    const lacking = Object.keys(entries).filter(key => typeof got[key] !== 'string' || !got[key].trim());
+    if (lacking.length) { console.error(`  ${gap.what}: the agent left out ${lacking.join(' ')}`); return false; }
+    writeJson(gap.what, menuIn(english, got));
+    console.log(`  menu ${gap.what}`);
+    return true;
+  };
+  const units: (() => Promise<boolean>)[] = [...pages.map(gap => () => page(gap)), ...uiLanguages.map(lang => () => ui(lang)), ...menus.map(gap => () => menu(gap))];
   console.log(`Docs: ${units.length} translations with ${model()} (${jobs()} at a time)...`);
   return all(units, jobs(), unit => unit());
 }

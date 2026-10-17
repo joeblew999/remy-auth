@@ -1,5 +1,5 @@
 ---
-title: "Minimal GUI proof"
+title: "Run, preview and test the app"
 description: "One Cloudflare Worker serves the site and the app; how to run it locally, preview it and test it against local and remote targets."
 ---
 
@@ -24,21 +24,15 @@ bindings and observability. Vite generates `dist/server/wrangler.json` and
 Both local preview and Wrangler deployment consume the generated production build.
 Development uses the same Worker source and Cloudflare runtime with hot reload.
 
-| Task | Target |
-| --- | --- |
-| `npm run dev` | Local Workers, hot reload, port 5173 |
-| `npm run build` | Build and Wrangler deployment dry run; no upload |
-| `npm run preview` | Build, then serve the production artifact on Cloudflare's local host at `PREVIEW_PORT` (4173) |
-| `dev:change`, `dev:land`, `dev:promote`, `dev:release` | The flow ([how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), [tasks](./tasks.md)); its checks run on the same local host |
-| `npm run ci` | What GitHub runs, the same way: types and unit, level 1, Google's audits and the consumers, each skipped when a branch's changes (against `origin/main`) cannot affect it (counting uncommitted work), level 1 in English and Arabic when nothing that changed can differ by language, then what each took (`npx remy last ci` prints the record). It installs Playwright's pinned Chromium and, on Linux, Noto CJK when missing. GitHub runs each part as its own job (`npm run ci -- every --shard 1/3` and so on), so `npm run ci -- <part>` reproduces any red job exactly; `--all` skips nothing |
-| `npm run browser` (Chrome DevTools MCP) | Not CI: the agent's own browser on a laptop, for looking at pages by hand. The checks never use it; Lighthouse runs directly in `npm run ci` |
-| `npm run test -- google` / `npm run test -- cwv` | Google's level: Lighthouse audits locally; Core Web Vitals on a throwaway Cloudflare Worker |
-| `npx remy cloudflare deploy` | Build, then upload production to the authenticated Cloudflare account; `dev:promote` runs it |
-| `npx remy cloudflare staging` | The same for the staging environment: its own Worker (`origins.staging`) and resources; `dev:land` runs it |
-| `npx remy cloudflare preview` | Deploy this commit as a throwaway Worker, run level 1 against it, delete it |
-| A pull request or any branch other than `main` (from Claude's cloud too: [working from Claude's cloud](./agents.md#working-from-claudes-cloud)) | Cloudflare's Workers Builds runs `npm run build` and `npx wrangler preview`: a throwaway Cloudflare Preview at `https://<branch>-remy-auth.gedw99.workers.dev`, named in a comment on the pull request. Previews have none of production's bindings (the `previews` block in `wrangler.jsonc`). A push to `main` runs `npx wrangler versions upload`: a new version, production unchanged |
-| `npm run test -- remote [origin]` | Same tests against a deployment; no local server or deployment |
-| `npm run test -- report [remote]` | Open the last local or remote run's HTML report, including Lighthouse reports |
+Every command for the app, its checks and its deployments, with what each does: [Commands](./commands.mdx).
+In short, the app runs locally on port 5173 with hot reload (`npm run dev`) and as the production build on
+4173 (`npm run preview`), and the checks run on that same local host. Previews on Cloudflare: every branch
+other than `main` (a pull request's too) is built by Cloudflare's Workers Builds (`npm run build`, then
+`npx wrangler preview`) and served at `https://<branch>-remy-auth.gedw99.workers.dev`, named in a comment on the
+pull request; previews have none of production's bindings (the `previews` block in `wrangler.jsonc`), and a push to
+`main` uploads a new version without moving production. From Claude's cloud, see
+[working from Claude's cloud](./agents.md#working-from-claudes-cloud). The agent's own browser on a laptop
+(`npm run browser`, Chrome DevTools) is not CI: the checks never use it.
 
 The flow does not run the whole suite against a deployment: the deploys end with the live smoke,
 and GitHub runs the suite after every landing. To run all of it against a deployed URL on purpose, a
@@ -77,7 +71,7 @@ secrets are managed through Cloudflare. Local data is not uploaded by deployment
 each kind promises; the two are never mixed.
 
 - **Site pages** (`sitePaths`: the home and formats) are for Google: complete in the server's HTML
-  without JavaScript, indexed, in the sitemap with `hreflang` alternates, and judged by level 2.
+  without JavaScript, indexed, in the sitemap with `hreflang` alternates, and judged by Google's audits.
   Their frame is `SiteShell` in [`shell.tsx`](https://github.com/joeblew999/remy-auth/blob/main/packages/ui/src/shell.tsx), built from static
   shadcn parts.
 - **App pages** (`appPaths`, under `/app`) need JavaScript, carry `noindex` (added by `pageHead`)
@@ -224,7 +218,7 @@ bites); the platform's catalog names no product (`tests/product.spec.ts`).
 - `src/router.tsx`: the package's `remyRouter`, a new router and TanStack Query client per request, with Query's SSR integration. `src/routes/__root.tsx` is the package's `remyRoot` with this app's config; TanStack Devtools (Router and Query panels) is passed in there, in the app's own file, because its `devtools()` Vite plugin strips it from production builds only outside `node_modules`; the build-boundary check proves no devtools or server-only code reaches the browser.
 - `src/parts.json`: the package's [parts](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md) this app uses, one per line (the showcase's `@joeblew999/remy-showcase/time-zones`, `deferred-place` and `status-card`, and the platform's `seo-routes`); `remyParts()` in `vite.config.ts` mounts their routes and `partChecks()` in `tests/gui.spec.ts` runs their checks.
 - `packages/ui/`: everything both apps share; its [README](./ui-package.md) lists the exports.
-- `tests/`: the package's shared checks (`@joeblew999/remy-ui/checks`, the showcase's `@joeblew999/remy-showcase/*.checks`) plus the checks only this repository owns (catalogs, concurrent server renders, hydration, its extra formats rows); `lighthouse.spec.ts` and `performance.spec.ts` are level 2.
+- `tests/`: the package's shared checks (`@joeblew999/remy-ui/checks`, the showcase's `@joeblew999/remy-showcase/*.checks`) plus the checks only this repository owns (catalogs, concurrent server renders, hydration, its extra formats rows); `lighthouse.spec.ts` is `npm run ci`'s `audits` part and `performance.spec.ts` the release's Core Web Vitals.
 
 Locale is passed explicitly into compiled message functions; concurrent requests share no
 mutable locale state. The catalogs are the `locales` in
@@ -239,21 +233,23 @@ runs them on server-rendered ones.
 
 ## Evidence and limits
 
-Two levels: level 1 is every check of ours in every language (`npm run test -- every`); level 2 is Google's
-(`npm run test -- google`, `npm run test -- cwv`). A check of something that depends on the language (fonts and
+`npm run ci` runs four parts, the same four GitHub runs as jobs: `check` (`dev:change`'s check, whole; under `npm run ci` it reports what `dev:change` would fix, such as a stale `COMMANDS.md`, and writes nothing), `browser`
+(every check of ours in a browser), `audits` (Google's Lighthouse) and `new-app` (a brand-new app on this commit's
+package); Core Web Vitals on a throwaway Cloudflare Worker is the release's (`npm run test -- cwv`). There are no
+levels to choose: what a run includes is what its change can affect. A check of something that depends on the language (fonts and
 scripts, hyphenation, direction, formats, the catalogs) runs in every checked language (`checkedLocales`); a check
 of behaviour that does not (the security policy, noindex, search params, the demo form, error pages, API answers)
 runs in the base language and the first right-to-left one (`behaviourLocales`; `BEHAVIOUR_LOCALES` overrides).
-On a pull request each level first asks what changed and is skipped, saying so, when nothing it checks did
+On a pull request each part first asks what changed and is skipped, saying so, when nothing it checks did
 (`packages/ui/src/cli/unchanged.ts`, with its unit checks): plans, the docs content and Markdown outside the
-packages run none; the blank app and the fixture run only the consumers level. Pushes to `main` and tags run
-everything. Level 1 also asks whether what changed can differ by language: the catalogs and language settings,
+packages run none; the blank app and the fixture run only `new-app`. Pushes to `main` and tags run
+everything. The browser part also asks whether what changed can differ by language: the catalogs and language settings,
 fonts and any CSS, code that formats by locale (named for it, or calling `Intl`, `toLocale…` or a text direction),
 the browser checks themselves, the lockfile and the Node version. When nothing can, it runs in English and Arabic
-only and says so: on 2026-10-17 that was 37 of the 49 recent commits on `main` that needed level 1, and a run in
+only and says so: on 2026-10-17 that was 37 of the 49 recent commits on `main` that needed the browser part, and a run in
 1 min 39 s instead of 2 min 49 s. The tooling and the unit checks never count. Every language still runs on every
 push to `main`, which `dev:promote` waits for, so a page that breaks in one language alone is caught there at the
-latest. `npm run ci` locally decides exactly as a pull request does (`--all` runs everything; `CHECK_LOCALES` set
+latest. `npm run ci` locally decides exactly as a pull request does (`npm run ci -- --everything` runs all of it, as main does; `CHECK_LOCALES` set
 by hand wins). What the checks cover is the checks themselves: `tests/` and the package's
 `@joeblew999/remy-ui/checks` (each check's title says what it proves); the flow's steps that run them are in
 [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). In short: every page in every

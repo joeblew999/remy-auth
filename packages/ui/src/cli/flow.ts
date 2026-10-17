@@ -22,8 +22,8 @@ export const steps: Record<Step, { what: string }> = {
   // checks, translation status, the docs when docs changed.
   change: { what: 'the check, in seconds' },
   // The change leaves the machine: the check again, then commit, main, staging. GitHub runs every
-  // language, Google's audits and the consumer fixture after the push, in parallel, while coding goes on.
-  land: { what: 'the check and level 1 here, then a pull request, merged when GitHub agrees, and staging' },
+  // part a change can affect on its pull request, in parallel, and everything after the merge.
+  land: { what: 'the check and the browser checks here, then a pull request, merged when GitHub agrees, and staging' },
   // Production, on purpose: what is on a pushed main, no gate (staging and GitHub ran the checks).
   promote: { what: 'production from a pushed main' },
   // A release, on purpose, rarely: all of it, locally, then the tag (packages.ts's release does both).
@@ -57,7 +57,7 @@ export const main = dispatch('flow', commands);
  */
 export const heavy: Record<string, string> = {
   'project:verify': 'the release gate: dev:release runs it; GitHub runs its parts after every push',
-  'project:test': 'level 1: npm run ci runs it, and dev:land and GitHub with it',
+  'project:test': 'the browser checks: npm run ci runs them, and dev:land and GitHub with it',
   'project:test:quick': 'every browser check: on purpose only; dev:change is the check',
   'project:test:remote': 'the suite against a deployment: GitHub runs the suite; cf:deploy runs the live smoke',
   'project:test:google': "Google's audits: GitHub runs them after every push",
@@ -67,9 +67,11 @@ export const heavy: Record<string, string> = {
   'playwright test': 'the browser suite by hand: dev:change runs the check; npm run test -- only <words> runs one area',
   'i18n:translate': 'translation: dev:land runs it in the change, before its commit',
   'i18n translate': 'translation: dev:land runs it in the change, before its commit',
-  'remy test': 'level 1: npm run ci runs it, and dev:land and GitHub with it; one area: npm run test -- only <words>',
-  'npm test': 'level 1: npm run ci runs it, and dev:land and GitHub with it; one area: npm run test -- only <words>',
+  'remy test': 'the browser checks: npm run ci runs them, and dev:land and GitHub with it; one area: npm run test -- only <words>',
+  'npm test': 'the browser checks: npm run ci runs them, and dev:land and GitHub with it; one area: npm run test -- only <words>',
   'test:consumers': 'the consumer fixture: GitHub runs it after every push; remy test consumers is its gate',
+  // Serving by hand with a raw tool call (an agent did, 2026-10-17): every way to serve has its command.
+  'wrangler dev': 'serving by hand: npx remy docs serve (the built docs, with llms.txt), npm run preview (the built app), npm run dev (hot reload); when no command does what you need, add one',
 };
 
 /** Where a key's spelling needs more than its words: the suite is refused, its light forms (only, report, live, smoke) are not. */

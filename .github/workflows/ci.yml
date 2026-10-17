@@ -1,6 +1,7 @@
 # The heavy checks, on GitHub after every push to main, on every pull request and on every version tag, in parallel, while
 # the developer keeps coding; then the release for tags. Every job is one part of `npm run ci`, and the same
-# command runs the same parts anywhere: `npm run ci` locally (all of them, in turn) gives GitHub's answer.
+# command runs the same parts anywhere: `npm run ci` locally (each part the change can affect, in turn) gives a pull
+# request's answer, and `npm run ci -- --everything` main's.
 # Every Remy repo runs this same workflow (.plans/thin-apps.md, group 6): remy-auth through the triggers
 # below, any other repo by calling it at the tag its package is on, which `remy upgrade` moves with it:
 #
@@ -8,7 +9,7 @@
 #   permissions: {}
 #   jobs:
 #     checks:
-#       uses: joeblew999/remy-auth/.github/workflows/google.yml@vX.Y.Z
+#       uses: joeblew999/remy-auth/.github/workflows/ci.yml@vX.Y.Z
 #       permissions: { contents: write, packages: write }
 #
 # Every step is a package.json script, so the caller's own package.json decides what runs. The release
@@ -16,7 +17,8 @@
 # made locally with npm run dev:release is left alone; a repository that publishes no packages never
 # tags. npm ci reads @joeblew999/remy-ui from GitHub Packages with the run's token (the app's .npmrc),
 # once the package grants the repository read access ("Manage Actions access").
-name: Checks and release
+# Named for what it runs (`npm run ci`); called google.yml until 2026-10-17.
+name: CI
 
 on:
   push:
@@ -44,18 +46,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: types and unit
+          - name: check
             part: check
-          - name: every language 1/3
-            part: every --shard 1/3
-          - name: every language 2/3
-            part: every --shard 2/3
-          - name: every language 3/3
-            part: every --shard 3/3
-          - name: google
-            part: google
-          - name: consumers
-            part: consumers
+          - name: browser 1/3
+            part: browser --shard 1/3
+          - name: browser 2/3
+            part: browser --shard 2/3
+          - name: browser 3/3
+            part: browser --shard 3/3
+          - name: audits
+            part: audits
+          - name: new-app
+            part: new-app
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     permissions:
@@ -78,7 +80,7 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-      - if: matrix.part == 'consumers'
+      - if: matrix.part == 'new-app'
         uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: /tmp/remy-fixture-skills

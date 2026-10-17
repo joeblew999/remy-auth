@@ -30,7 +30,8 @@ export function playwrightConfig({ webServer, testDir = './tests', timezoneId = 
     // `npm run ci`, not whatever Chrome a machine has: the same browser on a Mac, in a cloud agent's
     // container and on GitHub, so a check gives the same answer everywhere (owner, 2026-10-17). Its light
     // headless shell, for speed, for every check.
-    reporter: unit ? [['list']] : [['list'], ['html', { open: 'never', outputFolder: `playwright-report/${remote ? 'remote' : 'local'}` }]],
+    // The results as JSON too (results.json beside the report), so the command line can name a flaky check in its summary.
+    reporter: unit ? [['list']] : [['list'], ['html', { open: 'never', outputFolder: `playwright-report/${remote ? 'remote' : 'local'}` }], ['json', { outputFile: `playwright-report/${remote ? 'remote' : 'local'}-results.json` }]],
     use: { baseURL: target.origin, ...devices['Desktop Chrome'], timezoneId, colorScheme: process.env.COLOR_SCHEME ?? 'light' },
     // Two levels. "ours": the app's own checks, fast, gate every local release.
     // "google" and "google-cwv": Lighthouse audits and Core Web Vitals, slow, run in CI.

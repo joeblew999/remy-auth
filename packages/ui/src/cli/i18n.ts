@@ -13,6 +13,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parts } from './page.ts';
+import type { Subcommands } from './commands.ts';
 
 export type Gap = { language: string; kind: string; what: string };
 const gapLine = (gap: Gap) => `${gap.language} ${gap.kind} ${gap.what}`;
@@ -81,6 +82,32 @@ export function changedSections(english: string, translation: string): number[] 
   const recorded = madeFrom(translation), now = pagePrints(english);
   if (!recorded || recorded.length !== now.length || sections(withoutRecord(translation)).length !== now.length) return undefined;
   return now.flatMap((value, index) => (value === recorded[index] ? [] : [index]));
+}
+
+/**
+ * A docs menu's words (meta.json): its title, and the labels of its separators ("---Help---") and links
+ * ("[Text](url)"), each keyed by where it sits. Pages translate as pages; a menu was never translated, so the
+ * Spanish sidebar, its llms.txt headings and its site title stayed English (2026-10-17).
+ */
+export function menuWords(meta: { title?: string; pages?: string[] }): Record<string, string> {
+  const words: Record<string, string> = {};
+  if (meta.title) words.title = meta.title;
+  (meta.pages ?? []).forEach((entry, index) => {
+    const label = /^---(.+)---$/.exec(entry)?.[1] ?? /^\[([^\]]+)\]\(.+\)$/.exec(entry)?.[1];
+    if (label) words[`pages.${index}`] = label;
+  });
+  return words;
+}
+
+/** The menu in another language (meta.<lang>.json, which Fumadocs reads): the English menu with the translated words, and the record of what it was made from. */
+export function menuIn(meta: { title?: string; pages?: string[] } & Record<string, unknown>, words: Record<string, string>): Record<string, unknown> {
+  const pages = (meta.pages ?? []).map((entry, index) => {
+    const label = words[`pages.${index}`];
+    if (!label) return entry;
+    if (/^---.+---$/.test(entry)) return `---${label}---`;
+    return entry.replace(/^\[[^\]]+\]/, `[${label}]`);
+  });
+  return { ...meta, ...(meta.title && words.title ? { title: words.title } : {}), pages, translatedFrom: print(menuWords(meta)) };
 }
 
 /** A catalog's record: `translated-from/<lang>.json` in the catalog's folder, key to fingerprint. */
@@ -176,7 +203,9 @@ export function docsGaps(cwd = process.cwd()): { gaps: Gap[]; sites: number } {
   const sites = existsSync(content) ? readdirSync(content, { withFileTypes: true }).filter(entry => entry.isDirectory() && existsSync(join(content, entry.name, 'i18n.json'))).map(entry => join(content, entry.name)) : [];
   if (!sites.length) return { gaps: [], sites: 0 };
   const language = /\.[a-z]{2,3}(-[A-Za-z]{2,4})?\.mdx?$/;
-  const files = (where: string) => (git(cwd, 'ls-files', '-co', '--exclude-standard', '--', relative(cwd, where)) ?? '').split('\n').filter(Boolean);
+  // What git knows that is there now: a page deleted or renamed but not yet committed is still in git's index, and
+  // counting it made a renamed page both missing and an orphan (2026-10-17, dev:change renaming .mdx to .md).
+  const files = (where: string) => (git(cwd, 'ls-files', '-co', '--exclude-standard', '--', relative(cwd, where)) ?? '').split('\n').filter(Boolean).filter(file => existsSync(join(cwd, file)));
   const stale = (english: string, translation: string) => {
     const recorded = madeFrom(readFileSync(join(cwd, translation), 'utf8'));
     return !recorded || recorded.join(' ') !== pagePrints(readFileSync(join(cwd, english), 'utf8')).join(' ');
@@ -192,6 +221,13 @@ export function docsGaps(cwd = process.cwd()): { gaps: Gap[]; sites: number } {
         const translation = english.replace(/\.(mdx?)$/, `.${lang}.$1`);
         if (!existsSync(join(cwd, translation))) gaps.push({ language: lang, kind: 'missing', what: translation });
         else if (stale(english, translation)) gaps.push({ language: lang, kind: 'stale', what: translation });
+      }
+      // The site's menu (meta.json) in this language: missing, or made from other English words.
+      const menu = join(site, 'meta.json');
+      if (existsSync(menu)) {
+        const translated = join(site, `meta.${lang}.json`);
+        const made = existsSync(translated) ? (readJson(translated).translatedFrom as string | undefined) : undefined;
+        if (made !== print(menuWords(readJson(menu) as { title?: string; pages?: string[] }))) gaps.push({ language: lang, kind: 'menu', what: relative(cwd, translated) });
       }
       for (const translation of pages.filter(file => file.endsWith(`.${lang}.md`) || file.endsWith(`.${lang}.mdx`))) {
         const english = translation.replace(new RegExp(`\\.${lang}\\.(mdx?)$`), '.$1');
@@ -260,6 +296,11 @@ export async function checkAll(strict = process.env.I18N_STRICT === '1', cwd = p
 }
 
 export const what = "translations: check [messages|docs] [--list] (offline, read-only), translate [messages|docs] (the machine's Claude; dev:land runs it in the change)";
+/** The subcommands, for remy help and the Commands page; main dispatches on the same two words. */
+export const commands: Subcommands = {
+  check: { what: '[messages|docs] [--list]: the offline checks, read-only, no git history: a warning (exit 0) while coding and in npm run ci, exit 1 with I18N_STRICT=1 (the release); --list prints one line per gap', run: rest => main(['check', ...rest]) },
+  translate: { what: '[messages|docs] [files…]: what the checks list, by the machine\'s Claude (I18N_MODEL, default sonnet; I18N_JOBS at a time, default 4): only the changed sections and keys, with their records; named translation files redone in full; dev:land runs it in the change', run: rest => main(['translate', ...rest]) },
+};
 export async function main(args: string[]): Promise<void> {
   const [command, which, ...rest] = args;
   const list = args.includes('--list');

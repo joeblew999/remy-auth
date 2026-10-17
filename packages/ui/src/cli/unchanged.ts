@@ -2,7 +2,7 @@
 // 2026-10-17: "make sure we don't have bits of code scattered all over the place"). Any step that skips
 // work because nothing changed, or keeps a record of a run, goes through here and nowhere else:
 //
-// - `languageInput` / `allLanguages`: whether level 1 runs in every language or in English and Arabic.
+// - `languageInput` / `allLanguages`: whether the browser part runs in every language or in English and Arabic.
 // - `cacheDir`: the one folder for such state, node_modules/.cache/remy. Never checked in (node_modules
 //   is ignored), one per checkout and worktree (each has its own install), thrown away with a CI runner,
 //   wiped by a fresh `npm ci`.
@@ -53,7 +53,7 @@ export function whenChanged(name: string, patterns: string[], step: () => void):
 // The workflow runs `npm run ci -- <part>` as always; a part nothing it checks touched says so and
 // passes, so every job still reports. Pushes to main and tags run everything; ci decides when to compare.
 
-export type Part = 'every' | 'google' | 'consumers';
+export type Part = 'browser' | 'audits' | 'new-app';
 
 /**
  * Changes no part tests: plans, the docs Worker's content and Markdown outside the packages. The docs
@@ -72,10 +72,10 @@ const consumerInputs = (file: string) =>
   file.startsWith('packages/') || consumerOnly(file) || file.startsWith('.github/workflows/')
   || ['package.json', 'package-lock.json', '.node-version'].includes(file);
 
-/** Whether `part` must run for these changed files. Unknown paths count for every and google; consumers runs only for its inputs. */
+/** Whether `part` must run for these changed files. Unknown paths count for browser and audits; new-app runs only for its inputs. */
 export function affects(part: Part, files: readonly string[]): boolean {
   const live = files.filter(file => !inert(file));
-  if (part === 'consumers') return live.some(consumerInputs);
+  if (part === 'new-app') return live.some(consumerInputs);
   return live.some(file => !consumerOnly(file));
 }
 
@@ -91,7 +91,7 @@ export function changedFiles(): string[] | undefined {
   if (!base && !pullRequest) return undefined;
   // Locally the work is often not committed yet: compare the files as they are (the working tree, and new
   // files) with where the branch left the base. On 2026-10-17 `${base}...HEAD`, commits only, told a branch
-  // whose every change was uncommitted that nothing changed, and level 1 was skipped.
+  // whose every change was uncommitted that nothing changed, and the browser part was skipped.
   const since = base ? spawnSync('git', ['merge-base', base, 'HEAD'], { encoding: 'utf8' }).stdout?.trim() : undefined;
   if (base && !since) { console.log(`could not tell what changed (no common commit with ${base}): running everything.`); return undefined; }
   const range = since ? [since] : ['HEAD^1', 'HEAD'];
@@ -102,12 +102,12 @@ export function changedFiles(): string[] | undefined {
 }
 
 /**
- * What can make a page differ by language, so a change to it runs level 1 in every language: the catalogs
+ * What can make a page differ by language, so a change to it runs the browser part in every language: the catalogs
  * and language settings, fonts and any CSS (a layout that fits in English can overflow in German or Thai),
  * code that formats by locale (named for it, or using Intl, toLocale* or a text direction), the browser
  * checks themselves, and what decides the runtime (the lockfile, the Node version, whose Intl data it is).
  * Not the tooling (packages/ui/src/cli, tasks) or the unit checks: they render no page.
- * `read` gives a file's current text, undefined when it is gone (then its name alone decides).
+ * `read` gives a file's current text, undefined when it is gone (then its name alone decides, as above).
  */
 export function languageInput(file: string, read: (file: string) => string | undefined = path => existsSync(path) ? readFileSync(path, 'utf8') : undefined): boolean {
   // The lockfile, not package.json: a version bump or a script is no new dependency (2026-10-17: counting
@@ -121,22 +121,24 @@ export function languageInput(file: string, read: (file: string) => string | und
   if (/\.css$/.test(file)) return true;
   if (!/\.(tsx?|jsx?|mjs)$/.test(file)) return false;
   const text = read(file);
-  return text === undefined || /\bIntl\.|\.toLocale[A-Z]\w*\(|getTextInfo|\bdir=|direction/.test(text);
+  // A deleted file decides by its name alone (above): its code runs nowhere now, and whatever used it changed too and
+  // is judged itself (2026-10-17: a deleted tooling script sent a branch to every language).
+  return text !== undefined && /\bIntl\.|\.toLocale[A-Z]\w*\(|getTextInfo|\bdir=|direction/.test(text);
 }
 
 /**
- * Whether level 1 must run in every language, or English and the first right-to-left language are enough.
+ * Whether the browser part must run in every language, or English and the first right-to-left language are enough.
  * Every language when what changed cannot be known (a push to main, a tag, --all: the full answer after
  * merge, which dev:promote waits for) or when a change can differ by language (languageInput); otherwise
- * the two, and it says so, naming the rule. Most of level 1's time is the same checks in thirteen
+ * the two, and it says so, naming the rule. Most of the browser part's time is the same checks in thirteen
  * languages (2026-10-17: 174 of 247 checks, 71% of the time).
  */
 export function allLanguages(): boolean {
   const files = changedFiles();
   if (!files) return true;
   const why = files.filter(file => !inert(file)).filter(file => languageInput(file));
-  if (why.length) { console.log(`test every: every language: what changed can differ by language (${why.slice(0, 5).join(', ')}${why.length > 5 ? `, and ${why.length - 5} more` : ''}).`); return true; }
-  console.log('test every: the quick languages only (the base language and the first right-to-left one: English and Arabic here): nothing that changed can differ by language. Every language runs after merge; --all runs them here.');
+  if (why.length) { console.log(`browser: every language: what changed can differ by language (${why.slice(0, 5).join(', ')}${why.length > 5 ? `, and ${why.length - 5} more` : ''}).`); return true; }
+  console.log('browser: the quick languages only (the base language and the first right-to-left one: English and Arabic here): nothing that changed can differ by language. Every language runs on main; npm run ci -- --everything runs them here.');
   return false;
 }
 
@@ -145,6 +147,6 @@ export function skip(part: Part): boolean {
   const files = changedFiles();
   if (!files || affects(part, files)) return false;
   const shown = files.slice(0, 8).join(', ') + (files.length > 8 ? `, and ${files.length - 8} more` : '');
-  console.log(`test ${part}: skipped, nothing it checks changed (${files.length ? shown : 'no files'}).`);
+  console.log(`${part}: skipped, nothing it checks changed (${files.length ? shown : 'no files'}).`);
   return true;
 }

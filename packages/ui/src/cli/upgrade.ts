@@ -19,7 +19,12 @@ export async function upgrade(version: string | undefined): Promise<void> {
   if (install.status !== 0) fail('upgrade: npm install failed');
   // The shared CI workflow at the same tag, when the app calls it.
   const retag = (file: string, pattern: RegExp) => { const text = readFileSync(file, 'utf8'); const next = text.replace(pattern, `$1v${version}`); if (next !== text) { writeFileSync(file, next); console.log(`upgrade: ${file} at v${version}`); } };
-  if (existsSync('.github/workflows')) for (const name of readdirSync('.github/workflows').filter(name => /\.ya?ml$/.test(name))) retag(`.github/workflows/${name}`, /(joeblew999\/remy-auth\/\.github\/workflows\/[a-z-]+\.yml@)v\d+\.\d+\.\d+/g);
+  if (existsSync('.github/workflows')) for (const name of readdirSync('.github/workflows').filter(name => /\.ya?ml$/.test(name))) {
+    retag(`.github/workflows/${name}`, /(joeblew999\/remy-auth\/\.github\/workflows\/[a-z-]+\.yml@)v\d+\.\d+\.\d+/g);
+    // The shared workflow is ci.yml from the release after 0.15.1 (google.yml until then, which older tags keep).
+    const after = (v: string) => { const [a = 0, b = 0, c = 0] = v.split('.').map(Number); return a * 1e6 + b * 1e3 + c > 15_001; };
+    if (after(version)) { const file = `.github/workflows/${name}`; writeFileSync(file, readFileSync(file, 'utf8').replace('remy-auth/.github/workflows/google.yml@', 'remy-auth/.github/workflows/ci.yml@')); }
+  }
   installSkills();
   rules();
   await register(false);

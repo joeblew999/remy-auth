@@ -1,6 +1,6 @@
 ---
 title: "Developer tooling reference"
-description: "The developer tooling reference: the package.json scripts and the remy commands, pinned tools, secrets, agent skills and the Cloudflare services behind the docs."
+description: "The tools behind the commands: where each area is explained, pinned tools, secrets, agent skills and the Cloudflare services behind the docs. Every command itself is on Commands."
 ---
 
 ## The tooling
@@ -68,25 +68,15 @@ scripts; the rest are `remy` commands (`npx remy <command>`), one module each in
 `npx remy help` lists every command, one line each, and a command run without arguments says its own
 (`npx remy docs`). The flow is one of them, `remy flow <step>`, which the `dev:<step>` scripts call.
 
-| Scripts and commands | Purpose |
-| --- | --- |
-| `npm run dev:status`, `dev:start`, `dev:change`, `dev:land`, `dev:promote`, `dev:release`, `dev:done` | The flow ([how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)) |
-| `npm run dev`, `build`, `preview` | The app: hot reload, the production build with a Wrangler dry run, the built Worker on the preview port ([the GUI](./gui.md)) |
-| `npm run test -- every\|quick\|only <words>\|smoke\|google\|cwv\|remote\|live\|consumers\|report` | The browser checks at every level; the suite is GitHub's after a landing, `only <words>` is the one run a step does not own |
-| `npm run check -- [plans\|single-copies\|routes\|types\|unit\|translations\|docs]` | The check (`dev:change`), or one part of it |
-| `npm run setup`, `npx remy verify [setup\|tooling\|doctor]`, `npm run upgrade -- <version>` | An installation: its checks, the tooling invariants, the CLI versions; moving an app to a release |
-| `npm run packages -- check\|upgrade\|pack\|notes\|bumped\|publish\|tag\|release` | A repository that publishes packages ([the command line](./tasks.md#a-repository-that-publishes-packages)) |
-| `npx remy cloudflare deploy\|staging\|docs-deploy\|versions\|urls\|preview\|preview-delete` | Deployments, what each is running, an app's page URLs, a throwaway check Worker ([the command line](./tasks.md#cloudflare)) |
-| `npm run logs`, `errors`, `wrangler`, `npm run observe -- events\|ai-usage\|ai-check\|gateway` | Live logs, the Cloudflare CLI, stored logs and the AI's usage, setup and gateway (below) |
-| `npm run docs -- dev\|build\|check\|test [remote]\|preview\|answers on\|off\|publish\|questions\|provision\|init\|observe` | The docs Worker, `@joeblew999/remy-ui`'s, over an app's `docs/` ([writing docs](./writing-docs.mdx)); remy-auth alone: `npm run docs:cli`, the Fumadocs CLI in the package |
-| `npx remy i18n check [messages\|docs] [--list]`, `i18n translate` | Translations: the offline checks (a warning in the check, the gate at a release), the translator `dev:land` runs in the change ([in the change](./how-we-work.md#translations-in-the-change)) |
-| `npm run plans -- status\|check\|close\|park\|open` | The plans rule ([plans](./how-we-work.md#plans-few-short-closed)) |
-| `npx remy last [command]` | The last run's record of a command (or of whatever ran last): when it started, its parts, its total; every `remy` command is timed by the command line itself ([the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)) |
-| `npx remy skills install\|list\|remove`, `npx remy mcp register\|verify\|status`, `npx remy rules` | The pinned agent skills, MCP registration, the rules block in an app's `AGENTS.md` (below) |
-| `npm run shots -- <page> [--phone] [--dark] [--all] [--video]`, `npm run browser`, `browser:start`, `browser:stop`, `npm run web` | Screenshots, the Chrome DevTools CLI and session, Modern Web Guidance (below) |
-| `npm run api -- spec [origin] [--urls]` | The OpenAPI document a running Worker serves |
-| `npm run codex`, `codex:resume`, `claude`, `claude:resume` | Start or resume an agent session (below) |
-| remy-auth's own: `npm run auth…`, `ui:components`, `ui:blocks`, `ui:theme`, `ui:verify`, `ui:version`, `template:check`, `release-checks`, `generate`, `local`, `test:consumers` | Better Auth, the shadcn files, the release's own checks, what this repository generates and prepares |
+Every script and command, with what each does, is on **[Commands](./commands.mdx)**, generated from the
+command line itself, so it cannot drift; no page lists them by hand. Where each area is explained:
+
+- The flow and who runs each step: [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)
+- The app, local and remote checks, previews: [the GUI](./gui.md)
+- Deployments, translations, a repository that publishes packages: [the command line](./tasks.md)
+- The docs Worker over an app's `docs/`: [writing docs](./writing-docs.mdx)
+- Plans: [plans](./how-we-work.md#plans-few-short-closed); translations as a rule: [in the change](./how-we-work.md#translations-in-the-change)
+- Agent skills, MCP, screenshots and the agents' own browser: below
 
 `npm run packages -- upgrade` uses the locally pinned `npm-check-updates` to move npm
 dependencies past existing version pins, saves exact versions, installs them and
@@ -116,9 +106,9 @@ tooling`: every `package.json` matches the lockfile, the Wrangler configuration 
 observability on, the workflows name only scripts that exist, every installed skill comes from a
 pinned source with its Claude link), then the check. They use the existing local installation and
 do not provision Cloudflare resources. The gate then runs every browser check of ours in every
-language (`npm run test -- every`) against the production artifact in local Workers using installed
-Chrome, then the consumer fixture. Google's audits are not in it: `npm run test -- google` and
-`npm run test -- cwv`, which the release runs after it. No deployment is performed. See [the GUI proof](./gui.md) for scope and commands.
+language (`npm run ci`'s `browser` part) against the production artifact in local Workers, then the new-app
+test. Google's audits are not in it: `npm run ci -- audits` and `npm run test -- cwv`, which the release runs
+after it. No deployment is performed. See [the GUI proof](./gui.md) for scope and commands.
 
 
 ## Start or reload your agent
@@ -187,10 +177,12 @@ Skills live in `.agents/skills/`; `.claude/skills/` links to the same files.
 ### The `remy` skill: the platform's rules for every repo's agents
 
 Beside the pinned skills, `remy skills install` installs `remy` from the installed package
-(`./node_modules/@joeblew999/remy-ui/skills`), so its version is the package's. It is
-generated from these developer docs (how we work, the principles, tooling, the command line, the UI
-package, writing docs, the GUI) by remy-auth's `generate` script, which every pack and release runs
-(`packages/ui/skill.mjs`); the docs stay the one source. In an app, `npx remy rules` keeps a marked
+(`./node_modules/@joeblew999/remy-ui/skills`), so its version is the package's: the rules of the
+version an app runs, offline. It is every page of these developer docs exactly as the docs Worker serves them to
+AI tools (`/dev/llms.txt`, each page's `.md`: includes resolved, components as text), made by `remy skills build`
+when the package is packed or published (never in the quick check). So the skill, `llms.txt`, each page's
+Markdown and the MCP servers are one text from one source: a page cannot reach one and miss another. The live
+docs (`/dev/llms.txt`, `/api/mcp/dev`) always have the newest; the skill says so. In an app, `npx remy rules` keeps a marked
 block in `AGENTS.md` pointing its agents at the skill and naming the version; `npm run setup` and
 `npm run upgrade` run it, so an upgrade changes the rules the agents read in the same step.
 remy-auth's own `AGENTS.md` is a pointer to [Agents: start here](./agents.md).

@@ -1,7 +1,7 @@
 ---
 title: "Agentes: empieza aquí"
 description: "Dónde empieza un agente de IA en este repositorio: los documentos que son dueños de las reglas, en orden de lectura, los sitios en producción y el flujo por el que pasa cada tarea."
-translatedFrom: "82d7be50 338e15ff"
+translatedFrom: "3eb07c21 338e15ff"
 ---
 
 **Para agentes de IA** (Claude Code, Codex, cualquier otro) que trabajan en este repositorio, y para las
@@ -24,8 +24,8 @@ las traducciones que están al lado (`*.es.md`).
 
 1. [Principios de desarrollo](./development.md): propiedad, única fuente de verdad, puertas de
    pruebas, código generado, decisiones del dueño.
-2. [Herramientas para desarrolladores](./tooling.md): los scripts y comandos, herramientas fijadas y
-   habilidades de agente. Ejecuta los comandos del proyecto con `npm run <script>`.
+2. [Herramientas para desarrolladores](./tooling.md): herramientas fijadas y habilidades de agente; todos los
+   comandos están en [Comandos](./commands.mdx), generados a partir de la línea de comandos. Ejecuta los comandos del proyecto con `npm run <script>`.
 3. [Flujo de trabajo en tiempo de ejecución de la GUI](./gui.md): un solo Worker, objetivos de
    prueba locales y remotos.
 4. [Cómo trabajamos](./how-we-work.md): primero las herramientas del proyecto, encuestas antes de

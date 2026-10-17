@@ -1,7 +1,7 @@
 ---
 title: "Cómo trabajamos"
 description: "Cómo trabajan aquí las personas y los agentes: las herramientas del proyecto primero, encuestas antes de elegir herramientas, shadcn y TanStack, puertas de control, planes y traducciones."
-translatedFrom: "be9633b9 9d3c93f6 790e3737 0ed0ead4 d8386d74 94b8f1c6 4dca6b46 4aece31e f3262ad2 b2a387bd 2f9aba9e 2a2eaf1d c8f062fe cfedf838 01c70038 d7ee26c1 0dd8a337 b5662e6a c756fe69"
+translatedFrom: "be9633b9 9d3c93f6 790e3737 0ed0ead4 d8386d74 94b8f1c6 4dca6b46 4aece31e f3262ad2 b2a387bd 2f9aba9e 2a2eaf1d c8f062fe b970b8f3 01c70038 d7ee26c1 5cbd4b38 b5662e6a 80d26491"
 ---
 
 Este documento es el dueño de cómo trabajan las personas y los agentes: los hábitos que ha pedido el
@@ -245,7 +245,7 @@ que cada app, desde las tareas compartidas; `npm run setup` instala el guardián
 | Mirar | `npm run dev:status` | todos, primero: cada sesión de agente se abre con esto (un hook), un desarrollador cuando se sienta a trabajar | los últimos commits de main con el veredicto de GitHub, qué ejecuta cada despliegue, cada worktree por delante y por detrás de main, traducciones, pull requests, lo primero de `.plans/now.md` | segundos |
 | Antes de un trozo de trabajo | `npm run dev:start -- <nombre>` | quien hace el trabajo, para cada trozo, incluida una edición de una línea | un worktree propio a partir de main, instalado, con sus propios puertos, el guardián | ~1 min |
 | Después de cada cambio | `npm run dev:change` | quien esté codificando; el único paso que se espera | la comprobación (`remy check`): planes, tipos con los de las propias tareas, las comprobaciones de funciones simples (`tests/**/*.unit.spec.ts`), el estado de las traducciones; una build solo cuando cambió un archivo de ruta, la documentación solo cuando cambió la documentación | ~6 s |
-| El cambio deja la máquina | `npm run dev:land -- "<qué cambió>"` | quien hizo el trabajo, por su cuenta, en cuanto termina y la comprobación está en verde | las traducciones que dejó desactualizadas (segundos), la comprobación, el nivel 1 tal como lo ejecutará la pull request, un commit, push de la rama, abrir su pull request, esperar las comprobaciones de GitHub (confirman lo que aquí pasó), merge, despliegue en staging. Nunca directo a main; desde main, primero mueve el trabajo a una rama propia. Tras el merge, la propia ejecución de main comprueba todo (también las auditorías de Google y el fixture de consumer) | unos minutos: el nivel 1 aquí, luego las comprobaciones de GitHub |
+| El cambio deja la máquina | `npm run dev:land -- "<qué cambió>"` | quien hizo el trabajo, por su cuenta, en cuanto termina y la comprobación está en verde | las traducciones que dejó desactualizadas (segundos), la comprobación, cada parte de `npm run ci` que el cambio pueda afectar (tal como las ejecutará su pull request), un commit, push de la rama, abrir su pull request, esperar las comprobaciones de GitHub (confirman lo que aquí pasó), merge, despliegue en staging. Nunca directo a main; desde main, primero mueve el trabajo a una rama propia. Tras el merge, la propia ejecución de main comprueba todo, cada parte en cada idioma | unos minutos: las partes aquí, luego las comprobaciones de GitHub |
 | Producción | `npm run dev:promote` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `remy cloudflare deploy` y el Worker de documentación, a partir de un main ya empujado, sin puerta de control: staging y GitHub ya ejecutaron las comprobaciones | ~1 min |
 | Una publicación | `npm run dev:release` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `remy packages release`: cada comprobación, cada idioma, localmente, a propósito, y luego la etiqueta | ~5 min |
 | Cuando está landed | `npm run dev:done` | quien hizo el landing, cuando el trozo de trabajo termina; un worktree sobrevive a tantos landings como el trabajo necesite | el worktree y la rama desaparecen | segundos |
@@ -261,15 +261,15 @@ que cada app, desde las tareas compartidas; `npm run setup` instala el guardián
 - Un área que parece mal: `npm run test -- only <palabras>` (las comprobaciones de navegador
   cuyo título coincide, en y ar, ~30 s). Es la única ejecución de navegador que no es propiedad de un
   paso.
-- **El guardián** (`remy guard`, un hook de Claude Code en cada comando de shell que ejecuta un agente) se
-  niega a ejecutar `remy verify`, `npm run test -- every`, `npm run test -- quick`, `npm run test -- remote`,
-  `npm run test -- google`, `npm run test -- cwv`, `npm run test -- consumers`, `npm run test -- consumers`, un
-  `playwright test` desnudo y `remy i18n translate` fuera del flujo, y en su lugar nombra el paso
-  correspondiente. Todos ellos siguen pudiendo ejecutarse a mano desde una terminal, con
-  `REMY_FLOW=hand` por delante (`REMY_FLOW=hand npm run test -- every`): el propio comando pregunta quién
-  lo está ejecutando (la puerta de control) y se niega ante una ejecución desnuda, en cualquier máquina. Eso es
-  una decisión de una persona; el guardián se niega a ejecutarlo desde un agente aun así, que es el
-  fallo para el que existe. Una tarea cuyo propio trabajo termina con la verificación (`npm run setup`,
+- **El guardián** (`remy guard`, un hook de Claude Code en cada comando de shell que ejecuta un agente,
+  registrado en cada máquina por `npm run setup`) rechaza las comprobaciones pesadas fuera del flujo (la puerta
+  de control de la publicación, las comprobaciones de navegador contra un despliegue, Core Web Vitals, un
+  `playwright test` desnudo, `remy i18n translate`) y `wrangler dev` a secas, y nombra qué ejecutar en su lugar
+  (`COMMANDS.md`). Todas siguen pudiendo ejecutarse a mano desde una terminal, con `REMY_FLOW=hand` por
+  delante (`REMY_FLOW=hand npm run test -- remote`): el propio comando pregunta quién lo está ejecutando
+  (la puerta de control) y se niega ante una ejecución desnuda, en cualquier máquina. Eso es una decisión de
+  una persona; el guardián se niega a ejecutarlo desde un agente aun así, que es el fallo para el que
+  existe. Una tarea cuyo propio trabajo termina con la verificación (`npm run setup`,
   `npm run packages -- upgrade`, `npm run upgrade`) indica que está preguntando, así que esas se ejecutan tal
   como están escritas.
 - **Estas páginas nunca dan un comando que las herramientas rechacen.** Un comando pesado se escribe con
@@ -302,8 +302,7 @@ que cada app, desde las tareas compartidas; `npm run setup` instala el guardián
   [command]` lo imprime. Un comando iniciado dentro de otro (`npm run ci` ejecuta `check types` y `test
   every`, `dev:land` ejecuta `i18n translate`) escribe, con sangría, en el registro de la ejecución exterior,
   de modo que una ejecución deja un único registro de todo lo que ejecutó. Un comando solo marca sus partes
-  (`lap`) y añade lo que midió él mismo (`note`: cada llamada al traductor, cada paso del fixture de
-  consumer); nunca escribe un registro ni un resumen propios (propietario, 2026-10-17: «debería obtenerlo
+  (`lap`) y añade lo que midió él mismo (`note`: cada llamada al traductor, cada paso de la prueba de la app nueva); nunca escribe un registro ni un resumen propios (propietario, 2026-10-17: «debería obtenerlo
   automáticamente porque es parte de la CLI»). Un paso lento es un número en el log, no una sensación
   (propietario, 2026-10-10, sobre un landing con staging listo a los 40 segundos cuyo comando tardó seis
   minutos: «cómo puede ser 6 minutos»).
@@ -362,7 +361,7 @@ porque todos nuestros repos van a usar esto».
 - Una rama mezclada que queda suelta (local o en GitHub) es ruido, no historia: `main` y las etiquetas
   la contienen.
 
-## Compartir una máquina entre agentes [#sharing-one-machine-between-agents]
+## Sharing one machine between agents [#sharing-one-machine-between-agents]
 
 La máquina se cayó el 2026-09-25 con unos diez agentes construyendo y probando a la vez (carga 188), y
 las comprobaciones sensibles al tiempo fallaron mucho antes de eso. Así que:
@@ -374,8 +373,8 @@ las comprobaciones sensibles al tiempo fallaron mucho antes de eso. Así que:
   (nunca 4190, que los navegadores bloquean); `PREVIEW_PORT=4232 npm run …` los sobrescribe.
 - Como máximo tres agentes ejecutan pruebas al mismo tiempo; la investigación, la escritura y los
   spikes de prueba no cuentan. Cuando se necesitan más, pon `PLAYWRIGHT_WORKERS=2` para cada uno.
-- El nivel de Google (`npm run test -- google`, `npm run test -- cwv`) toma un lock de toda la máquina, así
-  que una segunda ejecución espera en lugar de distorsionar la primera.
+- Las auditorías de Google (`npm run ci -- audits`) y Core Web Vitals (`npm run test -- cwv`) toman un lock de toda la
+  máquina, así que una segunda ejecución espera en lugar de distorsionar la primera.
 - Nunca encadenes un despliegue después de una comprobación con `;`: los pasos del flujo se ejecutan
   uno tras otro y se detienen en el primer fallo.
 
@@ -407,7 +406,7 @@ landing. Nada de esto se hace a mano.
 | Mirar | `npm run dev:status` | qué está pasando, preguntado a los dueños de los hechos: los últimos commits de main con el veredicto de GitHub, qué ejecuta cada despliegue, cada worktree por delante y por detrás de main, traducciones, pull requests. Cada sesión de agente se abre con esto (un hook que registra `remy guard`); un desarrollador lo ejecuta cuando se sienta a trabajar |
 | Empezar | `npm run dev:start -- <nombre>` | un worktree en la rama `<nombre>` a partir de main (`.claude/worktrees/<nombre>`), instalado (`npm ci`, el script `local` de la app), con puertos propios y el guardián del flujo. Los propios worktrees de Claude Code viven en el mismo lugar y son solo una carpeta: dentro de uno, `npm run dev:start` sin nombre lo prepara de la misma forma |
 | Codificar | `npm run dev:change` | la comprobación, en segundos, después de cada cambio |
-| Aterrizar | `npm run dev:land -- "<qué cambió>"` | primero se incorpora main (un conflicto se detiene nombrando los archivos), las traducciones que el cambio dejó desactualizadas (la suscripción de Claude en esta máquina, nunca GitHub), la comprobación, el nivel 1 tal como lo ejecuta la pull request (`npm run ci -- every`), un commit, un push de la rama, se abre su pull request (o se actualiza la abierta), se esperan las comprobaciones de GitHub, un squash merge, staging, y este checkout se restablece al nuevo main. Una comprobación en rojo deja la pull request abierta y nombra el job; `npm run ci -- <parte>` lo reproduce. Hablar con GitHub es solo cosa de `packages/ui/src/cli/github.ts`, mediante su API REST |
+| Aterrizar | `npm run dev:land -- "<qué cambió>"` | primero se incorpora main (un conflicto se detiene nombrando los archivos), las traducciones que el cambio dejó desactualizadas (la suscripción de Claude en esta máquina, nunca GitHub), la comprobación, cada parte de `npm run ci` que el cambio pueda afectar, tal como las ejecuta su pull request, un commit, un push de la rama, se abre su pull request (o se actualiza la abierta), se esperan las comprobaciones de GitHub, un squash merge, staging, y este checkout se restablece al nuevo main. Una comprobación en rojo deja la pull request abierta y nombra el job; `npm run ci -- <parte>` lo reproduce. Hablar con GitHub es solo cosa de `packages/ui/src/cli/github.ts`, mediante su API REST |
 | Terminar | `npm run dev:done` | el worktree y la rama que ya aterrizaron desaparecen; se niega mientras algo quede sin aterrizar |
 | Producción | `npm run dev:promote` | a partir de main, solo un commit que GitHub aprobó, con la palabra del propietario |
 

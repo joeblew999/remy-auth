@@ -219,7 +219,7 @@ tasks; `npm run setup` installs the guard.
 | Look | `npm run dev:status` | everyone, first: every agent session opens with it (a hook), a developer when they sit down | main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests, the top of `.plans/now.md` | seconds |
 | Before a piece of work | `npm run dev:start -- <name>` | whoever does the work, for every piece, a one-line edit included | a worktree of its own from main, installed, its own ports, the guard | ~1 min |
 | After every change | `npm run dev:change` | whoever is coding; the only step waited for | the check (`remy check`): plans, types with the tasks' own, the plain-function checks (`tests/**/*.unit.spec.ts`), translation status; a build only when a route file changed, the docs only when docs changed | ~6 s |
-| The change leaves the machine | `npm run dev:land -- "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | the translations it made stale (seconds), the check, level 1 as the pull request will run it, one commit, push the branch, open its pull request, wait for GitHub's checks (they confirm what passed here), merge, deploy staging. Never straight to main; from main it moves the work to a branch of its own first. After the merge main's own run checks everything (Google's audits and the consumer fixture too) | a few minutes: level 1 here, then GitHub's checks |
+| The change leaves the machine | `npm run dev:land -- "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | the translations it made stale (seconds), the check, every part of `npm run ci` the change can affect (as its pull request will run them), one commit, push the branch, open its pull request, wait for GitHub's checks (they confirm what passed here), merge, deploy staging. Never straight to main; from main it moves the work to a branch of its own first. After the merge main's own run checks everything, every part in every language | a few minutes: the parts here, then GitHub's checks |
 | Production | `npm run dev:promote` | the owner, or an agent the owner asked in that session | `remy cloudflare deploy` and the docs Worker, from a pushed main, no gate: staging and GitHub already ran the checks | ~1 min |
 | A release | `npm run dev:release` | the owner, or an agent the owner asked in that session | `remy packages release`: every check, every language, locally, on purpose, then the tag | ~5 min |
 | When landed | `npm run dev:done` | whoever landed, when the piece of work is over; a worktree lives through as many landings as the work takes | the worktree and branch go | seconds |
@@ -233,11 +233,11 @@ tasks; `npm run setup` installs the guard.
 
 - One area that looks wrong: `npm run test -- only <words>` (the browser checks whose title
   matches, en and ar, ~30 s). It is the only browser run a step does not own.
-- **The guard** (`remy guard`, a Claude Code hook on every shell command an agent runs) refuses
-  `remy verify`, `npm run test -- every`, `npm run test -- quick`, `npm run test -- remote`, `npm run test -- google`,
-  `npm run test -- cwv`, `npm run test -- consumers`, `npm run test -- consumers`, a bare `playwright test` and
-  `remy i18n translate` outside the flow, and names the step instead. Every one still runs by hand from a
-  terminal, with `REMY_FLOW=hand` in front (`REMY_FLOW=hand npm run test -- every`): the command itself
+- **The guard** (`remy guard`, a Claude Code hook on every shell command an agent runs, registered on each machine
+  by `npm run setup`) refuses the heavy checks outside the flow (the release gate, the browser checks against a
+  deployment, Core Web Vitals, a bare `playwright test`, `remy i18n translate`) and raw `wrangler dev`, naming
+  what to run instead (`COMMANDS.md`). Every one still runs by hand from a terminal, with `REMY_FLOW=hand` in
+  front (`REMY_FLOW=hand npm run test -- remote`): the command itself
   asks who is running it (the gate) and refuses a bare run, on every machine. That is a
   person's decision; the guard refuses it from an agent even so, which is the fault it exists for.
   A task whose own job ends with the verification (`npm run setup`, `npm run packages -- upgrade`,
@@ -270,7 +270,7 @@ tasks; `npm run setup` installs the guard.
   [command]` prints it. A command started inside another (`npm run ci` runs `check types` and `test
   every`, `dev:land` runs `i18n translate`) writes into the outer run's record, indented, so one run
   leaves one record of everything it ran. A command only marks its parts (`lap`) and adds what it measured
-  itself (`note`: each translator call, each step of the consumer fixture); it never writes a record or a
+  itself (`note`: each translator call, each step of the new-app test); it never writes a record or a
   summary of its own (owner, 2026-10-17: "it should get it automatically because it's part of the CLI"). A slow step is a number in the log, not a feeling (owner,
   2026-10-10, of a landing on staging after 40 seconds whose command ran six minutes: "how can it be
   6 minutes").
@@ -334,7 +334,7 @@ and timing-sensitive checks failed well before that. So:
   4190, which browsers block); `PREVIEW_PORT=4232 npm run …` overrides them.
 - At most three agents run tests at the same time; research, writing and scratch spikes do not
   count. When more are needed, set `PLAYWRIGHT_WORKERS=2` for each.
-- Google's level (`npm run test -- google`, `npm run test -- cwv`) takes a machine-wide lock, so a second
+- Google's audits (`npm run ci -- audits`) and Core Web Vitals (`npm run test -- cwv`) take a machine-wide lock, so a second
   run waits rather than skewing the first.
 - Never chain a deploy after a check with `;`: the flow's steps run each in turn and stop at the first failure.
 
@@ -363,7 +363,7 @@ the only integrator, and GitHub checks every landing. Nothing here is done by ha
 | Look | `npm run dev:status` | what is going on, asked from the facts' owners: main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests. Every agent session opens with it (a hook `remy guard` registers); a developer runs it when they sit down |
 | Start | `npm run dev:start -- <name>` | a worktree on branch `<name>` from main (`.claude/worktrees/<name>`), installed (`npm ci`, the app's `local` script), with ports of its own and the flow's guard. Claude Code's own worktrees live at the same place and are only a folder: inside one, `npm run dev:start` with no name prepares it the same way |
 | Code | `npm run dev:change` | the check, in seconds, after every change |
-| Land | `npm run dev:land -- "<what changed>"` | main merged in first (a conflict stops with the files named), the translations the change made stale (the Claude subscription on this machine, never GitHub), the check, level 1 as the pull request runs it (`npm run ci -- every`), one commit, one push of the branch, its pull request opened (or the open one updated), GitHub's checks waited for, a squash merge, staging, this checkout reset to the new main. A red check leaves the pull request open and names the job; `npm run ci -- <part>` reproduces it. Talking to GitHub is `packages/ui/src/cli/github.ts` only, through its REST API |
+| Land | `npm run dev:land -- "<what changed>"` | main merged in first (a conflict stops with the files named), the translations the change made stale (the Claude subscription on this machine, never GitHub), the check, every part of `npm run ci` the change can affect, as its pull request runs them, one commit, one push of the branch, its pull request opened (or the open one updated), GitHub's checks waited for, a squash merge, staging, this checkout reset to the new main. A red check leaves the pull request open and names the job; `npm run ci -- <part>` reproduces it. Talking to GitHub is `packages/ui/src/cli/github.ts` only, through its REST API |
 | Finish | `npm run dev:done` | the landed worktree and branch go; refuses while anything is unlanded |
 | Production | `npm run dev:promote` | from main, only a commit GitHub passed, on the owner's word |
 

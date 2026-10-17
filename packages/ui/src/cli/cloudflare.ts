@@ -204,7 +204,7 @@ const workerName = async (): Promise<string> => (await workerConfig()).name;
 
 /**
  * Deploy this commit as a throwaway Worker <worker>-check-<alias> (production untouched), wait until it
- * serves this build, run level 1 against it in the quick languages, then delete it (or keep it, for
+ * serves this build, run the browser checks against it in the quick languages, then delete it (or keep it, for
  * the speed measurement). A Worker of its own, because preview URLs are off (every old version and
  * alias was public) and `wrangler delete` removes it completely. Answers the preview's origin.
  */
@@ -240,7 +240,7 @@ export async function preview(alias?: string, keep = false): Promise<string> {
     }
     if (ok < 10) fail(`preview: ${origin} did not answer steadily within 2 minutes`);
     tool('playwright', ['test', '--project=ours'], { env: { TEST_BASE_URL: origin, TEST_TARGET: 'remote', ...quickLocales() } });
-    console.log(`Preview passed level 1: ${origin}`);
+    console.log(`Preview passed the browser checks: ${origin}`);
     return origin;
   } finally { if (!keep) await remove(); }
 }
@@ -264,13 +264,13 @@ export async function previewDelete(name?: string): Promise<void> {
 
 export const what = 'Cloudflare: production and staging deploys, the docs Worker, throwaway previews, what each deployment runs';
 export const commands: Subcommands = {
-  deploy: { what: 'production from this checkout, then the live smoke (dev:promote runs it)', run: () => deploy() },
-  staging: { what: "the Wrangler configuration's env.staging to origins.staging (dev:land runs it)", run: () => deploy('staging') },
+  deploy: { what: 'production from this checkout (DEPLOY_ORIGIN): upload, wait for the new version, then its live smoke; refuses a D1, KV or R2 binding with no existing resource, since creating resources is the owner\'s (dev:promote runs it)', run: () => deploy() },
+  staging: { what: "the same for staging (CLOUDFLARE_ENV=staging, the Wrangler configuration's env.staging): its own Worker at origins.staging, production untouched (dev:land runs it on a machine signed in to Cloudflare)", run: () => deploy('staging') },
   'docs-deploy': { what: "the docs Worker, then its pages to Ask AI's index (dev:promote runs it)", run: () => deployDocs() },
-  versions: { what: '[origins…]: a row per deployment, each commit placed against this checkout', run: async rest => { const { table, unanswered } = await versions(rest.length ? rest : undefined); console.log(table); if (unanswered) process.exit(1); } },
+  versions: { what: '[origins…]: what each deployment runs, asked and never remembered: service, environment, commit and how far it is from this checkout, when it was deployed', run: async rest => { const { table, unanswered } = await versions(rest.length ? rest : undefined); console.log(table); if (unanswered) process.exit(1); } },
   urls: { what: '[origin]: the URLs a deployment answers at', run: async rest => { await urls(rest[0]); } },
-  preview: { what: '[alias] [--keep]: a throwaway Worker <name>-check-<alias> with this build, deleted after its checks unless kept', run: async rest => { await preview(rest.find(part => !part.startsWith('--')), rest.includes('--keep')); } },
-  'preview-delete': { what: '[name]: delete a preview Worker', run: rest => previewDelete(rest[0]) },
+  preview: { what: '[alias] [--keep]: this build as a throwaway Worker <name>-check-<alias> (production untouched), the browser checks against it, then deleted unless --keep (a machine signed in to Cloudflare; from Claude\'s cloud, push the branch instead)', run: async rest => { await preview(rest.find(part => !part.startsWith('--')), rest.includes('--keep')); } },
+  'preview-delete': { what: '[name]: list the throwaway check Workers, or delete one; never production', run: rest => previewDelete(rest[0]) },
   wait: { what: '<origin> <wrangler-output-file>: until the origin serves the uploaded version, every home-page asset included', run: rest => { const [origin, output] = rest; if (!origin || !output) fail('remy cloudflare wait <origin> <wrangler-output-file>'); return waitFor(origin, output); } },
   provisioned: { what: 'refuse when a D1, KV or R2 binding names no existing resource', run: () => provisioned() },
 };

@@ -320,3 +320,4 @@ task logic, facts in several places), and their fixes in order. Waits for the ow
 [flue](parked/flue.md): a link to https://github.com/withastro/flue, to come back to.
 
 [cf-cli](parked/cf-cli.md): adopt Cloudflare's `cf` CLI (https://github.com/cloudflare/cf), to come back to.
+- Sign-in code request answered 500 once under load (tests/auth.spec.ts:164, the second address; flaky, passed on retry, local run 2026-10-17): find why the endpoint errors.

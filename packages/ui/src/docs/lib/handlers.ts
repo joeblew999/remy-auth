@@ -25,7 +25,8 @@ export async function llmsText(name: SiteName, splat = '', origin = '') {
   const site = sites[name];
   const { lang, slugs } = site.parse(splat.replace(/\.txt$/, ''));
   // Fumadocs' index, with the part's audience under its title.
-  if (slugs.join('/') === 'llms') return text((await site.llms.index(lang)).replace(/^(# .*\n)/, `$1\n${llmsSummary(name, origin)}\n`), 'text/plain');
+  // Page links absolute, as the summary's and root llms.txt's are: the text is also read away from this host.
+  if (slugs.join('/') === 'llms') return text((await site.llms.index(lang)).replace(/^(# .*\n)/, `$1\n${llmsSummary(name, origin)}\n`).replace(/\]\(\//g, `](${origin}/`), 'text/plain');
   if (slugs.join('/') === 'llms-full') return text(await site.llms.full(lang), 'text/plain');
   return new Response('Not found', { status: 404 });
 }
@@ -33,7 +34,7 @@ export async function llmsText(name: SiteName, splat = '', origin = '') {
 /** /reference/llms.txt, llms-full.txt and /reference/<operation>.md: the API reference as text, from the spec. */
 export async function referenceText(splat = '', origin = '') {
   const name = splat.replace(/\.(txt|md)$/, '');
-  if (splat === 'llms.txt') return text(`# ${docsConfig.titles.reference}\n\n${llmsSummary('reference', origin)}\n\n${await referenceLlms.index()}\n`, 'text/plain');
+  if (splat === 'llms.txt') return text(`# ${docsConfig.titles.reference}\n\n${llmsSummary('reference', origin)}\n\n${await referenceLlms.index(origin)}\n`, 'text/plain');
   if (splat === 'llms-full.txt') return text((await Promise.all(reference.getPages().map(referenceLlms.page))).join('\n'), 'text/plain');
   const page = splat.endsWith('.md') ? reference.getPage(name.split('/').filter(Boolean)) : undefined;
   return page ? text(await referenceLlms.page(page), 'text/markdown') : new Response('Not found', { status: 404 });
@@ -60,7 +61,7 @@ type McpLlms = { index(): Promise<string>; page(page: never): Promise<string> };
 type McpSearch = { search(query: string): Promise<{ url: string }[]> };
 
 const referenceLlms = {
-  index: async () => reference.getPages().map(page => `- [${page.data.title}](${page.url}): ${page.data.description ?? ''}`).join('\n'),
+  index: async (origin = '') => reference.getPages().map(page => `- [${page.data.title}](${origin}${page.url})${page.data.description ? `: ${page.data.description}` : ''}`).join('\n'),
   page: async (page: ReturnType<typeof reference.getPages>[number]) => {
     const { operations = [] } = page.data.getOpenAPIPageProps() as { operations?: { path: string; method: string }[] };
     const spec = page.data.getSchema().bundled as { paths?: Record<string, Record<string, unknown>> };

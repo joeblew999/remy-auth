@@ -6,8 +6,18 @@ import { jobParts } from '../../packages/ui/src/cli/ci';
 // the workflow's job list is held to the parts and shards ci defines, so the two cannot drift apart.
 
 test("the workflow runs exactly ci's jobs, one npm run ci line each", () => {
-  const workflow = readFileSync('.github/workflows/google.yml', 'utf8');
+  const workflow = readFileSync('.github/workflows/ci.yml', 'utf8');
   expect(workflow).toContain('npm run ci -- ${{ matrix.part }}');
   const listed = [...workflow.matchAll(/^\s+part: (.+)$/gm)].map(match => match[1]!.trim());
-  expect([...listed].sort(), `google.yml runs ${listed.join(', ')}; ci expects ${jobParts().join(', ')}`).toEqual([...jobParts()].sort());
+  expect([...listed].sort(), `ci.yml runs ${listed.join(', ')}; ci expects ${jobParts().join(', ')}`).toEqual([...jobParts()].sort());
+});
+
+test('a check that passed only on its retry is named, with its file and line', async () => {
+  const { flakyIn } = await import('../../packages/ui/src/cli/test');
+  const report = { suites: [{ suites: [{ specs: [
+    { file: 'tests/auth.spec.ts', line: 164, title: 'a fourth code request is refused', tests: [{ status: 'flaky' }] },
+    { file: 'tests/gui.spec.ts', line: 12, title: 'the home page hydrates', tests: [{ status: 'expected' }] },
+  ] }] }] };
+  expect(flakyIn(report)).toEqual(['tests/auth.spec.ts:164 a fourth code request is refused']);
+  expect(flakyIn({})).toEqual([]);
 });

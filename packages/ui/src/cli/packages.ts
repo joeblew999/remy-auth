@@ -57,10 +57,13 @@ export async function upgrade(): Promise<void> {
 }
 
 const generate = (): void => tool('npm', ['run', '--if-present', '--silent', 'generate'], { what: 'generate' });
+/** What the package ships that is made from the docs: the remy skill (remy-auth only), before any pack or publish. */
+const shipped = async (): Promise<void> => { const { buildSkill } = await import('./skills.ts'); await buildSkill(); };
 
 /** A tarball of each published package, here, for a scratch app to install before any release. */
-export function pack(): void {
+export async function pack(): Promise<void> {
   generate();
+  await shipped();
   const { published } = workspaces();
   if (!published.length) { console.log('pack: this repository publishes no packages (no workspace that is not private).'); return; }
   for (const item of published) tool('npm', ['pack', '--workspace', item.name]);
@@ -96,7 +99,7 @@ export function bumped(): void {
 }
 
 /** Publish each package whose version is not on its registry yet; with a release tag, also create the GitHub release from the changelog. */
-export function publish(options: { release?: string; dryRun?: boolean } = {}): void {
+export async function publish(options: { release?: string; dryRun?: boolean } = {}): Promise<void> {
   const scratch = mkdtempSync(join(tmpdir(), 'remy-publish-'));
   try {
     let releaseNotes: string | undefined;
@@ -110,6 +113,7 @@ export function publish(options: { release?: string; dryRun?: boolean } = {}): v
     // An app's own .npmrc (the blank app's) reads ${GITHUB_TOKEN} and outranks the user config written below.
     const env = { GITHUB_TOKEN: token, NODE_AUTH_TOKEN: token };
     generate();
+    await shipped();
     for (const item of workspaces().published) {
       const host = item.registry.replace(/^https:\/\//, '').replace(/\/$/, '');
       const npmrc = join(scratch, 'npmrc');
@@ -138,7 +142,7 @@ export function publish(options: { release?: string; dryRun?: boolean } = {}): v
 }
 
 /** The release's last step, after the gates: on a clean main that is not behind origin, tag the lead's version, push main and the tag, then publish with the release. */
-export function tag(): void {
+export async function tag(): Promise<void> {
   const { name, version, title } = lead();
   if (git('branch', '--show-current') !== 'main') fail('Release from main.');
   if (git('status', '--porcelain')) fail('Commit everything before releasing.');
@@ -150,7 +154,7 @@ export function tag(): void {
   execFileSync('git', ['tag', '-a', `v${version}`, '-m', `${title} ${version}`]);
   execFileSync('git', ['push', 'origin', 'main'], { stdio: 'inherit' });
   execFileSync('git', ['push', 'origin', `v${version}`], { stdio: 'inherit' });
-  publish({ release: `v${version}` });
+  await publish({ release: `v${version}` });
 }
 
 /**
@@ -171,7 +175,7 @@ export async function release(): Promise<void> {
   tool('npm', ['run', '--if-present', 'release-checks'], { what: 'release-checks' });
   await google();
   await cwv('release');
-  tag();
+  await tag();
 }
 
 export const what = 'a repository that publishes packages: updates, the pack, the notes, the publish, the tag, the release';

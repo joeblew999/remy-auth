@@ -59,19 +59,20 @@ else {
 }
 await check();
 lap('the check');
-// What the pull request's checks run, here first: level 1 as GitHub will run it for these changes (the check
-// above already covered types and unit). GitHub then confirms instead of finding out.
+// What the pull request's checks run, here first: every part of npm run ci these changes can affect, as GitHub will (the
+// check above already covered types and unit; each part skips itself when nothing it checks changed). GitHub then
+// confirms instead of finding out.
 const [remy, ...remyArgs] = remyCommand();
-if (spawnSync(remy!, [...remyArgs, 'ci', 'every'], { stdio: 'inherit', env: { ...process.env, REMY_FLOW: 'ci' } }).status !== 0) fail('level 1 failed here (above), so nothing was pushed. Fix it, then land again.');
-lap('level 1, as the pull request runs it');
+if (spawnSync(remy!, [...remyArgs, 'ci', 'browser', 'audits', 'new-app'], { stdio: 'inherit', env: { ...process.env, REMY_FLOW: 'ci' } }).status !== 0) fail('a part of npm run ci failed here (above), so nothing was pushed. Fix it, then land again.');
+lap('the parts the change can affect, as its pull request runs them');
 if (read('status', '--porcelain') !== '') { git('add', '-A'); git('commit', '-q', '-m', message); }
 if (read('rev-list', '--count', 'origin/main..HEAD') === '0') fail('nothing to land: this branch has nothing main does not.');
 
-// One push of the branch (the pre-push hook skips: REMY_FLOW is set, and level 1 just passed), then its pull request.
+// One push of the branch (the pre-push hook skips: REMY_FLOW is set, and the browser checks just passed), then its pull request.
 git('push', '-q', '-u', 'origin', `HEAD:refs/heads/${here.branch}`);
 const head = read('rev-parse', 'HEAD');
-// What level 1 took here, from this landing's own record (timing.ts: the ci run above wrote into it).
-const ran = lastRecord('flow land').split('\n').find(line => /ci every: passed/.test(line))?.trim() ?? 'level 1 passed';
+// What the browser checks took here, from this landing's own record (timing.ts: the ci run above wrote into it).
+const ran = lastRecord('flow land').split('\n').find(line => /ci browser: passed/.test(line))?.trim() ?? 'the browser checks passed';
 const pull = pullFor(slug, here.branch) ?? openPull(slug, here.branch, title, `${body ? `${body}\n\n` : ''}Landed with \`npm run dev:land\`. Here first: ${ran}`);
 lap('commit, push and pull request');
 console.log(`dev:land: ${pull.html_url} is open; GitHub checks ${head.slice(0, 7)} (what passed here, confirmed).`);
@@ -85,7 +86,7 @@ if ('refused' in merged) fail(`GitHub would not merge ${pull.html_url}: ${merged
 const landed = merged.sha;
 deleteBranch(slug, here.branch);
 lap('merge');
-console.log(`dev:land: merged as ${landed.slice(0, 7)} (${pull.html_url}); main's own run checks everything, Google and the consumer fixture included; dev:promote waits for it.`);
+console.log(`dev:land: merged as ${landed.slice(0, 7)} (${pull.html_url}); main's own run checks everything, every part in every language; dev:promote waits for it.`);
 
 // This checkout and the main checkout follow the new main: the branch's content is in it (squashed), so the
 // branch is reset to it, ready for the next change.

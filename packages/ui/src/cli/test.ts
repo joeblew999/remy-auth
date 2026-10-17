@@ -1,6 +1,6 @@
 // The browser checks (`remy test …`), each what a step, GitHub or a hand that said so runs; the gate
-// (allowed.ts) refuses the heavy ones outside the flow. Level 1 is every check of ours; level 2 is
-// Google's. `only <words>` is the one browser run a step does not own: the checks whose title matches,
+// (allowed.ts) refuses the heavy ones outside the flow. What CI runs (the browser part, the audits, the new app) is
+// `npm run ci`, which calls the functions here; the sub-commands are what a person reaches for by hand. `only <words>` is the one browser run a step does not own: the checks whose title matches,
 // in the quick languages.
 import { spawnSync } from 'node:child_process';
 import { dispatch, type Subcommands } from './commands.ts';
@@ -11,10 +11,31 @@ import { gate } from './allowed.ts';
 import { preview, previewDelete } from './cloudflare.ts';
 import { build } from './dev.ts';
 import { allLanguages, skip } from './unchanged.ts';
+import { warn } from './timing.ts';
 
 function playwright(args: string[], env: Record<string, string>): void {
+  const results = join(process.cwd(), 'playwright-report', `${env.TEST_TARGET === 'remote' ? 'remote' : 'local'}-results.json`);
+  rmSync(results, { force: true });
   const result = spawnSync(join(process.cwd(), 'node_modules', '.bin', 'playwright'), ['test', ...args], { stdio: 'inherit', env: { ...process.env, ...env } });
+  flaky(results);
   if (result.status !== 0) process.exit(result.status ?? 1);
+}
+
+type Suite = { specs?: { file: string; line: number; title: string; tests: { status: string }[] }[]; suites?: Suite[] };
+/** The checks in Playwright's JSON results that passed only on their retry ("file:line title"). */
+export function flakyIn(report: { suites?: Suite[] }): string[] {
+  const found: string[] = [];
+  const walk = (suite: Suite) => { for (const spec of suite.specs ?? []) if (spec.tests.some(test => test.status === 'flaky')) found.push(`${spec.file}:${spec.line} ${spec.title}`); suite.suites?.forEach(walk); };
+  report.suites?.forEach(walk);
+  return found;
+}
+
+/** A check that passed only on its retry (playwright.js retries once under CI) is named in the run's summary line, never only in the log. */
+function flaky(results: string): void {
+  let report: { suites?: Suite[] };
+  try { report = JSON.parse(readFileSync(results, 'utf8')); } catch { return; }
+  const found = flakyIn(report);
+  if (found.length) warn(`${found.length} flaky, passed only on its retry: ${found.join('; ')}`);
 }
 const local = { TEST_TARGET: 'local' };
 /** The quick languages: `quick`, which the checks resolve (checks.js: the base language and the first right-to-left one); QUICK_LOCALES names others. */
@@ -43,12 +64,12 @@ async function withLevel2Lock<T>(work: () => T): Promise<T> {
   try { return await work(); } finally { rmSync(lock, { recursive: true, force: true }); }
 }
 
-/** Every check of ours (level 1), on the production artifact in local Workers: in every language, or in English and Arabic when the change cannot differ by language. */
-/** REMY_SHARD=<i>/<n> runs one part of the checks (GitHub splits level 1 across jobs; `npm run ci -- every --shard 1/3`). */
+/** The browser checks (ci's browser part), on the production artifact in local Workers: in every language, or in English and Arabic when the change cannot differ by language. */
+/** REMY_SHARD=<i>/<n> runs one part of the checks (GitHub splits the browser part across jobs; `npm run ci -- browser --shard 1/3`). */
 const shard = () => (process.env.REMY_SHARD ? [`--shard=${process.env.REMY_SHARD}`] : []);
 export function every(): void {
   gate('project:test');
-  if (skip('every')) return;
+  if (skip('browser')) return;
   // English and Arabic when nothing that changed can differ by language (unchanged.ts); CHECK_LOCALES set by hand wins.
   const languages = process.env.CHECK_LOCALES || allLanguages() ? {} : quickLocales();
   build();
@@ -60,9 +81,9 @@ export function quick(): void { gate('project:test:quick'); build(); playwright(
 export function only(words: string): void { build(); playwright(['--project=ours', '--grep', words], { ...local, ...quickLocales() }); }
 /** The smoke checks alone, on a local build. */
 export function smoke(): void { build(); playwright(['--project=ours', '--grep', 'smoke [a-zA-Z-]+:'], local); }
-/** Google's audits (level 2), locally. */
-export async function google(): Promise<void> { gate('project:test:google'); if (skip('google')) return; build(); await withLevel2Lock(() => playwright(['--project=google'], local)); }
-/** Level 1 against a deployment. */
+/** Google's audits (ci's audits part), locally. */
+export async function google(): Promise<void> { gate('project:test:google'); if (skip('audits')) return; build(); await withLevel2Lock(() => playwright(['--project=google'], local)); }
+/** The browser checks against a deployment. */
 /**
  * The suite against a deployment. Against production (the default) everything, Google's audits included; against
  * any other origin (a preview, staging) our checks only: those are hidden from search engines on purpose, which
@@ -79,12 +100,12 @@ export function live(origin?: string): void { playwright(['--project=ours', '--g
 /** The other repositories this one serves, tested as they get it: the app's "test:consumers" script, when it has one. */
 export function consumers(): void {
   gate('project:test:consumers');
-  if (skip('consumers')) return;
+  if (skip('new-app')) return;
   // Not silent: npm would hand loglevel=silent to every nested npm in the fixture (its publish dry run reads a 404 from npm's output).
   const result = spawnSync('npm', ['run', '--if-present', 'test:consumers'], { stdio: 'inherit', env: { ...process.env, REMY_FLOW: process.env.REMY_FLOW ?? 'hand' } });
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
-/** Google's Core Web Vitals (level 2, speed) on a throwaway Cloudflare Worker of this commit, deleted whatever happens. */
+/** Google's Core Web Vitals (speed) on a throwaway Cloudflare Worker of this commit, deleted whatever happens. */
 export async function cwv(alias?: string): Promise<void> {
   gate('project:test:cwv');
   const origin = await preview(alias, true);
@@ -96,17 +117,13 @@ export async function cwv(alias?: string): Promise<void> {
 /** Open the last local or remote run's HTML report. */
 export function report(which: 'local' | 'remote' = 'local'): void { spawnSync(join(process.cwd(), 'node_modules', '.bin', 'playwright'), ['show-report', `playwright-report/${which}`], { stdio: 'inherit' }); }
 
-export const what = 'the browser checks, over a local build or a deployment';
+export const what = 'the browser checks by hand: one area, the smoke, against a deployment, Core Web Vitals, the report (what CI runs is npm run ci)';
 export const commands: Subcommands = {
-  every: { what: 'every check in every language over a local build; the default (GitHub runs it after every landing)', run: () => every() },
-  quick: { what: 'every check in a few languages (QUICK_LOCALES)', run: () => quick() },
   only: { what: '<words>: the checks whose title matches, in a few languages; the one targeted run by hand', run: rest => { if (!rest.length) { console.error('remy test only <words>'); process.exit(2); } return only(rest.join(' ')); } },
   smoke: { what: 'tier 1: every page answers, the home page hydrates', run: () => smoke() },
-  google: { what: "Google's Lighthouse audits (level 2; one run at a time on this machine)", run: () => google() },
   cwv: { what: '[alias]: Core Web Vitals on a throwaway preview Worker', run: rest => cwv(rest[0]) },
-  remote: { what: '[origin]: the suite against a deployment (the production origin by default)', run: rest => remoteSuite(rest[0]) },
+  remote: { what: '[origin]: the browser checks against a deployment: production by default, Google\'s audits included; any other origin (a preview, staging) our checks only', run: rest => remoteSuite(rest[0]) },
   live: { what: '[origin]: the smoke against a deployment (every deploy ends with it)', run: rest => live(rest[0]) },
-  consumers: { what: 'the repositories this one serves: the blank app and the consumer fixture', run: () => consumers() },
   report: { what: '[remote]: open the last HTML report, local or remote', run: rest => report(rest[0] === 'remote' ? 'remote' : 'local') },
 };
-export const main = dispatch('test', commands, 'every');
+export const main = dispatch('test', commands);

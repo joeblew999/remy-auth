@@ -3,6 +3,7 @@
   "pages": [
     "index",
     "agents",
+    "commands",
     "development",
     "how-we-work",
     "tooling",
@@ -12,7 +13,6 @@
     "tasks",
     "writing-docs",
     "ai-tools",
-    "[API reference](/reference)",
     "changelog"
   ]
 }

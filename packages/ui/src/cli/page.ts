@@ -1,3 +1,5 @@
+import { existsSync, readFileSync, readdirSync, renameSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 // What the docs translator may write, as functions: translate.ts passes every agent result through
 // pageFrom, and
 // tests/unit/i18n-docs.unit.spec.ts holds every translated page in the repository to broken. On
@@ -36,4 +38,48 @@ export function pageFrom(result: unknown, english: string): { content: string } 
   if (typeof content !== 'string') return { refused: 'the agent returned no page' };
   const why = broken(english, content);
   return why ? { refused: `what the agent returned is not the page: ${why}` } : { content };
+}
+
+// --- .md or .mdx: decided by the page, never by a person ------------------------------------------------
+// Plain .md is read the same everywhere: the docs site, an agent reading the file, GitHub, the remy skill other
+// repos' agents get. .mdx only works on the site, so it is for pages that need a component and nothing else
+// (owner, 2026-10-17: "how do you know that?" — nobody has to: the check renames the page).
+
+/** Whether a page needs MDX: a component (a capitalised tag, or `<include>`) outside code. */
+export function needsMdx(page: string): boolean {
+  const prose = page.replace(/^(```|~~~)[\s\S]*?^\1/gm, '').replace(/`[^`\n]*`/g, '');
+  return /<(?:[A-Z][A-Za-z]*|include)[\s/>]/.test(prose);
+}
+
+/**
+ * Gives every English page under `dirs` the ending its content needs, renaming its translations with it and
+ * fixing the links to it in the same folder; returns what was renamed ("old -> new"). With `verify` it renames nothing
+ * and returns what would be (npm run ci fails on it: CI says what dev:change would have fixed).
+ */
+export function rightEndings(dirs: string[], verify = false): string[] {
+  const renamed: string[] = [];
+  const translation = /\.[a-z]{2,3}(?:-[A-Za-z]{2,4})?\.mdx?$/;
+  for (const dir of dirs.filter(dir => existsSync(dir))) {
+    for (const folder of [dir, ...readdirSync(dir, { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => join(dir, entry.name))]) {
+      const files = readdirSync(folder).filter(name => /\.mdx?$/.test(name));
+      for (const name of files.filter(name => !translation.test(name))) {
+        const want = needsMdx(readFileSync(join(folder, name), 'utf8')) ? '.mdx' : '.md';
+        if (name.endsWith(want)) continue;
+        if (verify) { renamed.push(`${join(folder, name)} should be ${name.replace(/\.mdx?$/, want)}`); continue; }
+        const base = name.replace(/\.mdx?$/, '');
+        for (const file of files.filter(file => file === name || (translation.test(file) && file.startsWith(`${base}.`) && /^\.[a-z]{2,3}(?:-[A-Za-z]{2,4})?\.mdx?$/.test(file.slice(base.length))))) {
+          const next = file.replace(/\.mdx?$/, want);
+          renameSync(join(folder, file), join(folder, next));
+          renamed.push(`${join(folder, file)} -> ${next}`);
+        }
+        const from = new RegExp(`\\./${base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\.mdx?(?=[)"'#])`, 'g');
+        for (const other of readdirSync(folder).filter(file => /\.mdx?$/.test(file))) {
+          const text = readFileSync(join(folder, other), 'utf8');
+          const fixed = text.replace(from, `./${base}${want}`);
+          if (fixed !== text) writeFileSync(join(folder, other), fixed);
+        }
+      }
+    }
+  }
+  return renamed;
 }

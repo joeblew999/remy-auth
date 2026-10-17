@@ -1,7 +1,7 @@
 // Every remy command is timed by the command line itself (remy.ts calls `begin`), not by the command
 // (owner, 2026-10-17: "it should get it automatically because it's part of the CLI"). A run writes its
 // record to node_modules/.cache/remy/<command>-last.txt: when it started, its parts, and its total with
-// passed or failed. A remy command started inside another (ci runs `check types` and `test every`, dev:land
+// passed or failed. A remy command started inside another (ci runs `check types` and `check unit`, dev:land
 // runs `i18n translate`, the consumer fixture's script) writes into the outer run's record, indented under
 // it, so one `npm run ci` leaves one record of everything it ran. A command only marks its parts (`lap`)
 // and adds detail it measured itself (`note`). `npx remy last [command]` prints a record; where the time
@@ -11,6 +11,7 @@ import { join } from 'node:path';
 import { span, type Part } from './feedback.ts';
 
 const parts: Part[] = [];
+const warnings: string[] = [];
 let mark = Date.now();
 let file: string | undefined;
 let indent = '';
@@ -35,7 +36,7 @@ export function begin(command: string, args: string[]): void {
   if (file) { process.env.REMY_RECORD = file; process.env.REMY_RECORD_DEPTH = String(depth + 1); }
   process.on('exit', code => {
     const took = Date.now() - started;
-    const summary = `${command}: ${code === 0 ? 'passed' : `failed (exit ${code})`} in ${span(took)}${parts.length ? `: ${parts.map(part => `${part.what} ${span(part.ms)}`).join(', ')}` : ''}`;
+    const summary = `${command}: ${code === 0 ? 'passed' : `failed (exit ${code})`} in ${span(took)}${parts.length ? `: ${parts.map(part => `${part.what} ${span(part.ms)}`).join(', ')}` : ''}${warnings.length ? ` (${warnings.join('; ')})` : ''}`;
     write(summary);
     if (depth === 0 && (parts.length || took >= 10_000)) console.log(`\n${summary}`);
   });
@@ -48,6 +49,9 @@ export function lap(what: string): void {
   mark = now;
   write(`  ${what} ${span(parts.at(-1)!.ms)}`);
 }
+
+/** Something the run's summary line must say, whatever else it says (a check that passed only on its retry): never only in the log above it. */
+export function warn(text: string): void { warnings.push(text); write(`  ${text}`); }
 
 /** The parts so far, for a command that sums itself up in its own words (dev:land's last line). */
 export const laps = (): Part[] => [...parts];

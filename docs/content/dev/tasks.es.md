@@ -1,7 +1,7 @@
 ---
 title: "La línea de comandos"
 description: "remy, la herramienta que toda app de Remy instala con el paquete: los scripts, la estructura que leen, una app nueva, la publicación de paquetes, las traducciones, Cloudflare y los planes."
-translatedFrom: "26693786 120aeace 7ee47dda 79fb3dca f61ecbb5 6b54351a 465aa437 218b0959"
+translatedFrom: "26693786 ffed0063 9352ad42 79fb3dca c0217a27 4e9524a9 39363a65 218b0959"
 ---
 
 La herramienta es `remy`, el bin de `@joeblew999/remy-ui` (`packages/ui/src/cli`, un módulo de TypeScript por
@@ -43,7 +43,7 @@ encuentra; ninguna comprobación propia lo mantiene.
 | `messages/`, `project.inlang/` | el preset de la app, el script `generate` de la app, `remy i18n` | las cadenas propias de la app, si las hay (compiladas en `src/paraglide/`) |
 | `.plans/` (`now.md`, `done/`, `parked/`) | `remy plans` | los planes del repositorio |
 | `AGENTS.md`, `.github/workflows/` | agentes; GitHub | el puntero de los agentes a la documentación; CI |
-| `packages/ui/src/cli/`, `template/`, `fixtures/consumer/` | el paquete; `giget`; `remy test consumers` | solo remy-auth: la propia línea de comandos, la app en blanco desde la que arranca un repositorio nuevo, y el fixture de consumidor que prueba ambos tal como los recibiría otro repositorio |
+| `packages/ui/src/cli/`, `template/`, `fixtures/consumer/` | el paquete; `giget`; `npm run ci -- new-app` | solo remy-auth: la propia línea de comandos, la app en blanco desde la que arranca un repositorio nuevo, y el fixture de consumidor que prueba ambos tal como los recibiría otro repositorio |
 
 ### Un consumidor nuevo [#a-new-consumer]
 
@@ -72,7 +72,7 @@ que un solo cambio de versión actualiza.
 6. El primer despliegue, a mano: `npx remy cloudflare deploy`, y `npx remy cloudflare docs-deploy` para la
    documentación. Una vez que el repositorio está en GitHub (paso 7), el trabajo pasa por [el flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest):
    `dev:land` para cada cambio terminado, `dev:promote` para producción y la documentación.
-7. CI: `.github/workflows/google.yml` llama al flujo de trabajo compartido de remy-auth en la misma tag (todos los
+7. CI: `.github/workflows/ci.yml` llama al flujo de trabajo compartido de remy-auth en la misma tag (todos los
    idiomas, las auditorías de Google en cada push a `main`). Da al repositorio nuevo acceso de lectura en la
    configuración del paquete `@joeblew999/remy-ui` ("Manage Actions access"), o `npm ci` falla allí.
 
@@ -130,32 +130,15 @@ catálogo), `local` (el estado local que una app necesita antes de ejecutarse, q
 `dev:start` ejecutan primero; remy-auth escribe ahí su `.dev.vars` y migra su D1 local), `release-checks` y
 `test:consumers`.
 
-El flujo de desarrollo es código, `packages/ui/src/cli/flow.ts`, con cuatro pasos y un guardián
-([cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)):
+El flujo de desarrollo es código, `packages/ui/src/cli/flow.ts`, con cuatro pasos y un guardián. El flujo, paso a paso, y quién ejecuta cada uno: [cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest); todos los comandos: [Comandos](./commands.mdx).
 
-| Paso | Script |
-| --- | --- |
-| Primero | `dev:status` (main con los veredictos de GitHub, los despliegues, los worktrees por delante y por detrás, las traducciones, las pull requests; un hook `SessionStart` lo ejecuta para los agentes) |
-| Un trabajo | `dev:start -- <name>` (un worktree propio desde main, `npm ci`, puertos propios, el guardián); `dev:done` lo elimina cuando el trabajo termina y queda fusionado |
-| Cada cambio | `dev:change` (`remy flow change`, cada parte una función: planes, copias únicas, rutas cuando cambia un archivo de ruta, tipos, las comprobaciones unitarias, las traducciones como aviso, la documentación cuando cambia) |
-| Trabajo terminado | `dev:land -- "<message>"` (la comprobación, commit, main, push, el despliegue en staging, y luego la traducción cuando está desactualizada; GitHub ejecuta entonces `npm run test -- every`, `google` y `consumers` en paralelo, y una ejecución en rojo comenta en el commit. Las mismas tres en local, a propósito, por una persona: `REMY_FLOW=hand npm run test -- <level>`) |
-| Producción | `dev:promote` (se niega ante un commit que GitHub no ha aprobado; luego el despliegue a producción, el despliegue de la documentación, lo que ejecuta cada despliegue) |
-| Un release | `dev:release` (`remy packages release`, que ejecuta `remy verify`) |
-| Un área | `npm run test -- only <words>` |
-| El guardián | `npx remy guard` lo registra (`npm run setup` lo hace); `npx remy guard --check` lo verifica (las comprobaciones de la instalación lo hacen) |
-
-`npm run test -- every` es cada una de nuestras comprobaciones en todos los idiomas (dentro de `remy verify`).
-`remy verify` y CI terminan con `remy test consumers`, los demás repositorios a los que este sirve,
-probados tal como los reciben: el script `test:consumers` de la app, nada por defecto; en remy-auth, el
-fixture de consumidor, que construye la app en blanco y un paquete propio a partir de la plataforma de este commit
+`remy verify` (la puerta del release) ejecuta las comprobaciones de navegador en todos los idiomas y después la prueba de app nueva, igual que las partes `browser` y `new-app` de `npm run ci`: los demás repositorios a los que este sirve, probados tal como los reciben: el script `test:consumers` de la app, nada por defecto; en remy-auth, la prueba de app nueva (`fixtures/consumer`), que construye la app en blanco y un paquete propio a partir de la plataforma de este commit
 (el paquete desde un tarball con versión propia, las tareas desde una copia fuera de cualquier `node_modules`, el
-`.npmrc` de la plantilla) y ejecuta la instalación, las skills (instaladas una vez por lista fijada y luego
-reutilizadas), los invariantes de las herramientas, la comprobación, las comprobaciones rápidas de navegador, la
-documentación y una publicación de prueba (dry-run) (~1,5 a 3 min, sobre todo la red).
+`.npmrc` de la plantilla) y ejecuta la instalación, las skills (instaladas una vez por lista fijada y luego reutilizadas), los invariantes de las herramientas, la comprobación, las comprobaciones rápidas de navegador, la documentación y una publicación de prueba (dry-run) (~1,5 a 3 min, sobre todo la red).
 Un cambio que rompería otro repositorio falla ahí, no en ese repositorio. Las pruebas se comprueban con tipos junto
-con la app (`tsconfig.json` incluye `tests/`). El nivel de Google es
-`npm run test -- google` (auditorías de Lighthouse, local; CI en cada push y tag) y `npm run test -- cwv`
-(Core Web Vitals en un Worker de Cloudflare desechable); el release ejecuta ambas.
+con la app (`tsconfig.json` incluye `tests/`). Las auditorías de Google son
+`npm run ci -- audits` (Lighthouse, local; CI siempre que un cambio pueda afectarlas, y en cada push a main y en cada tag) y Core Web Vitals es
+`npm run test -- cwv` (en un Worker de Cloudflare desechable); el release ejecuta ambas.
 
 Dónde se ejecutan las comprobaciones: el comportamiento propio del paquete compartido se comprueba una vez, en remy-auth, antes de cada
 release. Una app construida sobre el paquete ejecuta un conjunto de contrato (sus páginas renderizan, las páginas de sitio y de app se mantienen
@@ -199,33 +182,12 @@ TypeScript en el paquete (`packages/ui/src/cli/i18n.ts`, `translate.ts`: `remy i
   Traducir usa el login de Claude de la máquina.
 - Una app sin proyecto inlang ni sitios de documentación recibe "nothing to check" y sale con 0.
 
-| Comando | Hace |
-| --- | --- |
-| `remy i18n check` | Ambas comprobaciones; un WARNING y salida 0 mientras se programa (la comprobación la ejecuta), salida 1 con `I18N_STRICT=1` (el release) |
-| `remy i18n check messages` | Los huecos de los catálogos, y los idiomas que difieren de los de la plataforma (`de unlisted`); `--list` una línea por hueco (`es missing nav_more`) |
-| `remy i18n check docs` | Los huecos de la documentación; `--list` una línea por hueco (`es stale docs/content/dev/gui.es.md`) |
-| `remy i18n translate` | Mensajes y luego documentación, escritos con sus registros y dejados para el commit del cambio; `dev:land` lo ejecuta antes de la comprobación; a mano, con `REMY_FLOW=hand` delante |
-| `remy i18n translate messages` | Los huecos de los catálogos, un idioma por llamada al agente |
-| `remy i18n translate docs [files]` | Los huecos de la documentación, una página por llamada al agente; los archivos de traducción indicados se rehacen por completo |
+Los dos comandos, `npx remy i18n check` y `npx remy i18n translate`, con sus opciones: [Comandos](./commands.mdx).
 
-Ajustes: `I18N_MODEL` (por defecto `sonnet`), `I18N_JOBS` (4).
 
 ### Cloudflare [#cloudflare]
 
-`npx remy cloudflare <command>`; cada uno indica en su comentario de cabecera si es local o remoto (y de producción).
-
-| Comando | Hace |
-| --- | --- |
-| `deploy` | Construye con `DEPLOY_ORIGIN`, sube, espera a la nueva versión (`the wait for the new version`) y luego ejecuta su comprobación smoke en vivo. Sin pruebas antes: `dev:promote` lo ejecuta después de las comprobaciones del flujo. Se niega cuando un binding de D1, KV o R2 nombra un recurso que no existe: Wrangler crearía uno durante el despliegue, y crear recursos corresponde al propietario (`preview` se niega del mismo modo) |
-| `preview [alias] [--keep]` | Despliega este commit como un Worker desechable `<worker>-check-<commit>` (producción intacta), ejecuta el nivel 1 contra él y lo elimina; `--keep` lo conserva |
-| `preview-delete [name]` | Lista los Workers de comprobación, o elimina uno por nombre; nunca el Worker de producción |
-| `urls [origin]` | Imprime las páginas y `/healthz` del origen de producción (o de uno dado), para informes |
-| `staging` | `deploy` para el entorno de staging: construye con `CLOUDFLARE_ENV=staging` (`env.staging` en la configuración de Wrangler) y sube su propio Worker en `origins.staging`; producción queda intacta. Lo que staging permite más allá de producción está en la [tabla de entornos](./auth.md#environments-one-table) de la app |
-| `versions [origins…]` | Pregunta a cada despliegue (los orígenes de `remy.config.ts`, o los orígenes dados) qué está ejecutando: servicio, entorno, commit, cuán lejos está eso de este checkout, cuándo se desplegó. [Se pregunta, nunca se recuerda](./gui.md#which-version-is-deployed) |
-| `docs-deploy` | El Worker de la documentación: construye, despliega y publica sus páginas en el índice de Ask AI; `dev:promote` lo ejecuta |
-| `npm run test -- remote [origin]` | El nivel 1 contra un despliegue, por una persona (`REMY_FLOW=hand`): los despliegues del flujo terminan con el smoke en vivo, y GitHub ejecuta la suite |
-| `npm run observe -- events\|ai-usage\|ai-check\|gateway` | Workers Logs almacenados, uso de AI Gateway, comprobación de la configuración de IA, los ajustes del gateway ([herramientas](./tooling.md#the-docs-answers-on-cloudflare-ai-search-and-ai-gateway)) |
-| `npm run upgrade -- <version>` | Mueve una app a una misma publicación compartida: la versión del paquete y la tag del flujo de trabajo de CI juntas, y luego las comprobaciones de la instalación |
+Todos los comandos `npx remy cloudflare …`, y `npx remy test remote`, `npx remy observe` y `npx remy upgrade`, con lo que hace y lo que rechaza cada uno: [Comandos](./commands.mdx). Cada uno indica en su comentario de cabecera si es local o remoto (y de producción).
 
 Las credenciales vienen del login de Wrangler, o del llavero a través de fnox
 ([herramientas](./tooling.md#secrets-fnox)).

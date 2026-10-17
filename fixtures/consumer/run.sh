@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# The consumer fixture (README.md): run by npm run test -- consumers (remy test consumers) from remy-auth's root.
+# The new-app test (README.md): ci's new-app part (npm run ci -- new-app) runs it from remy-auth's root.
 set -euo pipefail
 root=$(pwd)
 out=$(mktemp -d); trap 'rm -rf "$out"' EXIT
@@ -13,6 +13,9 @@ step() { local now; now=$(date +%s); took="$took, $1 $((now - mark)) s"; mark=$n
 #    the showcase's peer range still holds), so npm can never substitute a published copy (it did once: the
 #    scratch tarball was 0.13.0, the published version).
 npm run --silent generate > /dev/null
+# What the package ships that is made from the docs (the remy skill), as every pack and publish makes it.
+node packages/ui/src/cli/remy.ts skills build
+step skill
 pack() { # <folder> <name> -> the tarball's path
   local v; v="$(node -p "require('./packages/$1/package.json').version")+dev.$sha"
   # tar, not rsync: every machine that runs ci has it (a cloud agent's container had no rsync, 2026-10-17).
@@ -65,8 +68,8 @@ npx remy verify tooling
 step 'skills and tooling'
 npm run dev:change
 step dev:change
-# The quick browser checks, as the flow would run them for the new app: this run is inside remy test consumers, which the flow authorised.
-REMY_FLOW="${REMY_FLOW:-land}" PREVIEW_PORT=$((${PREVIEW_PORT:-4173} + 100)) npm run test -- quick
+# The new app's browser checks in the quick languages, through its own npm run ci (this run is inside ci's new-app part).
+REMY_FLOW="${REMY_FLOW:-land}" CHECK_LOCALES=quick PREVIEW_PORT=$((${PREVIEW_PORT:-4173} + 100)) npm run ci -- browser
 step 'browser checks'
 DOCS_PREVIEW_PORT=$((${DOCS_PREVIEW_PORT:-4174} + 100)) npm run docs -- test
 step 'docs checks'
@@ -75,14 +78,14 @@ step 'docs checks'
 # has, so everywhere else (a Mac, a cloud agent, GitHub after merge) the fixture stops before it (2026-10-17).
 if [ -n "${REMY_REHEARSE_PUBLISH:-}" ]; then
   # As a release runs it: no GITHUB_TOKEN in the environment (the tool finds its own token).
-  # In CI the release job hands the token over as NODE_AUTH_TOKEN (google.yml); on a machine, gh's login.
+  # In CI the release job hands the token over as NODE_AUTH_TOKEN (ci.yml); on a machine, gh's login.
   if [ -n "${CI:-}" ] && [ -n "${GITHUB_ACTIONS:-}" ]; then
     env -u GITHUB_TOKEN NODE_AUTH_TOKEN="$GITHUB_TOKEN" npm run packages -- publish --dry-run
   else
     env -u GITHUB_TOKEN npm run packages -- publish --dry-run
   fi
 fi
-summary="consumers: the blank app and a package it owns install, build and pass on this commit's platform ($version) in $(( $(date +%s) - started )) s: ${took#, }."
+summary="new-app: the blank app and a package it owns install, build and pass on this commit's platform ($version) in $(( $(date +%s) - started )) s: ${took#, }."
 echo "$summary"
 # Into the record of the remy run that started this script (timing.ts), at its depth.
 if [ -n "${REMY_RECORD:-}" ]; then printf '%*s%s\n' "$(( ${REMY_RECORD_DEPTH:-0} * 2 ))" '' "$summary" >> "$REMY_RECORD"; fi
