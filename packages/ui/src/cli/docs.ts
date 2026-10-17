@@ -6,7 +6,7 @@
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { main as observe } from './observe.ts';
 import { dispatch, type Subcommands } from './commands.ts';
@@ -54,6 +54,7 @@ async function appDocs(): Promise<{
       dev: { meta: json('content/dev/meta.json'), i18n: json('content/dev/i18n.json') },
     },
     docsConfig,
+    relative(root, docs()),
   );
   return { docsConfig, table, questions: json('content/questions.json') as Question[] };
 }

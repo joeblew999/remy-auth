@@ -22,4 +22,5 @@ export type DocsTable = {
 export declare function docsTableOf(
   files: { users: SiteFiles; dev: SiteFiles },
   docsConfig: { repository: string; branch: string },
+  folder?: string,
 ): DocsTable;

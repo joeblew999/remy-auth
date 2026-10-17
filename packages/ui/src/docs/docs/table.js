@@ -18,4 +18,8 @@ export const {
   docsObjectKey,
   docsObjectForKey,
   docsLangOfPath,
-} = docsTableOf({ users: { meta: usersMeta, i18n: usersI18n }, dev: { meta: devMeta, i18n: devI18n } }, docsConfig);
+} = docsTableOf(
+  { users: { meta: usersMeta, i18n: usersI18n }, dev: { meta: devMeta, i18n: devI18n } },
+  docsConfig,
+  __REMY_DOCS_FOLDER__,
+);

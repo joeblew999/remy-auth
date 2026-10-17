@@ -1,19 +1,20 @@
 // The two docs sites for code that runs without their Fumadocs loaders (Node scripts, the checks, the
 // sitemap), from Fumadocs' own files: each site's meta.json (its pages, in order) and i18n.json (its
 // languages). The sites themselves read everything from the loaders (lib/source.ts). Layout (the app's
-// docs/content/<users|dev>/, paths from the repository root): <page>.md or .mdx in the site's default
+// <docs>/content/<users|dev>/, paths from the repository root; <docs> is docs/ in an app that is its own repository,
+// apps/docs in a workspace such as remy-auth's): <page>.md or .mdx in the site's default
 // language, a translation beside it as <page>.<lang>.md(x). Pure: the Worker gives it the app's files
 // through Vite (table.js), the command line from the file system (cli/docs.ts: publish, questions).
 
-/** The docs table over one app's sites and config. */
-export function docsTableOf({ users, dev }, docsConfig) {
+/** The docs table over one app's sites and config; `folder`: the docs package's folder from the repository root. */
+export function docsTableOf({ users, dev }, docsConfig, folder = 'docs') {
   /** Where the source lives, for links to files that are not docs pages (docs.config.ts). */
   const { repository, branch } = docsConfig;
 
   /** The sites by name (their URL base): users' docs at /docs, developers' at /dev. */
   const docsSites = {
-    docs: { dir: 'docs/content/users', meta: users.meta, ...users.i18n },
-    dev: { dir: 'docs/content/dev', meta: dev.meta, ...dev.i18n },
+    docs: { dir: `${folder}/content/users`, meta: users.meta, ...users.i18n },
+    dev: { dir: `${folder}/content/dev`, meta: dev.meta, ...dev.i18n },
   };
 
   const isPage = (page) => !page.startsWith('[') && !page.startsWith('---');

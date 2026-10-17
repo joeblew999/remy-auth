@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cloudflare } from '@cloudflare/vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
@@ -65,6 +65,13 @@ export function docsWorkerConfig(docsConfig, srcDirectory) {
       traces: { enabled: true, persist: true, head_sampling_rate: 1 },
     },
   };
+}
+
+/** The docs package's folder from its repository's root (the nearest folder above it with a .git): docs, apps/docs. */
+function repositoryFolder(root) {
+  for (let dir = resolve(root); dir !== dirname(dir); dir = dirname(dir))
+    if (existsSync(join(dir, '.git'))) return relative(dir, resolve(root)) || '.';
+  return 'docs';
 }
 
 /**
@@ -169,7 +176,7 @@ export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
         { find: /^@remy-docs-app\//, replacement: app },
       ],
     },
-    define: { __REMY_DOCS_API__: JSON.stringify(api) },
+    define: { __REMY_DOCS_API__: JSON.stringify(api), __REMY_DOCS_FOLDER__: JSON.stringify(repositoryFolder(root)) },
     server: { host: '127.0.0.1', port: 5174, strictPort: true },
   });
 }
