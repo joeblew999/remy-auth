@@ -16,5 +16,12 @@
   },
   "dependencies": {
     "@joeblew999/remy-ui": "0.15.1"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "npm",
+      "version": "11.19.1",
+      "onFail": "download"
+    }
   }
 }
