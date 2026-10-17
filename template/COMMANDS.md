@@ -27,7 +27,6 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy guard` | register the flow's guard and the status hook with Claude (--check: is it registered) |
 | `npx remy guard-hook` | the Claude PreToolUse hook the guard registers: refuses a heavy check outside the flow, naming the step |
 | `npx remy allowed` | &lt;task&gt;: may this heavy task run now (the gate the flow sets; refused with exit 1 outside it) |
-| `npx remy check` | the check (vp run check), or one part: plans · single-copies · routes · types · commands · endings · translations · docs |
 | `npx remy plans` | the plans rule on this app's .plans/: few, short, closed |
 | `npx remy plans status` | [--json]: now.md's open items, the open plans with their status line and last commit (STALE after 14 days), the parked ones |
 | `npx remy plans check` | now.md exists, every link under .plans/ resolves, every open plan is linked from now.md; instant (the check runs it) |
@@ -71,14 +70,10 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy packages publish` | [--release vX.Y.Z] [--dry-run]: each registry accepts its token, then each workspace whose version is new on its registry, then the GitHub release from its CHANGELOG notes; the tag's CI job runs the same |
 | `npx remy packages tag` | on a clean main: the lead package's version as the tag, pushed with main, then the publish |
 | `npx remy packages release` | the release, after vp run ci: the app's release-checks script, Core Web Vitals on a preview, the tag (vp run release runs it) |
-| `npx remy test` | the browser checks by hand: one area, the smoke, against a deployment, Core Web Vitals, the report (what CI runs is vp run ci) |
-| `npx remy test only` | &lt;words&gt;: the checks whose title matches, in a few languages; the one targeted run by hand |
-| `npx remy test smoke` | tier 1: every page answers, the home page hydrates |
-| `npx remy test cwv` | [alias]: Core Web Vitals on a throwaway preview Worker |
+| `npx remy test` | the browser checks against a deployment, which Vite Plus has no tool for: the suite, the smoke, Core Web Vitals on a preview (the local build: vp run test:browser) |
 | `npx remy test remote` | [origin]: the browser checks against a deployment: production by default, Google's audits included; any other origin (a preview, staging) our checks only |
 | `npx remy test live` | [origin]: the smoke against a deployment (every deploy ends with it) |
-| `npx remy test report` | [remote]: open the last HTML report, local or remote |
-| `npx remy ci` | [check\|browser\|audits\|new-app] [--shard i/n] [--everything] [--last]: what GitHub runs, the same here: no part runs every part this change can affect, as a pull request does; --everything runs all of it in every language, nothing skipped, as main does |
+| `npx remy test cwv` | [alias]: Core Web Vitals on a throwaway preview Worker (the release runs it) |
 | `npx remy browsers` | what a browser check needs on this machine: Playwright's Chromium, and on Linux a Han font |
 | `npx remy docs` | the docs Worker, @joeblew999/remy-ui's, over this app's docs/ |
 | `npx remy docs serve` | the built docs here at DOCS_PREVIEW_PORT (4174), as their checks and AI tools see them: llms.txt, each page's .md (preview is Cloudflare's) |

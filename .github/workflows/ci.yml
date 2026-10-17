@@ -39,8 +39,9 @@ concurrency:
 
 jobs:
   # Parallel jobs that share nothing, so the answer comes back in the time of the longest. Each job is
-  # one part of `vp run ci`, the same command a person or an agent runs locally (ci.ts), and the workflow
-  # holds nothing else: what ci needs (Playwright's Chromium, the Han fonts) it installs itself.
+  # one task of `vp run ci`'s, the same command a person or an agent runs locally (the tasks name the jobs:
+  # githubJobs in packages/ui/src/tasks.js), and the workflow holds nothing else: what a browser task needs
+  # (Playwright's Chromium, the Han fonts) is a task too (browsers).
   checks:
     strategy:
       fail-fast: false
@@ -67,9 +68,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          # Two commits: on a pull request the checkout is the merge commit, and its first parent (the base
-          # branch) is what ci compares against to skip a part nothing it checks changed (unchanged.ts).
-          fetch-depth: 2
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .node-version

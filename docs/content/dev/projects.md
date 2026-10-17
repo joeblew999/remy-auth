@@ -28,7 +28,7 @@ anywhere else is simply not found; no checker of its own keeps it.
 | `package.json`'s `scripts`, `remy.config.ts`, `.node-version` | npm, `remy` | the entry: every command; the origins, ports and release package; the Node version |
 | `package.json`, `package-lock.json` | npm, `remy` (workspaces) | the app's dependencies; `workspaces` when it owns packages |
 | `wrangler.jsonc` | wrangler, the Cloudflare Vite plugin, `remy cloudflare` | the Worker's name, bindings and assets |
-| `vite.config.ts`, `tsconfig.json`, `playwright.config.ts` | Vite, `remy check types`, `remy test` | the build, types and browser checks |
+| `vite.config.ts`, `tsconfig.json`, `playwright.config.ts` | Vite Plus (the tasks, `vp check`), Playwright (`vp run test:browser`) | the build, types and browser checks |
 | `fnox.toml`, `skills-lock.json` | fnox, `remy skills` | secret names; the pinned skills |
 | `src/routes/`, `src/routeTree.gen.ts` | TanStack Start (the tree is generated) | the product's pages |
 | `src/parts.json` | the package's `remyParts()` | the shared parts the app lists (none without the file; the blank app lists `seo-routes`) |
@@ -106,7 +106,7 @@ remy-auth's own checkout, `npm link ../remy-auth/packages/ui` (and `npm unlink` 
 The platform supplies every npm package the app and the tasks need, at one version: they are
 `@joeblew999/remy-ui`'s own dependencies (the framework, the toolchain, the checks' tools), so an app's
 `package.json` names the package, its own packages and whatever its product adds. `the check's single-copies part`
-(in `remy check`) fails when a package that breaks when installed twice (React, TanStack Router and
+(`vp run check`'s `check:single-copies`) fails when a package that breaks when installed twice (React, TanStack Router and
 Query, the MDX stringifier; the package's `remy.singleCopy` list) is: remove the app's own pin. The commands call an
 app's own hooks where it has them, as scripts of its `package.json`, run if present: `generate` (code
 generated before type checking; the blank app's compiles its own catalog), `local` (the local state an

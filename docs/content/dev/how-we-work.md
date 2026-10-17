@@ -229,7 +229,7 @@ tasks; `vp run setup` installs the guard.
   reads the table and still asks whether to land has stopped using the flow (owner, 2026-10-10,
   after one did: "Is it absolutely clear when each should be run by you?").
 
-- One area that looks wrong: `npx remy test only <words>` (the browser checks whose title
+- One area that looks wrong: `vp run test:browser --grep <words>` (the browser checks whose title
   matches, en and ar, ~30 s). It is the only browser run a step does not own.
 - **The guard** (`remy guard`, a Claude Code hook on every shell command an agent runs, registered on each machine
   by `vp run setup`) refuses the heavy checks outside the flow (the release gate, the browser checks against a
@@ -251,10 +251,11 @@ tasks; `vp run setup` installs the guard.
   when the harness says it finished. Starting it in the background and then polling it in the
   foreground is the same fault (owner, 2026-10-09: "You just did it again for 2 long running
   things"). Only `vp run check` (seconds) is run and waited for.
-- **One module knows about earlier runs: `packages/ui/src/cli/unchanged.ts`.** Skipping a step because
-  nothing changed (`vp run check`'s stamps, `vp run ci`'s parts on a branch) and the state folder
-  (`node_modules/.cache/remy`) live there. A new kind of skip is added to it, never written again
-  elsewhere (owner, 2026-10-17: "make sure we don't have bits of code scattered all over the place").
+- **What runs again is Vite Plus's decision, never ours.** A task whose inputs did not change is replayed from
+  Vite Plus's cache, so `vp run check` and `vp run ci` skip what nothing touched, here and (with the cache kept
+  between runs) on GitHub. No code of ours decides that something can be skipped (owner, 2026-10-17: "make sure we
+  don't have bits of code scattered all over the place"); a task that reruns when it should not has an input to
+  declare in its `cache` settings, which `vp run --last-details` names.
 - **Anything longer than a few seconds runs in the background, always.** `vp run ci` or any part of it,
   a build, a browser run, an install. A command running in the foreground is cancelled when the owner
   sends a message (the Claude app stops it), so the work silently never happens and the owner is blamed
@@ -278,7 +279,7 @@ tasks; `vp run setup` installs the guard.
   `vp run ci <part>`, the same command GitHub ran, since the workflow holds no
   logic of its own (`remy verify tooling` checks every script a workflow names exists). An agent reads the
   run's own log (`gh run view <id> --log-failed`) and runs the one area
-  (`npx remy test only <words>`). Report what was tested and what was not; never call
+  (`vp run test:browser --grep <words>`). Report what was tested and what was not; never call
   untested work verified.
 - **A landing that fails after the push still finishes what it can, and says where it stopped.**
   The pull request is merged before staging; when staging's deploy or its live smoke fails, `vp run land`

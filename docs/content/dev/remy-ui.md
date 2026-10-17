@@ -58,7 +58,7 @@ prerendered example):
   `themeChecks` fail without it.
 - **A route for every path in `appPaths` and `sitePaths`**, each a few lines over the shared page (the
   showcase's Clock spreads `clockRouteOptions` from `@joeblew999/remy-showcase/clock-route`).
-- **`tests/smoke.spec.ts`**, one `smokeChecks(...)` call: `npx remy test smoke` and the live smoke after
+- **`tests/smoke.spec.ts`**, one `smokeChecks(...)` call: `vp run test:browser --grep smoke` and the live smoke after
   every deploy run it, and fail with "No tests found" without it.
 - **`.plans/now.md`**, the one ordered list of open work (`remy plans check`, in the check).
 - **Installs and upgrades through the package's commands**, never by hand: `vp run setup` (install,

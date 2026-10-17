@@ -51,35 +51,24 @@ export const commands: Subcommands = {
 export const main = dispatch('flow', commands);
 
 /**
- * The heavy commands no step runs by default, and why: GitHub runs them after every push (the suite,
- * Google's audits, the consumers), the release runs them (the gate), or they cost minutes for an
- * answer the check already gave (remote, a bare playwright run). The gate (allowed.ts) knows
- * them by these names; the hook refuses each outside its step and names the step instead. Running one by hand stays possible: REMY_FLOW=hand in front, at a terminal, is a decision.
+ * What the flow's word must come before (owner, 2026-10-11: the gate is only on what costs money or ships), and why:
+ * translation spends Claude's tokens (vp run land translates, in the change), Core Web Vitals make a throwaway Worker
+ * on Cloudflare (vp run release runs them). Everything else is Vite Plus's tasks, which its cache makes cheap to rerun,
+ * so nothing refuses them. The gate (allowed.ts) knows these by name; the hook refuses each outside its step and names
+ * the step instead. Running one by hand stays possible: REMY_FLOW=hand in front, at a terminal, is a decision.
  */
 export const heavy: Record<string, string> = {
-  verify: 'the release gate: vp run release runs it; GitHub runs its parts on every pull request',
-  'test:browser': 'the browser checks: vp run ci runs them, and vp run land and GitHub with it',
-  'test:remote': 'the suite against a deployment: GitHub runs the suite; every deploy ends with the live smoke',
-  'test:audits': "Google's audits: vp run ci runs them, and vp run land and GitHub with it",
-  'test:cwv': 'Core Web Vitals on a preview: on purpose only, before a release',
-  'playwright test': 'the browser suite by hand: vp run check runs the check; npx remy test only <words> runs one area',
   'i18n:translate': 'translation: vp run land runs it in the change, before its commit',
   'i18n translate': 'translation: vp run land runs it in the change, before its commit',
-  'remy test':
-    'the browser checks: vp run ci runs them, and vp run land and GitHub with it; one area: npx remy test only <words>',
-  'npm test':
-    'the browser checks: vp run ci runs them, and vp run land and GitHub with it; one area: npx remy test only <words>',
-  'test:consumers': 'the consumer fixture: GitHub runs it after every push; remy test consumers is its gate',
+  'test:cwv': 'Core Web Vitals on a throwaway Cloudflare Worker: vp run release runs them',
   // Serving by hand with a raw tool call (an agent did, 2026-10-17): every way to serve has its command.
   'wrangler dev':
-    'serving by hand: npx remy docs serve (the built docs, with llms.txt), vp run preview (the built app), vp run dev (hot reload); when no command does what you need, add one',
+    'serving by hand: vp run preview (the built app), vp run dev (hot reload), npx remy docs serve (the built docs, with llms.txt); when no command does what you need, add one',
 };
 
-/** Where a key's spelling needs more than its words: the suite is refused, its light forms (only, report, live, smoke) are not. */
+/** Where a key's spelling needs more than its words. */
 const spelled: Record<string, RegExp> = {
-  'remy test': /\bremy(?:\.[jt]s)?\s+test(?!\s+(?:only|report|live|smoke)\b)/,
-  'npm test': /\bnpm\s+(?:run\s+)?test\b(?!:)(?!\s+--\s+(?:only|report|live|smoke)\b)/,
-  'test:consumers': /\bnpm\s+run\s+test:consumers\b|(?:^|[;&|(]\s*)(?:bash\s+|sh\s+|\.\/)fixtures\/consumer\/run\.sh\b/,
+  'test:cwv': /\bremy(?:\.[jt]s)?\s+test\s+cwv\b/,
 };
 
 const git = (...args: string[]) =>

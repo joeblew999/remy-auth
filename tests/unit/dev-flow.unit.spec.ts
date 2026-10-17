@@ -1,13 +1,12 @@
 import { test, expect } from 'vite-plus/test';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 
-// The flow's gate (allowed.ts) refuses a heavy command that nobody said they were running. The pages
-// never give one bare: in a fenced shell block, the suite, the release gate or the translator is
-// written with REMY_FLOW=hand in front (a person's decision at a terminal) or not as a command at all.
-// On 2026-10-10 eight lines on six pages did, and three installation tasks ended in the refusal.
+// The flow's gate (allowed.ts) refuses what costs money or ships when nobody said they were running it. The pages
+// never give one bare: in a fenced shell block, the translator or Core Web Vitals is written with REMY_FLOW=hand in
+// front (a person's decision at a terminal) or not as a command at all. On 2026-10-10 eight lines on six pages gave
+// a gated command bare, and three installation tasks ended in the refusal.
 
-const heavy =
-  /^(?:[A-Z_]+=\S+\s+)*(?:npm\s+run\s+test\s+--\s+(?:every|quick|google|cwv|remote|consumers)\b|npm\s+test\b|npx\s+remy\s+verify(?!\s+(?:setup|tooling|doctor)\b)|npx\s+remy\s+i18n\s+translate\b)/;
+const heavy = /^(?:[A-Z_]+=\S+\s+)*(?:npx\s+remy\s+i18n\s+translate\b|npx\s+remy\s+test\s+cwv\b)/;
 const walk = (dir: string): string[] =>
   readdirSync(dir).flatMap((name) => {
     const path = `${dir}/${name}`;

@@ -242,24 +242,17 @@ runs them on server-rendered ones.
 
 ## Evidence and limits
 
-`vp run ci` runs four parts, the same four GitHub runs as jobs: `check` (`vp run check`'s check, whole; under `vp run ci` it reports what `vp run check` would fix, such as a stale `COMMANDS.md`, and writes nothing), `browser`
-(every check of ours in a browser), `audits` (Google's Lighthouse) and `new-app` (a brand-new app on this commit's
-package); Core Web Vitals on a throwaway Cloudflare Worker is the release's (`npx remy test cwv`). There are no
-levels to choose: what a run includes is what its change can affect. A check of something that depends on the language (fonts and
-scripts, hyphenation, direction, formats, the catalogs) runs in every checked language (`checkedLocales`); a check
-of behaviour that does not (the security policy, noindex, search params, the demo form, error pages, API answers)
-runs in the base language and the first right-to-left one (`behaviourLocales`; `BEHAVIOUR_LOCALES` overrides).
-On a pull request each part first asks what changed and is skipped, saying so, when nothing it checks did
-(`packages/ui/src/cli/unchanged.ts`, with its unit checks): plans, the docs content and Markdown outside the
-packages run none; the blank app and the fixture run only `new-app`. Pushes to `main` and tags run
-everything. The browser part also asks whether what changed can differ by language: the catalogs and language settings,
-fonts and any CSS, code that formats by locale (named for it, or calling `Intl`, `toLocale…` or a text direction),
-the browser checks themselves, the lockfile and the Node version. When nothing can, it runs in English and Arabic
-only and says so: on 2026-10-17 that was 37 of the 49 recent commits on `main` that needed the browser part, and a run in
-1 min 39 s instead of 2 min 49 s. The tooling and the unit checks never count. Every language still runs on every
-push to `main`, which `vp run promote` waits for, so a page that breaks in one language alone is caught there at the
-latest. `vp run ci` locally decides exactly as a pull request does (`vp run ci --everything` runs all of it, as main does; `CHECK_LOCALES` set
-by hand wins). What the checks cover is the checks themselves: `tests/` and the package's
+`vp run ci` runs the check, then the browser checks (`test:browser`), then Google's Lighthouse audits
+(`test:audits`) and, in remy-auth, a brand-new app on this commit's package (`new-app`), one after the other: the
+audits measure speed, so they never run beside another browser run. GitHub runs the same tasks as parallel jobs (the
+browser checks in three slices, `vp run test:browser --shard 1/3`). Core Web Vitals on a throwaway Cloudflare Worker
+is the release's (`npx remy test cwv`). There are no levels to choose and no part decides to skip itself: every
+language runs, and what nothing touched comes from Vite Plus's cache instead of running again. A check of something
+that depends on the language (fonts and scripts, hyphenation, direction, formats, the catalogs) runs in every checked
+language (`checkedLocales`); a check of behaviour that does not (the security policy, noindex, search params, the demo
+form, error pages, API answers) runs in the base language and the first right-to-left one (`behaviourLocales`;
+`BEHAVIOUR_LOCALES` overrides). By hand, `CHECK_LOCALES=quick vp run test:browser` runs English and Arabic only.
+What the checks cover is the checks themselves: `tests/` and the package's
 `@joeblew999/remy-ui/checks` (each check's title says what it proves); the flow's steps that run them are in
 [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). In short: every page in every
 language without JavaScript (language, direction, metadata, links), catalogs and plurals, the formats

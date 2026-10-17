@@ -1,7 +1,7 @@
 // The plans rule as code (docs/content/dev/how-we-work.md, "Plans: few, short, closed"): `remy plans
 // status|check|close|park|open`, on the app's .plans/ from its root: .plans/now.md is the one ordered
 // list, .plans/*.md the few open plan files, .plans/done/ and .plans/parked/ the closed and parked
-// ones, .plans/stability-log.md optional. `check` is part of the check (check.ts). Node built-ins and
+// ones, .plans/stability-log.md optional. `check` is part of the check (remy-check plans, the check:plans task). Node built-ins and
 // git only; no network.
 import { execFileSync } from 'node:child_process';
 import { dispatch, type Subcommands } from './commands.ts';

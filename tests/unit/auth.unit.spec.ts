@@ -14,7 +14,7 @@ import { seededPeople } from '../../src/auth/seed';
 
 // Sign-in's rules that are plain functions: the environment table, who gets the published code, the
 // mailer, which account fields a person may write. No Worker, no build, no browser: they run in a
-// second or two (remy check unit), so they run on every check. What needs the Worker is
+// second or two (vp test), so they run on every check. What needs the Worker is
 // in tests/auth.spec.ts.
 
 test('one table says what each environment permits; anything undeclared is production, where no convenience exists', () => {

@@ -4,7 +4,7 @@ import { codeMail } from '../../src/auth/code-mail';
 import { product } from '../../src/product';
 
 // The product's name where no page shows it: the catalog and the sign-in email. Plain functions, so
-// they run without a build (remy check unit). What the pages show is productNameChecks'.
+// they run without a build (vp test). What the pages show is productNameChecks'.
 
 test("no message in the platform's catalog names a product: a message that says the name takes it as {product}", () => {
   const catalog: Record<string, unknown> = JSON.parse(readFileSync('packages/ui/messages/en.json', 'utf8'));

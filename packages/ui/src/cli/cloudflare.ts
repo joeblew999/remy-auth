@@ -11,7 +11,6 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { publish } from './docs.ts';
-import { prepare } from './dev.ts';
 import { dispatch, type Subcommands } from './commands.ts';
 
 // A declaration, not a constant: tsc narrows after a call only to a function declared with its never type.
@@ -215,7 +214,6 @@ export async function deploy(environment?: 'staging'): Promise<void> {
   const env: Record<string, string> = environment ? { CLOUDFLARE_ENV: environment, DEPLOY_ORIGIN: origin } : {};
   Object.assign(process.env, env);
   await provisioned(environment);
-  prepare();
   tool('vp', ['build', '.'], { env: { ...env, PUBLIC_ORIGIN: origin } });
   await provisioned(environment);
   const scratch = mkdtempSync(join(tmpdir(), 'remy-deploy-'));
@@ -404,7 +402,6 @@ export async function preview(alias?: string, keep = false): Promise<string> {
     );
   };
   try {
-    prepare();
     tool('vp', ['build', '.'], { env: { PUBLIC_ORIGIN: origin } });
     await provisioned();
     const scratch = mkdtempSync(join(tmpdir(), 'remy-preview-'));

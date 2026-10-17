@@ -125,9 +125,8 @@ export async function buildSkill(): Promise<void> {
     console.log('skills build: only remy-auth makes the remy skill (from its developer docs).');
     return;
   }
-  const { parts } = await import('./check.ts');
-  await parts.docs!();
-  const { serveBuilt } = await import('./docs.ts');
+  const { build, serveBuilt } = await import('./docs.ts');
+  build();
   const { origin: base, stop } = await serveBuilt();
   const text = async (path: string) => {
     const response = await fetch(base + path);
