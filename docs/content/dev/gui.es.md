@@ -1,7 +1,7 @@
 ---
 title: "Ejecutar, previsualizar y probar la app"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "573a07f6 5d5de609 0bf2533c 2a9d9497 917db7e6 222ea1f3 655a09ab 71e7a9a3 1c401884"
+translatedFrom: "573a07f6 5d5de609 0bf2533c 2a9d9497 917db7e6 222ea1f3 655a09ab 71e7a9a3 73202548"
 ---
 
 ```sh
@@ -240,7 +240,7 @@ las ejecuta sobre páginas renderizadas en servidor.
 
 ## Evidencia y límites [#evidence-and-limits]
 
-`npm run ci` ejecuta cuatro partes, las mismas cuatro que GitHub ejecuta como jobs: `check` (tipos, unitarias, traducciones), `browser`
+`npm run ci` ejecuta cuatro partes, las mismas cuatro que GitHub ejecuta como jobs: `check` (la comprobación de `dev:change`, completa; con `npm run ci` informa de lo que `dev:change` corregiría, como un `COMMANDS.md` desactualizado, y no escribe nada), `browser`
 (todas nuestras comprobaciones en un navegador), `audits` (Lighthouse de Google) y `new-app` (una app nueva sobre el
 paquete de este commit); los Core Web Vitals en un Worker de Cloudflare desechable son cosa de la release (`npm run test -- cwv`). No hay
 niveles que elegir: lo que incluye una ejecución es lo que su cambio puede afectar. Una comprobación de algo que depende del idioma (fuentes y
