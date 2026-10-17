@@ -36,7 +36,7 @@ Development uses the same Worker source and Cloudflare runtime with hot reload.
 | `npx remy cloudflare deploy` | Build, then upload production to the authenticated Cloudflare account; `dev:promote` runs it |
 | `npx remy cloudflare staging` | The same for the staging environment: its own Worker (`origins.staging`) and resources; `dev:land` runs it |
 | `npx remy cloudflare preview` | Deploy this commit as a throwaway Worker, run level 1 against it, delete it |
-| A pull request or any branch other than `main` | Cloudflare's Workers Builds runs `npm run build` and `npx wrangler preview`: a throwaway Cloudflare Preview at `https://<branch>-remy-auth.gedw99.workers.dev`, named in a comment on the pull request. Previews have none of production's bindings (the `previews` block in `wrangler.jsonc`). A push to `main` runs `npx wrangler versions upload`: a new version, production unchanged |
+| A pull request or any branch other than `main` (from Claude's cloud too: [working from Claude's cloud](./agents.md#working-from-claudes-cloud)) | Cloudflare's Workers Builds runs `npm run build` and `npx wrangler preview`: a throwaway Cloudflare Preview at `https://<branch>-remy-auth.gedw99.workers.dev`, named in a comment on the pull request. Previews have none of production's bindings (the `previews` block in `wrangler.jsonc`). A push to `main` runs `npx wrangler versions upload`: a new version, production unchanged |
 | `npm run test -- remote [origin]` | Same tests against a deployment; no local server or deployment |
 | `npm run test -- report [remote]` | Open the last local or remote run's HTML report, including Lighthouse reports |
 
