@@ -1,7 +1,7 @@
 ---
 title: "Proyectos: estructura, apps nuevas y publicación"
 description: "Qué guarda todo proyecto de Remy en el mismo lugar, cómo empezar una app nueva, la publicación de paquetes, las traducciones, Cloudflare y los planes. Todos los comandos están en Comandos."
-translatedFrom: "e378d315 dddf0a4c a395e86d 5819460b 3df9ec8f 19dcbc6c 39363a65 ce3bc73a"
+translatedFrom: "e378d315 dddf0a4c a395e86d 5819460b c01eff07 19dcbc6c 39363a65 ce3bc73a"
 ---
 
 La herramienta es `remy`, el bin de `@joeblew999/remy-ui` (`packages/ui/src/cli`, un módulo de TypeScript por
@@ -145,8 +145,8 @@ release. Una app construida sobre el paquete ejecuta un conjunto de contrato (su
 separadas, sus propias funcionalidades funcionan) más el nivel de Google en sus propias páginas de sitio, no toda la suite del paquete
 de nuevo. Mantén las comprobaciones baratas en lugar de quitarlas (el reloj de Playwright en lugar de esperas
 reales, una página de navegador por comprobación, workers en paralelo). Las comprobaciones recorren `checkedLocales` de
-`@joeblew999/remy-ui/checks`, que respeta `CHECK_LOCALES` (una lista separada por comas, o `quick`: el idioma base
-y el primero de derecha a izquierda, que las propias comprobaciones determinan, así que ningún comando nombra idiomas). Cada paso indica cuánto tardó.
+`@joeblew999/remy-ui/checks`: un idioma por cada forma en que la app dibuja el texto por defecto, todos los idiomas con
+`CHECK_LOCALES=all` (el release), `quick` para el idioma base y el primero de derecha a izquierda, o una lista separada por comas; las propias comprobaciones determinan los idiomas, así que ningún comando los nombra ([cuáles y por qué](./run-and-test.md)). Cada paso indica cuánto tardó.
 
 ### Traducciones [#translations]
 

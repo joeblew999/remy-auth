@@ -1,7 +1,7 @@
 ---
 title: "Ejecutar, previsualizar y probar la app"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "633d518a 397ebf73 5cbb94fc 2bff6ee3 55966c34 7066b78a 3ef97f39 fdbfb49e dbc3fd29 3142b7b0"
+translatedFrom: "633d518a 397ebf73 5cbb94fc 2bff6ee3 55966c34 7066b78a 3ef97f39 fdbfb49e dbc3fd29 9c983078"
 ---
 
 :::note
@@ -261,12 +261,17 @@ las ejecuta sobre páginas renderizadas en servidor.
 (`test:audits`) y, en remy-auth, una app nueva sobre el paquete de este commit (`new-app`), una tras otra: las
 auditorías miden la velocidad, así que nunca se ejecutan junto a otra ejecución de navegador. GitHub ejecuta las mismas tareas como jobs en paralelo (las
 comprobaciones de navegador en tres fragmentos, `vp run test:browser --shard 1/3`). Los Core Web Vitals en un Worker de Cloudflare desechable
-son cosa de la release (`npx remy test cwv`). No hay niveles que elegir y ninguna parte decide omitirse: se ejecuta
-cada idioma, y lo que nada ha tocado sale de la caché de Vite Plus en lugar de ejecutarse de nuevo. Una comprobación de algo
-que depende del idioma (fuentes y escrituras, separación silábica, dirección, formatos, los catálogos) se ejecuta en cada idioma
-comprobado (`checkedLocales`); una comprobación de un comportamiento que no depende de él (la política de seguridad, noindex, los parámetros de búsqueda, el formulario
-de demo, las páginas de error, las respuestas de la API) se ejecuta en el idioma base y en el primero de derecha a izquierda (`behaviourLocales`;
-`BEHAVIOUR_LOCALES` lo sustituye). A mano, `CHECK_LOCALES=quick vp run test:browser` ejecuta solo inglés y árabe.
+son cosa de la release (`npx remy test cwv`). No hay niveles que elegir y ninguna parte decide omitirse, y lo que nada ha tocado sale de la caché de Vite Plus en lugar de ejecutarse de nuevo. Qué se prueba se decide una sola vez, según lo que una comprobación
+puede demostrar (propietario, 2026-10-17: "you really need to decide what is tested and what isn't"):
+
+- Una comprobación de cómo se dibuja el texto (fuentes y escrituras, separación silábica, dirección, ajuste a un teléfono, formatos) se ejecuta en
+  un idioma por cada forma en que la app dibuja texto (`checkedLocales`): cada idioma al que fonts.css da su propia pila de fuentes, cada idioma han, y el inglés para la pila predeterminada compartida; hoy 9 de 13, calculados a partir de fonts.css. El español, el polaco, el turco y el alemán dibujan exactamente igual que el inglés.
+- Una comprobación de un comportamiento que no depende del idioma (la política de seguridad, noindex, los parámetros de búsqueda, el formulario de demo, las páginas de error, las respuestas de la API) se ejecuta en inglés y en el primer idioma de derecha a izquierda (`behaviourLocales`).
+- Lo que sí difiere en cada idioma se comprueba en todos: los catálogos y sus plurales (las comprobaciones unitarias),
+  el sitemap, hreflang y el selector de idioma, y las muestras de mayúsculas/minúsculas y de separación silábica.
+- Una release ejecuta todas las comprobaciones en todos los idiomas (`CHECK_LOCALES=all`, su script lo establece). A mano, `CHECK_LOCALES`
+  acepta `all`, `quick` (inglés y árabe) o una lista separada por comas; `BEHAVIOUR_LOCALES` sustituye la segunda regla.
+
 Lo que cubren las comprobaciones son las propias comprobaciones: `tests/` y el
 `@joeblew999/remy-ui/checks` del paquete (el título de cada comprobación dice qué demuestra); los pasos del flujo que las ejecutan están en
 [cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). En resumen: cada página en cada
