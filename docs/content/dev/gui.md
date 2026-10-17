@@ -233,7 +233,7 @@ runs them on server-rendered ones.
 
 ## Evidence and limits
 
-`npm run ci` runs four parts, the same four GitHub runs as jobs: `check` (types, unit, translations), `browser`
+`npm run ci` runs four parts, the same four GitHub runs as jobs: `check` (`dev:change`'s check, whole; under `npm run ci` it reports what `dev:change` would fix, such as a stale `COMMANDS.md`, and writes nothing), `browser`
 (every check of ours in a browser), `audits` (Google's Lighthouse) and `new-app` (a brand-new app on this commit's
 package); Core Web Vitals on a throwaway Cloudflare Worker is the release's (`npm run test -- cwv`). There are no
 levels to choose: what a run includes is what its change can affect. A check of something that depends on the language (fonts and

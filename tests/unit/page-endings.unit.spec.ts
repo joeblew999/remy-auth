@@ -25,3 +25,10 @@ test('a page with the wrong ending is renamed with its translations, and the lin
   expect(readFileSync(join(dir, 'users', 'index.mdx'), 'utf8')).toBe('<Card href="./app.md">App</Card> [tabs](./tabs.mdx)\n');
   expect(rightEndings([dir])).toEqual([]);
 });
+
+test('under ci the wrong ending is reported, nothing renamed', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'endings-verify-'));
+  writeFileSync(join(dir, 'plain.mdx'), '# Plain\n');
+  expect(rightEndings([dir], true)).toEqual([`${join(dir, 'plain.mdx')} should be plain.md`]);
+  expect(readdirSync(dir)).toEqual(['plain.mdx']);
+});

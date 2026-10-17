@@ -53,9 +53,10 @@ export function needsMdx(page: string): boolean {
 
 /**
  * Gives every English page under `dirs` the ending its content needs, renaming its translations with it and
- * fixing the links to it in the same folder; returns what was renamed ("old -> new").
+ * fixing the links to it in the same folder; returns what was renamed ("old -> new"). With `verify` it renames nothing
+ * and returns what would be (npm run ci fails on it: CI says what dev:change would have fixed).
  */
-export function rightEndings(dirs: string[]): string[] {
+export function rightEndings(dirs: string[], verify = false): string[] {
   const renamed: string[] = [];
   const translation = /\.[a-z]{2,3}(?:-[A-Za-z]{2,4})?\.mdx?$/;
   for (const dir of dirs.filter(dir => existsSync(dir))) {
@@ -64,6 +65,7 @@ export function rightEndings(dirs: string[]): string[] {
       for (const name of files.filter(name => !translation.test(name))) {
         const want = needsMdx(readFileSync(join(folder, name), 'utf8')) ? '.mdx' : '.md';
         if (name.endsWith(want)) continue;
+        if (verify) { renamed.push(`${join(folder, name)} should be ${name.replace(/\.mdx?$/, want)}`); continue; }
         const base = name.replace(/\.mdx?$/, '');
         for (const file of files.filter(file => file === name || (translation.test(file) && file.startsWith(`${base}.`) && /^\.[a-z]{2,3}(?:-[A-Za-z]{2,4})?\.mdx?$/.test(file.slice(base.length))))) {
           const next = file.replace(/\.mdx?$/, want);

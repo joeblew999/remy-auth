@@ -14,8 +14,8 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { lap, lastRecord } from './timing.ts';
 
-// The four parts, one name each everywhere (this list, GitHub's job names, the logs, COMMANDS.md): `check` (types,
-// unit, translations), `browser` (the browser checks on a local build), `audits` (Google's Lighthouse) and `new-app`
+// The four parts, one name each everywhere (this list, GitHub's job names, the logs, COMMANDS.md): `check` (dev:change's
+// check, whole, verifying instead of fixing), `browser` (the browser checks on a local build), `audits` (Google's Lighthouse) and `new-app`
 // (a brand-new app on this commit's package). What a run includes is decided by what its change can affect
 // (unchanged.ts), so there are no levels to choose (owner, 2026-10-17: levels were a second vocabulary for these).
 type Part = 'check' | 'browser' | 'audits' | 'new-app';
@@ -100,9 +100,8 @@ const npm = (...args: string[]) => run('npm', ['run', ...args]);
 /** Each part runs here, in this process; REMY_FLOW says the run is CI's, so the gate lets it pass. */
 async function runPart(part: Part, shardOf?: string): Promise<void> {
   process.env.REMY_FLOW = process.env.REMY_FLOW ?? 'ci';
-  // Translations too: offline and without git history, so GitHub's shallow checkout gives the same answer as a
-  // Mac; a warning, as in dev:change (the release is strict).
-  if (part === 'check') { for (const name of ['types', 'unit', 'translations']) npm('check', '--', name); return; }
+  // The check is dev:change's, whole (owner, 2026-10-17: one meaning of "check"); under ci it verifies instead of fixing.
+  if (part === 'check') { npm('check'); return; }
   if (part === 'browser' && shardOf) process.env.REMY_SHARD = shardOf;
   const test = await import('./test.ts');
   if (part === 'browser') test.every();

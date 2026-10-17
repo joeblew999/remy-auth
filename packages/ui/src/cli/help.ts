@@ -60,13 +60,17 @@ export async function commandsMarkdown(dir = '.'): Promise<string> {
  */
 export const commandsDirs = (): string[] => ['.', 'template'].filter(dir => dir === '.' || existsSync(join(dir, 'package.json')));
 
-/** Writes each folder's COMMANDS.md when it differs; true when any changed. */
-export async function writeCommands(): Promise<boolean> {
+/**
+ * Writes each folder's COMMANDS.md when it differs; true when any changed. With `verify` (npm run ci, here and on
+ * GitHub) it writes nothing and fails on a stale one instead: CI says what dev:change would have fixed.
+ */
+export async function writeCommands(verify = false): Promise<boolean> {
   let changed = false;
   for (const dir of commandsDirs()) {
     const file = join(dir, commandsFile);
     const text = await commandsMarkdown(dir);
     if (existsSync(file) && readFileSync(file, 'utf8') === text) { console.log(`${file}: current.`); continue; }
+    if (verify) { console.error(`${file} is not what the command line says: npm run dev:change rewrites it.`); process.exit(1); }
     writeFileSync(file, text);
     console.log(`${file}: written from the command line.`);
     changed = true;
