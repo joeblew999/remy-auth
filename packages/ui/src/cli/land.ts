@@ -1,21 +1,20 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import { ended, span, type Landing } from './feedback.ts';
-import { lap, laps, lastRecord } from './timing.ts';
-import { check } from './check.ts';
+import { existsSync, readFileSync, rmSync } from 'node:fs';
+import { lap, laps } from './timing.ts';
+import { preparedFile } from './prepare.ts';
 import { describeRun, latestRun, where } from './flow.ts';
 import { remyCommand } from './config.ts';
-import { translationGaps } from './i18n.ts';
 import { deleteBranch, merge, openPull, pullFor, repo, waitForChecks } from './github.ts';
 
 export async function main(args: string[]): Promise<void> {
-  // The land step, through a pull request, never straight to main (owner's rule: work goes through a branch
-  // and a pull request, and the pull request merges when green). In order, each part once: main merged in;
-  // the translations this change made stale or missing (only the sections and keys whose English changed);
-  // the check; what a pull request runs, here first (`vp run ci`, so GitHub only confirms it); one commit;
-  // push the branch; open its pull request (or update the open one); wait for GitHub's checks; merge it;
-  // deploy staging; bring this checkout to the new main. Run from main, it first moves the work to a branch
-  // of its own. Production is vp run promote. It says what each part took. (Until 2026-10-17 it fast-forwarded
-  // main and pushed it, and translated on main after that as a second push.)
+  // The last part of `vp run land` (its script: remy flow prepare, then vp run ci, then this), through a pull request,
+  // never straight to main (owner's rule: work goes through a branch and a pull request, and the pull request merges
+  // when green). prepare brought main in and translated; Vite Plus's ci passed here. Then, each part once: one commit;
+  // push the branch; open its pull request (or update the open one); wait for GitHub's checks (they confirm what
+  // passed here); merge it; bring this checkout to the new main; deploy staging. Production is vp run promote. It
+  // says what each part took.
+  process.env.REMY_FLOW = 'land';
   const message = args.join(' ').trim();
   if (!message) {
     console.error('land: say what changed: vp run land "<message>"');
@@ -31,73 +30,13 @@ export async function main(args: string[]): Promise<void> {
     process.exit(1);
   }
   const slug = repo() ?? fail('origin is not a GitHub repository, so there is nowhere to open the pull request.');
-
+  const prepared = existsSync(preparedFile())
+    ? (JSON.parse(readFileSync(preparedFile(), 'utf8')) as { translation: Landing['translation']; fromMain: boolean })
+    : fail('nothing was prepared: land through vp run land "<what changed>", which prepares, checks, then lands.');
+  rmSync(preparedFile());
+  const { translation, fromMain } = prepared;
   const here = where();
-  const fromMain = here.onMain;
-  // Landing on a red main is allowed (the fix is a landing too) and never silent.
-  const mainRun = latestRun();
-  if (mainRun && mainRun.status === 'completed' && mainRun.conclusion !== 'success')
-    console.log(
-      `land: main is RED, ${describeRun(mainRun)}. Landing on it anyway; if this is not the fix, somebody's is owed.`,
-    );
-  execFileSync('git', ['fetch', '-q', 'origin', 'main']);
-  // From main: the work moves to a branch of its own (uncommitted changes and commits not yet on origin come along).
-  if (here.onMain) {
-    if (here.clean && read('rev-list', '--count', 'origin/main..HEAD') === '0')
-      fail('nothing to land: main is clean and on origin/main.');
-    const branch = `land/${
-      message
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '')
-        .slice(0, 40) || 'change'
-    }-${Date.now().toString(36)}`;
-    git('switch', '-q', '-c', branch);
-    console.log(`land: the work moves from main to ${branch}, which lands through a pull request.`);
-    Object.assign(here, { branch, onMain: false });
-  }
-  // Among many agents main moves under every branch. What lands is the branch with main in it, so main comes
-  // in first (a merge; a conflict stops here with the files named), and everything after runs on that.
-  if (read('rev-list', '--count', `${here.branch}..origin/main`) !== '0') {
-    if (!here.clean) {
-      git('add', '-A');
-      git('commit', '-q', '-m', message);
-    }
-    const merged = spawnSync('git', ['merge', '-q', 'origin/main', '-m', `Merge main into ${here.branch}`], {
-      stdio: 'inherit',
-    });
-    if (merged.status !== 0)
-      fail(`main does not merge cleanly into ${here.branch}; resolve the files git names, commit, then land again`);
-  }
-  // Translation, in the change: only when something is stale or missing. A failed translation does not stop
-  // the landing (the English is the source); it is still owed, the check warns, and the last line says so.
-  let translation: Landing['translation'] = 'up to date';
-  if ((await translationGaps()).length === 0) console.log('land: translations are up to date.');
-  else {
-    const [remy, ...remyArgs] = remyCommand();
-    translation =
-      spawnSync(remy!, [...remyArgs, 'i18n', 'translate'], {
-        stdio: 'inherit',
-        env: { ...process.env, REMY_FLOW: 'land' },
-      }).status === 0
-        ? 'done'
-        : 'failed';
-    lap(translation === 'done' ? 'translation' : 'translation, failed');
-  }
-  await check();
-  lap('the check');
-  // What the pull request's checks run, here first: every part of vp run ci these changes can affect, as GitHub will (the
-  // check above already covered types and unit; each part skips itself when nothing it checks changed). GitHub then
-  // confirms instead of finding out.
-  const [remy, ...remyArgs] = remyCommand();
-  if (
-    spawnSync(remy!, [...remyArgs, 'ci', 'browser', 'audits', 'new-app'], {
-      stdio: 'inherit',
-      env: { ...process.env, REMY_FLOW: 'ci' },
-    }).status !== 0
-  )
-    fail('a part of vp run ci failed here (above), so nothing was pushed. Fix it, then land again.');
-  lap('the parts the change can affect, as its pull request runs them');
+  if (here.onMain) fail('this is main; vp run land moves the work to a branch of its own first.');
   if (read('status', '--porcelain') !== '') {
     git('add', '-A');
     git('commit', '-q', '-m', message);
@@ -108,15 +47,14 @@ export async function main(args: string[]): Promise<void> {
   // One push of the branch (the pre-push hook skips: REMY_FLOW is set, and the browser checks just passed), then its pull request.
   git('push', '-q', '-u', 'origin', `HEAD:refs/heads/${here.branch}`);
   const head = read('rev-parse', 'HEAD');
-  // What the browser checks took here, from this landing's own record (timing.ts: the ci run above wrote into it).
-  const ran =
-    lastRecord('flow land')
-      .split('\n')
-      .find((line) => /ci browser: passed/.test(line))
-      ?.trim() ?? 'the browser checks passed';
   const pull =
     pullFor(slug, here.branch) ??
-    openPull(slug, here.branch, title, `${body ? `${body}\n\n` : ''}Landed with \`vp run land\`. Here first: ${ran}`);
+    openPull(
+      slug,
+      here.branch,
+      title,
+      `${body ? `${body}\n\n` : ''}Landed with \`vp run land\`: \`vp run ci\` passed here first.`,
+    );
   lap('commit, push and pull request');
   console.log(`land: ${pull.html_url} is open; GitHub checks ${head.slice(0, 7)} (what passed here, confirmed).`);
 
@@ -164,6 +102,7 @@ export async function main(args: string[]): Promise<void> {
     !/not authenticated/i.test(
       spawnSync('npx', ['wrangler', 'whoami'], { encoding: 'utf8', timeout: 30_000 }).stdout ?? '',
     );
+  const [remy, ...remyArgs] = remyCommand();
   const staging: Landing['staging'] = !process.env.STAGING_ORIGIN
     ? 'none'
     : !signedIn

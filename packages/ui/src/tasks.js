@@ -155,6 +155,8 @@ export const style = {
   // Vite Plus's type check runs inside its lint (typeAware and typeCheck), so `vp check` is format, lint and types.
   // template/ and fixtures/ are other apps' source in remy-auth, checked as installed apps by the new-app test.
   lint: { options: { typeAware: true, typeCheck: true }, ignorePatterns: ['template/**', 'fixtures/**'] },
+  // vp staged (the pre-commit hook, .vite-hooks/pre-commit): the staged files formatted and their lint fixes applied.
+  staged: { '*': 'vp check --fix' },
   // vp test: the plain-function checks only; tests/*.spec.ts are the browser checks, Playwright's.
   test: { include: ['tests/**/*.unit.spec.ts'], passWithNoTests: true },
 };

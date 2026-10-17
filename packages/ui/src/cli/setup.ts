@@ -1,10 +1,10 @@
-// `remy setup` (vp run setup): install dependencies, the pinned skills, the agents' rules block, MCP
-// registration and the flow's guard, then the installation's checks and the check. About two minutes,
+// `remy setup` (vp run setup, whose script runs vp run check after it): install dependencies (their install runs
+// vp config, Vite Plus's Git hooks), the pinned skills, the agents' rules block, MCP registration and the flow's
+// guard, then the installation's checks. About two minutes,
 // no browser: the browser suite is GitHub's after every landing, and the release's.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { main as guard } from './register.ts';
-import { installPrePush } from './ci.ts';
 import { register } from './mcp.ts';
 import { rules } from './rules.ts';
 import { installSkills } from './skills.ts';
@@ -56,12 +56,11 @@ export async function setup(): Promise<void> {
   rules();
   await register(false);
   guard([]);
-  installPrePush();
   await verifySetup();
 }
 
 export const what =
-  "npm ci, the pinned skills, the agents' rules, MCP registration, the guard, the pre-push hook (vp run ci), then the installation's checks (remy verify setup); preconditions: those alone";
+  "npm ci (which installs Vite Plus's Git hooks), the pinned skills, the agents' rules, MCP registration, the guard, then the installation's checks (remy verify setup); vp run setup runs vp run check after it";
 export async function main(args: string[]): Promise<void> {
   if (args[0] === 'preconditions') return preconditions();
   return setup();

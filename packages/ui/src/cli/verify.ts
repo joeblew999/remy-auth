@@ -10,12 +10,9 @@ import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync } from '
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { gate } from './allowed.ts';
-import { check } from './check.ts';
 import { register } from './mcp.ts';
 import { main as guard } from './register.ts';
 import { pins, remySkillPath } from './skills.ts';
-import { consumers, every } from './test.ts';
 
 type Json = Record<string, any>;
 const readJson = (file: string): Json => JSON.parse(readFileSync(file, 'utf8'));
@@ -159,33 +156,19 @@ export async function tooling(): Promise<void> {
   console.log('Tooling verified.');
 }
 
-/** What an installation must satisfy, about a minute, no browser. */
+/** What an installation must satisfy, in seconds, no build: the check is vp run check, which vp run setup runs next. */
 export async function verifySetup(): Promise<void> {
   tool('npm', ['ls', '--depth=0'], 'npm ls');
   await register(true);
   guard(['--check']);
   doctor();
   await tooling();
-  await check();
 }
 
-/** The release's gate: the installation's checks, every browser check in every language, the other repositories this one serves. */
-export async function verify(): Promise<void> {
-  gate('verify');
-  await verifySetup();
-  process.env.REMY_FLOW ??= 'release';
-  every();
-  consumers();
-}
-
-export const what = "the installation's checks and the release gate";
+export const what = "the installation's checks";
 export const commands: Subcommands = {
-  all: {
-    what: "everything: the installation's checks, every language, the consumers (the release gate; vp run release runs it); the default",
-    run: () => verify(),
-  },
   setup: {
-    what: "the installation's checks: npm ls, MCP, the guard, doctor, tooling, the check (vp run setup ends with it)",
+    what: "the installation's checks: npm ls, MCP, the guard, doctor, tooling (remy setup ends with them); the default",
     run: () => verifySetup(),
   },
   tooling: {
@@ -194,4 +177,4 @@ export const commands: Subcommands = {
   },
   doctor: { what: "the tooling's versions", run: () => doctor() },
 };
-export const main = dispatch('verify', commands, 'all');
+export const main = dispatch('verify', commands, 'setup');

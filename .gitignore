@@ -38,3 +38,5 @@ node_modules/
 /packages/ui/skills/
 # The command line as an app runs it, emitted from packages/ui/src/cli by ui:generate (and prepack).
 /packages/ui/cli/
+# Vite Plus's Git hook dispatcher, written by vp config (the prepare script); the hooks themselves are .vite-hooks/*.
+.vite-hooks/_/

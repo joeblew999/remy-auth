@@ -19,11 +19,11 @@ export type Step = 'land' | 'promote' | 'release';
 export const steps: Record<Step, { what: string }> = {
   // The change leaves the machine: the check again, then commit, main, staging. GitHub runs every
   // part a change can affect on its pull request, in parallel, and everything after the merge.
-  land: { what: 'the check and the browser checks here, then a pull request, merged when GitHub agrees, and staging' },
+  land: { what: 'after vp run ci: one commit, a pull request, merged when GitHub agrees, then staging' },
   // Production, on purpose: what is on a pushed main, no gate (staging and GitHub ran the checks).
   promote: { what: 'production from a pushed main' },
   // A release, on purpose, rarely: all of it, locally, then the tag (packages.ts's release does both).
-  release: { what: 'every check, every language, then the tag' },
+  release: { what: "after vp run ci: the repository's release checks, Core Web Vitals on a preview, then the tag" },
 };
 
 /**
@@ -39,6 +39,10 @@ export const commands: Subcommands = {
   status: {
     what: "what is going on: main with GitHub's verdicts, the open pull requests, the deployments, the worktrees, the translations, the top of now.md",
     run: step(() => import('./status.ts')),
+  },
+  prepare: {
+    what: 'land|release: what comes before the checks: for land, main merged in, the work off main, the translations; for a release, a clean main, translations complete, versions bumped',
+    run: step(() => import('./prepare.ts')),
   },
   land: { what: `"<what changed>": ${steps.land.what}`, run: step(() => import('./land.ts')) },
   promote: { what: steps.promote.what, run: step(() => import('./promote.ts')) },

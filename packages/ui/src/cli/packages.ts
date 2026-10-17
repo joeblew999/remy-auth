@@ -9,8 +9,8 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { translationGaps } from './i18n.ts';
-import { cwv, google } from './test.ts';
-import { verify, verifySetup } from './verify.ts';
+import { cwv } from './test.ts';
+import { verifySetup } from './verify.ts';
 
 function fail(message: string): never {
   console.error(message);
@@ -270,19 +270,23 @@ export async function tag(): Promise<void> {
  * release gate with every check in every language, the app's own release checks, Google's audits
  * locally and Core Web Vitals on a Cloudflare preview), then the tag. About five minutes.
  */
+/** What a release needs before its checks run (`remy flow prepare release`): translations complete, versions bumped. */
+export async function releaseReady(): Promise<void> {
+  if ((await translationGaps()).length)
+    fail('release: translations are incomplete or stale (npx remy i18n check); land, which translates, first.');
+  bumped();
+}
+
+/**
+ * The release's own part, after `vp run ci` passed whole (its script: remy flow prepare release, then vp run ci, then
+ * this): the repository's release-checks, Core Web Vitals on a throwaway preview, then the tag.
+ */
 export async function release(): Promise<void> {
   // The release is what runs the gated commands: said first, before the gate asks (2026-10-11, the first
   // release refused itself with the marker set after it).
   process.env.REMY_FLOW ??= 'release';
-  // Only a release has a token the registry accepts, so only a release rehearses the consumer fixture's publish.
-  process.env.REMY_REHEARSE_PUBLISH = '1';
-  if ((await translationGaps()).length)
-    fail('release: translations are incomplete or stale (npx remy i18n check); land, which translates, first.');
-  bumped();
-  await verify();
   // Not silent: npm would hand loglevel=silent to every nested npm in the script.
   tool('npm', ['run', '--if-present', 'release-checks'], { what: 'release-checks' });
-  await google();
   await cwv('release');
   await tag();
 }
@@ -325,7 +329,7 @@ export const commands: Subcommands = {
     run: () => tag(),
   },
   release: {
-    what: "the release: translations strict, bumped, the gate (remy verify), the app's release-checks script, Google, Core Web Vitals on a preview, the tag (vp run release runs it)",
+    what: "the release, after vp run ci: the app's release-checks script, Core Web Vitals on a preview, the tag (vp run release runs it)",
     run: () => release(),
   },
 };

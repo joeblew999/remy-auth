@@ -39,18 +39,26 @@ test('no English page gives a heavy command bare in a shell block: REMY_FLOW=han
   expect(bare).toEqual([]);
 });
 
-// An installation (setup, the upgrades) ends with its own checks, about a minute and no browser; the
-// browser suite is GitHub's after every landing and the release's (owner, 2026-10-11, of a setup that
-// ran it: "Setup takes 2 minutes. This is clearly wrong").
-test("an installation ends with the installation's checks, never the browser suite; the release gate starts with them", () => {
-  const setup = readFileSync('packages/ui/src/cli/setup.ts', 'utf8');
-  expect(setup.indexOf('await verifySetup();')).toBeGreaterThan(setup.indexOf('guard([]);'));
-  expect(readFileSync('packages/ui/src/cli/verify.ts', 'utf8')).toMatch(/gate\('verify'\);\n\s*await verifySetup\(\);/);
-  const packages = readFileSync('packages/ui/src/cli/packages.ts', 'utf8');
-  expect(packages).toMatch(/export async function upgrade\(\)[\s\S]*?await verifySetup\(\);/);
-  // The release marks itself before it runs the gate, or the gate refuses it.
-  const release = packages.slice(packages.indexOf('export async function release()'));
-  expect(release.indexOf("process.env.REMY_FLOW ??= 'release'")).toBeGreaterThan(0);
-  expect(release.indexOf("process.env.REMY_FLOW ??= 'release'")).toBeLessThan(release.indexOf('await verify();'));
-  expect(readFileSync('packages/ui/src/cli/upgrade.ts', 'utf8')).toMatch(/guard\(\[\]\);\n\s*await verifySetup\(\);/);
+// The flow's steps are scripts that run Vite Plus between their own parts, never the other way round: land and a
+// release prepare (what changes the files, or what would stop them), then vp run ci, then their own part; setup
+// installs, then vp run check. The installation's own checks run no check and no browser (owner, 2026-10-11, of a
+// setup that ran the browser suite: "Setup takes 2 minutes. This is clearly wrong").
+test('the flow runs vp run ci or vp run check between its own parts, in remy-auth and in every app', () => {
+  for (const [file, remy] of [
+    ['package.json', 'node packages/ui/src/cli/remy.ts'],
+    ['template/package.json', 'remy'],
+  ] as const) {
+    const { scripts } = JSON.parse(readFileSync(file, 'utf8')) as { scripts: Record<string, string> };
+    expect(scripts.land, file).toBe(`${remy} flow prepare land && vp run ci && ${remy} flow land`);
+    expect(scripts.release, file).toBe(
+      `${remy} flow prepare release && REMY_REHEARSE_PUBLISH=1 vp run ci && ${remy} flow release`,
+    );
+    expect(scripts.setup, file).toBe(`${remy} setup && vp run check`);
+  }
+  const verify = readFileSync('packages/ui/src/cli/verify.ts', 'utf8');
+  const setupChecks = verify.slice(verify.indexOf('export async function verifySetup()'));
+  expect(setupChecks.slice(0, setupChecks.indexOf('\n}'))).not.toMatch(/check\(\)|every\(\)|consumers\(\)/);
+  // Nothing of the command line's runs Vite Plus's task runner: the scripts do.
+  for (const name of readdirSync('packages/ui/src/cli').filter((file) => file.endsWith('.ts')))
+    expect(readFileSync(`packages/ui/src/cli/${name}`, 'utf8'), name).not.toMatch(/['"]vp['"],\s*\[\s*['"]run['"]/);
 });

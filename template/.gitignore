@@ -15,3 +15,5 @@ docs/.remy-docs/
 # A developer's own overrides, e.g. the shared tasks from a local remy-auth checkout.
 src/paraglide/
 project.inlang/cache/
+# Vite Plus's Git hook dispatcher, written by vp config (the prepare script); the hooks themselves are .vite-hooks/*.
+.vite-hooks/_/

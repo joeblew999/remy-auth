@@ -13,10 +13,10 @@ Day to day, two: `vp run check` after every edit, `vp run land "<what changed>"`
 | `vp run fix` | what the check only verifies, written: COMMANDS.md and each docs page's ending |
 | `vp run ci` | what GitHub runs, the same here: the check, then the browser checks, Google's audits and a new app (`vp run ci browser --shard 1/3` runs one part) |
 | `vp run status` | what is going on: main with GitHub's verdicts, the open pull requests, the deployments, the worktrees, the translations, the top of now.md |
-| `vp run land "<what changed>"` | the check and the browser checks here, then a pull request, merged when GitHub agrees, and staging |
+| `vp run land "<what changed>"` | after vp run ci: one commit, a pull request, merged when GitHub agrees, then staging |
 | `vp run promote` | production from a pushed main |
-| `vp run release` | every check, every language, then the tag |
-| `vp run setup` | npm ci, the pinned skills, the agents' rules, MCP registration, the guard, the pre-push hook (vp run ci), then the installation's checks (remy verify setup); preconditions: those alone |
+| `vp run release` | after vp run ci: the repository's release checks, Core Web Vitals on a preview, then the tag |
+| `vp run setup` | npm ci (which installs Vite Plus's Git hooks), the pinned skills, the agents' rules, MCP registration, the guard, then the installation's checks (remy verify setup); vp run setup runs vp run check after it |
 
 ## Everything the command line does
 
@@ -47,10 +47,9 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy cloudflare preview-delete` | [name]: list the throwaway check Workers, or delete one; never production |
 | `npx remy cloudflare wait` | &lt;origin&gt; &lt;wrangler-output-file&gt;: until the origin serves the uploaded version, every home-page asset included |
 | `npx remy cloudflare provisioned` | refuse when a D1, KV or R2 binding names no existing resource, or a D1 database (the Previews' included) keeps no read copies |
-| `npx remy setup` | npm ci, the pinned skills, the agents' rules, MCP registration, the guard, the pre-push hook (vp run ci), then the installation's checks (remy verify setup); preconditions: those alone |
-| `npx remy verify` | the installation's checks and the release gate |
-| `npx remy verify all` | everything: the installation's checks, every language, the consumers (the release gate; vp run release runs it); the default |
-| `npx remy verify setup` | the installation's checks: npm ls, MCP, the guard, doctor, tooling, the check (vp run setup ends with it) |
+| `npx remy setup` | npm ci (which installs Vite Plus's Git hooks), the pinned skills, the agents' rules, MCP registration, the guard, then the installation's checks (remy verify setup); vp run setup runs vp run check after it |
+| `npx remy verify` | the installation's checks |
+| `npx remy verify setup` | the installation's checks: npm ls, MCP, the guard, doctor, tooling (remy setup ends with them); the default |
 | `npx remy verify tooling` | the lockfile, wrangler.jsonc's observability, placement and preview_urls, the workflows, the skill pins |
 | `npx remy verify doctor` | the tooling's versions |
 | `npx remy skills` | the pinned official agent skills for Codex and Claude |
@@ -71,7 +70,7 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy packages bumped` | every published package whose files changed since the last release tag has a new version |
 | `npx remy packages publish` | [--release vX.Y.Z] [--dry-run]: each registry accepts its token, then each workspace whose version is new on its registry, then the GitHub release from its CHANGELOG notes; the tag's CI job runs the same |
 | `npx remy packages tag` | on a clean main: the lead package's version as the tag, pushed with main, then the publish |
-| `npx remy packages release` | the release: translations strict, bumped, the gate (remy verify), the app's release-checks script, Google, Core Web Vitals on a preview, the tag (vp run release runs it) |
+| `npx remy packages release` | the release, after vp run ci: the app's release-checks script, Core Web Vitals on a preview, the tag (vp run release runs it) |
 | `npx remy test` | the browser checks by hand: one area, the smoke, against a deployment, Core Web Vitals, the report (what CI runs is vp run ci) |
 | `npx remy test only` | &lt;words&gt;: the checks whose title matches, in a few languages; the one targeted run by hand |
 | `npx remy test smoke` | tier 1: every page answers, the home page hydrates |
@@ -107,6 +106,7 @@ The repository's own tools, as package.json defines them, each run as `vp run <s
 
 | Script | Runs |
 | --- | --- |
+| `vp run prepare` | `vp config --no-agent` |
 | `vp run release-checks` | `vp run template:check && vp run ui:verify` |
 | `vp run test:consumers` | `bash fixtures/consumer/run.sh` |
 | `vp run auth:generate` | `node scripts/auth-generate.ts` |
