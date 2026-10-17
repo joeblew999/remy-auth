@@ -39,7 +39,7 @@ unset I18N_INLANG RELEASE_PACKAGE RELEASE_TITLE
 npm pkg set "dependencies.@joeblew999/remy-ui=file:$ui" "dependencies.@joeblew999/remy-showcase=file:$showcase" "dependencies.@joeblew999/remy-fixture-contract=*" "workspaces[1]=packages/*"
 # A part another package offers, listed by its package (its routes, modules and checks come from the tarball).
 node -e "const f='src/parts.json',p=require('./'+f);p.push('@joeblew999/remy-showcase/time-zones');require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')"
-sed -i.bak "s#export default remyDocs(docsConfig);#export default remyDocs(docsConfig, { contract: '@joeblew999/remy-fixture-contract' });#" docs/vite.config.ts
+sed -i.bak "s#export default remyDocs(docsConfig, { root: import.meta.dirname });#export default remyDocs(docsConfig, { root: import.meta.dirname, contract: '@joeblew999/remy-fixture-contract' });#" docs/vite.config.ts
 rm -f docs/vite.config.ts.bak
 grep -q "remy-fixture-contract" docs/vite.config.ts
 git init -q && git add -A && git -c user.name=remy -c user.email=remy@localhost commit -qm fixture && git branch -M main
