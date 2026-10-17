@@ -50,6 +50,8 @@ git init -q && git add -A && git -c user.name=remy -c user.email=remy@localhost 
 export GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token)}"
 npm install --prefer-offline --no-audit --no-fund --loglevel=error
 step install
+# What the script wrote above (src/parts.json), in the app's style, which needs the installed configuration.
+vp fmt src/parts.json > /dev/null
 # The pinned skills are the same download for every repository, not part of what the fixture is for: install
 # them once per version of the pinned list and reuse them (~2 min of GitHub clones otherwise).
 # The key covers the pinned list and the package's own remy skill, so a changed skill is installed again.
