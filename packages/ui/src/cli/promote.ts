@@ -1,3 +1,4 @@
+import { commentOnCommit, repo } from './github.ts';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { deploy, deployDocs, versions } from './cloudflare.ts';
@@ -28,8 +29,8 @@ const origin = process.env.DEPLOY_ORIGIN;
 if (origin) {
   const release = await fetch(`${origin}/healthz`, { cache: 'no-store' }).then(r => r.json() as Promise<{ release?: string }>).then(body => body.release).catch(() => undefined);
   const body = `Promoted to production: ${origin} serves this commit (Worker version ${release ?? 'unknown'})${process.env.DOCS_ORIGIN && existsSync('docs') ? `; docs: ${process.env.DOCS_ORIGIN}/dev` : ''}. Live now: npm run dev:status.`;
-  const slug = spawnSync('gh', ['repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner'], { encoding: 'utf8' }).stdout?.trim();
-  const posted = slug ? spawnSync('gh', ['api', `repos/${slug}/commits/${head}/comments`, '-f', `body=${body}`], { stdio: 'ignore' }).status === 0 : false;
+  const slug = repo();
+  const posted = slug ? commentOnCommit(slug, head, body) : false;
   console.log(posted ? `dev:promote: written on the commit (${head.slice(0, 7)}).` : 'dev:promote: could not write on the commit (gh); the deployments say what they run.');
 }
 }

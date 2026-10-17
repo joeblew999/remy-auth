@@ -6,14 +6,19 @@ import { test, expect, chromium } from '@playwright/test';
 import { locales, baseLocale, localizeUrl, extractLocaleFromHeader } from './paraglide/runtime.js';
 import { matchChinese } from './matching.js';
 
+/** The base language (else the first) and the first right-to-left one among `list`: what "quick" means, here and only here. */
+const pair = list => [...new Set([list.includes(baseLocale) ? baseLocale : list[0], list.find(locale => new Intl.Locale(locale).getTextInfo().direction === 'rtl')].filter(Boolean))];
+
 /**
- * The languages whose checks run: every locale, or the comma-separated subset in CHECK_LOCALES
- * (the quick development tier, `project:test:quick`). Checks iterate this; expectations that must
- * hold for every language (sitemap, hreflang, switcher) keep using `locales`.
+ * The languages whose checks run: every locale; CHECK_LOCALES=quick for the base language and the first
+ * right-to-left one (what the command line asks for when a change cannot differ by language, and the quick
+ * tier; it never names languages itself); or a comma-separated subset. Checks iterate this; expectations
+ * that must hold for every language (sitemap, hreflang, switcher) keep using `locales`.
  */
-export const checkedLocales = process.env.CHECK_LOCALES
-  ? locales.filter(locale => process.env.CHECK_LOCALES.split(',').map(value => value.trim()).includes(locale))
-  : locales;
+const asked = process.env.CHECK_LOCALES;
+export const checkedLocales = !asked ? locales
+  : asked === 'quick' ? pair(locales)
+  : locales.filter(locale => asked.split(',').map(value => value.trim()).includes(locale));
 
 /**
  * The languages for checks of behaviour that does not depend on the language (the security policy,
@@ -24,10 +29,9 @@ export const checkedLocales = process.env.CHECK_LOCALES
  * scripts, hyphenation, direction, formats, the catalogs) keep iterating `checkedLocales`.
  * BEHAVIOUR_LOCALES (comma-separated) overrides, e.g. to run them all again.
  */
-const firstRtl = checkedLocales.find(locale => new Intl.Locale(locale).getTextInfo().direction === 'rtl');
 export const behaviourLocales = process.env.BEHAVIOUR_LOCALES
   ? checkedLocales.filter(locale => process.env.BEHAVIOUR_LOCALES.split(',').map(value => value.trim()).includes(locale))
-  : [...new Set([checkedLocales.includes(baseLocale) ? baseLocale : checkedLocales[0], firstRtl].filter(Boolean))];
+  : pair(checkedLocales);
 import { m } from './paraglide/messages.js';
 import { samples } from './samples.js';
 

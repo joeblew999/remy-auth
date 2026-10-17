@@ -22,10 +22,14 @@ export function playwrightConfig({ webServer, testDir = './tests', timezoneId = 
     // CI the runner is ours alone, so one browser per core rather than Playwright's half (GitHub's runner for
     // a public repository has four cores; the "every language" job used two of them, 2026-10-17).
     ...(process.env.PLAYWRIGHT_WORKERS ? { workers: Number(process.env.PLAYWRIGHT_WORKERS) } : process.env.CI ? { workers: '100%' } : {}),
+    // One retry under CI (npm run ci sets CI locally too, so the same here as on GitHub): the local Workers
+    // server can drop a reused connection mid-request ("socket hang up", PR #22, 2026-10-17), which says
+    // nothing about the app. A check that passes only on its retry is reported as flaky, never hidden.
+    retries: process.env.CI && !unit ? 1 : 0,
     // The browser is Playwright's own Chromium, pinned by the @playwright/test version and installed by
     // `npm run ci`, not whatever Chrome a machine has: the same browser on a Mac, in a cloud agent's
     // container and on GitHub, so a check gives the same answer everywhere (owner, 2026-10-17). Its light
-    // headless shell, for speed; the font checks alone use the full Chromium (fontChecks says why).
+    // headless shell, for speed, for every check.
     reporter: unit ? [['list']] : [['list'], ['html', { open: 'never', outputFolder: `playwright-report/${remote ? 'remote' : 'local'}` }]],
     use: { baseURL: target.origin, ...devices['Desktop Chrome'], timezoneId, colorScheme: process.env.COLOR_SCHEME ?? 'light' },
     // Two levels. "ours": the app's own checks, fast, gate every local release.

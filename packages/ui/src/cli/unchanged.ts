@@ -136,7 +136,7 @@ export function allLanguages(): boolean {
   if (!files) return true;
   const why = files.filter(file => !inert(file)).filter(file => languageInput(file));
   if (why.length) { console.log(`test every: every language: what changed can differ by language (${why.slice(0, 5).join(', ')}${why.length > 5 ? `, and ${why.length - 5} more` : ''}).`); return true; }
-  console.log('test every: English and Arabic only: nothing that changed can differ by language. Every language runs after merge; --all runs them here.');
+  console.log('test every: the quick languages only (the base language and the first right-to-left one: English and Arabic here): nothing that changed can differ by language. Every language runs after merge; --all runs them here.');
   return false;
 }
 

@@ -48,7 +48,7 @@ export const span = (ms: number) => { const seconds = Math.round(ms / 1000); ret
 /** What a step says about its time: the whole, then each part ("5 min 57 s: the check 6 s, staging 33 s, translation 5 min 14 s"). */
 export const took = (parts: Part[]) => `${span(parts.reduce((sum, part) => sum + part.ms, 0))}: ${parts.map(part => `${part.what} ${span(part.ms)}`).join(', ')}`;
 
-/** How a landing's parts after the push ended: main is pushed by then, whatever these say. */
+/** How a landing's parts after the merge ended: the change is in main by then, whatever these say. */
 export type Landing = { commit: string; staging: 'up' | 'failed' | 'none'; translation: 'up to date' | 'done' | 'failed' };
 
 /**
@@ -59,7 +59,7 @@ export type Landing = { commit: string; staging: 'up' | 'failed' | 'none'; trans
 export function ended({ commit, staging, translation }: Landing, parts: Part[]): { failed: boolean; line: string } {
   const failed = staging === 'failed' || translation === 'failed';
   const state = [
-    `main is pushed at ${commit.slice(0, 7)}`,
+    `merged into main as ${commit.slice(0, 7)}`,
     staging === 'up' ? 'staging is up' : staging === 'none' ? 'staging not deployed (no STAGING_ORIGIN)' : 'staging FAILED (the deploy or its live smoke, named above; dev:status says what staging runs)',
     translation === 'done' ? 'translated in the same commit' : translation === 'up to date' ? 'translations were up to date' : 'translation FAILED and still owed (the page and why are above; the next dev:land tries again)',
   ].join('; ');

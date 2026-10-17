@@ -17,7 +17,8 @@ function playwright(args: string[], env: Record<string, string>): void {
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
 const local = { TEST_TARGET: 'local' };
-const quickLocales = () => ({ CHECK_LOCALES: process.env.CHECK_LOCALES ?? process.env.QUICK_LOCALES ?? 'en,ar' });
+/** The quick languages: `quick`, which the checks resolve (checks.js: the base language and the first right-to-left one); QUICK_LOCALES names others. */
+export const quickLocales = () => ({ CHECK_LOCALES: process.env.CHECK_LOCALES ?? process.env.QUICK_LOCALES ?? 'quick' });
 const remote = (origin = process.env.TEST_BASE_URL ?? process.env.DEPLOY_ORIGIN) => {
   if (!origin) { console.error('test: pass TEST_BASE_URL, or put origins.production in remy.config.ts'); process.exit(1); }
   return { TEST_TARGET: 'remote', TEST_BASE_URL: origin };

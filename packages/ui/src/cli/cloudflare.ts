@@ -2,6 +2,7 @@
 // the docs; `remy flow status` asks what each deployment runs): the deploy, the check that nothing would be
 // created by it, the wait for the new version, what runs where, and an app's page URLs. By hand, the
 // same through `remy cloudflare <deploy|staging|versions|urls|docs-deploy>`. Wrangler does the work.
+import { quickLocales } from './test.ts';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -238,7 +239,7 @@ export async function preview(alias?: string, keep = false): Promise<string> {
       if (ok < 10) await sleep(1000);
     }
     if (ok < 10) fail(`preview: ${origin} did not answer steadily within 2 minutes`);
-    tool('playwright', ['test', '--project=ours'], { env: { TEST_BASE_URL: origin, TEST_TARGET: 'remote', CHECK_LOCALES: process.env.CHECK_LOCALES ?? process.env.QUICK_LOCALES ?? 'en,ar' } });
+    tool('playwright', ['test', '--project=ours'], { env: { TEST_BASE_URL: origin, TEST_TARGET: 'remote', ...quickLocales() } });
     console.log(`Preview passed level 1: ${origin}`);
     return origin;
   } finally { if (!keep) await remove(); }
