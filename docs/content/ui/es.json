@@ -52,9 +52,7 @@
   "Type(type table)": "Tipo",
   "View as Markdown(page actions)": "Ver como Markdown",
   "displayName": "displayName",
-  "Product guide(docs section)": "Guía del producto",
   "For people using the app(docs section)": "Para quienes usan la aplicación",
-  "Developer docs(docs section)": "Documentación para desarrolladores",
   "For developers building Remy(docs section)": "Para desarrolladores que crean Remy",
   "API reference(docs section)": "Referencia de la API",
   "For developers calling the API(docs section)": "Para desarrolladores que usan la API"

@@ -1,8 +1,8 @@
 {
-  "title": "Guía del producto Remy",
+  "title": "Guía de Remy",
   "pages": [
     "index",
-    "---Uso de Remy---",
+    "---Cómo usar Remy---",
     "formats",
     "app",
     "---Ayuda---",
@@ -10,5 +10,5 @@
     "ai-assistants",
     "whats-new"
   ],
-  "translatedFrom": "dddbb6a7"
+  "translatedFrom": "ecbecb32"
 }

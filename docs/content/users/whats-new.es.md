@@ -1,10 +1,15 @@
 ---
 title: "Novedades"
-description: "Los cambios en las apps de Remy que notarán quienes las usan, de lo más reciente a lo más antiguo."
-translatedFrom: "cae6f6fc ef055dfd"
+description: "Los cambios en Remy que notarán quienes lo usan, de lo más reciente a lo más antiguo."
+translatedFrom: "0e9ed25f 928c05de ef055dfd"
 ---
 
 Esta página está escrita a mano para las personas que usan la app. El registro de cambios para desarrolladores, con cada versión de los paquetes, está en la documentación para desarrolladores.
+
+## Octubre de 2026 [#october-2026]
+
+- Inicia sesión con un código enviado a tu correo electrónico: :ui[nav_account], y luego **:ui[account_sign_in_title]**. Sin contraseña.
+- :ui[nav_notes]: escribe notas y comparte cada una con otras personas para que la lean o la editen.
 
 ## Septiembre de 2026 [#september-2026]
 

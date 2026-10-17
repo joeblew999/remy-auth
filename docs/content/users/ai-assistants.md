@@ -10,7 +10,7 @@ guide's MCP server:
 https://remy-auth-docs.gedw99.workers.dev/api/mcp/docs
 ```
 
-It only has this product guide. Building Remy, or calling its API, is in the
+It only has this guide. Building Remy, or calling its API, is in the
 [developer docs](/dev/ai-tools) instead.
 
 ## ChatGPT

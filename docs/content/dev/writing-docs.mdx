@@ -79,6 +79,15 @@ description: "How dates, numbers, currency and direction change with the languag
 ---
 ```
 
+## The app's own words
+
+A page that names something in the app (a page, a button, a menu) writes `:ui[key]`, the key of that word in the
+app's Paraglide catalog (`packages/ui/messages/en.json`, or the app's own `messages/en.json`), never the word itself:
+`Open **:ui[nav_notes]** from the menu` reads "Open **Notes** from the menu" on an English page and "Notas" on a
+Spanish one. The word is filled in when the docs build (`remark-ui-words.js` in the docs Worker), so the site,
+each page's `.md` and `llms.txt` carry it; a key the catalog does not have stops the build. Rename a label in
+the catalog and the guide follows; the translator keeps the markers as they are.
+
 ## Pictures and videos
 
 :::note
