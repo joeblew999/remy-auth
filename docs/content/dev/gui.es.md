@@ -1,7 +1,7 @@
 ---
 title: "Prueba mínima de GUI"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "513edd76 64994efc 0e8ef4b6 2a9d9497 917db7e6 222ea1f3 655a09ab 1d2bc14b 6b0fddca"
+translatedFrom: "513edd76 0f3bda7f 0e8ef4b6 2a9d9497 917db7e6 222ea1f3 655a09ab 1d2bc14b 6b0fddca"
 ---
 
 ```sh
@@ -37,7 +37,7 @@ El desarrollo usa el mismo código fuente del Worker y el mismo runtime de Cloud
 | `npx remy cloudflare deploy` | Build y luego sube producción a la cuenta de Cloudflare autenticada; `dev:promote` lo ejecuta |
 | `npx remy cloudflare staging` | Lo mismo para el entorno de staging: su propio Worker (`origins.staging`) y sus propios recursos; `dev:land` lo ejecuta |
 | `npx remy cloudflare preview` | Despliega este commit como un Worker desechable, ejecuta el nivel 1 contra él y lo elimina |
-| Una pull request o cualquier rama distinta de `main` | Workers Builds de Cloudflare ejecuta `npm run build` y `npx wrangler preview`: una Cloudflare Preview desechable en `https://<branch>-remy-auth.gedw99.workers.dev`, indicada en un comentario de la pull request. Las previews no tienen ninguno de los bindings de producción (el bloque `previews` de `wrangler.jsonc`). Un push a `main` ejecuta `npx wrangler versions upload`: una versión nueva, con producción sin cambios |
+| Una pull request o cualquier rama distinta de `main` (también desde la nube de Claude: [trabajar desde la nube de Claude](./agents.md#working-from-claudes-cloud)) | Workers Builds de Cloudflare ejecuta `npm run build` y `npx wrangler preview`: una Cloudflare Preview desechable en `https://<branch>-remy-auth.gedw99.workers.dev`, indicada en un comentario de la pull request. Las previews no tienen ninguno de los bindings de producción (el bloque `previews` de `wrangler.jsonc`). Un push a `main` ejecuta `npx wrangler versions upload`: una versión nueva, con producción sin cambios |
 | `npm run test -- remote [origin]` | Las mismas pruebas contra un deployment; sin servidor local ni deployment |
 | `npm run test -- report [remote]` | Abre el informe HTML de la última ejecución local o remota, incluidos los informes de Lighthouse |
 

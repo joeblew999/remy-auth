@@ -98,10 +98,14 @@ else spawnSync('git', ['-C', root, 'fetch', '-q', 'origin', 'main:main'], { stdi
 
 // Staging, from the merged main. A staging failure (the deploy or its live smoke) does not undo the landing:
 // the last line says the whole state and the step ends non-zero.
-const staging: Landing['staging'] = !process.env.STAGING_ORIGIN ? 'none' : spawnSync(remy!, [...remyArgs, 'cloudflare', 'staging'], { stdio: 'inherit' }).status === 0 ? 'up' : 'failed';
+// A machine with no Cloudflare sign-in (a cloud agent's container: no token there) skips staging and says so;
+// that is not a failure of the landing (docs/content/dev/agents.md, working from Claude's cloud).
+const signedIn = !!process.env.CLOUDFLARE_API_TOKEN || !/not authenticated/i.test(spawnSync('npx', ['wrangler', 'whoami'], { encoding: 'utf8', timeout: 30_000 }).stdout ?? '');
+const staging: Landing['staging'] = !process.env.STAGING_ORIGIN ? 'none' : !signedIn ? 'signed out' : spawnSync(remy!, [...remyArgs, 'cloudflare', 'staging'], { stdio: 'inherit' }).status === 0 ? 'up' : 'failed';
 lap('staging');
 if (staging === 'up') console.log(`dev:land: staging is up, ${span(laps().reduce((sum, part) => sum + part.ms, 0))} after the start. Production: npm run dev:promote.`);
 else if (staging === 'none') console.log('dev:land: no origins.staging in remy.config.ts; nothing deployed.');
+else if (staging === 'signed out') console.log('dev:land: no Cloudflare sign-in on this machine, so staging is not deployed from here.');
 else console.error('dev:land: staging failed (the lines above say whether the deploy or the live smoke); the change is merged; the last line says the state.');
 
 const end = ended({ commit: landed, staging, translation }, laps());

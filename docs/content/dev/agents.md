@@ -38,3 +38,25 @@ Start with `npm run dev:status` (what is going on) and
 [the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest): `npm run dev:change`
 after every change, `npm run dev:land -- "<what changed>"` when the work is finished and the check is
 green.
+
+## Working from Claude's cloud
+
+An agent in Claude's cloud (Claude on the web or the phone) has no Cloudflare token: `wrangler`,
+`npx remy cloudflare preview`, `staging` and `deploy` cannot sign in there; `dev:land` lands through the pull
+request as anywhere and says it skipped staging (no Cloudflare sign-in), which is not a failure. It has the **Cloudflare connector** instead (the app's Cloudflare tools, signed in as the
+owner), which an agent uses by hand; nothing in the repository depends on it.
+
+- **A preview of the work, from the cloud**: push the branch, with no pull request (`git push -u origin
+  <branch>`; GitHub runs nothing for a branch without one). Cloudflare's Workers Builds builds it and serves
+  it at `https://<branch>-remy-auth.gedw99.workers.dev`; the connector's builds tools show the build and its
+  log. Then check it: `REMY_FLOW=hand npm run test -- remote https://<branch>-remy-auth.gedw99.workers.dev`
+  (our checks only: a preview is hidden from search engines on purpose, so Google's audits judge production).
+  Proven on 2026-10-17: the branch `claude/cloud-previews` built on Cloudflare in about a minute and passed.
+- **Cloudflare's build settings** live on Cloudflare, not in the repository, so they are written here and
+  changed only through the connector, to match: two build rules on the `remy-auth` Worker, both
+  `npm run build`, `NODE_VERSION` as in `.node-version`. `main`: deploy `npx wrangler versions upload` (a
+  new version; production moves only with `dev:promote`). Every other branch: deploy `npx wrangler preview`.
+  On 2026-10-17 the branches rule was missing, so no branch got a preview although these docs said so;
+  it was added through the connector.
+- **Production, staging and the `npx remy cloudflare …` commands** run on the owner's Mac, which has the
+  token.
