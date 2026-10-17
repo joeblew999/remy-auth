@@ -30,9 +30,11 @@
   // Preview URLs off (2026-09-25): every uploaded version and alias was public, the recent ones with
   // the AI answers on the production index, and old versions never see the ASK_PAUSED stop. Cloudflare's
   // newer Previews are served through this same switch, so cf:preview deploys a throwaway Worker instead.
-  "preview_urls": false,
-  // Worker Previews (Cloudflare's throwaway preview per branch and pull request, made by Workers Builds with
-  // `wrangler preview`). Previews inherit none of production's bindings; empty means none of their own yet.
+  // On for Worker Previews: Workers Builds makes a throwaway Cloudflare Preview of every branch and pull request
+  // (`wrangler preview`), each at https://<branch>-remy-auth.gedw99.workers.dev. This also gives every uploaded
+  // version a URL of its own (owner's choice, 2026-10-17). Previews inherit none of production's bindings; the
+  // `previews` block holds their own, empty for now.
+  "preview_urls": true,
   "previews": {},
   // Staging (remy cloudflare staging, which builds with CLOUDFLARE_ENV=staging): the same code as its own
   // Worker, with its own two databases, so nothing a visitor does there touches production's. Its
@@ -42,6 +44,8 @@
   "env": {
     "staging": {
       "name": "remy-auth-staging",
+      // Staging is not built by Workers Builds and keeps version URLs off (preview_urls is inherited).
+      "preview_urls": false,
       "version_metadata": { "binding": "CF_VERSION_METADATA" },
       "vars": { "ENVIRONMENT": "staging", "EMAIL_FROM": "noreply@mail.ubuntusoftware.net" },
       "d1_databases": [
