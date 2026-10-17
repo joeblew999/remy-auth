@@ -2,9 +2,9 @@
 // browser. Every part is a function here (.plans/tooling-in-typescript.md, slice 2). `remy check
 // <part>` runs one part.
 import { execFileSync, spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
-import { join, relative, sep } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { whenChanged } from './unchanged.ts';
 import { checkAll as translations } from './i18n.ts';
 import { check as plans } from './plans.ts';
 
@@ -33,34 +33,6 @@ function tool(name: string, args: string[], options: { cwd?: string; env?: Recor
   const bin = join(process.cwd(), 'node_modules', '.bin', name);
   const result = spawnSync(bin, args, { cwd: options.cwd, stdio: 'inherit', env: { ...process.env, ...options.env } });
   if (result.status !== 0) { console.error(`${name} ${args.join(' ')}: failed`); process.exit(result.status ?? 1); }
-}
-
-/**
- * "Only when the sources changed since it last passed": a stamp under
- * node_modules/.cache/remy holds a fingerprint (path, size, mtime) of every file the globs name; the
- * part runs when it differs, and the stamp is written when the part passes.
- */
-function fingerprint(patterns: string[]): string {
-  const hash = createHash('sha256');
-  const toRegExp = (glob: string) => new RegExp(`^${glob.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*\*\//g, '(?:.*/)?').replace(/\*/g, '[^/]*')}$`);
-  const walk = (dir: string): string[] => existsSync(dir) ? readdirSync(dir, { withFileTypes: true }).flatMap(entry => { const path = join(dir, entry.name); return entry.isDirectory() ? (entry.name === 'node_modules' ? [] : walk(path)) : [path]; }) : [];
-  for (const pattern of patterns) {
-    const fixed = pattern.split('/').filter(part => !part.includes('*'));
-    const base = pattern.includes('*') ? fixed.slice(0, pattern.split('/').findIndex(part => part.includes('*'))).join('/') || '.' : pattern;
-    const matches = toRegExp(pattern);
-    const files = pattern.includes('*') ? walk(base).map(file => relative(process.cwd(), file).split(sep).join('/')).filter(file => matches.test(file)) : (existsSync(pattern) ? [pattern] : []);
-    for (const file of files.sort()) { const info = statSync(file); hash.update(`${file} ${info.size} ${info.mtimeMs}\n`); }
-  }
-  return hash.digest('hex');
-}
-const stampFile = (name: string) => join(process.cwd(), 'node_modules', '.cache', 'remy', `${name}.stamp`);
-function whenChanged(name: string, patterns: string[], part: () => void): void {
-  const file = stampFile(name);
-  if (existsSync(file) && readFileSync(file, 'utf8') === fingerprint(patterns)) { console.log(`${name}: nothing changed since it last passed.`); return; }
-  part();
-  // The sources as they are after the pass: a part that writes among them (wrangler types) does not undo its own stamp.
-  mkdirSync(join(process.cwd(), 'node_modules', '.cache', 'remy'), { recursive: true });
-  writeFileSync(file, fingerprint(patterns));
 }
 
 /** What the app generates before type checking: its package.json's "generate" script, when it has one (remy-auth: the catalogs, the skill, this bin; an app: its own catalog). */

@@ -4,13 +4,13 @@
 // in the quick languages.
 import { spawnSync } from 'node:child_process';
 import { dispatch, type Subcommands } from './commands.ts';
-import { mkdirSync, rmSync, rmdirSync, statSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { gate } from './allowed.ts';
 import { preview, previewDelete } from './cloudflare.ts';
 import { build } from './dev.ts';
-import { skip } from './changes.ts';
+import { allLanguages, skip } from './unchanged.ts';
 
 function playwright(args: string[], env: Record<string, string>): void {
   const result = spawnSync(join(process.cwd(), 'node_modules', '.bin', 'playwright'), ['test', ...args], { stdio: 'inherit', env: { ...process.env, ...env } });
@@ -31,16 +31,28 @@ const remote = (origin = process.env.TEST_BASE_URL ?? process.env.DEPLOY_ORIGIN)
  */
 async function withLevel2Lock<T>(work: () => T): Promise<T> {
   const lock = join(tmpdir(), 'remy-level2.lock');
-  const stale = () => { try { const info = statSync(lock); return !info.isDirectory() || Date.now() - info.mtimeMs > 30 * 60_000; } catch { return false; } };
+  // Stale: a file (the mise-era flock), a directory older than half an hour, or one whose holder has gone
+  // (its pid file names a process that no longer runs: a run stopped part-way, 2026-10-17).
+  const holderGone = () => { try { const pid = Number(readFileSync(join(lock, 'pid'), 'utf8')); if (!pid) return false; process.kill(pid, 0); return false; } catch (error) { return (error as NodeJS.ErrnoException).code === 'ESRCH'; } };
+  const stale = () => { try { const info = statSync(lock); return !info.isDirectory() || Date.now() - info.mtimeMs > 30 * 60_000 || holderGone(); } catch { return false; } };
   for (let waited = 0; ; waited++) {
     if (stale()) { console.log(`test: taking over a stale lock at ${lock}`); rmSync(lock, { recursive: true, force: true }); }
-    try { mkdirSync(lock); break; } catch { if (waited % 30 === 0) console.log(`test: another speed measurement runs on this machine (${lock}); waiting for it.`); await new Promise(resolve => setTimeout(resolve, 2000)); }
+    try { mkdirSync(lock); writeFileSync(join(lock, 'pid'), String(process.pid)); break; } catch { if (waited % 30 === 0) console.log(`test: another speed measurement runs on this machine (${lock}); waiting for it.`); await new Promise(resolve => setTimeout(resolve, 2000)); }
   }
-  try { return await work(); } finally { try { rmdirSync(lock); } catch { /* gone */ } }
+  try { return await work(); } finally { rmSync(lock, { recursive: true, force: true }); }
 }
 
-/** Every check of ours in every language (level 1), on the production artifact in local Workers. */
-export function every(): void { gate('project:test'); if (skip('every')) return; build(); playwright(['--project=ours'], local); }
+/** Every check of ours (level 1), on the production artifact in local Workers: in every language, or in English and Arabic when the change cannot differ by language. */
+/** REMY_SHARD=<i>/<n> runs one part of the checks (GitHub splits level 1 across jobs; `npm run ci -- every --shard 1/3`). */
+const shard = () => (process.env.REMY_SHARD ? [`--shard=${process.env.REMY_SHARD}`] : []);
+export function every(): void {
+  gate('project:test');
+  if (skip('every')) return;
+  // English and Arabic when nothing that changed can differ by language (unchanged.ts); CHECK_LOCALES set by hand wins.
+  const languages = process.env.CHECK_LOCALES || allLanguages() ? {} : quickLocales();
+  build();
+  playwright(['--project=ours', ...shard()], { ...local, ...languages });
+}
 /** Every check in the quick languages. */
 export function quick(): void { gate('project:test:quick'); build(); playwright(['--project=ours'], { ...local, ...quickLocales() }); }
 /** The checks whose title matches, in the quick languages: the one browser run a step does not own. */

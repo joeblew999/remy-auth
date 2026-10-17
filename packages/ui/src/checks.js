@@ -3,8 +3,6 @@
 // transpiling. Node's own Intl is the oracle for formatted text; the compiled messages are the
 // ones the app renders. Call the factories from a test file and pass the app's public paths.
 import { test, expect, chromium } from '@playwright/test';
-import { execFileSync } from 'node:child_process';
-import { readFileSync, rmSync } from 'node:fs';
 import { locales, baseLocale, localizeUrl, extractLocaleFromHeader } from './paraglide/runtime.js';
 import { matchChinese } from './matching.js';
 
@@ -100,7 +98,8 @@ export function publicPageChecks({ paths, prerendered = false, oneLanguage = { l
       await context.close();
     });
 
-    test(`${locale}: the home page's structured data stays single once hydrated`, async ({ page, baseURL }) => {
+    // Behaviour, not language: the base language and a right-to-left one are enough (behaviourLocales).
+    if (behaviourLocales.includes(locale)) test(`${locale}: the home page's structured data stays single once hydrated`, async ({ page, baseURL }) => {
       // Guards TanStack Router issue #6627: the browser must not add a second copy of the head script.
       await page.goto(localizedPath('', locale));
       await hydrated(page.locator('body'));
@@ -313,32 +312,53 @@ export function themeChecks() {
 }
 
 /**
- * Google Lighthouse through the pinned Chrome DevTools CLI against the same target as the other
- * checks. The CLI runs accessibility, SEO, best-practices and agentic-browsing; upstream excludes
- * Performance by design. Every scored audit must pass, not only the category score; none is exempt.
+ * Playwright's pinned Chromium with Lighthouse's own puppeteer-core connected to it, for the two
+ * Lighthouse checks: Lighthouse drives a fresh page through it. The same browser as every other check.
+ */
+async function lighthouseBrowser() {
+  const port = 9222 + Math.floor(Math.random() * 1000);
+  const browser = await chromium.launch({ channel: 'chromium', args: [`--remote-debugging-port=${port}`] });
+  const puppeteer = await import('puppeteer-core');
+  const connected = await puppeteer.default.connect({ browserURL: `http://127.0.0.1:${port}` });
+  return { connected, close: async () => { await connected.disconnect(); await browser.close(); } };
+}
+
+// The screens and user agents Lighthouse audits as, the ones the Chrome DevTools CLI used before.
+const auditDevices = {
+  mobile: { formFactor: 'mobile', screenEmulation: { mobile: true, width: 412, height: 823, deviceScaleFactor: 1.75, disabled: false },
+    emulatedUserAgent: 'Mozilla/5.0 (Linux; Android 11; moto g power (2022)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Mobile Safari/537.36' },
+  desktop: { formFactor: 'desktop', screenEmulation: { mobile: false, width: 1350, height: 940, deviceScaleFactor: 1, disabled: false },
+    emulatedUserAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36' },
+};
+
+/**
+ * Google Lighthouse, run directly against the same target as the other checks: accessibility, SEO,
+ * best practices and agentic browsing (Performance is performanceChecks'). Every scored audit must pass,
+ * not only the category score; none is exempt. It used to go through the Chrome DevTools CLI, a daemon
+ * around this same Lighthouse; that CLI stays for agents to look at pages (npm run browser), not for checks.
  */
 export function lighthouseChecks({ pages }) {
-  // npx --no-install finds the pinned binary from any workspace (a docs app's bins are hoisted to the root).
-  const cli = (...args) => execFileSync('npx', ['--no-install', 'chrome-devtools', ...args],
-    { encoding: 'utf8', env: { ...process.env, NODE_NO_WARNINGS: '1' }, timeout: 120_000 });
   test.describe('lighthouse', () => {
     test.describe.configure({ mode: 'serial', timeout: 120_000 });
-    test.beforeAll(() => { cli('start', '--isolated', '--headless', '--no-usage-statistics', '--no-performance-crux'); });
-    test.afterAll(() => { cli('stop'); });
+    let lighthouse;
+    test.beforeAll(async () => { lighthouse = await lighthouseBrowser(); });
+    test.afterAll(async () => { await lighthouse?.close(); });
     for (const { path, device } of pages) {
       test(`${device}: ${path} passes every audit`, async ({ baseURL }, testInfo) => {
-        const dir = testInfo.outputPath('lighthouse');
-        rmSync(dir, { recursive: true, force: true });
-        if (process.env.COLOR_SCHEME) cli('emulate', '1', '--colorScheme', process.env.COLOR_SCHEME);
-        cli('navigate_page', '1', '--url', `${baseURL}${path}`);
-        cli('lighthouse_audit', '1', '--device', device, '--output-format', 'json', '--outputDirPath', dir);
-        const report = JSON.parse(readFileSync(`${dir}/report.json`, 'utf8'));
+        const { navigation, generateReport } = await import('lighthouse');
+        const page = await lighthouse.connected.newPage();
+        if (process.env.COLOR_SCHEME) await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: process.env.COLOR_SCHEME }]);
+        const result = await navigation(page, `${baseURL}${path}`, {
+          flags: { onlyCategories: ['accessibility', 'seo', 'best-practices', 'agentic-browsing'], output: 'json', logLevel: 'error', maxWaitForLoad: 30_000, ...auditDevices[device] },
+        });
+        await page.close();
+        const report = result.lhr;
+        await testInfo.attach('lighthouse.html', { body: generateReport(report, 'html'), contentType: 'text/html' });
         expect(report.finalDisplayedUrl).toBe(`${baseURL}${path}`);
         const failures = Object.values(report.categories).flatMap(category => category.auditRefs)
           .map(ref => report.audits[ref.id])
           .filter(audit => audit.score !== null && audit.score < 1)
           .map(audit => `${audit.id}: ${audit.title}`);
-        await testInfo.attach('lighthouse.html', { path: `${dir}/report.html`, contentType: 'text/html' });
         expect([...new Set(failures)], 'See the lighthouse.html attachment in the HTML report').toEqual([]);
       });
     }
@@ -369,17 +389,11 @@ export function performanceChecks({ pages, thresholds = {}, runs = 5 }) {
   const limits = { score: 0.9, lcp: 2500, cls: 0.1, tbt: 200, ...thresholds };
   test.describe('core web vitals', () => {
     test.describe.configure({ mode: 'serial', timeout: 600_000 });
-    const port = 9222 + Math.floor(Math.random() * 1000);
-    let browser, puppeteerBrowser;
-    test.beforeAll(async () => {
-      browser = await chromium.launch({ channel: 'chrome', args: [`--remote-debugging-port=${port}`] });
-      // Lighthouse bundles puppeteer-core; connecting it to the same Chrome lets Lighthouse drive a
-      // fresh page. Never warm the page first: a visitor's first load in a new tab is cold, and a
-      // warm-up once hid a multi-second font stall that real visitors paid.
-      const puppeteer = await import('puppeteer-core');
-      puppeteerBrowser = await puppeteer.default.connect({ browserURL: `http://127.0.0.1:${port}` });
-    });
-    test.afterAll(async () => { await puppeteerBrowser?.disconnect(); await browser?.close(); });
+    // Never warm the page first: a visitor's first load in a new tab is cold, and a warm-up once hid a
+    // multi-second font stall that real visitors paid.
+    let lighthouse, puppeteerBrowser;
+    test.beforeAll(async () => { lighthouse = await lighthouseBrowser(); puppeteerBrowser = lighthouse.connected; });
+    test.afterAll(async () => { await lighthouse?.close(); });
     for (const { path, device } of pages) {
       test(`${device}: ${path} meets Google's good thresholds`, async ({ baseURL }, testInfo) => {
         const { navigation, desktopConfig, generateReport } = await import('lighthouse');
@@ -670,8 +684,10 @@ export function fontChecks({ paths, selectors = ['h1', 'h1 + p'], budget = fontB
       await page.evaluate(() => document.fonts.ready);
       await cdp.send('DOM.enable');
       await cdp.send('CSS.enable');
-      const { root } = await cdp.send('DOM.getDocument');
       const problems = async () => {
+        // The document again on every try: hydration replaces nodes, and a node id from before it is gone
+        // ("Could not find node with given id", which made this check fail at random, 2026-10-17).
+        const { root } = await cdp.send('DOM.getDocument');
         const found = [];
         let matched = 0;
         for (const selector of selectors) {
@@ -709,27 +725,29 @@ export function fontChecks({ paths, selectors = ['h1', 'h1 + p'], budget = fontB
     }
   });
 
-  // Han: Japanese and Traditional Chinese draw the same code points with different glyphs, so each needs its own font.
+  // Han: Japanese and Traditional Chinese draw the same code points with different glyphs. What the app
+  // controls is that each page says its language (the browser chooses the glyph shapes, and the system font,
+  // by it) and that no web font of ours draws both. Which system font a machine picks is the machine's: an
+  // earlier version measured that, and its answer changed with the operating system, the installed fonts and
+  // the browser build (2026-10-17).
   const han = locales.filter(locale => hanScripts.includes(new Intl.Locale(locale).maximize().script));
-  if (han.length > 1 && checkedLocales.some(locale => han.includes(locale))) test(`${han.join(', ')}: each Han language is drawn by a font of its own`, async ({ page }) => {
+  if (han.length > 1 && checkedLocales.some(locale => han.includes(locale))) test(`${han.join(', ')}: each Han language says its language and shares no web font with another`, async ({ page }) => {
     const cdp = await page.context().newCDPSession(page);
-    const fonts = {};
+    const ours = {};
     for (const locale of han) {
       await page.goto(localizedPath(paths[0], locale));
       await page.evaluate(() => document.fonts.ready);
+      await expect(page.locator('html'), locale).toHaveAttribute('lang', locale);
       const latin = namedFonts(await page.locator('h1').evaluate(node => getComputedStyle(node).fontFamily))[0];
       await cdp.send('DOM.enable');
       await cdp.send('CSS.enable');
       const { root } = await cdp.send('DOM.getDocument');
       const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector: 'h1' });
-      // The font drawing most of the heading besides the Latin one: the Han font, web or system.
-      const [most] = (await cdp.send('CSS.getPlatformFontsForNode', { nodeId })).fonts
-        .filter(font => font.glyphCount > 0 && !drawnBy(font, latin) && !tofu(font)).sort((a, b) => b.glyphCount - a.glyphCount);
-      fonts[locale] = most?.familyName ?? '';
+      ours[locale] = (await cdp.send('CSS.getPlatformFontsForNode', { nodeId })).fonts
+        .filter(font => font.isCustomFont && font.glyphCount > 0 && !drawnBy(font, latin) && !tofu(font)).map(font => font.familyName);
     }
-    for (const locale of han) {
-      expect(fonts[locale], `${locale}: no Han font draws the heading`).not.toBe('');
-      expect(han.filter(other => other !== locale && fonts[other] === fonts[locale]), `${locale} shares ${fonts[locale]} with another Han language`).toEqual([]);
+    for (const locale of han) for (const other of han) if (other !== locale) {
+      expect(ours[locale].filter(family => ours[other].includes(family)), `${locale} and ${other} share a web font for their Han text`).toEqual([]);
     }
   });
 }

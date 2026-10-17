@@ -45,22 +45,19 @@ export function timeZonesChecks({ known = 'Asia/Tokyo', alias = 'asia/tokyo', un
     });
   }
 
-  test('another spelling of a time zone redirects permanently to its page; the unknown zone page fits and hydrates', async ({ request, page }) => {
-    for (const locale of checkedLocales) {
-      const response = await request.get(localizedPath(`${base}/${alias}`, locale), { maxRedirects: 0 });
-      expect(response.status(), locale).toBe(301);
-      expect(response.headers()['location']).toMatch(new RegExp(`${localizedPath(`${base}/${known}`, locale)}$`));
-    }
+  // One test per language, so the languages spread across the workers (one test for all thirteen took 22 s).
+  for (const locale of checkedLocales) test(`${locale}: another spelling of a time zone redirects permanently to its page; the unknown zone page fits and hydrates`, async ({ request, page }) => {
+    const response = await request.get(localizedPath(`${base}/${alias}`, locale), { maxRedirects: 0 });
+    expect(response.status(), locale).toBe(301);
+    expect(response.headers()['location']).toMatch(new RegExp(`${localizedPath(`${base}/${known}`, locale)}$`));
     await page.setViewportSize({ width: 375, height: 812 });
-    for (const locale of checkedLocales) {
-      const response = await page.goto(localizedPath(`${base}/${unknown}`, locale));
-      expect(response?.status()).toBe(404);
-      await page.waitForLoadState('networkidle');
-      await expect(page.getByRole('heading', { level: 1 })).toHaveText(m.not_found({}, { locale }));
-      await page.goto(localizedPath(`${base}/${known}`, locale));
-      await expect(page.getByRole('heading', { level: 1 })).toHaveText(zoneName(locale, known, 'longGeneric'));
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${locale} overflows`).toBe(true);
-    }
+    const missing = await page.goto(localizedPath(`${base}/${unknown}`, locale));
+    expect(missing?.status()).toBe(404);
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(m.not_found({}, { locale }));
+    await page.goto(localizedPath(`${base}/${known}`, locale));
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(zoneName(locale, known, 'longGeneric'));
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${locale} overflows`).toBe(true);
   });
 }
 

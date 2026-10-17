@@ -20,13 +20,13 @@ test('a landing ends with the whole state after the push, and fails when staging
   const parts = [{ what: 'the check', ms: 6_000 }, { what: 'commit, main and push', ms: 4_000 }, { what: 'staging', ms: 33_000 }, { what: 'translation', ms: 314_000 }];
   const clean = ended({ commit: '9102bf7abcdef', staging: 'up', translation: 'done' }, parts);
   expect(clean.failed).toBe(false);
-  expect(clean.line).toBe('dev:land: done in 5 min 57 s: the check 6 s, commit, main and push 4 s, staging 33 s, translation 5 min 14 s. main is pushed at 9102bf7; staging is up; translation done and pushed.');
+  expect(clean.line).toBe('dev:land: done in 5 min 57 s: the check 6 s, commit, main and push 4 s, staging 33 s, translation 5 min 14 s. main is pushed at 9102bf7; staging is up; translated in the same commit.');
   const smoke = ended({ commit: '9102bf7abcdef', staging: 'failed', translation: 'done' }, parts);
   expect(smoke.failed).toBe(true);
   expect(smoke.line).toMatch(/^dev:land: ended with a failure after 5 min 57 s/);
   expect(smoke.line).toContain('main is pushed at 9102bf7');
   expect(smoke.line).toContain('staging FAILED');
-  expect(smoke.line).toContain('translation done and pushed');
+  expect(smoke.line).toContain('translated in the same commit');
   const owed = ended({ commit: '9102bf7abcdef', staging: 'up', translation: 'failed' }, parts);
   expect(owed.failed).toBe(true);
   expect(owed.line).toContain('translation FAILED and still owed');

@@ -1,6 +1,7 @@
 ---
 title: "Cómo trabajamos"
 description: "Cómo trabajan aquí las personas y los agentes: las herramientas del proyecto primero, encuestas antes de elegir herramientas, shadcn y TanStack, puertas de control, planes y traducciones."
+translatedFrom: "be9633b9 9d3c93f6 790e3737 0ed0ead4 d8386d74 94b8f1c6 4dca6b46 4aece31e f3262ad2 b2a387bd 2f9aba9e 2a2eaf1d c8f062fe f251d8d4 01c70038 d7ee26c1 0dd8a337 b5662e6a 6d2a6138"
 ---
 
 Este documento es el dueño de cómo trabajan las personas y los agentes: los hábitos que ha pedido el
@@ -160,46 +161,46 @@ enlaces localizados, que TanStack Router transporta. No escribimos capas neutral
 framework ni código de idioma propio; cuando a Paraglide le falta algo, usa primero sus opciones y
 registra el hueco en el plan que lo posee.
 
-## Traducciones: un único escritor [#translations-one-writer]
+## Traducciones: en el mismo cambio [#translations-in-the-change]
 
-El inglés es la fuente; las traducciones lo siguen, escritas por un único escritor a la vez. Los
-agentes cambian estos archivos todo el tiempo, así que traducir dentro de cada rama de funcionalidad
-choca y deja los idiomas a medio actualizar.
+El inglés es la fuente; las traducciones lo siguen, en el mismo cambio. Una pull request lleva junto su
+inglés y sus traducciones: un commit, un push, una ejecución de las comprobaciones.
 
 - Un agente de funcionalidad escribe solo en inglés: la documentación en inglés y el catálogo base
-  (`messages/en.json`). Nunca edita una traducción (`<página>.<idioma>.md` en `docs/content`) ni el
+  (`messages/en.json`). Nunca edita a mano una traducción (`<página>.<idioma>.md` en `docs/content`) ni el
   catálogo de otro locale.
-- La traducción es su propio paso, en `main` tras los merges: `dev:land` ejecuta `remy i18n translate` ahí,
-  al final, cuando algo está desactualizado; nadie la ejecuta por su cuenta. El agente Claude, fijado
-  en la tarea, traduce exactamente lo que lista `remy i18n check`, y la tarea lo comitea; **el commit es la
-  marca** (git decide qué está desactualizado: una traducción está desactualizada cuando su inglés
-  cambió después del último commit de la traducción). Se niega a ejecutarse en otras ramas, con inglés
-  sin comitear, con traducciones sin comitear y en una segunda ejecución mientras otra mantiene el
-  lock, que comparte cada worktree, así que los agentes en paralelo no pueden disparar traducciones ni
-  competir por ellas.
-- El agente no recibe herramientas: se le entrega el inglés (y, para una página desactualizada, el diff
-  del inglés y la traducción actual) y devuelve texto; la tarea escribe los archivos que pidió y nada
-  más.
+- `dev:land` traduce lo que el cambio dejó desactualizado o faltante, en la rama, antes de la comprobación y
+  del commit (`remy i18n translate`); nadie la ejecuta por su cuenta. El agente Claude traduce exactamente
+  lo que lista `remy i18n check`: para una página desactualizada, solo las secciones cuyo inglés cambió; para un
+  catálogo, solo las claves que cambiaron.
+- **Cada traducción registra de qué se hizo**: una página traducida, una huella de cada sección en inglés
+  (`translatedFrom` en su frontmatter); un catálogo, una huella de cada mensaje en inglés
+  (`translated-from/<idioma>.json` a su lado). Desactualizado es donde el registro y el inglés difieren. No se lee
+  ningún historial de git, así que la respuesta es la misma en un Mac, en el contenedor de un agente en la nube y en el
+  checkout superficial de GitHub, donde `npm run ci` también lo comprueba.
+- Los agentes que trabajan a la vez no necesitan lock ni un único escritor: cada worktree traduce su propio cambio, y dos
+  ramas que cambian la misma sección en inglés ya se encuentran en ese inglés; tras mezclar main,
+  `dev:land` vuelve a traducir lo que la mezcla dejó desactualizado. (Hasta el 2026-10-17 la traducción se ejecutaba en `main`
+  después del push, bajo un lock, juzgada por el historial de git: cada landing que tocaba la documentación empujaba main dos veces,
+  ejecutaba dos veces las comprobaciones de GitHub, y una página se reescribía entera por un cambio de una línea.)
+- El agente no recibe herramientas: se le entrega el inglés (y, para una página desactualizada, las secciones cambiadas y
+  su traducción actual) y devuelve texto; la tarea escribe los archivos que pidió, con sus
+  registros, y nada más.
 - Lo que devuelve el agente se escribe solo cuando es la página: cada campo del frontmatter que tiene su
-  inglés, y el texto que viene después (`tasks/i18n/docs/page.ts`). Un agente fallido deja la página
-  como estaba, dice por qué y hace fallar la ejecución; `dev:land` entonces dice que la traducción
-  todavía se debe, y el siguiente landing lo vuelve a intentar. `tests/unit/i18n-docs.unit.spec.ts`
-  sujeta a cada página traducida del repositorio a la misma regla, en cada comprobación y en GitHub, la
-  única comprobación que recibe el propio commit de una traducción. El 2026-10-09 el `null` de un agente
-  fallido se comiteó como una página y detuvo la construcción de la documentación en main.
-- Una traducción que no es una página se borra, nunca se restaura a mano: una página que falta se
-  traduce desde el inglés en el siguiente landing, y una restaurada a mano quedaría marcada como actual
-  por su commit.
-- `remy i18n check` solo lee, sin conexión, así que es seguro en cualquier lugar, en cualquier número de
-  worktrees, y como `depends`. `remy i18n translate` nunca es un `depends`.
-- Desactualizado o faltante es un aviso mientras se avanza (`remy check` lo imprime) y un error al
+  inglés, y el texto que viene después (`packages/ui/src/cli/page.ts`). Un agente fallido deja la página
+  como estaba, dice por qué y hace fallar la traducción; `dev:land` aun así aterriza el inglés, dice que la traducción
+  todavía se debe, y el siguiente landing lo vuelve a intentar. `tests/unit/i18n-docs.unit.spec.ts` sujeta a cada
+  página traducida del repositorio a la misma regla. El 2026-10-09 el `null` de un agente fallido se comiteó como
+  una página y detuvo la construcción de la documentación en main.
+- Una traducción que no es una página se borra, nunca se restaura a mano: una página que falta se traduce
+  desde el inglés en el siguiente landing.
+- `remy i18n check` solo lee, sin conexión, así que es seguro en cualquier lugar y en cualquier número de worktrees.
+  `remy i18n translate` nunca es un `depends`.
+- Desactualizado o faltante es un aviso mientras se avanza y en `npm run ci` (la parte de comprobación), y un error al
   publicar (`dev:release` ejecuta `remy i18n check` con `I18N_STRICT=1` primero).
-- Comitea en un archivo de traducción solo cambios de traducción reales: cualquier commit sobre él lo
-  marca como actual. Un cambio estructural (un renombrado, una barrida) que toca traducciones de
-  documentación va seguido de `REMY_FLOW=hand npx remy i18n translate docs <archivo>…`, que vuelve a comprobar esos
-  archivos contra el inglés por completo. Los catálogos no tienen ese rehacer: cambia la estructura de
-  un catálogo (el archivo de cada locale) en el mismo commit que `en.json`, para que ninguna clave de
-  inglés cambiada quede oculta.
+- Un cambio estructural (un renombrado, una barrida) que toca traducciones de documentación va seguido de
+  `REMY_FLOW=hand npx remy i18n translate docs <archivo>…`, que deja esos archivos totalmente alineados con el
+  inglés. Cambia la estructura de un catálogo (el archivo de cada locale) en el mismo commit que `en.json`.
 
 El layout y los comandos están en [la línea de comandos](./tasks.md#translations).
 
@@ -244,7 +245,7 @@ que cada app, desde las tareas compartidas; `npm run setup` instala el guardián
 | Mirar | `npm run dev:status` | todos, primero: cada sesión de agente se abre con esto (un hook), un desarrollador cuando se sienta a trabajar | los últimos commits de main con el veredicto de GitHub, qué ejecuta cada despliegue, cada worktree por delante y por detrás de main, traducciones, pull requests, lo primero de `.plans/now.md` | segundos |
 | Antes de un trozo de trabajo | `npm run dev:start -- <nombre>` | quien hace el trabajo, para cada trozo, incluida una edición de una línea | un worktree propio a partir de main, instalado, con sus propios puertos, el guardián | ~1 min |
 | Después de cada cambio | `npm run dev:change` | quien esté codificando; el único paso que se espera | la comprobación (`remy check`): planes, tipos con los de las propias tareas, las comprobaciones de funciones simples (`tests/**/*.unit.spec.ts`), el estado de las traducciones; una build solo cuando cambió un archivo de ruta, la documentación solo cuando cambió la documentación | ~6 s |
-| El cambio deja la máquina | `npm run dev:land -- "<qué cambió>"` | quien hizo el trabajo, por su cuenta, en cuanto termina y la comprobación está en verde | la comprobación, commit, fast-forward de main, push, despliegue en staging, y luego la traducción al final cuando está desactualizada. GitHub entonces ejecuta cada idioma, las auditorías de Google y el fixture de consumer en paralelo, mientras sigues codificando (`gh run list`) | ~1 min hasta staging; la traducción después |
+| El cambio deja la máquina | `npm run dev:land -- "<qué cambió>"` | quien hizo el trabajo, por su cuenta, en cuanto termina y la comprobación está en verde | las traducciones que dejó desactualizadas (segundos), la comprobación, un commit, fast-forward de main, push, despliegue en staging. GitHub entonces ejecuta `npm run ci` como jobs en paralelo (tipos y unitarias, el nivel 1 en tres partes, las auditorías de Google, el fixture de consumer), mientras sigues codificando (`gh run list`); `npm run ci` ejecuta lo mismo en local | ~1 min hasta staging |
 | Producción | `npm run dev:promote` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `remy cloudflare deploy` y el Worker de documentación, a partir de un main ya empujado, sin puerta de control: staging y GitHub ya ejecutaron las comprobaciones | ~1 min |
 | Una publicación | `npm run dev:release` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `remy packages release`: cada comprobación, cada idioma, localmente, a propósito, y luego la etiqueta | ~5 min |
 | Cuando está landed | `npm run dev:done` | quien hizo el landing, cuando el trozo de trabajo termina; un worktree sobrevive a tantos landings como el trabajo necesite | el worktree y la rama desaparecen | segundos |
@@ -283,12 +284,29 @@ que cada app, desde las tareas compartidas; `npm run setup` instala el guardián
   propietario, y actúa cuando el harness diga que terminó. Iniciarlo en segundo plano y luego hacer
   polling de él en primer plano es el mismo fallo (propietario, 2026-10-09: «Acabas de hacerlo otra vez
   con 2 cosas de larga duración»). Solo `dev:change` (segundos) se ejecuta y se espera.
-- **Cada paso dice cuánto tardó.** `dev:land` termina con sus
-  partes (la comprobación; commit, main y push; staging; traducción) y dice cuánto tardó staging en
-  estar listo desde el inicio; el traductor dice, para cada llamada al agente, cuánto tardó Claude
-  Code, cuánto de eso fue la API, y cuántos tokens escribió. Un paso lento es un número en el log, no
-  una sensación (propietario, 2026-10-10, sobre un landing con staging listo a los 40 segundos cuyo
-  comando tardó seis minutos: «cómo puede ser 6 minutos»).
+- **Un solo módulo conoce las ejecuciones anteriores: `packages/ui/src/cli/unchanged.ts`.** Omitir un paso
+  porque nada cambió (los sellos de dev:change, las partes de `npm run ci` en una rama) y la carpeta de estado
+  (`node_modules/.cache/remy`) viven ahí. Un nuevo tipo de omisión se añade a ese módulo, nunca se vuelve a
+  escribir en otro lugar (propietario, 2026-10-17: «asegúrate de que no tengamos trozos de código esparcidos
+  por todas partes»).
+- **Todo lo que dure más de unos segundos se ejecuta en segundo plano, siempre.** `npm run ci` o cualquiera
+  de sus partes, una build, una ejecución de navegador, una instalación. Un comando que corre en primer plano
+  se cancela cuando el propietario envía un mensaje (la app de Claude lo detiene), así que el trabajo
+  nunca se hace en silencio y se culpa al propietario por hablar. Iniciado en segundo plano, con su salida
+  en un archivo que el agente vigila, sobrevive a cada mensaje: el propietario puede hablar con el agente
+  en cualquier momento sin romper nada (propietario, 2026-10-17: «esta mierda entre primer plano y
+  segundo plano me está jodiendo todo el maldito tiempo»).
+- **Cada paso dice cuánto tardó, sin cronometrarse a sí mismo.** La línea de comandos cronometra cada
+  comando `remy` (`packages/ui/src/cli/timing.ts`, llamado desde `remy.ts`): su registro, cuándo empezó, sus
+  partes y su total, haya pasado o fallado, es `node_modules/.cache/remy/<command>-last.txt`, y `npx remy last
+  [command]` lo imprime. Un comando iniciado dentro de otro (`npm run ci` ejecuta `check types` y `test
+  every`, `dev:land` ejecuta `i18n translate`) escribe, con sangría, en el registro de la ejecución exterior,
+  de modo que una ejecución deja un único registro de todo lo que ejecutó. Un comando solo marca sus partes
+  (`lap`) y añade lo que midió él mismo (`note`: cada llamada al traductor, cada paso del fixture de
+  consumer); nunca escribe un registro ni un resumen propios (propietario, 2026-10-17: «debería obtenerlo
+  automáticamente porque es parte de la CLI»). Un paso lento es un número en el log, no una sensación
+  (propietario, 2026-10-10, sobre un landing con staging listo a los 40 segundos cuyo comando tardó seis
+  minutos: «cómo puede ser 6 minutos»).
 - **La respuesta de GitHub viene a ti.** Una ejecución en rojo comenta en el commit (GitHub se lo dice a
   su autor), nombrando la ejecución; `dev:change` empieza diciendo qué hizo la última ejecución en
   main; `dev:promote` se niega sobre un commit cuya ejecución no esté en verde o no haya terminado. Para
@@ -299,11 +317,10 @@ que cada app, desde las tareas compartidas; `npm run setup` instala el guardián
   Informa de qué se probó y qué no; nunca llames verificado a un trabajo no probado.
 - **Un landing que falla después del push aun así termina lo que puede, y dice dónde se detuvo.**
   Main se empuja antes que staging; cuando el despliegue de staging o su smoke en vivo falla,
-  `dev:land` igualmente ejecuta la traducción (está en main, se debe de todos modos), y luego termina
-  con código distinto de cero con el estado en una línea: en qué commit se empujó main, si staging se
-  desplegó o no, qué smoke falló, si la traducción se hizo o no. No se deja nada a medias para que la
-  siguiente persona lo descubra (propietario, 2026-10-10, después de que un landing se detuviera en el
-  smoke con la traducción omitida en silencio: «ahora tú y los demás agentes estáis jodidos»).
+  `dev:land` termina con código distinto de cero con el estado en una línea: en qué commit se empujó main,
+  si staging se desplegó o no, qué smoke falló, si la traducción se hizo o no.
+  No se deja nada a medias para que la siguiente persona lo descubra (propietario, 2026-10-10, después de que un landing se detuviera
+  en el smoke con la traducción omitida en silencio: «ahora tú y los demás agentes estáis jodidos»).
 - Nunca encadenes un comando de control con `grep` o `tail` mediante un pipe: el pipe oculta su código
   de salida. Una vez esto publicó una versión cuyas comprobaciones habían fallado, y el 2026-10-10
   ocultó un `dev:land` fallido.
@@ -390,7 +407,7 @@ landing. Nada de esto se hace a mano.
 | Mirar | `npm run dev:status` | qué está pasando, preguntado a los dueños de los hechos: los últimos commits de main con el veredicto de GitHub, qué ejecuta cada despliegue, cada worktree por delante y por detrás de main, traducciones, pull requests. Cada sesión de agente se abre con esto (un hook que registra `remy guard`); un desarrollador lo ejecuta cuando se sienta a trabajar |
 | Empezar | `npm run dev:start -- <nombre>` | un worktree en la rama `<nombre>` a partir de main (`.claude/worktrees/<nombre>`), instalado (`npm ci`, el script `local` de la app), con puertos propios y el guardián del flujo. Los propios worktrees de Claude Code viven en el mismo lugar y son solo una carpeta: dentro de uno, `npm run dev:start` sin nombre lo prepara de la misma forma |
 | Codificar | `npm run dev:change` | la comprobación, en segundos, después de cada cambio |
-| Aterrizar | `npm run dev:land -- "<qué cambió>"` | primero se mezcla main (un conflicto se detiene nombrando los archivos), la comprobación, commit, fast-forward de main, push, staging, y luego la traducción al final cuando está desactualizada (la suscripción de Claude en esta máquina, nunca GitHub). GitHub ejecuta las comprobaciones pesadas; una ejecución en rojo comenta en el commit |
+| Aterrizar | `npm run dev:land -- "<qué cambió>"` | primero se mezcla main (un conflicto se detiene nombrando los archivos), las traducciones que el cambio dejó desactualizadas (la suscripción de Claude en esta máquina, nunca GitHub), la comprobación, un commit, fast-forward de main, un push, staging. GitHub ejecuta las comprobaciones pesadas; una ejecución en rojo comenta en el commit |
 | Terminar | `npm run dev:done` | el worktree y la rama que ya aterrizaron desaparecen; se niega mientras algo quede sin aterrizar |
 | Producción | `npm run dev:promote` | a partir de main, solo un commit que GitHub aprobó, con la palabra del propietario |
 
@@ -403,8 +420,7 @@ landing. Nada de esto se hace a mano.
   simple (`tests/**/*.unit.spec.ts`) cuando puede serlo, en el navegador cuando solo un navegador lo
   muestra.
 - **Los landings se serializan solos.** Dos agentes aterrizando a la vez: el `dev:land` del segundo ve
-  que main se movió, lo mezcla, vuelve a comprobar y aterriza. El paso de traducción es un único
-  escritor en todos los worktrees.
+  que main se movió, lo mezcla, traduce lo que la mezcla dejó desactualizado, vuelve a comprobar y aterriza.
 - **Revisión práctica antes de producción.** Pasar las comprobaciones no es el final: usa la pieza en
   staging en un navegador real, con el ancho de un móvil, y arregla lo que se sienta mal. Luego
   `dev:promote`.

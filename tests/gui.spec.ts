@@ -94,18 +94,18 @@ test('concurrent server renders retain their requested language and direction', 
   }));
 });
 
-test('formats page hydrates in every language without errors and fills the device time zone', async ({ page }) => {
+// One test per language, so the languages spread across the workers (one test for all of them took 13 s).
+for (const locale of checkedLocales) test(`${locale}: formats page hydrates without errors and fills the device time zone`, async ({ page }) => {
   const errors = collectErrors(page);
-  for (const locale of checkedLocales) {
-    await page.goto(localizedPath('/formats', locale));
-    await page.waitForLoadState('networkidle');
-    await expect(page.locator('html')).toHaveAttribute('dir', direction(locale));
-    await expect(page.locator('[data-sample="currency"]')).toHaveText(new Intl.NumberFormat(formatTag(locale), { style: 'currency', currency: localeInfo(locale as any).currency }).format(samples.amount));
-    await expect(page.locator('[data-sample="local"]')).toHaveText(new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'long', timeZone: 'Asia/Tokyo' }).format(samples.instant));
-  }
+  await page.goto(localizedPath('/formats', locale));
+  await page.waitForLoadState('networkidle');
+  await expect(page.locator('html')).toHaveAttribute('dir', direction(locale));
+  await expect(page.locator('[data-sample="currency"]')).toHaveText(new Intl.NumberFormat(formatTag(locale), { style: 'currency', currency: localeInfo(locale as any).currency }).format(samples.amount));
+  await expect(page.locator('[data-sample="local"]')).toHaveText(new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'long', timeZone: 'Asia/Tokyo' }).format(samples.instant));
   expect(errors).toEqual([]);
-  expect(endonym('en')).toBe('English');
 });
+
+test('endonyms come from Intl', () => { expect(endonym('en')).toBe('English'); });
 
 // The docs moved to the docs Worker: each old address answers a permanent redirect to its page there,
 // in the same language (src/routes/docs.$.tsx), so links and search engines follow.

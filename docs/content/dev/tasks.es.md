@@ -1,6 +1,7 @@
 ---
 title: "La línea de comandos"
 description: "remy, la herramienta que toda app de Remy instala con el paquete: los scripts, la estructura que leen, una app nueva, la publicación de paquetes, las traducciones, Cloudflare y los planes."
+translatedFrom: "26693786 120aeace 7ee47dda 79fb3dca 52e4a3ff 6b54351a 465aa437 218b0959"
 ---
 
 La herramienta es `remy`, el bin de `@joeblew999/remy-ui` (`packages/ui/src/cli`, un módulo de TypeScript por
@@ -168,32 +169,34 @@ reales, una página de navegador por comprobación, workers en paralelo). Las co
 ### Traducciones [#translations]
 
 Una misma estructura en cada app, para que los mismos comandos `remy i18n` funcionen en todas partes (la regla sobre quién traduce es
-[un solo redactor](./how-we-work.md#translations-one-writer)):
+[en el cambio](./how-we-work.md#translations-in-the-change)):
 
 | Qué | Inglés | Traducción |
 | --- | --- | --- |
 | Docs | `docs/content/<site>/<page>.md` o `.mdx` (estructura de Fumadocs) | a su lado: `<page>.<locale>.md` o `.mdx` |
 | Catálogos de UI | el catálogo del idioma base de cada proyecto inlang (`<dir>/project.inlang`) | el catálogo de cada idioma, según el `pathPattern` propio del proyecto (p. ej. `messages/<locale>.json`) |
 
-Dos flujos, uno para cada tipo de texto, con el mismo patrón en ambos: detectar sin conexión con git, traducir
-con el Claude Code de la máquina (headless, sin herramientas) y hacer commit. Ambos son TypeScript en el paquete
-(`packages/ui/src/cli/i18n.ts`, `translate.ts`: `remy i18n check`, `remy i18n translate`); las tareas de
-abajo les reenvían.
+Dos flujos, uno para cada tipo de texto, con el mismo patrón en ambos: detectar sin conexión a partir del
+registro de cada traducción sobre lo que se tradujo, traducir con el Claude Code de la máquina (headless, sin
+herramientas) y escribir las traducciones y sus registros (el commit del cambio los incluye). Ambos son
+TypeScript en el paquete (`packages/ui/src/cli/i18n.ts`, `translate.ts`: `remy i18n check`,
+`remy i18n translate`); las tareas de abajo les reenvían.
 
 - **Mensajes de UI** (Paraglide): los catálogos, los idiomas y el idioma base vienen del propio
   `settings.json` de inlang (`I18N_INLANG`, o si no, el único proyecto que git conoce). Se detectan: catálogos y claves
-  que faltan (`jq`), `{placeholders}` perdidos o inventados (`@lingual/i18n-check`), claves cuyo inglés cambió desde
-  el último commit del catálogo (`git`, `jq`), y las categorías de plural que necesita el idioma (`Intl.PluralRules`,
+  que faltan (`jq`), `{placeholders}` perdidos o inventados (`@lingual/i18n-check`), claves cuyo inglés difiere del
+  registro del catálogo (`translated-from/<locale>.json` a su lado), y las categorías de plural que necesita el idioma (`Intl.PluralRules`,
   `tasks/i18n/messages/plurals.mjs`: ninguna herramienta externa las comprueba).
 - **Docs** (Fumadocs): la carpeta es `I18N_DOCS_DIR` (por defecto `docs/content`); cada sitio con un
-  `i18n.json` traduce cada página en inglés a cada uno de sus idiomas. Se detectan: páginas que faltan y
-  desactualizadas (`git`), huérfanas, y el propio texto de Fumadocs UI (`ui/<lang>.json` frente a `ui/en.json`).
+  `i18n.json` traduce cada página en inglés a cada uno de sus idiomas. Se detectan: páginas que faltan,
+  desactualizadas (su frontmatter `translatedFrom`: una huella por sección en inglés), huérfanas, y el propio texto de Fumadocs UI (`ui/<lang>.json` frente a `ui/en.json`).
 - **El traductor** es el Claude Code en modo headless de la máquina (`claude -p`), sin herramientas, sin servidores
   MCP, skills ni ajustes de proyecto, y con salida estructurada: las claves de un catálogo vuelven como JSON y
-  se combinan en el orden de claves del inglés; una página vuelve completa, y solo se escribe cuando es una
+  se combinan en el orden de claves del inglés; de una página desactualizada vuelven las secciones que cambiaron y se
+  insertan en su sitio (una página que ya no encaja con su registro, o una que falta, vuelve completa), y solo se escribe cuando es una
   página (`page.ts`). Los prompts están en `packages/ui/src/cli/prompts.ts`. Una llamada por idioma
   (mensajes) o por página (docs), `I18N_JOBS` a la vez.
-- Las comprobaciones no necesitan clave, ni red, pero sí el historial completo de git (un clon superficial se rechaza).
+- Las comprobaciones no necesitan clave, ni red, ni historial de git (un clon superficial da la misma respuesta).
   Traducir usa el login de Claude de la máquina.
 - Una app sin proyecto inlang ni sitios de documentación recibe "nothing to check" y sale con 0.
 
@@ -202,12 +205,11 @@ abajo les reenvían.
 | `remy i18n check` | Ambas comprobaciones; un WARNING y salida 0 mientras se programa (la comprobación la ejecuta), salida 1 con `I18N_STRICT=1` (el release) |
 | `remy i18n check messages` | Los huecos de los catálogos, y los idiomas que difieren de los de la plataforma (`de unlisted`); `--list` una línea por hueco (`es missing nav_more`) |
 | `remy i18n check docs` | Los huecos de la documentación; `--list` una línea por hueco (`es stale docs/content/dev/gui.es.md`) |
-| `remy i18n translate` | En main: mensajes y luego documentación, un commit para cada uno; `dev:land` lo ejecuta, al final; a mano, con `REMY_FLOW=hand` delante |
+| `remy i18n translate` | Mensajes y luego documentación, escritos con sus registros y dejados para el commit del cambio; `dev:land` lo ejecuta antes de la comprobación; a mano, con `REMY_FLOW=hand` delante |
 | `remy i18n translate messages` | Los huecos de los catálogos, un idioma por llamada al agente |
 | `remy i18n translate docs [files]` | Los huecos de la documentación, una página por llamada al agente; los archivos de traducción indicados se rehacen por completo |
 
-Ajustes: `I18N_MODEL` (por defecto `sonnet`), `I18N_JOBS` (4), `I18N_COMMIT=0` (deja el cambio
-sin commit para revisarlo), `I18N_BRANCH` (`main`).
+Ajustes: `I18N_MODEL` (por defecto `sonnet`), `I18N_JOBS` (4).
 
 ### Cloudflare [#cloudflare]
 

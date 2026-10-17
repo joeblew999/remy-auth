@@ -26,7 +26,7 @@ const branches: BranchFact[] = read('-C', root, 'worktree', 'list', '--porcelain
   return { branch, path, ahead: ahead ?? 0, behind: behind ?? 0, base };
 });
 const deployments = process.env.DEPLOY_ORIGIN ? (await versions()).table.split('\n').filter(line => /^(ORIGIN|https?:)/.test(line)).join('\n') : undefined;
-const translations = (await translationGaps(root)).length === 0 ? 'complete and current' : 'stale or missing (dev:land translates on main)';
+const translations = (await translationGaps(root)).length === 0 ? 'complete and current' : 'stale or missing (dev:land translates them in the change)';
 const pulls = JSON.parse(ask('gh', ['pr', 'list', '--json', 'number,title,author']) ?? '[]').map((pull: { number: number; title: string; author: { login: string } }) => ({ number: pull.number, title: pull.title, author: pull.author.login }));
 
 // The open list, as the repo keeps it: the numbered items of now.md's "What is left" section, first line

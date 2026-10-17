@@ -1,6 +1,7 @@
 ---
 title: "Los docs en tus herramientas de IA"
 description: "Todos los servidores MCP y archivos llms.txt disponibles, para quién es cada uno, cómo añadirlos a ChatGPT, Claude, Cursor, VS Code o Gemini, y cómo ve los docs el Modo IA de Google."
+translatedFrom: "e62b56cc c8b4748c 6ddbd1d5 2ab7325e 74f22d99 e5922ed4 759edef8"
 ---
 
 La documentación tiene tres partes, cada una para un público distinto, y cada parte tiene su propio servidor MCP y sus propios archivos llms.

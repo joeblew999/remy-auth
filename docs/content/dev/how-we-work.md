@@ -140,40 +140,45 @@ Paraglide owns all language behaviour: which language a request gets, through it
 carrying them. We do not write framework-neutral layers or our own language code; when Paraglide
 lacks something, use its options first and record the gap in the owning plan.
 
-## Translations: one writer
+## Translations: in the change
 
-English is the source; translations follow it, written by one writer at a time. Agents change these
-files all the time, so translating inside every feature branch collides and leaves languages
-half-updated.
+English is the source; translations follow it, in the same change. A pull request holds its English and
+its translations together: one commit, one push, one run of the checks.
 
 - A feature agent writes English only: the English docs and the base catalog (`messages/en.json`).
-  It never edits a translation (`<page>.<lang>.md` in `docs/content`) or another locale's catalog.
-- Translation is its own step, on `main` after the merges: `dev:land` runs `remy i18n translate` there,
-  last, when something is stale; nobody runs it by itself. The Claude agent,
-  pinned in the task, translates exactly what `remy i18n check` lists, and the task commits it; **the commit
-  is the mark** (git decides what is stale: a translation is stale when its English changed after the
-  translation's last commit). It refuses other branches, uncommitted English, uncommitted translations
-  and a second run while one holds the lock, which every worktree shares, so parallel agents cannot set
-  off translations or race on them.
-- The agent gets no tools: it is handed the English (and, for a stale page, the English diff and the
-  current translation) and returns text; the task writes the files it asked for and nothing else.
+  It never edits a translation (`<page>.<lang>.md` in `docs/content`) or another locale's catalog by hand.
+- `dev:land` translates what the change made stale or missing, on the branch, before the check and
+  the commit (`remy i18n translate`); nobody runs it by itself. The Claude agent translates exactly
+  what `remy i18n check` lists: for a stale page, only the sections whose English changed; for a
+  catalog, only the changed keys.
+- **Each translation records what it was made from**: a translated page a fingerprint of each English
+  section (`translatedFrom` in its frontmatter), a catalog a fingerprint of each English message
+  (`translated-from/<lang>.json` beside it). Stale is where the record and the English differ. No git
+  history is read, so the answer is the same on a Mac, in a cloud agent's container and in GitHub's
+  shallow checkout, where `npm run ci` checks it too.
+- Agents working at once need no lock and no one writer: each worktree translates its own change, and two
+  branches that change the same English section already meet at that English; after merging main,
+  `dev:land` translates again whatever the merge left stale. (Until 2026-10-17 translation ran on `main`
+  after the push, under a lock, judged by git history: every landing that touched docs pushed main twice,
+  ran GitHub's checks twice, and a page was rewritten whole for a one-line change.)
+- The agent gets no tools: it is handed the English (and, for a stale page, the changed sections and
+  their current translation) and returns text; the task writes the files it asked for, with their
+  records, and nothing else.
 - What the agent returns is written only when it is the page: every frontmatter field its English
-  has, and text after it (`tasks/i18n/docs/page.ts`). A failed agent leaves the page as it was, says
-  why and fails the run; `dev:land` then says the translation is still owed, and the next landing
-  tries again. `tests/unit/i18n-docs.unit.spec.ts` holds every translated page in the repository to
-  the same rule, on every check and on GitHub, the only check a translation's own commit gets. On
-  2026-10-09 a failed agent's `null` was committed as a page and stopped the docs building on main.
+  has, and text after it (`packages/ui/src/cli/page.ts`). A failed agent leaves the page as it was, says
+  why and fails the translation; `dev:land` still lands the English, says the translation is still
+  owed, and the next landing tries again. `tests/unit/i18n-docs.unit.spec.ts` holds every translated
+  page in the repository to the same rule. On 2026-10-09 a failed agent's `null` was committed as a
+  page and stopped the docs building on main.
 - A translation that is not a page is deleted, never restored by hand: a missing page is translated
-  from the English by the next landing, and a restored one would be marked current by its commit.
-- `remy i18n check` only reads, offline, so it is safe anywhere, in any number of worktrees, and as a
-  `depends`. `remy i18n translate` is never a `depends`.
-- Stale or missing is a warning while pumping (`remy check` prints it) and an error at release
-  (`dev:release` runs `remy i18n check` with `I18N_STRICT=1` first).
-- Commit only real translation changes to a translation file: any commit to it marks it current. A
-  structural change (a rename, a sweep) that touches docs translations is followed by
-  `REMY_FLOW=hand npx remy i18n translate docs <file>…`, which re-checks those files against the English in full.
-  Catalogs have no such redo: change a catalog's structure (every locale's file) in the same commit as
-  `en.json`, so no changed English key is hidden.
+  from the English by the next landing.
+- `remy i18n check` only reads, offline, so it is safe anywhere and in any number of worktrees.
+  `remy i18n translate` is never a `depends`.
+- Stale or missing is a warning while coding and in `npm run ci` (the check part), and an error at
+  release (`dev:release` runs `remy i18n check` with `I18N_STRICT=1` first).
+- A structural change (a rename, a sweep) that touches docs translations is followed by
+  `REMY_FLOW=hand npx remy i18n translate docs <file>…`, which brings those files fully in line with the
+  English. Change a catalog's structure (every locale's file) in the same commit as `en.json`.
 
 The layout and the commands are in [the command line](./tasks.md#translations).
 
@@ -214,7 +219,7 @@ tasks; `npm run setup` installs the guard.
 | Look | `npm run dev:status` | everyone, first: every agent session opens with it (a hook), a developer when they sit down | main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests, the top of `.plans/now.md` | seconds |
 | Before a piece of work | `npm run dev:start -- <name>` | whoever does the work, for every piece, a one-line edit included | a worktree of its own from main, installed, its own ports, the guard | ~1 min |
 | After every change | `npm run dev:change` | whoever is coding; the only step waited for | the check (`remy check`): plans, types with the tasks' own, the plain-function checks (`tests/**/*.unit.spec.ts`), translation status; a build only when a route file changed, the docs only when docs changed | ~6 s |
-| The change leaves the machine | `npm run dev:land -- "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | the check, commit, fast-forward main, push, deploy staging, then translation last when stale. GitHub then runs every language, Google's audits and the consumer fixture in parallel, while you keep coding (`gh run list`) | ~1 min to staging; translation after |
+| The change leaves the machine | `npm run dev:land -- "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | the translations it made stale (seconds), the check, one commit, fast-forward main, push, deploy staging. GitHub then runs `npm run ci` as parallel jobs (types and unit, level 1 in three parts, Google's audits, the consumer fixture), while you keep coding (`gh run list`); `npm run ci` runs the same locally | ~1 min to staging |
 | Production | `npm run dev:promote` | the owner, or an agent the owner asked in that session | `remy cloudflare deploy` and the docs Worker, from a pushed main, no gate: staging and GitHub already ran the checks | ~1 min |
 | A release | `npm run dev:release` | the owner, or an agent the owner asked in that session | `remy packages release`: every check, every language, locally, on purpose, then the tag | ~5 min |
 | When landed | `npm run dev:done` | whoever landed, when the piece of work is over; a worktree lives through as many landings as the work takes | the worktree and branch go | seconds |
@@ -248,10 +253,25 @@ tasks; `npm run setup` installs the guard.
   when the harness says it finished. Starting it in the background and then polling it in the
   foreground is the same fault (owner, 2026-10-09: "You just did it again for 2 long running
   things"). Only `dev:change` (seconds) is run and waited for.
-- **Every step says how long it took.** `dev:land` ends with its parts
-  (the check; commit, main and push; staging; translation) and says how long after the start staging
-  was up; the translator says for every agent call how long Claude Code took, how much of that was
-  the API, and how many tokens it wrote. A slow step is a number in the log, not a feeling (owner,
+- **One module knows about earlier runs: `packages/ui/src/cli/unchanged.ts`.** Skipping a step because
+  nothing changed (dev:change's stamps, `npm run ci`'s parts on a branch) and the state folder
+  (`node_modules/.cache/remy`) live there. A new kind of skip is added to it, never written again
+  elsewhere (owner, 2026-10-17: "make sure we don't have bits of code scattered all over the place").
+- **Anything longer than a few seconds runs in the background, always.** `npm run ci` or any part of it,
+  a build, a browser run, an install. A command running in the foreground is cancelled when the owner
+  sends a message (the Claude app stops it), so the work silently never happens and the owner is blamed
+  for talking. Started in the background, with its output in a file the agent watches, it survives
+  every message: the owner can talk to the agent at any time without breaking anything (owner,
+  2026-10-17: "this bullshit between foreground and background kicking me in the ass all the bloody
+  time").
+- **Every step says how long it took, without timing itself.** The command line times every `remy`
+  command (`packages/ui/src/cli/timing.ts`, called from `remy.ts`): its record, when it started, its parts
+  and its total, passed or failed, is `node_modules/.cache/remy/<command>-last.txt`, and `npx remy last
+  [command]` prints it. A command started inside another (`npm run ci` runs `check types` and `test
+  every`, `dev:land` runs `i18n translate`) writes into the outer run's record, indented, so one run
+  leaves one record of everything it ran. A command only marks its parts (`lap`) and adds what it measured
+  itself (`note`: each translator call, each step of the consumer fixture); it never writes a record or a
+  summary of its own (owner, 2026-10-17: "it should get it automatically because it's part of the CLI"). A slow step is a number in the log, not a feeling (owner,
   2026-10-10, of a landing on staging after 40 seconds whose command ran six minutes: "how can it be
   6 minutes").
 - **GitHub's answer comes to you.** A red run comments on the commit (GitHub tells its author), naming
@@ -263,9 +283,9 @@ tasks; `npm run setup` installs the guard.
   (`npm run test -- only <words>`). Report what was tested and what was not; never call
   untested work verified.
 - **A landing that fails after the push still finishes what it can, and says where it stopped.**
-  Main is pushed before staging; when staging's deploy or its live smoke fails, `dev:land` still runs
-  the translation (it is on main, owed regardless), then ends non-zero with the state in one line:
-  main pushed at which commit, staging deployed or not, which smoke failed, translation done or not.
+  Main is pushed before staging; when staging's deploy or its live smoke fails, `dev:land` ends
+  non-zero with the state in one line: main pushed at which commit, staging deployed or not, which
+  smoke failed, translation done or not.
   Nothing half-done is left for the next person to discover (owner, 2026-10-10, after a landing stopped
   at the smoke with the translation silently skipped: "now you and other agents are screwed").
 - Never pipe a gating command through `grep` or `tail` in a chain: the pipe hides its exit code.
@@ -343,7 +363,7 @@ the only integrator, and GitHub checks every landing. Nothing here is done by ha
 | Look | `npm run dev:status` | what is going on, asked from the facts' owners: main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests. Every agent session opens with it (a hook `remy guard` registers); a developer runs it when they sit down |
 | Start | `npm run dev:start -- <name>` | a worktree on branch `<name>` from main (`.claude/worktrees/<name>`), installed (`npm ci`, the app's `local` script), with ports of its own and the flow's guard. Claude Code's own worktrees live at the same place and are only a folder: inside one, `npm run dev:start` with no name prepares it the same way |
 | Code | `npm run dev:change` | the check, in seconds, after every change |
-| Land | `npm run dev:land -- "<what changed>"` | main merged in first (a conflict stops with the files named), the check, commit, fast-forward main, push, staging, then translation last when stale (the Claude subscription on this machine, never GitHub). GitHub runs the heavy checks; a red run comments on the commit |
+| Land | `npm run dev:land -- "<what changed>"` | main merged in first (a conflict stops with the files named), the translations the change made stale (the Claude subscription on this machine, never GitHub), the check, one commit, fast-forward main, one push, staging. GitHub runs the heavy checks; a red run comments on the commit |
 | Finish | `npm run dev:done` | the landed worktree and branch go; refuses while anything is unlanded |
 | Production | `npm run dev:promote` | from main, only a commit GitHub passed, on the owner's word |
 
@@ -354,7 +374,7 @@ the only integrator, and GitHub checks every landing. Nothing here is done by ha
 - **Every part proves itself**: it lands with its own check in `tests/`, a plain function
   (`tests/**/*.unit.spec.ts`) when it can be one, in the browser when only a browser shows it.
 - **Landings serialise themselves.** Two agents landing at once: the second's `dev:land` sees main
-  moved, merges it in, checks again and lands. The translation step is one writer across worktrees.
+  moved, merges it in, translates what the merge left stale, checks again and lands.
 - **Hands-on pass before production.** Passing checks is not the end: use the piece on staging in a
   real browser, on a phone's width, and fix what feels bad. Then `dev:promote`.
 - **An agent never waits in the foreground** on `dev:land`, `dev:promote` or a GitHub run; it starts

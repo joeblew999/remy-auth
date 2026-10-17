@@ -61,7 +61,7 @@ export function ended({ commit, staging, translation }: Landing, parts: Part[]):
   const state = [
     `main is pushed at ${commit.slice(0, 7)}`,
     staging === 'up' ? 'staging is up' : staging === 'none' ? 'staging not deployed (no STAGING_ORIGIN)' : 'staging FAILED (the deploy or its live smoke, named above; dev:status says what staging runs)',
-    translation === 'done' ? 'translation done and pushed' : translation === 'up to date' ? 'translations were up to date' : 'translation FAILED and still owed (the page and why are above; the next dev:land tries again)',
+    translation === 'done' ? 'translated in the same commit' : translation === 'up to date' ? 'translations were up to date' : 'translation FAILED and still owed (the page and why are above; the next dev:land tries again)',
   ].join('; ');
   return failed
     ? { failed, line: `dev:land: ended with a failure after ${took(parts)}. ${state}. Land again: staging and any translation owed run again; the rest costs nothing.` }

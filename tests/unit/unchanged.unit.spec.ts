@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { affects, inert } from '../../packages/ui/src/cli/changes';
+import { affects, inert } from '../../packages/ui/src/cli/unchanged';
 
 // A pull request runs only the levels its changes can affect (owner, 2026-10-17: one changed Markdown
 // file ran three five-minute jobs). The rule is a function, so a wrong path fails here in seconds.
@@ -28,4 +28,18 @@ test('the blank app and the fixture run consumers alone; a new folder runs every
   expect(affects('every', ['template/src/routes/index.tsx', 'fixtures/consumer/run.sh'])).toBe(false);
   expect(affects('every', ['infra/new-thing.ts'])).toBe(true);
   expect(affects('google', ['infra/new-thing.ts'])).toBe(true);
+});
+
+test('level 1 runs in every language only for what can differ by language', async () => {
+  const { languageInput } = await import('../../packages/ui/src/cli/unchanged');
+  const text = (body: string) => () => body;
+  // Can differ by language: catalogs, fonts and any CSS, locale code by name or by what it calls, browser checks, the runtime.
+  for (const file of ['packages/ui/messages/th.json', 'packages/ui/src/fonts.css', 'src/styles.css', 'packages/ui/src/locale.ts', 'packages/ui/src/checks.js', 'tests/gui.spec.ts', 'package-lock.json', '.node-version'])
+    expect(languageInput(file, text('')), file).toBe(true);
+  expect(languageInput('packages/ui/src/rows.tsx', text('const at = new Intl.DateTimeFormat(locale)'))).toBe(true);
+  expect(languageInput('src/notes.tsx', text('when.toLocaleDateString(lang)'))).toBe(true);
+  expect(languageInput('src/gone.tsx', () => undefined)).toBe(true);
+  // Cannot: plain code, version bumps, the tooling, the unit checks.
+  for (const file of ['src/api/router.ts', 'package.json', 'packages/ui/package.json', 'packages/ui/src/cli/translate.ts', 'tests/unit/ci.unit.spec.ts', 'README.md'])
+    expect(languageInput(file, text('export const x = 1;')), file).toBe(false);
 });

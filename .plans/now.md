@@ -5,6 +5,12 @@ out because it's now gotten into a huge mess." One list, in order. Close an item
 main and live where that applies; then move its plan to [done/](done/) with a closing line. Big features
 wait in [parked/](parked/). What broke along the way is in the [stability log](stability-log.md).
 
+## First: CI fast and the same locally (2026-10-17)
+
+[2026-10-17-01-ci-local-and-fast.md](2026-10-17-01-ci-local-and-fast.md): `npm run ci` runs what GitHub runs,
+locally and in a cloud agent's container; pull requests wait only for types, unit and level 1; previews
+straight from a checkout. What the owner asked for, the design, status and what comes next are all there.
+
 ## What is left, in order (2026-10-09)
 
 Owner: "make plans for all the things left." Everything open, each with its plan and its command.

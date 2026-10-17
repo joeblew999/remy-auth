@@ -24,6 +24,7 @@
     "build": "remy app build",
     "preview": "remy app preview",
     "test": "remy test",
+    "ci": "remy ci",
     "docs": "remy docs",
     "observe": "remy observe",
     "shots": "remy shots",

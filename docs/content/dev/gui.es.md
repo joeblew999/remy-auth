@@ -1,6 +1,7 @@
 ---
 title: "Prueba mínima de GUI"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
+translatedFrom: "513edd76 64994efc 0e8ef4b6 2a9d9497 917db7e6 222ea1f3 655a09ab 1d2bc14b 6b0fddca"
 ---
 
 ```sh
@@ -30,10 +31,13 @@ El desarrollo usa el mismo código fuente del Worker y el mismo runtime de Cloud
 | `npm run build` | Build y ensayo (dry run) del deployment de Wrangler; sin subida |
 | `npm run preview` | Build y luego sirve el artefacto de producción en el host local de Cloudflare en `PREVIEW_PORT` (4173) |
 | `dev:change`, `dev:land`, `dev:promote`, `dev:release` | El flujo ([cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), [tareas](./tasks.md)); sus comprobaciones se ejecutan en el mismo host local |
+| `npm run ci` | Lo que ejecuta GitHub, de la misma manera: tipos y unitarias, nivel 1, las auditorías de Google y los consumidores, cada uno omitido cuando los cambios de una rama (respecto a `origin/main`) no pueden afectarle (contando el trabajo sin confirmar), nivel 1 en inglés y árabe cuando nada de lo que ha cambiado puede diferir según el idioma, y después lo que tardó cada uno (`npx remy last ci` imprime el registro). Instala el Chromium fijado de Playwright y, en Linux, Noto CJK si falta. GitHub ejecuta cada parte como un job propio (`npm run ci -- every --shard 1/3` y así sucesivamente), de modo que `npm run ci -- <part>` reproduce exactamente cualquier job en rojo; `--all` no omite nada |
+| `npm run browser` (Chrome DevTools MCP) | No es CI: el navegador propio del agente en un portátil, para mirar páginas a mano. Las comprobaciones nunca lo usan; Lighthouse se ejecuta directamente en `npm run ci` |
 | `npm run test -- google` / `npm run test -- cwv` | El nivel de Google: auditorías de Lighthouse en local; Core Web Vitals en un Worker de Cloudflare desechable |
 | `npx remy cloudflare deploy` | Build y luego sube producción a la cuenta de Cloudflare autenticada; `dev:promote` lo ejecuta |
 | `npx remy cloudflare staging` | Lo mismo para el entorno de staging: su propio Worker (`origins.staging`) y sus propios recursos; `dev:land` lo ejecuta |
 | `npx remy cloudflare preview` | Despliega este commit como un Worker desechable, ejecuta el nivel 1 contra él y lo elimina |
+| Una pull request o cualquier rama distinta de `main` | Workers Builds de Cloudflare ejecuta `npm run build` y `npx wrangler preview`: una Cloudflare Preview desechable en `https://<branch>-remy-auth.gedw99.workers.dev`, indicada en un comentario de la pull request. Las previews no tienen ninguno de los bindings de producción (el bloque `previews` de `wrangler.jsonc`). Un push a `main` ejecuta `npx wrangler versions upload`: una versión nueva, con producción sin cambios |
 | `npm run test -- remote [origin]` | Las mismas pruebas contra un deployment; sin servidor local ni deployment |
 | `npm run test -- report [remote]` | Abre el informe HTML de la última ejecución local o remota, incluidos los informes de Lighthouse |
 
@@ -243,7 +247,21 @@ las ejecuta sobre páginas renderizadas en servidor.
 ## Evidencia y límites [#evidence-and-limits]
 
 Dos niveles: el nivel 1 es cada comprobación nuestra en cada idioma (`npm run test -- every`); el nivel 2 es el de Google
-(`npm run test -- google`, `npm run test -- cwv`). Lo que cubren las comprobaciones son las propias comprobaciones: `tests/` y el
+(`npm run test -- google`, `npm run test -- cwv`). Una comprobación de algo que depende del idioma (fuentes y
+escrituras, separación silábica, dirección, formatos, los catálogos) se ejecuta en cada idioma comprobado (`checkedLocales`); una comprobación
+de un comportamiento que no depende de él (la política de seguridad, noindex, los parámetros de búsqueda, el formulario de demo, las páginas de error, las respuestas de la API)
+se ejecuta en el idioma base y en el primero de derecha a izquierda (`behaviourLocales`; `BEHAVIOUR_LOCALES` lo sustituye).
+En una pull request, cada nivel pregunta primero qué ha cambiado y se omite, indicándolo, cuando nada de lo que comprueba ha cambiado
+(`packages/ui/src/cli/unchanged.ts`, con sus comprobaciones unitarias): los planes, el contenido de los docs y el Markdown fuera de los
+paquetes no ejecutan ninguno; la app en blanco y el fixture ejecutan solo el nivel de consumidores. Los push a `main` y las etiquetas ejecutan
+todo. El nivel 1 pregunta además si lo que ha cambiado puede diferir según el idioma: los catálogos y los ajustes de idioma,
+las fuentes y cualquier CSS, el código que da formato según la configuración regional (por su nombre, o que llama a `Intl`, `toLocale…` o a una dirección de texto),
+las propias comprobaciones del navegador, el lockfile y la versión de Node. Cuando nada de eso puede diferir, se ejecuta solo en inglés y árabe
+y lo indica: el 2026-10-17 fueron 37 de los 49 commits recientes de `main` que necesitaron el nivel 1, y una ejecución de
+1 min 39 s en lugar de 2 min 49 s. Las herramientas y las comprobaciones unitarias nunca cuentan. Todos los idiomas se siguen ejecutando en cada
+push a `main`, que `dev:promote` espera, así que una página que falla solo en un idioma se detecta ahí, como muy tarde.
+`npm run ci` en local decide exactamente igual que una pull request (`--all` ejecuta todo; un `CHECK_LOCALES` fijado
+a mano prevalece). Lo que cubren las comprobaciones son las propias comprobaciones: `tests/` y el
 `@joeblew999/remy-ui/checks` del paquete (el título de cada comprobación dice qué demuestra); los pasos del flujo que las ejecutan están en
 [cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). En resumen: cada página en cada
 idioma sin JavaScript (idioma, dirección, metadatos, enlaces), catálogos y plurales, los valores de formatos
