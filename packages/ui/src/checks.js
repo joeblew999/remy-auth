@@ -5,6 +5,7 @@
 import { test, expect, chromium } from '@playwright/test';
 import { locales, baseLocale, localizeUrl, extractLocaleFromHeader } from './paraglide/runtime.js';
 import { matchChinese } from './matching.js';
+import { readFileSync } from 'node:fs';
 
 /** The base language (else the first) and the first right-to-left one among `list`: what "quick" means, here and only here. */
 const pair = (list) => [
@@ -17,22 +18,46 @@ const pair = (list) => [
 ];
 
 /**
- * The languages whose checks run: every locale; CHECK_LOCALES=quick for the base language and the first
- * right-to-left one (what the command line asks for when a change cannot differ by language, and the quick
- * tier; it never names languages itself); or a comma-separated subset. Checks iterate this; expectations
- * that must hold for every language (sitemap, hreflang, switcher) keep using `locales`.
+ * One language per way the app draws text, the languages whose checks run by default: each language fonts.css gives a
+ * font stack of its own (Arabic, Persian, Hebrew, Thai, Devanagari, Ethiopic), each Han language (each drawn by its
+ * own system font), and for the shared default stack the base language. The others draw exactly as the base language
+ * does, so their copy of every per-language check tested nothing new (owner, 2026-10-17: "you really need to decide
+ * what is tested and what isn't"; 4 of 13 languages). Read from fonts.css, so a new script or font is checked as soon
+ * as it is there. What differs by language beyond drawing is checked elsewhere in every language: the catalogs (unit
+ * checks), the casing and hyphenation samples (textChecks), the sitemap and switcher (`locales`).
+ */
+function byRendering(list) {
+  const css = readFileSync(new URL('./fonts.css', import.meta.url), 'utf8');
+  const ownStack = new Set([...css.matchAll(/html:lang\(([a-zA-Z-]+)\)/g)].map((match) => match[1]));
+  const han = ['Jpan', 'Hant', 'Hans'];
+  const key = (locale) =>
+    ownStack.has(locale) || han.includes(new Intl.Locale(locale).maximize().script) ? locale : 'default';
+  // The base language first, so it stands for the default stack; then the list's own order.
+  const ordered = list.includes(baseLocale) ? [baseLocale, ...list.filter((locale) => locale !== baseLocale)] : list;
+  const seen = new Set();
+  const chosen = new Set(ordered.filter((locale) => !seen.has(key(locale)) && seen.add(key(locale))));
+  return list.filter((locale) => chosen.has(locale));
+}
+
+/**
+ * The languages whose checks run: one per way of drawing text (byRendering, the default); CHECK_LOCALES=all for every
+ * locale (a release runs them all); CHECK_LOCALES=quick for the base language and the first right-to-left one (a
+ * deployment's smoke); or a comma-separated subset. Checks iterate this; expectations that must hold for every
+ * language (sitemap, hreflang, switcher) keep using `locales`.
  */
 const asked = process.env.CHECK_LOCALES;
 export const checkedLocales = !asked
-  ? locales
-  : asked === 'quick'
-    ? pair(locales)
-    : locales.filter((locale) =>
-        asked
-          .split(',')
-          .map((value) => value.trim())
-          .includes(locale),
-      );
+  ? byRendering(locales)
+  : asked === 'all'
+    ? locales
+    : asked === 'quick'
+      ? pair(locales)
+      : locales.filter((locale) =>
+          asked
+            .split(',')
+            .map((value) => value.trim())
+            .includes(locale),
+        );
 
 /**
  * The languages for checks of behaviour that does not depend on the language (the security policy,

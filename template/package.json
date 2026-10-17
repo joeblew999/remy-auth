@@ -10,7 +10,7 @@
     "status": "remy flow status",
     "land": "remy flow prepare land && vp run ci && remy flow land",
     "promote": "remy flow promote",
-    "release": "remy flow prepare release && REMY_REHEARSE_PUBLISH=1 vp run ci && vp run release-checks && remy flow release",
+    "release": "remy flow prepare release && REMY_REHEARSE_PUBLISH=1 CHECK_LOCALES=all vp run ci && vp run release-checks && remy flow release",
     "setup": "remy setup && vp run check",
     "upgrade": "remy upgrade"
   },

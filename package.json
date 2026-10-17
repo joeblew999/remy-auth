@@ -11,7 +11,7 @@
     "status": "node packages/ui/src/cli/remy.ts flow status",
     "land": "node packages/ui/src/cli/remy.ts flow prepare land && vp run ci && node packages/ui/src/cli/remy.ts flow land",
     "promote": "node packages/ui/src/cli/remy.ts flow promote",
-    "release": "node packages/ui/src/cli/remy.ts flow prepare release && REMY_REHEARSE_PUBLISH=1 vp run ci && vp run release-checks && node packages/ui/src/cli/remy.ts flow release",
+    "release": "node packages/ui/src/cli/remy.ts flow prepare release && REMY_REHEARSE_PUBLISH=1 CHECK_LOCALES=all vp run ci && vp run release-checks && node packages/ui/src/cli/remy.ts flow release",
     "setup": "node packages/ui/src/cli/remy.ts setup && vp run check",
     "docs:cli": "cd packages/ui/src/docs && node ../../../../node_modules/@fumadocs/cli/dist/index.js",
     "ui:components": "shadcn add button card input label badge alert field separator direction skeleton empty sidebar breadcrumb collapsible dropdown-menu avatar sheet tooltip navigation-menu use-mobile table spinner tabs --overwrite --yes -c apps/remy-auth",

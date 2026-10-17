@@ -254,12 +254,20 @@ runs them on server-rendered ones.
 (`test:audits`) and, in remy-auth, a brand-new app on this commit's package (`new-app`), one after the other: the
 audits measure speed, so they never run beside another browser run. GitHub runs the same tasks as parallel jobs (the
 browser checks in three slices, `vp run test:browser --shard 1/3`). Core Web Vitals on a throwaway Cloudflare Worker
-is the release's (`npx remy test cwv`). There are no levels to choose and no part decides to skip itself: every
-language runs, and what nothing touched comes from Vite Plus's cache instead of running again. A check of something
-that depends on the language (fonts and scripts, hyphenation, direction, formats, the catalogs) runs in every checked
-language (`checkedLocales`); a check of behaviour that does not (the security policy, noindex, search params, the demo
-form, error pages, API answers) runs in the base language and the first right-to-left one (`behaviourLocales`;
-`BEHAVIOUR_LOCALES` overrides). By hand, `CHECK_LOCALES=quick vp run test:browser` runs English and Arabic only.
+is the release's (`npx remy test cwv`). There are no levels to choose and no part decides to skip itself, and what
+nothing touched comes from Vite Plus's cache instead of running again. What is tested is decided once, by what a check
+can show (owner, 2026-10-17: "you really need to decide what is tested and what isn't"):
+
+- A check of how text is drawn (fonts and scripts, hyphenation, direction, fitting a phone, formats) runs in one
+  language per way the app draws text (`checkedLocales`): each language fonts.css gives its own font stack, each Han
+  language, and English for the shared default stack; 9 of the 13 today, worked out from fonts.css. Spanish, Polish,
+  Turkish and German draw exactly as English does.
+- A check of behaviour that does not depend on the language (the security policy, noindex, search params, the demo
+  form, error pages, API answers) runs in English and the first right-to-left language (`behaviourLocales`).
+- What does differ in every language is checked in every language: the catalogs and their plurals (the unit checks),
+  the sitemap, hreflang and the language switcher, and the casing and hyphenation samples.
+- A release runs every check in every language (`CHECK_LOCALES=all`, its script sets it). By hand, `CHECK_LOCALES`
+  takes `all`, `quick` (English and Arabic) or a comma-separated list; `BEHAVIOUR_LOCALES` overrides the second rule.
 What the checks cover is the checks themselves: `tests/` and the package's
 `@joeblew999/remy-ui/checks` (each check's title says what it proves); the flow's steps that run them are in
 [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). In short: every page in every

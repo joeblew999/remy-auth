@@ -52,7 +52,7 @@ test('the flow runs vp run ci or vp run check between its own parts, in remy-aut
     const { scripts } = JSON.parse(readFileSync(file, 'utf8')) as { scripts: Record<string, string> };
     expect(scripts.land, file).toBe(`${remy} flow prepare land && vp run ci && ${remy} flow land`);
     expect(scripts.release, file).toBe(
-      `${remy} flow prepare release && REMY_REHEARSE_PUBLISH=1 vp run ci && vp run release-checks && ${remy} flow release`,
+      `${remy} flow prepare release && REMY_REHEARSE_PUBLISH=1 CHECK_LOCALES=all vp run ci && vp run release-checks && ${remy} flow release`,
     );
     expect(scripts.setup, file).toBe(`${remy} setup && vp run check`);
     // What remy upgrade writes into an app is what remy-auth and the template have: one source, tasks.js.
