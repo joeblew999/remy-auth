@@ -52,10 +52,14 @@ export default {
           untrackedEnv: ['REMY_FLOW', 'GITHUB_ACTIONS', 'PREVIEW_PORT'],
         },
       },
-      check: {
-        command: 'node packages/ui/src/cli/remy.ts check',
-        cache: { input: [{ auto: true }, ...generated], untrackedEnv: ['REMY_FLOW', 'GITHUB_ACTIONS'] },
+      // What the type check needs and git does not hold: the compiled UI text (Paraglide), the command line as an app
+      // runs it, the Worker's binding types, and the docs' own (their package's generate task).
+      generate: {
+        command: ['node packages/ui/paraglide.mjs', 'tsc -p packages/ui/src/cli', 'wrangler types'],
+        dependsOn: ['@joeblew999/remy-auth-docs#generate'],
       },
+      // Vite+'s check (format, lint, types) on everything generated first.
+      check: { command: 'vp check', dependsOn: ['generate'] },
     },
   },
 };
