@@ -18,7 +18,8 @@ export async function main(): Promise<void> {
   const aStep = /\b(npm\s+run\s+dev:|remy\s+)(change|land|promote|release)\b/.test(command);
   const found = command && !aStep ? heavyIn(command) : undefined;
   if (found) {
-    console.error(`The flow refuses \`${found.task}\` here: ${found.why}.\nThe steps: npm run dev:change (after every change, seconds) · npm run dev:land -- "<message>" (commit, main, push, staging; GitHub runs the heavy checks) · npm run dev:promote (production) · npm run dev:release (a release). One area: npm run test -- only <words>.`);
+    // What to run instead is COMMANDS.md, generated from the command line; never a list written here (it drifted).
+    console.error(`The flow refuses \`${found.task}\` here: ${found.why}.\nWhat to run instead: COMMANDS.md ("What you run" first), generated from the command line.`);
     process.exit(2);
   }
 }

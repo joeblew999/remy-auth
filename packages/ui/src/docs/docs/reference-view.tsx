@@ -20,7 +20,7 @@ export function ReferenceView({ page }: { page: NonNullable<Awaited<ReturnType<t
   return <RootProvider theme={{ storageKey: 'theme', attribute: 'class', defaultTheme: 'system', enableSystem: true, nonce }}
     search={{ options: { api: '/api/search/reference' } }}>
     <DocsLayout tree={pageTree}
-      tabs={sectionTabs}
+      tabs={sectionTabs()}
       tabMode="navbar" nav={{ title: docsConfig.product, url: '/', mode: 'top' }}
       links={[{ text: 'Site', url: docsConfig.appUrl, external: true }, { text: 'App', url: `${docsConfig.appUrl}/app`, external: true }]}
       sidebar={{ footer: <AiLinks section={'reference'} /> }}>

@@ -1,7 +1,7 @@
 ---
-title: "Prueba mínima de GUI"
+title: "Ejecutar, previsualizar y probar la app"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "513edd76 5d5de609 0e8ef4b6 2a9d9497 917db7e6 222ea1f3 655a09ab 1d2bc14b 6b0fddca"
+translatedFrom: "573a07f6 5d5de609 0e8ef4b6 2a9d9497 917db7e6 222ea1f3 655a09ab 1d2bc14b 6b0fddca"
 ---
 
 ```sh

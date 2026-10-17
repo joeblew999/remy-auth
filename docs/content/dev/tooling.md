@@ -1,6 +1,6 @@
 ---
 title: "Developer tooling reference"
-description: "The developer tooling reference: the package.json scripts and the remy commands, pinned tools, secrets, agent skills and the Cloudflare services behind the docs."
+description: "The tools behind the commands: where each area is explained, pinned tools, secrets, agent skills and the Cloudflare services behind the docs. Every command itself is on Commands."
 ---
 
 ## The tooling

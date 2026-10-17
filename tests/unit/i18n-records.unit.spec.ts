@@ -44,3 +44,11 @@ test('a spliced section keeps the blank line before the next heading (it was los
   expect(result).toBe(spanish.replace('Primero.', 'Primero, otra vez.'));
   expect(sections(result)).toHaveLength(3);
 });
+
+test("a docs menu's words are its title and its separators' and links' labels, put back in their places", async () => {
+  const { menuIn, menuWords } = await import('../../packages/ui/src/cli/i18n');
+  const menu = { title: 'Remy product guide', pages: ['index', '---Help---', 'faq', '[API reference](/reference)'] };
+  expect(menuWords(menu)).toEqual({ title: 'Remy product guide', 'pages.1': 'Help', 'pages.3': 'API reference' });
+  const spanish = menuIn(menu, { title: 'Guía de Remy', 'pages.1': 'Ayuda', 'pages.3': 'Referencia de la API' });
+  expect(spanish).toEqual({ title: 'Guía de Remy', pages: ['index', '---Ayuda---', 'faq', '[Referencia de la API](/reference)'], translatedFrom: print(menuWords(menu)) });
+});

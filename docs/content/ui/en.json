@@ -51,5 +51,11 @@
   "Toggle Theme(theme switcher)(aria-label)": "Toggle Theme",
   "Type(type table)": "Type",
   "View as Markdown(page actions)": "View as Markdown",
-  "displayName": "displayName"
+  "displayName": "displayName",
+  "Product guide(docs section)": "Product guide",
+  "For people using the app(docs section)": "For people using the app",
+  "Developer docs(docs section)": "Developer docs",
+  "For developers building Remy(docs section)": "For developers building Remy",
+  "API reference(docs section)": "API reference",
+  "For developers calling the API(docs section)": "For developers calling the API"
 }

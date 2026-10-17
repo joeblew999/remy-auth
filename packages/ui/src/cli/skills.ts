@@ -5,7 +5,7 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { dispatch, type Subcommands } from './commands.ts';
-import { spawn, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 
 export const skillsCli = 'skills@1.7.0';
 
@@ -64,17 +64,11 @@ export async function buildSkill(): Promise<void> {
   if (!existsSync('docs/content/dev') || !existsSync('packages/ui/package.json')) { console.log('skills build: only remy-auth makes the remy skill (from its developer docs).'); return; }
   const { parts } = await import('./check.ts');
   await parts.docs!();
-  const port = Number(process.env.SKILL_DOCS_PORT ?? 4178);
-  const server = spawn(join('..', 'node_modules', '.bin', 'wrangler'), ['dev', '-c', 'dist/server/wrangler.json', '--local', '--ip', '127.0.0.1', '--port', String(port)], { cwd: 'docs', stdio: 'ignore' });
-  const base = `http://127.0.0.1:${port}`;
+  const { serveBuilt } = await import('./docs.ts');
+  const { origin: base, stop } = await serveBuilt();
   const text = async (path: string) => { const response = await fetch(base + path); if (!response.ok) throw new Error(`skills build: ${path} answered ${response.status}`); return response.text(); };
   try {
-    for (let tries = 0; ; tries++) {
-      if (await fetch(`${base}/dev/llms.txt`).then(response => response.ok, () => false)) break;
-      if (tries > 90) throw new Error('skills build: the docs Worker did not answer within 90 s');
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-    const pages = [...(await text('/dev/llms.txt')).matchAll(/^- \[([^\]]+)\]\(\/dev(?:\/([^)#\s]+))?\): (.*)$/gm)].map(([, title, slug, description]) => ({ title: title!, slug: slug ?? 'index', description: description! }));
+    const pages = [...(await text('/dev/llms.txt')).matchAll(/^- \[([^\]]+)\]\((?:https?:\/\/[^/)]+)?\/dev(?:\/([^)#\s]+))?\): (.*)$/gm)].map(([, title, slug, description]) => ({ title: title!, slug: slug ?? 'index', description: description! }));
     if (pages.length < 5) throw new Error(`skills build: /dev/llms.txt lists ${pages.length} pages`);
     const out = join('packages', 'ui', 'skills', 'remy');
     rmSync(out, { recursive: true, force: true });
@@ -100,5 +94,5 @@ them to AI tools.${live} Every command: \`COMMANDS.md\` at the repo root (CLAUDE
 ${pages.map(page => `- [${page.title}](references/${page.slug}.md): ${page.description}`).join('\n')}
 `);
     console.log(`skills build: the remy skill, ${pages.length} pages from the docs as AI tools read them (${version}).`);
-  } finally { server.kill(); }
+  } finally { stop(); }
 }

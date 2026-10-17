@@ -84,6 +84,32 @@ export function changedSections(english: string, translation: string): number[] 
   return now.flatMap((value, index) => (value === recorded[index] ? [] : [index]));
 }
 
+/**
+ * A docs menu's words (meta.json): its title, and the labels of its separators ("---Help---") and links
+ * ("[Text](url)"), each keyed by where it sits. Pages translate as pages; a menu was never translated, so the
+ * Spanish sidebar, its llms.txt headings and its site title stayed English (2026-10-17).
+ */
+export function menuWords(meta: { title?: string; pages?: string[] }): Record<string, string> {
+  const words: Record<string, string> = {};
+  if (meta.title) words.title = meta.title;
+  (meta.pages ?? []).forEach((entry, index) => {
+    const label = /^---(.+)---$/.exec(entry)?.[1] ?? /^\[([^\]]+)\]\(.+\)$/.exec(entry)?.[1];
+    if (label) words[`pages.${index}`] = label;
+  });
+  return words;
+}
+
+/** The menu in another language (meta.<lang>.json, which Fumadocs reads): the English menu with the translated words, and the record of what it was made from. */
+export function menuIn(meta: { title?: string; pages?: string[] } & Record<string, unknown>, words: Record<string, string>): Record<string, unknown> {
+  const pages = (meta.pages ?? []).map((entry, index) => {
+    const label = words[`pages.${index}`];
+    if (!label) return entry;
+    if (/^---.+---$/.test(entry)) return `---${label}---`;
+    return entry.replace(/^\[[^\]]+\]/, `[${label}]`);
+  });
+  return { ...meta, ...(meta.title && words.title ? { title: words.title } : {}), pages, translatedFrom: print(menuWords(meta)) };
+}
+
 /** A catalog's record: `translated-from/<lang>.json` in the catalog's folder, key to fingerprint. */
 export const recordFile = (catalog: string): string => join(dirname(catalog), 'translated-from', catalog.slice(dirname(catalog).length + 1));
 /** The record of a catalog, empty when it has none. */
@@ -195,6 +221,13 @@ export function docsGaps(cwd = process.cwd()): { gaps: Gap[]; sites: number } {
         const translation = english.replace(/\.(mdx?)$/, `.${lang}.$1`);
         if (!existsSync(join(cwd, translation))) gaps.push({ language: lang, kind: 'missing', what: translation });
         else if (stale(english, translation)) gaps.push({ language: lang, kind: 'stale', what: translation });
+      }
+      // The site's menu (meta.json) in this language: missing, or made from other English words.
+      const menu = join(site, 'meta.json');
+      if (existsSync(menu)) {
+        const translated = join(site, `meta.${lang}.json`);
+        const made = existsSync(translated) ? (readJson(translated).translatedFrom as string | undefined) : undefined;
+        if (made !== print(menuWords(readJson(menu) as { title?: string; pages?: string[] }))) gaps.push({ language: lang, kind: 'menu', what: relative(cwd, translated) });
       }
       for (const translation of pages.filter(file => file.endsWith(`.${lang}.md`) || file.endsWith(`.${lang}.mdx`))) {
         const english = translation.replace(new RegExp(`\\.${lang}\\.(mdx?)$`), '.$1');

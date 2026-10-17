@@ -3,7 +3,7 @@
 // included), a preview Worker, Ask AI's answers paused or resumed (an emergency stop, seconds), its
 // pages published to the index, what Ask AI needs on Cloudflare (printed, created never), its logs and
 // its gateway (observe.ts, with the docs Worker's generated configuration), and starting an app's docs.
-import { execFileSync, spawnSync } from 'node:child_process';
+import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -46,6 +46,31 @@ const previewName = () => `${(JSON.parse(readFileSync(join(docs(), '.remy-docs',
 export const dev = (): void => tool(bin('vite'), ['dev']);
 export const build = (): void => tool(bin('vite'), ['build']);
 /** Build (which writes .remy-docs/), binding types, types. */
+/**
+ * The built docs on local Workers, as their checks and AI tools see them (/dev/llms.txt, each page's .md), at
+ * DOCS_PREVIEW_PORT: the one way to serve them (`remy docs serve`, and the remy skill's build), so nobody runs
+ * Wrangler by hand to look (2026-10-17). Resolves once they answer; `stop` ends the server.
+ */
+export async function serveBuilt(port = Number(process.env.DOCS_PREVIEW_PORT ?? 4174)): Promise<{ origin: string; stop: () => void }> {
+  const server = spawn(bin('wrangler'), ['dev', '-c', 'dist/server/wrangler.json', '--local', '--ip', '127.0.0.1', '--port', String(port)], { cwd: docs(), stdio: 'ignore' });
+  const origin = `http://127.0.0.1:${port}`;
+  const stop = () => { server.kill(); };
+  for (let waited = 0; !(await fetch(`${origin}/llms.txt`).then(response => response.ok, () => false)); waited++) {
+    if (waited >= 90) { stop(); fail(`docs serve: ${origin} did not answer within 90 s`); }
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+  return { origin, stop };
+}
+
+/** `remy docs serve`: build, then serve the built docs here until stopped (Ctrl-C). */
+async function serve(): Promise<void> {
+  build();
+  const { origin, stop } = await serveBuilt();
+  console.log(`docs: the built docs at ${origin} (AI tools read ${origin}/llms.txt, ${origin}/dev/llms.txt, each page's .md); Ctrl-C stops them.`);
+  process.on('SIGINT', () => { stop(); process.exit(0); });
+  await new Promise(() => {});
+}
+
 export function check(): void { build(); tool(bin('wrangler'), ['types', '-c', '.remy-docs/wrangler.json']); tool(bin('tsc'), ['-p', '.']); }
 /** The docs' browser checks on a local build, at the docs preview port. */
 export function test(): void { build(); tool(bin('playwright'), ['test', '-c', '../node_modules/@joeblew999/remy-ui/src/docs/playwright.config.js', '--project=ours'], { env: { PREVIEW_PORT: process.env.DOCS_PREVIEW_PORT ?? '4174' } }); }
@@ -204,6 +229,7 @@ export const what = "the docs Worker, @joeblew999/remy-ui's, over this app's doc
 export const commands: Subcommands = {
   dev: { what: 'the docs Worker with hot reload', run: () => dev() },
   build: { what: 'the production build, which writes .remy-docs/', run: () => build() },
+  serve: { what: "the built docs here at DOCS_PREVIEW_PORT (4174), as their checks and AI tools see them: llms.txt, each page's .md (preview is Cloudflare's)", run: () => serve() },
   check: { what: 'build, binding types, types', run: () => check() },
   test: { what: "[remote]: the docs' browser checks on a local build, or against the deployment with every MCP server's tools", run: rest => rest[0] === 'remote' ? testRemote() : test() },
   preview: { what: 'a preview Worker of the docs, answers paused', run: () => preview() },

@@ -1,5 +1,5 @@
 ---
-title: "Minimal GUI proof"
+title: "Run, preview and test the app"
 description: "One Cloudflare Worker serves the site and the app; how to run it locally, preview it and test it against local and remote targets."
 ---
 

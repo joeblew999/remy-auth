@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
-description: "La referencia de herramientas de desarrollo: los scripts de package.json y los comandos de remy, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación."
-translatedFrom: "e2a6bd75 afd520fb 0971c6b1 2ddd885f e9c16a40 ec3067e7 1ff06e1d 067ae0a5 e6b13d48 bdbd896f 35c0ad6b e58ce74e 4087c066 73b31a8d b2463d08 ab72ce36"
+description: "Las herramientas detrás de los comandos: dónde se explica cada área, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación. Todos los comandos están en Comandos."
+translatedFrom: "cccfd094 afd520fb 0971c6b1 2ddd885f e9c16a40 ec3067e7 1ff06e1d 067ae0a5 e6b13d48 bdbd896f 35c0ad6b e58ce74e 4087c066 73b31a8d b2463d08 ab72ce36"
 ---
 
 ## Las herramientas [#the-tooling]

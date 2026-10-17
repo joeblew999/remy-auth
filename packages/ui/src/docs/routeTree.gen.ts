@@ -11,7 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CspReportRouteImport } from './routes/csp-report'
+import { Route as DevDotmdRouteImport } from './routes/dev[.]md'
+import { Route as DocsDotmdRouteImport } from './routes/docs[.]md'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
+import { Route as ReferenceDotmdRouteImport } from './routes/reference[.]md'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as DevSplatRouteImport } from './routes/dev/$'
@@ -38,9 +41,24 @@ const CspReportRoute = CspReportRouteImport.update({
   path: '/csp-report',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DevDotmdRoute = DevDotmdRouteImport.update({
+  id: '/dev.md',
+  path: '/dev.md',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsDotmdRoute = DocsDotmdRouteImport.update({
+  id: '/docs.md',
+  path: '/docs.md',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
   id: '/llms.txt',
   path: '/llms.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReferenceDotmdRoute = ReferenceDotmdRouteImport.update({
+  id: '/reference.md',
+  path: '/reference.md',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
@@ -125,7 +143,10 @@ const ApiSearchSiteRoute = ApiSearchSiteRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/csp-report': typeof CspReportRoute
+  '/dev.md': typeof DevDotmdRoute
+  '/docs.md': typeof DocsDotmdRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/reference.md': typeof ReferenceDotmdRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dev/$': typeof DevSplatRoute
@@ -145,7 +166,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/csp-report': typeof CspReportRoute
+  '/dev.md': typeof DevDotmdRoute
+  '/docs.md': typeof DocsDotmdRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/reference.md': typeof ReferenceDotmdRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dev/$': typeof DevSplatRoute
@@ -166,7 +190,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/csp-report': typeof CspReportRoute
+  '/dev.md': typeof DevDotmdRoute
+  '/docs.md': typeof DocsDotmdRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/reference.md': typeof ReferenceDotmdRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dev/$': typeof DevSplatRoute
@@ -188,7 +215,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/csp-report'
+    | '/dev.md'
+    | '/docs.md'
     | '/llms.txt'
+    | '/reference.md'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/dev/$'
@@ -208,7 +238,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/csp-report'
+    | '/dev.md'
+    | '/docs.md'
     | '/llms.txt'
+    | '/reference.md'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/dev/$'
@@ -228,7 +261,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/csp-report'
+    | '/dev.md'
+    | '/docs.md'
     | '/llms.txt'
+    | '/reference.md'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/dev/$'
@@ -249,7 +285,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CspReportRoute: typeof CspReportRoute
+  DevDotmdRoute: typeof DevDotmdRoute
+  DocsDotmdRoute: typeof DocsDotmdRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
+  ReferenceDotmdRoute: typeof ReferenceDotmdRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   DevSplatRoute: typeof DevSplatRoute
@@ -283,11 +322,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CspReportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dev.md': {
+      id: '/dev.md'
+      path: '/dev.md'
+      fullPath: '/dev.md'
+      preLoaderRoute: typeof DevDotmdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs.md': {
+      id: '/docs.md'
+      path: '/docs.md'
+      fullPath: '/docs.md'
+      preLoaderRoute: typeof DocsDotmdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/llms.txt': {
       id: '/llms.txt'
       path: '/llms.txt'
       fullPath: '/llms.txt'
       preLoaderRoute: typeof LlmsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reference.md': {
+      id: '/reference.md'
+      path: '/reference.md'
+      fullPath: '/reference.md'
+      preLoaderRoute: typeof ReferenceDotmdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/robots.txt': {
@@ -401,7 +461,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CspReportRoute: CspReportRoute,
+  DevDotmdRoute: DevDotmdRoute,
+  DocsDotmdRoute: DocsDotmdRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
+  ReferenceDotmdRoute: ReferenceDotmdRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   DevSplatRoute: DevSplatRoute,

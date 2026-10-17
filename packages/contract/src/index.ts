@@ -55,7 +55,7 @@ const refusals = {
 export const contract = {
   status: oc
     .meta(policy('public'))
-    .meta(openapi({ method: 'GET', path: '/api/status', summary: 'Liveness of the Worker', tags: ['status'] }))
+    .meta(openapi({ method: 'GET', path: '/api/status', summary: 'Liveness of the Worker', tags: ['status'], description: 'Answers "ok" with the Worker that answered and the deployed version\'s ID ("local" when it is not deployed). Needs no session.' }))
     .output(status),
   me: oc
     .meta(policy('session'))
@@ -71,7 +71,7 @@ export const contract = {
       .output(noteList),
     create: oc
       .meta(may('CREATE_NOTE'))
-      .meta(openapi({ method: 'POST', path: '/api/notes', tags: ['notes'], summary: 'Write a note' }))
+      .meta(openapi({ method: 'POST', path: '/api/notes', tags: ['notes'], summary: 'Write a note', description: 'Anyone signed in may. The note is theirs: only they may share it or delete it.' }))
       .errors({ UNAUTHORIZED: refusals.UNAUTHORIZED })
       .input(noteDraft)
       .output(note),

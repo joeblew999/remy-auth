@@ -123,7 +123,7 @@ export function DocsView({ page }: { page: DocsPageData & { ask?: boolean } }) {
       // Fumadocs' Notebook layout: the three docs sections as tabs in the top bar, with the App link, search,
       // language and theme beside them, the same on every docs page; the page list in the sidebar.
       tabMode="navbar"
-      tabs={sectionTabs}
+      tabs={sectionTabs(page.lang)}
       nav={{ title: docsConfig.product, url: '/', mode: 'top' }}
       links={[{ text: 'Site', url: docsConfig.appUrl, external: true }, { text: 'App', url: `${docsConfig.appUrl}/app`, external: true }]}
       sidebar={{ footer: <AiLinks section={page.site} /> }}>

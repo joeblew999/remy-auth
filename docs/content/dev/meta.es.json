@@ -1,0 +1,19 @@
+{
+  "title": "Documentación para desarrolladores de Remy",
+  "pages": [
+    "index",
+    "agents",
+    "commands",
+    "development",
+    "how-we-work",
+    "tooling",
+    "gui",
+    "ui-package",
+    "auth",
+    "tasks",
+    "writing-docs",
+    "ai-tools",
+    "changelog"
+  ],
+  "translatedFrom": "df7b17d5"
+}

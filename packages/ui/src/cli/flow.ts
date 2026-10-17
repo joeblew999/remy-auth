@@ -70,6 +70,8 @@ export const heavy: Record<string, string> = {
   'remy test': 'level 1: npm run ci runs it, and dev:land and GitHub with it; one area: npm run test -- only <words>',
   'npm test': 'level 1: npm run ci runs it, and dev:land and GitHub with it; one area: npm run test -- only <words>',
   'test:consumers': 'the consumer fixture: GitHub runs it after every push; remy test consumers is its gate',
+  // Serving by hand with a raw tool call (an agent did, 2026-10-17): every way to serve has its command.
+  'wrangler dev': 'serving by hand: npx remy docs serve (the built docs, with llms.txt), npm run preview (the built app), npm run dev (hot reload); when no command does what you need, add one',
 };
 
 /** Where a key's spelling needs more than its words: the suite is refused, its light forms (only, report, live, smoke) are not. */
