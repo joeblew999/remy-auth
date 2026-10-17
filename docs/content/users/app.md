@@ -24,4 +24,4 @@ The app opens from **Open the app** in the top bar.
 - **On a tablet or computer**, the list of pages is down the side. The button at the top left shrinks it
   to icons and back.
 
-Developers: how the app is built is in [the developer docs](/dev/gui).
+Developers: how the app is built is in [the developer docs](/dev/run-and-test).

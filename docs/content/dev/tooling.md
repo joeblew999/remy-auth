@@ -72,8 +72,8 @@ Every script and command, with what each does, is on **[Commands](./commands.mdx
 command line itself, so it cannot drift; no page lists them by hand. Where each area is explained:
 
 - The flow and who runs each step: [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)
-- The app, local and remote checks, previews: [the GUI](./gui.md)
-- Deployments, translations, a repository that publishes packages: [the command line](./tasks.md)
+- The app, local and remote checks, previews: [the GUI](./run-and-test.md)
+- Deployments, translations, a repository that publishes packages: [the command line](./projects.md)
 - The docs Worker over an app's `docs/`: [writing docs](./writing-docs.mdx)
 - Plans: [plans](./how-we-work.md#plans-few-short-closed); translations as a rule: [in the change](./how-we-work.md#translations-in-the-change)
 - Agent skills, MCP, screenshots and the agents' own browser: below
@@ -95,7 +95,7 @@ main, push, staging; GitHub runs the heavy checks), `dev:promote` (production) a
 `dev:start` and `dev:done` around a piece of work and `dev:status` to look; a gate in every heavy
 command refuses it outside them. The rule is in
 [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), the commands in
-[the command line](./tasks.md).
+[the command line](./projects.md).
 
 `npx remy verify` is the release's gate: `dev:release` runs it. An installation ends with
 `npx remy verify setup` (`npm run setup`, `npm run packages -- upgrade` and `npm run upgrade` run it): about
@@ -108,7 +108,7 @@ pinned source with its Claude link), then the check. They use the existing local
 do not provision Cloudflare resources. The gate then runs every browser check of ours in every
 language (`npm run ci`'s `browser` part) against the production artifact in local Workers, then the new-app
 test. Google's audits are not in it: `npm run ci -- audits` and `npm run test -- cwv`, which the release runs
-after it. No deployment is performed. See [the GUI proof](./gui.md) for scope and commands.
+after it. No deployment is performed. See [the GUI proof](./run-and-test.md) for scope and commands.
 
 
 ## Start or reload your agent

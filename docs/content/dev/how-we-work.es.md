@@ -6,7 +6,7 @@ translatedFrom: "be9633b9 9d3c93f6 790e3737 0ed0ead4 d8386d74 94b8f1c6 4dca6b46 
 
 Este documento es el dueño de cómo trabajan las personas y los agentes: los hábitos que ha pedido el
 propietario, tanto para desarrolladores como para agentes de IA. Lo que el código debe ser vive en
-[principios de desarrollo](./development.md).
+[principios de desarrollo](./principles.md).
 
 ## Dónde viven las reglas [#where-rules-live]
 
@@ -14,7 +14,7 @@ propietario, tanto para desarrolladores como para agentes de IA. Lo que el códi
   que abra el repositorio, persona o agente, debe encontrar las mismas reglas. La memoria del agente
   es solo para cosas que concierne a un único agente, nunca para cómo funciona el proyecto.
 - Cada hecho tiene un único hogar, como exigen los
-  [principios de desarrollo](./development.md#development-principles); eso también aplica a estas reglas.
+  [principios de desarrollo](./principles.md#development-principles); eso también aplica a estas reglas.
 - Los `AGENTS.md` y `CLAUDE.md` de la raíz son punteros a [Agentes: empieza aquí](./agents.md) y no
   contienen ninguna regla propia: `CLAUDE.md` es un `@import` de esa página, así que Claude Code la
   carga; `AGENTS.md` la nombra, para Codex y cualquier otra herramienta. Una regla escrita en
@@ -202,7 +202,7 @@ inglés y sus traducciones: un commit, un push, una ejecución de las comprobaci
   `REMY_FLOW=hand npx remy i18n translate docs <archivo>…`, que deja esos archivos totalmente alineados con el
   inglés. Cambia la estructura de un catálogo (el archivo de cada locale) en el mismo commit que `en.json`.
 
-El layout y los comandos están en [la línea de comandos](./tasks.md#translations).
+El layout y los comandos están en [la línea de comandos](./projects.md#translations).
 
 ## Planes: pocos, cortos, cerrados [#plans-few-short-closed]
 
@@ -217,7 +217,7 @@ completa al final.
 Las tareas compartidas `remy plans …` hacen los movimientos: `remy plans status` lista lo que está abierto,
 `remy plans close`, `remy plans park` y `remy plans open` (un plan aparcado que se retoma) añaden la línea, mueven el
 archivo y redirigen cada enlace, y `remy plans check` (en el check, `dev:change`) mantiene `.plans/`
-ordenado ([tareas](./tasks.md#plans)).
+ordenado ([tareas](./projects.md#plans)).
 
 ## Cuando el propietario delega decisiones [#when-the-owner-delegates-decisions]
 
@@ -254,7 +254,7 @@ que cada app, desde las tareas compartidas; `npm run setup` instala el guardián
   trabajo terminado sin preguntar: staging forma parte del landing, GitHub comprueba cada landing, y
   nada llega a producción por ese camino. La palabra del propietario es para producción y para una
   publicación, los dos pasos cuya columna así lo dice, y para el aprovisionamiento
-  ([principios de desarrollo](./development.md#development-principles)). Un agente que lee la tabla y
+  ([principios de desarrollo](./principles.md#development-principles)). Un agente que lee la tabla y
   aun así pregunta si debe aterrizar ha dejado de usar el flujo (propietario, 2026-10-10, después de que
   uno lo hiciera: «¿Está absolutamente claro cuándo te corresponde ejecutar cada paso?»).
 

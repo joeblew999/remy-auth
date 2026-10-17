@@ -22,11 +22,11 @@ En producción: la app <https://remy-auth.gedw99.workers.dev> (staging, con el i
 herramientas de IA en `/llms.txt`). El origen de estas páginas es `docs/content/dev/*.md`: lee eso, no
 las traducciones que están al lado (`*.es.md`).
 
-1. [Principios de desarrollo](./development.md): propiedad, única fuente de verdad, puertas de
+1. [Principios de desarrollo](./principles.md): propiedad, única fuente de verdad, puertas de
    pruebas, código generado, decisiones del dueño.
 2. [Herramientas para desarrolladores](./tooling.md): herramientas fijadas y habilidades de agente; todos los
    comandos están en [Comandos](./commands.mdx), generados a partir de la línea de comandos. Ejecuta los comandos del proyecto con `npm run <script>`.
-3. [Flujo de trabajo en tiempo de ejecución de la GUI](./gui.md): un solo Worker, objetivos de
+3. [Flujo de trabajo en tiempo de ejecución de la GUI](./run-and-test.md): un solo Worker, objetivos de
    prueba locales y remotos.
 4. [Cómo trabajamos](./how-we-work.md): primero las herramientas del proyecto, encuestas antes de
    elegir herramientas, shadcn y TanStack de principio a fin para la UI, el flujo y quién ejecuta cada
@@ -34,7 +34,7 @@ las traducciones que están al lado (`*.es.md`).
 5. [Inicio de sesión y permisos](./auth.md): el guard, el motor de relaciones, `<Allowed>`, entornos
    y correo: lo que recibe toda app de Remy, y dónde remy-auth usa cada uno de ellos.
 6. El plan en [`.plans/`](https://github.com/joeblew999/remy-auth/tree/main/.plans) que cubre tu
-   tarea, y sus [roles de Executor/Reviewer](./development.md#plans-and-roles).
+   tarea, y sus [roles de Executor/Reviewer](./principles.md#plans-and-roles).
 
 Empieza con `npm run dev:status` (qué está pasando) y
 [las herramientas propias del proyecto](./how-we-work.md#use-the-projects-own-tools-first), y termina

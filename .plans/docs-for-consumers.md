@@ -131,7 +131,7 @@ English, 169 KB Spanish) and one `.md` per page. What the output needs:
 
 ### 1. Should it be docs at all? The rules audit
 
-89 distinct rules in how-we-work, development, tooling and `docs/content/dev/tasks.md`:
+89 distinct rules in how-we-work, development, tooling and `docs/content/dev/projects.md`:
 **22 enforced, 31 checkable, 36 prose only.**
 
 - **Enforced, but not in apps.** `ui:verify` and `ui:release` are in the root `mise.toml`, and
@@ -196,7 +196,7 @@ English, 169 KB Spanish) and one `.md` per page. What the output needs:
 ### 2. Can the tools describe themselves?
 
 Yes, for tasks and the API. `mise generate task-docs` renders every task's description, dependencies,
-arguments and flags, included tasks too. The per-task "Does" rows in `docs/content/dev/tasks.md` become a
+arguments and flags, included tasks too. The per-task "Does" rows in `docs/content/dev/projects.md` become a
 generated block; the hand-written part keeps only grouping, tiers and cross-links. Two gaps: it does not
 say which include a task came from, and `--style detailed` equals `simple` in 2026.9.12.
 `mise tasks --json` is the data for the lint. The API reference is already oRPC's `/api/doc`. Package
@@ -348,7 +348,7 @@ only, so it is not the main route.
    block; remy-auth-app's `AGENTS.md` loses its GitHub `main` links. Prove with Codex and Claude that
    the skill is listed and the block loads, then that an upgrade from one release to the next shows the
    rule change in the diff.
-7. **Task reference:** `docs:tasks` injects `mise generate task-docs` into `docs/content/dev/tasks.md`; the
+7. **Task reference:** `docs:tasks` injects `mise generate task-docs` into `docs/content/dev/projects.md`; the
    hand-written tables keep the grouping only.
 8. **Later, the owner's call:** the AI Search public MCP or the Fumadocs MCP route; agent evals.
 
@@ -382,7 +382,7 @@ version-matched reference, and `llms.txt` because Fumadocs makes it cheap.
 ## Tool-up trial (2026-09-26)
 
 Owner: "convert 1 doc and then tool up to see what works and does not work well ... don't miss any
-aspects". Two trials: `docs/content/dev/gui.md` converted on the local branch `fumadocs-trial` (worktree
+aspects". Two trials: `docs/content/dev/run-and-test.md` converted on the local branch `fumadocs-trial` (worktree
 `.claude/worktrees/fumadocs-trial`); a scratch app from `create-fumadocs-app` 16.2.9 `--template
 tanstack-start --search orama`, then every `@fumadocs/cli` 1.7.0 feature, one commit each, built and
 each route requested.

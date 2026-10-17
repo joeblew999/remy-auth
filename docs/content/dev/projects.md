@@ -1,6 +1,6 @@
 ---
-title: "The command line"
-description: "remy, the tooling every Remy app installs with the package: the scripts, the layout they read, a new app, publishing packages, translations, Cloudflare and plans."
+title: "Projects: layout, new apps and publishing"
+description: "What every Remy project keeps in the same place, how to start a new app, publishing packages, translations, Cloudflare and plans. Every command is on Commands."
 ---
 
 The tooling is `remy`, the bin of `@joeblew999/remy-ui` (`packages/ui/src/cli`, one TypeScript module per

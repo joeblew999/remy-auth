@@ -90,20 +90,20 @@ también dice quién ejecuta producción y una publicación. Las comprobaciones 
 ejecuta después de cada aterrizaje, y las herramientas las rechazan fuera del flujo.
 
 La vista previa local y el despliegue remoto usan el mismo build y la misma configuración de Wrangler.
-Consulta los [comandos locales/remotos](./gui.md#one-scaffold-for-local-and-cloudflare)
+Consulta los [comandos locales/remotos](./run-and-test.md#one-scaffold-for-local-and-cloudflare)
 para el despliegue y para ejecutar las mismas pruebas contra una URL desplegada.
 
 Revisa los cambios de dependencias después de actualizar. Node está fijado en `.node-version` y en los
 `engines` de `package.json`; los commits de origen de las skills están en el paquete (`packages/ui/src/cli/skills.ts`), que todas las
-apps instalan ([la línea de comandos](./tasks.md)).
+apps instalan ([la línea de comandos](./projects.md)).
 
 ## Documentación del proyecto [#project-documentation]
 
 - [Agentes: empieza aquí](./agents.md): por dónde empiezan los agentes; el `AGENTS.md` y `CLAUDE.md` raíz solo apuntan a él.
-- [Principios de desarrollo](./development.md): qué debe ser el código, y cómo funcionan los planes.
+- [Principios de desarrollo](./principles.md): qué debe ser el código, y cómo funcionan los planes.
 - [Cómo trabajamos](./how-we-work.md): cómo trabajan las personas y los agentes.
 - [Herramientas de desarrollo](./tooling.md): los scripts y comandos, skills, MCP y herramientas de navegador.
-- [Flujo de trabajo en tiempo de ejecución de la GUI](./gui.md): un Worker, objetivos de prueba locales y remotos.
-- [La línea de comandos](./tasks.md): `remy`, las herramientas que toda app instala con el paquete.
-- [Paquete de UI compartido](./ui-package.md) y su [registro de cambios](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
+- [Flujo de trabajo en tiempo de ejecución de la GUI](./run-and-test.md): un Worker, objetivos de prueba locales y remotos.
+- [La línea de comandos](./projects.md): `remy`, las herramientas que toda app instala con el paquete.
+- [Paquete de UI compartido](./remy-ui.md) y su [registro de cambios](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
 - [Planes](https://github.com/joeblew999/remy-auth/tree/main/.plans): [.plans/now.md](https://github.com/joeblew999/remy-auth/blob/main/.plans/now.md) es la única lista de lo que está abierto y en qué punto está.

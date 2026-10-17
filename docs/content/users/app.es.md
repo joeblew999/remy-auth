@@ -25,4 +25,4 @@ La app se abre desde **Open the app** en la barra superior.
 - **En una tableta o un ordenador**, la lista de páginas está en el lateral. El botón de la parte superior
   izquierda la reduce a iconos y la vuelve a ampliar.
 
-Para desarrolladores: cómo está construida la app se explica en [la documentación para desarrolladores](/dev/gui).
+Para desarrolladores: cómo está construida la app se explica en [la documentación para desarrolladores](/dev/run-and-test).

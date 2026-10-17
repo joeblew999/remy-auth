@@ -71,7 +71,7 @@ Below this section is the history of how it got here.
      stale until someone's `project:setup` rewrites it (seen 2026-10-10: setup dirtied the tree after the
      day's doc changes). Either the lock stops hashing a generated skill, or `dev:land` refreshes it
      when docs changed; decide in item 4's work on the tooling.
-   - **The new-app steps** in [tasks](../docs/content/dev/tasks.md) were corrected by reading, not by
+   - **The new-app steps** in [tasks](../docs/content/dev/projects.md) were corrected by reading, not by
      running (translate once by hand with `REMY_FLOW=hand`, the first deploy by hand, then the flow);
      creating `remy-auth-test` (item 3) is their first run.
    - Closed of it: `dev:land` deploys staging before it translates (05896d6, 2026-10-09). The word

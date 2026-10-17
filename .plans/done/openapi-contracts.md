@@ -4,7 +4,7 @@ Closed 2026-09-26: items 2-6 built on oRPC 1.15.4 (contract 0.2.0 published with
 
 Status: decided 2026-09-25 (2.0 rechecked 2026-09-26) under the owner's delegation, from a scored survey with scratch proofs
 (below). It builds on the [TanStack move](tanstack.md), on main since release 0.9.0. Owner:
-remy-auth. Executor/Reviewer roles as in [plans and roles](../../docs/content/dev/development.md#plans-and-roles). Tools were chosen by
+remy-auth. Executor/Reviewer roles as in [plans and roles](../../docs/content/dev/principles.md#plans-and-roles). Tools were chosen by
 survey, as [how we work](../../docs/content/dev/how-we-work.md) requires.
 
 ## Goal

@@ -52,7 +52,7 @@ remotas también puede apuntar a una preview local ya en ejecución para comprob
 
 Los comandos son los del paquete (`remy`), controlados por el `remy.config.ts` de este proyecto (los origins, los
 puertos); los propios de este repositorio son sus scripts de `package.json` (`local`, `generate`, `release-checks`,
-`test:consumers`; [la línea de comandos](./tasks.md#choosing-the-version-released-development-or-local)). La configuración de Playwright
+`test:consumers`; [la línea de comandos](./projects.md#choosing-the-version-released-development-or-local)). La configuración de Playwright
 es el `playwrightConfig()` del paquete.
 
 Existe una única configuración de Worker con un entorno con nombre, `staging` (`env.staging` en
@@ -224,7 +224,7 @@ muestra «Remy» (`productNameChecks`, en el conjunto compartido de cada app; el
 - `src/notes/`: la demo de notas, que usa el motor de relaciones como lo haría cualquier app: sus datos en su propia D1 (`DEMO_DB`, `migrations-demo/`; ahí una persona es solo un ID de cuenta) a través de `store.ts`, la página (`page.tsx`) y la función de servidor que su loader consulta (`state.ts`). El vocabulario y las formas son los del contrato (`packages/contract/src/notes.ts`).
 - `src/router.tsx`: el `remyRouter` del paquete, un router y un cliente de TanStack Query nuevos por petición, con la integración SSR de Query. `src/routes/__root.tsx` es el `remyRoot` del paquete con la configuración de esta app; TanStack Devtools (paneles de Router y Query) se pasa ahí, en el propio archivo de la app, porque su plugin de Vite `devtools()` lo elimina de las builds de producción solo fuera de `node_modules`; la comprobación de frontera de build demuestra que ni devtools ni código exclusivo de servidor llegan al navegador.
 - `src/parts.json`: las [partes](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md) del paquete que usa esta app, una por línea (`@joeblew999/remy-showcase/time-zones`, `deferred-place` y `status-card` del showcase, y `seo-routes` de la plataforma); `remyParts()` en `vite.config.ts` monta sus rutas y `partChecks()` en `tests/gui.spec.ts` ejecuta sus comprobaciones.
-- `packages/ui/`: todo lo que comparten ambas apps; su [README](./ui-package.md) enumera las exportaciones.
+- `packages/ui/`: todo lo que comparten ambas apps; su [README](./remy-ui.md) enumera las exportaciones.
 - `tests/`: las comprobaciones compartidas del paquete (`@joeblew999/remy-ui/checks`, el `@joeblew999/remy-showcase/*.checks` del showcase) más las comprobaciones que solo posee este repositorio (catálogos, renderizados concurrentes en servidor, hidratación, sus filas de formatos adicionales); `lighthouse.spec.ts` es la parte `audits` de `npm run ci` y `performance.spec.ts` los Core Web Vitals de la release.
 
 El locale se pasa explícitamente a las funciones de mensaje compiladas; las peticiones concurrentes no comparten

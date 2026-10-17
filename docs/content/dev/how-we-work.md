@@ -4,14 +4,14 @@ description: "How people and agents work here: project tools first, surveys befo
 ---
 
 This document owns how people and agents work: the habits the owner has asked for, for developers
-and AI agents alike. What the code must be lives in [development principles](./development.md).
+and AI agents alike. What the code must be lives in [development principles](./principles.md).
 
 ## Where rules live
 
 - Write down how we work here, in the repository, not in an agent's private memory. Anyone
   opening the repository, person or agent, should find the same rules. Agent memory is only for
   things that concern one agent, never for how the project works.
-- Each fact has one home, as [development principles](./development.md#development-principles)
+- Each fact has one home, as [development principles](./principles.md#development-principles)
   require; that applies to these rules too.
 - The root `AGENTS.md` and `CLAUDE.md` are pointers to [Agents: start here](./agents.md) and hold no
   rule of their own: `CLAUDE.md` is an `@import` of that page, so Claude Code loads it; `AGENTS.md`
@@ -180,7 +180,7 @@ its translations together: one commit, one push, one run of the checks.
   `REMY_FLOW=hand npx remy i18n translate docs <file>…`, which brings those files fully in line with the
   English. Change a catalog's structure (every locale's file) in the same commit as `en.json`.
 
-The layout and the commands are in [the command line](./tasks.md#translations).
+The layout and the commands are in [the command line](./projects.md#translations).
 
 ## Plans: few, short, closed
 
@@ -192,7 +192,7 @@ features wait in `.plans/parked/`. Closing a plan needs no extra deploy or test 
 code into one deploy and one full run at the end.
 The shared `remy plans …` tasks do the moves: `remy plans status` lists what is open, `remy plans close`, `remy plans park` and
 `remy plans open` (a parked plan taken up again) add the line, move the file and repoint every link, and `remy plans check` (in the check, `dev:change`) keeps `.plans/` tidy
-([tasks](./tasks.md#plans)).
+([tasks](./projects.md#plans)).
 
 ## When the owner delegates decisions
 
@@ -227,7 +227,7 @@ tasks; `npm run setup` installs the guard.
 - **Who runs a step is in the table, and it is never a question.** An agent lands its own finished
   work without asking: staging is part of landing, GitHub checks every landing, and nothing reaches
   production by it. The owner's word is for production and a release, the two steps whose column says
-  so, and for provisioning ([development principles](./development.md#development-principles)). An agent that
+  so, and for provisioning ([development principles](./principles.md#development-principles)). An agent that
   reads the table and still asks whether to land has stopped using the flow (owner, 2026-10-10,
   after one did: "Is it absolutely clear when each should be run by you?").
 

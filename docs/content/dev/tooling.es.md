@@ -74,8 +74,8 @@ Todos los scripts y comandos, con lo que hace cada uno, están en **[Comandos](.
 propia línea de comandos, así que no puede quedar desactualizada; ninguna página los lista a mano. Dónde se explica cada área:
 
 - El flujo y quién ejecuta cada paso: [cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)
-- La app, las comprobaciones locales y remotas, las previsualizaciones: [la GUI](./gui.md)
-- Despliegues, traducciones, un repositorio que publica paquetes: [la línea de comandos](./tasks.md)
+- La app, las comprobaciones locales y remotas, las previsualizaciones: [la GUI](./run-and-test.md)
+- Despliegues, traducciones, un repositorio que publica paquetes: [la línea de comandos](./projects.md)
 - El Worker de documentación sobre el `docs/` de una app: [escribir docs](./writing-docs.mdx)
 - Planes: [planes](./how-we-work.md#plans-few-short-closed); las traducciones como regla: [en el cambio](./how-we-work.md#translations-in-the-change)
 - Skills de agentes, MCP, capturas de pantalla y el navegador propio de los agentes: más abajo
@@ -98,7 +98,7 @@ El flujo son cuatro pasos: `dev:change` (la comprobación, en segundos, después
 `dev:status` para mirar; una puerta en cada comando pesado se niega a ejecutarlo
 fuera de ellos. La regla está en
 [cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), los comandos en
-[la línea de comandos](./tasks.md).
+[la línea de comandos](./projects.md).
 
 `npx remy verify` es la puerta del release: `dev:release` lo ejecuta. Una instalación termina con
 `npx remy verify setup` (`npm run setup`, `npm run packages -- upgrade` y `npm run upgrade` lo ejecutan): alrededor de
@@ -111,7 +111,7 @@ fuente fijada con su enlace de Claude), y luego el check. Usan la instalación l
 no aprovisionan recursos de Cloudflare. Después la puerta ejecuta cada comprobación de navegador propia en cada
 idioma (la parte `browser` de `npm run ci`) contra el artefacto de producción en Workers locales,
 y luego la prueba de la app nueva. Las auditorías de Google no están incluidas: `npm run ci -- audits` y
-`npm run test -- cwv`, que el release ejecuta después. No se realiza ningún despliegue. Consulta [la prueba de la GUI](./gui.md) para el alcance y los comandos.
+`npm run test -- cwv`, que el release ejecuta después. No se realiza ningún despliegue. Consulta [la prueba de la GUI](./run-and-test.md) para el alcance y los comandos.
 
 
 ## Iniciar o recargar tu agente [#start-or-reload-your-agent]

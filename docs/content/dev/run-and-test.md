@@ -51,7 +51,7 @@ also target an already-running local preview to check the external-server path.
 
 The commands are the package's (`remy`), driven by this project's `remy.config.ts` (the origins, the
 ports); this repository's own are its `package.json` scripts (`local`, `generate`, `release-checks`,
-`test:consumers`; [the command line](./tasks.md#choosing-the-version-released-development-or-local)). The Playwright
+`test:consumers`; [the command line](./projects.md#choosing-the-version-released-development-or-local)). The Playwright
 configuration is the package's `playwrightConfig()`.
 
 There is one Worker configuration with one named environment, `staging` (`env.staging` in
@@ -237,7 +237,7 @@ bites); the platform's catalog names no product (`tests/product.spec.ts`).
 - `src/notes/`: the notes demo, which uses the relation engine as any app would: its data in its own D1 (`DEMO_DB`, `migrations-demo/`; a person is only an account ID there) through `store.ts`, the page (`page.tsx`) and the server function its loader asks (`state.ts`). The vocabulary and the shapes are the contract's (`packages/contract/src/notes.ts`).
 - `src/router.tsx`: the package's `remyRouter`, a new router and TanStack Query client per request, with Query's SSR integration. `src/routes/__root.tsx` is the package's `remyRoot` with this app's config; TanStack Devtools (Router and Query panels) is passed in there, in the app's own file, because its `devtools()` Vite plugin strips it from production builds only outside `node_modules`; the build-boundary check proves no devtools or server-only code reaches the browser.
 - `src/parts.json`: the package's [parts](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md) this app uses, one per line (the showcase's `@joeblew999/remy-showcase/time-zones`, `deferred-place` and `status-card`, and the platform's `seo-routes`); `remyParts()` in `vite.config.ts` mounts their routes and `partChecks()` in `tests/gui.spec.ts` runs their checks.
-- `packages/ui/`: everything both apps share; its [README](./ui-package.md) lists the exports.
+- `packages/ui/`: everything both apps share; its [README](./remy-ui.md) lists the exports.
 - `tests/`: the package's shared checks (`@joeblew999/remy-ui/checks`, the showcase's `@joeblew999/remy-showcase/*.checks`) plus the checks only this repository owns (catalogs, concurrent server renders, hydration, its extra formats rows); `lighthouse.spec.ts` is `npm run ci`'s `audits` part and `performance.spec.ts` the release's Core Web Vitals.
 
 Locale is passed explicitly into compiled message functions; concurrent requests share no

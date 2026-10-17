@@ -301,7 +301,7 @@ no symlinks and no generated config.
 - The `<!-- translated-from: … -->` provenance line in the 13 files under `docs/i18n/es/`.
 - `remarkDropProvenance` and its `remarkPlugins` entry in `source.config.ts` (about 12 lines).
 - The `--mark` step, and its text in docs/content/dev/how-we-work.md ("Translations: one writer") and
-  `docs/content/dev/tasks.md`. Committing the translation *is* the mark.
+  `docs/content/dev/projects.md`. Committing the translation *is* the mark.
 
 **What remains ours:**
 
@@ -412,7 +412,7 @@ These do not depend on the tool choice and are unchanged from the first analysis
      `remarkDropProvenance` and its `remarkPlugins` entry.
    - Switch plural messages from `=other` to `=*` and confirm they compile and render in ar, he, ja and pl.
    - Rewrite how-we-work "Translations: one writer" (the commit is the mark; `=*` for plurals) and
-     `docs/content/dev/tasks.md`.
+     `docs/content/dev/projects.md`.
 3. **Prove the writer:** add `i18n:translate` with the pinned Claude Code and `tasks/i18n/translator.md`.
    Settle how the agent gets the English diff (the prompt, or read-only `Bash(git diff:*)`). Run it on main
    for an English docs edit and for a new plural message; confirm the check goes green, manual fixes

@@ -12,7 +12,7 @@ import { verifySetup } from './verify.ts';
 
 /** What setup needs before it can start, each with where to go. */
 export function preconditions(): void {
-  const recipe = 'docs/content/dev/tasks.md, "A new consumer" (https://remy-auth-docs.gedw99.workers.dev/dev/tasks#a-new-consumer)';
+  const recipe = 'docs/content/dev/projects.md, "A new consumer" (https://remy-auth-docs.gedw99.workers.dev/dev/projects#a-new-consumer)';
   const problems: string[] = [];
   if (spawnSync('git', ['rev-parse', '--git-dir'], { stdio: 'ignore' }).status !== 0) problems.push('not a git repository: run git init (the translation and plans tools read git history)');
   if (!existsSync('package.json')) problems.push(`no package.json: start from the blank app (${recipe})`);

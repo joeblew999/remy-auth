@@ -1,5 +1,5 @@
 ---
-title: "@joeblew999/remy-ui"
+title: "The UI package (@joeblew999/remy-ui)"
 description: "The UI every Remy app shares: stock shadcn, fonts, Paraglide catalogs, the site and app pages, TanStack Start glue and its checks."
 ---
 
@@ -14,7 +14,7 @@ Everything in `src/components`, `src/hooks` and `src/styles/globals.css` is what
 CLI writes (monorepo layout: the app's `components.json` routes `shadcn add` here), including `cn`
 from shadcn's own `cn` package; nothing there is edited by hand. `npm run ui:components` and
 `npm run ui:theme` regenerate them and `npm run ui:verify` fails on any drift (see
-[docs/gui.md](./gui.md#shadcn-stock)). Blocks are owned copies in `src/blocks`.
+[docs/gui.md](./run-and-test.md#shadcn-stock)). Blocks are owned copies in `src/blocks`.
 
 ## Usage
 
@@ -48,7 +48,7 @@ are `@joeblew999/remy-showcase` (`packages/showcase`, its README), for the apps 
 What every app on the package has, so the shared tasks and checks work in it (remy-auth-app is the
 prerendered example):
 
-- **Its frame settings, once, in `defineRemyApp`** (`app-config`): its name (the product's, [written once](./gui.md#the-products-name)), source, the site header's and
+- **Its frame settings, once, in `defineRemyApp`** (`app-config`): its name (the product's, [written once](./run-and-test.md#the-products-name)), source, the site header's and
   the app sidebar's links (each written with TanStack's `linkOptions`, so it is checked against the app's
   own routes where it is written). The shared frame names no route but `/`, so an app with other pages
   than remy-auth's type-checks as it is.
@@ -78,7 +78,7 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `paths` | `isAppPath`: whether a de-localized path is an app page |
 | `shell` | The site frame: `SiteShell` (alias `Shell`), `Intro`, `ZoneBadge`, `SkipLink` |
 | `app-shell` | The app frame alone: `AppShell` (the sidebar, the phone's bottom bar), for an app's own app pages. Its footer has the build stamp (`versions`) |
-| `app-config` | `defineRemyApp` and its types (`RemyApp`, `NavItem`): the app's name, source and navigation for every frame; `useRemyApp`, `usePreferredLocale`. `brand` is [the product's name](./gui.md#the-products-name), the one place it is written: every message that says it takes it as `{product}`; `pageTitle(title, brand)` is a page's title as the browser tab shows it |
+| `app-config` | `defineRemyApp` and its types (`RemyApp`, `NavItem`): the app's name, source and navigation for every frame; `useRemyApp`, `usePreferredLocale`. `brand` is [the product's name](./run-and-test.md#the-products-name), the one place it is written: every message that says it takes it as `{product}`; `pageTitle(title, brand)` is a page's title as the browser tab shows it |
 | `root` | `remyRoot(app, { devtools })`: the root route's options (the document in the page's language and direction, `AppProviders`, the language to offer, the problem pages); `RemyRouterContext`, `preferredLocale`. An app's `__root.tsx` is `createRootRouteWithContext<RemyRouterContext>()(remyRoot(remyApp, { devtools: <TanStackDevtools … /> }))`: the devtools stay in the app's file, where TanStack's Vite plugin strips them from production builds |
 | `router` | `remyRouter(routeTree)`: the router every app makes (the locale rewrite, a QueryClient per request with Query's SSR integration, intent preloading, the CSP nonce) |
 | `app/vite` | `remyApp({ plugins, start, cloudflare, port, build })`: an app's whole `vite.config.ts` (TanStack Devtools, the parts, the build stamp, Cloudflare, Fontaine, Tailwind, Start, React; the app's own catalog when it has `project.inlang`) |
@@ -93,7 +93,7 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `tanstack` | `localizedWorker` (Worker entry: observability, Paraglide's middleware and entry redirects around TanStack Start), `localeRewrite`, `pageHead`, `suggestedLocale`, `suggestedLocaleInBrowser` |
 | `client` | `useSuggestedLocale`, `DeviceTime` for prerendered apps |
 | `worker` | `withObservability` and the request-ID helpers; its `/healthz` says which deployment answered (`build`'s `Deployment`) |
-| `build`, `build/vite` | [Which version is deployed](./gui.md#which-version-is-deployed). `build/vite`: `remyBuild({ packages })`, the Vite plugin behind `virtual:remy-build` (in `remyApp()` and `remyDocs()` already), and `buildStamp()`. `build`: the Zod shapes `stamp` and `deployment` with their types `Build` and `Deployment`, `askDeployment(origin)`, `deploymentQuery(origin)` (TanStack Query options: asked in the browser, again every five minutes), `sameBuild`, `shortCommit` |
+| `build`, `build/vite` | [Which version is deployed](./run-and-test.md#which-version-is-deployed). `build/vite`: `remyBuild({ packages })`, the Vite plugin behind `virtual:remy-build` (in `remyApp()` and `remyDocs()` already), and `buildStamp()`. `build`: the Zod shapes `stamp` and `deployment` with their types `Build` and `Deployment`, `askDeployment(origin)`, `deploymentQuery(origin)` (TanStack Query options: asked in the browser, again every five minutes), `sameBuild`, `shortCommit` |
 | `versions` | `BuildStamp` (one quiet line: the environment off production, the product's name, the commit, and a reload control when the deployment has moved on under the page) and `Versions` (this app, its docs Worker and the `deployments` the app lists in `defineRemyApp`, each answering for itself, and the packages of this build). Stock shadcn parts; put either anywhere inside `AppProviders` |
 | `cloudflare` | `placeFromCloudflare` |
 | `problem` | The localized problem pages: `Problem`, `NotFound`, `ErrorPage`, `problemPages` (one spread line per page route) |
@@ -121,7 +121,7 @@ The package's dependencies are the platform's one dependency set, pinned exactly
 TanStack Start, Router and Query), the toolchain (Vite, Wrangler, Tailwind, TypeScript) and the tools the
 shared tasks and checks run (Playwright, Lighthouse, the DevTools MCP server, npm-check-updates). An app
 names only the package; `remy.singleCopy` in its `package.json` lists those that break when installed twice,
-which the check's single-copies part keeps ([the command line](./tasks.md#choosing-the-version-released-development-or-local)).
+which the check's single-copies part keeps ([the command line](./projects.md#choosing-the-version-released-development-or-local)).
 
 ## Language
 

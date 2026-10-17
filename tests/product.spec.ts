@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { localizedPath } from '@joeblew999/remy-ui/checks';
 import { deployments } from '../src/deployments';
 
-// The product's name is the app's to give (docs/content/dev/gui.md, "The product's name"): Remy is
+// The product's name is the app's to give (docs/content/dev/run-and-test.md, "The product's name"): Remy is
 // this prototype's, and a project built on the same code has its own. Nothing in the shared packages
 // may say it for them. What the pages show is the shared productNameChecks' (every app runs it; the
 // consumer fixture, called "My app", is where it bites); what no page shows is in tests/unit.

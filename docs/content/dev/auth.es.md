@@ -28,7 +28,7 @@ operación.
 
 ## Quién puede llamar a un endpoint: el guard [#who-may-call-an-endpoint-the-guard]
 
-La API de una app es oRPC contract-first ([el paquete de UI](./ui-package.md)). Cada procedimiento
+La API de una app es oRPC contract-first ([el paquete de UI](./remy-ui.md)). Cada procedimiento
 declara quién puede llamarlo, en el contrato, y un único middleware raíz lo hace cumplir. Un
 procedimiento que no declara nada nunca se ejecuta, y las comprobaciones compartidas hacen fallar la
 build por ello.
@@ -152,7 +152,7 @@ captura el correo. Un correo siempre tiene una parte en texto plano; un envío r
 quién era y por qué. Un mensaje a una dirección a la que ningún correo puede llegar (`unreachable`:
 `.test`, `.example`, `example.com` y similares, que es lo que es la dirección de una persona
 sembrada) nunca se envía: solo podría rebotar. El correo del código de inicio de sesión se escribe en
-el idioma del lector y en [el nombre del producto](./gui.md#the-products-name), con el código y sin
+el idioma del lector y en [el nombre del producto](./run-and-test.md#the-products-name), con el código y sin
 enlace.
 
 ## Qué comprueba cada pieza [#what-each-piece-is-checked-by]

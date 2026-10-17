@@ -16,7 +16,7 @@ Todo lo que hay en `src/components`, `src/hooks` y `src/styles/globals.css` es l
 de shadcn fijada en una versión concreta (diseño de monorepo: el `components.json` de la app
 encamina `shadcn add` hacia aquí), incluido `cn`, del propio paquete `cn` de shadcn; nada de eso se
 edita a mano. `npm run ui:components` y `npm run ui:theme` los regeneran, y `npm run ui:verify`
-falla ante cualquier desviación (ver [docs/gui.md](./gui.md#shadcn-stock)). Los bloques son
+falla ante cualquier desviación (ver [docs/gui.md](./run-and-test.md#shadcn-stock)). Los bloques son
 copias propias en `src/blocks`.
 
 ## Uso [#usage]
@@ -55,7 +55,7 @@ con las páginas principales y Más, que abre la barra lateral. Por qué: [el pl
 Lo que tiene toda app basada en el paquete, para que las tareas y comprobaciones compartidas funcionen en ella
 (remy-auth-app es el ejemplo prerrenderizado):
 
-- **Sus ajustes de marco, una sola vez, en `defineRemyApp`** (`app-config`): su nombre (el del producto, [escrito una sola vez](./gui.md#the-products-name)), el código fuente, los enlaces de la cabecera del sitio y
+- **Sus ajustes de marco, una sola vez, en `defineRemyApp`** (`app-config`): su nombre (el del producto, [escrito una sola vez](./run-and-test.md#the-products-name)), el código fuente, los enlaces de la cabecera del sitio y
   de la barra lateral de la app (cada uno escrito con `linkOptions` de TanStack, de modo que se comprueba contra las propias
   rutas de la app donde está escrito). El marco compartido no nombra ninguna ruta salvo `/`, de modo que una app con otras páginas
   distintas a las de remy-auth tipa correctamente tal cual.
@@ -85,7 +85,7 @@ Todas bajo `@joeblew999/remy-ui/`, como TSX y CSS para consumidores de Vite y Ta
 | `paths` | `isAppPath`: si una ruta sin localizar es una página de app |
 | `shell` | El marco del sitio: `SiteShell` (alias `Shell`), `Intro`, `ZoneBadge`, `SkipLink` |
 | `app-shell` | Solo el marco de la app: `AppShell` (la barra lateral, la barra inferior del teléfono), para las páginas de app propias de una app. Su pie de página tiene el sello de build (`versions`) |
-| `app-config` | `defineRemyApp` y sus tipos (`RemyApp`, `NavItem`): el nombre, el código fuente y la navegación de la app para cada marco; `useRemyApp`, `usePreferredLocale`. `brand` es [el nombre del producto](./gui.md#the-products-name), el único lugar donde se escribe: todo mensaje que lo menciona lo recibe como `{product}`; `pageTitle(title, brand)` es el título de una página tal como lo muestra la pestaña del navegador |
+| `app-config` | `defineRemyApp` y sus tipos (`RemyApp`, `NavItem`): el nombre, el código fuente y la navegación de la app para cada marco; `useRemyApp`, `usePreferredLocale`. `brand` es [el nombre del producto](./run-and-test.md#the-products-name), el único lugar donde se escribe: todo mensaje que lo menciona lo recibe como `{product}`; `pageTitle(title, brand)` es el título de una página tal como lo muestra la pestaña del navegador |
 | `root` | `remyRoot(app, { devtools })`: las opciones de la ruta raíz (el documento en el idioma y dirección de la página, `AppProviders`, el idioma a ofrecer, las páginas de problema); `RemyRouterContext`, `preferredLocale`. El `__root.tsx` de una app es `createRootRouteWithContext<RemyRouterContext>()(remyRoot(remyApp, { devtools: <TanStackDevtools … /> }))`: las devtools permanecen en el archivo de la app, donde el plugin de Vite de TanStack las elimina de los builds de producción |
 | `router` | `remyRouter(routeTree)`: el router que crea cada app (la reescritura de locale, un QueryClient por solicitud con la integración SSR de Query, precarga por intención, el nonce de CSP) |
 | `app/vite` | `remyApp({ plugins, start, cloudflare, port, build })`: el `vite.config.ts` completo de una app (TanStack Devtools, las partes, el sello de build, Cloudflare, Fontaine, Tailwind, Start, React; el catálogo propio de la app cuando tiene `project.inlang`) |
@@ -100,7 +100,7 @@ Todas bajo `@joeblew999/remy-ui/`, como TSX y CSS para consumidores de Vite y Ta
 | `tanstack` | `localizedWorker` (punto de entrada del Worker: observabilidad, el middleware de Paraglide y redirecciones de entrada alrededor de TanStack Start), `localeRewrite`, `pageHead`, `suggestedLocale`, `suggestedLocaleInBrowser` |
 | `client` | `useSuggestedLocale`, `DeviceTime` para apps prerrenderizadas |
 | `worker` | `withObservability` y los ayudantes de ID de solicitud; su `/healthz` indica qué despliegue respondió (el `Deployment` de `build`) |
-| `build`, `build/vite` | [Qué versión está desplegada](./gui.md#which-version-is-deployed). `build/vite`: `remyBuild({ packages })`, el plugin de Vite detrás de `virtual:remy-build` (ya presente en `remyApp()` y `remyDocs()`), y `buildStamp()`. `build`: las formas de Zod `stamp` y `deployment` con sus tipos `Build` y `Deployment`, `askDeployment(origin)`, `deploymentQuery(origin)` (opciones de TanStack Query: consultado en el navegador, de nuevo cada cinco minutos), `sameBuild`, `shortCommit` |
+| `build`, `build/vite` | [Qué versión está desplegada](./run-and-test.md#which-version-is-deployed). `build/vite`: `remyBuild({ packages })`, el plugin de Vite detrás de `virtual:remy-build` (ya presente en `remyApp()` y `remyDocs()`), y `buildStamp()`. `build`: las formas de Zod `stamp` y `deployment` con sus tipos `Build` y `Deployment`, `askDeployment(origin)`, `deploymentQuery(origin)` (opciones de TanStack Query: consultado en el navegador, de nuevo cada cinco minutos), `sameBuild`, `shortCommit` |
 | `versions` | `BuildStamp` (una línea discreta: el entorno cuando no es producción, el nombre del producto, el commit, y un control de recarga cuando el despliegue ha avanzado bajo la página) y `Versions` (esta app, su Worker de docs y los `deployments` que la app lista en `defineRemyApp`, cada uno respondiendo por sí mismo, y los paquetes de este build). Piezas de shadcn de fábrica; coloca cualquiera de las dos en cualquier lugar dentro de `AppProviders` |
 | `cloudflare` | `placeFromCloudflare` |
 | `problem` | Las páginas de problema localizadas: `Problem`, `NotFound`, `ErrorPage`, `problemPages` (una línea de propagación por cada ruta de página) |
@@ -130,7 +130,7 @@ Wrangler, Tailwind, TypeScript) y las herramientas que ejecutan las tareas y com
 compartidas (Playwright, Lighthouse, el servidor MCP de DevTools, npm-check-updates). Una app solo
 nombra el paquete; `remy.singleCopy` en su `package.json` lista las que se rompen si se instalan dos
 veces, lo que mantiene la parte de copias únicas de la comprobación
-([la línea de comandos](./tasks.md#choosing-the-version-released-development-or-local)).
+([la línea de comandos](./projects.md#choosing-the-version-released-development-or-local)).
 
 ## Idioma [#language]
 
