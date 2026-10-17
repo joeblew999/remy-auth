@@ -119,7 +119,7 @@ function appTasks(root, { remy }) {
     generate: {
       command: [...catalog, 'wrangler types'],
       dependsOn: [{ task: 'generate', from: 'dependencies' }],
-      cache: { input: [{ auto: true }, '!**/paraglide/**', '!worker-configuration.d.ts'], untrackedEnv: network },
+      cache: { input: [{ auto: true }, ...generated], untrackedEnv: network },
     },
     // The build's folder emptied before the build runs or comes from the cache: a cache hit restores the build's files
     // over what is there and removes nothing, so an earlier build's chunks would stay beside them (a browser check
