@@ -56,7 +56,19 @@ export function splice(english: string, translation: string, fresh: Map<number, 
 }
 
 /** What a translation of this English page records: one fingerprint per section. */
-export const pagePrints = (english: string): string[] => sections(english).map(print);
+/**
+ * A section as its words, not its layout: runs of spaces collapsed and a table's padding gone, so the formatter
+ * (vp fmt, which lines up a table's columns) never makes a translation look stale. Owner, 2026-10-17: Vite+ is
+ * right; its formatting is applied everywhere, and spacing is not a change to what a page says.
+ */
+const words = (section: string): string => section
+  .replace(/^[ \t]*\|.*\|[ \t]*$/gm, row => row.replace(/[ \t]*\|[ \t]*/g, '|').replace(/-{3,}/g, '---'))
+  .replace(/[ \t]+/g, ' ').replace(/ +$/gm, '');
+export const pagePrints = (english: string): string[] => sections(english).map(section => print(words(section)));
+/** Each section's fingerprint as records made before 2026-10-17 took it, layout included: still accepted, so no page went stale. */
+const layoutPrints = (english: string): string[] => sections(english).map(print);
+/** Whether a recorded fingerprint is section `index`'s, today's or the older kind. */
+const same = (recorded: string | undefined, now: string[], layout: string[], index: number) => recorded === now[index] || recorded === layout[index];
 
 const recordLine = /^translatedFrom:.*\r?\n/m;
 /** The fingerprints a translated page records, or undefined when it records none. */
@@ -79,9 +91,9 @@ export function withRecord(page: string, prints: string[]): string {
  * English or the translation has a different number of sections than the record): then the whole page.
  */
 export function changedSections(english: string, translation: string): number[] | undefined {
-  const recorded = madeFrom(translation), now = pagePrints(english);
+  const recorded = madeFrom(translation), now = pagePrints(english), layout = layoutPrints(english);
   if (!recorded || recorded.length !== now.length || sections(withoutRecord(translation)).length !== now.length) return undefined;
-  return now.flatMap((value, index) => (value === recorded[index] ? [] : [index]));
+  return now.flatMap((_, index) => (same(recorded[index], now, layout, index) ? [] : [index]));
 }
 
 /**
@@ -208,7 +220,8 @@ export function docsGaps(cwd = process.cwd()): { gaps: Gap[]; sites: number } {
   const files = (where: string) => (git(cwd, 'ls-files', '-co', '--exclude-standard', '--', relative(cwd, where)) ?? '').split('\n').filter(Boolean).filter(file => existsSync(join(cwd, file)));
   const stale = (english: string, translation: string) => {
     const recorded = madeFrom(readFileSync(join(cwd, translation), 'utf8'));
-    return !recorded || recorded.join(' ') !== pagePrints(readFileSync(join(cwd, english), 'utf8')).join(' ');
+    const text = readFileSync(join(cwd, english), 'utf8'), now = pagePrints(text), layout = layoutPrints(text);
+    return !recorded || recorded.length !== now.length || !now.every((_, index) => same(recorded[index], now, layout, index));
   };
   const gaps: Gap[] = [];
   const languages = new Set<string>();
