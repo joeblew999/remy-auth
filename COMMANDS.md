@@ -109,7 +109,6 @@ Shortcuts to the tools themselves, as package.json defines them.
 
 | Script | Runs |
 | --- | --- |
-| `npm run generate` | `node packages/ui/paraglide.mjs && tsc -p packages/ui/src/cli` |
 | `npm run release-checks` | `npm run template:check && npm run ui:verify` |
 | `npm run local` | `node scripts/local.ts` |
 | `npm run test:consumers` | `bash fixtures/consumer/run.sh` |

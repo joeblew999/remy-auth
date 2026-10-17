@@ -52,19 +52,59 @@ export default {
           untrackedEnv: ['REMY_FLOW', 'GITHUB_ACTIONS', 'PREVIEW_PORT'],
         },
       },
-      // What the type check needs and git does not hold: the compiled UI text (Paraglide), the command line as an app
-      // runs it, the Worker's binding types, and the docs' own (their package's generate task).
+      // What the type check needs and git does not hold: the compiled UI text (Paraglide) and the Worker's binding
+      // types, after the docs' own (their package's generate task). Each step reads the file it is about to rewrite:
+      // what it writes is its output (restored on a cache hit), never its input.
       generate: {
-        command: ['node packages/ui/paraglide.mjs', 'tsc -p packages/ui/src/cli', 'wrangler types'],
+        command: ['node packages/ui/paraglide.mjs', 'wrangler types'],
         dependsOn: ['@joeblew999/remy-auth-docs#generate'],
-        // Each step reads the file it is about to rewrite: what it writes is its output (restored on a cache hit),
-        // never its input.
+        cache: { input: [{ auto: true }, '!packages/ui/src/paraglide/**', '!worker-configuration.d.ts'] },
+      },
+      // The command line as an installed app runs it (JavaScript, packages/ui/cli): what the bin's unit check runs,
+      // and what the package ships.
+      cli: {
+        command: 'tsc -p packages/ui/src/cli',
+        cache: { input: [{ auto: true }, '!packages/ui/cli/**'] },
+      },
+      // The project's own checks, each one of its tools, run as a tool. Under REMY_FLOW=ci (here and on GitHub) the
+      // ones that would fix something only verify it, so the variable is part of what is cached.
+      'check:plans': 'node packages/ui/src/cli/remy.ts plans check',
+      'check:single-copies': 'node packages/ui/src/cli/remy.ts check single-copies',
+      // It writes COMMANDS.md (here and the blank app's): its output, never its input.
+      'check:commands': {
+        command: 'node packages/ui/src/cli/remy.ts check commands',
+        cache: { env: ['REMY_FLOW'], input: [{ auto: true }, '!COMMANDS.md', '!template/COMMANDS.md'] },
+      },
+      'check:endings': { command: 'node packages/ui/src/cli/remy.ts check endings', cache: { env: ['REMY_FLOW'] } },
+      'check:translations': 'node packages/ui/src/cli/remy.ts check translations',
+      // The checks that are plain functions (tests/**/*.unit.spec.ts): no Worker, no browser. The bin's check runs
+      // the built command line; the commands list is current before them, since one checks it.
+      'check:unit': {
+        command: 'TEST_TARGET=unit playwright test --project=unit --pass-with-no-tests',
+        dependsOn: ['cli', 'check:commands', 'generate'],
+        // Playwright's record of its last run and its report: temporary, neither input nor output.
         cache: {
-          input: [{ auto: true }, '!packages/ui/src/paraglide/**', '!packages/ui/cli/**', '!worker-configuration.d.ts'],
+          input: [{ auto: true }, '!test-results/**', '!playwright-report/**'],
+          output: [{ auto: true }, '!test-results/**', '!playwright-report/**'],
         },
       },
-      // Vite+'s check (format, lint, types) on everything generated first.
-      check: { command: 'vp check', dependsOn: ['generate'] },
+      // The check: Vite+'s own (format, lint, types: the app's, the docs', the command line's) once everything it
+      // reads exists, the app and the docs built (the route tree, every docs page compiling, translations included),
+      // and the project's own checks passed.
+      check: {
+        command: 'vp check',
+        dependsOn: [
+          'generate',
+          'build',
+          '@joeblew999/remy-auth-docs#build',
+          'check:plans',
+          'check:single-copies',
+          'check:commands',
+          'check:endings',
+          'check:translations',
+          'check:unit',
+        ],
+      },
     },
   },
 };

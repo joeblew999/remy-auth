@@ -9,7 +9,7 @@
   "scripts": {
     "dev:status": "node packages/ui/src/cli/remy.ts flow status",
     "dev:start": "node packages/ui/src/cli/remy.ts flow start",
-    "dev:change": "node packages/ui/src/cli/remy.ts flow change",
+    "dev:change": "vp run check && node packages/ui/src/cli/remy.ts flow change",
     "dev:land": "node packages/ui/src/cli/remy.ts flow land",
     "dev:promote": "node packages/ui/src/cli/remy.ts flow promote",
     "dev:release": "node packages/ui/src/cli/remy.ts flow release",
