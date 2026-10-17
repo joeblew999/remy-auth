@@ -1,8 +1,10 @@
 // `remy upgrade <version>` (an app, not remy-auth): move to one shared release. The package at that
-// exact version, the shared CI workflow at its tag, then the skills of that release, the agents' rules
-// block, the guard, and the installation's checks.
+// exact version, the shared CI workflow at its tag, the flow's scripts and Vite Plus's Git hooks as that release
+// has them, then the skills of that release, the agents' rules block, the guard, and the installation's checks.
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { register } from './mcp.ts';
 import { main as guard } from './register.ts';
 import { rules } from './rules.ts';
@@ -61,12 +63,49 @@ export async function upgrade(version: string | undefined): Promise<void> {
         );
       }
     }
+  await scriptsAndHooks();
   installSkills();
   rules();
   await register(false);
   guard([]);
   await verifySetup();
   console.log(`upgrade: on @joeblew999/remy-ui ${version}.`);
+}
+
+/**
+ * The scripts and hooks of the release just installed (its tasks.js, the one source): the flow's scripts in place of
+ * an app's old ones (npm run dev:land and the rest), no script that shares a name with a shared task (Vite Plus runs
+ * the task), the app's own kept; Vite Plus's hooks in .vite-hooks/, its dispatcher ignored.
+ */
+export async function scriptsAndHooks(): Promise<void> {
+  const tasks = (await import(
+    pathToFileURL(join(process.cwd(), 'node_modules', '@joeblew999', 'remy-ui', 'src', 'tasks.js')).href
+  )) as typeof import('../tasks.js');
+  const manifest = JSON.parse(readFileSync('package.json', 'utf8')) as { scripts?: Record<string, string> };
+  const old =
+    /^(dev:[a-z]+|plans|packages|test|docs|observe|shots|api|logs|errors|wrangler|browser(:[a-z]+)?|web|codex(:[a-z]+)?|claude(:[a-z]+)?)$/;
+  const shared = new Set(tasks.taskNames());
+  const own = Object.fromEntries(
+    Object.entries(manifest.scripts ?? {}).filter(([name]) => !old.test(name) && !shared.has(name)),
+  );
+  const dropped = Object.keys(manifest.scripts ?? {}).filter((name) => !(name in own));
+  manifest.scripts = { ...own, ...tasks.flowScripts('remy'), upgrade: 'remy upgrade' };
+  writeFileSync('package.json', `${JSON.stringify(manifest, null, 2)}\n`);
+  if (dropped.length) console.log(`upgrade: scripts the tasks replace, removed: ${dropped.join(', ')}`);
+  mkdirSync('.vite-hooks', { recursive: true });
+  for (const [name, text] of Object.entries(tasks.hookFiles)) {
+    writeFileSync(join('.vite-hooks', name), text);
+    chmodSync(join('.vite-hooks', name), 0o755);
+  }
+  const ignore = existsSync('.gitignore') ? readFileSync('.gitignore', 'utf8') : '';
+  if (!ignore.includes('.vite-hooks/_/'))
+    writeFileSync(
+      '.gitignore',
+      `${ignore.replace(/\n?$/, '\n')}# Vite Plus's Git hook dispatcher, written by vp config (the prepare script).\n.vite-hooks/_/\n`,
+    );
+  console.log(
+    "upgrade: the flow is vp run (COMMANDS.md); Cloudflare's build command for this app is now: npx vp run build",
+  );
 }
 
 export const what =

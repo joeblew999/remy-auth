@@ -1,5 +1,6 @@
 import { test, expect } from 'vite-plus/test';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { flowScripts, hookFiles, taskNames } from '../../packages/ui/src/tasks.js';
 
 // The flow's gate (allowed.ts) refuses what costs money or ships when nobody said they were running it. The pages
 // never give one bare: in a fenced shell block, the translator or Core Web Vitals is written with REMY_FLOW=hand in
@@ -53,7 +54,17 @@ test('the flow runs vp run ci or vp run check between its own parts, in remy-aut
       `${remy} flow prepare release && REMY_REHEARSE_PUBLISH=1 vp run ci && ${remy} flow release`,
     );
     expect(scripts.setup, file).toBe(`${remy} setup && vp run check`);
+    // What remy upgrade writes into an app is what remy-auth and the template have: one source, tasks.js.
+    expect(scripts, file).toMatchObject(flowScripts(remy));
+    for (const name of taskNames()) expect(scripts[name], `${file}: ${name} is a task`).toBeUndefined();
   }
+  expect(JSON.parse(readFileSync('template/package.json', 'utf8')).scripts).toEqual({
+    ...flowScripts('remy'),
+    upgrade: 'remy upgrade',
+  });
+  for (const folder of ['.vite-hooks', 'template/.vite-hooks'])
+    for (const [name, text] of Object.entries(hookFiles))
+      expect(readFileSync(`${folder}/${name}`, 'utf8'), `${folder}/${name}`).toBe(text);
   const verify = readFileSync('packages/ui/src/cli/verify.ts', 'utf8');
   const setupChecks = verify.slice(verify.indexOf('export async function verifySetup()'));
   expect(setupChecks.slice(0, setupChecks.indexOf('\n}'))).not.toMatch(/check\(\)|every\(\)|consumers\(\)/);

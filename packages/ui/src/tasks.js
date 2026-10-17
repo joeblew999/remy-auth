@@ -239,6 +239,36 @@ export function remyTasks({ root = process.cwd(), tasks = {} } = {}) {
   };
 }
 
+/**
+ * The flow's scripts, the same in every repository (`remy`: how it runs the command line): Vite Plus runs our steps
+ * around its own checks, never the other way round. remy-auth's root, the blank app and every app that upgrades have
+ * exactly these (a unit check holds the first two to it; `remy upgrade` writes them into an app).
+ */
+export const flowScripts = (remy = 'remy') => ({
+  // Vite Plus's Git hooks, installed by every install (the dispatcher, .vite-hooks/_; the hooks are hookFiles).
+  prepare: 'vp config --no-agent',
+  status: `${remy} flow status`,
+  land: `${remy} flow prepare land && vp run ci && ${remy} flow land`,
+  promote: `${remy} flow promote`,
+  release: `${remy} flow prepare release && REMY_REHEARSE_PUBLISH=1 vp run ci && ${remy} flow release`,
+  setup: `${remy} setup && vp run check`,
+});
+
+/** The Git hooks every repository commits (.vite-hooks/), which Vite Plus's dispatcher runs. */
+export const hookFiles = {
+  'pre-commit':
+    '#!/bin/sh\n# Before a commit: the staged files formatted and their lint fixes applied (vite.config.ts, staged).\nvp staged\n',
+  'pre-push':
+    '#!/bin/sh\n# Before a push: what its pull request will run, first. The flow\'s own steps (vp run land: REMY_FLOW is set) ran it\n# already; REMY_SKIP_CI=1 skips it once, on purpose.\n[ -n "$REMY_FLOW" ] || [ -n "$REMY_SKIP_CI" ] && exit 0\nexec vp run ci\n',
+};
+
+/** The names an app's own script may not have: the shared tasks' (a script and a task cannot share one). */
+export const taskNames = () => [
+  ...Object.keys(appTasks('.', { remy: 'remy', check: 'remy-check' })),
+  'local',
+  ...Object.keys(workspaceTasks({ check: 'remy-check' }, { generate: [], build: [] }, [])),
+];
+
 /** The formatter and the linter, one style for every repository. */
 export const style = {
   // Code and config only: Markdown is prose whose layout is its author's, and the translations are fingerprinted

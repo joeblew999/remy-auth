@@ -9,6 +9,12 @@ export declare function remyTasks(options?: {
   root?: string;
   tasks?: Record<string, unknown>;
 }): Record<string, unknown>;
+/** The flow's scripts, the same in every repository; `remy` is how it runs the command line. */
+export declare function flowScripts(remy?: string): Record<string, string>;
+/** The Git hooks every repository commits (.vite-hooks/), by file name. */
+export declare const hookFiles: Record<string, string>;
+/** The names an app's own script may not have: the shared tasks'. */
+export declare function taskNames(): string[];
 /** The formatter, the linter, the staged files and the unit checks: one style for every repository. */
 export declare const style: Record<string, unknown>;
 /** Whether the app at `root` is its own repository (not a member of a workspace above it). */
