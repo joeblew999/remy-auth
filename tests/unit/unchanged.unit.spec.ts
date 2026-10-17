@@ -38,7 +38,8 @@ test('the browser part runs in every language only for what can differ by langua
     expect(languageInput(file, text('')), file).toBe(true);
   expect(languageInput('packages/ui/src/rows.tsx', text('const at = new Intl.DateTimeFormat(locale)'))).toBe(true);
   expect(languageInput('src/notes.tsx', text('when.toLocaleDateString(lang)'))).toBe(true);
-  expect(languageInput('src/gone.tsx', () => undefined)).toBe(true);
+  expect(languageInput('src/gone.tsx', () => undefined)).toBe(false);
+  expect(languageInput('packages/ui/src/gone-locale.ts', () => undefined)).toBe(true);
   // Cannot: plain code, version bumps, the tooling, the unit checks.
   for (const file of ['src/api/router.ts', 'package.json', 'packages/ui/package.json', 'packages/ui/src/cli/translate.ts', 'tests/unit/ci.unit.spec.ts', 'README.md'])
     expect(languageInput(file, text('export const x = 1;')), file).toBe(false);

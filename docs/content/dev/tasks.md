@@ -130,7 +130,7 @@ The development flow is code, `packages/ui/src/cli/flow.ts`, with four steps and
 template's `.npmrc`) and runs install, skills (installed once per pinned list, then reused), the tooling invariants, the check, the quick browser checks, the docs and a dry-run publish (~1.5 to 3 min, mostly the network).
 A change that would break another repository fails there, not in that repository. Tests are type-checked with
 the app (`tsconfig.json` includes `tests/`). Google's audits are
-`npm run ci -- audits` (Lighthouse, local; CI on every push to main and every tag) and Core Web Vitals is
+`npm run ci -- audits` (Lighthouse, local; CI whenever a change can affect it, and on every push to main and every tag) and Core Web Vitals is
 `npm run test -- cwv` (on a throwaway Cloudflare Worker); the release runs both.
 
 Where checks run: the shared package's own behaviour is proven once, in remy-auth, before each

@@ -107,7 +107,7 @@ export function changedFiles(): string[] | undefined {
  * code that formats by locale (named for it, or using Intl, toLocale* or a text direction), the browser
  * checks themselves, and what decides the runtime (the lockfile, the Node version, whose Intl data it is).
  * Not the tooling (packages/ui/src/cli, tasks) or the unit checks: they render no page.
- * `read` gives a file's current text, undefined when it is gone (then its name alone decides).
+ * `read` gives a file's current text, undefined when it is gone (then its name alone decides, as above).
  */
 export function languageInput(file: string, read: (file: string) => string | undefined = path => existsSync(path) ? readFileSync(path, 'utf8') : undefined): boolean {
   // The lockfile, not package.json: a version bump or a script is no new dependency (2026-10-17: counting
@@ -121,7 +121,9 @@ export function languageInput(file: string, read: (file: string) => string | und
   if (/\.css$/.test(file)) return true;
   if (!/\.(tsx?|jsx?|mjs)$/.test(file)) return false;
   const text = read(file);
-  return text === undefined || /\bIntl\.|\.toLocale[A-Z]\w*\(|getTextInfo|\bdir=|direction/.test(text);
+  // A deleted file decides by its name alone (above): its code runs nowhere now, and whatever used it changed too and
+  // is judged itself (2026-10-17: a deleted tooling script sent a branch to every language).
+  return text !== undefined && /\bIntl\.|\.toLocale[A-Z]\w*\(|getTextInfo|\bdir=|direction/.test(text);
 }
 
 /**

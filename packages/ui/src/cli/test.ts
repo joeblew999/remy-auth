@@ -11,10 +11,31 @@ import { gate } from './allowed.ts';
 import { preview, previewDelete } from './cloudflare.ts';
 import { build } from './dev.ts';
 import { allLanguages, skip } from './unchanged.ts';
+import { warn } from './timing.ts';
 
 function playwright(args: string[], env: Record<string, string>): void {
+  const results = join(process.cwd(), 'playwright-report', `${env.TEST_TARGET === 'remote' ? 'remote' : 'local'}-results.json`);
+  rmSync(results, { force: true });
   const result = spawnSync(join(process.cwd(), 'node_modules', '.bin', 'playwright'), ['test', ...args], { stdio: 'inherit', env: { ...process.env, ...env } });
+  flaky(results);
   if (result.status !== 0) process.exit(result.status ?? 1);
+}
+
+type Suite = { specs?: { file: string; line: number; title: string; tests: { status: string }[] }[]; suites?: Suite[] };
+/** The checks in Playwright's JSON results that passed only on their retry ("file:line title"). */
+export function flakyIn(report: { suites?: Suite[] }): string[] {
+  const found: string[] = [];
+  const walk = (suite: Suite) => { for (const spec of suite.specs ?? []) if (spec.tests.some(test => test.status === 'flaky')) found.push(`${spec.file}:${spec.line} ${spec.title}`); suite.suites?.forEach(walk); };
+  report.suites?.forEach(walk);
+  return found;
+}
+
+/** A check that passed only on its retry (playwright.js retries once under CI) is named in the run's summary line, never only in the log. */
+function flaky(results: string): void {
+  let report: { suites?: Suite[] };
+  try { report = JSON.parse(readFileSync(results, 'utf8')); } catch { return; }
+  const found = flakyIn(report);
+  if (found.length) warn(`${found.length} flaky, passed only on its retry: ${found.join('; ')}`);
 }
 const local = { TEST_TARGET: 'local' };
 /** The quick languages: `quick`, which the checks resolve (checks.js: the base language and the first right-to-left one); QUICK_LOCALES names others. */

@@ -1,7 +1,7 @@
 ---
 title: "La línea de comandos"
 description: "remy, la herramienta que toda app de Remy instala con el paquete: los scripts, la estructura que leen, una app nueva, la publicación de paquetes, las traducciones, Cloudflare y los planes."
-translatedFrom: "26693786 ffed0063 9352ad42 79fb3dca 1679c6b9 4e9524a9 39363a65 218b0959"
+translatedFrom: "26693786 ffed0063 9352ad42 79fb3dca c0217a27 4e9524a9 39363a65 218b0959"
 ---
 
 La herramienta es `remy`, el bin de `@joeblew999/remy-ui` (`packages/ui/src/cli`, un módulo de TypeScript por
@@ -137,7 +137,7 @@ El flujo de desarrollo es código, `packages/ui/src/cli/flow.ts`, con cuatro pas
 `.npmrc` de la plantilla) y ejecuta la instalación, las skills (instaladas una vez por lista fijada y luego reutilizadas), los invariantes de las herramientas, la comprobación, las comprobaciones rápidas de navegador, la documentación y una publicación de prueba (dry-run) (~1,5 a 3 min, sobre todo la red).
 Un cambio que rompería otro repositorio falla ahí, no en ese repositorio. Las pruebas se comprueban con tipos junto
 con la app (`tsconfig.json` incluye `tests/`). Las auditorías de Google son
-`npm run ci -- audits` (Lighthouse, local; CI en cada push a main y en cada tag) y Core Web Vitals es
+`npm run ci -- audits` (Lighthouse, local; CI siempre que un cambio pueda afectarlas, y en cada push a main y en cada tag) y Core Web Vitals es
 `npm run test -- cwv` (en un Worker de Cloudflare desechable); el release ejecuta ambas.
 
 Dónde se ejecutan las comprobaciones: el comportamiento propio del paquete compartido se comprueba una vez, en remy-auth, antes de cada

@@ -22,7 +22,7 @@ export const steps: Record<Step, { what: string }> = {
   // checks, translation status, the docs when docs changed.
   change: { what: 'the check, in seconds' },
   // The change leaves the machine: the check again, then commit, main, staging. GitHub runs every
-  // language, Google's audits and the consumer fixture after the push, in parallel, while coding goes on.
+  // part a change can affect on its pull request, in parallel, and everything after the merge.
   land: { what: 'the check and the browser checks here, then a pull request, merged when GitHub agrees, and staging' },
   // Production, on purpose: what is on a pushed main, no gate (staging and GitHub ran the checks).
   promote: { what: 'production from a pushed main' },

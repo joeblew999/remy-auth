@@ -79,7 +79,7 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy test remote` | [origin]: the browser checks against a deployment: production by default, Google's audits included; any other origin (a preview, staging) our checks only |
 | `npx remy test live` | [origin]: the smoke against a deployment (every deploy ends with it) |
 | `npx remy test report` | [remote]: open the last HTML report, local or remote |
-| `npx remy ci` | [check\|browser\|audits\|new-app] [--shard i/n] [--everything] [--last]: what GitHub runs, the same here: no part runs what a pull request runs for this change (what it can affect); --everything runs every part in every language, nothing skipped, as main does |
+| `npx remy ci` | [check\|browser\|audits\|new-app] [--shard i/n] [--everything] [--last]: what GitHub runs, the same here: no part runs every part this change can affect, as a pull request does; --everything runs all of it in every language, nothing skipped, as main does |
 | `npx remy last` | [command]: the last run's record (when it started, its parts, its total), of a command or of whatever ran last |
 | `npx remy docs` | the docs Worker, @joeblew999/remy-ui's, over this app's docs/ |
 | `npx remy docs dev` | the docs Worker with hot reload |

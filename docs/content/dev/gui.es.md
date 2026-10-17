@@ -1,7 +1,7 @@
 ---
 title: "Ejecutar, previsualizar y probar la app"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "573a07f6 5d5de609 0bf2533c 2a9d9497 917db7e6 222ea1f3 655a09ab 1d2bc14b 1c401884"
+translatedFrom: "573a07f6 5d5de609 0bf2533c 2a9d9497 917db7e6 222ea1f3 655a09ab 71e7a9a3 1c401884"
 ---
 
 ```sh
@@ -225,7 +225,7 @@ muestra «Remy» (`productNameChecks`, en el conjunto compartido de cada app; el
 - `src/router.tsx`: el `remyRouter` del paquete, un router y un cliente de TanStack Query nuevos por petición, con la integración SSR de Query. `src/routes/__root.tsx` es el `remyRoot` del paquete con la configuración de esta app; TanStack Devtools (paneles de Router y Query) se pasa ahí, en el propio archivo de la app, porque su plugin de Vite `devtools()` lo elimina de las builds de producción solo fuera de `node_modules`; la comprobación de frontera de build demuestra que ni devtools ni código exclusivo de servidor llegan al navegador.
 - `src/parts.json`: las [partes](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md) del paquete que usa esta app, una por línea (`@joeblew999/remy-showcase/time-zones`, `deferred-place` y `status-card` del showcase, y `seo-routes` de la plataforma); `remyParts()` en `vite.config.ts` monta sus rutas y `partChecks()` en `tests/gui.spec.ts` ejecuta sus comprobaciones.
 - `packages/ui/`: todo lo que comparten ambas apps; su [README](./ui-package.md) enumera las exportaciones.
-- `tests/`: las comprobaciones compartidas del paquete (`@joeblew999/remy-ui/checks`, el `@joeblew999/remy-showcase/*.checks` del showcase) más las comprobaciones que solo posee este repositorio (catálogos, renderizados concurrentes en servidor, hidratación, sus filas de formatos adicionales); `lighthouse.spec.ts` y `performance.spec.ts` son de nivel 2.
+- `tests/`: las comprobaciones compartidas del paquete (`@joeblew999/remy-ui/checks`, el `@joeblew999/remy-showcase/*.checks` del showcase) más las comprobaciones que solo posee este repositorio (catálogos, renderizados concurrentes en servidor, hidratación, sus filas de formatos adicionales); `lighthouse.spec.ts` es la parte `audits` de `npm run ci` y `performance.spec.ts` los Core Web Vitals de la release.
 
 El locale se pasa explícitamente a las funciones de mensaje compiladas; las peticiones concurrentes no comparten
 estado mutable de locale. Los catálogos son los `locales` en

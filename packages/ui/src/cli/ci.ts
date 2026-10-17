@@ -21,20 +21,16 @@ import { lap, lastRecord } from './timing.ts';
 type Part = 'check' | 'browser' | 'audits' | 'new-app';
 const parts: Part[] = ['check', 'browser', 'audits', 'new-app'];
 /**
- * What a pull request waits for, and what `npm run ci` runs by default: types and unit, and the browser checks. A pull
- * request waits for its slowest job, and Google's audits (about 2 minutes) and the consumer fixture (about
- * 4, a fresh install of a blank app) were the slowest by far, while what they catch (search and packaging)
- * is rarely what a change breaks. So they run after merge, on every push to main and every tag, where
- * dev:promote refuses a red main and a release runs them again; `npm run ci -- --everything` runs them here
- * (owner, 2026-10-17: "massively speed up CI").
+ * One rule, on a pull request and here alike: every part runs when what changed can affect it (unchanged.ts
+ * decides, and each part says when it skips). Until 2026-10-17 the audits and the new app ran only after merge, a
+ * second tier the change rules made needless (owner: "because we have changes now, maybe you don't need different
+ * levels of CI"); now a change to the package meets the new app before it merges. Main runs everything, nothing
+ * skipped, as the safety net dev:promote waits for; `npm run ci -- --everything` runs that here.
  */
-const fast: Part[] = ['check', 'browser'];
 /** GitHub splits the browser part across this many jobs. */
 export const shards = 3;
 /** The jobs GitHub's workflow must run, one `npm run ci -- <part>` each (tests/unit/ci.unit.spec.ts holds the workflow to it). */
 export const jobParts = (): string[] => ['check', ...Array.from({ length: shards }, (_, i) => `browser --shard ${i + 1}/${shards}`), 'audits', 'new-app'];
-const afterMerge: Part[] = ['audits', 'new-app'];
-const pullRequest = process.env.GITHUB_EVENT_NAME === 'pull_request';
 const browserParts: Part[] = ['browser', 'audits', 'new-app'];
 
 const fail = (message: string): never => { console.error(`ci: ${message}`); process.exit(1); };
@@ -140,15 +136,10 @@ export async function ci(args: string[]): Promise<void> {
     else asked.push(args[i]!);
   }
   if (shardOf !== undefined && !/^\d+\/\d+$/.test(shardOf)) fail(`--shard takes <i>/<n>, got ${shardOf}`);
-  const chosen = (asked.length ? asked : everything ? parts : fast) as Part[];
+  const chosen = (asked.length ? asked : parts) as Part[];
   for (const part of chosen) if (!parts.includes(part)) fail(`unknown part ${part}: ${parts.join(', ')}`);
   if (shardOf && (chosen.length !== 1 || chosen[0] !== 'browser')) fail('--shard splits the browser part only: npm run ci -- browser --shard 1/3');
 
-  // On a pull request GitHub still starts the after-merge jobs (one workflow for every event); they end here.
-  if (pullRequest && chosen.every(part => afterMerge.includes(part))) {
-    console.log(`ci: ${chosen.join(', ')} runs after merge (pushes to main and tags), not on a pull request.`);
-    return;
-  }
   // Run as on GitHub: tools that read CI behave alike (Playwright, for one, uses every core under it).
   process.env.CI = process.env.CI ?? '1';
   node();
@@ -160,8 +151,8 @@ export async function ci(args: string[]): Promise<void> {
     await runPart(part, shardOf);
     lap(shardOf ? `${part} ${shardOf}` : part);
   }
-  if (!onGitHub && !asked.length && !everything) console.log('ci: what a pull request runs, for what this change can affect. Main runs everything: npm run ci -- --everything.');
+  if (!onGitHub && !asked.length && !everything) console.log('ci: what a pull request runs: every part this change can affect. Main runs all of it: npm run ci -- --everything.');
 }
 
-export const what = "[check|browser|audits|new-app] [--shard i/n] [--everything] [--last]: what GitHub runs, the same here: no part runs what a pull request runs for this change (what it can affect); --everything runs every part in every language, nothing skipped, as main does";
+export const what = "[check|browser|audits|new-app] [--shard i/n] [--everything] [--last]: what GitHub runs, the same here: no part runs every part this change can affect, as a pull request does; --everything runs all of it in every language, nothing skipped, as main does";
 export const main = (args: string[]): Promise<void> => ci(args);

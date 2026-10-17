@@ -59,11 +59,12 @@ else {
 }
 await check();
 lap('the check');
-// What the pull request's checks run, here first: the browser checks as GitHub will run it for these changes (the check
-// above already covered types and unit). GitHub then confirms instead of finding out.
+// What the pull request's checks run, here first: every part of npm run ci these changes can affect, as GitHub will (the
+// check above already covered types and unit; each part skips itself when nothing it checks changed). GitHub then
+// confirms instead of finding out.
 const [remy, ...remyArgs] = remyCommand();
-if (spawnSync(remy!, [...remyArgs, 'ci', 'browser'], { stdio: 'inherit', env: { ...process.env, REMY_FLOW: 'ci' } }).status !== 0) fail('the browser checks failed here (above), so nothing was pushed. Fix it, then land again.');
-lap('browser checks, as the pull request runs them');
+if (spawnSync(remy!, [...remyArgs, 'ci', 'browser', 'audits', 'new-app'], { stdio: 'inherit', env: { ...process.env, REMY_FLOW: 'ci' } }).status !== 0) fail('a part of npm run ci failed here (above), so nothing was pushed. Fix it, then land again.');
+lap('the parts the change can affect, as its pull request runs them');
 if (read('status', '--porcelain') !== '') { git('add', '-A'); git('commit', '-q', '-m', message); }
 if (read('rev-list', '--count', 'origin/main..HEAD') === '0') fail('nothing to land: this branch has nothing main does not.');
 
@@ -85,7 +86,7 @@ if ('refused' in merged) fail(`GitHub would not merge ${pull.html_url}: ${merged
 const landed = merged.sha;
 deleteBranch(slug, here.branch);
 lap('merge');
-console.log(`dev:land: merged as ${landed.slice(0, 7)} (${pull.html_url}); main's own run checks everything, Google and the consumer fixture included; dev:promote waits for it.`);
+console.log(`dev:land: merged as ${landed.slice(0, 7)} (${pull.html_url}); main's own run checks everything, every part in every language; dev:promote waits for it.`);
 
 // This checkout and the main checkout follow the new main: the branch's content is in it (squashed), so the
 // branch is reset to it, ready for the next change.
