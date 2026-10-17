@@ -213,12 +213,12 @@ function appTasks(root, { remy }) {
     clean: { command: `node -e "require('node:fs').rmSync('dist', { recursive: true, force: true })"`, cache: false },
     // vp dev, vp build and vp preview are Vite Plus's own; these are the app's, with what they need first.
     dev: { command: 'vp dev .', dependsOn: prepared, cache: false },
-    // The production build. Its stamp names the commit it was built
-    // from (build-vite.js, through git, which Vite Plus does not see), so the commit is in the command: Vite Plus's
-    // cache key holds the command, and a new commit (a commit, a merge) builds again. Read as Vite Plus loads the
-    // configuration, it is right in a worktree too, whose .git is a file (2026-10-17: .git/HEAD as an input was not).
+    // The production build. Its stamp names the commit it was built from (build-vite.js). Here and on GitHub a build
+    // is replayed while nothing it reads changes, across commits (a docs-only commit tests nothing again), so its stamp
+    // may name an earlier commit, which the stamp check allows. On Cloudflare (WORKERS_CI) the commit is in the command,
+    // part of Vite Plus's cache key, so a deployment always names its own commit.
     build: {
-      command: `REMY_COMMIT=${commit(root)} vp build .`,
+      command: process.env.WORKERS_CI ? `REMY_COMMIT=${commit(root)} vp build .` : 'vp build .',
       dependsOn: [...prepared, 'clean'],
       cache: {
         input: [{ auto: true }, ...generated, lockfile],
@@ -242,11 +242,13 @@ function appTasks(root, { remy }) {
     },
     // What a browser check needs on this machine: Playwright's Chromium and, on Linux, a Han font (remy browsers).
     browsers: { command: `${remy} browsers`, cache: false },
+    // CI=1 unless set: the same Playwright here as on GitHub (a browser per core, one retry reported as flaky), which
+    // `remy ci` used to set; without it Playwright ran half the cores (one here, 247 checks in 6 minutes, 2026-10-17).
     // The browser checks on the production build, every language (CHECK_LOCALES=quick: a few), Playwright's own
     // options passed through (`vp run test:browser --shard 1/3`, `--grep <words>`). The build they test is an
     // input; Playwright's results and Wrangler's local state are neither input nor output.
     'test:browser': {
-      command: `PREVIEW_PORT=${port} playwright test --project=ours`,
+      command: `CI=\${CI:-1} PREVIEW_PORT=${port} playwright test --project=ours`,
       dependsOn: ['build', 'browsers'],
       cache: {
         env: ['CHECK_LOCALES', 'BEHAVIOUR_LOCALES', 'COLOR_SCHEME'],
@@ -259,7 +261,7 @@ function appTasks(root, { remy }) {
     // beside them: they measure speed, so `remy test audits` holds the machine's speed lock around Playwright (two
     // agents' audits at once skew both).
     'test:audits': {
-      command: `PREVIEW_PORT=${port} ${remy} test audits`,
+      command: `CI=\${CI:-1} PREVIEW_PORT=${port} ${remy} test audits`,
       dependsOn: ['build', 'browsers'],
       cache: { untrackedEnv: ['PREVIEW_PORT', ...network], input: browserInputs, output: [] },
     },

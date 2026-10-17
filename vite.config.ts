@@ -1,4 +1,4 @@
-import { remyWorkspace } from '@joeblew999/remy-ui/workspace';
+import { network, remyWorkspace } from '@joeblew999/remy-ui/workspace';
 
 // remy-auth's workspace (apps/*, packages/*): the style, the workspace's tasks and the app's under the same names, from
 // the package (@joeblew999/remy-ui/workspace), plus what is remy-auth's alone: its unit checks run the command line
@@ -14,10 +14,28 @@ export default remyWorkspace({
     },
     // What the package ships that git does not hold: its catalogs (src/paraglide) and its command line (cli/).
     // The new-app test packs it, and the release publishes it.
+    // Cached on what a new app is made of (the blank app, the fixture, the packages, the lockfile, the developer docs
+    // its remy skill is built from), so a change to
+    // remy-auth's own app or its product docs runs it no more (~3 minutes). It writes nothing here: its app lives in a scratch folder.
     'new-app': {
       command: 'bash fixtures/consumer/run.sh',
       dependsOn: ['@joeblew999/remy-ui#generate', '@joeblew999/remy-ui#cli'],
-      cache: false,
+      cache: {
+        input: [
+          'template/**',
+          'fixtures/**',
+          'apps/docs/content/dev/**',
+          'packages/**',
+          'package-lock.json',
+          '!**/node_modules/**',
+          '!**/paraglide/**',
+          '!packages/ui/cli/**',
+          '!packages/ui/skills/**',
+        ],
+        output: [],
+        env: ['REMY_REHEARSE_PUBLISH'],
+        untrackedEnv: [...network, 'GITHUB_TOKEN', 'NODE_AUTH_TOKEN', 'REMY_FLOW', 'PREVIEW_PORT'],
+      },
     },
     // The release's publish (GitHub's release job, for a version tag): each package whose version is new on its
     // registry, then the GitHub release (`vp run publish --release vX.Y.Z`).
