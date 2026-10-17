@@ -18,22 +18,38 @@ that app ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/to
 
 ### Vite Plus: the machine's `vp`, in managed mode
 
-Every machine that works on the repo (your Mac, Claude's cloud, GitHub) runs Vite Plus's global `vp`, in
-**managed mode**. That is what makes `node` and `npm` the Node `.node-version` pins, rather than whatever Node
-the machine happens to have. The `vite-plus` package in the dependencies is the toolchain; it does not choose
-Node.
+Vite Plus is one tool, and its command is always `vp`. It is installed in two places, each doing its own job:
+
+| | On the machine (global) | In the repo (local) |
+| --- | --- | --- |
+| How it gets there | once per machine: `curl -fsSL https://vite.plus \| bash` | the `vite-plus` package in `package.json`, in `node_modules` |
+| What it does | picks Node and npm: the Node `.node-version` pins (26.10.0) | the tools: build, lint, format, type check, tests, the task runner |
+| Who sets the version | whoever installed it | the repo, so every machine gets the same |
+
+You only type `vp`. The machine's `vp` puts the pinned Node in place, then runs the repo's version of the tools.
+Every machine that works on the repo (your Mac, Claude's cloud, GitHub) has both, with the machine's `vp` in
+**managed mode**; without it, `node` and `npm` are whatever the machine happens to have, and nothing says so.
 
 ```sh
-curl -fsSL https://vite.plus | bash   # once per machine: the global vp
+curl -fsSL https://vite.plus | bash   # once per machine: the global vp (say yes to managing Node)
 vp env on                             # managed mode: node and npm follow .node-version
-vp env current                        # must say: Source .node-version, Mode managed
+vp env current                        # must say: Version 26.10.0, Source .node-version, Mode managed
 vp install                            # the dependencies, on that Node
 ```
 
 The installer, run without a terminal (as an agent runs it), leaves `vp` in **system-first** mode. In that mode
 the pin is silently ignored and every check runs on the machine's Node, so check `vp env current` before
-trusting any result. Claude's cloud machines start empty, so the committed `.claude/settings.json` runs these
-steps at the start of every session there and reports the Node it got; on your own machine you run them once.
+trusting any result.
+
+- **Claude's cloud** machines start empty. The committed `.claude/settings.json` runs the four steps at the
+  start of every session there and reports the Node it got, so nobody runs them by hand.
+- **Your own machine (a Mac):** you run the four steps once. After that, `node` goes through `vp` in every
+  project, not only this one: a project with its own `.node-version` gets that Node; one without gets `vp`'s
+  default (the latest LTS) rather than the Node installed before. `vp env default <version>` sets that default.
+  The session step in `.claude/settings.json` does nothing there.
+- **A checkout made before 17 October 2026** has a `.claude/settings.json` written by `remy guard` (it was not
+  committed then). Delete it before pulling, or the pull refuses; then `vp install` and `npx remy guard`.
+
 `remy guard` writes its hooks, with this machine's paths, to `.claude/settings.local.json`, which is not committed.
 Vite Plus's own instructions for agents load in every Claude session from the installed package
 (`CLAUDE.md` imports `node_modules/vite-plus/AGENTS.md`), and its docs for the installed version are in
