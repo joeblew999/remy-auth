@@ -1,4 +1,4 @@
-// `remy setup` (npm run setup): install dependencies, the pinned skills, the agents' rules block, MCP
+// `remy setup` (vp run setup): install dependencies, the pinned skills, the agents' rules block, MCP
 // registration and the flow's guard, then the installation's checks and the check. About two minutes,
 // no browser: the browser suite is GitHub's after every landing, and the release's.
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -61,7 +61,7 @@ export async function setup(): Promise<void> {
 }
 
 export const what =
-  "npm ci, the pinned skills, the agents' rules, MCP registration, the guard, the pre-push hook (npm run ci), then the installation's checks (npm run setup); preconditions: those alone";
+  "npm ci, the pinned skills, the agents' rules, MCP registration, the guard, the pre-push hook (vp run ci), then the installation's checks (remy verify setup); preconditions: those alone";
 export async function main(args: string[]): Promise<void> {
   if (args[0] === 'preconditions') return preconditions();
   return setup();

@@ -1,9 +1,9 @@
 // Every remy command is timed by the command line itself (remy.ts calls `begin`), not by the command
 // (owner, 2026-10-17: "it should get it automatically because it's part of the CLI"). A run writes its
 // record to node_modules/.cache/remy/<command>-last.txt: when it started, its parts, and its total with
-// passed or failed. A remy command started inside another (ci runs `check types` and `check unit`, dev:land
+// passed or failed. A remy command started inside another (ci runs `check types` and `check unit`, vp run land
 // runs `i18n translate`, the consumer fixture's script) writes into the outer run's record, indented under
-// it, so one `npm run ci` leaves one record of everything it ran. A command only marks its parts (`lap`)
+// it, so one `vp run ci` leaves one record of everything it ran. A command only marks its parts (`lap`)
 // and adds detail it measured itself (`note`). `npx remy last [command]` prints a record; where the time
 // goes is read from the run, never remembered.
 import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
@@ -70,7 +70,7 @@ export function warn(text: string): void {
   write(`  ${text}`);
 }
 
-/** The parts so far, for a command that sums itself up in its own words (dev:land's last line). */
+/** The parts so far, for a command that sums itself up in its own words (vp run land's last line). */
 export const laps = (): Part[] => [...parts];
 
 /** Adds a time this run measured itself (one agent call, one step of a script) to the record, outside the parts. */

@@ -1,8 +1,8 @@
-// Screenshots for looking at a page as a visitor does (`remy shots`, npm run shots): a debugging tool.
-//   npm run shots -- /docs/tooling                        one shot: desktop, light, English
-//   npm run shots -- /formats --phone --dark --locale ar  only the variants asked for
-//   npm run shots -- --all                                every site and app page, desktop and phone, light and dark, en and ar
-//   npm run shots -- /formats --video                     a WebM of the page loading and scrolled through
+// Screenshots for looking at a page as a visitor does (`remy shots`, npx remy shots): a debugging tool.
+//   npx remy shots /docs/tooling                        one shot: desktop, light, English
+//   npx remy shots /formats --phone --dark --locale ar  only the variants asked for
+//   npx remy shots --all                                every site and app page, desktop and phone, light and dark, en and ar
+//   npx remy shots /formats --video                     a WebM of the page loading and scrolled through
 // Width: --desktop (1280) and/or --phone (390), default desktop. Theme: --light and/or --dark, default
 // light. Language: --locale en,ar (default en). Origin: --origin, else the production origin; a local
 // build works too. Prints each file's path, so it can be opened or read straight away.
@@ -103,5 +103,5 @@ export async function shots(args: string[]): Promise<void> {
 }
 
 export const what =
-  '[path] [--phone] [--dark] [--locale en,ar] [--video] [--all] [--out dir] [--origin url]: screenshots (or a WebM) of a page as a visitor sees it; --all every page, desktop and phone, light and dark, en and ar (npm run shots)';
+  '[path] [--phone] [--dark] [--locale en,ar] [--video] [--all] [--out dir] [--origin url]: screenshots (or a WebM) of a page as a visitor sees it; --all every page, desktop and phone, light and dark, en and ar (npx remy shots)';
 export const main = (args: string[]): Promise<void> => shots(args);

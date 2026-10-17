@@ -1,4 +1,4 @@
-// The translator (`remy i18n translate`, which `dev:land` runs in the change, before its commit): the
+// The translator (`remy i18n translate`, which `vp run land` runs in the change, before its commit): the
 // machine's Claude Code, headless and with no tools, translates exactly the gaps the checks list (i18n.ts),
 // one language (messages) or one page (docs) per call, I18N_JOBS at a time, and writes the files it asked
 // for with the record of what each was made from; nothing else, and no commit (the change commits them
@@ -414,7 +414,7 @@ export async function translateDocs(redo: string[] = []): Promise<boolean> {
   return all(units, jobs(), (unit) => unit());
 }
 
-/** Both, messages then docs: what `dev:land` runs in the change, before its commit. */
+/** Both, messages then docs: what `vp run land` runs in the change, before its commit. */
 export async function translate(args: string[]): Promise<void> {
   const [which, ...rest] = args;
   const messages = which === undefined || which === 'messages' ? await translateMessages() : true;

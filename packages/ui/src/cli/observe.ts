@@ -6,7 +6,7 @@
 // generated one; else the nearest), and the gateway from the instance. Never prints a token.
 // Credentials: Wrangler's login reads AI Search, but it cannot ask for AI Gateway or Workers Logs
 // access, so those use CLOUDFLARE_API_TOKEN ("AI Gateway Edit", which includes reading, and "Workers
-// Observability Read"), from fnox (the macOS keychain): fnox exec -- npm run observe -- …
+// Observability Read"), from fnox (the macOS keychain): fnox exec -- npx remy observe …
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
@@ -78,7 +78,7 @@ async function setup() {
     const json = (await response.json()) as Json;
     if (!json.success && response.status === 403 && observed(path) && !apiToken)
       fail(
-        `${method} ${path}: 403. Wrangler's login cannot read AI Gateway or Workers Logs: run through fnox so CLOUDFLARE_API_TOKEN is set (fnox exec -- npm run observe -- …). The token needs "AI Gateway Edit" and "Workers Observability Read": https://dash.cloudflare.com/profile/api-tokens`,
+        `${method} ${path}: 403. Wrangler's login cannot read AI Gateway or Workers Logs: run through fnox so CLOUDFLARE_API_TOKEN is set (fnox exec -- npx remy observe …). The token needs "AI Gateway Edit" and "Workers Observability Read": https://dash.cloudflare.com/profile/api-tokens`,
       );
     if (!json.success) fail(`${method} ${path}: ${response.status} ${JSON.stringify(json.errors)}`);
     return json;

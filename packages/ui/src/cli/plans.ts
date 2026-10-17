@@ -265,7 +265,7 @@ type Move = 'close' | 'park' | 'open';
 function move(kind: Move, word: string, args: string[]): void {
   const [name, ...note] = args;
   const reason = note.join(' ').trim();
-  if (!name || !reason) fail(`Usage: npm run plans -- ${kind} <plan> "<${kind === 'close' ? 'what shipped' : 'why'}>"`);
+  if (!name || !reason) fail(`Usage: npx remy plans ${kind} <plan> "<${kind === 'close' ? 'what shipped' : 'why'}>"`);
   if (!existsSync(plansDir)) fail('No .plans/ here.');
   const from: Record<Move, string[]> = {
     close: [plansDir, join(plansDir, 'parked')],
@@ -327,7 +327,7 @@ function move(kind: Move, word: string, args: string[]): void {
   console.log(
     `  now.md: ${kind === 'open' ? 'add its item, in the order it closes' : struck ? 'struck its item' : 'no open item links to it'}`,
   );
-  console.log('Review with git diff, then npm run dev:change.');
+  console.log('Review with git diff, then vp run check.');
 }
 
 export const what = "the plans rule on this app's .plans/: few, short, closed";

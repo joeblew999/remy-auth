@@ -19,17 +19,17 @@ Both local preview and Wrangler deployment consume the generated production buil
 Development uses the same Worker source and Cloudflare runtime with hot reload.
 
 Every command for the app, its checks and its deployments, with what each does: [Commands](./commands.mdx).
-In short, the app runs locally on port 5173 with hot reload (`npm run dev`) and as the production build on
-4173 (`npm run preview`), and the checks run on that same local host. Every branch other than `main` gets a
+In short, the app runs locally on port 5173 with hot reload (`vp run dev`) and as the production build on
+4173 (`vp run preview`), and the checks run on that same local host. Every branch other than `main` gets a
 preview on Cloudflare: [on Cloudflare](#on-cloudflare), below. The agent's own browser on a laptop
-(`npm run browser`, Chrome DevTools) is not CI: the checks never use it.
+(`npx chrome-devtools`, Chrome DevTools) is not CI: the checks never use it.
 
 The flow does not run the whole suite against a deployment: the deploys end with the live smoke,
 and GitHub runs the suite after every landing. To run all of it against a deployed URL on purpose, a
 person says so at a terminal (the command refuses without it, and the guard refuses it from an agent):
 
 ```sh
-REMY_FLOW=hand npm run test -- remote https://your-worker.your-subdomain.workers.dev
+REMY_FLOW=hand npx remy test remote https://your-worker.your-subdomain.workers.dev
 ```
 
 The URL must be an origin, without a path or query. The checks that
@@ -48,7 +48,7 @@ There is one Worker configuration with one named environment, `staging` (`env.st
 `wrangler.jsonc`): the same code as its own Worker, with its own databases and secret. A named
 environment is selected with `CLOUDFLARE_ENV` at build time, as the
 [Cloudflare Vite integration](https://developers.cloudflare.com/workers/vite-plugin/reference/cloudflare-environments/)
-requires; `remy cloudflare staging` (which `dev:land` runs) does that and then everything the
+requires; `remy cloudflare staging` (which `vp run land` runs) does that and then everything the
 production deploy does. Keep the
 implementation shared; vary only resource identifiers, secrets and other environment values. Bindings,
 vars and required secrets are not inherited by a named environment: each is declared again there. Do not copy the application or use remote bindings for
@@ -119,10 +119,10 @@ Components and the theme are what the shadcn CLI writes, in shadcn's monorepo la
 scripts in [`package.json`](https://github.com/joeblew999/remy-auth/blob/main/package.json) are the only way they change:
 
 ```sh
-npm run ui:components       # Re-add every shadcn component (extend the list there to add one)
-npm run ui:theme            # Rewrite globals.css with shadcn's default theme
-npm run ui:blocks           # Diff each owned block against upstream, in place
-npm run ui:verify           # Re-run both and fail on any difference (runs before every release)
+vp run ui:components       # Re-add every shadcn component (extend the list there to add one)
+vp run ui:theme            # Rewrite globals.css with shadcn's default theme
+vp run ui:blocks           # Diff each owned block against upstream, in place
+vp run ui:verify           # Re-run both and fail on any difference (runs before every release)
 ```
 
 Blocks are owned copies, as shadcn intends; sidebar-16's README says what was changed. The
@@ -140,13 +140,13 @@ Fonts live in [`packages/ui/src/fonts.css`](https://github.com/joeblew999/remy-a
 - **A preview of a branch**: push it, with no pull request (GitHub runs nothing for a branch without one).
   Cloudflare's Workers Builds builds it and serves it at `https://<branch>-remy-auth.gedw99.workers.dev`
   (a `/` in the branch becomes `-`); the connector's builds tools show the build and its log. Then check it:
-  `REMY_FLOW=hand npm run test -- remote https://<branch>-remy-auth.gedw99.workers.dev` (our checks only: a
+  `REMY_FLOW=hand npx remy test remote https://<branch>-remy-auth.gedw99.workers.dev` (our checks only: a
   preview is hidden from search engines on purpose, so Google's audits judge production). This is the way
   from Claude's cloud, which has no Cloudflare token; a machine signed in has `npx remy cloudflare preview` too.
 - **Cloudflare's build settings** live on Cloudflare, not in the repository, so they are written here and
   changed only through the connector, to match: two build rules on the `remy-auth` Worker, both
-  `npm run build`, `NODE_VERSION` as in `.node-version`. `main`: deploy `npx wrangler versions upload` (a
-  new version; production moves only with `dev:promote`). Every other branch: deploy `npx wrangler preview`.
+  `vp run build`, `NODE_VERSION` as in `.node-version`. `main`: deploy `npx wrangler versions upload` (a
+  new version; production moves only with `vp run promote`). Every other branch: deploy `npx wrangler preview`.
 - **Speed far from the databases**: the Worker runs with Smart Placement (`wrangler.jsonc`, checked by
   `npx remy verify tooling`), and every request reads through its own D1 session, so reads come from the
   nearest copy (`@joeblew999/remy-ui/replicas`; a unit check refuses app code using a database binding raw).
@@ -175,7 +175,7 @@ out of date (the design is remy-sport's, whose committed record of deployments w
   and the `deployments` the app lists there (staging beside production, a service it calls), each
   answering for itself, then the packages this build was made with. remy-auth's Settings page shows
   it, with its production and staging.
-- **`npm run dev:status`** (and `npx remy cloudflare versions`) prints a row per deployment (the origins in
+- **`vp run status`** (and `npx remy cloudflare versions`) prints a row per deployment (the origins in
   `remy.config.ts`, or the origins given), with each commit placed against this checkout: `= HEAD`, `3 behind HEAD`. Use it
   before saying what is live.
 
@@ -227,7 +227,7 @@ bites); the platform's catalog names no product (`tests/product.spec.ts`).
 - `src/router.tsx`: the package's `remyRouter`, a new router and TanStack Query client per request, with Query's SSR integration. `src/routes/__root.tsx` is the package's `remyRoot` with this app's config; TanStack Devtools (Router and Query panels) is passed in there, in the app's own file, because its `devtools()` Vite plugin strips it from production builds only outside `node_modules`; the build-boundary check proves no devtools or server-only code reaches the browser.
 - `src/parts.json`: the package's [parts](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md) this app uses, one per line (the showcase's `@joeblew999/remy-showcase/time-zones`, `deferred-place` and `status-card`, and the platform's `seo-routes`); `remyParts()` in `vite.config.ts` mounts their routes and `partChecks()` in `tests/gui.spec.ts` runs their checks.
 - `packages/ui/`: everything both apps share; its [README](./remy-ui.md) lists the exports.
-- `tests/`: the package's shared checks (`@joeblew999/remy-ui/checks`, the showcase's `@joeblew999/remy-showcase/*.checks`) plus the checks only this repository owns (catalogs, concurrent server renders, hydration, its extra formats rows); `lighthouse.spec.ts` is `npm run ci`'s `audits` part and `performance.spec.ts` the release's Core Web Vitals.
+- `tests/`: the package's shared checks (`@joeblew999/remy-ui/checks`, the showcase's `@joeblew999/remy-showcase/*.checks`) plus the checks only this repository owns (catalogs, concurrent server renders, hydration, its extra formats rows); `lighthouse.spec.ts` is `vp run ci`'s `audits` part and `performance.spec.ts` the release's Core Web Vitals.
 
 Locale is passed explicitly into compiled message functions; concurrent requests share no
 mutable locale state. The catalogs are the `locales` in
@@ -242,9 +242,9 @@ runs them on server-rendered ones.
 
 ## Evidence and limits
 
-`npm run ci` runs four parts, the same four GitHub runs as jobs: `check` (`dev:change`'s check, whole; under `npm run ci` it reports what `dev:change` would fix, such as a stale `COMMANDS.md`, and writes nothing), `browser`
+`vp run ci` runs four parts, the same four GitHub runs as jobs: `check` (`vp run check`'s check, whole; under `vp run ci` it reports what `vp run check` would fix, such as a stale `COMMANDS.md`, and writes nothing), `browser`
 (every check of ours in a browser), `audits` (Google's Lighthouse) and `new-app` (a brand-new app on this commit's
-package); Core Web Vitals on a throwaway Cloudflare Worker is the release's (`npm run test -- cwv`). There are no
+package); Core Web Vitals on a throwaway Cloudflare Worker is the release's (`npx remy test cwv`). There are no
 levels to choose: what a run includes is what its change can affect. A check of something that depends on the language (fonts and
 scripts, hyphenation, direction, formats, the catalogs) runs in every checked language (`checkedLocales`); a check
 of behaviour that does not (the security policy, noindex, search params, the demo form, error pages, API answers)
@@ -257,8 +257,8 @@ fonts and any CSS, code that formats by locale (named for it, or calling `Intl`,
 the browser checks themselves, the lockfile and the Node version. When nothing can, it runs in English and Arabic
 only and says so: on 2026-10-17 that was 37 of the 49 recent commits on `main` that needed the browser part, and a run in
 1 min 39 s instead of 2 min 49 s. The tooling and the unit checks never count. Every language still runs on every
-push to `main`, which `dev:promote` waits for, so a page that breaks in one language alone is caught there at the
-latest. `npm run ci` locally decides exactly as a pull request does (`npm run ci -- --everything` runs all of it, as main does; `CHECK_LOCALES` set
+push to `main`, which `vp run promote` waits for, so a page that breaks in one language alone is caught there at the
+latest. `vp run ci` locally decides exactly as a pull request does (`vp run ci -- --everything` runs all of it, as main does; `CHECK_LOCALES` set
 by hand wins). What the checks cover is the checks themselves: `tests/` and the package's
 `@joeblew999/remy-ui/checks` (each check's title says what it proves); the flow's steps that run them are in
 [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). In short: every page in every
@@ -273,7 +273,7 @@ Google's level covers site pages only (app pages are noindex by design): Lightho
 `lighthouse` package, judge `/en` (mobile and desktop) and `/en/formats`
 ([`tests/performance.spec.ts`](https://github.com/joeblew999/remy-auth/blob/main/tests/performance.spec.ts)) against Google's good thresholds (LCP
 2.5 s, CLS 0.1, TBT 200 ms, Performance at least 0.9), on a throwaway Cloudflare Worker
-(`npm run test -- cwv`), not localhost.
+(`npx remy test cwv`), not localhost.
 
 Limits: no organizations, OAuth tokens or cross-app sign-in yet, so only remy-auth's own pages know
 who is signed in ([the auth plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/auth-service.md)). The site is served from its workers.dev address (`DEPLOY_ORIGIN`); the production public origin and

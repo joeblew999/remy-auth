@@ -25,7 +25,7 @@ export function main(args: string[]): void {
   const ours = pre.find((entry) => entry.hooks.some((h) => /(run dev:guard-hook| guard-hook)$/.test(h.command)));
   const wanted = { matcher: 'Bash', hooks: [hook] };
   const session = (settings.hooks.SessionStart ??= []);
-  const oursStart = session.find((entry) => entry.hooks.some((h) => /(run dev:status| status)$/.test(h.command)));
+  const oursStart = session.find((entry) => entry.hooks.some((h) => /(run vp run status| status)$/.test(h.command)));
   const same =
     ours &&
     JSON.stringify(ours) === JSON.stringify(wanted) &&

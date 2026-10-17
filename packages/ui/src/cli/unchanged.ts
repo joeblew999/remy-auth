@@ -7,8 +7,8 @@
 //   is ignored), one per checkout and worktree (each has its own install), thrown away with a CI runner,
 //   wiped by a fresh `npm ci`.
 // - `whenChanged`: run a step only when the files it reads changed since it last passed (a fingerprint
-//   of their paths, sizes and times, stamped when the step passes). dev:change's steps use it.
-// - `changedFiles` / `affects` / `skip`: which of `npm run ci`'s parts a branch's changes can affect,
+//   of their paths, sizes and times, stamped when the step passes). vp run check's steps use it.
+// - `changedFiles` / `affects` / `skip`: which of `vp run ci`'s parts a branch's changes can affect,
 //   from git (against the base branch on a pull request, against origin/main locally).
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
@@ -79,9 +79,9 @@ export function whenChanged(name: string, patterns: string[], step: () => void):
   writeFileSync(file, fingerprint(patterns));
 }
 
-// --- Which of npm run ci's parts a branch's changes can affect -----------------------------------------
+// --- Which of vp run ci's parts a branch's changes can affect -----------------------------------------
 // (owner, 2026-10-17: a pull request that changed one Markdown file still ran three five-minute jobs).
-// The workflow runs `npm run ci -- <part>` as always; a part nothing it checks touched says so and
+// The workflow runs `vp run ci -- <part>` as always; a part nothing it checks touched says so and
 // passes, so every job still reports. Pushes to main and tags run everything; ci decides when to compare.
 
 export type Part = 'browser' | 'audits' | 'new-app';
@@ -181,7 +181,7 @@ export function languageInput(
 /**
  * Whether the browser part must run in every language, or English and the first right-to-left language are enough.
  * Every language when what changed cannot be known (a push to main, a tag, --all: the full answer after
- * merge, which dev:promote waits for) or when a change can differ by language (languageInput); otherwise
+ * merge, which vp run promote waits for) or when a change can differ by language (languageInput); otherwise
  * the two, and it says so, naming the rule. Most of the browser part's time is the same checks in thirteen
  * languages (2026-10-17: 174 of 247 checks, 71% of the time).
  */
@@ -196,7 +196,7 @@ export function allLanguages(): boolean {
     return true;
   }
   console.log(
-    'browser: the quick languages only (the base language and the first right-to-left one: English and Arabic here): nothing that changed can differ by language. Every language runs on main; npm run ci -- --everything runs them here.',
+    'browser: the quick languages only (the base language and the first right-to-left one: English and Arabic here): nothing that changed can differ by language. Every language runs on main; vp run ci -- --everything runs them here.',
   );
   return false;
 }

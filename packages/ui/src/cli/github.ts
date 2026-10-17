@@ -88,7 +88,7 @@ export async function waitForChecks(
     if (now?.failed.length) return { state: 'red', failed: now.failed };
     if (polls % 4 === 0)
       console.log(
-        `dev:land: GitHub is checking ${sha.slice(0, 7)} (${Math.round((Date.now() - started) / 1000)} s so far)...`,
+        `land: GitHub is checking ${sha.slice(0, 7)} (${Math.round((Date.now() - started) / 1000)} s so far)...`,
       );
     await new Promise((resolve) => setTimeout(resolve, 15_000));
   }

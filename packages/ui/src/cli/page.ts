@@ -54,7 +54,7 @@ export function needsMdx(page: string): boolean {
 /**
  * Gives every English page under `dirs` the ending its content needs, renaming its translations with it and
  * fixing the links to it in the same folder; returns what was renamed ("old -> new"). With `verify` it renames nothing
- * and returns what would be (npm run ci fails on it: CI says what dev:change would have fixed).
+ * and returns what would be (vp run ci fails on it: CI says what vp run check would have fixed).
  */
 export function rightEndings(dirs: string[], verify = false): string[] {
   const renamed: string[] = [];

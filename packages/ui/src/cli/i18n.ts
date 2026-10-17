@@ -282,7 +282,7 @@ export function docsGaps(cwd = process.cwd()): { gaps: Gap[]; sites: number } {
   if (!sites.length) return { gaps: [], sites: 0 };
   const language = /\.[a-z]{2,3}(-[A-Za-z]{2,4})?\.mdx?$/;
   // What git knows that is there now: a page deleted or renamed but not yet committed is still in git's index, and
-  // counting it made a renamed page both missing and an orphan (2026-10-17, dev:change renaming .mdx to .md).
+  // counting it made a renamed page both missing and an orphan (2026-10-17, vp run check renaming .mdx to .md).
   const files = (where: string) =>
     (git(cwd, 'ls-files', '-co', '--exclude-standard', '--', relative(cwd, where)) ?? '')
       .split('\n')
@@ -408,20 +408,20 @@ export async function checkAll(strict = process.env.I18N_STRICT === '1', cwd = p
   const docs = checkDocs(false, cwd);
   if (messages && docs) return true;
   if (strict) return false;
-  console.log('WARNING: translations are incomplete or stale; npm run dev:land translates them, in this change.');
+  console.log('WARNING: translations are incomplete or stale; vp run land translates them, in this change.');
   return true;
 }
 
 export const what =
-  "translations: check [messages|docs] [--list] (offline, read-only), translate [messages|docs] (the machine's Claude; dev:land runs it in the change)";
+  "translations: check [messages|docs] [--list] (offline, read-only), translate [messages|docs] (the machine's Claude; vp run land runs it in the change)";
 /** The subcommands, for remy help and the Commands page; main dispatches on the same two words. */
 export const commands: Subcommands = {
   check: {
-    what: '[messages|docs] [--list]: the offline checks, read-only, no git history: a warning (exit 0) while coding and in npm run ci, exit 1 with I18N_STRICT=1 (the release); --list prints one line per gap',
+    what: '[messages|docs] [--list]: the offline checks, read-only, no git history: a warning (exit 0) while coding and in vp run ci, exit 1 with I18N_STRICT=1 (the release); --list prints one line per gap',
     run: (rest) => main(['check', ...rest]),
   },
   translate: {
-    what: "[messages|docs] [files…]: what the checks list, by the machine's Claude (I18N_MODEL, default sonnet; I18N_JOBS at a time, default 4): only the changed sections and keys, with their records; named translation files redone in full; dev:land runs it in the change",
+    what: "[messages|docs] [files…]: what the checks list, by the machine's Claude (I18N_MODEL, default sonnet; I18N_JOBS at a time, default 4): only the changed sections and keys, with their records; named translation files redone in full; vp run land runs it in the change",
     run: (rest) => main(['translate', ...rest]),
   },
 };

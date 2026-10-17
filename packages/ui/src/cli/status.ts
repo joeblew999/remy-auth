@@ -63,7 +63,7 @@ export async function main(): Promise<void> {
   const translations =
     (await translationGaps(root)).length === 0
       ? 'complete and current'
-      : 'stale or missing (dev:land translates them in the change)';
+      : 'stale or missing (vp run land translates them in the change)';
   const slug = repo(root);
   const pulls = (slug ? (githubPulls(slug) ?? []) : []).map((pull) => ({
     number: pull.number,

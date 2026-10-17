@@ -1,4 +1,4 @@
-// What dev:status and dev:land say, composed from facts they are given, so a check can hand them facts
+// What vp run status and vp run land say, composed from facts they are given, so a check can hand them facts
 // (tests/unit). No imports: the app's checks load this too.
 
 export type CommitFact = { sha: string; subject: string; author: string; when: string };
@@ -55,7 +55,7 @@ export function compose({ commits, runs, branches, deployments, translations, pu
   for (const branch of working) {
     const behindRed = red.length > 0 && branch.behind > 0;
     lines.push(
-      `  ${branch.branch.padEnd(24)} ${branch.ahead} ahead, ${branch.behind} behind main${behindRed ? ' (behind a red commit: dev:land merges main in; check what it says)' : ''}  ${branch.path}`,
+      `  ${branch.branch.padEnd(24)} ${branch.ahead} ahead, ${branch.behind} behind main${behindRed ? ' (behind a red commit: vp run land merges main in; check what it says)' : ''}  ${branch.path}`,
     );
   }
   if (translations) lines.push('', `translations: ${translations}`);
@@ -91,7 +91,7 @@ export type Landing = {
 };
 
 /**
- * The last line of dev:land: the whole state, so a landing that failed after the push leaves nothing
+ * The last line of land: the whole state, so a landing that failed after the push leaves nothing
  * for the next person to discover (owner, 2026-10-10, after one stopped at staging's smoke with the
  * translation silently skipped). `failed` is the exit code.
  */
@@ -105,17 +105,17 @@ export function ended({ commit, staging, translation }: Landing, parts: Part[]):
         ? 'staging not deployed (no STAGING_ORIGIN)'
         : staging === 'signed out'
           ? 'staging not deployed: this machine has no Cloudflare sign-in (deploy it from one that has: npx remy cloudflare staging)'
-          : 'staging FAILED (the deploy or its live smoke, named above; dev:status says what staging runs)',
+          : 'staging FAILED (the deploy or its live smoke, named above; vp run status says what staging runs)',
     translation === 'done'
       ? 'translated in the same commit'
       : translation === 'up to date'
         ? 'translations were up to date'
-        : 'translation FAILED and still owed (the page and why are above; the next dev:land tries again)',
+        : 'translation FAILED and still owed (the page and why are above; the next vp run land tries again)',
   ].join('; ');
   return failed
     ? {
         failed,
-        line: `dev:land: ended with a failure after ${took(parts)}. ${state}. Land again: staging and any translation owed run again; the rest costs nothing.`,
+        line: `land: ended with a failure after ${took(parts)}. ${state}. Land again: staging and any translation owed run again; the rest costs nothing.`,
       }
-    : { failed, line: `dev:land: done in ${took(parts)}. ${state}.` };
+    : { failed, line: `land: done in ${took(parts)}. ${state}.` };
 }

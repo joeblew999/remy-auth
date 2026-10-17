@@ -484,7 +484,7 @@ const auditDevices = {
  * Google Lighthouse, run directly against the same target as the other checks: accessibility, SEO,
  * best practices and agentic browsing (Performance is performanceChecks'). Every scored audit must pass,
  * not only the category score; none is exempt. It used to go through the Chrome DevTools CLI, a daemon
- * around this same Lighthouse; that CLI stays for agents to look at pages (npm run browser), not for checks.
+ * around this same Lighthouse; that CLI stays for agents to look at pages (npx chrome-devtools), not for checks.
  */
 export function lighthouseChecks({ pages }) {
   test.describe('lighthouse', () => {

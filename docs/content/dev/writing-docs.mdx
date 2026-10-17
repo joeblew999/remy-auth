@@ -92,7 +92,7 @@ the catalog and the guide follows; the translator keeps the markers as they are.
 
 :::note
 Take them with the project's own tool, so they show the real app:
-`npm run shots -- /formats --out docs/public/media` for a picture, and add `--video`
+`npx remy shots /formats --out docs/public/media` for a picture, and add `--video`
 for a short recording of the page.
 :::
 
@@ -114,7 +114,7 @@ for a short recording of the page.
 ## Components
 
 A page is `.md` (plain, read the same on the site, by an agent and in the `remy` skill) unless it uses a component,
-then `.mdx` (the site alone reads those). Nobody picks: `npm run dev:change` renames a page, its translations and
+then `.mdx` (the site alone reads those). Nobody picks: `vp run check` renames a page, its translations and
 the links to it when its content needs the other ending.
 
 In `.mdx` pages: `<Callout>` (or `:::note`, `:::warning` in any page), `<Cards>` and `<Card>`, `<Tabs>`
@@ -125,7 +125,7 @@ and `<Tab>`, `<Steps>` and `<Step>`, `<Accordions>` and `<Accordion>`, `<Files>`
 
 ## The Fumadocs CLI
 
-`npm run docs:cli -- feature <name>` (remy-auth only) runs the pinned Fumadocs CLI in the shared docs
+`vp run docs:cli -- feature <name>` (remy-auth only) runs the pinned Fumadocs CLI in the shared docs
 Worker, `packages/ui/src/docs`; its `cli.json` maps the folders there, and what it writes is a change to
 the package, reviewed like any other. Apps take the Worker from the package and never run it.
 
@@ -138,6 +138,6 @@ the package, reviewed like any other. Apps take the Worker from the package and 
 
 ## Translations
 
-Write English only. `dev:land` translates what your change made stale, in the same commit
+Write English only. `vp run land` translates what your change made stale, in the same commit
 ([translations: in the change](./how-we-work.md#translations-in-the-change)); `npx remy i18n check docs` lists what each
 language still needs.

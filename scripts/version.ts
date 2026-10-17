@@ -1,4 +1,4 @@
-// npm run ui:version -- <version>: the next release's version, written everywhere it appears: the
+// vp run ui:version -- <version>: the next release's version, written everywhere it appears: the
 // package, the showcase's and the contract's peer range (they are written against this release's
 // exports), the lockfile, and the blank app's two pins. Then template:check.
 import { execFileSync } from 'node:child_process';
@@ -6,7 +6,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
 const version = process.argv[2];
 if (!version || !/^\d+\.\d+\.\d+$/.test(version)) {
-  console.error('npm run ui:version -- <version>: the next version without the v, e.g. 0.15.0');
+  console.error('vp run ui:version -- <version>: the next version without the v, e.g. 0.15.0');
   process.exit(2);
 }
 const npm = (...args: string[]) => execFileSync('npm', args, { stdio: ['ignore', 'ignore', 'inherit'] });

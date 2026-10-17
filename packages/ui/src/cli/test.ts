@@ -1,6 +1,6 @@
 // The browser checks (`remy test …`), each what a step, GitHub or a hand that said so runs; the gate
 // (allowed.ts) refuses the heavy ones outside the flow. What CI runs (the browser part, the audits, the new app) is
-// `npm run ci`, which calls the functions here; the sub-commands are what a person reaches for by hand. `only <words>` is the one browser run a step does not own: the checks whose title matches,
+// `vp run ci`, which calls the functions here; the sub-commands are what a person reaches for by hand. `only <words>` is the one browser run a step does not own: the checks whose title matches,
 // in the quick languages.
 import { spawnSync } from 'node:child_process';
 import { dispatch, type Subcommands } from './commands.ts';
@@ -116,7 +116,7 @@ async function withSpeedLock<T>(work: () => T): Promise<T> {
 }
 
 /** The browser checks (ci's browser part), on the production artifact in local Workers: in every language, or in English and Arabic when the change cannot differ by language. */
-/** REMY_SHARD=<i>/<n> runs one part of the checks (GitHub splits the browser part across jobs; `npm run ci -- browser --shard 1/3`). */
+/** REMY_SHARD=<i>/<n> runs one part of the checks (GitHub splits the browser part across jobs; `vp run ci -- browser --shard 1/3`). */
 const shard = () => (process.env.REMY_SHARD ? [`--shard=${process.env.REMY_SHARD}`] : []);
 export function every(): void {
   gate('test:browser');
@@ -198,7 +198,7 @@ export function report(which: 'local' | 'remote' = 'local'): void {
 }
 
 export const what =
-  'the browser checks by hand: one area, the smoke, against a deployment, Core Web Vitals, the report (what CI runs is npm run ci)';
+  'the browser checks by hand: one area, the smoke, against a deployment, Core Web Vitals, the report (what CI runs is vp run ci)';
 export const commands: Subcommands = {
   only: {
     what: '<words>: the checks whose title matches, in a few languages; the one targeted run by hand',

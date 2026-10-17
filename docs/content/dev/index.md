@@ -45,8 +45,8 @@ Node as `.node-version` says (26), then from this checkout:
 
 ```sh
 npm install          # once, for the lockfile and the remy bin
-npm run setup        # the pinned skills, MCP, the flow's guard, the installation's checks
-npm run dev          # http://127.0.0.1:5173/en
+vp run setup        # the pinned skills, MCP, the flow's guard, the installation's checks
+vp run dev          # http://127.0.0.1:5173/en
 ```
 
 Open [localhost:5173/en](http://127.0.0.1:5173/en); switch to Spanish or try the demo.

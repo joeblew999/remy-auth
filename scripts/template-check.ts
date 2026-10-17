@@ -1,4 +1,4 @@
-// npm run template:check: the blank app (template/) pins this release of @joeblew999/remy-ui: its
+// vp run template:check: the blank app (template/) pins this release of @joeblew999/remy-ui: its
 // package.json and its CI workflow's tag. A release check.
 import { readFileSync } from 'node:fs';
 

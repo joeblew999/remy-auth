@@ -29,7 +29,7 @@ is general, not only for missing tools:
   two choices, both inside the landing they are on: **fix it** when it is small, or **write it into
   `.plans/now.md`** ("What is left, in order": what was seen, where, and what would fix it), a plan
   file when it is big. Mentioning it in a chat or a report alone is neither.
-- **Everyone hears it through the repo**: `dev:status` prints that list to every session (agents
+- **Everyone hears it through the repo**: `vp run status` prints that list to every session (agents
   open with it), so what one person saw reaches all, and the next landing takes the top of it.
 - **"Done" is the end of a sweep, not of a list.** Before saying it: branches and worktrees, open
   pull requests, `remy cloudflare versions`, `remy plans check`, a search for the words the change retired, the docs
@@ -37,12 +37,12 @@ is general, not only for missing tools:
 
 ## Use the project's own tools first
 
-- Start with `npm run setup`; [developer tooling](./tooling.md) says what it installs.
+- Start with `vp run setup`; [developer tooling](./tooling.md) says what it installs.
 - Before doing any step by hand (installing, upgrading, releasing, deploying, translating), find its script:
-  `npm run` lists them, in whichever repository you are in; an app has the same ones. Owner,
-  2026-09-26, after an app was upgraded by hand past `npm run upgrade`: "you know we do not reinvent wheels".
+  `vp run` lists them, in whichever repository you are in; an app has the same ones. Owner,
+  2026-09-26, after an app was upgraded by hand past `vp run upgrade`: "you know we do not reinvent wheels".
 - Run commands through the package.json scripts, check the real page with the Chrome DevTools tools
-  (`npm run browser`), and use the installed skills before reading upstream sources, searching
+  (`npx chrome-devtools`), and use the installed skills before reading upstream sources, searching
   `node_modules` or writing one-off scripts.
 - Look at the real page with the browser tools before writing a test for it.
 - Once the tools can answer a question, stop researching and use them.
@@ -80,9 +80,9 @@ until you're pushed!" ([the Fumadocs decision](https://github.com/joeblew999/rem
 UI is hard and never done, so we take what shadcn and TanStack have spent years getting right,
 and write only what they do not provide.
 
-- **shadcn's CLI writes every component and the theme.** Components come from `npm run ui:components`,
-  the theme from `npm run ui:theme` (shadcn's default Nova style, neutral, Geist: no preset, no
-  branding of our own). `npm run ui:verify` fails the release on any hand edit. The repository uses
+- **shadcn's CLI writes every component and the theme.** Components come from `vp run ui:components`,
+  the theme from `vp run ui:theme` (shadcn's default Nova style, neutral, Geist: no preset, no
+  branding of our own). `vp run ui:verify` fails the release on any hand edit. The repository uses
   shadcn's monorepo layout, so `shadcn add` run in the app writes into the shared package.
 - **Look for a shadcn block before building a layout or a screen:**
   `./node_modules/.bin/shadcn search @shadcn -t registry:block`. Add it with `shadcn add`, keep its
@@ -96,10 +96,10 @@ and write only what they do not provide.
   and so on), install its agent skills, then delete the code it replaces.
 - Before writing any UI code, ask: does shadcn, TanStack or Paraglide already do this? If yes, use it.
 
-- Look at it: before calling UI work done, screenshot the pages you changed with `npm run shots` (desktop and
+- Look at it: before calling UI work done, screenshot the pages you changed with `npx remy shots` (desktop and
   phone, light and dark, English and Arabic) and look at the screenshots. Checks prove behaviour; only
   the screenshots show layout, spacing, overflow and mixed-direction text; name the pages you changed
-  (`npm run shots -- /formats --phone`), `--all` only for a sweep (owner, 2026-09-26: "It's
+  (`npx remy shots /formats --phone`), `--all` only for a sweep (owner, 2026-09-26: "It's
   really depressing how you can't see the look of the web site properly").
 
 ### Which TanStack library for what
@@ -147,7 +147,7 @@ its translations together: one commit, one push, one run of the checks.
 
 - A feature agent writes English only: the English docs and the base catalog (`messages/en.json`).
   It never edits a translation (`<page>.<lang>.md` in `docs/content`) or another locale's catalog by hand.
-- `dev:land` translates what the change made stale or missing, on the branch, before the check and
+- `vp run land` translates what the change made stale or missing, on the branch, before the check and
   the commit (`remy i18n translate`); nobody runs it by itself. The Claude agent translates exactly
   what `remy i18n check` lists: for a stale page, only the sections whose English changed; for a
   catalog, only the changed keys.
@@ -155,10 +155,10 @@ its translations together: one commit, one push, one run of the checks.
   section (`translatedFrom` in its frontmatter), a catalog a fingerprint of each English message
   (`translated-from/<lang>.json` beside it). Stale is where the record and the English differ. No git
   history is read, so the answer is the same on a Mac, in a cloud agent's container and in GitHub's
-  shallow checkout, where `npm run ci` checks it too.
+  shallow checkout, where `vp run ci` checks it too.
 - Agents working at once need no lock and no one writer: each worktree translates its own change, and two
   branches that change the same English section already meet at that English; after merging main,
-  `dev:land` translates again whatever the merge left stale. (Until 2026-10-17 translation ran on `main`
+  `vp run land` translates again whatever the merge left stale. (Until 2026-10-17 translation ran on `main`
   after the push, under a lock, judged by git history: every landing that touched docs pushed main twice,
   ran GitHub's checks twice, and a page was rewritten whole for a one-line change.)
 - The agent gets no tools: it is handed the English (and, for a stale page, the changed sections and
@@ -166,7 +166,7 @@ its translations together: one commit, one push, one run of the checks.
   records, and nothing else.
 - What the agent returns is written only when it is the page: every frontmatter field its English
   has, and text after it (`packages/ui/src/cli/page.ts`). A failed agent leaves the page as it was, says
-  why and fails the translation; `dev:land` still lands the English, says the translation is still
+  why and fails the translation; `vp run land` still lands the English, says the translation is still
   owed, and the next landing tries again. `tests/unit/i18n-docs.unit.spec.ts` holds every translated
   page in the repository to the same rule. On 2026-10-09 a failed agent's `null` was committed as a
   page and stopped the docs building on main.
@@ -174,8 +174,8 @@ its translations together: one commit, one push, one run of the checks.
   from the English by the next landing.
 - `remy i18n check` only reads, offline, so it is safe anywhere and in any number of worktrees.
   `remy i18n translate` is never a `depends`.
-- Stale or missing is a warning while coding and in `npm run ci` (the check part), and an error at
-  release (`dev:release` runs `remy i18n check` with `I18N_STRICT=1` first).
+- Stale or missing is a warning while coding and in `vp run ci` (the check part), and an error at
+  release (`vp run release` runs `remy i18n check` with `I18N_STRICT=1` first).
 - A structural change (a rename, a sweep) that touches docs translations is followed by
   `REMY_FLOW=hand npx remy i18n translate docs <file>…`, which brings those files fully in line with the
   English. Change a catalog's structure (every locale's file) in the same commit as `en.json`.
@@ -208,20 +208,19 @@ what you run locally and what you run in GitHub asynchronously", and "The toolin
 happens at development ... make sure the developer flow is also formalised so that this stupid
 fuckups can't happen. And so you and developers use that same flow so that it's fixed forever." So
 the flow is code, not a rule to remember: `packages/ui/src/cli/flow.ts` is the one place its decisions live.
-Its four steps are `dev:change`, `dev:land`, `dev:promote` and `dev:release` (`flow.ts`'s `Step`);
-`dev:start` and `dev:done` bracket a piece of work; `dev:status` looks; a guard refuses what is not
-one of them. Seven commands, nothing else. remy-auth gets it the way every app does, from the shared
-tasks; `npm run setup` installs the guard.
+Its four steps are `vp run check`, `vp run land`, `vp run promote` and `vp run release` (`flow.ts`'s `Step`,
+and the check, Vite Plus's tasks); `vp run status` looks; a guard refuses what is not one of them. Five commands,
+nothing else. A piece of work runs in a worktree of its own: Claude Code's (`.claude/worktrees/<name>`), or
+`git worktree add` by hand; each worktree gets its own ports. remy-auth gets it the way every app does, from the shared
+tasks; `vp run setup` installs the guard.
 
 | Step | Command | Who runs it, and when | What runs | Time |
 | --- | --- | --- | --- | --- |
-| Look | `npm run dev:status` | everyone, first: every agent session opens with it (a hook), a developer when they sit down | main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests, the top of `.plans/now.md` | seconds |
-| Before a piece of work | `npm run dev:start -- <name>` | whoever does the work, for every piece, a one-line edit included | a worktree of its own from main (`.claude/worktrees/<name>`), installed, its own ports, the guard; inside one of Claude Code's own worktrees (the same place), `npm run dev:start` with no name prepares it the same way | ~1 min |
-| After every change | `npm run dev:change` | whoever is coding; the only step waited for | the check (`remy check`): plans, types with the tasks' own, the plain-function checks (`tests/**/*.unit.spec.ts`), translation status; a build only when a route file changed, the docs only when docs changed | ~6 s |
-| The change leaves the machine | `npm run dev:land -- "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | main merged in first (a conflict stops, naming the files), the translations it made stale (seconds), the check, every part of `npm run ci` the change can affect (as its pull request will run them), one commit, push the branch, open its pull request (or update the open one), wait for GitHub's checks (they confirm what passed here), squash-merge, deploy staging, reset this checkout to the new main; a red check leaves the pull request open and names the job. GitHub is reached only through `packages/ui/src/cli/github.ts`, its REST API. Never straight to main; from main it moves the work to a branch of its own first. After the merge main's own run checks everything, every part in every language | a few minutes: the parts here, then GitHub's checks |
-| Production | `npm run dev:promote` | the owner, or an agent the owner asked in that session | `remy cloudflare deploy` and the docs Worker, from a pushed main, no gate: staging and GitHub already ran the checks | ~1 min |
-| A release | `npm run dev:release` | the owner, or an agent the owner asked in that session | `remy packages release`: every check, every language, locally, on purpose, then the tag | ~5 min |
-| When landed | `npm run dev:done` | whoever landed, when the piece of work is over; a worktree lives through as many landings as the work takes | the worktree and branch go; refuses while anything is unlanded | seconds |
+| Look | `vp run status` | everyone, first: every agent session opens with it (a hook), a developer when they sit down | main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests, the top of `.plans/now.md` | seconds |
+| After every change | `vp run check` | whoever is coding; the only step waited for | Vite Plus's tasks (`vite.config.ts`): everything generated, the app and the docs built, the project's own checks (plans, single copies, the commands list, page endings, translation status, the plain-function checks in `tests/**/*.unit.spec.ts`), then `vp check` (format, lint, types); what has not changed comes from Vite Plus's cache | ~4 s unchanged, ~50 s from nothing |
+| The change leaves the machine | `vp run land -- "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | main merged in first (a conflict stops, naming the files), the translations it made stale (seconds), the check, every part of `vp run ci` the change can affect (as its pull request will run them), one commit, push the branch, open its pull request (or update the open one), wait for GitHub's checks (they confirm what passed here), squash-merge, deploy staging, reset this checkout to the new main; a red check leaves the pull request open and names the job. GitHub is reached only through `packages/ui/src/cli/github.ts`, its REST API. Never straight to main; from main it moves the work to a branch of its own first. After the merge main's own run checks everything, every part in every language | a few minutes: the parts here, then GitHub's checks |
+| Production | `vp run promote` | the owner, or an agent the owner asked in that session | `remy cloudflare deploy` and the docs Worker, from a pushed main, no gate: staging and GitHub already ran the checks | ~1 min |
+| A release | `vp run release` | the owner, or an agent the owner asked in that session | `remy packages release`: every check, every language, locally, on purpose, then the tag | ~5 min |
 
 - **Who runs a step is in the table, and it is never a question.** An agent lands its own finished
   work without asking: staging is part of landing, GitHub checks every landing, and nothing reaches
@@ -230,33 +229,33 @@ tasks; `npm run setup` installs the guard.
   reads the table and still asks whether to land has stopped using the flow (owner, 2026-10-10,
   after one did: "Is it absolutely clear when each should be run by you?").
 
-- One area that looks wrong: `npm run test -- only <words>` (the browser checks whose title
+- One area that looks wrong: `npx remy test only <words>` (the browser checks whose title
   matches, en and ar, ~30 s). It is the only browser run a step does not own.
 - **The guard** (`remy guard`, a Claude Code hook on every shell command an agent runs, registered on each machine
-  by `npm run setup`) refuses the heavy checks outside the flow (the release gate, the browser checks against a
+  by `vp run setup`) refuses the heavy checks outside the flow (the release gate, the browser checks against a
   deployment, Core Web Vitals, a bare `playwright test`, `remy i18n translate`) and raw `wrangler dev`, naming
   what to run instead (`COMMANDS.md`). Every one still runs by hand from a terminal, with `REMY_FLOW=hand` in
-  front (`REMY_FLOW=hand npm run test -- remote`): the command itself
+  front (`REMY_FLOW=hand npx remy test remote`): the command itself
   asks who is running it (the gate) and refuses a bare run, on every machine. That is a
   person's decision; the guard refuses it from an agent even so, which is the fault it exists for.
-  A task whose own job ends with the verification (`npm run setup`, `npm run packages -- upgrade`,
-  `npm run upgrade`) says it is asking, so those run as written.
+  A task whose own job ends with the verification (`vp run setup`, `npx remy packages upgrade`,
+  `vp run upgrade`) says it is asking, so those run as written.
 - **These pages never give a command the tooling refuses.** A heavy command is written with
-  `REMY_FLOW=hand` in front or named without `npm run`; `tests/unit/dev-flow.unit.spec.ts` reads
+  `REMY_FLOW=hand` in front or named without `vp run`; `tests/unit/dev-flow.unit.spec.ts` reads
   every English page and every task for one run bare, on every check (2026-10-10: eight lines on six
-  pages did, and `npm run setup` ended in the refusal).
+  pages did, and `vp run setup` ended in the refusal).
 - A rule that can be a function belongs in `tests/**/*.unit.spec.ts` (no build, no Worker, no
   browser), so it runs on every check for free. The browser is for what only a browser shows.
-- **An agent never waits on a long-running step.** `dev:land`, `dev:promote`, `dev:release`, a
+- **An agent never waits on a long-running step.** `vp run land`, `vp run promote`, `vp run release`, a
   translation, a remote suite: start it in the background, keep working or answer the owner, and act
   when the harness says it finished. Starting it in the background and then polling it in the
   foreground is the same fault (owner, 2026-10-09: "You just did it again for 2 long running
-  things"). Only `dev:change` (seconds) is run and waited for.
+  things"). Only `vp run check` (seconds) is run and waited for.
 - **One module knows about earlier runs: `packages/ui/src/cli/unchanged.ts`.** Skipping a step because
-  nothing changed (dev:change's stamps, `npm run ci`'s parts on a branch) and the state folder
+  nothing changed (`vp run check`'s stamps, `vp run ci`'s parts on a branch) and the state folder
   (`node_modules/.cache/remy`) live there. A new kind of skip is added to it, never written again
   elsewhere (owner, 2026-10-17: "make sure we don't have bits of code scattered all over the place").
-- **Anything longer than a few seconds runs in the background, always.** `npm run ci` or any part of it,
+- **Anything longer than a few seconds runs in the background, always.** `vp run ci` or any part of it,
   a build, a browser run, an install. A command running in the foreground is cancelled when the owner
   sends a message (the Claude app stops it), so the work silently never happens and the owner is blamed
   for talking. Started in the background, with its output in a file the agent watches, it survives
@@ -266,29 +265,29 @@ tasks; `npm run setup` installs the guard.
 - **Every step says how long it took, without timing itself.** The command line times every `remy`
   command (`packages/ui/src/cli/timing.ts`, called from `remy.ts`): its record, when it started, its parts
   and its total, passed or failed, is `node_modules/.cache/remy/<command>-last.txt`, and `npx remy last
-  [command]` prints it. A command started inside another (`npm run ci` runs `check types` and `test
-  every`, `dev:land` runs `i18n translate`) writes into the outer run's record, indented, so one run
+  [command]` prints it. A command started inside another (`vp run ci` runs `check types` and `test
+  every`, `vp run land` runs `i18n translate`) writes into the outer run's record, indented, so one run
   leaves one record of everything it ran. A command only marks its parts (`lap`) and adds what it measured
   itself (`note`: each translator call, each step of the new-app test); it never writes a record or a
   summary of its own (owner, 2026-10-17: "it should get it automatically because it's part of the CLI"). A slow step is a number in the log, not a feeling (owner,
   2026-10-10, of a landing on staging after 40 seconds whose command ran six minutes: "how can it be
   6 minutes").
 - **GitHub's answer comes to you.** A red run comments on the commit (GitHub tells its author), naming
-  the run; `dev:change` starts by saying what the last run on main did; `dev:promote` refuses a commit
+  the run; `vp run check` starts by saying what the last run on main did; `vp run promote` refuses a commit
   whose run is not green or not finished. To reproduce a red job, a person runs
-  `npm run ci -- <part>`, the same command GitHub ran, since the workflow holds no
+  `vp run ci -- <part>`, the same command GitHub ran, since the workflow holds no
   logic of its own (`remy verify tooling` checks every script a workflow names exists). An agent reads the
   run's own log (`gh run view <id> --log-failed`) and runs the one area
-  (`npm run test -- only <words>`). Report what was tested and what was not; never call
+  (`npx remy test only <words>`). Report what was tested and what was not; never call
   untested work verified.
 - **A landing that fails after the push still finishes what it can, and says where it stopped.**
-  The pull request is merged before staging; when staging's deploy or its live smoke fails, `dev:land`
+  The pull request is merged before staging; when staging's deploy or its live smoke fails, `vp run land`
   ends non-zero with the state in one line: merged at which commit, staging deployed or not, which
   smoke failed, translation done or not.
   Nothing half-done is left for the next person to discover (owner, 2026-10-10, after a landing stopped
   at the smoke with the translation silently skipped: "now you and other agents are screwed").
 - Never pipe a gating command through `grep` or `tail` in a chain: the pipe hides its exit code.
-  This once released a version whose checks had failed, and on 2026-10-10 hid a failed `dev:land`.
+  This once released a version whose checks had failed, and on 2026-10-10 hid a failed `vp run land`.
 
 ## Manual work becomes scripts over real tools
 
@@ -297,8 +296,8 @@ and "make sure you have something in docs about using your judgment about things
 being turned into a mise task that uses a tool ... It's vital because all our repos will be using this."
 
 - Every check runs through a script or a `remy` command that wraps the real tool: the flow's steps and
-  the checks (`npm run test`, Playwright), the live smoke after a deploy, `remy plans check`,
-  `remy i18n check`, `npm run shots` to look. (The owner's words above say mise, which the scripts
+  the checks (`npx remy test`, Playwright), the live smoke after a deploy, `remy plans check`,
+  `remy i18n check`, `npx remy shots` to look. (The owner's words above say mise, which the scripts
   replaced on 2026-10-11; the rule is the same.)
   No `curl` loops, one-off scripts or ad-hoc greps to decide whether something works: they cannot be
   repeated, apps on the package do not get them, and nobody sees them later.
@@ -328,12 +327,12 @@ The machine crashed on 2026-09-25 with about ten agents building and testing at 
 and timing-sensitive checks failed well before that. So:
 
 - An agent builds and tests only in its own git worktree, never in the main checkout: builds write
-  `dist/`, and two builds in one checkout delete each other's files. `dev:start` makes the worktree.
+  `dist/`, and two builds in one checkout delete each other's files. Claude Code makes the worktree.
 - Each worktree has its own `PREVIEW_PORT` and `DOCS_PREVIEW_PORT`, computed from its name (never
-  4190, which browsers block); `PREVIEW_PORT=4232 npm run …` overrides them.
+  4190, which browsers block); `PREVIEW_PORT=4232 vp run …` overrides them.
 - At most three agents run tests at the same time; research, writing and scratch spikes do not
   count. When more are needed, set `PLAYWRIGHT_WORKERS=2` for each.
-- Google's audits (`npm run ci -- audits`) and Core Web Vitals (`npm run test -- cwv`) take a machine-wide lock, so a second
+- Google's audits (`vp run ci -- audits`) and Core Web Vitals (`npx remy test cwv`) take a machine-wide lock, so a second
   run waits rather than skewing the first.
 - Never chain a deploy after a check with `;`: the flow's steps run each in turn and stop at the first failure.
 
@@ -348,7 +347,7 @@ and timing-sensitive checks failed well before that. So:
 - Every report about something the owner can look at gives its URLs: the live sites, the preview
   (`npx remy cloudflare preview` prints it) and a direct link to each page or feature discussed.
 - Say what was checked and what was not.
-- What is live is asked, not remembered: `npm run dev:status` prints what each deployment is running
+- What is live is asked, not remembered: `vp run status` prints what each deployment is running
   and how far that is from your checkout. Say it from there, not from what you last deployed.
 
 ## Many agents, one flow
@@ -360,19 +359,19 @@ the only integrator, and GitHub checks every landing. Nothing here is done by ha
 The steps, what each runs and who runs it: [the flow's table](#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
 
 - **Split by independence.** An orchestrator splits work into parts that touch different files, and
-  starts one agent per part with `dev:start`. A part that needs another's result waits for that
+  starts one agent per part, each in a worktree of its own. A part that needs another's result waits for that
   landing; it does not share a worktree.
 - **Spike first when the risk is unknown**: one agent proves the risky point and lands or stops.
 - **Every part proves itself**: it lands with its own check in `tests/`, a plain function
   (`tests/**/*.unit.spec.ts`) when it can be one, in the browser when only a browser shows it.
 - **Landings serialise themselves.** Two agents landing at once: each has its own pull request; GitHub
-  refuses the second merge only when the two conflict, and then the second `dev:land` brings main in,
+  refuses the second merge only when the two conflict, and then the second `vp run land` brings main in,
   translates what the merge left stale, checks again and lands.
 - **Hands-on pass before production.** Passing checks is not the end: use the piece on staging in a
-  real browser, on a phone's width, and fix what feels bad. Then `dev:promote`.
-- **An agent never waits in the foreground** on `dev:land`, `dev:promote` or a GitHub run; it starts
-  them in the background and acts on the result. Only `dev:change` is waited for.
+  real browser, on a phone's width, and fix what feels bad. Then `vp run promote`.
+- **An agent never waits in the foreground** on `vp run land`, `vp run promote` or a GitHub run; it starts
+  them in the background and acts on the result. Only `vp run check` is waited for.
 - **Everything asynchronous comes back to everyone** ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/dev-feedback.md)):
-  a red GitHub job writes on the commit, naming itself; `dev:land` says when main is red; `dev:promote`
-  writes on the commit what went live; `dev:status` shows all of it to whoever asks, and every agent
+  a red GitHub job writes on the commit, naming itself; `vp run land` says when main is red; `vp run promote`
+  writes on the commit what went live; `vp run status` shows all of it to whoever asks, and every agent
   session asks first.

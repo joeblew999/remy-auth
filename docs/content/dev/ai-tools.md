@@ -37,7 +37,7 @@ Each server's instructions say who it is for, so an assistant with all three pic
 | VS Code | `.vscode/mcp.json`: `{"servers": {"remy-developer-docs": {"type": "http", "url": "https://remy-auth-docs.gedw99.workers.dev/api/mcp/dev"}}}` |
 
 Swap in another row's URL and name for the product guide or the API reference.
-`npm run docs -- test remote` lists every server's tools.
+`npx remy docs test remote` lists every server's tools.
 
 ## Gemini and Google
 

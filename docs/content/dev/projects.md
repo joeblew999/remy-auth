@@ -5,7 +5,7 @@ description: "What every Remy project keeps in the same place, how to start a ne
 
 The tooling is `remy`, the bin of `@joeblew999/remy-ui` (`packages/ui/src/cli`, one TypeScript module per
 command); an app gets it with the package (`npm install`, at the package's version) and names it in its
-`package.json` scripts, the same ones in every app (`"dev:change": "remy flow change"`). An app says once, in
+`package.json` scripts, the same ones in every app (`"`vp run check`": "remy flow change"`). An app says once, in
 `remy.config.ts`, where it is deployed and its ports:
 
 ```ts
@@ -41,7 +41,7 @@ anywhere else is simply not found; no checker of its own keeps it.
 | `messages/`, `project.inlang/` | the app preset, the app's `generate` script, `remy i18n` | the app's own strings, if any (compiled into `src/paraglide/`) |
 | `.plans/` (`now.md`, `done/`, `parked/`) | `remy plans` | the repo's plans |
 | `AGENTS.md`, `.github/workflows/` | agents; GitHub | the agents' pointer at the docs; CI |
-| `packages/ui/src/cli/`, `template/`, `fixtures/consumer/` | the package; `giget`; `npm run ci -- new-app` | remy-auth only: the command line itself, the blank app a new repo starts from, and the consumer fixture that tests both as another repo gets them |
+| `packages/ui/src/cli/`, `template/`, `fixtures/consumer/` | the package; `giget`; `vp run ci -- new-app` | remy-auth only: the command line itself, the blank app a new repo starts from, and the consumer fixture that tests both as another repo gets them |
 
 ### A new consumer
 
@@ -53,21 +53,21 @@ Everything else is the package, which one version bump upgrades.
 1. Prerequisites: Node as `.node-version` says, `gh auth login` with a token that has `read:packages`,
    Google Chrome (the checks use it), and `wrangler login` before the first deploy.
 2. `npx -y giget@3.3.1 gh:joeblew999/remy-auth/template#vX.Y.Z <name>`, then `cd <name>` and `git init`
-   (the translation and plans tools read git history; `npm run setup` says so if it is missing).
+   (the translation and plans tools read git history; `vp run setup` says so if it is missing).
 3. Name the app: replace `my-app` and `My app` (`grep -rn -i "my.app" --exclude-dir=node_modules .`):
    `package.json`, `wrangler.jsonc`, `src/service.ts`, `remy.config.ts`'s origins, `docs/docs.config.ts` (the
    product's name and source, which the app's frame reads too) and `messages/en.json`.
 4. Node as `.node-version` says, then `GITHUB_TOKEN=$(gh auth token) npm install` once to write
-   `package-lock.json`, then `npm run setup` (npm ci, the pinned skills and the `remy` skill, the
+   `package-lock.json`, then `vp run setup` (npm ci, the pinned skills and the `remy` skill, the
    `AGENTS.md` rules block, MCP registration, the flow's guard, the installation's checks).
 5. Commit everything, `package-lock.json`, `skills-lock.json` and `src/routeTree.gen.ts` included. The
    blank app's strings come translated; after the English changes (`messages/en.json`, the docs), commit it
    and translate this once by hand, `REMY_FLOW=hand npx remy i18n translate`, which writes the other
-   languages (it never commits: commit them with the rest); from then on `dev:land` does it.
+   languages (it never commits: commit them with the rest); from then on `vp run land` does it.
 6. The first deploy, by hand: `npx remy cloudflare deploy`, and `npx remy cloudflare docs-deploy` for the
    docs. Once the
    repository is on GitHub (step 7), work goes through [the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest):
-   `dev:land` for every finished change, `dev:promote` for production and the docs.
+   `vp run land` for every finished change, `vp run promote` for production and the docs.
 7. CI: `.github/workflows/ci.yml` calls remy-auth's shared workflow at the same tag (every language, Google's
    audits on every push to `main`). Grant the new repository read access in the `@joeblew999/remy-ui`
    package's settings ("Manage Actions access"), or `npm ci` fails there.
@@ -77,9 +77,9 @@ Then the app grows in its own files: pages in `src/routes/` (a page beside a par
 `videos`, which then needs an `<Outlet />`), their links in `src/remy-app.tsx`, strings in `messages/en.json`
 (`m` from `src/paraglide/messages.js`), an API as a contract package and `src/api/` (every procedure that
 takes input documents an error, or `apiChecks` fails: the package's `api/coverage` rule), docs in
-`docs/content/`. Move to a new release with `npm run upgrade -- <version>` (the package and the CI
+`docs/content/`. Move to a new release with `vp run upgrade -- <version>` (the package and the CI
 workflow's tag together). Two local browser runs at once share `PREVIEW_PORT` and the second fails to
-start its server: give each shell its own (`PREVIEW_PORT=4232 npm run …`).
+start its server: give each shell its own (`PREVIEW_PORT=4232 vp run …`).
 
 ### A repository that publishes packages
 
@@ -93,14 +93,14 @@ anything else is refused at build time and in Playwright, whose message names th
 export map. A package's own strings are its own inlang project, compiled by its build, whose runtime
 follows the platform's language with one call, `followLocale(runtime)` (`locale`); the i18n tasks read it
 through `I18N_INLANG`. Checks the repository adds to a release go in its `release-checks` script (remy-auth:
-`template:check`, `ui:verify`). remy-auth sets a release's version with `npm run ui:version -- X.Y.Z`, which
+`template:check`, `ui:verify`). remy-auth sets a release's version with `vp run ui:version -- X.Y.Z`, which
 writes it everywhere it appears (the package and the blank app's pins).
 
 ### Choosing the version: released, development or local
 
-The tooling and the package are one thing: remy-auth's `npm run dev:release` publishes `@joeblew999/remy-ui`
+The tooling and the package are one thing: remy-auth's `vp run release` publishes `@joeblew999/remy-ui`
 X.Y.Z, bin included, and tags the same commit `vX.Y.Z`. A consumer pins that one number in its
-`package.json` (and its CI workflow's tag), and `npm run upgrade -- X.Y.Z` moves both. To work against
+`package.json` (and its CI workflow's tag), and `vp run upgrade -- X.Y.Z` moves both. To work against
 remy-auth's own checkout, `npm link ../remy-auth/packages/ui` (and `npm unlink` back).
 
 The platform supplies every npm package the app and the tasks need, at one version: they are
@@ -110,20 +110,20 @@ The platform supplies every npm package the app and the tasks need, at one versi
 Query, the MDX stringifier; the package's `remy.singleCopy` list) is: remove the app's own pin. The commands call an
 app's own hooks where it has them, as scripts of its `package.json`, run if present: `generate` (code
 generated before type checking; the blank app's compiles its own catalog), `local` (the local state an
-app needs before it runs, which `dev`, `build` and `dev:start` run first; remy-auth writes its `.dev.vars`
+app needs before it runs, which `vp run dev` and `vp run build` run first; remy-auth writes its `.dev.vars`
 and migrates its local D1 there), `release-checks` and `test:consumers`.
 
 The development flow is code, `packages/ui/src/cli/flow.ts`, with four steps and a guard. The flow, step by step, and who runs each: [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest); every command: [Commands](./commands.mdx).
 
-`remy verify` (the release gate) runs the browser checks in every language, then the new-app test, as `npm run ci`'s
+`remy verify` (the release gate) runs the browser checks in every language, then the new-app test, as `vp run ci`'s
 `browser` and `new-app` parts do: the other repositories this one serves tested as they get it: the app's
 `test:consumers` script, nothing by default; in remy-auth, the new-app test (`fixtures/consumer`), which builds the blank app and a package it owns from this commit's platform
 (the package from a tarball with a version of its own, the tasks from a copy outside any `node_modules`, the
 template's `.npmrc`) and runs install, skills (installed once per pinned list, then reused), the tooling invariants, the check, the quick browser checks, the docs and a dry-run publish (~1.5 to 3 min, mostly the network).
 A change that would break another repository fails there, not in that repository. Tests are type-checked with
 the app (`tsconfig.json` includes `tests/`). Google's audits are
-`npm run ci -- audits` (Lighthouse, local; CI whenever a change can affect it, and on every push to main and every tag) and Core Web Vitals is
-`npm run test -- cwv` (on a throwaway Cloudflare Worker); the release runs both.
+`vp run ci -- audits` (Lighthouse, local; CI whenever a change can affect it, and on every push to main and every tag) and Core Web Vitals is
+`npx remy test cwv` (on a throwaway Cloudflare Worker); the release runs both.
 
 Where checks run: the shared package's own behaviour is proven once, in remy-auth, before each
 release. An app built on the package runs a contract set (its pages render, site and app pages stay
@@ -178,11 +178,11 @@ Credentials come from Wrangler's login, or from the keychain through fnox
 
 ### Plans
 
-The plans rule ([how we work](./how-we-work.md#plans-few-short-closed)) as commands (`npm run plans -- …`), the same in
+The plans rule ([how we work](./how-we-work.md#plans-few-short-closed)) as commands (`npx remy plans …`), the same in
 every project: `.plans/now.md` is the one ordered list, `.plans/*.md` the few open plan files,
 `.plans/done/` and `.plans/parked/` the rest, `.plans/stability-log.md` optional. A project with no
 `.plans/` passes `plans check` and has nothing to list.
 
 The commands, with what each does, are on [Commands](./commands.mdx).
 
-`close` and `park` change files and stage the move but never commit: read `git diff`, then `npm run dev:change`.
+`close` and `park` change files and stage the move but never commit: read `git diff`, then `vp run check`.

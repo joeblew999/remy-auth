@@ -1,5 +1,5 @@
 # Keeps the pinned GitHub Actions current. remy-auth's shared workflow moves with the tasks and the package
-# (npm run upgrade), never on its own.
+# (vp run upgrade), never on its own.
 version: 2
 updates:
   - package-ecosystem: github-actions

@@ -108,13 +108,22 @@ export async function tooling(): Promise<void> {
     ? readdirSync('.github/workflows').filter((name) => /\.ya?ml$/.test(name))
     : [];
   if (workflows.length) {
-    const scripts = new Set(Object.keys(manifest.scripts ?? {}));
+    // What `vp run` can run: package.json's scripts and vite.config.ts's tasks, read from the file Vite Plus reads.
+    const config = existsSync('vite.config.ts')
+      ? ((await import(pathToFileURL(join(process.cwd(), 'vite.config.ts')).href)) as {
+          default?: { run?: { tasks?: Record<string, unknown> } };
+        })
+      : {};
+    const runnable = new Set([
+      ...Object.keys(manifest.scripts ?? {}),
+      ...Object.keys(config.default?.run?.tasks ?? {}),
+    ]);
     for (const name of workflows) {
       const text = readFileSync(`.github/workflows/${name}`, 'utf8');
-      for (const match of text.matchAll(/\bnpm run ([a-z0-9][a-z0-9:_-]*)/g))
+      for (const match of text.matchAll(/\b(?:npm|vp) run ([a-z0-9][a-z0-9:_-]*)/g))
         assert.ok(
-          scripts.has(match[1]!),
-          `.github/workflows/${name} runs npm script ${match[1]}, which package.json does not have`,
+          runnable.has(match[1]!),
+          `.github/workflows/${name} runs ${match[1]}, which is neither a package.json script nor a vite.config.ts task`,
         );
     }
     console.log(`The workflows name only commands that exist (${workflows.join(', ')}).`);
@@ -172,11 +181,11 @@ export async function verify(): Promise<void> {
 export const what = "the installation's checks and the release gate";
 export const commands: Subcommands = {
   all: {
-    what: "everything: the installation's checks, every language, the consumers (the release gate; dev:release runs it); the default",
+    what: "everything: the installation's checks, every language, the consumers (the release gate; vp run release runs it); the default",
     run: () => verify(),
   },
   setup: {
-    what: "the installation's checks: npm ls, MCP, the guard, doctor, tooling, the check (npm run setup ends with it)",
+    what: "the installation's checks: npm ls, MCP, the guard, doctor, tooling, the check (vp run setup ends with it)",
     run: () => verifySetup(),
   },
   tooling: {

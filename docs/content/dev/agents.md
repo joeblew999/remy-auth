@@ -23,7 +23,7 @@ read those, not the translations beside them (`*.es.md`).
 1. [Development principles](./principles.md): ownership, single source of truth, test gates,
    generated code, owner decisions.
 2. [Developer tooling](./tooling.md): pinned tools and agent skills; every command is on
-   [Commands](./commands.mdx), generated from the command line. Run project commands through `npm run <script>`.
+   [Commands](./commands.mdx), generated from the command line. Run project commands through `vp run <name>` (a task or a script).
 3. [Run, preview and test the app](./run-and-test.md): one Worker, local and remote test targets, Cloudflare.
 4. [How we work](./how-we-work.md): project tools first, surveys before tool choices, shadcn and
    TanStack all the way for UI, the flow and who runs each step, multi-agent work. Record working
@@ -33,16 +33,16 @@ read those, not the translations beside them (`*.es.md`).
 6. The plan in [`.plans/`](https://github.com/joeblew999/remy-auth/tree/main/.plans) covering your
    task, and its [Executor/Reviewer roles](./principles.md#plans-and-roles).
 
-Start with `npm run dev:status` (what is going on) and
+Start with `vp run status` (what is going on) and
 [the project's own tools](./how-we-work.md#use-the-projects-own-tools-first), and finish through
-[the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest): `npm run dev:change`
-after every change, `npm run dev:land -- "<what changed>"` when the work is finished and the check is
+[the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest): `vp run check`
+after every change, `vp run land -- "<what changed>"` when the work is finished and the check is
 green.
 
 ## Working from Claude's cloud
 
 An agent in Claude's cloud (Claude on the web or the phone) has no Cloudflare token: `wrangler` and the
-`npx remy cloudflare` deploys cannot sign in there, and `dev:land` says it skipped staging, which is not a
+`npx remy cloudflare` deploys cannot sign in there, and `vp run land` says it skipped staging, which is not a
 failure. It has the **Cloudflare connector** instead, used by hand; nothing in the repository depends on it.
 How to preview a branch from there, and what lives on Cloudflare rather than in the repository:
 [On Cloudflare](./run-and-test.md#on-cloudflare).

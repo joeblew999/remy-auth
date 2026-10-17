@@ -92,7 +92,7 @@ export function docs(): void {
   );
 }
 
-/** Under npm run ci (here and on GitHub) the check verifies what dev:change would fix itself: it writes nothing. */
+/** Under vp run ci (here and on GitHub) the check verifies what vp run check would fix itself: it writes nothing. */
 const verifying = (): boolean => process.env.REMY_FLOW === 'ci';
 
 /** The parts, in order. Translations are a warning here. */
@@ -109,7 +109,7 @@ export const parts: Record<string, () => void | Promise<unknown>> = {
     const lines = rightEndings(['docs/content', 'template/docs/content'], verifying());
     for (const line of lines) console.log(`endings: ${line}`);
     if (verifying() && lines.length) {
-      console.error('endings: npm run dev:change renames them.');
+      console.error('endings: vp run check renames them.');
       process.exit(1);
     }
   },
@@ -123,7 +123,7 @@ export async function check(): Promise<void> {
   for (const part of Object.values(parts)) await part();
 }
 
-export const what = `the check (dev:change), or one part: ${Object.keys(parts).join(' · ')}`;
+export const what = `the check (vp run check), or one part: ${Object.keys(parts).join(' · ')}`;
 export async function main(args: string[]): Promise<void> {
   const [name] = args;
   if (!name) {

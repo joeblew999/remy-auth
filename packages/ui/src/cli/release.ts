@@ -7,7 +7,7 @@ export async function main(): Promise<void> {
   const here = where();
   if (!here.onMain || !here.clean) {
     console.error(
-      `dev:release: a release is made from a clean main (this is ${here.branch}${here.clean ? '' : ', with changes'}); npm run dev:land first`,
+      `release: a release is made from a clean main (this is ${here.branch}${here.clean ? '' : ', with changes'}); vp run land first`,
     );
     process.exit(1);
   }

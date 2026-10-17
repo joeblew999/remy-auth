@@ -1,6 +1,6 @@
 import type { RemyProject } from '@joeblew999/remy-ui/project';
 
-// Where this app is deployed and its local ports: the one place the tooling (npm run dev:*) reads
+// Where this app is deployed and its local ports: the one place the tooling (vp run dev:*) reads
 // them. A worktree computes its own ports from its name.
 export default {
   origins: {

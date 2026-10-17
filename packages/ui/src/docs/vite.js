@@ -45,7 +45,7 @@ export function docsWorkerConfig(docsConfig, srcDirectory) {
     assets: { directory: './dist/client' },
     preview_urls: false,
     ...askBindings(false),
-    // Working on answers (CLOUDFLARE_ENV=ask npm run docs -- dev): the same Worker locally, AI Search remote. Never deployed.
+    // Working on answers (CLOUDFLARE_ENV=ask vp -C docs dev): the same Worker locally, AI Search remote. Never deployed.
     ...(ask
       ? {
           env: {

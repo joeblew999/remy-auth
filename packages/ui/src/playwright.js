@@ -10,7 +10,7 @@ export function playwrightConfig({ webServer, testDir = './tests', timezoneId = 
   // The checks that are plain functions (*.unit.spec.ts): no Worker, no build, no browser.
   const unit = process.env.TEST_TARGET === 'unit';
   if (remote && !process.env.TEST_BASE_URL)
-    throw new Error('Set TEST_BASE_URL to the deployed origin for npm run test -- remote.');
+    throw new Error('Set TEST_BASE_URL to the deployed origin for npx remy test remote.');
   const port = process.env.PREVIEW_PORT ?? '4173';
   const target = new URL(remote ? process.env.TEST_BASE_URL : `http://127.0.0.1:${port}`);
   if (
@@ -34,12 +34,12 @@ export function playwrightConfig({ webServer, testDir = './tests', timezoneId = 
       : process.env.CI
         ? { workers: '100%' }
         : {}),
-    // One retry under CI (npm run ci sets CI locally too, so the same here as on GitHub): the local Workers
+    // One retry under CI (vp run ci sets CI locally too, so the same here as on GitHub): the local Workers
     // server can drop a reused connection mid-request ("socket hang up", PR #22, 2026-10-17), which says
     // nothing about the app. A check that passes only on its retry is reported as flaky, never hidden.
     retries: process.env.CI && !unit ? 1 : 0,
     // The browser is Playwright's own Chromium, pinned by the @playwright/test version and installed by
-    // `npm run ci`, not whatever Chrome a machine has: the same browser on a Mac, in a cloud agent's
+    // `vp run ci`, not whatever Chrome a machine has: the same browser on a Mac, in a cloud agent's
     // container and on GitHub, so a check gives the same answer everywhere (owner, 2026-10-17). Its light
     // headless shell, for speed, for every check.
     // The results as JSON too (results.json beside the report), so the command line can name a flaky check in its summary.

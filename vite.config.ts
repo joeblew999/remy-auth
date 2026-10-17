@@ -7,7 +7,7 @@ import { options as paraglide } from './packages/ui/paraglide.mjs';
 // the folder a tool happened to start in (Vite+ loads every workspace's config from the root).
 const app = remyApp({ plugins: [paraglideVitePlugin(paraglide)], root: import.meta.dirname });
 
-// Trial: the tasks Vite+ runs and caches (vp run <task>). Files the tooling generates are its outputs, never
+// The tasks Vite Plus runs and caches (vp run <task>); an uncached one (cache: false) sees the whole environment. Files the tooling generates are its outputs, never
 // its inputs: a task that rewrites what it reads can never be skipped.
 const generated = [
   '!packages/ui/src/paraglide/**',
@@ -40,17 +40,38 @@ export default {
   lint: { options: { typeAware: true, typeCheck: true }, ignorePatterns: ['template/**', 'fixtures/**'] },
   run: {
     tasks: {
+      // The app's local state: .dev.vars, the migrations on Wrangler's local databases, the guard's fixture
+      // (scripts/local.ts). Every time: it applies only what is missing.
+      local: { command: 'node scripts/local.ts', cache: false },
+      // vp dev, vp build and vp preview are Vite Plus's own; these are the app's, with what they need first.
+      dev: { command: 'vp dev .', dependsOn: ['local', 'generate'], cache: false },
+      // The production build, then Wrangler's deployment dry run (no upload).
       build: {
-        command: 'vp build .',
+        command: ['vp build .', 'wrangler deploy --dry-run'],
+        dependsOn: ['local', 'generate'],
         cache: { input: [{ auto: true }, ...generated], output: ['dist/**'] },
       },
-      browser: {
-        command: 'node packages/ui/src/cli/remy.ts ci browser --everything',
+      // The production build on Cloudflare's local host, at PREVIEW_PORT (4173 unless a worktree has its own).
+      preview: {
+        command: 'wrangler dev --ip 127.0.0.1 --port ${PREVIEW_PORT:-4173}',
         dependsOn: ['build'],
-        cache: {
-          input: [{ auto: true }, ...generated, '!.git/**'],
-          untrackedEnv: ['REMY_FLOW', 'GITHUB_ACTIONS', 'PREVIEW_PORT'],
-        },
+        cache: false,
+      },
+      // What GitHub runs, the same here: the check, then the browser checks, Google's audits and the new app
+      // (`vp run ci -- browser --shard 1/3` runs one part, as one GitHub job does).
+      ci: {
+        command: 'node packages/ui/src/cli/remy.ts ci',
+        dependsOn: ['check'],
+        cache: false,
+      },
+      // The release's publish (GitHub's release job, for a version tag): each package whose version is new on its
+      // registry, then the GitHub release (`vp run publish -- --release vX.Y.Z`).
+      publish: { command: 'node packages/ui/src/cli/remy.ts packages publish', cache: false },
+      // What the check only verifies, written: the commands list (COMMANDS.md, here and the blank app's) and each
+      // docs page's ending (.md, or .mdx when it uses a component).
+      fix: {
+        command: ['node packages/ui/src/cli/remy.ts check commands', 'node packages/ui/src/cli/remy.ts check endings'],
+        cache: false,
       },
       // What the type check needs and git does not hold: the compiled UI text (Paraglide) and the Worker's binding
       // types, after the docs' own (their package's generate task). Each step reads the file it is about to rewrite:
@@ -66,16 +87,13 @@ export default {
         command: 'tsc -p packages/ui/src/cli',
         cache: { input: [{ auto: true }, '!packages/ui/cli/**'] },
       },
-      // The project's own checks, each one of its tools, run as a tool. Under REMY_FLOW=ci (here and on GitHub) the
-      // ones that would fix something only verify it, so the variable is part of what is cached.
+      // The project's own checks, each one of its tools, run as a tool. A check never writes: the two that could
+      // fix something verify it (REMY_FLOW=ci), and `vp run fix` writes it.
       'check:plans': 'node packages/ui/src/cli/remy.ts plans check',
       'check:single-copies': 'node packages/ui/src/cli/remy.ts check single-copies',
       // It writes COMMANDS.md (here and the blank app's): its output, never its input.
-      'check:commands': {
-        command: 'node packages/ui/src/cli/remy.ts check commands',
-        cache: { env: ['REMY_FLOW'], input: [{ auto: true }, '!COMMANDS.md', '!template/COMMANDS.md'] },
-      },
-      'check:endings': { command: 'node packages/ui/src/cli/remy.ts check endings', cache: { env: ['REMY_FLOW'] } },
+      'check:commands': 'REMY_FLOW=ci node packages/ui/src/cli/remy.ts check commands',
+      'check:endings': 'REMY_FLOW=ci node packages/ui/src/cli/remy.ts check endings',
       'check:translations': 'node packages/ui/src/cli/remy.ts check translations',
       // The checks that are plain functions (tests/**/*.unit.spec.ts): no Worker, no browser. The bin's check runs
       // the built command line; the commands list is current before them, since one checks it.

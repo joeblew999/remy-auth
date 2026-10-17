@@ -19,8 +19,8 @@ export async function main(): Promise<void> {
     }),
   );
   const command: string = input?.tool_input?.command ?? '';
-  // The flow's own steps run heavy tasks on purpose (dev:land, dev:promote, dev:release): they are not refused.
-  const aStep = /\b(npm\s+run\s+dev:|remy\s+)(change|land|promote|release)\b/.test(command);
+  // The flow's own steps run heavy tasks on purpose (vp run land, vp run promote, vp run release): they are not refused.
+  const aStep = /\b(vp\s+run\s+|remy\s+(?:flow\s+)?)(check|ci|land|promote|release)\b/.test(command);
   const found = command && !aStep ? heavyIn(command) : undefined;
   if (found) {
     // What to run instead is COMMANDS.md, generated from the command line; never a list written here (it drifted).

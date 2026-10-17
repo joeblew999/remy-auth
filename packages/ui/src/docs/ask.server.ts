@@ -34,7 +34,7 @@ export const answerQuestion = createServerOnlyFn(
     if (!question) return { status: 'empty' };
     const request = getRequest();
     const started = Date.now();
-    // One `ask` event per question (npm run observe -- events -- ask): its outcome, how long the model call took,
+    // One `ask` event per question (npx remy observe events -- ask): its outcome, how long the model call took,
     // how many sources it cited and the page's language. Never the question itself.
     const log = (outcome: string, fields: Record<string, unknown> = {}, level: 'info' | 'error' = 'info') =>
       writeLog({
@@ -64,7 +64,7 @@ export const answerQuestion = createServerOnlyFn(
       log('too-long', { length: question.length });
       return { status: 'too-long', length: question.length };
     }
-    // The emergency stop (npm run docs -- answers off): the secret ASK_PAUSED set means no model call at all.
+    // The emergency stop (npx remy docs answers off): the secret ASK_PAUSED set means no model call at all.
     if ((env as { ASK_PAUSED?: string }).ASK_PAUSED) {
       log('paused');
       return { status: 'no-answer' };

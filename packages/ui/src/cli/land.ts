@@ -11,14 +11,14 @@ export async function main(args: string[]): Promise<void> {
   // The land step, through a pull request, never straight to main (owner's rule: work goes through a branch
   // and a pull request, and the pull request merges when green). In order, each part once: main merged in;
   // the translations this change made stale or missing (only the sections and keys whose English changed);
-  // the check; what a pull request runs, here first (`npm run ci`, so GitHub only confirms it); one commit;
+  // the check; what a pull request runs, here first (`vp run ci`, so GitHub only confirms it); one commit;
   // push the branch; open its pull request (or update the open one); wait for GitHub's checks; merge it;
   // deploy staging; bring this checkout to the new main. Run from main, it first moves the work to a branch
-  // of its own. Production is dev:promote. It says what each part took. (Until 2026-10-17 it fast-forwarded
+  // of its own. Production is vp run promote. It says what each part took. (Until 2026-10-17 it fast-forwarded
   // main and pushed it, and translated on main after that as a second push.)
   const message = args.join(' ').trim();
   if (!message) {
-    console.error('dev:land: say what changed: npm run dev:land -- "<message>"');
+    console.error('land: say what changed: vp run land -- "<message>"');
     process.exit(1);
   }
   // The first line titles the commit and the pull request; the rest, if any, is their body.
@@ -27,7 +27,7 @@ export async function main(args: string[]): Promise<void> {
   const git = (...args: string[]) => execFileSync('git', args, { stdio: ['ignore', 'inherit', 'inherit'] });
   const read = (...args: string[]) => execFileSync('git', args, { encoding: 'utf8' }).trim();
   function fail(line: string): never {
-    console.error(`dev:land: ${line}`);
+    console.error(`land: ${line}`);
     process.exit(1);
   }
   const slug = repo() ?? fail('origin is not a GitHub repository, so there is nowhere to open the pull request.');
@@ -38,7 +38,7 @@ export async function main(args: string[]): Promise<void> {
   const mainRun = latestRun();
   if (mainRun && mainRun.status === 'completed' && mainRun.conclusion !== 'success')
     console.log(
-      `dev:land: main is RED, ${describeRun(mainRun)}. Landing on it anyway; if this is not the fix, somebody's is owed.`,
+      `land: main is RED, ${describeRun(mainRun)}. Landing on it anyway; if this is not the fix, somebody's is owed.`,
     );
   execFileSync('git', ['fetch', '-q', 'origin', 'main']);
   // From main: the work moves to a branch of its own (uncommitted changes and commits not yet on origin come along).
@@ -53,7 +53,7 @@ export async function main(args: string[]): Promise<void> {
         .slice(0, 40) || 'change'
     }-${Date.now().toString(36)}`;
     git('switch', '-q', '-c', branch);
-    console.log(`dev:land: the work moves from main to ${branch}, which lands through a pull request.`);
+    console.log(`land: the work moves from main to ${branch}, which lands through a pull request.`);
     Object.assign(here, { branch, onMain: false });
   }
   // Among many agents main moves under every branch. What lands is the branch with main in it, so main comes
@@ -72,7 +72,7 @@ export async function main(args: string[]): Promise<void> {
   // Translation, in the change: only when something is stale or missing. A failed translation does not stop
   // the landing (the English is the source); it is still owed, the check warns, and the last line says so.
   let translation: Landing['translation'] = 'up to date';
-  if ((await translationGaps()).length === 0) console.log('dev:land: translations are up to date.');
+  if ((await translationGaps()).length === 0) console.log('land: translations are up to date.');
   else {
     const [remy, ...remyArgs] = remyCommand();
     translation =
@@ -86,7 +86,7 @@ export async function main(args: string[]): Promise<void> {
   }
   await check();
   lap('the check');
-  // What the pull request's checks run, here first: every part of npm run ci these changes can affect, as GitHub will (the
+  // What the pull request's checks run, here first: every part of vp run ci these changes can affect, as GitHub will (the
   // check above already covered types and unit; each part skips itself when nothing it checks changed). GitHub then
   // confirms instead of finding out.
   const [remy, ...remyArgs] = remyCommand();
@@ -96,7 +96,7 @@ export async function main(args: string[]): Promise<void> {
       env: { ...process.env, REMY_FLOW: 'ci' },
     }).status !== 0
   )
-    fail('a part of npm run ci failed here (above), so nothing was pushed. Fix it, then land again.');
+    fail('a part of vp run ci failed here (above), so nothing was pushed. Fix it, then land again.');
   lap('the parts the change can affect, as its pull request runs them');
   if (read('status', '--porcelain') !== '') {
     git('add', '-A');
@@ -116,14 +116,9 @@ export async function main(args: string[]): Promise<void> {
       ?.trim() ?? 'the browser checks passed';
   const pull =
     pullFor(slug, here.branch) ??
-    openPull(
-      slug,
-      here.branch,
-      title,
-      `${body ? `${body}\n\n` : ''}Landed with \`npm run dev:land\`. Here first: ${ran}`,
-    );
+    openPull(slug, here.branch, title, `${body ? `${body}\n\n` : ''}Landed with \`vp run land\`. Here first: ${ran}`);
   lap('commit, push and pull request');
-  console.log(`dev:land: ${pull.html_url} is open; GitHub checks ${head.slice(0, 7)} (what passed here, confirmed).`);
+  console.log(`land: ${pull.html_url} is open; GitHub checks ${head.slice(0, 7)} (what passed here, confirmed).`);
 
   const verdict = await waitForChecks(slug, head);
   lap("GitHub's checks");
@@ -133,7 +128,7 @@ export async function main(args: string[]): Promise<void> {
     );
   if (verdict.state === 'red')
     fail(
-      `GitHub's checks failed on ${pull.html_url}: ${verdict.failed.map((run) => `${run.name} (${run.html_url})`).join(', ')}. Each job is one \`npm run ci -- <part>\`, which reproduces it here. The pull request stays open; fix, then land again.`,
+      `GitHub's checks failed on ${pull.html_url}: ${verdict.failed.map((run) => `${run.name} (${run.html_url})`).join(', ')}. Each job is one \`vp run ci -- <part>\`, which reproduces it here. The pull request stays open; fix, then land again.`,
     );
   const merged = merge(slug, pull.number, `${title} (#${pull.number})`, body);
   if ('refused' in merged)
@@ -144,7 +139,7 @@ export async function main(args: string[]): Promise<void> {
   deleteBranch(slug, here.branch);
   lap('merge');
   console.log(
-    `dev:land: merged as ${landed.slice(0, 7)} (${pull.html_url}); main's own run checks everything, every part in every language; dev:promote waits for it.`,
+    `land: merged as ${landed.slice(0, 7)} (${pull.html_url}); main's own run checks everything, every part in every language; vp run promote waits for it.`,
   );
 
   // This checkout and the main checkout follow the new main: the branch's content is in it (squashed), so the
@@ -179,14 +174,14 @@ export async function main(args: string[]): Promise<void> {
   lap('staging');
   if (staging === 'up')
     console.log(
-      `dev:land: staging is up, ${span(laps().reduce((sum, part) => sum + part.ms, 0))} after the start. Production: npm run dev:promote.`,
+      `land: staging is up, ${span(laps().reduce((sum, part) => sum + part.ms, 0))} after the start. Production: vp run promote.`,
     );
-  else if (staging === 'none') console.log('dev:land: no origins.staging in remy.config.ts; nothing deployed.');
+  else if (staging === 'none') console.log('land: no origins.staging in remy.config.ts; nothing deployed.');
   else if (staging === 'signed out')
-    console.log('dev:land: no Cloudflare sign-in on this machine, so staging is not deployed from here.');
+    console.log('land: no Cloudflare sign-in on this machine, so staging is not deployed from here.');
   else
     console.error(
-      'dev:land: staging failed (the lines above say whether the deploy or the live smoke); the change is merged; the last line says the state.',
+      'land: staging failed (the lines above say whether the deploy or the live smoke); the change is merged; the last line says the state.',
     );
 
   const end = ended({ commit: landed, staging, translation }, laps());

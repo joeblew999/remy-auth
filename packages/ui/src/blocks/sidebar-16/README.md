@@ -9,6 +9,6 @@ frame of every app page; site pages use `SiteShell` in `../../pages.tsx` instead
 
 Its files sit in `components/`, exactly where shadcn writes them when run from the package: the
 package's `components.json` points the `components` alias at `@joeblew999/remy-ui/blocks`.
-`npm run ui:blocks` shows upstream's changes to each file in place (`shadcn add --diff`); merge
+`vp run ui:blocks` shows upstream's changes to each file in place (`shadcn add --diff`); merge
 them by hand. Never re-add with `--overwrite`: the block's sample data would replace the config's, and the
 block's unused files (nav-projects, nav-secondary, nav-user, search-form) would appear.

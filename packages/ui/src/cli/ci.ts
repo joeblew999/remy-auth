@@ -1,7 +1,7 @@
-// `remy ci` (npm run ci): what GitHub runs, by the same command on a developer's Mac, in a cloud agent's
+// `remy ci` (vp run ci): what GitHub runs, by the same command on a developer's Mac, in a cloud agent's
 // container and on GitHub (owner, 2026-10-17: "the whole point is that we can run it locally and there").
-// Each GitHub job is `npm run ci -- <part>` and nothing else, so the workflow cannot drift from what a
-// person or an agent runs. Locally, `npm run ci` runs every part in turn and ends with what each took.
+// Each GitHub job is `vp run ci -- <part>` and nothing else, so the workflow cannot drift from what a
+// person or an agent runs. Locally, `vp run ci` runs every part in turn and ends with what each took.
 //
 // It owns its preconditions instead of leaving them to the machine: Playwright's pinned Chromium (the
 // browser every check uses), and on Linux a Han font, without which Japanese and Chinese are empty boxes. It skips what a change
@@ -14,27 +14,27 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { lap, lastRecord } from './timing.ts';
 
-// The four parts, one name each everywhere (this list, GitHub's job names, the logs, COMMANDS.md): `check` (dev:change's
-// check, whole, verifying instead of fixing), `browser` (the browser checks on a local build), `audits` (Google's Lighthouse) and `new-app`
-// (a brand-new app on this commit's package). What a run includes is decided by what its change can affect
+// The three parts after the check, one name each everywhere (this list, GitHub's job names, the logs, COMMANDS.md):
+// `browser` (the browser checks on a local build), `audits` (Google's Lighthouse) and `new-app` (a brand-new app on this
+// commit's package). The check itself is `vp run check`, which the `ci` task runs first, and GitHub as a job of its own. What a run includes is decided by what its change can affect
 // (unchanged.ts), so there are no levels to choose (owner, 2026-10-17: levels were a second vocabulary for these).
-type Part = 'check' | 'browser' | 'audits' | 'new-app';
-const parts: Part[] = ['check', 'browser', 'audits', 'new-app'];
+type Part = 'browser' | 'audits' | 'new-app';
+const parts: Part[] = ['browser', 'audits', 'new-app'];
 /**
  * One rule, on a pull request and here alike: every part runs when what changed can affect it (unchanged.ts
  * decides, and each part says when it skips). Until 2026-10-17 the audits and the new app ran only after merge, a
  * second tier the change rules made needless (owner: "because we have changes now, maybe you don't need different
  * levels of CI"); now a change to the package meets the new app before it merges. Main runs everything, nothing
- * skipped, as the safety net dev:promote waits for; `npm run ci -- --everything` runs that here.
+ * skipped, as the safety net `vp run promote` waits for; `vp run ci -- --everything` runs that here.
  */
 /** GitHub splits the browser part across this many jobs. */
 export const shards = 3;
-/** The jobs GitHub's workflow must run, one `npm run ci -- <part>` each (tests/unit/ci.unit.spec.ts holds the workflow to it). */
-export const jobParts = (): string[] => [
+/** The jobs GitHub's workflow must run, one `vp run <task>` each (tests/unit/ci.unit.spec.ts holds the workflow to it). */
+export const jobTasks = (): string[] => [
   'check',
-  ...Array.from({ length: shards }, (_, i) => `browser --shard ${i + 1}/${shards}`),
-  'audits',
-  'new-app',
+  ...Array.from({ length: shards }, (_, i) => `ci -- browser --shard ${i + 1}/${shards}`),
+  'ci -- audits',
+  'ci -- new-app',
 ];
 const browserParts: Part[] = ['browser', 'audits', 'new-app'];
 
@@ -96,7 +96,7 @@ function node(): void {
 }
 
 /**
- * Locally, compare against origin/main as a pull request would, so `npm run ci` on a branch skips what
+ * Locally, compare against origin/main as a pull request would, so `vp run ci` on a branch skips what
  * GitHub would skip; on main, or with --everything, nothing is skipped. On GitHub the workflow's event decides.
  */
 function changesBase(everything: boolean): void {
@@ -108,16 +108,9 @@ function changesBase(everything: boolean): void {
   console.log('ci: comparing with origin/main, as a pull request would (--everything runs all of it)');
 }
 
-const npm = (...args: string[]) => run('npm', ['run', ...args]);
-
 /** Each part runs here, in this process; REMY_FLOW says the run is CI's, so the gate lets it pass. */
 async function runPart(part: Part, shardOf?: string): Promise<void> {
   process.env.REMY_FLOW = process.env.REMY_FLOW ?? 'ci';
-  // The check is dev:change's, whole (owner, 2026-10-17: one meaning of "check"); under ci it verifies instead of fixing.
-  if (part === 'check') {
-    npm('check');
-    return;
-  }
   if (part === 'browser' && shardOf) process.env.REMY_SHARD = shardOf;
   const test = await import('./test.ts');
   if (part === 'browser') test.every();
@@ -126,8 +119,8 @@ async function runPart(part: Part, shardOf?: string): Promise<void> {
 }
 
 /**
- * The git pre-push hook `npm run setup` installs: a push runs `npm run ci` first, so what reaches GitHub
- * (and Cloudflare's preview build) already passed here. The flow's own steps (dev:land, dev:release),
+ * The git pre-push hook `vp run setup` installs: a push runs `vp run ci` first, so what reaches GitHub
+ * (and Cloudflare's preview build) already passed here. The flow's own steps (vp run land, vp run release),
  * which set REMY_FLOW and run their checks themselves, push without it; REMY_SKIP_CI=1 skips it on purpose.
  */
 export function installPrePush(): void {
@@ -138,10 +131,10 @@ export function installPrePush(): void {
   const file = join(hooks, 'pre-push');
   writeFileSync(
     file,
-    '#!/bin/sh\n# Installed by npm run setup (remy ci): a push runs what its pull request will, first.\n[ -n "$REMY_FLOW" ] || [ -n "$REMY_SKIP_CI" ] && exit 0\nexec npm run --silent ci\n',
+    '#!/bin/sh\n# Installed by vp run setup (remy ci): a push runs what its pull request will, first.\n[ -n "$REMY_FLOW" ] || [ -n "$REMY_SKIP_CI" ] && exit 0\nexec vp run ci\n',
     { mode: 0o755 },
   );
-  console.log(`ci: ${file} runs npm run ci before every push (REMY_SKIP_CI=1 to skip once).`);
+  console.log(`ci: ${file} runs vp run ci before every push (REMY_SKIP_CI=1 to skip once).`);
 }
 
 export async function ci(args: string[]): Promise<void> {
@@ -155,7 +148,7 @@ export async function ci(args: string[]): Promise<void> {
     } else if (args[i] === '--everything') everything = true;
     else if (args[i] === '--full' || args[i] === '--all')
       fail(
-        `${args[i]} is gone: npm run ci runs what this change can affect; npm run ci -- --everything runs all of it, as main does.`,
+        `${args[i]} is gone: vp run ci runs what this change can affect; vp run ci -- --everything runs all of it, as main does.`,
       );
     else if (args[i] === '--shard') shardOf = args[++i] ?? '';
     else asked.push(args[i]!);
@@ -164,7 +157,7 @@ export async function ci(args: string[]): Promise<void> {
   const chosen = (asked.length ? asked : parts) as Part[];
   for (const part of chosen) if (!parts.includes(part)) fail(`unknown part ${part}: ${parts.join(', ')}`);
   if (shardOf && (chosen.length !== 1 || chosen[0] !== 'browser'))
-    fail('--shard splits the browser part only: npm run ci -- browser --shard 1/3');
+    fail('--shard splits the browser part only: vp run ci -- browser --shard 1/3');
 
   // Run as on GitHub: tools that read CI behave alike (Playwright, for one, uses every core under it).
   process.env.CI = process.env.CI ?? '1';
@@ -183,7 +176,7 @@ export async function ci(args: string[]): Promise<void> {
   }
   if (!onGitHub && !asked.length && !everything)
     console.log(
-      'ci: what a pull request runs: every part this change can affect. Main runs all of it: npm run ci -- --everything.',
+      'ci: what a pull request runs: every part this change can affect. Main runs all of it: vp run ci -- --everything.',
     );
 }
 

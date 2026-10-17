@@ -474,15 +474,15 @@ export const what =
   'Cloudflare: production and staging deploys, the docs Worker, throwaway previews, what each deployment runs';
 export const commands: Subcommands = {
   deploy: {
-    what: "production from this checkout (DEPLOY_ORIGIN): upload, wait for the new version, then its live smoke; refuses a D1, KV or R2 binding with no existing resource, since creating resources is the owner's (dev:promote runs it)",
+    what: "production from this checkout (DEPLOY_ORIGIN): upload, wait for the new version, then its live smoke; refuses a D1, KV or R2 binding with no existing resource, since creating resources is the owner's (vp run promote runs it)",
     run: () => deploy(),
   },
   staging: {
-    what: "the same for staging (CLOUDFLARE_ENV=staging, the Wrangler configuration's env.staging): its own Worker at origins.staging, production untouched (dev:land runs it on a machine signed in to Cloudflare)",
+    what: "the same for staging (CLOUDFLARE_ENV=staging, the Wrangler configuration's env.staging): its own Worker at origins.staging, production untouched (vp run land runs it on a machine signed in to Cloudflare)",
     run: () => deploy('staging'),
   },
   'docs-deploy': {
-    what: "the docs Worker, then its pages to Ask AI's index (dev:promote runs it)",
+    what: "the docs Worker, then its pages to Ask AI's index (vp run promote runs it)",
     run: () => deployDocs(),
   },
   versions: {

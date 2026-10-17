@@ -2,7 +2,7 @@ import { defineDocsConfig } from '@joeblew999/remy-ui/docs/config';
 
 // This app's docs: what they say about the product (with content/, the whole of the app's docs; the Worker
 // is @joeblew999/remy-ui's). Replace every "My app" and URL. Ask AI is off until `ask` names its resources
-// (the owner creates them; npm run docs -- provision prints what they would be).
+// (the owner creates them; npx remy docs provision prints what they would be).
 export const docsConfig = defineDocsConfig({
   product: 'My app',
   titles: { docs: 'My app guide', dev: 'My app developer docs', reference: 'My app API reference' },

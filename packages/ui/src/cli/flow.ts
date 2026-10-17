@@ -2,25 +2,21 @@
 // development ... make sure the developer flow is also formalised so that this stupid fuckups can't
 // happen. And so you and developers use that same flow so that it's fixed forever"). This module is
 // the one place the flow's decisions live: which checks run at which step, what runs locally and what
-// runs on GitHub, what a step needs before it may run. The scripts in package.json (npm run
-// dev:<step>, remy <step>) are its commands; the agent hook (guard-hook.ts) refuses what is not one
-// of them. TypeScript, type-checked by the check (`npm run dev:change`), so a wrong step fails before it runs.
+// runs on GitHub, what a step needs before it may run. Its steps are scripts in package.json (`vp run land`,
+// `vp run promote`, `vp run release`, `vp run status`); the agent hook (guard-hook.ts) refuses what is not one
+// of them. TypeScript, type-checked by the check (`vp run check`), so a wrong step fails before it runs.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { dispatch, type Subcommands } from './commands.ts';
 
-/** The steps of development, in the order they happen (dev:start and dev:done bracket them for a worktree). */
-export type Step = 'change' | 'land' | 'promote' | 'release';
+/** The steps of development, in the order they happen; the check (`vp run check`) runs after every change. */
+export type Step = 'land' | 'promote' | 'release';
 
 /**
  * What each step runs, locally and on purpose, and nothing more. Every heavy task still exists for
  * running by hand or on GitHub; a step here is the only place it runs by default.
  */
 export const steps: Record<Step, { what: string }> = {
-  // After every change, while coding: seconds. check.ts, every part a function: the plans list, single
-  // copies, a build when a route file changed, types (the tasks' own included), the plain-function
-  // checks, translation status, the docs when docs changed.
-  change: { what: 'the check, in seconds' },
   // The change leaves the machine: the check again, then commit, main, staging. GitHub runs every
   // part a change can affect on its pull request, in parallel, and everything after the merge.
   land: { what: 'the check and the browser checks here, then a pull request, merged when GitHub agrees, and staging' },
@@ -31,27 +27,22 @@ export const steps: Record<Step, { what: string }> = {
 };
 
 /**
- * The flow as one command, `remy flow <step>` (npm run dev:<step>): status first, then the steps, then the
- * worktree's end. Each step is its own module, loaded when it runs; its line here is the one `remy help`
- * and `remy flow` print. A bare `remy <step>` still answers (remy.ts): the scripts of apps on 0.15 say it.
+ * The flow as one command, `remy flow <step>` (the scripts: `vp run status`, `vp run land`…): status first,
+ * then the steps. Each step is its own module, loaded when it runs; its line here is the one `remy help` and
+ * `remy flow` print. A bare `remy <step>` still answers (remy.ts): the scripts of apps on 0.15 say it.
  */
 type Script = { main: (args: string[]) => void | Promise<void> };
 const step = (load: () => Promise<Script>) => (args: string[]) => load().then((module) => module.main(args));
-export const what = 'the development flow: the four steps, and the two that bracket a worktree (npm run dev:<step>)';
+export const what =
+  'the development flow: what is going on, then landing, production and a release (vp run status · land · promote · release)';
 export const commands: Subcommands = {
   status: {
     what: "what is going on: main with GitHub's verdicts, the open pull requests, the deployments, the worktrees, the translations, the top of now.md",
     run: step(() => import('./status.ts')),
   },
-  start: {
-    what: '<name>: a worktree of your own from main, installed, its own ports, the guard',
-    run: step(() => import('./start.ts')),
-  },
-  change: { what: steps.change.what, run: step(() => import('./change.ts')) },
   land: { what: `"<what changed>": ${steps.land.what}`, run: step(() => import('./land.ts')) },
   promote: { what: steps.promote.what, run: step(() => import('./promote.ts')) },
   release: { what: steps.release.what, run: step(() => import('./release.ts')) },
-  done: { what: 'the worktree removed once its work is on main', run: step(() => import('./done.ts')) },
 };
 export const main = dispatch('flow', commands);
 
@@ -62,22 +53,22 @@ export const main = dispatch('flow', commands);
  * them by these names; the hook refuses each outside its step and names the step instead. Running one by hand stays possible: REMY_FLOW=hand in front, at a terminal, is a decision.
  */
 export const heavy: Record<string, string> = {
-  verify: 'the release gate: dev:release runs it; GitHub runs its parts on every pull request',
-  'test:browser': 'the browser checks: npm run ci runs them, and dev:land and GitHub with it',
+  verify: 'the release gate: vp run release runs it; GitHub runs its parts on every pull request',
+  'test:browser': 'the browser checks: vp run ci runs them, and vp run land and GitHub with it',
   'test:remote': 'the suite against a deployment: GitHub runs the suite; every deploy ends with the live smoke',
-  'test:audits': "Google's audits: npm run ci runs them, and dev:land and GitHub with it",
+  'test:audits': "Google's audits: vp run ci runs them, and vp run land and GitHub with it",
   'test:cwv': 'Core Web Vitals on a preview: on purpose only, before a release',
-  'playwright test': 'the browser suite by hand: dev:change runs the check; npm run test -- only <words> runs one area',
-  'i18n:translate': 'translation: dev:land runs it in the change, before its commit',
-  'i18n translate': 'translation: dev:land runs it in the change, before its commit',
+  'playwright test': 'the browser suite by hand: vp run check runs the check; npx remy test only <words> runs one area',
+  'i18n:translate': 'translation: vp run land runs it in the change, before its commit',
+  'i18n translate': 'translation: vp run land runs it in the change, before its commit',
   'remy test':
-    'the browser checks: npm run ci runs them, and dev:land and GitHub with it; one area: npm run test -- only <words>',
+    'the browser checks: vp run ci runs them, and vp run land and GitHub with it; one area: npx remy test only <words>',
   'npm test':
-    'the browser checks: npm run ci runs them, and dev:land and GitHub with it; one area: npm run test -- only <words>',
+    'the browser checks: vp run ci runs them, and vp run land and GitHub with it; one area: npx remy test only <words>',
   'test:consumers': 'the consumer fixture: GitHub runs it after every push; remy test consumers is its gate',
   // Serving by hand with a raw tool call (an agent did, 2026-10-17): every way to serve has its command.
   'wrangler dev':
-    'serving by hand: npx remy docs serve (the built docs, with llms.txt), npm run preview (the built app), npm run dev (hot reload); when no command does what you need, add one',
+    'serving by hand: npx remy docs serve (the built docs, with llms.txt), vp run preview (the built app), vp run dev (hot reload); when no command does what you need, add one',
 };
 
 /** Where a key's spelling needs more than its words: the suite is refused, its light forms (only, report, live, smoke) are not. */
@@ -115,7 +106,7 @@ export function latestRun(commit?: string): Run | null | undefined {
 /**
  * The install is what the lockfile says, or it is made so: npm writes what it installed to
  * node_modules/.package-lock.json, so a lockfile that moved (a version bump, a merge) shows there.
- * Nobody runs npm ci by hand; the steps that build (dev:start, dev:promote) call this first.
+ * Nobody runs npm ci by hand; the steps that build (`vp run promote`) call this first.
  */
 export function installed(cwd = '.'): void {
   const same = (() => {

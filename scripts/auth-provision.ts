@@ -1,4 +1,4 @@
-// npm run auth:provision: what a deployment (production, and staging beside it) needs on Cloudflare,
+// vp run auth:provision: what a deployment (production, and staging beside it) needs on Cloudflare,
 // printed; nothing is created (that is the owner's). The identity database and the showcase's, each
 // with its id in wrangler.jsonc and its migrations, the secret, and the domain the sign-in code is
 // mailed from. Until then the deploy refuses, because Wrangler would create the database by itself.
@@ -23,7 +23,7 @@ the send_email binding beside it must allow. Its domain has to be enabled for se
 
 A later migration is step 2 or 5 again, before the deploy that needs it.
 
-Staging (every npm run dev:land deploys it) is the same five steps on its own resources, with --env staging:
+Staging (every vp run land deploys it) is the same five steps on its own resources, with --env staging:
 databases remy-auth-staging and remy-auth-demo-staging, their ids in wrangler.jsonc under env.staging,
 then for each binding
      npx wrangler d1 migrations apply <DB|DEMO_DB> --remote --env staging

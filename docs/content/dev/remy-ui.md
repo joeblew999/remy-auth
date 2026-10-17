@@ -12,8 +12,8 @@ them. Consumers are remy-auth (server-rendered) and
 
 Everything in `src/components`, `src/hooks` and `src/styles/globals.css` is what the pinned shadcn
 CLI writes (monorepo layout: the app's `components.json` routes `shadcn add` here), including `cn`
-from shadcn's own `cn` package; nothing there is edited by hand. `npm run ui:components` and
-`npm run ui:theme` regenerate them and `npm run ui:verify` fails on any drift (see
+from shadcn's own `cn` package; nothing there is edited by hand. `vp run ui:components` and
+`vp run ui:theme` regenerate them and `vp run ui:verify` fails on any drift (see
 [docs/gui.md](./run-and-test.md#shadcn-stock)). Blocks are owned copies in `src/blocks`.
 
 ## Usage
@@ -58,11 +58,11 @@ prerendered example):
   `themeChecks` fail without it.
 - **A route for every path in `appPaths` and `sitePaths`**, each a few lines over the shared page (the
   showcase's Clock spreads `clockRouteOptions` from `@joeblew999/remy-showcase/clock-route`).
-- **`tests/smoke.spec.ts`**, one `smokeChecks(...)` call: `npm run test -- smoke` and the live smoke after
+- **`tests/smoke.spec.ts`**, one `smokeChecks(...)` call: `npx remy test smoke` and the live smoke after
   every deploy run it, and fail with "No tests found" without it.
 - **`.plans/now.md`**, the one ordered list of open work (`remy plans check`, in the check).
-- **Installs and upgrades through the package's commands**, never by hand: `npm run setup` (install,
-  skills, MCP, the installation's checks) and `npm run upgrade -- <version>` (the exact package version
+- **Installs and upgrades through the package's commands**, never by hand: `vp run setup` (install,
+  skills, MCP, the installation's checks) and `vp run upgrade -- <version>` (the exact package version
   and the CI workflow at the same tag, then the same checks). Both take GitHub Packages' token from
   `gh auth token`.
 
@@ -137,7 +137,7 @@ Chinese, Hindi, Amharic, Polish, Turkish and German) is agent-authored and unrev
 ## Publishing
 
 The package is `@joeblew999/remy-ui` on GitHub Packages (the scope must equal the
-GitHub owner there). `npm run dev:release` does the whole release from this machine, stopping at the first
+GitHub owner there). `vp run release` does the whole release from this machine, stopping at the first
 failure; its gates, in order, are `remy packages release` on [Commands](./commands.mdx). Core Web Vitals are
 measured cold on a throwaway Cloudflare Worker: the first visits after a deploy, which is what a slow page costs
 most. CI (`.github/workflows/ci.yml`) repeats Google's audits on the tag.
@@ -154,7 +154,7 @@ Consumers add to their `.npmrc`:
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
-and install through `npm run setup`, which takes a `read:packages` token from `gh auth token`
+and install through `vp run setup`, which takes a `read:packages` token from `gh auth token`
 (or `GITHUB_TOKEN` in the shell). Released versions are in the
 [changelog](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
 
@@ -181,7 +181,7 @@ listed by name (`"seo-routes"`); any package can offer parts too, listed as `"<p
    its own routes, or to the app's pages through its `app` options (the time-zones part's breadcrumb takes
    `parent`), never to a page another app may not have: the consumer fixture lists a showcase part and
    type-checks it without the showcase's pages.
-4. **Prove it:** `npm run dev:change` passes with the part listed, with it removed, and with the list
+4. **Prove it:** `vp run check` passes with the part listed, with it removed, and with the list
    empty (run a build once after editing `src/parts.json`, which regenerates the route tree).
 
 What stays a plain package module instead: code every app needs (observability), a hook an app must

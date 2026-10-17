@@ -11,14 +11,14 @@
   // Release and environment for the shared log contract (@joeblew999/remy-ui/worker).
   "version_metadata": { "binding": "CF_VERSION_METADATA" },
   // "production" here, "staging" in env.staging below, and "local" where a local .dev.vars says so
-  // (npm run local): the environment policy table in src/auth/environment.ts reads it, and
+  // (vp run local): the environment policy table in src/auth/environment.ts reads it, and
   // anything unknown is production.
   "vars": { "ENVIRONMENT": "production", "EMAIL_FROM": "noreply@mail.ubuntusoftware.net" },
   // The identity database (.plans/auth-service.md): Better Auth's tables, through the numbered
-  // migrations in migrations/ (npm run auth:generate, auth:migrate). Only this Worker reads or writes it.
+  // migrations in migrations/ (vp run auth:generate, auth:migrate). Only this Worker reads or writes it.
   // DEMO_DB is the showcase's own data (the notes demo), apart from the identities, as any app keeps
   // its data in its own database: the relation engine reads who may do what from those tables alone.
-  // Its migrations are in migrations-demo/ (npm run auth:migrate applies both locally).
+  // Its migrations are in migrations-demo/ (vp run local applies both locally).
   "d1_databases": [
     {
       "binding": "DB",
@@ -37,7 +37,7 @@
   // account has enabled for Email Sending (wrangler email sending list). A local Worker captures mail
   // instead of sending it (the environment table), so this binding is only ever used on a deployment.
   "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["noreply@mail.ubuntusoftware.net"] }],
-  // Better Auth signs and hashes with it. Local: .dev.vars (npm run local). Deployed: a Worker secret.
+  // Better Auth signs and hashes with it. Local: .dev.vars (vp run local). Deployed: a Worker secret.
   "secrets": { "required": ["BETTER_AUTH_SECRET"] },
   "assets": { "directory": "./dist/client" },
   // Preview URLs off (2026-09-25): every uploaded version and alias was public, the recent ones with

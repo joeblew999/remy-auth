@@ -1,3 +1,3 @@
 # Agent instructions
 
-`remy rules` writes the platform's rules block here (npm run setup runs it).
+`remy rules` writes the platform's rules block here (vp run setup runs it).

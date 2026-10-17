@@ -6,7 +6,7 @@ import { unstable_startWorker } from 'wrangler';
 // the platform run the oRPC 2.0 beta; other Remy apps are still on 1.15, whose procedures keep their
 // middlewares and output schemas elsewhere, and the guard must hold on both. tests/guard/worker.ts builds
 // the same router on each major behind the same guard code, and this starts it with Wrangler and reads
-// what happened. oRPC 1 is installed in tests/guard/v1 alone (npm run local).
+// what happened. oRPC 1 is installed in tests/guard/v1 alone (vp run local).
 // It touches neither the app nor its database, so it runs the same against any test target.
 
 type Outcome = { value?: unknown; code?: string };
@@ -31,13 +31,13 @@ type Major = {
 };
 
 // Read with a fallback: Playwright loads every spec file whatever is selected, so a missing fixture
-// (npm run local; dev, build and dev:start run it) fails the guard's own tests below,
+// (vp run local; vp run dev and vp run build run it) fails the guard's own tests below,
 // never a smoke run against a deployment.
 const version = (folder: string): string => {
   try {
     return JSON.parse(readFileSync(`${folder}/package.json`, 'utf8')).version;
   } catch {
-    return `? (${folder} is not installed: npm run local)`;
+    return `? (${folder} is not installed: vp run local)`;
   }
 };
 const installed = { v1: version('tests/guard/v1/node_modules/@orpc/server'), v2: version('node_modules/@orpc/server') };

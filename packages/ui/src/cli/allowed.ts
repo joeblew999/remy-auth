@@ -1,7 +1,7 @@
 // The flow's gate, in the tooling itself: every heavy task runs this first, and it passes only when
-// the flow is what called it (REMY_FLOW, which dev:land, dev:promote and dev:release set for what
+// the flow is what called it (REMY_FLOW, which vp run land, vp run promote and vp run release set for what
 // they run), on GitHub (where the workflow runs them after a push), or by a hand that said so
-// (REMY_FLOW=hand, a visible decision at a terminal). An installation (npm run setup, the upgrades)
+// (REMY_FLOW=hand, a visible decision at a terminal). An installation (vp run setup, the upgrades)
 // ends with npx remy verify setup, which runs nothing heavy, so it never meets this gate.
 // Anything else, an agent or a habit, is refused with the step to use instead. It holds for every
 // agent and every machine, because it is the task that refuses, not a setting on the machine; the
@@ -15,7 +15,7 @@ export function gate(task: string): void {
   if (by || onGitHub) return;
   const why = heavy[task] ?? 'a heavy check';
   console.error(
-    `${task}: not in the flow (${why}).\nThe steps, and what each runs: COMMANDS.md (npm run dev:change after every change; npm run dev:land -- "<what changed>" when the work is finished). One area: npm run test -- only <words>.\nBy hand, on purpose, at a terminal: REMY_FLOW=hand in front of the command.`,
+    `${task}: not in the flow (${why}).\nThe steps, and what each runs: COMMANDS.md (vp run check after every change; vp run land -- "<what changed>" when the work is finished). One area: npx remy test only <words>.\nBy hand, on purpose, at a terminal: REMY_FLOW=hand in front of the command.`,
   );
   process.exit(1);
 }

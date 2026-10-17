@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { ended, span, took } from '../../packages/ui/src/cli/feedback';
 
-// dev:land says what each of its parts took (owner, 2026-10-10, of a landing usable after 40 seconds
+// vp run land says what each of its parts took (owner, 2026-10-10, of a landing usable after 40 seconds
 // that held the terminal for six minutes: "how can it be 6 minutes"). The words are a function.
 
 test('a landing says how long the whole took, then each part, as a person reads time', () => {
@@ -32,11 +32,11 @@ test('a landing ends with the whole state after the push, and fails when staging
   const clean = ended({ commit: '9102bf7abcdef', staging: 'up', translation: 'done' }, parts);
   expect(clean.failed).toBe(false);
   expect(clean.line).toBe(
-    'dev:land: done in 5 min 57 s: the check 6 s, commit, main and push 4 s, staging 33 s, translation 5 min 14 s. merged into main as 9102bf7; staging is up; translated in the same commit.',
+    'land: done in 5 min 57 s: the check 6 s, commit, main and push 4 s, staging 33 s, translation 5 min 14 s. merged into main as 9102bf7; staging is up; translated in the same commit.',
   );
   const smoke = ended({ commit: '9102bf7abcdef', staging: 'failed', translation: 'done' }, parts);
   expect(smoke.failed).toBe(true);
-  expect(smoke.line).toMatch(/^dev:land: ended with a failure after 5 min 57 s/);
+  expect(smoke.line).toMatch(/^land: ended with a failure after 5 min 57 s/);
   expect(smoke.line).toContain('merged into main as 9102bf7');
   expect(smoke.line).toContain('staging FAILED');
   expect(smoke.line).toContain('translated in the same commit');

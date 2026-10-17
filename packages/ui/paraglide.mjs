@@ -1,4 +1,4 @@
-// One source for the Paraglide compiler options: the Vite plugin and `npm run generate`
+// One source for the Paraglide compiler options: the Vite plugin and `vp run generate`
 // both use it, so the generated runtime is identical everywhere.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';

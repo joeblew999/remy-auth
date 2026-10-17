@@ -3,7 +3,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { betterAuth } from 'better-auth';
 import { authOptions } from './options';
 
-// The Better Auth CLI's configuration (`npm run auth:generate`), never loaded by the Worker. A D1
+// The Better Auth CLI's configuration (`vp run auth:generate`), never loaded by the Worker. A D1
 // binding does not exist in Node, so the CLI compares the options with a throwaway SQLite database
 // built from migrations/: what `auth generate` writes is exactly what the migrations do not have yet.
 const database = new DatabaseSync(':memory:');

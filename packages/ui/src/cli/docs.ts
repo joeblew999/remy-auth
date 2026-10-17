@@ -1,4 +1,4 @@
-// The docs Worker, @joeblew999/remy-ui's, over an app's docs/ (`remy docs …`, npm run docs): run it
+// The docs Worker, @joeblew999/remy-ui's, over an app's docs/ (`remy docs …`, npx remy docs): run it
 // (dev), build and check it, test it locally or against its deployment (every MCP server's tools
 // included), a preview Worker, Ask AI's answers paused or resumed (an emergency stop, seconds), its
 // pages published to the index, what Ask AI needs on Cloudflare (printed, created never), its logs and
@@ -184,7 +184,7 @@ export function answers(state: 'on' | 'off'): void {
  * tools: frontmatter out, includes resolved, in every language the page has its own text in), delete what
  * is no longer a page (Wrangler cannot list a bucket: Cloudflare's R2 API does, with Wrangler's login), ask
  * AI Search to sync now and wait for that sync (minutes), then check the fixed questions find their pages
- * (questions). Nothing without `ask`. Production, after the docs deploy (dev:promote runs it).
+ * (questions). Nothing without `ask`. Production, after the docs deploy (vp run promote runs it).
  */
 export async function publish(): Promise<void> {
   const { docsConfig, table } = await appDocs();
@@ -282,7 +282,7 @@ async function synced(instance: string): Promise<void> {
     if (!created && watched.length === 0) break;
     if (Date.now() > deadline)
       fail(
-        `docs publish: the sync of ${instance} is still running after 15 minutes (npm run wrangler -- ai-search jobs list ${instance})`,
+        `docs publish: the sync of ${instance} is still running after 15 minutes (npx wrangler ai-search jobs list ${instance})`,
       );
     if (polls % 6 === 0)
       console.log(`  waiting for the sync of ${instance} (${watched.length ? 'running' : 'not listed yet'})…`);
@@ -350,12 +350,12 @@ export async function provision(): Promise<void> {
     `  2. the AI Search instance over it:   npx wrangler ai-search create ${ask.instance} --type r2 --source ${ask.bucket}`,
   );
   console.log(
-    `  3. its AI Gateway, ${ask.gateway}: set it as the instance's gateway (dashboard: AI Search, ${ask.instance}, Settings), then npm run docs -- observe gateway show`,
+    `  3. its AI Gateway, ${ask.gateway}: set it as the instance's gateway (dashboard: AI Search, ${ask.instance}, Settings), then npx remy docs observe gateway show`,
   );
   console.log(
     `  4. the rate limit: namespace ${ask.rateLimitNamespace}, a number unique on the account (Workers rate limiting needs no creating)`,
   );
-  console.log('Then npm run dev:promote: it deploys the docs and publishes the pages to the bucket.');
+  console.log('Then vp run promote: it deploys the docs and publishes the pages to the bucket.');
 }
 /** The docs app for a new repository, from remy-auth's template at a tag. */
 export function init(ref: string | undefined): void {
@@ -372,13 +372,10 @@ export function init(ref: string | undefined): void {
 
 export const what = "the docs Worker, @joeblew999/remy-ui's, over this app's docs/";
 export const commands: Subcommands = {
-  dev: { what: 'the docs Worker with hot reload', run: () => dev() },
-  build: { what: 'the production build, which writes .remy-docs/', run: () => build() },
   serve: {
     what: "the built docs here at DOCS_PREVIEW_PORT (4174), as their checks and AI tools see them: llms.txt, each page's .md (preview is Cloudflare's)",
     run: () => serve(),
   },
-  check: { what: 'build, binding types, types', run: () => check() },
   test: {
     what: "[remote]: the docs' browser checks on a local build, or against the deployment with every MCP server's tools",
     run: (rest) => (rest[0] === 'remote' ? testRemote() : test()),
@@ -392,7 +389,7 @@ export const commands: Subcommands = {
     },
   },
   publish: {
-    what: "the bucket holds exactly the live docs pages, the index's sync waited for, then the fixed questions (dev:promote runs it)",
+    what: "the bucket holds exactly the live docs pages, the index's sync waited for, then the fixed questions (vp run promote runs it)",
     run: () => publish(),
   },
   questions: {

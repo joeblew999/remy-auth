@@ -325,7 +325,7 @@ export const commands: Subcommands = {
     run: () => tag(),
   },
   release: {
-    what: "the release: translations strict, bumped, the gate (remy verify), the app's release-checks script, Google, Core Web Vitals on a preview, the tag (dev:release runs it)",
+    what: "the release: translations strict, bumped, the gate (remy verify), the app's release-checks script, Google, Core Web Vitals on a preview, the tag (vp run release runs it)",
     run: () => release(),
   },
 };
