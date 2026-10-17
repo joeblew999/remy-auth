@@ -29,6 +29,7 @@ export function remyTasks({ root = process.cwd(), tasks = {} } = {}) {
   // remy-auth, the package's own repository, runs the command line's TypeScript source; an app, the installed bin.
   const own = has('packages/ui/src/cli/remy.ts');
   const remy = own ? 'node packages/ui/src/cli/remy.ts' : 'remy';
+  const check = own ? 'node packages/ui/src/cli/checks.ts' : 'remy-check';
   const docs = has('docs/package.json')
     ? JSON.parse(readFileSync(resolve(root, 'docs/package.json'), 'utf8')).name
     : undefined;
@@ -65,19 +66,19 @@ export function remyTasks({ root = process.cwd(), tasks = {} } = {}) {
       dependsOn: ['build'],
       cache: false,
     },
-    // The project's own checks, each one of its tools, run as a tool. A check never writes: the two that could
-    // fix something verify it (REMY_FLOW=ci), and `vp run fix` writes it.
-    'check:plans': `${remy} plans check`,
-    'check:single-copies': `${remy} check single-copies`,
-    'check:commands': `REMY_FLOW=ci ${remy} check commands`,
-    'check:endings': `REMY_FLOW=ci ${remy} check endings`,
-    'check:translations': `${remy} check translations`,
+    // The project's own checks (remy-check, the package's plain tool for them). A check never writes: `vp run fix`
+    // writes what the two that could fix something report.
+    'check:plans': `${check} plans`,
+    'check:single-copies': `${check} single-copies`,
+    'check:commands': `${check} commands`,
+    'check:endings': `${check} endings`,
+    'check:translations': `${check} translations`,
     // The checks that are plain functions (tests/**/*.unit.spec.ts), on Vite Plus's test runner: no Worker, no browser.
-    // Vitest's own cache (its temporary files among them) is neither input nor output.
+    // Vitest's own caches (node_modules/.vite, .vitest-cache: hidden folders) are neither input nor output.
     'check:unit': {
       command: 'vp test',
       dependsOn: ['check:commands', 'generate'],
-      cache: { input: [{ auto: true }, '!node_modules/.vite/**'], output: [{ auto: true }, '!node_modules/.vite/**'] },
+      cache: { input: [{ auto: true }, '!node_modules/.*/**'], output: [{ auto: true }, '!node_modules/.*/**'] },
     },
     // The check: Vite Plus's own (format, lint, types) once everything it reads exists, the app and its docs built
     // (the route tree, every docs page compiling, translations included), and the project's own checks passed.
@@ -96,7 +97,7 @@ export function remyTasks({ root = process.cwd(), tasks = {} } = {}) {
       ],
     },
     // What the check only verifies, written: the commands list (COMMANDS.md) and each docs page's ending.
-    fix: { command: [`${remy} check commands`, `${remy} check endings`], cache: false },
+    fix: { command: [`${check} commands --write`, `${check} endings --write`], cache: false },
     // What GitHub runs, the same here: the check, then the browser checks, Google's audits and a new app
     // (`vp run ci browser --shard 1/3` runs one part, as one GitHub job does).
     ci: { command: `${remy} ci`, dependsOn: ['check'], cache: false },

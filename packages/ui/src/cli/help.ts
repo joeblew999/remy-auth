@@ -135,7 +135,7 @@ export async function writeCommands(verify = false): Promise<boolean> {
       continue;
     }
     if (verify) {
-      console.error(`${file} is not what the command line says: vp run check rewrites it.`);
+      console.error(`${file} is not what the command line says: vp run fix writes it.`);
       process.exit(1);
     }
     writeFileSync(file, text);

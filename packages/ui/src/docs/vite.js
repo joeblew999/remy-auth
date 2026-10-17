@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cloudflare } from '@cloudflare/vite-plugin';
@@ -75,15 +75,18 @@ export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
   const api = Boolean(contract);
   const app = root.endsWith('/') ? root : `${root}/`;
   const srcDirectory = relative(root, packageDocs).replace(/\/$/, '');
+  // Written while this configuration is evaluated, because Cloudflare's plugin reads wrangler.json then, before any
+  // task could make it; each file only when its text changed, so loading the configuration rewrites nothing.
   const generated = join(root, '.remy-docs');
   mkdirSync(generated, { recursive: true });
-  writeFileSync(
-    join(generated, 'collections.ts'),
-    readFileSync(join(packageDocs, 'lib/collections.source.ts'), 'utf8'),
-  );
-  writeFileSync(join(generated, 'app.json'), `${JSON.stringify({ api })}\n`);
-  writeFileSync(
-    join(generated, 'wrangler.json'),
+  const write = (name, text) => {
+    const file = join(generated, name);
+    if (!existsSync(file) || readFileSync(file, 'utf8') !== text) writeFileSync(file, text);
+  };
+  write('collections.ts', readFileSync(join(packageDocs, 'lib/collections.source.ts'), 'utf8'));
+  write('app.json', `${JSON.stringify({ api })}\n`);
+  write(
+    'wrangler.json',
     `${JSON.stringify({ ...docsWorkerConfig(docsConfig, `../${srcDirectory}`), assets: { directory: '../dist/client' } }, null, 2)}\n`,
   );
   return defineConfig({
