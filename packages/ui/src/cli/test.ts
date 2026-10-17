@@ -10,6 +10,7 @@ import { join } from 'node:path';
 import { gate } from './allowed.ts';
 import { preview, previewDelete } from './cloudflare.ts';
 import { build } from './dev.ts';
+import { skip } from './changes.ts';
 
 function playwright(args: string[], env: Record<string, string>): void {
   const result = spawnSync(join(process.cwd(), 'node_modules', '.bin', 'playwright'), ['test', ...args], { stdio: 'inherit', env: { ...process.env, ...env } });
@@ -39,7 +40,7 @@ async function withLevel2Lock<T>(work: () => T): Promise<T> {
 }
 
 /** Every check of ours in every language (level 1), on the production artifact in local Workers. */
-export function every(): void { gate('project:test'); build(); playwright(['--project=ours'], local); }
+export function every(): void { gate('project:test'); if (skip('every')) return; build(); playwright(['--project=ours'], local); }
 /** Every check in the quick languages. */
 export function quick(): void { gate('project:test:quick'); build(); playwright(['--project=ours'], { ...local, ...quickLocales() }); }
 /** The checks whose title matches, in the quick languages: the one browser run a step does not own. */
@@ -47,7 +48,7 @@ export function only(words: string): void { build(); playwright(['--project=ours
 /** The smoke checks alone, on a local build. */
 export function smoke(): void { build(); playwright(['--project=ours', '--grep', 'smoke [a-zA-Z-]+:'], local); }
 /** Google's audits (level 2), locally. */
-export async function google(): Promise<void> { gate('project:test:google'); build(); await withLevel2Lock(() => playwright(['--project=google'], local)); }
+export async function google(): Promise<void> { gate('project:test:google'); if (skip('google')) return; build(); await withLevel2Lock(() => playwright(['--project=google'], local)); }
 /** Level 1 against a deployment. */
 export function remoteSuite(origin?: string): void { gate('project:test:remote'); playwright([], remote(origin)); }
 /** The smoke checks against a deployment (the deploys run it once the new version is live). */
@@ -55,6 +56,7 @@ export function live(origin?: string): void { playwright(['--project=ours', '--g
 /** The other repositories this one serves, tested as they get it: the app's "test:consumers" script, when it has one. */
 export function consumers(): void {
   gate('project:test:consumers');
+  if (skip('consumers')) return;
   // Not silent: npm would hand loglevel=silent to every nested npm in the fixture (its publish dry run reads a 404 from npm's output).
   const result = spawnSync('npm', ['run', '--if-present', 'test:consumers'], { stdio: 'inherit', env: { ...process.env, REMY_FLOW: process.env.REMY_FLOW ?? 'hand' } });
   if (result.status !== 0) process.exit(result.status ?? 1);

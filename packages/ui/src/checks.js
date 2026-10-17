@@ -16,6 +16,20 @@ import { matchChinese } from './matching.js';
 export const checkedLocales = process.env.CHECK_LOCALES
   ? locales.filter(locale => process.env.CHECK_LOCALES.split(',').map(value => value.trim()).includes(locale))
   : locales;
+
+/**
+ * The languages for checks of behaviour that does not depend on the language (the security policy,
+ * noindex, search params, forms, error pages, API answers): the base language and the first
+ * right-to-left one among `checkedLocales`. What passes in those two passes in the rest, so running
+ * them in all thirteen only multiplied the time (owner, 2026-10-17: the "every language" job took
+ * 5.5 minutes, 81% of it these repeats). Checks of what does depend on the language (fonts and
+ * scripts, hyphenation, direction, formats, the catalogs) keep iterating `checkedLocales`.
+ * BEHAVIOUR_LOCALES (comma-separated) overrides, e.g. to run them all again.
+ */
+const firstRtl = checkedLocales.find(locale => new Intl.Locale(locale).getTextInfo().direction === 'rtl');
+export const behaviourLocales = process.env.BEHAVIOUR_LOCALES
+  ? checkedLocales.filter(locale => process.env.BEHAVIOUR_LOCALES.split(',').map(value => value.trim()).includes(locale))
+  : [...new Set([checkedLocales.includes(baseLocale) ? baseLocale : checkedLocales[0], firstRtl].filter(Boolean))];
 import { m } from './paraglide/messages.js';
 import { samples } from './samples.js';
 
@@ -420,7 +434,7 @@ export function zoneChecks({ sitePaths, appPaths }) {
   });
 
   // One test per language, as the other per-language checks: the work grows with the language count.
-  for (const locale of checkedLocales) {
+  for (const locale of behaviourLocales) {
     test(`${locale}: app pages are kept out of search and say they are the app`, async ({ page, request }) => {
       const sitemap = await (await request.get('/sitemap.xml')).text();
       for (const path of appPaths) {
@@ -533,7 +547,7 @@ export function cspChecks({ paths, reportPath = '/csp-report', enforce = true })
   });
 
   // One test per language, as the other per-language checks: the work grows with the language count.
-  for (const locale of checkedLocales) test(`${locale}: every page loads and hydrates without a single violation of that policy`, async ({ page }) => {
+  for (const locale of behaviourLocales) test(`${locale}: every page loads and hydrates without a single violation of that policy`, async ({ page }) => {
     await page.addInitScript(() => {
       window.__cspViolations = [];
       document.addEventListener('securitypolicyviolation', event => window.__cspViolations.push(`${event.effectiveDirective} ${event.blockedURI} ${event.sourceFile}:${event.lineNumber}`));

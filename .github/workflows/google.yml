@@ -58,10 +58,20 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          # Two commits: on a pull request the checkout is the merge commit, and its first parent (the base
+          # branch) is what `remy test` compares against to skip a level nothing it checks changed (changes.ts).
+          fetch-depth: 2
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version-file: .node-version
           cache: npm
+      # The consumer fixture downloads the pinned agent skills into this folder (fixtures/consumer/run.sh);
+      # kept between runs, keyed on the pinned list and the package's own skill, as on a developer's machine.
+      - if: matrix.level == 'consumers'
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: /tmp/remy-fixture-skills
+          key: remy-fixture-skills-${{ hashFiles('packages/ui/src/cli/skills.ts', 'packages/ui/skills/**') }}
       # Han languages are drawn by the system's fonts on purpose (fonts.css); a runner has none, so the
       # font checks see Liberation Sans for Japanese and Chinese alike. One package, as a visitor's machine has.
       - run: sudo apt-get install -y --no-install-recommends fonts-noto-cjk

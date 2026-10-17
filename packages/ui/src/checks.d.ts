@@ -10,6 +10,8 @@ export declare const foreignDigits: (text: string, locale: string) => string[];
 export declare const localizedPath: (path: string, locale: string) => string;
 /** Every locale, or the subset in CHECK_LOCALES. */
 export declare const checkedLocales: readonly string[];
+/** The base language and the first right-to-left one among checkedLocales: for checks of behaviour that does not depend on the language. */
+export declare const behaviourLocales: readonly string[];
 export declare function collectErrors(page: Page): string[];
 /** Resolves once React has hydrated the element. */
 export declare function hydrated(locator: Locator): Promise<void>;

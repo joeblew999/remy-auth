@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
 import { locales } from '@joeblew999/remy-ui/runtime';
 import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
-import { localizedPath, collectErrors, hydrated, checkedLocales } from '@joeblew999/remy-ui/checks';
+import { localizedPath, collectErrors, hydrated, behaviourLocales } from '@joeblew999/remy-ui/checks';
 
 /** Answers each dialog from `answers` in turn (true accepts) and records its type and message. */
 function dialogs(page, answers) {
@@ -18,7 +18,7 @@ function dialogs(page, answers) {
 }
 
 export function navigationBlockingChecks() {
-  for (const locale of checkedLocales) {
+  for (const locale of behaviourLocales) {
     const o = { locale };
     const demo = localizedPath('/app/demo', locale);
     const home = localizedPath('/app', locale);

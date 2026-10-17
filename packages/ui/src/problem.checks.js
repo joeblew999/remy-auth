@@ -2,7 +2,7 @@
 // a test file of a server-rendered app; every option is optional so an app passes what it has.
 import { test, expect } from '@playwright/test';
 import { m } from './paraglide/messages.js';
-import { direction, localizedPath, checkedLocales } from './checks.js';
+import { direction, localizedPath, behaviourLocales } from './checks.js';
 
 // What a leaked error would look like: stack frames, error class names, source paths.
 const leak = /\bat \S+ \(|\bat \S+:\d+:\d+|\b(?:Type|Reference|Range|Syntax)?Error: |\.tsx?:\d+/;
@@ -19,7 +19,7 @@ const leak = /\bat \S+ \(|\bat \S+:\d+:\d+|\b(?:Type|Reference|Range|Syntax)?Err
 export function problemChecks({ failingNavigation, serverRoutes = [] } = {}) {
   if (failingNavigation) {
     const { from, link, fail, heading } = failingNavigation;
-    for (const locale of checkedLocales) {
+    for (const locale of behaviourLocales) {
       const o = { locale };
       test(`${locale}: a loader that fails on the server shows the localized error page without the error, and retry recovers`, async ({ page }) => {
         await page.goto(localizedPath(from, locale));
