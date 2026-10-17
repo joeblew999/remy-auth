@@ -31,6 +31,9 @@
   // the AI answers on the production index, and old versions never see the ASK_PAUSED stop. Cloudflare's
   // newer Previews are served through this same switch, so cf:preview deploys a throwaway Worker instead.
   "preview_urls": false,
+  // Worker Previews (Cloudflare's throwaway preview per branch and pull request, made by Workers Builds with
+  // `wrangler preview`). Previews inherit none of production's bindings; empty means none of their own yet.
+  "previews": {},
   // Staging (remy cloudflare staging, which builds with CLOUDFLARE_ENV=staging): the same code as its own
   // Worker, with its own two databases, so nothing a visitor does there touches production's. Its
   // environment gives it the automatic sign-in (the seeded people, one press each) beside the normal
