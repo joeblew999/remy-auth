@@ -63,7 +63,17 @@ export function smoke(): void { build(); playwright(['--project=ours', '--grep',
 /** Google's audits (level 2), locally. */
 export async function google(): Promise<void> { gate('project:test:google'); if (skip('google')) return; build(); await withLevel2Lock(() => playwright(['--project=google'], local)); }
 /** Level 1 against a deployment. */
-export function remoteSuite(origin?: string): void { gate('project:test:remote'); playwright([], remote(origin)); }
+/**
+ * The suite against a deployment. Against production (the default) everything, Google's audits included; against
+ * any other origin (a preview, staging) our checks only: those are hidden from search engines on purpose, which
+ * Google's crawlability audit rightly reports (a branch preview, 2026-10-17).
+ */
+export function remoteSuite(origin?: string): void {
+  gate('project:test:remote');
+  const production = !origin || origin === process.env.DEPLOY_ORIGIN;
+  if (!production) console.log(`test remote: ${origin} is not production, so our checks only (Google's audits judge the production site).`);
+  playwright(production ? [] : ['--project=ours'], remote(origin));
+}
 /** The smoke checks against a deployment (the deploys run it once the new version is live). */
 export function live(origin?: string): void { playwright(['--project=ours', '--grep', 'smoke [a-zA-Z-]+:'], remote(origin)); }
 /** The other repositories this one serves, tested as they get it: the app's "test:consumers" script, when it has one. */

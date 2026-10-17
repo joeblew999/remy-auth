@@ -31,4 +31,7 @@ test('a landing ends with the whole state after the push, and fails when staging
   expect(owed.failed).toBe(true);
   expect(owed.line).toContain('translation FAILED and still owed');
   expect(ended({ commit: '9102bf7abcdef', staging: 'none', translation: 'up to date' }, parts).failed).toBe(false);
+  const cloud = ended({ commit: '9102bf7abcdef', staging: 'signed out', translation: 'up to date' }, parts);
+  expect(cloud.failed).toBe(false);
+  expect(cloud.line).toContain('no Cloudflare sign-in');
 });
