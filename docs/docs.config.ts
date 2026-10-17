@@ -13,7 +13,7 @@ export const docsConfig = defineDocsConfig({
   /** The product: in titles, the navigation, social images, Ask AI's answers and the MCP servers' names. */
   product,
   /** Each site's title after the page's own (and in the navigation): users' docs, developer docs, the API reference. */
-  titles: { docs: `${product} product guide`, dev: `${product} developer docs`, reference: `${product} API reference` },
+  titles: { docs: `${product} guide`, dev: `${product} developer docs`, reference: `${product} API reference` },
   /**
    * The MCP servers (/api/mcp/<site>), one per audience: its name, and what it tells an AI tool it is for
    * (MCP's server instructions; ChatGPT and Claude show and use them). Say plainly: product or developers.

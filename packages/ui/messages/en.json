@@ -278,7 +278,6 @@
   "open_app": "Open the app",
   "back_to_site": "Back to the site",
   "nav_location": "Location",
-  "app_home_title": "Your app",
   "app_home_description": "The interactive side of {product}: live data, forms and your device.",
   "app_home_intro": "Everything here runs in your browser. The site pages stay readable without JavaScript.",
   "location_title": "Where you are",
@@ -305,7 +304,6 @@
   "words_label": "Words in the home page title",
   "word_count_label": "Number of words",
   "long_word_label": "A long German word",
-  "nav_docs": "Docs",
   "nav_developers": "Developers",
   "nav_guide": "Guide",
   "docs_label": "Documentation",
@@ -350,14 +348,21 @@
   "notes_empty_description": "Notes you write, and notes other people share with you, appear here.",
   "notes_yours": "Yours",
   "notes_shared_with_you": "Shared with you",
-  "notes_shared_count": [{
-    "declarations": ["input count", "local countPlural = count: plural"],
-    "selectors": ["countPlural"],
-    "match": {
-      "countPlural=one": "Shared with {count} person",
-      "countPlural=*": "Shared with {count} people"
+  "notes_shared_count": [
+    {
+      "declarations": [
+        "input count",
+        "local countPlural = count: plural"
+      ],
+      "selectors": [
+        "countPlural"
+      ],
+      "match": {
+        "countPlural=one": "Shared with {count} person",
+        "countPlural=*": "Shared with {count} people"
+      }
     }
-  }],
+  ],
   "notes_read_only": "You can read this note.",
   "notes_edit": "Edit",
   "notes_share": "Share",
@@ -421,7 +426,6 @@
   "home_pages_heading": "What you can open here",
   "home_formats_open": "Open the formats page",
   "home_app_title": "App pages",
-  "home_app_open": "Open the app pages",
   "home_shared_heading": "What every {product} app shares",
   "home_shared_intro": "{product} apps are built on one package, @joeblew999/remy-ui, so each starts from the same pieces.",
   "home_shared_components_title": "Components and theme",

@@ -8,6 +8,7 @@ import viteReact from '@vitejs/plugin-react';
 import { defineConfig,                 } from 'vite';
 import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import remarkDirective from 'remark-directive';
+import { remarkUiWords } from './remark-ui-words.js';
 import { remarkAutoTypeTable } from 'fumadocs-typescript';
 import { remarkDirectiveAdmonition, remarkMdxMermaid, remarkSteps } from 'fumadocs-core/mdx-plugins';
 import { remyBuild } from '../build-vite.js';
@@ -80,11 +81,12 @@ export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
         },
       },
       // Fumadocs MDX compiles content/ for the collections (.remy-docs/collections.ts); before Start's plugin.
-      // Beyond its defaults (GFM, heading ids, images, code and npm tabs): callouts (:::note), Mermaid
+      // Beyond its defaults (GFM, heading ids, images, code and npm tabs): the app's own words (:ui[key], from its
+      // Paraglide catalog: remark-ui-words.js), callouts (:::note), Mermaid
       // (```mermaid), type tables from TypeScript (<auto-type-table>) and steps. GitHub's "default" code
       // themes keep 4.5:1 comment contrast on both backgrounds, which Lighthouse's accessibility audit requires.
       fumadocsMdx({ macro: { include: ['**/.remy-docs/collections.ts'] }, globalOptions: { mdxOptions: {
-        remarkPlugins: plugins => [remarkDirective, remarkDirectiveAdmonition, remarkMdxMermaid, remarkAutoTypeTable, ...plugins, remarkSteps],
+        remarkPlugins: plugins => [remarkDirective, remarkUiWords({ root: join(root, '..') }), remarkDirectiveAdmonition, remarkMdxMermaid, remarkAutoTypeTable, ...plugins, remarkSteps],
         rehypeCodeOptions: { themes: { light: 'github-light-default', dark: 'github-dark-default' } },
         // Pictures and videos live in public/media and are referenced by URL (Fumadocs' stock option), so the
         // Markdown that llms.txt, the .md pages and MCP serve keeps their real addresses.

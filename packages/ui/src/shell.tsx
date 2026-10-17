@@ -52,7 +52,7 @@ export function SiteShell({ locale, path = '', preferred, children }: { locale: 
             </NavigationMenuItem>;
           })}
           {app.docs && <>
-            <NavigationMenuItem><NavigationMenuLink render={<a href={`${app.docs}/docs`} />}>{m.nav_docs({}, o)}</NavigationMenuLink></NavigationMenuItem>
+            <NavigationMenuItem><NavigationMenuLink render={<a href={`${app.docs}/docs`} />}>{m.nav_guide({}, o)}</NavigationMenuLink></NavigationMenuItem>
             <NavigationMenuItem><NavigationMenuLink render={<a href={`${app.docs}/dev`} />}>{m.nav_developers({}, o)}</NavigationMenuLink></NavigationMenuItem>
           </>}
           {app.site?.links?.(path, locale)}

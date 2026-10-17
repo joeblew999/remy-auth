@@ -38,6 +38,8 @@ Keep the file working, exactly:
 - Code blocks and inline code: unchanged, except comments written in prose, which you translate.
 - Links: keep every URL and path as it is (relative links like \`./gui.md\` resolve to this language by
   themselves); translate the link text.
+- Keep every \`:ui[key]\` marker exactly as it is, key and brackets: it is the app's own word, which the docs fill in
+  from the app's catalog in this language. Never translate it or replace it with a word.
 - MDX: keep components, their names, props and structure; translate only text people read (children, and
   props such as \`title\` or \`description\`). Keep \`<include>\` lines as they are.
 - Tables, lists, callouts, images: the same structure; translate the words.

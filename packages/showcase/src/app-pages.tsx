@@ -31,7 +31,7 @@ export function AppHomePage({ locale, preferred, children }: { locale: Locale; p
   const o = { locale };
   return <AppShell locale={locale} path="/app" preferred={preferred}>
     <section className="flex flex-col gap-6">
-      <Intro locale={locale} back={false} title={m.app_home_title({}, o)} intro={m.app_home_intro({}, o)} />
+      <Intro locale={locale} back={false} title={m.nav_home({}, o)} intro={m.app_home_intro({}, o)} />
       <div className="flex flex-wrap gap-3">
         <Link className={buttonVariants({ size: 'lg' })} to="/app/demo" preload="intent">{m.demo_link({}, o)}</Link>
         <Link className={buttonVariants({ size: 'lg', variant: 'outline' })} to="/app/location" preload="intent">{m.nav_location({}, o)}</Link>

@@ -1,4 +1,5 @@
 import { docsConfig } from '@remy-docs-app/docs.config.ts';
+import { m } from '../../paraglide/messages.js';
 import usersI18n from '@remy-docs-app/content/users/i18n.json' with { type: 'json' };
 import devI18n from '@remy-docs-app/content/dev/i18n.json' with { type: 'json' };
 
@@ -17,9 +18,11 @@ const said = (english: string, lang = 'en') => Object.entries(catalogs).find(([p
  */
 const help = (who: 'docs' | 'dev', key: string) => docsConfig.aiHelp?.[who] ?? `/${key}/llms.txt`;
 export const sections = ([
-  { key: 'docs', title: 'Product guide', audience: 'For people using the app' },
-  { key: 'dev', title: 'Developer docs', audience: `For developers building ${docsConfig.product}` },
-  { key: 'reference', title: 'API reference', audience: 'For developers calling the API' },
+  // The guide's and the developers' names are the app's own (its catalog: the top bar says them), so the docs
+  // and the app never name a part two ways; the reference is the docs' alone.
+  { key: 'docs', title: m.nav_guide({}, { locale: 'en' }), name: (lang: string) => m.nav_guide({}, { locale: lang as 'en' }), audience: 'For people using the app' },
+  { key: 'dev', title: m.nav_developers({}, { locale: 'en' }), name: (lang: string) => m.nav_developers({}, { locale: lang as 'en' }), audience: `For developers building ${docsConfig.product}` },
+  { key: 'reference', title: 'API reference', name: (lang: string) => said('API reference', lang), audience: 'For developers calling the API' },
 ] as const).filter(section => section.key !== 'reference' || __REMY_DOCS_API__).map(section => ({
   ...section,
   aiPage: help(section.key === 'docs' ? 'docs' : 'dev', section.key),
@@ -33,7 +36,7 @@ export type Section = (typeof sections)[number];
 
 /** The top-bar tabs on a page in `lang`: each section's name and audience in that language, and its pages in that language (the reference has one). */
 export const sectionTabs = (lang = 'en') => sections.map(section => ({
-  title: said(section.title, lang),
+  title: section.name(lang),
   url: lang !== 'en' && section.key !== 'reference' ? `${section.base}/${lang}` : section.base,
   description: said(section.audience, lang),
 }));

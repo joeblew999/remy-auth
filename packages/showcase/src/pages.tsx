@@ -69,7 +69,7 @@ export function HomePage({ locale, preferred, cards, children }: { locale: Local
             <Link className={buttonVariants({ variant: 'outline' })} to="/formats" preload="intent">{m.home_formats_open({}, o)}</Link>
           </HomeCard>
           <HomeCard title={m.home_app_title({}, o)} description={m.app_home_description({ product }, o)}>
-            <Link className={buttonVariants({ variant: 'outline' })} to="/app" preload="intent">{m.home_app_open({}, o)}</Link>
+            <Link className={buttonVariants({ variant: 'outline' })} to="/app" preload="intent">{m.open_app({}, o)}</Link>
           </HomeCard>
           {cards}
         </div>
