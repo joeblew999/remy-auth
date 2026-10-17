@@ -20,7 +20,6 @@
     "packages": "node packages/ui/src/cli/remy.ts packages",
     "release-checks": "npm run template:check && npm run ui:verify",
     "dev": "node packages/ui/src/cli/remy.ts app dev",
-    "build": "node packages/ui/src/cli/remy.ts app build",
     "preview": "node packages/ui/src/cli/remy.ts app preview",
     "test": "node packages/ui/src/cli/remy.ts test",
     "ci": "node packages/ui/src/cli/remy.ts ci",
@@ -53,8 +52,7 @@
     "ui:theme": "shadcn apply nova --only theme --yes",
     "ui:verify": "npm run ui:theme && npm run ui:components && git diff --exit-code -- packages/ui/src/components packages/ui/src/styles src/lib",
     "ui:version": "node scripts/version.ts",
-    "template:check": "node scripts/template-check.ts",
-    "check": "node packages/ui/src/cli/remy.ts check"
+    "template:check": "node scripts/template-check.ts"
   },
   "dependencies": {
     "@joeblew999/remy-auth-contract": "*",
