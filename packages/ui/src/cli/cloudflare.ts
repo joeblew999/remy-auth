@@ -143,7 +143,7 @@ export async function deploy(environment?: 'staging'): Promise<void> {
   Object.assign(process.env, env);
   await provisioned(environment);
   prepare();
-  tool('vite', ['build'], { env: { ...env, PUBLIC_ORIGIN: origin } });
+  tool('vp', ['build', '.'], { env: { ...env, PUBLIC_ORIGIN: origin } });
   await provisioned(environment);
   const scratch = mkdtempSync(join(tmpdir(), 'remy-deploy-'));
   try {
@@ -160,7 +160,7 @@ export async function deployDocs(): Promise<void> {
   if (!existsSync('docs')) return;
   const docsOrigin = process.env.DOCS_ORIGIN;
   if (!docsOrigin) fail('deploy docs: origins.docs is not in remy.config.ts');
-  tool('vite', ['build'], { cwd: 'docs' });
+  tool('vp', ['build', '.'], { cwd: 'docs' });
   tool('wrangler', ['deploy', '-c', 'dist/server/wrangler.json'], { cwd: 'docs' });
   // Ask AI's pages, from the Worker just deployed: the bucket, the index's sync waited for, the fixed questions (docs.ts).
   await publish();
@@ -250,7 +250,7 @@ export async function preview(alias?: string, keep = false): Promise<string> {
   const remove = async () => { await previewDelete(name).catch(error => console.error(`preview: could not delete ${name}: ${error instanceof Error ? error.message : String(error)}`)); };
   try {
     prepare();
-    tool('vite', ['build'], { env: { PUBLIC_ORIGIN: origin } });
+    tool('vp', ['build', '.'], { env: { PUBLIC_ORIGIN: origin } });
     await provisioned();
     const scratch = mkdtempSync(join(tmpdir(), 'remy-preview-'));
     try {

@@ -22,10 +22,10 @@ const bin = (name: string) => join(process.cwd(), 'node_modules', '.bin', name);
  */
 export function prepare(): void { tool('npm', ['run', '--if-present', '--silent', 'local']); generate(); }
 
-export function dev(): void { prepare(); tool(bin('vite'), ['dev']); }
+export function dev(): void { prepare(); tool(bin('vp'), ['dev', '.']); }
 
 /** The production build, then Wrangler's deployment dry run; no upload. */
-export function build(): void { prepare(); tool(bin('vite'), ['build']); tool(bin('wrangler'), ['deploy', '--dry-run']); }
+export function build(): void { prepare(); tool(bin('vp'), ['build', '.']); tool(bin('wrangler'), ['deploy', '--dry-run']); }
 
 /** Build, then serve the production artifact on Cloudflare's local host at PREVIEW_PORT. */
 export function preview(): void { build(); tool(bin('wrangler'), ['dev', '--ip', '127.0.0.1', '--port', process.env.PREVIEW_PORT ?? '4173']); }

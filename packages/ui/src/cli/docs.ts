@@ -43,8 +43,8 @@ function tool(command: string, args: string[], options: { env?: Record<string, s
 const generated = (): string => { execFileSync(process.execPath, ['vite.config.ts'], { cwd: docs(), stdio: 'ignore' }); return '.remy-docs/wrangler.json'; };
 const previewName = () => `${(JSON.parse(readFileSync(join(docs(), '.remy-docs', 'wrangler.json'), 'utf8')) as { name: string }).name}-preview`;
 
-export const dev = (): void => tool(bin('vite'), ['dev']);
-export const build = (): void => tool(bin('vite'), ['build']);
+export const dev = (): void => tool(bin('vp'), ['dev', '.']);
+export const build = (): void => tool(bin('vp'), ['build', '.']);
 /** Build (which writes .remy-docs/), binding types, types. */
 /**
  * The built docs on local Workers, as their checks and AI tools see them (/dev/llms.txt, each page's .md), at

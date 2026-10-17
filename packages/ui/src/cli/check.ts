@@ -44,7 +44,7 @@ export function generate(): void {
 }
 
 /** src/routeTree.gen.ts, regenerated when a route file, the parts list or the Start instance (whose types it registers) changed (TanStack Start's plugin writes it during a build). */
-export const routes = (): void => whenChanged('routes', ['src/routes/**/*', 'src/parts.json', 'src/start.ts'], () => tool('vite', ['build']));
+export const routes = (): void => whenChanged('routes', ['src/routes/**/*', 'src/parts.json', 'src/start.ts'], () => tool('vp', ['build', '.']));
 
 /** Generate, Worker types, then the app's TypeScript (the command line's included: it is in the package's src). */
 export function types(): void {
@@ -60,7 +60,7 @@ export const unit = (): void => tool('playwright', ['test', '--project=unit', '-
 export function docs(): void {
   if (!existsSync('docs')) return;
   whenChanged('docs', ['docs/content/**/*', 'docs/*.ts', 'docs/*.json', 'packages/ui/src/docs/**/*.ts', 'packages/ui/src/docs/**/*.tsx', 'packages/ui/src/docs/**/*.js'], () => {
-    tool('vite', ['build'], { cwd: 'docs' });
+    tool('vp', ['build', '.'], { cwd: 'docs' });
     tool('wrangler', ['types', '-c', '.remy-docs/wrangler.json'], { cwd: 'docs' });
     tool('tsc', ['-p', '.'], { cwd: 'docs' });
   });
