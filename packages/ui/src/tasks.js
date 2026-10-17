@@ -126,12 +126,12 @@ function appTasks(root, { remy }) {
     // found one, 2026-10-17: a chunk no page loads).
     clean: { command: `node -e "require('node:fs').rmSync('dist', { recursive: true, force: true })"`, cache: false },
     // vp dev, vp build and vp preview are Vite Plus's own; these are the app's, with what they need first.
-    dev: { command: 'vp dev', dependsOn: prepared, cache: false },
+    dev: { command: 'vp dev .', dependsOn: prepared, cache: false },
     // The production build, then Wrangler's deployment dry run (no upload). Its stamp names the commit it was built
     // from (build-vite.js, through git, which Vite Plus does not see): git's record of the current commit is an input
     // too, so a new commit builds again.
     build: {
-      command: ['vp build', 'wrangler deploy --dry-run'],
+      command: ['vp build .', 'wrangler deploy --dry-run'],
       dependsOn: [...prepared, 'clean'],
       cache: {
         input: [
