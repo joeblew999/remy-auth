@@ -3,7 +3,7 @@ import { ended, span, type Landing } from './feedback.ts';
 import { existsSync, readFileSync, rmSync } from 'node:fs';
 import { lap, laps } from './timing.ts';
 import { preparedFile } from './prepare.ts';
-import { describeRun, latestRun, where } from './flow.ts';
+import { where } from './flow.ts';
 import { remyCommand } from './config.ts';
 import { deleteBranch, merge, openPull, pullFor, repo, waitForChecks } from './github.ts';
 
