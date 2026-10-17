@@ -87,6 +87,22 @@ export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
     `${JSON.stringify({ ...docsWorkerConfig(docsConfig, `../${srcDirectory}`), assets: { directory: '../dist/client' } }, null, 2)}\n`,
   );
   return defineConfig({
+    // The docs package's Vite Plus tasks. Its generated files (.remy-docs/, above) are written when this configuration
+    // is loaded, which every vp command does; generate adds the Worker's binding types. build is the production build,
+    // which proves every page compiles, translations included. What each writes is its output, never its input.
+    run: {
+      tasks: {
+        generate: {
+          command: 'wrangler types -c .remy-docs/wrangler.json',
+          cache: { input: [{ auto: true }, '!worker-configuration.d.ts'] },
+        },
+        build: {
+          command: 'vp build',
+          dependsOn: ['generate'],
+          cache: { input: [{ auto: true }, '!.remy-docs/**', '!dist/**', '!.wrangler/**'], output: ['dist/**'] },
+        },
+      },
+    },
     plugins: [
       // What this build is (`virtual:remy-build`): the docs Worker's /healthz answers with it, as an app's does.
       remyBuild({ root }),

@@ -99,11 +99,3 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy api` | spec [origin] [--urls]: the OpenAPI document a Worker generates from its contract |
 | `npx remy last` | [command]: the last run's record (when it started, its parts, its total), of a command or of whatever ran last |
 | `npx remy upgrade` | &lt;version&gt;: this app onto a release of the platform: the package, the workflow's tag, the skills, the rules, the guard, the installation's checks (vp run upgrade) |
-
-## The other scripts
-
-The repository's own tools, as package.json defines them, each run as `vp run <script>`.
-
-| Script | Runs |
-| --- | --- |
-| `vp run generate` | `node node_modules/@joeblew999/remy-ui/src/app-catalog.js` |

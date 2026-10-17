@@ -11,14 +11,7 @@
     "promote": "remy flow promote",
     "release": "remy flow release",
     "setup": "remy setup",
-    "upgrade": "remy upgrade",
-    "generate": "node node_modules/@joeblew999/remy-ui/src/app-catalog.js",
-    "dev": "vp run generate && vp dev",
-    "build": "vp run generate && vp build && wrangler deploy --dry-run",
-    "preview": "vp run build && wrangler dev --ip 127.0.0.1 --port ${PREVIEW_PORT:-4173}",
-    "check": "remy check",
-    "fix": "remy check commands && remy check endings",
-    "ci": "remy check && remy ci"
+    "upgrade": "remy upgrade"
   },
   "dependencies": {
     "@joeblew999/remy-ui": "0.15.1"

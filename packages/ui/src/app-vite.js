@@ -1,5 +1,7 @@
 // An app's Vite configuration (.plans/thin-apps.md, group 5): its vite.config.ts is
-// `export default remyApp()`, with its own extra plugins, TanStack Start options or port when it has any.
+// `export default remyApp()`, with its own extra plugins, TanStack Start options, port or tasks when it has any.
+// It is the app's whole Vite Plus configuration too: the shared tasks (tasks.js, `vp run <task>`) and one style
+// for the formatter and the linter.
 // TanStack Start on Cloudflare's Vite plugin, per Cloudflare's and Paraglide's guides: the Worker entry is
 // wrangler.jsonc's main (src/server.ts), and the Start plugin comes before React's. Start's defaults carry
 // two rows its checks prove: its router plugin splits each route's component into its own chunk (autoCodeSplitting;
@@ -18,12 +20,14 @@ import { resolve } from 'node:path';
 import { remyParts } from './parts/vite.js';
 import { remyBuild } from './build-vite.js';
 import { appCatalog } from './app-catalog.js';
+import { remyTasks, style } from './tasks.js';
 
 /**
  * The app's Vite configuration. `plugins`: the app's own, after TanStack Devtools (which must come first)
  * and before the shared ones; `start`: more TanStack Start options (e.g. `prerender`), merged over the
  * shared ones; `cloudflare`: more Cloudflare Vite plugin options; `port`: the dev server's; `build`:
- * the build stamp's options (`packages`: more packages whose versions it lists).
+ * the build stamp's options (`packages`: more packages whose versions it lists); `tasks`: the app's own Vite Plus
+ * tasks, added to the shared ones (one of the same name replaces it).
  */
 export function remyApp({
   plugins = [],
@@ -32,6 +36,7 @@ export function remyApp({
   port = 5173,
   root = process.cwd(),
   build = {},
+  tasks = {},
 } = {}) {
   // The shared package's parts the app lists in src/parts.json (.plans/parts.md): their routes and the
   // package's own (the CSP report endpoint) mount beside src/routes, and `virtual:remy-parts` says which.
@@ -40,6 +45,8 @@ export function remyApp({
   // runtime follows the platform's language (followLocale in the app's config).
   const catalog = existsSync(resolve(root, appCatalog.project)) ? [paraglideVitePlugin(appCatalog)] : [];
   return defineConfig({
+    ...style,
+    run: { tasks: remyTasks({ root, tasks }) },
     plugins: [
       // TanStack Devtools: first, as its docs require; strips the devtools from production builds.
       devtools(),
