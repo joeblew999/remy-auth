@@ -4,7 +4,7 @@
 // there is one list, and it is generated. `vp run fix` writes COMMANDS.md, and the check fails when it is stale.
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { tools } from './tools.ts';
+import { listed, tools } from './tools.ts';
 
 /** What a person runs, by its Vite Plus name: the lines are tasks.js's, beside the tasks and scripts they describe. */
 const frontDoor = async (): Promise<[string, string][]> =>
@@ -12,12 +12,12 @@ const frontDoor = async (): Promise<[string, string][]> =>
 
 /** `remy help`: every command, one line each; a command with subcommands names them. */
 export async function help(out: (line: string) => void): Promise<void> {
-  const width = Math.max(...Object.keys(tools).map((key) => key.length));
+  const width = Math.max(...listed().map((key) => key.length));
   out(
     "remy <command> [args]   (vp run lists this app's tasks and scripts; a command run without a subcommand says its own)",
   );
-  for (const [command, load] of Object.entries(tools)) {
-    const tool = await load();
+  for (const command of listed()) {
+    const tool = await tools[command]!();
     out(
       `  ${command.padEnd(width)}  ${tool.what}${tool.commands ? ` — ${Object.keys(tool.commands).join(' · ')}` : ''}`,
     );
@@ -61,8 +61,8 @@ export async function commandsMarkdown(dir = '.'): Promise<string> {
     '| Command | What it does |',
     '| --- | --- |',
   );
-  for (const [name, load] of Object.entries(tools)) {
-    const tool = await load();
+  for (const name of listed()) {
+    const tool = await tools[name]!();
     lines.push(`| \`npx remy ${name}\` | ${cell(tool.what)} |`);
     for (const [sub, { what }] of Object.entries(tool.commands ?? {}))
       lines.push(`| \`npx remy ${name} ${sub}\` | ${cell(what)} |`);

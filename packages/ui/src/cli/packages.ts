@@ -283,15 +283,24 @@ export async function tag(): Promise<void> {
   console.log(`packages: v${version} tagged and pushed; GitHub's release job publishes it.`);
 }
 
-/** What a release needs before its checks run (remy release check): translations complete, versions bumped. */
+/**
+ * What a release needs before its checks run (remy release check), the cheap things first so nothing long runs for a
+ * release that cannot happen: a package to release, its notes in CHANGELOG.md, a version not yet tagged, translations
+ * complete, every changed package bumped.
+ */
 export async function releaseReady(): Promise<void> {
+  if (!workspaces().published.length)
+    fail('release: this repository publishes no packages, so it has nothing to release.');
+  const { name, version } = lead();
+  notes(version);
+  if (quiet('git', ['rev-parse', '-q', '--verify', `refs/tags/v${version}`]))
+    fail(`release: v${version} is already tagged; bump ${name}'s version.`);
   if ((await translationGaps()).length)
     fail('release: translations are incomplete or stale (npx remy i18n check); land, which translates, first.');
   bumped();
 }
 
-export const what =
-  'a repository that publishes packages: updates, the pack, the notes, the publish, the tag, the release';
+export const what = 'a repository that publishes packages: updates, the pack, the notes, the publish, the tag';
 export const commands: Subcommands = {
   check: {
     what: "package updates available for the repository's own dependencies (npm-check-updates; never its own packages); nothing changed",

@@ -285,7 +285,7 @@ Google's level covers site pages only (app pages are noindex by design): Lightho
 (`npx remy test cwv`), not localhost.
 
 Limits: no organizations, OAuth tokens or cross-app sign-in yet, so only remy-auth's own pages know
-who is signed in ([the auth plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/auth-service.md)). The site is served from its workers.dev address (`DEPLOY_ORIGIN`); the production public origin and
+who is signed in ([the auth plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/auth-service.md)). The site is served from its workers.dev address (`origins.production` in remy.config.ts); the production public origin and
 Search Console are owner decisions ([now](https://github.com/joeblew999/remy-auth/blob/main/.plans/now.md)).
 
 Known tooling notices: Node may print the Chrome DevTools localStorage experimental

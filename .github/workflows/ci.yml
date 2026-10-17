@@ -14,8 +14,8 @@
 #       permissions: { contents: write, packages: write }
 #
 # Every step is a task the caller defines (its vite.config.ts, from the package), so the caller decides what runs.
-# The release job runs only for a tag and publishes only what is new (remy packages publish), so a release already
-# made locally with vp run release is left alone; a repository that publishes no packages never tags. vp install
+# The release job runs only for a tag and publishes what is new (vp run publish): vp run release checks and tags
+# locally, and this job is where the packages are published; a repository that publishes no packages never tags. vp install
 # reads @joeblew999/remy-ui from GitHub Packages with the run's token (the app's .npmrc), once the package grants the
 # repository read access ("Manage Actions access").
 # Named for what it runs (`vp run ci`); called google.yml until 2026-10-17.

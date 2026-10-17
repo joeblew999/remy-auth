@@ -28,4 +28,10 @@ export const tools: Record<string, () => Promise<Tool>> = {
   shots: () => import('./shots.ts'),
   api: () => import('./api.ts'),
   upgrade: () => import('./upgrade.ts'),
+  // The old hooks' commands, for one release (legacy.ts): never listed in help or COMMANDS.md.
+  'guard-hook': () => import('./legacy.ts').then((m) => ({ what: m.what, main: () => m.guardHook() })),
+  flow: () => import('./legacy.ts').then((m) => ({ what: m.what, main: (args: string[]) => m.flow(args) })),
 };
+
+/** The commands help and COMMANDS.md list: every command but the old hooks' stand-ins. */
+export const listed = (): string[] => Object.keys(tools).filter((name) => !['guard-hook', 'flow'].includes(name));

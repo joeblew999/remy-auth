@@ -5,6 +5,8 @@ set -euo pipefail
 root=$(pwd)
 out=$(mktemp -d); trap 'rm -rf "$out"' EXIT
 sha=$(git rev-parse --short HEAD)
+# This checkout's ports (a worktree's own, tasks.js's localPorts), so two worktrees' new apps never share one.
+read -r preview docs < <(node --input-type=module -e "import { localPorts } from './packages/ui/src/tasks.js'; const p = localPorts(process.cwd()); console.log(process.env.PREVIEW_PORT ?? p.preview, process.env.DOCS_PREVIEW_PORT ?? p.docsPreview)")
 # Each step says what it took, in the same words wherever `vp run ci` runs it (a Mac, a cloud agent, GitHub),
 # so where the time goes is read from the run itself, never remembered (owner, 2026-10-17).
 started=$(date +%s); mark=$started; took=""
@@ -64,9 +66,9 @@ step 'skills and tooling'
 vp run check
 step vp run check
 # The new app's browser checks in the quick languages, through its own vp run ci (this run is inside ci's new-app part).
-CHECK_LOCALES=quick PREVIEW_PORT=$((${PREVIEW_PORT:-4173} + 100)) vp run test:browser
+CHECK_LOCALES=quick PREVIEW_PORT=$((preview + 100)) vp run test:browser
 step 'browser checks'
-DOCS_PREVIEW_PORT=$((${DOCS_PREVIEW_PORT:-4174} + 100)) npx remy docs test
+DOCS_PREVIEW_PORT=$((docs + 100)) npx remy docs test
 step 'docs checks'
 summary="new-app: the blank app and a package it owns install, build and pass on this commit's platform ($version) in $(( $(date +%s) - started )) s: ${took#, }."
 echo "$summary"

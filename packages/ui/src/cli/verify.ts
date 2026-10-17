@@ -46,6 +46,16 @@ export function doctor(): void {
  */
 export async function tooling(): Promise<void> {
   const manifest = readJson('package.json');
+  // No script left from 0.15: one that shares a task's name stops vp run for both, and names a command this release
+  // has no more. An upgrade from 0.15 runs 0.15's own code, which never rewrote them; the second upgrade does.
+  const { taskNames } = await import('@joeblew999/remy-ui/workspace');
+  const shared = new Set(taskNames());
+  const old = Object.keys(manifest.scripts ?? {}).filter((name) => shared.has(name) || /^dev:[a-z]+$/.test(name));
+  assert.deepEqual(
+    old,
+    [],
+    `package.json has scripts from an older release (${old.join(', ')}): run npx remy upgrade <version> once more`,
+  );
   const lock = readJson('package-lock.json');
   for (const section of ['dependencies', 'devDependencies', 'optionalDependencies']) {
     assert.deepEqual(

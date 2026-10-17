@@ -27,9 +27,9 @@ export function main(args: string[]): void {
   const settings: Settings = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
   settings.hooks ??= {};
   const ours = (entry: Entry, pattern: RegExp) => entry.hooks.some((hook) => pattern.test(hook.command));
-  const guard = (settings.hooks.PreToolUse ?? []).filter((entry) => ours(entry, / guard-hook$/));
+  const guard = (settings.hooks.PreToolUse ?? []).filter((entry) => ours(entry, /(run dev:| )guard-hook$/));
   const session = (settings.hooks.SessionStart ??= []);
-  const existing = session.find((entry) => ours(entry, / (flow )?status$/));
+  const existing = session.find((entry) => ours(entry, /(run dev:status| (flow )?status| run vp run status)$/));
   const same = !guard.length && existing && JSON.stringify(existing) === JSON.stringify(start);
   if (check) {
     if (!same) {

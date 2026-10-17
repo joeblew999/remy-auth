@@ -198,9 +198,7 @@ export async function publish(): Promise<void> {
   const { bucket, instance } = docsConfig.ask;
   const origin = origins().docs;
   if (!origin)
-    fail(
-      'docs publish: DOCS_ORIGIN (origins.docs in remy.config.ts) is the live docs Worker whose .md pages it publishes',
-    );
+    fail('docs publish: origins.docs in remy.config.ts is the live docs Worker whose .md pages it publishes');
   const token = (JSON.parse(wrangler('auth', 'token', '--json')) as { token: string }).token;
   const account = (JSON.parse(wrangler('whoami', '--json')) as { accounts: { id: string }[] }).accounts[0]!.id;
   console.log(`Target: Cloudflare (remote), R2 bucket ${bucket} (PRODUCTION), then AI Search ${instance}`);

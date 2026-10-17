@@ -376,8 +376,9 @@ export const flowScripts = (remy = 'remy') => ({
   // A landing: the work on a branch with main in it, the translations it made stale, every check, then the commit, its
   // pull request merged when GitHub agrees, and staging. `vp run land "<what changed>"`: the words go to the last step.
   land: `${remy} land start && vp run translate && vp run ci && ${remy} land finish`,
-  // Production, on the owner's word: from a pushed main GitHub passed, the app then the docs, then what is live.
-  promote: `${remy} promote check && ${remy} cloudflare deploy && ${remy} cloudflare docs-deploy && ${remy} promote done`,
+  // Production, on the owner's word: from a pushed main GitHub passed, installed as its lockfile says, the app then the
+  // docs, then what is live.
+  promote: `${remy} promote check && vp install --frozen-lockfile && ${remy} cloudflare deploy && ${remy} cloudflare docs-deploy && ${remy} promote done`,
   // A release, on the owner's word: every check in every language, the repository's own release checks, the publish
   // rehearsed, Core Web Vitals on a throwaway Worker, then the tag, from which GitHub's release job publishes.
   release: `${remy} release check && CHECK_LOCALES=all vp run ci && vp run release-checks && vp run publish:rehearse && ${remy} test cwv && ${remy} packages tag`,

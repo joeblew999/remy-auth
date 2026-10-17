@@ -14,7 +14,7 @@ Day to day, two: `vp run check` after every edit, `vp run land "<what changed>"`
 | `vp run ci` | what GitHub runs, the same here: the check, the browser checks, Google's audits, a new app (each its own task, as GitHub's jobs: vp run test:browser --shard 1/3) |
 | `vp run status` | what is going on: main and GitHub's verdicts, pull requests, deployments, worktrees, translations (remy status) |
 | `vp run land "<what changed>"` | when the work is finished: a branch with main in it, the translations, every check, one commit through a pull request merged when GitHub agrees, then staging (remy land start → vp run translate → vp run ci → remy land finish) |
-| `vp run promote` | the owner's: production and the docs from a pushed main GitHub passed (remy promote check → remy cloudflare deploy → remy cloudflare docs-deploy → remy promote done) |
+| `vp run promote` | the owner's: production and the docs from a pushed main GitHub passed (remy promote check → vp install --frozen-lockfile → remy cloudflare deploy → remy cloudflare docs-deploy → remy promote done) |
 | `vp run release` | the owner's: every check in every language, the release checks, the publish rehearsed, Core Web Vitals, then the tag GitHub publishes from (remy release check → CHECK_LOCALES=all vp run ci → vp run release-checks → vp run publish:rehearse → remy test cwv → remy packages tag) |
 | `vp run setup` | an installation, then the check (remy setup check → remy setup install → remy skills install → remy rules → remy mcp register → remy hooks → remy verify → vp run check) |
 
@@ -70,7 +70,7 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy mcp verify` | the registration as it should be, written if not |
 | `npx remy mcp status` | what each client has registered |
 | `npx remy rules` | the platform's rules block in AGENTS.md, written or refreshed in place |
-| `npx remy packages` | a repository that publishes packages: updates, the pack, the notes, the publish, the tag, the release |
+| `npx remy packages` | a repository that publishes packages: updates, the pack, the notes, the publish, the tag |
 | `npx remy packages check` | package updates available for the repository's own dependencies (npm-check-updates; never its own packages); nothing changed |
 | `npx remy packages upgrade` | upgrade every package, major versions included, and install (vp run setup checks the installation) |
 | `npx remy packages pack` | pack each published workspace, as the publish would: a tarball a scratch app installs before any release |

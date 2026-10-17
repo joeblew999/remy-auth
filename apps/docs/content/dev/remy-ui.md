@@ -137,8 +137,9 @@ Chinese, Hindi, Amharic, Polish, Turkish and German) is agent-authored and unrev
 ## Publishing
 
 The package is `@joeblew999/remy-ui` on GitHub Packages (the scope must equal the
-GitHub owner there). `vp run release` does the whole release from this machine, stopping at the first
-failure; its gates, in order, are `remy packages release` on [Commands](./commands.mdx). Core Web Vitals are
+GitHub owner there). `vp run release` does the release's checks from this machine, stopping at the first
+failure, then tags it; its steps, in order, are on [Commands](./commands.mdx), and GitHub's release job publishes
+from the tag. Core Web Vitals are
 measured cold on a throwaway Cloudflare Worker: the first visits after a deploy, which is what a slow page costs
 most. CI (`.github/workflows/ci.yml`) repeats Google's audits on the tag.
 

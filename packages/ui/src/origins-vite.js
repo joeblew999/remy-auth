@@ -1,7 +1,8 @@
 // The app's origins, given to its build from the nearest remy.config.ts (origins.production, staging, docs) as
 // import.meta.env.VITE_DEPLOY_ORIGIN, VITE_STAGING_ORIGIN and VITE_DOCS_ORIGIN. The build reads the file itself, so
 // every way of building gets the same addresses (vp run build, vp build, Cloudflare's build) and Vite Plus counts
-// remy.config.ts among the build's inputs. One given in the environment wins, as Vite's own variables do.
+// remy.config.ts among the build's inputs. remy.config.ts wins over the shell: a value another project left there
+// steers nothing (the 0.15.1 rule, 2026-10-11).
 import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -20,8 +21,7 @@ export function remyOrigins({ root = process.cwd() } = {}) {
       const origins = (await import(pathToFileURL(file).href)).default?.origins ?? {};
       const define = {};
       for (const [key, name] of Object.entries(names))
-        if (origins[key] && process.env[name] === undefined)
-          define[`import.meta.env.${name}`] = JSON.stringify(origins[key]);
+        if (origins[key]) define[`import.meta.env.${name}`] = JSON.stringify(origins[key]);
       return { define };
     },
   };

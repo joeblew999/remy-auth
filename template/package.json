@@ -9,7 +9,7 @@
     "prepare": "vp config --no-agent",
     "status": "remy status",
     "land": "remy land start && vp run translate && vp run ci && remy land finish",
-    "promote": "remy promote check && remy cloudflare deploy && remy cloudflare docs-deploy && remy promote done",
+    "promote": "remy promote check && vp install --frozen-lockfile && remy cloudflare deploy && remy cloudflare docs-deploy && remy promote done",
     "release": "remy release check && CHECK_LOCALES=all vp run ci && vp run release-checks && vp run publish:rehearse && remy test cwv && remy packages tag",
     "setup": "remy setup check && remy setup install && remy skills install && remy rules && remy mcp register && remy hooks && remy verify && vp run check",
     "upgrade": "remy upgrade"
