@@ -59,8 +59,10 @@ export async function tooling(): Promise<void> {
 
   const { unstable_readConfig } = await import(pathToFileURL(createRequire(join(process.cwd(), 'package.json')).resolve('wrangler')).href) as typeof import('wrangler');
   const config = unstable_readConfig({ config: 'wrangler.jsonc' }) as Json;
-  // Every uploaded version and alias would be public, old ones without the app's later fixes.
-  assert.equal(config.preview_urls, false, 'wrangler.jsonc: preview_urls must be false');
+  // preview_urls makes every uploaded version and alias public, old ones without the app's later fixes. Only a
+  // Worker on Cloudflare's Worker Previews (a `previews` block, built by Workers Builds) turns it on, on purpose:
+  // that is what gives each branch and pull request its preview URL (owner, 2026-10-17).
+  if (config.previews === undefined) assert.equal(config.preview_urls, false, 'wrangler.jsonc: preview_urls must be false (true only with a previews block)');
   const observability = config.observability;
   assert.equal(observability?.enabled, true, 'Worker observability must be enabled');
   assert.equal(observability?.redact_query_string, true, 'Query-string redaction must be enabled');
