@@ -18,7 +18,7 @@ export default {
   run: {
     tasks: {
       build: {
-        command: 'node packages/ui/src/cli/remy.ts app build',
+        command: 'vp build .',
         cache: { input: [{ auto: true }, ...generated], output: ['dist/**'] },
       },
       browser: {
