@@ -62,7 +62,7 @@ prerendered example):
   every deploy run it, and fail with "No tests found" without it.
 - **`.plans/now.md`**, the one ordered list of open work (`remy plans check`, in the check).
 - **Installs and upgrades through the package's commands**, never by hand: `vp run setup` (install,
-  skills, MCP, the installation's checks) and `vp run upgrade -- <version>` (the exact package version
+  skills, MCP, the installation's checks) and `vp run upgrade <version>` (the exact package version
   and the CI workflow at the same tag, then the same checks). Both take GitHub Packages' token from
   `gh auth token`.
 

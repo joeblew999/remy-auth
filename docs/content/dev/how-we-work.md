@@ -218,7 +218,7 @@ tasks; `vp run setup` installs the guard.
 | --- | --- | --- | --- | --- |
 | Look | `vp run status` | everyone, first: every agent session opens with it (a hook), a developer when they sit down | main's last commits with GitHub's verdict, what each deployment runs, every worktree ahead and behind main, translations, pull requests, the top of `.plans/now.md` | seconds |
 | After every change | `vp run check` | whoever is coding; the only step waited for | Vite Plus's tasks (`vite.config.ts`): everything generated, the app and the docs built, the project's own checks (plans, single copies, the commands list, page endings, translation status, the plain-function checks in `tests/**/*.unit.spec.ts`), then `vp check` (format, lint, types); what has not changed comes from Vite Plus's cache | ~4 s unchanged, ~50 s from nothing |
-| The change leaves the machine | `vp run land -- "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | main merged in first (a conflict stops, naming the files), the translations it made stale (seconds), the check, every part of `vp run ci` the change can affect (as its pull request will run them), one commit, push the branch, open its pull request (or update the open one), wait for GitHub's checks (they confirm what passed here), squash-merge, deploy staging, reset this checkout to the new main; a red check leaves the pull request open and names the job. GitHub is reached only through `packages/ui/src/cli/github.ts`, its REST API. Never straight to main; from main it moves the work to a branch of its own first. After the merge main's own run checks everything, every part in every language | a few minutes: the parts here, then GitHub's checks |
+| The change leaves the machine | `vp run land "<what changed>"` | whoever did the work, on their own, as soon as it is finished and the check is green | main merged in first (a conflict stops, naming the files), the translations it made stale (seconds), the check, every part of `vp run ci` the change can affect (as its pull request will run them), one commit, push the branch, open its pull request (or update the open one), wait for GitHub's checks (they confirm what passed here), squash-merge, deploy staging, reset this checkout to the new main; a red check leaves the pull request open and names the job. GitHub is reached only through `packages/ui/src/cli/github.ts`, its REST API. Never straight to main; from main it moves the work to a branch of its own first. After the merge main's own run checks everything, every part in every language | a few minutes: the parts here, then GitHub's checks |
 | Production | `vp run promote` | the owner, or an agent the owner asked in that session | `remy cloudflare deploy` and the docs Worker, from a pushed main, no gate: staging and GitHub already ran the checks | ~1 min |
 | A release | `vp run release` | the owner, or an agent the owner asked in that session | `remy packages release`: every check, every language, locally, on purpose, then the tag | ~5 min |
 
@@ -275,7 +275,7 @@ tasks; `vp run setup` installs the guard.
 - **GitHub's answer comes to you.** A red run comments on the commit (GitHub tells its author), naming
   the run; `vp run check` starts by saying what the last run on main did; `vp run promote` refuses a commit
   whose run is not green or not finished. To reproduce a red job, a person runs
-  `vp run ci -- <part>`, the same command GitHub ran, since the workflow holds no
+  `vp run ci <part>`, the same command GitHub ran, since the workflow holds no
   logic of its own (`remy verify tooling` checks every script a workflow names exists). An agent reads the
   run's own log (`gh run view <id> --log-failed`) and runs the one area
   (`npx remy test only <words>`). Report what was tested and what was not; never call
@@ -332,7 +332,7 @@ and timing-sensitive checks failed well before that. So:
   4190, which browsers block); `PREVIEW_PORT=4232 vp run …` overrides them.
 - At most three agents run tests at the same time; research, writing and scratch spikes do not
   count. When more are needed, set `PLAYWRIGHT_WORKERS=2` for each.
-- Google's audits (`vp run ci -- audits`) and Core Web Vitals (`npx remy test cwv`) take a machine-wide lock, so a second
+- Google's audits (`vp run ci audits`) and Core Web Vitals (`npx remy test cwv`) take a machine-wide lock, so a second
   run waits rather than skewing the first.
 - Never chain a deploy after a check with `;`: the flow's steps run each in turn and stop at the first failure.
 

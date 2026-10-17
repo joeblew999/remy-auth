@@ -1,7 +1,7 @@
 # The heavy checks, on GitHub after every push to main, on every pull request and on every version tag, in parallel, while
 # the developer keeps coding; then the release for tags. Every job is one part of `vp run ci`, and the same
 # command runs the same parts anywhere: `vp run ci` locally (each part the change can affect, in turn) gives a pull
-# request's answer, and `vp run ci -- --everything` main's.
+# request's answer, and `vp run ci --everything` main's.
 # Every Remy repo runs this same workflow (.plans/thin-apps.md, group 6): remy-auth through the triggers
 # below, any other repo by calling it at the tag its package is on, which `remy upgrade` moves with it:
 #
@@ -49,15 +49,15 @@ jobs:
           - name: check
             task: check
           - name: browser 1/3
-            task: ci -- browser --shard 1/3
+            task: ci browser --shard 1/3
           - name: browser 2/3
-            task: ci -- browser --shard 2/3
+            task: ci browser --shard 2/3
           - name: browser 3/3
-            task: ci -- browser --shard 3/3
+            task: ci browser --shard 3/3
           - name: audits
-            task: ci -- audits
+            task: ci audits
           - name: new-app
-            task: ci -- new-app
+            task: ci new-app
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     permissions:
@@ -136,4 +136,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ github.ref_name }}
-        run: npx vp run publish -- --release "$TAG"
+        run: npx vp run publish --release "$TAG"

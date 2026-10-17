@@ -1,4 +1,4 @@
-// Written by `vp run docs:cli -- feature webmcp`. Adapted: one per docs site (its search API and its
+// Written by `vp run docs:cli feature webmcp`. Adapted: one per docs site (its search API and its
 // language are props), and page URLs map to Markdown as the site serves it (/docs/es/formats.md).
 import { useEffect } from 'react';
 import { useRouter } from 'fumadocs-core/framework';

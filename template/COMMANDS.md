@@ -2,7 +2,7 @@ _Generated from the command line itself (`npx remy help --write`; `vp run fix` w
 
 ## What you run
 
-Day to day, two: `vp run check` after every edit, `vp run land -- "<what changed>"` when the work is finished. `vp run promote` and `vp run release` are the owner's. `vp dev`, `vp build`, `vp preview` and `vp check` are Vite Plus's own tools, without the app's preparation; `vp run --last-details` says what the last run did.
+Day to day, two: `vp run check` after every edit, `vp run land "<what changed>"` when the work is finished. `vp run promote` and `vp run release` are the owner's. `vp dev`, `vp build`, `vp preview` and `vp check` are Vite Plus's own tools, without the app's preparation; `vp run --last-details` says what the last run did.
 
 | Command | What it does |
 | --- | --- |
@@ -11,9 +11,9 @@ Day to day, two: `vp run check` after every edit, `vp run land -- "<what changed
 | `vp run preview` | the production build on Cloudflare's local host, at PREVIEW_PORT (4173 by default) |
 | `vp run check` | after every change: everything generated, both builds, the project's own checks, then vp check (format, lint, types) |
 | `vp run fix` | what the check only verifies, written: COMMANDS.md and each docs page's ending |
-| `vp run ci` | what GitHub runs, the same here: the check, then the browser checks, Google's audits and a new app (`vp run ci -- browser --shard 1/3` runs one part) |
+| `vp run ci` | what GitHub runs, the same here: the check, then the browser checks, Google's audits and a new app (`vp run ci browser --shard 1/3` runs one part) |
 | `vp run status` | what is going on: main with GitHub's verdicts, the open pull requests, the deployments, the worktrees, the translations, the top of now.md |
-| `vp run land -- "<what changed>"` | the check and the browser checks here, then a pull request, merged when GitHub agrees, and staging |
+| `vp run land "<what changed>"` | the check and the browser checks here, then a pull request, merged when GitHub agrees, and staging |
 | `vp run promote` | production from a pushed main |
 | `vp run release` | every check, every language, then the tag |
 | `vp run setup` | npm ci, the pinned skills, the agents' rules, MCP registration, the guard, the pre-push hook (vp run ci), then the installation's checks (remy verify setup); preconditions: those alone |

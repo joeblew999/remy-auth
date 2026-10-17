@@ -1,6 +1,6 @@
 // `remy ci` (vp run ci): what GitHub runs, by the same command on a developer's Mac, in a cloud agent's
 // container and on GitHub (owner, 2026-10-17: "the whole point is that we can run it locally and there").
-// Each GitHub job is `vp run ci -- <part>` and nothing else, so the workflow cannot drift from what a
+// Each GitHub job is `vp run ci <part>` and nothing else, so the workflow cannot drift from what a
 // person or an agent runs. Locally, `vp run ci` runs every part in turn and ends with what each took.
 //
 // It owns its preconditions instead of leaving them to the machine: Playwright's pinned Chromium (the
@@ -25,16 +25,16 @@ const parts: Part[] = ['browser', 'audits', 'new-app'];
  * decides, and each part says when it skips). Until 2026-10-17 the audits and the new app ran only after merge, a
  * second tier the change rules made needless (owner: "because we have changes now, maybe you don't need different
  * levels of CI"); now a change to the package meets the new app before it merges. Main runs everything, nothing
- * skipped, as the safety net `vp run promote` waits for; `vp run ci -- --everything` runs that here.
+ * skipped, as the safety net `vp run promote` waits for; `vp run ci --everything` runs that here.
  */
 /** GitHub splits the browser part across this many jobs. */
 export const shards = 3;
 /** The jobs GitHub's workflow must run, one `vp run <task>` each (tests/unit/ci.unit.spec.ts holds the workflow to it). */
 export const jobTasks = (): string[] => [
   'check',
-  ...Array.from({ length: shards }, (_, i) => `ci -- browser --shard ${i + 1}/${shards}`),
-  'ci -- audits',
-  'ci -- new-app',
+  ...Array.from({ length: shards }, (_, i) => `ci browser --shard ${i + 1}/${shards}`),
+  'ci audits',
+  'ci new-app',
 ];
 const browserParts: Part[] = ['browser', 'audits', 'new-app'];
 
@@ -148,7 +148,7 @@ export async function ci(args: string[]): Promise<void> {
     } else if (args[i] === '--everything') everything = true;
     else if (args[i] === '--full' || args[i] === '--all')
       fail(
-        `${args[i]} is gone: vp run ci runs what this change can affect; vp run ci -- --everything runs all of it, as main does.`,
+        `${args[i]} is gone: vp run ci runs what this change can affect; vp run ci --everything runs all of it, as main does.`,
       );
     else if (args[i] === '--shard') shardOf = args[++i] ?? '';
     else asked.push(args[i]!);
@@ -157,7 +157,7 @@ export async function ci(args: string[]): Promise<void> {
   const chosen = (asked.length ? asked : parts) as Part[];
   for (const part of chosen) if (!parts.includes(part)) fail(`unknown part ${part}: ${parts.join(', ')}`);
   if (shardOf && (chosen.length !== 1 || chosen[0] !== 'browser'))
-    fail('--shard splits the browser part only: vp run ci -- browser --shard 1/3');
+    fail('--shard splits the browser part only: vp run ci browser --shard 1/3');
 
   // Run as on GitHub: tools that read CI behave alike (Playwright, for one, uses every core under it).
   process.env.CI = process.env.CI ?? '1';
@@ -176,7 +176,7 @@ export async function ci(args: string[]): Promise<void> {
   }
   if (!onGitHub && !asked.length && !everything)
     console.log(
-      'ci: what a pull request runs: every part this change can affect. Main runs all of it: vp run ci -- --everything.',
+      'ci: what a pull request runs: every part this change can affect. Main runs all of it: vp run ci --everything.',
     );
 }
 

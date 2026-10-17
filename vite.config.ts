@@ -58,14 +58,14 @@ export default {
         cache: false,
       },
       // What GitHub runs, the same here: the check, then the browser checks, Google's audits and the new app
-      // (`vp run ci -- browser --shard 1/3` runs one part, as one GitHub job does).
+      // (`vp run ci browser --shard 1/3` runs one part, as one GitHub job does).
       ci: {
         command: 'node packages/ui/src/cli/remy.ts ci',
         dependsOn: ['check'],
         cache: false,
       },
       // The release's publish (GitHub's release job, for a version tag): each package whose version is new on its
-      // registry, then the GitHub release (`vp run publish -- --release vX.Y.Z`).
+      // registry, then the GitHub release (`vp run publish --release vX.Y.Z`).
       publish: { command: 'node packages/ui/src/cli/remy.ts packages publish', cache: false },
       // What the check only verifies, written: the commands list (COMMANDS.md, here and the blank app's) and each
       // docs page's ending (.md, or .mdx when it uses a component).

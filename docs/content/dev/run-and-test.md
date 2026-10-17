@@ -258,7 +258,7 @@ the browser checks themselves, the lockfile and the Node version. When nothing c
 only and says so: on 2026-10-17 that was 37 of the 49 recent commits on `main` that needed the browser part, and a run in
 1 min 39 s instead of 2 min 49 s. The tooling and the unit checks never count. Every language still runs on every
 push to `main`, which `vp run promote` waits for, so a page that breaks in one language alone is caught there at the
-latest. `vp run ci` locally decides exactly as a pull request does (`vp run ci -- --everything` runs all of it, as main does; `CHECK_LOCALES` set
+latest. `vp run ci` locally decides exactly as a pull request does (`vp run ci --everything` runs all of it, as main does; `CHECK_LOCALES` set
 by hand wins). What the checks cover is the checks themselves: `tests/` and the package's
 `@joeblew999/remy-ui/checks` (each check's title says what it proves); the flow's steps that run them are in
 [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). In short: every page in every

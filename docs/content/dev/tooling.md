@@ -59,10 +59,10 @@ Better Auth runs in remy-auth's own Worker on a D1 database (`DB` in `wrangler.j
 options in `src/auth/options.ts`. Its scripts are remy-auth's own, in `package.json`:
 
 ```sh
-vp run auth:generate -- <name>        # LOCAL: what the options need beyond migrations/, as the next numbered migration
+vp run auth:generate <name>        # LOCAL: what the options need beyond migrations/, as the next numbered migration
 vp run local                   # LOCAL: apply migrations/ and migrations-demo/ to Wrangler's local D1 databases
 vp run local                          # LOCAL: .dev.vars when missing, the migrations, the guard's fixture (dev, build and start run it)
-vp run auth:mail -- you@example.com   # LOCAL: the sign-in codes captured for an address, from the running Worker
+vp run auth:mail you@example.com   # LOCAL: the sign-in codes captured for an address, from the running Worker
 vp run auth:provision                 # Prints what the deployed sign-in needs on Cloudflare; creates nothing
 ```
 
@@ -125,7 +125,7 @@ purpose, it is `REMY_FLOW=hand npx remy verify`. The installation's checks are t
 lockfile, MCP registration, the flow's guard, the CLI versions, the tooling invariants (`npx remy verify tooling`), then the check. They use the existing local installation and
 do not provision Cloudflare resources. The gate then runs every browser check of ours in every
 language (`vp run ci`'s `browser` part) against the production artifact in local Workers, then the new-app
-test. Google's audits are not in it: `vp run ci -- audits` and `npx remy test cwv`, which the release runs
+test. Google's audits are not in it: `vp run ci audits` and `npx remy test cwv`, which the release runs
 after it. No deployment is performed. See [the GUI proof](./run-and-test.md) for scope and commands.
 
 

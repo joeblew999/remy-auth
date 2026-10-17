@@ -1,4 +1,4 @@
-// vp run auth:generate -- <name>: what the Better Auth options need beyond migrations/, as the next
+// vp run auth:generate <name>: what the Better Auth options need beyond migrations/, as the next
 // numbered migration. The pinned CLI compares the options (src/auth/cli.ts) with a throwaway SQLite
 // database built from migrations/, so it writes only what is not there yet; change the options, then
 // generate, never edit Better Auth's tables by hand.
@@ -9,7 +9,7 @@ import { join } from 'node:path';
 
 const name = process.argv[2];
 if (!name) {
-  console.error('vp run auth:generate -- <name>: a name for the migration, e.g. organization');
+  console.error('vp run auth:generate <name>: a name for the migration, e.g. organization');
   process.exit(2);
 }
 const sql = join(mkdtempSync(join(tmpdir(), 'auth-generate-')), 'schema.sql');

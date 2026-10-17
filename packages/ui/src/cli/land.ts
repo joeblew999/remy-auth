@@ -18,7 +18,7 @@ export async function main(args: string[]): Promise<void> {
   // main and pushed it, and translated on main after that as a second push.)
   const message = args.join(' ').trim();
   if (!message) {
-    console.error('land: say what changed: vp run land -- "<message>"');
+    console.error('land: say what changed: vp run land "<message>"');
     process.exit(1);
   }
   // The first line titles the commit and the pull request; the rest, if any, is their body.
@@ -128,7 +128,7 @@ export async function main(args: string[]): Promise<void> {
     );
   if (verdict.state === 'red')
     fail(
-      `GitHub's checks failed on ${pull.html_url}: ${verdict.failed.map((run) => `${run.name} (${run.html_url})`).join(', ')}. Each job is one \`vp run ci -- <part>\`, which reproduces it here. The pull request stays open; fix, then land again.`,
+      `GitHub's checks failed on ${pull.html_url}: ${verdict.failed.map((run) => `${run.name} (${run.html_url})`).join(', ')}. Each job is one \`vp run ci <part>\`, which reproduces it here. The pull request stays open; fix, then land again.`,
     );
   const merged = merge(slug, pull.number, `${title} (#${pull.number})`, body);
   if ('refused' in merged)

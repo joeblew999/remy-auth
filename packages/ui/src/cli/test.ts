@@ -116,7 +116,7 @@ async function withSpeedLock<T>(work: () => T): Promise<T> {
 }
 
 /** The browser checks (ci's browser part), on the production artifact in local Workers: in every language, or in English and Arabic when the change cannot differ by language. */
-/** REMY_SHARD=<i>/<n> runs one part of the checks (GitHub splits the browser part across jobs; `vp run ci -- browser --shard 1/3`). */
+/** REMY_SHARD=<i>/<n> runs one part of the checks (GitHub splits the browser part across jobs; `vp run ci browser --shard 1/3`). */
 const shard = () => (process.env.REMY_SHARD ? [`--shard=${process.env.REMY_SHARD}`] : []);
 export function every(): void {
   gate('test:browser');

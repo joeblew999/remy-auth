@@ -81,7 +81,7 @@ export function whenChanged(name: string, patterns: string[], step: () => void):
 
 // --- Which of vp run ci's parts a branch's changes can affect -----------------------------------------
 // (owner, 2026-10-17: a pull request that changed one Markdown file still ran three five-minute jobs).
-// The workflow runs `vp run ci -- <part>` as always; a part nothing it checks touched says so and
+// The workflow runs `vp run ci <part>` as always; a part nothing it checks touched says so and
 // passes, so every job still reports. Pushes to main and tags run everything; ci decides when to compare.
 
 export type Part = 'browser' | 'audits' | 'new-app';
@@ -196,7 +196,7 @@ export function allLanguages(): boolean {
     return true;
   }
   console.log(
-    'browser: the quick languages only (the base language and the first right-to-left one: English and Arabic here): nothing that changed can differ by language. Every language runs on main; vp run ci -- --everything runs them here.',
+    'browser: the quick languages only (the base language and the first right-to-left one: English and Arabic here): nothing that changed can differ by language. Every language runs on main; vp run ci --everything runs them here.',
   );
   return false;
 }

@@ -36,7 +36,7 @@ read those, not the translations beside them (`*.es.md`).
 Start with `vp run status` (what is going on) and
 [the project's own tools](./how-we-work.md#use-the-projects-own-tools-first), and finish through
 [the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest): `vp run check`
-after every change, `vp run land -- "<what changed>"` when the work is finished and the check is
+after every change, `vp run land "<what changed>"` when the work is finished and the check is
 green.
 
 ## Working from Claude's cloud

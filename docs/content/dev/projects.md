@@ -41,7 +41,7 @@ anywhere else is simply not found; no checker of its own keeps it.
 | `messages/`, `project.inlang/` | the app preset, the app's `generate` script, `remy i18n` | the app's own strings, if any (compiled into `src/paraglide/`) |
 | `.plans/` (`now.md`, `done/`, `parked/`) | `remy plans` | the repo's plans |
 | `AGENTS.md`, `.github/workflows/` | agents; GitHub | the agents' pointer at the docs; CI |
-| `packages/ui/src/cli/`, `template/`, `fixtures/consumer/` | the package; `giget`; `vp run ci -- new-app` | remy-auth only: the command line itself, the blank app a new repo starts from, and the consumer fixture that tests both as another repo gets them |
+| `packages/ui/src/cli/`, `template/`, `fixtures/consumer/` | the package; `giget`; `vp run ci new-app` | remy-auth only: the command line itself, the blank app a new repo starts from, and the consumer fixture that tests both as another repo gets them |
 
 ### A new consumer
 
@@ -77,7 +77,7 @@ Then the app grows in its own files: pages in `src/routes/` (a page beside a par
 `videos`, which then needs an `<Outlet />`), their links in `src/remy-app.tsx`, strings in `messages/en.json`
 (`m` from `src/paraglide/messages.js`), an API as a contract package and `src/api/` (every procedure that
 takes input documents an error, or `apiChecks` fails: the package's `api/coverage` rule), docs in
-`docs/content/`. Move to a new release with `vp run upgrade -- <version>` (the package and the CI
+`docs/content/`. Move to a new release with `vp run upgrade <version>` (the package and the CI
 workflow's tag together). Two local browser runs at once share `PREVIEW_PORT` and the second fails to
 start its server: give each shell its own (`PREVIEW_PORT=4232 vp run …`).
 
@@ -93,14 +93,14 @@ anything else is refused at build time and in Playwright, whose message names th
 export map. A package's own strings are its own inlang project, compiled by its build, whose runtime
 follows the platform's language with one call, `followLocale(runtime)` (`locale`); the i18n tasks read it
 through `I18N_INLANG`. Checks the repository adds to a release go in its `release-checks` script (remy-auth:
-`template:check`, `ui:verify`). remy-auth sets a release's version with `vp run ui:version -- X.Y.Z`, which
+`template:check`, `ui:verify`). remy-auth sets a release's version with `vp run ui:version X.Y.Z`, which
 writes it everywhere it appears (the package and the blank app's pins).
 
 ### Choosing the version: released, development or local
 
 The tooling and the package are one thing: remy-auth's `vp run release` publishes `@joeblew999/remy-ui`
 X.Y.Z, bin included, and tags the same commit `vX.Y.Z`. A consumer pins that one number in its
-`package.json` (and its CI workflow's tag), and `vp run upgrade -- X.Y.Z` moves both. To work against
+`package.json` (and its CI workflow's tag), and `vp run upgrade X.Y.Z` moves both. To work against
 remy-auth's own checkout, `npm link ../remy-auth/packages/ui` (and `npm unlink` back).
 
 The platform supplies every npm package the app and the tasks need, at one version: they are
@@ -122,7 +122,7 @@ The development flow is code, `packages/ui/src/cli/flow.ts`, with four steps and
 template's `.npmrc`) and runs install, skills (installed once per pinned list, then reused), the tooling invariants, the check, the quick browser checks, the docs and a dry-run publish (~1.5 to 3 min, mostly the network).
 A change that would break another repository fails there, not in that repository. Tests are type-checked with
 the app (`tsconfig.json` includes `tests/`). Google's audits are
-`vp run ci -- audits` (Lighthouse, local; CI whenever a change can affect it, and on every push to main and every tag) and Core Web Vitals is
+`vp run ci audits` (Lighthouse, local; CI whenever a change can affect it, and on every push to main and every tag) and Core Web Vitals is
 `npx remy test cwv` (on a throwaway Cloudflare Worker); the release runs both.
 
 Where checks run: the shared package's own behaviour is proven once, in remy-auth, before each
