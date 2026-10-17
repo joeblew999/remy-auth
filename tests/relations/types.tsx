@@ -5,7 +5,7 @@ import type { RelationEngine } from '@joeblew999/remy-ui/api/relations';
 
 // Types only, never run: an app's vocabulary types its action names all the way through, from the
 // contract's policy to the engine's answers to the page. Each line below marked as an expected error
-// is a name the vocabulary does not define; project:typecheck fails the day one of them slips through.
+// is a name the vocabulary does not define; the check's types part fails the day one of them slips through.
 declare const engine: RelationEngine<typeof notesVocabulary>;
 declare const note: Note;
 

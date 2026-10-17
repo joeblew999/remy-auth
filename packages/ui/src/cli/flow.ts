@@ -4,7 +4,7 @@
 // the one place the flow's decisions live: which checks run at which step, what runs locally and what
 // runs on GitHub, what a step needs before it may run. The scripts in package.json (npm run
 // dev:<step>, remy <step>) are its commands; the agent hook (guard-hook.ts) refuses what is not one
-// of them. TypeScript, type-checked by project:check, so a wrong step fails before it runs.
+// of them. TypeScript, type-checked by the check (`npm run dev:change`), so a wrong step fails before it runs.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { dispatch, type Subcommands } from './commands.ts';
@@ -52,18 +52,15 @@ export const main = dispatch('flow', commands);
 /**
  * The heavy commands no step runs by default, and why: GitHub runs them after every push (the suite,
  * Google's audits, the consumers), the release runs them (the gate), or they cost minutes for an
- * answer the check already gave (quick, remote, a bare playwright run). The gate (allowed.ts) knows
+ * answer the check already gave (remote, a bare playwright run). The gate (allowed.ts) knows
  * them by these names; the hook refuses each outside its step and names the step instead. Running one by hand stays possible: REMY_FLOW=hand in front, at a terminal, is a decision.
  */
 export const heavy: Record<string, string> = {
-  'project:verify': 'the release gate: dev:release runs it; GitHub runs its parts after every push',
-  'project:test': 'the browser checks: npm run ci runs them, and dev:land and GitHub with it',
-  'project:test:quick': 'every browser check: on purpose only; dev:change is the check',
-  'project:test:remote': 'the suite against a deployment: GitHub runs the suite; cf:deploy runs the live smoke',
-  'project:test:google': "Google's audits: GitHub runs them after every push",
-  'project:test:cwv': 'Core Web Vitals on a preview: on purpose only, before a release',
-  'project:test:consumers': 'the consumer fixture: GitHub runs it after every push',
-  'template:test': 'the consumer fixture: GitHub runs it after every push',
+  'verify': 'the release gate: dev:release runs it; GitHub runs its parts on every pull request',
+  'test:browser': 'the browser checks: npm run ci runs them, and dev:land and GitHub with it',
+  'test:remote': 'the suite against a deployment: GitHub runs the suite; every deploy ends with the live smoke',
+  'test:audits': "Google's audits: npm run ci runs them, and dev:land and GitHub with it",
+  'test:cwv': 'Core Web Vitals on a preview: on purpose only, before a release',
   'playwright test': 'the browser suite by hand: dev:change runs the check; npm run test -- only <words> runs one area',
   'i18n:translate': 'translation: dev:land runs it in the change, before its commit',
   'i18n translate': 'translation: dev:land runs it in the change, before its commit',

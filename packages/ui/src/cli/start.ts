@@ -8,7 +8,7 @@ export function main(args: string[]): void {
 
 // STEP 0 of the flow, for one agent or developer among many: a place of their own to work in, ready.
 // A worktree on a branch of its own from main, installed (npm, the app's local state through
-// project:prepare), with ports of its own and the flow's guard, so two people or twenty agents never
+// the app's local script), with ports of its own and the flow's guard, so two people or twenty agents never
 // build, serve or test in one checkout. Idempotent: a worktree that exists (Claude Code makes its own
 // at the same place, .claude/worktrees/<name>, and only the folder) is prepared, not refused; from
 // inside a worktree, no name means this one. Everything done by hand before is here, once.

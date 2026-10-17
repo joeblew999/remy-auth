@@ -128,7 +128,7 @@ export async function verifySetup(): Promise<void> {
 
 /** The release's gate: the installation's checks, every browser check in every language, the other repositories this one serves. */
 export async function verify(): Promise<void> {
-  gate('project:verify');
+  gate('verify');
   await verifySetup();
   process.env.REMY_FLOW ??= 'release';
   every();

@@ -1,7 +1,7 @@
 ---
 title: "Arquitectura y principios de desarrollo"
 description: "Lo que el código debe ser: propiedad, una única fuente de verdad, gates de pruebas, código generado y decisiones del dueño."
-translatedFrom: "052958b0 dff03b43 b2dee8c7"
+translatedFrom: "052958b0 d509de88 b2dee8c7"
 ---
 
 Este documento es el dueño de lo que el código debe ser. Cómo trabajan las personas y los agentes día a día vive en

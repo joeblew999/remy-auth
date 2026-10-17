@@ -1,7 +1,7 @@
 ---
 title: "Inicio de sesión y permisos"
 description: "Cómo una app de Remy obtiene el inicio de sesión, los roles y los permisos basados en relaciones de remy-auth y su paquete: el guard, el motor de relaciones, el componente Allowed, los entornos, el correo y las comprobaciones que aporta cada uno."
-translatedFrom: "e4a4893b 11a05eab 84a55aae 3c366d63 a23b4622 1f3c842d 321b0ff7 04dc5b91 6a98127e b5e68f6c f2b3d098"
+translatedFrom: "e4a4893b 11a05eab 8793c16f 3c366d63 a23b4622 1f3c842d 321b0ff7 04dc5b91 a75b5026 b5e68f6c f2b3d098"
 ---
 
 remy-auth existe para que Better Auth funcione bien con TanStack y oRPC en cada app de Remy: una app
@@ -36,10 +36,10 @@ build por ello.
 ```ts
 // El contrato: quién puede llamar a cada procedimiento.
 import { actions, personal, policy } from '@joeblew999/remy-ui/api/policy';
-const may = actions(vocabulary);                       // solo las acciones propias del vocabulario pasan la verificación de tipos
-oc.meta(policy('public'))                              // cualquiera; la respuesta puede no nombrar a ninguna persona
-oc.meta(policy('session')).meta(personal('the caller\'s own account'))   // cualquier persona que haya iniciado sesión, sus propios datos
-oc.meta(may('EDIT_NOTE'))                              // quien tenga una relación a la que la acción está concedida
+const may = actions(vocabulary);                       // only the vocabulary's own actions type-check
+oc.meta(policy('public'))                              // anyone; the answer may name no person
+oc.meta(policy('session')).meta(personal('the caller\'s own account'))   // any signed-in person, their own data
+oc.meta(may('EDIT_NOTE'))                              // whoever holds a relation the action is granted to
 
 // El router: el guard en la raíz, de modo que envuelve la validación y rechaza primero a un desconocido.
 import { guard, signedIn, type GuardContext } from '@joeblew999/remy-ui/api/guard';
@@ -47,10 +47,10 @@ const api = implement(contract).$context<Context & GuardContext<User>>().use(gua
 ```
 
 El contexto de cada llamada le da al guard `getSession` (la sesión del llamador o null, consultada
-solo cuando una política la necesita, tal como comparte la guía de Better Auth de oRPC) y, cuando las
-políticas nombran acciones, `relations` (el motor de relaciones de la app). Una app que no hace
-iniciar sesión a nadie pasa `noSession`. Para una acción, el guard responde 401 sin sesión, 404 para
-algo que no existe antes de decirle a nadie 403, y luego consulta al motor.
+solo cuando una política la necesita, tal como la comparte la guía de Better Auth de oRPC) y, cuando
+las políticas nombran acciones, `relations` (el motor de relaciones de la app). Una app que no hace
+iniciar sesión a nadie pasa `noSession`. Para una acción, el guard responde 401 sin sesión y 404 si
+la cosa no existe, antes de decirle 403 a nadie; después consulta al motor.
 
 ## Quién puede hacer qué: relaciones [#who-may-do-what-relations]
 
@@ -152,7 +152,7 @@ captura el correo. Un correo siempre tiene una parte en texto plano; un envío r
 quién era y por qué. Un mensaje a una dirección a la que ningún correo puede llegar (`unreachable`:
 `.test`, `.example`, `example.com` y similares, que es lo que es la dirección de una persona
 sembrada) nunca se envía: solo podría rebotar. El correo del código de inicio de sesión se escribe en
-el idioma del lector y en [el nombre del producto](./run-and-test.md#the-products-name), con el código y sin
+el idioma del lector y con [el nombre del producto](./run-and-test.md#the-products-name), con el código y sin
 enlace.
 
 ## Qué comprueba cada pieza [#what-each-piece-is-checked-by]

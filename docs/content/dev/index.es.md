@@ -1,7 +1,7 @@
 ---
 title: "Desarrolladores: empieza aquí"
 description: "Para desarrolladores que construyen Remy o una app sobre él: autenticación compartida para las apps de Remy, Better Auth en Cloudflare Workers, el paquete compartido remy-ui y por dónde empezar."
-translatedFrom: "15c7d6a6 48bae343 6dd49ee8 88eb7fe7 bb481083 c1c9c2c9"
+translatedFrom: "15c7d6a6 48bae343 d60c8461 88eb7fe7 c3e96873 c0d418f2"
 ---
 
 **Para desarrolladores** que construyen Remy, o una app sobre su paquete de UI compartido. ¿Usas la app? Lee la
@@ -52,7 +52,6 @@ npm run dev          # http://127.0.0.1:5173/en
 ```
 
 Abre [localhost:5173/en](http://127.0.0.1:5173/en); cambia a español o prueba la demo.
-La configuración instala las dependencias y las skills, registra MCP, y luego ejecuta las comprobaciones de la instalación (sin navegador).
 
 La configuración instala la **Codex CLI** fijada en su versión; autentícate cuando se te solicite. **Claude Code**
 es opcional y se instala aparte.
@@ -65,29 +64,8 @@ Cómo iniciar, reanudar y recargar Codex o Claude Code, en VS Code o en una term
 
 ## Comandos cotidianos [#everyday-commands]
 
-Los comandos cotidianos, iguales en todas las apps de la plataforma (los scripts de `package.json`,
-ejecutados por el bin `remy` del paquete):
-
-| Tarea | Comando |
-| --- | --- |
-| Ver qué está pasando | `npm run dev:status` |
-| Empezar una tarea, en un worktree propio | `npm run dev:start -- <name>` |
-| Comprobar, después de cada cambio | `npm run dev:change` |
-| Aterrizar el trabajo terminado: main, las comprobaciones de GitHub, staging | `npm run dev:land -- "<what changed>"` |
-| Listar los scripts | `npm run` |
-| Ejecutar la GUI local | `npm run dev` |
-| Probar el build de producción en local | `npm run preview` |
-| Las versiones de las herramientas | `npx remy verify doctor` |
-| Comprobar actualizaciones de paquetes | `npm run packages -- check` |
-| Actualizar paquetes, incluidas las versiones mayores | `npm run packages -- upgrade` |
-| Ayuda de la CLI de Better Auth | `npm run auth -- --help` |
-| Ayuda de la CLI de Cloudflare | `npm run wrangler -- --help` |
-| Inspeccionar las herramientas de navegador | `npm run browser -- --help` |
-| Inspeccionar el estado de MCP en ambos clientes | `npx remy mcp status` |
-
-Las primeras cuatro son [el flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), que
-también dice quién ejecuta producción y una publicación. Las comprobaciones pesadas no son comandos cotidianos: GitHub las
-ejecuta después de cada aterrizaje, y las herramientas las rechazan fuera del flujo.
+Todos los comandos, generados a partir de la propia línea de comandos, están en [Comandos](./commands.mdx). Lo que ejecutas día a
+día, y quién ejecuta producción y una publicación, está en [el flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
 
 La vista previa local y el despliegue remoto usan el mismo build y la misma configuración de Wrangler.
 Consulta los [comandos locales/remotos](./run-and-test.md#one-scaffold-for-local-and-cloudflare)
@@ -95,15 +73,15 @@ para el despliegue y para ejecutar las mismas pruebas contra una URL desplegada.
 
 Revisa los cambios de dependencias después de actualizar. Node está fijado en `.node-version` y en los
 `engines` de `package.json`; los commits de origen de las skills están en el paquete (`packages/ui/src/cli/skills.ts`), que todas las
-apps instalan ([la línea de comandos](./projects.md)).
+apps instalan ([proyectos](./projects.md)).
 
 ## Documentación del proyecto [#project-documentation]
 
 - [Agentes: empieza aquí](./agents.md): por dónde empiezan los agentes; el `AGENTS.md` y `CLAUDE.md` raíz solo apuntan a él.
 - [Principios de desarrollo](./principles.md): qué debe ser el código, y cómo funcionan los planes.
 - [Cómo trabajamos](./how-we-work.md): cómo trabajan las personas y los agentes.
-- [Herramientas de desarrollo](./tooling.md): los scripts y comandos, skills, MCP y herramientas de navegador.
-- [Flujo de trabajo en tiempo de ejecución de la GUI](./run-and-test.md): un Worker, objetivos de prueba locales y remotos.
-- [La línea de comandos](./projects.md): `remy`, las herramientas que toda app instala con el paquete.
+- [Herramientas de desarrollo](./tooling.md): las herramientas fijadas, los secretos, las skills de agentes, MCP y las herramientas de navegador.
+- [Ejecutar, previsualizar y probar la app](./run-and-test.md): un Worker, objetivos de prueba locales y remotos, Cloudflare.
+- [Proyectos](./projects.md): la estructura que mantiene toda app, una app nueva, publicación, traducciones, Cloudflare y planes.
 - [Paquete de UI compartido](./remy-ui.md) y su [registro de cambios](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
 - [Planes](https://github.com/joeblew999/remy-auth/tree/main/.plans): [.plans/now.md](https://github.com/joeblew999/remy-auth/blob/main/.plans/now.md) es la única lista de lo que está abierto y en qué punto está.

@@ -1,18 +1,10 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "Las herramientas detrás de los comandos: dónde se explica cada área, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación. Todos los comandos están en Comandos."
-translatedFrom: "cccfd094 afd520fb 0971c6b1 2ddd885f 436cda38 ec3067e7 1ff06e1d 067ae0a5 e6b13d48 bdbd896f 35c0ad6b e58ce74e 4087c066 73b31a8d b2463d08 ab72ce36"
+translatedFrom: "cccfd094 fb75f597 226f2d81 82be72a9 6077bbda ec3067e7 1ff06e1d 067ae0a5 e6b13d48 bdbd896f e18bd963 e58ce74e 4087c066 73b31a8d b245c9d0 ab72ce36"
 ---
 
 ## Las herramientas [#the-tooling]
-
-```sh
-npm run                   # cada script, con lo que ejecuta
-npm run setup             # los skills fijados, MCP, el guard del flujo, las comprobaciones de la instalación
-npm run auth -- --help    # la CLI de Better Auth
-npm run wrangler -- --help
-npm run auth:info
-```
 
 `package.json` es la entrada, como en cualquier proyecto TypeScript: sus scripts ejecutan cada comando del proyecto.
 Node está fijado por `.node-version` y por el `engines` de `package.json`; cada herramienta es una dependencia de
@@ -50,18 +42,11 @@ tiene a las personas de ejemplo y envía correo de verdad; cualquier otro entorn
 el correo se envía a través de Cloudflare Email Service y no hay nadie de ejemplo). La base de datos
 desplegada, sus migraciones y el secreto de Worker `BETTER_AUTH_SECRET` solo se crean a petición del
 propietario: `auth:provision` imprime los pasos, y hasta que la base de datos exista, el despliegue se
-niega, porque de otro modo Wrangler la crearía por sí misma.
+iega, porque de otro modo Wrangler la crearía por sí misma.
 
 Estas son herramientas para desarrolladores/operadores. El inicio de sesión de la CLI de Remy para usuarios finales y las llamadas
 delegadas a la API siguen siendo parte del hito del servicio. Ambas apps están en vivo en Cloudflare; el despliegue a producción sube a
 `origins.production` en [remy.config.ts](https://github.com/joeblew999/remy-auth/blob/main/remy.config.ts), y `dev:promote` lo ejecuta, solo a petición del propietario.
-
-### Actualizaciones de paquetes [#package-upgrades]
-
-```sh
-npm run packages -- check            # Preview available updates
-npm run packages -- upgrade          # Apply latest versions, including majors, then the installation's checks
-```
 
 ### Los scripts y los comandos [#the-scripts-and-commands]
 
@@ -75,12 +60,14 @@ propia línea de comandos, así que no puede quedar desactualizada; ninguna pág
 
 - El flujo y quién ejecuta cada paso: [cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)
 - La app, las comprobaciones locales y remotas, las previsualizaciones: [la GUI](./run-and-test.md)
-- Despliegues, traducciones, un repositorio que publica paquetes: [la línea de comandos](./projects.md)
+- La estructura del proyecto, una app nueva, las traducciones, un repositorio que publica paquetes: [proyectos](./projects.md)
 - El Worker de documentación sobre el `docs/` de una app: [escribir docs](./writing-docs.mdx)
 - Planes: [planes](./how-we-work.md#plans-few-short-closed); las traducciones como regla: [en el cambio](./how-we-work.md#translations-in-the-change)
 - Skills de agentes, MCP, capturas de pantalla y el navegador propio de los agentes: más abajo
 
-`npm run packages -- upgrade` usa el `npm-check-updates` fijado localmente para mover las
+### Actualizaciones de paquetes [#package-upgrades]
+
+`npx remy packages upgrade` usa el `npm-check-updates` fijado localmente para mover las
 dependencias npm más allá de los pins de versión existentes, guarda las versiones exactas, las instala y
 refresca `package-lock.json`, y luego ejecuta las comprobaciones de la instalación.
 Los conflictos de peer fallan visiblemente; el comando no usa `--force` ni `--legacy-peer-deps`
@@ -92,22 +79,13 @@ de las actualizaciones del registro. Los pins de Node y de las fuentes de skills
 
 ### Verificación [#verification]
 
-El flujo son cuatro pasos: `dev:change` (la comprobación, en segundos, después de cada cambio),
-`dev:land` (commit, main, push, staging; GitHub ejecuta las comprobaciones pesadas), `dev:promote`
-(producción) y `dev:release`, con `dev:start` y `dev:done` alrededor de una pieza de trabajo y
-`dev:status` para mirar; una puerta en cada comando pesado se niega a ejecutarlo
-fuera de ellos. La regla está en
-[cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), los comandos en
-[la línea de comandos](./projects.md).
+El flujo, sus pasos y quién ejecuta cada uno: [cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
 
 `npx remy verify` es la puerta del release: `dev:release` lo ejecuta. Una instalación termina con
 `npx remy verify setup` (`npm run setup`, `npm run packages -- upgrade` y `npm run upgrade` lo ejecutan): alrededor de
 un minuto, sin navegador. Nadie ejecuta la puerta mientras programa (`dev:change` es la comprobación); a mano, a
 propósito, es `REMY_FLOW=hand npx remy verify`. Las comprobaciones de la instalación son las dependencias frente al
-lockfile, el registro de MCP, el guard del flujo, las versiones de las CLI, los invariantes de las herramientas (`npx remy verify
-tooling`: cada `package.json` coincide con el lockfile, la configuración de Wrangler mantiene los previews desactivados y la
-observabilidad activada, los workflows nombran solo scripts que existen, cada skill instalado proviene de una
-fuente fijada con su enlace de Claude), y luego el check. Usan la instalación local existente y
+lockfile, el registro de MCP, el guard del flujo, las versiones de las CLI, los invariantes de las herramientas (`npx remy verify tooling`), y luego el check. Usan la instalación local existente y
 no aprovisionan recursos de Cloudflare. Después la puerta ejecuta cada comprobación de navegador propia en cada
 idioma (la parte `browser` de `npm run ci`) contra el artefacto de producción en Workers locales,
 y luego la prueba de la app nueva. Las auditorías de Google no están incluidas: `npm run ci -- audits` y
@@ -214,12 +192,6 @@ DevTools usa ambos. Modern Web Guidance usa su CLI, y muchos skills de auth/Clou
 también funcionan a través de las CLI existentes; un skill no requiere automáticamente
 un servidor MCP.
 
-```sh
-npx remy mcp register   # Also runs during npm run setup
-npx remy mcp verify     # Also runs in the installation's checks
-npx remy mcp status     # Requires both Codex and Claude CLIs
-```
-
 El registro (`packages/ui/src/cli/mcp.ts`) escribe la entrada `chrome-devtools` en
 `.codex/config.toml` y `.mcp.json`, locales del proyecto. Cada cliente lanza el `chrome-devtools-mcp`
 propio de la app (aislado, headless, telemetría desactivada) con una ruta absoluta. Los archivos generados
@@ -325,16 +297,10 @@ Local o remoto: las páginas de docs, la página de Ask AI y todas las comprobac
 localmente; las respuestas solo existen en Cloudflare (AI Search no tiene versión local).
 Cada comando indica en su comentario de cabecera si es local o remoto (y si es de producción).
 
-```sh
-npm run docs -- publish                          # REMOTE, PRODUCTION: bucket = docs pages, the index's sync waited for, then the fixed questions (dev:promote runs it)
-npm run docs -- questions                        # REMOTE: the fixed questions alone (docs/content/questions.json), search only, no answer written
-CLOUDFLARE_ENV=ask npm run docs -- dev           # LOCAL docs Worker, answers from the live index
-npm run docs -- answers off                      # REMOTE, PRODUCTION: emergency stop, seconds, no build
-npm run docs -- answers on                       # REMOTE, PRODUCTION: resume
-fnox exec -- npm run docs -- observe ai-check    # REMOTE, read only: AI Search, AI Gateway, answers paused or not
-fnox exec -- npm run docs -- observe gateway     # REMOTE: the gateway's settings
-fnox exec -- npm run docs -- observe gateway rate-limit off   # REMOTE: change a setting (read back after); also logs on|off
-```
+Los comandos de la documentación (`npm run docs -- …`: publish, questions, answers, observe) están en [Comandos](./commands.mdx).
+Hay dos cosas que esa lista no puede decir: los comandos `observe` necesitan el token del gateway, así que ejecútalos como
+`fnox exec -- npm run docs -- observe …`; y `CLOUDFLARE_ENV=ask npm run docs -- dev` ejecuta el Worker de docs local
+con respuestas del índice real.
 
 Tokens: consulta [secretos](#secrets-fnox) más abajo.
 
@@ -351,12 +317,8 @@ Historial almacenado y las respuestas de IA, de solo lectura, desde las propias 
 Worker, su instancia de AI Search y el AI Gateway de esa instancia provienen de su configuración de Wrangler, así que
 una app que lo incluya obtiene el suyo propio:
 
-```sh
-fnox exec -- npm run observe -- events                      # Workers Logs, last 24 h: counts by event and level, latest 10
-fnox exec -- npm run observe -- events ask --since 7d --limit 20   # one per question: outcome, time, citations
-fnox exec -- npm run observe -- ai-usage                    # AI Gateway, last 7 days: calls, cache, failures, tokens, cost, time
-fnox exec -- npm run observe -- ai-check                    # AI Search and gateway settings against Cloudflare's advice; fails on FAIL
-```
+Los comandos `observe` (en [Comandos](./commands.mdx)) leen Workers Logs y el AI Gateway; ejecútalos como
+`fnox exec -- npm run observe -- …`, para el token.
 
 ### Secretos: fnox [#secrets-fnox]
 

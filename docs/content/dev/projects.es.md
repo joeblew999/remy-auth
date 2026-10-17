@@ -1,7 +1,7 @@
 ---
-title: "La línea de comandos"
-description: "remy, la herramienta que toda app de Remy instala con el paquete: los scripts, la estructura que leen, una app nueva, la publicación de paquetes, las traducciones, Cloudflare y los planes."
-translatedFrom: "26693786 ffed0063 9352ad42 79fb3dca c0217a27 4e9524a9 39363a65 218b0959"
+title: "Proyectos: estructura, apps nuevas y publicación"
+description: "Qué guarda todo proyecto de Remy en el mismo lugar, cómo empezar una app nueva, la publicación de paquetes, las traducciones, Cloudflare y los planes. Todos los comandos están en Comandos."
+translatedFrom: "3ff1ce70 ffed0063 f341441b 72b80ae7 c0217a27 4e9524a9 39363a65 b248b01b"
 ---
 
 La herramienta es `remy`, el bin de `@joeblew999/remy-ui` (`packages/ui/src/cli`, un módulo de TypeScript por
@@ -67,8 +67,8 @@ que un solo cambio de versión actualiza.
 5. Haz commit de todo, `package-lock.json`, `skills-lock.json` y `src/routeTree.gen.ts` incluidos. Las
    cadenas de la app en blanco ya vienen traducidas; cuando el inglés cambie (`messages/en.json`, la
    documentación), haz commit de ello y traduce esto una vez a mano, `REMY_FLOW=hand npx remy i18n
-   translate`, que escribe y hace commit de los demás idiomas; a partir de entonces lo hace
-   `dev:land`.
+   translate`, que escribe los demás idiomas (nunca hace commit: haz commit de ellos junto con el resto);
+   a partir de entonces lo hace `dev:land`.
 6. El primer despliegue, a mano: `npx remy cloudflare deploy`, y `npx remy cloudflare docs-deploy` para la
    documentación. Una vez que el repositorio está en GitHub (paso 7), el trabajo pasa por [el flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest):
    `dev:land` para cada cambio terminado, `dev:promote` para producción y la documentación.
@@ -90,16 +90,7 @@ shell el suyo (`PREVIEW_PORT=4232 npm run …`).
 
 Un repositorio también puede publicar paquetes propios (un contrato, un paquete de UI), como hace
 remy-auth; eso no cuesta ningún comando propio. Sus paquetes son workspaces de npm (`packages/<name>/`,
-`workspaces` de `package.json`), y cada uno que no es `private` se publica mediante `remy packages`
-(`npm run packages -- …`):
-
-| Comando | Hace |
-| --- | --- |
-| `check`, `upgrade` | Versiones npm más nuevas de las dependencias propias del repositorio (raíz y workspaces; nunca sus propios paquetes ni `@joeblew999/remy-ui`), previsualizadas (`check`) o aplicadas, y luego las comprobaciones de la instalación (`upgrade`) |
-| `pack` | Un tarball de cada paquete publicado, para que una app de prueba lo instale antes de cualquier release |
-| `release` | Las puertas de control (traducciones en modo estricto, cada paquete modificado con su versión subida, `remy verify`, el script `release-checks` de la app, auditorías de Google, Core Web Vitals), y luego `tag`; `dev:release` lo ejecuta |
-| `tag` | Sobre un `main` limpio: etiqueta la versión del paquete de release, hace push y luego `publish --release` |
-| `publish` | Publica cada paquete cuya versión es nueva en su registro; con `--release vX.Y.Z` también el release de GitHub a partir de `CHANGELOG.md` (`notes`). El job de CI de la tag ejecuta el mismo comando |
+`workspaces` de `package.json`), y cada uno que no es `private` se publica mediante `remy packages`, cuyos subcomandos están en [Comandos](./commands.mdx).
 
 En `remy.config.ts`: `release.package` (el paquete cuya versión da nombre al release) y
 `release.title`. El `exports` de un paquete nombra cada subruta que sus usuarios importan
@@ -199,12 +190,6 @@ todos los proyectos: `.plans/now.md` es la única lista ordenada, `.plans/*.md` 
 `.plans/done/` y `.plans/parked/` el resto, `.plans/stability-log.md` opcional. Un proyecto sin
 `.plans/` pasa `plans check` y no tiene nada que listar.
 
-| Comando | Hace |
-| --- | --- |
-| `status` | Los elementos abiertos de `now.md` por sección, los archivos de plan abiertos con su primera línea `Status:`/`Closed`/`Parked` y su último commit (STALE a los 14 días), los planes aparcados. `--json` para agentes |
-| `check` | `now.md` existe, cada enlace relativo a un `.md` bajo `.plans/` resuelve, ningún `.md` fuera de `.plans/`, `done/` y `parked/`, cada archivo de plan abierto enlazado desde `now.md`. Instantánea, sin red; la comprobación la ejecuta primero |
-| `close <plan> "<lo publicado>"` | Añade `Closed <hoy>: ...` bajo el título, lo mueve a `done/` (desde `.plans/` o `parked/`; `git mv` si está versionado), reapunta los enlaces relativos hacia él en `.plans/`, `docs/`, `packages/*/README.md` y los `*.md` de la raíz, y sus propios enlaces desde la carpeta nueva, y tacha su elemento en `now.md` |
-| `park <plan> "<por qué>"` | Lo mismo hacia `parked/` con `Parked <hoy>: ...` |
-| `open <plan> "<por qué ahora>"` | Un plan aparcado que se retoma: lo mismo desde `parked/` de vuelta a `.plans/` con `Opened <hoy>: ...`; añade su elemento a `now.md` tú mismo |
+Los comandos, con lo que hace cada uno, están en [Comandos](./commands.mdx).
 
 `close` y `park` cambian archivos y preparan el movimiento, pero nunca hacen commit: lee `git diff` y luego `npm run dev:change`.

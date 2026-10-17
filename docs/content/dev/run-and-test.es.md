@@ -1,14 +1,8 @@
 ---
 title: "Ejecutar, previsualizar y probar la app"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "573a07f6 5d5de609 0bf2533c 2a9d9497 917db7e6 222ea1f3 655a09ab 71e7a9a3 73202548"
+translatedFrom: "633d518a 9addc553 0bf2533c 2a9d9497 21aba997 316407e6 222ea1f3 655a09ab fba690a6 73202548"
 ---
-
-```sh
-npm run dev                # http://127.0.0.1:5173/en
-npm run preview            # Production build on local Workers, port 4173
-npm run dev:change        # The check, in seconds (the flow's first step)
-```
 
 :::note
 Google Chrome debe estar instalado. Todo se ejecuta localmente en el runtime de Workers, sobre la
@@ -27,12 +21,8 @@ El desarrollo usa el mismo código fuente del Worker y el mismo runtime de Cloud
 
 Todos los comandos de la aplicación, sus comprobaciones y sus deployments, con lo que hace cada uno: [Comandos](./commands.mdx).
 En resumen, la aplicación se ejecuta en local en el puerto 5173 con hot reload (`npm run dev`) y como build de producción en
-el 4173 (`npm run preview`), y las comprobaciones se ejecutan en ese mismo host local. Previews en Cloudflare: cada rama
-distinta de `main` (también la de una pull request) la compila Workers Builds de Cloudflare (`npm run build` y luego
-`npx wrangler preview`) y se sirve en `https://<branch>-remy-auth.gedw99.workers.dev`, indicada en un comentario de la
-pull request; las previews no tienen ninguno de los bindings de producción (el bloque `previews` de `wrangler.jsonc`), y un push a
-`main` sube una versión nueva sin mover producción. Desde la nube de Claude, consulta
-[trabajar desde la nube de Claude](./agents.md#working-from-claudes-cloud). El navegador propio del agente en un portátil
+el 4173 (`npm run preview`), y las comprobaciones se ejecutan en ese mismo host local. Cada rama distinta de `main` obtiene una
+preview en Cloudflare: [en Cloudflare](#on-cloudflare), más abajo. El navegador propio del agente en un portátil
 (`npm run browser`, Chrome DevTools) no es CI: las comprobaciones nunca lo usan.
 
 El flujo no ejecuta toda la suite contra un deployment: los deploys terminan con el smoke en vivo,
@@ -52,7 +42,7 @@ remotas también puede apuntar a una preview local ya en ejecución para comprob
 
 Los comandos son los del paquete (`remy`), controlados por el `remy.config.ts` de este proyecto (los origins, los
 puertos); los propios de este repositorio son sus scripts de `package.json` (`local`, `generate`, `release-checks`,
-`test:consumers`; [la línea de comandos](./projects.md#choosing-the-version-released-development-or-local)). La configuración de Playwright
+`test:consumers`; [proyectos](./projects.md#choosing-the-version-released-development-or-local)). La configuración de Playwright
 es el `playwrightConfig()` del paquete.
 
 Existe una única configuración de Worker con un entorno con nombre, `staging` (`env.staging` en
@@ -135,7 +125,6 @@ npm run ui:components       # Re-add every shadcn component (extend the list the
 npm run ui:theme            # Rewrite globals.css with shadcn's default theme
 npm run ui:blocks           # Diff each owned block against upstream, in place
 npm run ui:verify           # Re-run both and fail on any difference (runs before every release)
-npm run packages -- pack    # Produce the package tarballs locally
 ```
 
 Los bloques son copias propias, tal como shadcn pretende; el README de sidebar-16 explica qué se cambió. El
@@ -147,6 +136,26 @@ Las fuentes viven en [`packages/ui/src/fonts.css`](https://github.com/joeblew999
 `globals.css` (ver [`src/styles.css`](https://github.com/joeblew999/remy-auth/blob/main/src/styles.css)); el archivo explica sus reglas. fontaine en
 [`vite.config.ts`](https://github.com/joeblew999/remy-auth/blob/main/vite.config.ts) genera las fuentes de respaldo ajustadas en tamaño que nombra.
 `publicPageChecks` falla ante cualquier familia nombrada que no esté cargada.
+
+## En Cloudflare [#on-cloudflare]
+
+- **Una preview de una rama**: haz push de la rama, sin pull request (GitHub no ejecuta nada para una rama sin ella).
+  Workers Builds de Cloudflare la compila y la sirve en `https://<branch>-remy-auth.gedw99.workers.dev`
+  (una `/` en la rama se convierte en `-`); las herramientas de builds del conector muestran la build y su log. Después compruébala:
+  `REMY_FLOW=hand npm run test -- remote https://<branch>-remy-auth.gedw99.workers.dev` (solo nuestras comprobaciones: una
+  preview se oculta a propósito de los buscadores, así que las auditorías de Google evalúan producción). Este es el camino
+  desde la nube de Claude, que no tiene token de Cloudflare; una máquina con sesión iniciada dispone también de `npx remy cloudflare preview`.
+- **Los ajustes de build de Cloudflare** viven en Cloudflare, no en el repositorio, así que se escriben aquí y
+  solo se cambian a través del conector, para que coincidan: dos reglas de build en el Worker `remy-auth`, ambas
+  `npm run build`, con `NODE_VERSION` como en `.node-version`. `main`: deploy `npx wrangler versions upload` (una
+  versión nueva; producción solo se mueve con `dev:promote`). Cualquier otra rama: deploy `npx wrangler preview`.
+- **Velocidad lejos de las bases de datos**: el Worker se ejecuta con Smart Placement (`wrangler.jsonc`, comprobado por
+  `npx remy verify tooling`), y cada petición lee a través de su propia sesión de D1, de modo que las lecturas vienen de la
+  copia más cercana (`@joeblew999/remy-ui/replicas`; una comprobación unitaria rechaza el código de la app que use un binding de base de datos en bruto).
+- **Toda base de datos D1 mantiene copias de lectura y vive en la región de producción**: la regla de la plataforma, que
+  `npx remy cloudflare provisioned` consulta a Cloudflare antes de cada deploy, incluidas las bases de datos de las previews,
+  y ante la cual rechaza el deploy, nombrando la corrección. Ninguna de las dos es un ajuste que la configuración de Wrangler pueda contener.
+- **Producción, staging y los comandos `npx remy cloudflare …`** se ejecutan en el Mac del propietario, que tiene el token.
 
 ## Qué versión está desplegada [#which-version-is-deployed]
 
@@ -220,7 +229,7 @@ muestra «Remy» (`productNameChecks`, en el conjunto compartido de cada app; el
 - `src/routes/`: rutas de archivo de TanStack (loaders, `head`, renderizado por ruta) que renderizan las páginas del paquete, más las filas de formatos adicionales de esta app (`src/formats-extras.tsx`), mientras que `robots.txt` y `sitemap.xml` (la parte seo-routes) y `/csp-report` (`app-routes`) son las rutas de servidor del paquete, montadas junto a ellas; `src/routeTree.gen.ts` lo genera el plugin del router durante el dev y el build, y se versiona.
 - `src/server.ts`: entrada del Worker a través del `localizedWorker` del paquete (IDs de petición, logs de estado estructurados, `/healthz`, el middleware de Paraglide, redirecciones de entrada). Start recibe la petición original, así que las funciones de servidor leen la geolocalización de Cloudflare a partir de las propiedades `cf` de la petición en un módulo exclusivo de servidor bajo la protección de imports de Start (`packages/showcase/src/parts/deferred-place/place.server.ts`, la parte deferred-place del showcase). El wrapper pasa su ID de petición hacia dentro como `X-Request-ID`; el middleware de petición de Start lo expone como `context.requestId`, y un middleware de función registra una línea `server_fn` por cada llamada (el `start` del paquete, registrado en `src/start.ts`). Ahí mismo, un segundo middleware de petición genera el nonce de CSP por petición que el router compartido (`router`) entrega a TanStack Router, y la ruta de servidor `/csp-report` del paquete (`app-routes`) registra los reportes de la política ([cabeceras de seguridad](https://github.com/joeblew999/remy-auth/blob/main/.plans/parked/gui-portal.md)). El nombre del servicio tiene un único hogar, `src/service.ts`.
 - `src/api/`: la implementación del contrato (`router.ts`, tras el guard; sin imports de Workers para que las comprobaciones puedan cargarlo en Node), el contexto de cada llamada, con la sesión de quien llama (`context.server.ts`), y el cliente isomórfico con sus utilidades de TanStack Query (`client.ts`). El contrato es `packages/contract/`; el mecanismo compartido son las exportaciones `api/*` del paquete; [el plan de contratos](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/openapi-contracts.md) es dueño del diseño.
-- `src/auth/`: Better Auth en este Worker ([el plan de autenticación](https://github.com/joeblew999/remy-auth/blob/main/.plans/auth-service.md)): sus opciones, compartidas por el Worker y la CLI (`options.ts`), la instancia construida en el primer uso a partir del binding D1 (`auth.server.ts`), la configuración de la CLI (`cli.ts`), la tabla de entorno (`environment.ts`), las personas precargadas (`seed.ts`, `people.server.ts`), el envío de correo y el correo del código (`mail.server.ts`, `code-mail.ts`), la regla sobre los campos que una persona puede escribir (`fields.ts`), la función de servidor de la cuenta (`account.ts`) y el formulario de inicio de sesión, su selector y el cliente de navegador de Better Auth (`sign-in.tsx`, `client.ts`). `migrations/` contiene las migraciones numeradas de D1 ([tareas](./tooling.md#developer-cli)).
+- `src/auth/`: Better Auth en este Worker ([el plan de autenticación](https://github.com/joeblew999/remy-auth/blob/main/.plans/auth-service.md)): sus opciones, compartidas por el Worker y la CLI (`options.ts`), la instancia construida en el primer uso a partir del binding D1 (`auth.server.ts`), la configuración de la CLI (`cli.ts`), la tabla de entorno (`environment.ts`), las personas precargadas (`seed.ts`, `people.server.ts`), el envío de correo y el correo del código (`mail.server.ts`, `code-mail.ts`), la regla sobre los campos que una persona puede escribir (`fields.ts`), la función de servidor de la cuenta (`account.ts`) y el formulario de inicio de sesión, su selector y el cliente de navegador de Better Auth (`sign-in.tsx`, `client.ts`). `migrations/` contiene las migraciones numeradas de D1 ([los scripts de Better Auth](./tooling.md#the-tooling)).
 - `src/notes/`: la demo de notas, que usa el motor de relaciones como lo haría cualquier app: sus datos en su propia D1 (`DEMO_DB`, `migrations-demo/`; ahí una persona es solo un ID de cuenta) a través de `store.ts`, la página (`page.tsx`) y la función de servidor que su loader consulta (`state.ts`). El vocabulario y las formas son los del contrato (`packages/contract/src/notes.ts`).
 - `src/router.tsx`: el `remyRouter` del paquete, un router y un cliente de TanStack Query nuevos por petición, con la integración SSR de Query. `src/routes/__root.tsx` es el `remyRoot` del paquete con la configuración de esta app; TanStack Devtools (paneles de Router y Query) se pasa ahí, en el propio archivo de la app, porque su plugin de Vite `devtools()` lo elimina de las builds de producción solo fuera de `node_modules`; la comprobación de frontera de build demuestra que ni devtools ni código exclusivo de servidor llegan al navegador.
 - `src/parts.json`: las [partes](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md) del paquete que usa esta app, una por línea (`@joeblew999/remy-showcase/time-zones`, `deferred-place` y `status-card` del showcase, y `seo-routes` de la plataforma); `remyParts()` en `vite.config.ts` monta sus rutas y `partChecks()` en `tests/gui.spec.ts` ejecuta sus comprobaciones.

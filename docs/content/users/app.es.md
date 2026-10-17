@@ -1,7 +1,7 @@
 ---
 title: "La app"
 description: "Las páginas de la app y cómo encontrarlas en un teléfono, una tableta o un ordenador."
-translatedFrom: "7dd6fbd2 cbec0a1c"
+translatedFrom: "7dd6fbd2 6bc8a613"
 ---
 
 La app se abre desde **Open the app** en la barra superior.

@@ -29,7 +29,7 @@ test('no English page gives a heavy command bare in a shell block: REMY_FLOW=han
 test('an installation ends with the installation\'s checks, never the browser suite; the release gate starts with them', () => {
   const setup = readFileSync('packages/ui/src/cli/setup.ts', 'utf8');
   expect(setup.indexOf('await verifySetup();')).toBeGreaterThan(setup.indexOf('guard([]);'));
-  expect(readFileSync('packages/ui/src/cli/verify.ts', 'utf8')).toMatch(/gate\('project:verify'\);\n\s*await verifySetup\(\);/);
+  expect(readFileSync('packages/ui/src/cli/verify.ts', 'utf8')).toMatch(/gate\('verify'\);\n\s*await verifySetup\(\);/);
   const packages = readFileSync('packages/ui/src/cli/packages.ts', 'utf8');
   expect(packages).toMatch(/export async function upgrade\(\)[\s\S]*?await verifySetup\(\);/);
   // The release marks itself before it runs the gate, or the gate refuses it.

@@ -1,7 +1,7 @@
 ---
-title: "@joeblew999/remy-ui"
+title: "El paquete de UI (@joeblew999/remy-ui)"
 description: "La interfaz que comparten todas las apps de Remy: shadcn de fábrica, fuentes, catálogos de Paraglide, las páginas del sitio y de la app, el pegamento de TanStack Start y sus comprobaciones."
-translatedFrom: "5bd7d27a 8db87367 a0992f8d 97d920a0 62bc7837 e03f7604 6d53a8c9"
+translatedFrom: "f3f6cb00 ce14fe94 f12a28fb 9c6f92b3 62bc7837 3f747e59 6d53a8c9"
 ---
 
 La interfaz que comparten todas las apps de Remy: componentes y tema de shadcn de fábrica, fuentes,
@@ -130,7 +130,7 @@ Wrangler, Tailwind, TypeScript) y las herramientas que ejecutan las tareas y com
 compartidas (Playwright, Lighthouse, el servidor MCP de DevTools, npm-check-updates). Una app solo
 nombra el paquete; `remy.singleCopy` en su `package.json` lista las que se rompen si se instalan dos
 veces, lo que mantiene la parte de copias únicas de la comprobación
-([la línea de comandos](./projects.md#choosing-the-version-released-development-or-local)).
+([proyectos](./projects.md#choosing-the-version-released-development-or-local)).
 
 ## Idioma [#language]
 
@@ -148,14 +148,11 @@ polaco, turco y alemán) están escritos por un agente y sin revisar.
 ## Publicación [#publishing]
 
 El paquete es `@joeblew999/remy-ui` en GitHub Packages (ahí el scope debe coincidir con el
-propietario de GitHub). `npm run dev:release` (alias `release`) hace toda la publicación desde esta
-máquina y se detiene en el primer fallo: traducciones completas y al día (`remy i18n check`, estricto), todas
-nuestras comprobaciones (`remy verify`), los archivos de shadcn exactamente como los escribe su CLI
-(`npm run ui:verify`), las auditorías Lighthouse de Google y Core Web Vitals medidos en frío sobre un Worker de
-Cloudflare desechable (`npm run test -- cwv`: las primeras visitas tras un despliegue, que es donde una
-página lenta sale más cara). Después etiqueta `vX.Y.Z` a partir de `packages/ui/package.json`, hace
-push, publica con tu token de `gh` y crea el release de GitHub a partir de la sección correspondiente
-del CHANGELOG. CI (`.github/workflows/ci.yml`) repite las auditorías de Google sobre el tag.
+propietario de GitHub). `npm run dev:release` hace toda la publicación desde esta máquina y se
+detiene en el primer fallo; sus puertas, en orden, son `remy packages release` en
+[Comandos](./commands.mdx). Core Web Vitals se miden en frío sobre un Worker de Cloudflare
+desechable: las primeras visitas tras un despliegue, que es donde una página lenta sale más cara.
+CI (`.github/workflows/ci.yml`) repite las auditorías de Google sobre el tag.
 
 Antes de publicar, un solo commit: la versión en `packages/ui/package.json` (y en
 `packages/contract/package.json` cuando el contrato cambió) y la sección del CHANGELOG. Ningún otro
