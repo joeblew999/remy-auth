@@ -88,7 +88,15 @@ export async function scriptsAndHooks(): Promise<void> {
   const own = Object.fromEntries(
     Object.entries(manifest.scripts ?? {}).filter(([name]) => !old.test(name) && !shared.has(name)),
   );
-  const dropped = Object.keys(manifest.scripts ?? {}).filter((name) => !(name in own));
+  // An app's own release checks keep running: the name is a task now, which the app's vite.config.ts gives them.
+  const releaseChecks = manifest.scripts?.['release-checks'];
+  if (releaseChecks) {
+    own['release-checks:app'] = releaseChecks;
+    console.log(
+      "upgrade: your release-checks script is now release-checks:app; vp run release runs the release-checks task, so add to vite.config.ts: remyApp({ tasks: { 'release-checks': { command: 'vp run release-checks:app', cache: false } } })",
+    );
+  }
+  const dropped = Object.keys(manifest.scripts ?? {}).filter((name) => !(name in own) && name !== 'release-checks');
   manifest.scripts = { ...own, ...tasks.flowScripts('remy'), upgrade: 'remy upgrade' };
   writeFileSync('package.json', `${JSON.stringify(manifest, null, 2)}\n`);
   if (dropped.length) console.log(`upgrade: scripts the tasks replace, removed: ${dropped.join(', ')}`);
@@ -103,6 +111,20 @@ export async function scriptsAndHooks(): Promise<void> {
       '.gitignore',
       `${ignore.replace(/\n?$/, '\n')}# Vite Plus's Git hook dispatcher, written by vp config (the prepare script).\n.vite-hooks/_/\n`,
     );
+  // Vite Plus's own rules for agents, from the installed package, beside the app's.
+  const vitePlusRules = '@node_modules/vite-plus/AGENTS.md';
+  if (existsSync('CLAUDE.md') && !readFileSync('CLAUDE.md', 'utf8').includes(vitePlusRules))
+    writeFileSync('CLAUDE.md', `${readFileSync('CLAUDE.md', 'utf8').replace(/\n?$/, '\n')}${vitePlusRules}\n`);
+  // The docs' configuration names its own folder: Vite Plus loads it from the repository's root.
+  const docsConfig = join('docs', 'vite.config.ts');
+  if (existsSync(docsConfig)) {
+    const text = readFileSync(docsConfig, 'utf8');
+    const next = text.replace(/remyDocs\(docsConfig\)/, 'remyDocs(docsConfig, { root: import.meta.dirname })');
+    if (next !== text) {
+      writeFileSync(docsConfig, next);
+      console.log(`upgrade: ${docsConfig} names its folder (root: import.meta.dirname)`);
+    }
+  }
   console.log(
     "upgrade: the flow is vp run (COMMANDS.md); Cloudflare's build command for this app is now: npx vp run build",
   );

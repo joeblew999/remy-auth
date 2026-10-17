@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# The new-app test (README.md): ci's new-app part (vp run ci new-app) runs it from remy-auth's root.
+# The new-app test (README.md): the new-app task (vp run new-app; vp run ci's last part) runs it from remy-auth's
+# root, after the package's catalogs and command line are built (the task's dependsOn).
 set -euo pipefail
 root=$(pwd)
 out=$(mktemp -d); trap 'rm -rf "$out"' EXIT
@@ -12,7 +13,6 @@ step() { local now; now=$(date +%s); took="$took, $1 $((now - mark)) s"; mark=$n
 # 1. The platform and the showcase as npm serves them, each with a version no registry has (build metadata, so
 #    the showcase's peer range still holds), so npm can never substitute a published copy (it did once: the
 #    scratch tarball was 0.13.0, the published version).
-vp run @joeblew999/remy-ui#generate > /dev/null
 # What the package ships that is made from the docs (the remy skill), as every pack and publish makes it.
 node packages/ui/src/cli/remy.ts skills build
 step skill

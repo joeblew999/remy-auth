@@ -26,3 +26,11 @@ export declare function remyWorkspace(options?: {
   tasks?: Record<string, unknown>;
   ci?: string[];
 }): Record<string, unknown>;
+/** A worktree's own ports, from its name. */
+export function portsFor(name: string): { preview: number; docsPreview: number };
+/** The worktree's name when `cwd` is in one; the main checkout has none. */
+export function worktreeName(cwd?: string): string | undefined;
+/** The local ports at `root`: a worktree's own, else remy.config.ts's, else 4173 and 4174. */
+export function localPorts(root?: string): { preview: number; docsPreview: number };
+/** The app whose strings a docs folder uses: the folder above docs/, or the workspace's app. */
+export function docsApp(docsRoot: string): string;

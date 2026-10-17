@@ -14,7 +14,7 @@ import { dirname, join, relative } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parts } from './page.ts';
 import type { Subcommands } from './commands.ts';
-import { docsDir } from './config.ts';
+import { docsContent } from './config.ts';
 
 export type Gap = { language: string; kind: string; what: string };
 const gapLine = (gap: Gap) => `${gap.language} ${gap.kind} ${gap.what}`;
@@ -273,8 +273,7 @@ export async function messagesGaps(cwd = process.cwd()): Promise<{ gaps: Gap[]; 
  * stale keys.
  */
 export function docsGaps(cwd = process.cwd()): { gaps: Gap[]; sites: number } {
-  const dir = process.env.I18N_DOCS_DIR ?? join(docsDir() ?? 'docs', 'content');
-  const content = join(cwd, dir);
+  const content = join(cwd, docsContent(cwd));
   const sites = existsSync(content)
     ? readdirSync(content, { withFileTypes: true })
         .filter((entry) => entry.isDirectory() && existsSync(join(content, entry.name, 'i18n.json')))
@@ -386,9 +385,7 @@ export async function checkMessages(list: boolean, cwd = process.cwd()): Promise
 export function checkDocs(list: boolean, cwd = process.cwd()): boolean {
   const { gaps, sites } = docsGaps(cwd);
   if (!sites) {
-    console.log(
-      `Docs: no sites with an i18n.json under ${process.env.I18N_DOCS_DIR ?? join(docsDir() ?? 'docs', 'content')}, nothing to check.`,
-    );
+    console.log(`Docs: no sites with an i18n.json under ${docsContent()}, nothing to check.`);
     return true;
   }
   if (!gaps.length) {

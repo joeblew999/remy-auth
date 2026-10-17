@@ -66,7 +66,7 @@ export async function main(args: string[]): Promise<void> {
     );
   if (verdict.state === 'red')
     fail(
-      `GitHub's checks failed on ${pull.html_url}: ${verdict.failed.map((run) => `${run.name} (${run.html_url})`).join(', ')}. Each job is one \`vp run ci <part>\`, which reproduces it here. The pull request stays open; fix, then land again.`,
+      `GitHub's checks failed on ${pull.html_url}: ${verdict.failed.map((run) => `${run.name} (${run.html_url})`).join(', ')}. Each job is one \`vp run <task>\` (its name says which), which reproduces it here. The pull request stays open; fix, then land again.`,
     );
   const merged = merge(slug, pull.number, `${title} (#${pull.number})`, body);
   if ('refused' in merged)

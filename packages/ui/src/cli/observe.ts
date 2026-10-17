@@ -10,6 +10,8 @@
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
+import { join } from 'node:path';
+import { appDir } from './config.ts';
 import { dispatch, type Subcommands } from './commands.ts';
 
 type Json = Record<string, any>;
@@ -42,9 +44,10 @@ async function setup() {
   const { unstable_readConfig } = (await import(
     pathToFileURL(requireHere.resolve('wrangler')).href
   )) as typeof import('wrangler');
-  const config = unstable_readConfig(
-    process.env.REMY_WRANGLER_CONFIG ? { config: process.env.REMY_WRANGLER_CONFIG } : {},
-  ) as Json;
+  // The app's configuration unless one is named (the docs Worker's): the root of a workspace has none.
+  const config = unstable_readConfig({
+    config: process.env.REMY_WRANGLER_CONFIG ?? join(appDir(), 'wrangler.jsonc'),
+  }) as Json;
   const login = (() => {
     try {
       return (JSON.parse(wrangler('auth', 'token', '--json')) as { token: string }).token;

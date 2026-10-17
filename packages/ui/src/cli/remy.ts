@@ -13,6 +13,27 @@ import { tools } from './tools.ts';
 import { help, writeCommands } from './help.ts';
 
 const [name = '', ...args] = process.argv.slice(2);
+
+// An app still on the scripts of 0.15 (an upgrade from it runs 0.15's own code, which never rewrote them): a script
+// that shares a task's name stops `vp run` for both, and names a command this release no longer has. `remy upgrade`
+// again, now this release's code, rewrites them.
+if (name !== 'upgrade') {
+  try {
+    const { readFileSync } = await import('node:fs');
+    const scripts = Object.keys(
+      (JSON.parse(readFileSync('package.json', 'utf8')) as { scripts?: Record<string, string> }).scripts ?? {},
+    );
+    const { taskNames } = await import('@joeblew999/remy-ui/workspace');
+    const shared = new Set(taskNames());
+    const clashing = scripts.filter((script) => shared.has(script) || /^dev:[a-z]+$/.test(script));
+    if (clashing.length)
+      console.error(
+        `remy: this app's scripts are an older release's (${clashing.join(', ')}): run npx remy upgrade <this version> once more, which rewrites them.`,
+      );
+  } catch {
+    // No package.json here, or no package to ask: nothing to say.
+  }
+}
 if (name === 'help' || name === '--help' || name === '-h') {
   if (args.includes('--write')) await writeCommands();
   else await help(console.log);

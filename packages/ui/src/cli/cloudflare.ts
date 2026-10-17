@@ -60,7 +60,11 @@ export async function provisioned(environment = process.env.CLOUDFLARE_ENV || un
     fail(
       `Not deploying${environment ? ` ${environment}` : ''}: Wrangler would create these by itself.\n${missing.map((line) => `  ${line}`).join('\n')}\nCreate each on the owner's request and put its id in the Wrangler configuration.`,
     );
-  databasesRight(unstable_readConfig({}) as Databases, config as Databases, environment);
+  databasesRight(
+    unstable_readConfig({ config: join(appDir(), 'wrangler.jsonc') }) as Databases,
+    config as Databases,
+    environment,
+  );
 }
 
 type Databases = {

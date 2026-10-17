@@ -30,7 +30,7 @@ import {
 import { pageFrom } from './page.ts';
 import { lap, note } from './timing.ts';
 import { docsPrompt, messagesPrompt } from './prompts.ts';
-import { docsDir } from './config.ts';
+import { docsContent } from './config.ts';
 
 const git = (...args: string[]) =>
   execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
@@ -243,7 +243,7 @@ const suffix = /\.([a-z]{2,3}(?:-[A-Za-z]{2,4})?)\.mdx?$/;
 
 /** The docs' gaps, one page per agent call; named translation files are redone in full. True when every one was written. */
 export async function translateDocs(redo: string[] = []): Promise<boolean> {
-  const dir = process.env.I18N_DOCS_DIR ?? join(docsDir() ?? 'docs', 'content');
+  const dir = docsContent();
   const list: Gap[] = docsGaps().gaps.filter((gap) => gap.kind !== 'orphan');
   for (const file of redo) {
     const match = suffix.exec(file);

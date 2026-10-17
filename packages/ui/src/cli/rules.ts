@@ -13,7 +13,7 @@ export function rules(): void {
     existsSync(join(docsDir() ?? 'docs', 'content/dev/how-we-work.md'))
   ) {
     console.log(
-      'rules: remy-auth owns the rules (docs/content/dev/agents.md, which AGENTS.md points at); nothing to write.',
+      'rules: remy-auth owns the rules (its developer docs, agents.md, which AGENTS.md points at); nothing to write.',
     );
     return;
   }
@@ -31,7 +31,7 @@ Its rules are the \`remy\` skill; read \`.agents/skills/remy/SKILL.md\` (Claude:
 \`.claude/skills/remy/SKILL.md\`) before changing anything. It lists the references: how we work, the
 development principles, tooling, the UI package and writing docs.
 The flow is code, and the only way to work here: \`COMMANDS.md\` lists it first, then every command, generated
-from the command line itself (\`vp run check\` keeps it current; never list commands by hand). The
+from the command line itself (\`vp run fix\` writes it, \`vp run check\` refuses it stale; never list commands by hand). The
 tooling refuses the heavy checks outside the flow's steps. Long steps run in the background; never wait on them.
 Seen something wrong, slow, missing or left over? Fix it in the same landing when small, or write it
 into \`.plans/now.md\` in that landing; \`vp run status\` shows that list to everyone. "Done" is the end

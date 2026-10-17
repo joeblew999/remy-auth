@@ -9,8 +9,53 @@
 // the same names. What differs is read from the folders, never set: remy-auth runs the command line's source, an app
 // the installed `remy`; an app with project.inlang compiles its own strings; one with scripts/local.ts prepares its
 // local state; one with a docs package checks it too.
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { dirname, join, relative, resolve } from 'node:path';
+import { createRequire } from 'node:module';
+import { basename, dirname, join, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+/** A worktree's own ports, from its name: the same name, the same ports, never another worktree's. */
+export function portsFor(name) {
+  const seed = parseInt(createHash('sha256').update(name).digest('hex').slice(0, 6), 16);
+  const preview = 4200 + (seed % 400) * 2;
+  return { preview, docsPreview: preview + 1 };
+}
+
+/** The worktree's name when `cwd` is in one; the main checkout has none. */
+export function worktreeName(cwd = process.cwd()) {
+  try {
+    const read = (...args) =>
+      execFileSync('git', ['-C', cwd, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    const root = read('rev-parse', '--path-format=absolute', '--git-common-dir').replace(/\/\.git$/, '');
+    const top = read('rev-parse', '--show-toplevel');
+    return top === root ? undefined : basename(top);
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * The local ports at `root`: a worktree's own, else the nearest remy.config.ts's `ports`, else 4173 and 4174. The tasks
+ * read them as Vite Plus loads the configuration, and the command line the same way, so two worktrees' checks never
+ * share a port; PREVIEW_PORT or DOCS_PREVIEW_PORT in the shell wins.
+ */
+export function localPorts(root = process.cwd()) {
+  const name = worktreeName(root);
+  if (name) return portsFor(name);
+  let configured = {};
+  for (let dir = resolve(root); ; dir = dirname(dir)) {
+    const file = join(dir, 'remy.config.ts');
+    if (existsSync(file)) {
+      const loaded = createRequire(import.meta.url)(file);
+      configured = (loaded.default ?? loaded).ports ?? {};
+      break;
+    }
+    if (dir === dirname(dir)) break;
+  }
+  return { preview: configured.preview ?? 4173, docsPreview: configured.docsPreview ?? 4174 };
+}
 
 /** What a task writes and never reads as an input: generated files, builds, test results, local state. */
 export const generated = [
@@ -84,6 +129,24 @@ function commandLine(root, workspace = root) {
 export const standalone = (root) => !workspaceOf(root);
 
 /** The packages under a workspace's folders whose package.json says they are an app (has a wrangler config) or docs. */
+/**
+ * The app whose strings a docs folder at `docsRoot` uses (its messages/): the folder holding docs/ in an app that is its
+ * own repository, the workspace's app (the package with a wrangler.jsonc) in a workspace.
+ */
+export function docsApp(docsRoot) {
+  const workspace = workspaceOf(docsRoot);
+  if (workspace && workspace !== resolve(docsRoot, '..')) {
+    const dirs = (json(join(workspace, 'package.json')).workspaces ?? []).flatMap((pattern) => {
+      if (!pattern.endsWith('/*')) return [join(workspace, pattern)];
+      const parent = join(workspace, pattern.slice(0, -2));
+      return existsSync(parent) ? readdirSync(parent).map((name) => join(parent, name)) : [];
+    });
+    const app = dirs.find((dir) => existsSync(join(dir, 'wrangler.jsonc')));
+    if (app) return app;
+  }
+  return resolve(docsRoot, '..');
+}
+
 function members(workspace) {
   /** @type {{ apps: string[]; docs: string[] }} */
   const found = { apps: [], docs: [] };
@@ -103,11 +166,34 @@ function members(workspace) {
 }
 
 /** The app's own tasks: what its folder builds, serves and tests in a browser. */
+/**
+ * The installed dependencies, which no task reads as files (node_modules is never an input): their lockfile, at the
+ * workspace's root, so a dependency update builds again.
+ */
+const lockfile = { pattern: 'package-lock.json', base: 'workspace' };
+
+/** This checkout's commit, or "none" outside git. */
+function commit(root) {
+  try {
+    return execFileSync('git', ['-C', root, 'rev-parse', 'HEAD'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+  } catch {
+    return 'none';
+  }
+}
+
 function appTasks(root, { remy }) {
+  // This checkout's port (a worktree's own), unless the shell names one.
+  const port = `\${PREVIEW_PORT:-${localPorts(root).preview}}`;
   const has = (path) => existsSync(resolve(root, path));
   // The strings the type check needs compiled: the app's own, when it has them; a workspace package's (remy-auth's
   // shared catalogs) through that package's generate task, which `from: dependencies` runs first.
-  const catalog = has('project.inlang') ? ['node node_modules/@joeblew999/remy-ui/src/app-catalog.js'] : [];
+  // The package's compiler script from the app's folder, wherever node_modules is (the app's own, or its workspace's).
+  const catalog = has('project.inlang')
+    ? [`node ${relative(root, fileURLToPath(new URL('./app-catalog.js', import.meta.url)))}`]
+    : [];
   const local = has('scripts/local.ts');
   const prepared = [...(local ? ['local'] : []), 'generate'];
   return {
@@ -119,7 +205,7 @@ function appTasks(root, { remy }) {
     generate: {
       command: [...catalog, 'wrangler types'],
       dependsOn: [{ task: 'generate', from: 'dependencies' }],
-      cache: { input: [{ auto: true }, ...generated], untrackedEnv: network },
+      cache: { input: [{ auto: true }, ...generated, lockfile], untrackedEnv: network },
     },
     // The build's folder emptied before the build runs or comes from the cache: a cache hit restores the build's files
     // over what is there and removes nothing, so an earlier build's chunks would stay beside them (a browser check
@@ -128,26 +214,21 @@ function appTasks(root, { remy }) {
     // vp dev, vp build and vp preview are Vite Plus's own; these are the app's, with what they need first.
     dev: { command: 'vp dev .', dependsOn: prepared, cache: false },
     // The production build, then Wrangler's deployment dry run (no upload). Its stamp names the commit it was built
-    // from (build-vite.js, through git, which Vite Plus does not see): git's record of the current commit is an input
-    // too, so a new commit builds again.
+    // from (build-vite.js, through git, which Vite Plus does not see), so the commit is in the command: Vite Plus's
+    // cache key holds the command, and a new commit (a commit, a merge) builds again. Read as Vite Plus loads the
+    // configuration, it is right in a worktree too, whose .git is a file (2026-10-17: .git/HEAD as an input was not).
     build: {
-      command: ['vp build .', 'wrangler deploy --dry-run'],
+      command: [`REMY_COMMIT=${commit(root)} vp build .`, 'wrangler deploy --dry-run'],
       dependsOn: [...prepared, 'clean'],
       cache: {
-        input: [
-          { auto: true },
-          ...generated,
-          { pattern: '.git/HEAD', base: 'workspace' },
-          { pattern: '.git/refs/heads/**', base: 'workspace' },
-          { pattern: '.git/packed-refs', base: 'workspace' },
-        ],
+        input: [{ auto: true }, ...generated, lockfile],
         output: ['dist/**'],
         untrackedEnv: network,
       },
     },
-    // The production build on Cloudflare's local host, at PREVIEW_PORT (4173 unless a worktree has its own).
+    // The production build on Cloudflare's local host, at this checkout's port.
     preview: {
-      command: 'wrangler dev --ip 127.0.0.1 --port ${PREVIEW_PORT:-4173}',
+      command: `wrangler dev --ip 127.0.0.1 --port ${port}`,
       dependsOn: ['build'],
       cache: false,
     },
@@ -157,10 +238,10 @@ function appTasks(root, { remy }) {
     // options passed through (`vp run test:browser --shard 1/3`, `--grep <words>`). The build they test is an
     // input; Playwright's results and Wrangler's local state are neither input nor output.
     'test:browser': {
-      command: 'playwright test --project=ours',
+      command: `PREVIEW_PORT=${port} playwright test --project=ours`,
       dependsOn: ['build', 'browsers'],
       cache: {
-        env: ['CHECK_LOCALES'],
+        env: ['CHECK_LOCALES', 'BEHAVIOUR_LOCALES', 'COLOR_SCHEME'],
         untrackedEnv: ['PREVIEW_PORT', ...network],
         input: browserInputs,
         output: [],
@@ -170,7 +251,7 @@ function appTasks(root, { remy }) {
     // beside them: they measure speed, so `remy test audits` holds the machine's speed lock around Playwright (two
     // agents' audits at once skew both).
     'test:audits': {
-      command: `${remy} test audits`,
+      command: `PREVIEW_PORT=${port} ${remy} test audits`,
       dependsOn: ['build', 'browsers'],
       cache: { untrackedEnv: ['PREVIEW_PORT', ...network], input: browserInputs, output: [] },
     },
@@ -181,7 +262,7 @@ function appTasks(root, { remy }) {
  * The workspace's tasks: the project's own checks, the unit checks, vp check over everything, fix and ci. `before`:
  * what the check needs built and generated first (the app's tasks, by name, `pkg#task` in a workspace).
  */
-function workspaceTasks({ check }, before, ciAfterCheck) {
+function workspaceTasks({ remy, check }, before, ciAfterCheck) {
   return {
     // The project's own checks (remy-check, the package's plain tool for them). A check never writes: `vp run fix`
     // writes what the two that could fix something report.
@@ -217,6 +298,11 @@ function workspaceTasks({ check }, before, ciAfterCheck) {
     // What GitHub runs, the same here: the check, then the browser checks, then Google's audits, one after the other
     // (each `vp run` inlined as its own cached task). GitHub runs each part as a job of its own (githubJobs).
     ci: { command: ['vp run test:browser', 'vp run test:audits', ...ciAfterCheck], dependsOn: ['check'], cache: false },
+    // The checks a repository adds to a release (vp run release runs them after vp run ci): none of its own by default;
+    // a repository's vite.config.ts gives its own under this name (remy-auth: the blank app's pins, shadcn's files).
+    'release-checks': { command: 'echo "release-checks: this repository adds none"', cache: false },
+    // Each package the repository publishes (the tag's CI job runs this), after what the packages ship is generated.
+    publish: { command: `${remy} packages publish`, dependsOn: [...before.generate], cache: false },
   };
 }
 
@@ -251,7 +337,7 @@ export const flowScripts = (remy = 'remy') => ({
   status: `${remy} flow status`,
   land: `${remy} flow prepare land && vp run ci && ${remy} flow land`,
   promote: `${remy} flow promote`,
-  release: `${remy} flow prepare release && REMY_REHEARSE_PUBLISH=1 vp run ci && ${remy} flow release`,
+  release: `${remy} flow prepare release && REMY_REHEARSE_PUBLISH=1 vp run ci && vp run release-checks && ${remy} flow release`,
   setup: `${remy} setup && vp run check`,
 });
 
@@ -267,7 +353,7 @@ export const hookFiles = {
 export const taskNames = () => [
   ...Object.keys(appTasks('.', { remy: 'remy', check: 'remy-check' })),
   'local',
-  ...Object.keys(workspaceTasks({ check: 'remy-check' }, { generate: [], build: [] }, [])),
+  ...Object.keys(workspaceTasks({ remy: 'remy', check: 'remy-check' }, { generate: [], build: [] }, [])),
 ];
 
 /** The formatter and the linter, one style for every repository. */

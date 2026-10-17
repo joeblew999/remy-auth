@@ -12,7 +12,7 @@ import { remarkUiWords } from './remark-ui-words.js';
 import { remarkAutoTypeTable } from 'fumadocs-typescript';
 import { remarkDirectiveAdmonition, remarkMdxMermaid, remarkSteps } from 'fumadocs-core/mdx-plugins';
 import { remyBuild } from '../build-vite.js';
-import { network } from '../tasks.js';
+import { docsApp, network } from '../tasks.js';
 
 // An app's whole docs Worker from its docs.config.ts (.plans/thin-apps.md, group 2): its docs/vite.config.ts
 // is `export default remyDocs(docsConfig, { contract: '<its contract package>' })`. The Worker itself is this
@@ -150,7 +150,7 @@ export function remyDocs(docsConfig, { contract, root = process.cwd() } = {}) {
           mdxOptions: {
             remarkPlugins: (plugins) => [
               remarkDirective,
-              remarkUiWords({ root: join(root, '..') }),
+              remarkUiWords({ root: docsApp(root) }),
               remarkDirectiveAdmonition,
               remarkMdxMermaid,
               remarkAutoTypeTable,

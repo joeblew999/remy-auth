@@ -103,12 +103,10 @@ The repository's own tools, as package.json defines them, each run as `vp run <s
 | Script | Runs |
 | --- | --- |
 | `vp run prepare` | `vp config --no-agent` |
-| `vp run release-checks` | `vp run template:check && vp run ui:verify` |
-| `vp run test:consumers` | `bash fixtures/consumer/run.sh` |
 | `vp run docs:cli` | `cd packages/ui/src/docs && node ../../../../node_modules/@fumadocs/cli/dist/index.js` |
-| `vp run ui:components` | `shadcn add button card input label badge alert field separator direction skeleton empty sidebar breadcrumb collapsible dropdown-menu avatar sheet tooltip navigation-menu use-mobile table spinner tabs --overwrite --yes` |
+| `vp run ui:components` | `shadcn add button card input label badge alert field separator direction skeleton empty sidebar breadcrumb collapsible dropdown-menu avatar sheet tooltip navigation-menu use-mobile table spinner tabs --overwrite --yes -c apps/remy-auth` |
 | `vp run ui:blocks` | `shadcn add @shadcn/sidebar-16 -c packages/ui --diff src/blocks/sidebar-16/components/app-sidebar.tsx && shadcn add @shadcn/sidebar-16 -c packages/ui --diff src/blocks/sidebar-16/components/nav-main.tsx && shadcn add @shadcn/sidebar-16 -c packages/ui --diff src/blocks/sidebar-16/components/site-header.tsx` |
-| `vp run ui:theme` | `shadcn apply nova --only theme --yes` |
-| `vp run ui:verify` | `vp run ui:theme && vp run ui:components && git diff --exit-code -- packages/ui/src/components packages/ui/src/styles src/lib` |
+| `vp run ui:theme` | `shadcn apply nova --only theme --yes -c apps/remy-auth` |
+| `vp run ui:verify` | `vp run ui:theme && vp run ui:components && vp fmt packages/ui/src/components packages/ui/src/hooks packages/ui/src/styles apps/remy-auth/src/lib && git diff --exit-code -- packages/ui/src/components packages/ui/src/hooks packages/ui/src/styles apps/remy-auth/src/lib` |
 | `vp run ui:version` | `node scripts/version.ts` |
 | `vp run template:check` | `node scripts/template-check.ts` |

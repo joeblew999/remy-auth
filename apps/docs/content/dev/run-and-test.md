@@ -113,7 +113,7 @@ intent; language changes on site pages are full navigations.
 ## shadcn, stock
 
 Components and the theme are what the shadcn CLI writes, in shadcn's monorepo layout: this app's
-[`components.json`](https://github.com/joeblew999/remy-auth/blob/main/components.json) routes `shadcn add` into the package
+[`apps/remy-auth/components.json`](https://github.com/joeblew999/remy-auth/blob/main/apps/remy-auth/components.json) routes `shadcn add` into the package
 ([`packages/ui/components.json`](https://github.com/joeblew999/remy-auth/blob/main/packages/ui/components.json)), and
 `packages/ui/src/styles/globals.css` is written by the CLI too. Nobody edits either by hand; the
 scripts in [`package.json`](https://github.com/joeblew999/remy-auth/blob/main/package.json) are the only way they change:

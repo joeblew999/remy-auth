@@ -6,23 +6,30 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-- CI: the shared workflow is `.github/workflows/ci.yml` (it was `google.yml`), named for what it runs,
-  `npm run ci`. Apps move to it with this release: `remy upgrade` rewrites the `uses:` line.
+### Changed: Vite Plus runs everything
+- Every app is a Vite Plus project (`vp`, the toolchain the package already uses): `remyApp()` in its
+  `vite.config.ts` gives it the tasks (`generate`, `build`, `dev`, `preview`, `browsers`, `test:browser`,
+  `test:audits`, the project's own checks, `check`, `fix`, `ci`, `release-checks`, `publish`), which Vite Plus
+  runs in order and replays from its cache when nothing they read changed. Each task is one tool; a `remy`
+  command only does what Vite Plus has no tool for, and none of ours runs `vp run`.
+- The flow is `vp run check` after every change, `vp run land "<what changed>"`, `vp run promote`,
+  `vp run release`, `vp run status`, `vp run setup` (COMMANDS.md). `vp run ci` is what GitHub runs, the same
+  locally; GitHub runs each part as a job (`vp run <task>`) with Vite Plus's task cache between runs.
+- Git hooks are Vite Plus's (`.vite-hooks/`: `vp staged` before a commit, `vp run ci` before a push outside
+  the flow), installed by the `prepare` script.
+- The old scripts and commands are gone: `dev:<step>`, `remy check`, `remy ci`, `remy app`, `remy dev`, the
+  `remy flow` steps `start`, `change` and `done` (Claude Code's own worktrees do that), `remy verify all`.
+- A worktree's own ports reach the tasks (`localPorts()`), so two worktrees' checks never share one.
+- CI: the shared workflow is `.github/workflows/ci.yml` (it was `google.yml`).
 
-### Changed
-- The flow is one command, `remy flow <step>` (`status`, `start`, `change`, `land`, `promote`, `release`,
-  `done`), dispatched from the table in `flow.ts` like every other command; the blank app's scripts say
-  it. A bare `remy <step>` still answers, since the scripts of apps on 0.15 say that; the Claude session
-  hook now runs `remy flow status`.
-- `remy help` lists every command, and the list is read from the commands themselves: each module exports
-  its one line and, where it has subcommands, their table (`commands.ts`), which its main dispatches on and
-  its own usage prints from (`remy docs` with no subcommand). A command cannot exist without its line; a
-  line cannot outlive its command. The flow's seven steps are listed from `flow.ts`'s table.
-- `remy verify all` names the release gate `remy verify` alone still runs; `remy skills remove` is listed.
-- GitHub's verdict on a commit is main's push run: a release tag's run on the same commit (the release
-  job's) no longer holds `dev:promote` as "still checking".
-- Every build and deploy runs the app's `generate` script first (`prepare` in `dev.ts`), so Paraglide's
-  Vite plugin finds unchanged inputs at build start and rewrites nothing.
+### Upgrading an app
+- `npx remy upgrade <version>` rewrites the app's scripts to the flow's (its own are kept; one that shares a
+  task's name goes, `release-checks` becomes `release-checks:app`), writes `.vite-hooks/`, gives
+  `docs/vite.config.ts` its `root`, and moves the workflow to `ci.yml`. From 0.15.x, run it twice: the first run
+  is 0.15's own code, which installs this release; the second, this release's, rewrites the scripts (`remy`
+  says so on every command until it has).
+- Cloudflare's build command for the app is now `npx vp run build`.
+- Node as `.node-version` says, and npm as `devEngines` pins it (`vp env`).
 
 ## [0.15.1] - 2026-10-11
 

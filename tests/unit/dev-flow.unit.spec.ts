@@ -40,7 +40,8 @@ test('no English page gives a heavy command bare in a shell block: REMY_FLOW=han
 });
 
 // The flow's steps are scripts that run Vite Plus between their own parts, never the other way round: land and a
-// release prepare (what changes the files, or what would stop them), then vp run ci, then their own part; setup
+// release prepare (what changes the files, or what would stop them), then vp run ci (a release, its release-checks too),
+// then their own part; setup
 // installs, then vp run check. The installation's own checks run no check and no browser (owner, 2026-10-11, of a
 // setup that ran the browser suite: "Setup takes 2 minutes. This is clearly wrong").
 test('the flow runs vp run ci or vp run check between its own parts, in remy-auth and in every app', () => {
@@ -51,7 +52,7 @@ test('the flow runs vp run ci or vp run check between its own parts, in remy-aut
     const { scripts } = JSON.parse(readFileSync(file, 'utf8')) as { scripts: Record<string, string> };
     expect(scripts.land, file).toBe(`${remy} flow prepare land && vp run ci && ${remy} flow land`);
     expect(scripts.release, file).toBe(
-      `${remy} flow prepare release && REMY_REHEARSE_PUBLISH=1 vp run ci && ${remy} flow release`,
+      `${remy} flow prepare release && REMY_REHEARSE_PUBLISH=1 vp run ci && vp run release-checks && ${remy} flow release`,
     );
     expect(scripts.setup, file).toBe(`${remy} setup && vp run check`);
     // What remy upgrade writes into an app is what remy-auth and the template have: one source, tasks.js.
@@ -70,5 +71,8 @@ test('the flow runs vp run ci or vp run check between its own parts, in remy-aut
   expect(setupChecks.slice(0, setupChecks.indexOf('\n}'))).not.toMatch(/check\(\)|every\(\)|consumers\(\)/);
   // Nothing of the command line's runs Vite Plus's task runner: the scripts do.
   for (const name of readdirSync('packages/ui/src/cli').filter((file) => file.endsWith('.ts')))
-    expect(readFileSync(`packages/ui/src/cli/${name}`, 'utf8'), name).not.toMatch(/['"]vp['"],\s*\[\s*['"]run['"]/);
+    expect(readFileSync(`packages/ui/src/cli/${name}`, 'utf8'), name).not.toMatch(
+      // vp run itself, or npm run, whose scripts may run it (the release's npm run release-checks did, 2026-10-17).
+      /['"]vp['"],\s*\[\s*['"]run['"]|['"]npm['"],\s*\[\s*['"]run['"]/,
+    );
 });

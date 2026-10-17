@@ -2,11 +2,10 @@
 // deployed and its local ports. The steps read it here and hand it on as the environment the tasks
 // still expect (DEPLOY_ORIGIN, STAGING_ORIGIN, DOCS_ORIGIN, the VITE_ copies, the ports), set only
 // where the shell did not. A worktree's ports come from its name, so nothing is written for them.
-import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { existsSync, readdirSync } from 'node:fs';
-import { basename, dirname, join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { localPorts } from '@joeblew999/remy-ui/workspace';
 
 export type RemyProject = {
   /** Where the app is deployed: production, its staging, its docs Worker. */
@@ -27,25 +26,8 @@ export async function project(cwd = process.cwd()): Promise<RemyProject> {
   return loaded.default ?? {};
 }
 
-/** This worktree's own ports, from its name: the same name, the same ports, never shared with another. */
-export function portsFor(name: string): { preview: number; docsPreview: number } {
-  const seed = parseInt(createHash('sha256').update(name).digest('hex').slice(0, 6), 16);
-  const preview = 4200 + (seed % 400) * 2;
-  return { preview, docsPreview: preview + 1 };
-}
-
-/** The worktree's name when the cwd is one; the main checkout has none. */
-export function worktreeName(cwd = process.cwd()): string | undefined {
-  try {
-    const read = (...args: string[]) =>
-      execFileSync('git', ['-C', cwd, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
-    const root = read('rev-parse', '--path-format=absolute', '--git-common-dir').replace(/\/\.git$/, '');
-    const top = read('rev-parse', '--show-toplevel');
-    return top === root ? undefined : basename(top);
-  } catch {
-    return undefined;
-  }
-}
+// The ports, a worktree's own included: the tasks' one definition (tasks.js), which the command line uses too.
+export { localPorts, portsFor, worktreeName } from '@joeblew999/remy-ui/workspace';
 
 /**
  * How to run remy in a checkout, for a hook or a child: the platform's own source where it is
@@ -79,10 +61,7 @@ export async function configure(cwd = process.cwd()): Promise<RemyProject> {
   const set = (name: string, value: number) => {
     if (process.env[name] === undefined) process.env[name] = String(value);
   };
-  const name = worktreeName(cwd);
-  const ports = name
-    ? portsFor(name)
-    : { preview: config.ports?.preview ?? 4173, docsPreview: config.ports?.docsPreview ?? 4174 };
+  const ports = localPorts(cwd);
   set('PREVIEW_PORT', ports.preview);
   set('DOCS_PREVIEW_PORT', ports.docsPreview);
   return config;
@@ -104,6 +83,14 @@ export function appDir(cwd = process.cwd()): string {
 export function docsDir(cwd = process.cwd()): string | undefined {
   if (existsSync(join(cwd, 'docs', 'docs.config.ts'))) return join(cwd, 'docs');
   return packageDirs(cwd).find((dir) => existsSync(join(dir, 'docs.config.ts')));
+}
+
+/**
+ * The docs' content folder relative to cwd (I18N_DOCS_DIR wins): the translation tools read and name paths from the
+ * repository's root. docsDir() is absolute, so never join it onto cwd (the docs check found nothing, 2026-10-17).
+ */
+export function docsContent(cwd = process.cwd()): string {
+  return process.env.I18N_DOCS_DIR ?? relative(cwd, join(docsDir(cwd) ?? join(cwd, 'docs'), 'content'));
 }
 
 /** An installed tool's binary: node_modules/.bin, from this folder up, as Node resolves packages (a workspace installs once, at its root). */

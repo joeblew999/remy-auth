@@ -17,3 +17,11 @@ test('a changed word still is', () => {
     pagePrints(page('| A | B |\n| --- | --- |\n| one | three words |')),
   );
 });
+
+// The docs' translation check finds remy-auth's own docs (apps/docs), from the root: on 2026-10-17 it joined an
+// absolute folder onto the root, found no site, and reported nothing to translate, so neither a landing nor a
+// release would have translated anything.
+test("the docs' translation check finds this repository's docs sites", async () => {
+  const { docsGaps } = await import('../../packages/ui/src/cli/i18n.ts');
+  expect(docsGaps().sites).toBeGreaterThan(0);
+});

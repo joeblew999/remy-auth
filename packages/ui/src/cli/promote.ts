@@ -38,7 +38,7 @@ export async function main(): Promise<void> {
     process.exit(1);
   } else if (checks.conclusion !== 'success') {
     console.error(
-      `promote: GitHub's checks did not pass, ${describeRun(checks)}; fix that first (REMY_FLOW=hand npx remy test <level> reproduces it)`,
+      `promote: GitHub's checks did not pass, ${describeRun(checks)}; fix that first (vp run ci reproduces it here)`,
     );
     process.exit(1);
   } else console.log(`promote: GitHub's checks passed, ${describeRun(checks)}`);

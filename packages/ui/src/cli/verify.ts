@@ -117,7 +117,12 @@ export async function tooling(): Promise<void> {
     ]);
     for (const name of workflows) {
       const text = readFileSync(`.github/workflows/${name}`, 'utf8');
-      for (const match of text.matchAll(/\b(?:npm|vp) run ([a-z0-9][a-z0-9:_-]*)/g))
+      // `vp run <name>` written out, and each job's `task:` in a matrix (the workflow runs `vp run ${{ matrix.task }}`).
+      const named = [
+        ...text.matchAll(/\b(?:npm|vp) run ([a-z0-9][a-z0-9:_-]*)/g),
+        ...text.matchAll(/^\s*-?\s*task:\s*['"]?([a-z0-9][a-z0-9:_-]*)/gm),
+      ];
+      for (const match of named)
         assert.ok(
           runnable.has(match[1]!),
           `.github/workflows/${name} runs ${match[1]}, which is neither a package.json script nor a vite.config.ts task`,
@@ -147,6 +152,7 @@ export async function tooling(): Promise<void> {
       assert.equal(skill.ref, ref, `${name}: installed source differs from the pin`);
       const canonical = `.agents/skills/${name}`;
       const link = `.claude/skills/${name}`;
+      assert.ok(existsSync(`${canonical}/SKILL.md`), `${name}: not installed here; npx remy skills install`);
       assert.ok(readFileSync(`${canonical}/SKILL.md`, 'utf8').trim(), `${name}: empty SKILL.md`);
       assert.ok(lstatSync(link).isSymbolicLink(), `${name}: Claude path must be a symlink`);
       assert.equal(realpathSync(link), realpathSync(canonical), `${name}: incorrect Claude target`);

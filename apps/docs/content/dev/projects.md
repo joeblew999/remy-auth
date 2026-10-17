@@ -48,7 +48,7 @@ the root either way.
 | `messages/`, `project.inlang/` | the app preset, the app's `generate` task, `remy i18n` | the app's own strings, if any (compiled into `src/paraglide/`) |
 | `.plans/` (`now.md`, `done/`, `parked/`) | `remy plans` | the repo's plans |
 | `AGENTS.md`, `.github/workflows/` | agents; GitHub | the agents' pointer at the docs; CI |
-| `packages/ui/src/cli/`, `template/`, `fixtures/consumer/` | the package; `giget`; `vp run ci new-app` | remy-auth only: the command line itself, the blank app a new repo starts from, and the consumer fixture that tests both as another repo gets them |
+| `packages/ui/src/cli/`, `template/`, `fixtures/consumer/` | the package; `giget`; `vp run new-app` | remy-auth only: the command line itself, the blank app a new repo starts from, and the consumer fixture that tests both as another repo gets them |
 
 ### A new consumer
 
@@ -100,8 +100,8 @@ In `remy.config.ts`: `release.package` (the package whose version names the rele
 anything else is refused at build time and in Playwright, whose message names the importing file, not the
 export map. A package's own strings are its own inlang project, compiled by its build, whose runtime
 follows the platform's language with one call, `followLocale(runtime)` (`locale`); the i18n tasks read it
-through `I18N_INLANG`. Checks the repository adds to a release go in its `release-checks` script (remy-auth:
-`template:check`, `ui:verify`). remy-auth sets a release's version with `vp run ui:version X.Y.Z`, which
+through `I18N_INLANG`. Checks the repository adds to a release are its `release-checks` task, in its `vite.config.ts`, which
+`vp run release` runs after `vp run ci` (remy-auth: `template:check`, `ui:verify`). remy-auth sets a release's version with `vp run ui:version X.Y.Z`, which
 writes it everywhere it appears (the package and the blank app's pins).
 
 ### Choosing the version: released, development or local

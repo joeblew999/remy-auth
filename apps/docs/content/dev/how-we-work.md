@@ -275,9 +275,9 @@ tasks; `vp run setup` installs the guard.
   2026-10-10, of a landing on staging after 40 seconds whose command ran six minutes: "how can it be
   6 minutes").
 - **GitHub's answer comes to you.** A red run comments on the commit (GitHub tells its author), naming
-  the run; `vp run check` starts by saying what the last run on main did; `vp run promote` refuses a commit
-  whose run is not green or not finished. To reproduce a red job, a person runs
-  `vp run ci <part>`, the same command GitHub ran, since the workflow holds no
+  the run; `vp run land` and `vp run release` start by saying what the last run on main did; `vp run promote`
+  refuses a commit whose run is not green or not finished. To reproduce a red job, a person runs
+  `vp run <task>` (the job's name), the same command GitHub ran, since the workflow holds no
   logic of its own (`remy verify tooling` checks every script a workflow names exists). An agent reads the
   run's own log (`gh run view <id> --log-failed`) and runs the one area
   (`vp run test:browser --grep <words>`). Report what was tested and what was not; never call

@@ -5,7 +5,7 @@
 // the tag, which publishes.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { dispatch, type Subcommands } from './commands.ts';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { translationGaps } from './i18n.ts';
@@ -90,7 +90,31 @@ export async function upgrade(): Promise<void> {
   await verifySetup();
 }
 
-const generate = (): void => tool('npm', ['run', '--if-present', '--silent', 'generate'], { what: 'generate' });
+/**
+ * Every file a published package names (its bins, its exports) exists before it is packed: its generated ones
+ * (remy-ui's cli/ and src/paraglide/) are Vite Plus's tasks' output, which `vp run publish` runs first; a pack
+ * without them would ship a package whose commands and catalogs are missing.
+ */
+const shipsWhatItNames = (): void => {
+  for (const item of workspaces().published) {
+    const manifest = JSON.parse(readFileSync(join(item.location, 'package.json'), 'utf8')) as {
+      bin?: string | Record<string, string>;
+      exports?: unknown;
+    };
+    const targets: string[] = [];
+    const walk = (value: unknown): void => {
+      if (typeof value === 'string') targets.push(value);
+      else if (value && typeof value === 'object') Object.values(value).forEach(walk);
+    };
+    walk(manifest.bin);
+    walk(manifest.exports);
+    const missing = targets.filter((target) => !target.includes('*') && !existsSync(join(item.location, target)));
+    if (missing.length)
+      fail(
+        `packages: ${item.name} names files that are not built: ${missing.join(', ')}. vp run publish builds them first (its tasks).`,
+      );
+  }
+};
 /** What the package ships that is made from the docs: the remy skill (remy-auth only), before any pack or publish. */
 const shipped = async (): Promise<void> => {
   const { buildSkill } = await import('./skills.ts');
@@ -99,7 +123,7 @@ const shipped = async (): Promise<void> => {
 
 /** A tarball of each published package, here, for a scratch app to install before any release. */
 export async function pack(): Promise<void> {
-  generate();
+  shipsWhatItNames();
   await shipped();
   const { published } = workspaces();
   if (!published.length) {
@@ -189,7 +213,7 @@ export async function publish(options: { release?: string; dryRun?: boolean } = 
     if (!token) fail('publish: no token (NODE_AUTH_TOKEN, or gh auth login)');
     // An app's own .npmrc (the blank app's) reads ${GITHUB_TOKEN} and outranks the user config written below.
     const env = { GITHUB_TOKEN: token, NODE_AUTH_TOKEN: token };
-    generate();
+    shipsWhatItNames();
     await shipped();
     for (const item of workspaces().published) {
       const host = item.registry.replace(/^https:\/\//, '').replace(/\/$/, '');
@@ -278,15 +302,13 @@ export async function releaseReady(): Promise<void> {
 }
 
 /**
- * The release's own part, after `vp run ci` passed whole (its script: remy flow prepare release, then vp run ci, then
- * this): the repository's release-checks, Core Web Vitals on a throwaway preview, then the tag.
+ * The release's own part, after `vp run ci` and `vp run release-checks` passed (its script runs both, Vite Plus's):
+ * Core Web Vitals on a throwaway preview, then the tag.
  */
 export async function release(): Promise<void> {
   // The release is what runs the gated commands: said first, before the gate asks (2026-10-11, the first
   // release refused itself with the marker set after it).
   process.env.REMY_FLOW ??= 'release';
-  // Not silent: npm would hand loglevel=silent to every nested npm in the script.
-  tool('npm', ['run', '--if-present', 'release-checks'], { what: 'release-checks' });
   await cwv('release');
   await tag();
 }
