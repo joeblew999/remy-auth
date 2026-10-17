@@ -69,5 +69,5 @@ export async function shots(args: string[]): Promise<void> {
   await browser.close();
 }
 
-export const what = '[path] [--phone] [--dark] [--locale xx]: screenshots of a page as a visitor sees it (npm run shots)';
+export const what = '[path] [--phone] [--dark] [--locale en,ar] [--video] [--all] [--out dir] [--origin url]: screenshots (or a WebM) of a page as a visitor sees it; --all every page, desktop and phone, light and dark, en and ar (npm run shots)';
 export const main = (args: string[]): Promise<void> => shots(args);

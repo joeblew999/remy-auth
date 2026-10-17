@@ -24,7 +24,7 @@ read those, not the translations beside them (`*.es.md`).
    generated code, owner decisions.
 2. [Developer tooling](./tooling.md): pinned tools and agent skills; every command is on
    [Commands](./commands.mdx), generated from the command line. Run project commands through `npm run <script>`.
-3. [GUI runtime workflow](./run-and-test.md): one Worker, local and remote test targets.
+3. [Run, preview and test the app](./run-and-test.md): one Worker, local and remote test targets, Cloudflare.
 4. [How we work](./how-we-work.md): project tools first, surveys before tool choices, shadcn and
    TanStack all the way for UI, the flow and who runs each step, multi-agent work. Record working
    rules there, not in agent memory.
@@ -45,4 +45,4 @@ An agent in Claude's cloud (Claude on the web or the phone) has no Cloudflare to
 `npx remy cloudflare` deploys cannot sign in there, and `dev:land` says it skipped staging, which is not a
 failure. It has the **Cloudflare connector** instead, used by hand; nothing in the repository depends on it.
 How to preview a branch from there, and what lives on Cloudflare rather than in the repository:
-[GUI runtime workflow, on Cloudflare](./run-and-test.md#on-cloudflare).
+[On Cloudflare](./run-and-test.md#on-cloudflare).

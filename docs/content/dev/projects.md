@@ -62,8 +62,8 @@ Everything else is the package, which one version bump upgrades.
    `AGENTS.md` rules block, MCP registration, the flow's guard, the installation's checks).
 5. Commit everything, `package-lock.json`, `skills-lock.json` and `src/routeTree.gen.ts` included. The
    blank app's strings come translated; after the English changes (`messages/en.json`, the docs), commit it
-   and translate this once by hand, `REMY_FLOW=hand npx remy i18n translate`, which writes and commits
-   the other languages; from then on `dev:land` does it.
+   and translate this once by hand, `REMY_FLOW=hand npx remy i18n translate`, which writes the other
+   languages (it never commits: commit them with the rest); from then on `dev:land` does it.
 6. The first deploy, by hand: `npx remy cloudflare deploy`, and `npx remy cloudflare docs-deploy` for the
    docs. Once the
    repository is on GitHub (step 7), work goes through [the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest):
@@ -85,15 +85,7 @@ start its server: give each shell its own (`PREVIEW_PORT=4232 npm run …`).
 
 A repository may also publish packages of its own (a contract, a UI package), as remy-auth does; that
 costs no command of its own. Its packages are npm workspaces (`packages/<name>/`, `package.json`'s
-`workspaces`), and each one that is not `private` is published by `remy packages` (`npm run packages -- …`):
-
-| Command | Does |
-| --- | --- |
-| `check`, `upgrade` | Newer npm versions of the repository's own dependencies (root and workspaces; never its own packages or `@joeblew999/remy-ui`), previewed (`check`) or applied, then the installation's checks (`upgrade`) |
-| `pack` | A tarball of each published package, for a scratch app to install before any release |
-| `release` | The gates (translations strict, every changed package bumped, `remy verify`, the app's `release-checks` script, Google's audits, Core Web Vitals), then `tag`; `dev:release` runs it |
-| `tag` | On a clean `main`: tag the release package's version, push, then `publish --release` |
-| `publish` | Publish each package whose version is new on its registry; with `--release vX.Y.Z` also the GitHub release from `CHANGELOG.md` (`notes`). The tag's CI job runs the same command |
+`workspaces`), and each one that is not `private` is published by `remy packages`, whose subcommands are on [Commands](./commands.mdx).
 
 In `remy.config.ts`: `release.package` (the package whose version names the release) and
 `release.title`. A package's `exports` name every subpath its users import (`"./video": "./src/video.ts"`);
@@ -191,12 +183,6 @@ every project: `.plans/now.md` is the one ordered list, `.plans/*.md` the few op
 `.plans/done/` and `.plans/parked/` the rest, `.plans/stability-log.md` optional. A project with no
 `.plans/` passes `plans check` and has nothing to list.
 
-| Command | Does |
-| --- | --- |
-| `status` | Open items in `now.md` by section, open plan files with their first `Status:`/`Closed`/`Parked` line and last commit (STALE after 14 days), parked plans. `--json` for agents |
-| `check` | `now.md` exists, every relative `.md` link under `.plans/` resolves, no `.md` outside `.plans/`, `done/` and `parked/`, every open plan file linked from `now.md`. Instant, no network; the check runs it first |
-| `close <plan> "<what shipped>"` | Adds `Closed <today>: ...` under the title, moves it to `done/` (from `.plans/` or `parked/`; `git mv` when tracked), repoints relative links to it in `.plans/`, `docs/`, `packages/*/README.md` and the root `*.md`, and its own links from the new folder, strikes its `now.md` item |
-| `park <plan> "<why>"` | The same into `parked/` with `Parked <today>: ...` |
-| `open <plan> "<why now>"` | A parked plan taken up again: the same from `parked/` back into `.plans/` with `Opened <today>: ...`; add its item to `now.md` yourself |
+The commands, with what each does, are on [Commands](./commands.mdx).
 
 `close` and `park` change files and stage the move but never commit: read `git diff`, then `npm run dev:change`.

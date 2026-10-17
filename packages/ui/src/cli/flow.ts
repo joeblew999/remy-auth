@@ -39,7 +39,7 @@ type Script = { main: (args: string[]) => void | Promise<void> };
 const step = (load: () => Promise<Script>) => (args: string[]) => load().then(module => module.main(args));
 export const what = 'the development flow: the four steps, and the two that bracket a worktree (npm run dev:<step>)';
 export const commands: Subcommands = {
-  status: { what: "what is going on: main with GitHub's verdicts, the deployments, the worktrees, the translations", run: step(() => import('./status.ts')) },
+  status: { what: "what is going on: main with GitHub's verdicts, the open pull requests, the deployments, the worktrees, the translations, the top of now.md", run: step(() => import('./status.ts')) },
   start: { what: '<name>: a worktree of your own from main, installed, its own ports, the guard', run: step(() => import('./start.ts')) },
   change: { what: steps.change.what, run: step(() => import('./change.ts')) },
   land: { what: `"<what changed>": ${steps.land.what}`, run: step(() => import('./land.ts')) },

@@ -180,13 +180,13 @@ export async function release(): Promise<void> {
 
 export const what = 'a repository that publishes packages: updates, the pack, the notes, the publish, the tag, the release';
 export const commands: Subcommands = {
-  check: { what: 'package updates available (npm-check-updates); nothing changed', run: () => check() },
+  check: { what: "package updates available for the repository's own dependencies (npm-check-updates; never its own packages); nothing changed", run: () => check() },
   upgrade: { what: "upgrade every package, major versions included, then the installation's checks", run: () => upgrade() },
-  pack: { what: 'pack each published workspace, as the publish would', run: () => pack() },
+  pack: { what: 'pack each published workspace, as the publish would: a tarball a scratch app installs before any release', run: () => pack() },
   notes: { what: "<version>: the CHANGELOG section of a version, as the GitHub release's notes", run: rest => { if (!rest[0]) fail('remy packages notes <version>'); process.stdout.write(notes(rest[0])); } },
   bumped: { what: 'every published package whose files changed since the last release tag has a new version', run: () => bumped() },
-  publish: { what: '[--release vX.Y.Z] [--dry-run]: each registry accepts its token, then publish each workspace, then the GitHub release from its notes', run: rest => { const at = rest.indexOf('--release'); return publish({ release: at >= 0 ? rest[at + 1] : undefined, dryRun: rest.includes('--dry-run') }); } },
+  publish: { what: '[--release vX.Y.Z] [--dry-run]: each registry accepts its token, then each workspace whose version is new on its registry, then the GitHub release from its CHANGELOG notes; the tag\'s CI job runs the same', run: rest => { const at = rest.indexOf('--release'); return publish({ release: at >= 0 ? rest[at + 1] : undefined, dryRun: rest.includes('--dry-run') }); } },
   tag: { what: "on a clean main: the lead package's version as the tag, pushed with main, then the publish", run: () => tag() },
-  release: { what: 'the release: translations strict, bumped, the gate, Google, Core Web Vitals on a preview, the tag (dev:release runs it)', run: () => release() },
+  release: { what: "the release: translations strict, bumped, the gate (remy verify), the app's release-checks script, Google, Core Web Vitals on a preview, the tag (dev:release runs it)", run: () => release() },
 };
 export const main = dispatch('packages', commands);

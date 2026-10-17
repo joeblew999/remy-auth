@@ -121,7 +121,7 @@ The package's dependencies are the platform's one dependency set, pinned exactly
 TanStack Start, Router and Query), the toolchain (Vite, Wrangler, Tailwind, TypeScript) and the tools the
 shared tasks and checks run (Playwright, Lighthouse, the DevTools MCP server, npm-check-updates). An app
 names only the package; `remy.singleCopy` in its `package.json` lists those that break when installed twice,
-which the check's single-copies part keeps ([the command line](./projects.md#choosing-the-version-released-development-or-local)).
+which the check's single-copies part keeps ([projects](./projects.md#choosing-the-version-released-development-or-local)).
 
 ## Language
 
@@ -137,13 +137,10 @@ Chinese, Hindi, Amharic, Polish, Turkish and German) is agent-authored and unrev
 ## Publishing
 
 The package is `@joeblew999/remy-ui` on GitHub Packages (the scope must equal the
-GitHub owner there). `npm run dev:release` (alias `release`) does the whole release from this machine, stopping at the
-first failure: translations complete and current (`remy i18n check`, strict), every check of ours
-(`remy verify`), shadcn's files exactly as its CLI writes them (`npm run ui:verify`), Google's Lighthouse audits,
-and Core Web Vitals measured cold on a throwaway Cloudflare Worker (`npm run test -- cwv`: the first visits
-after a deploy, which is what a slow page costs most). Then it tags `vX.Y.Z` from
-`packages/ui/package.json`, pushes, publishes with your `gh` token and creates the GitHub release from the
-matching CHANGELOG section. CI (`.github/workflows/ci.yml`) repeats Google's audits on the tag.
+GitHub owner there). `npm run dev:release` does the whole release from this machine, stopping at the first
+failure; its gates, in order, are `remy packages release` on [Commands](./commands.mdx). Core Web Vitals are
+measured cold on a throwaway Cloudflare Worker: the first visits after a deploy, which is what a slow page costs
+most. CI (`.github/workflows/ci.yml`) repeats Google's audits on the tag.
 
 Before releasing, one commit: the version in `packages/ui/package.json` (and in
 `packages/contract/package.json` when the contract changed) and the CHANGELOG section. No other file
