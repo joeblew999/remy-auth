@@ -39,8 +39,9 @@ export async function ensureSeededPeople(request: Request): Promise<void> {
   if (!permits(env, 'seededSignIn')) throw new Error('This environment has no seeded people.');
   const { adapter } = await auth(request).$context;
   const at = new Date();
-  for (const person of seededPeople) {
-    if (await adapter.findOne({ model: 'user', where: [{ field: 'id', value: person.id }] })) continue;
+  // Side by side: each lookup is a round trip to the database, which may be a continent away.
+  await Promise.all(seededPeople.map(async person => {
+    if (await adapter.findOne({ model: 'user', where: [{ field: 'id', value: person.id }] })) return;
     await adapter.create({ model: 'user', data: { ...person, emailVerified: true, createdAt: at, updatedAt: at }, forceAllowId: true });
-  }
+  }));
 }

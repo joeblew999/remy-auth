@@ -5,6 +5,9 @@
   // Shared source for local development, production preview and deployment.
   "main": "./src/server.ts",
   "compatibility_flags": ["nodejs_compat"],
+  // Smart Placement: Cloudflare runs the Worker near its databases when that is faster, so a page's
+  // queries are local and a visitor far from them pays one trip, not one per query.
+  "placement": { "mode": "smart" },
   // Release and environment for the shared log contract (@joeblew999/remy-ui/worker).
   "version_metadata": { "binding": "CF_VERSION_METADATA" },
   // "production" here, "staging" in env.staging below, and "local" where a local .dev.vars says so
