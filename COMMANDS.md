@@ -7,7 +7,7 @@ Day to day, two: `vp run check` after every edit, `vp run land "<what changed>"`
 | Command | What it does |
 | --- | --- |
 | `vp run dev` | the app with hot reload, its local state (.dev.vars, the migrations) and generated files first |
-| `vp run build` | the production build and Wrangler's deployment dry run, after the same; no upload |
+| `vp run build` | the production build, after the same; no upload (vp run check adds Wrangler's deployment dry run) |
 | `vp run preview` | the production build on Cloudflare's local host, at PREVIEW_PORT (4173 by default) |
 | `vp run check` | after every change: everything generated, both builds, the project's own checks, then vp check (format, lint, types) |
 | `vp run fix` | what the check only verifies, written: COMMANDS.md and each docs page's ending |

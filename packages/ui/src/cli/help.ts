@@ -16,7 +16,10 @@ async function frontDoor(): Promise<[string, string][]> {
   const step = (name: string) => flow[name]?.what ?? '';
   return [
     ['vp run dev', 'the app with hot reload, its local state (.dev.vars, the migrations) and generated files first'],
-    ['vp run build', "the production build and Wrangler's deployment dry run, after the same; no upload"],
+    [
+      'vp run build',
+      "the production build, after the same; no upload (vp run check adds Wrangler's deployment dry run)",
+    ],
     ['vp run preview', "the production build on Cloudflare's local host, at PREVIEW_PORT (4173 by default)"],
     [
       'vp run check',

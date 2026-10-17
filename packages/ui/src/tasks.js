@@ -213,18 +213,26 @@ function appTasks(root, { remy }) {
     clean: { command: `node -e "require('node:fs').rmSync('dist', { recursive: true, force: true })"`, cache: false },
     // vp dev, vp build and vp preview are Vite Plus's own; these are the app's, with what they need first.
     dev: { command: 'vp dev .', dependsOn: prepared, cache: false },
-    // The production build, then Wrangler's deployment dry run (no upload). Its stamp names the commit it was built
+    // The production build. Its stamp names the commit it was built
     // from (build-vite.js, through git, which Vite Plus does not see), so the commit is in the command: Vite Plus's
     // cache key holds the command, and a new commit (a commit, a merge) builds again. Read as Vite Plus loads the
     // configuration, it is right in a worktree too, whose .git is a file (2026-10-17: .git/HEAD as an input was not).
     build: {
-      command: [`REMY_COMMIT=${commit(root)} vp build .`, 'wrangler deploy --dry-run'],
+      command: `REMY_COMMIT=${commit(root)} vp build .`,
       dependsOn: [...prepared, 'clean'],
       cache: {
         input: [{ auto: true }, ...generated, lockfile],
         output: ['dist/**'],
         untrackedEnv: network,
       },
+    },
+    // Wrangler's deployment dry run on the build (no upload): the Worker as Cloudflare would take it. A task of its own,
+    // with no output: in the build's command, Vite Plus cached it as a sub-task of its own and, the build rebuilt for
+    // a new commit, replayed the files it had recorded over the new dist/ (an old stamp, an old chunk: 2026-10-17).
+    'check:deploy': {
+      command: 'wrangler deploy --dry-run',
+      dependsOn: ['build'],
+      cache: { input: [{ auto: true }, '!**/node_modules/**', '!**/.wrangler/**'], output: [], untrackedEnv: network },
     },
     // The production build on Cloudflare's local host, at this checkout's port.
     preview: {
@@ -321,7 +329,11 @@ export function remyTasks({ root = process.cwd(), tasks = {} } = {}) {
   if (docs) own.generate.dependsOn.push(`${docs}#generate`);
   return {
     ...own,
-    ...workspaceTasks(commands, { generate: ['generate'], build: ['build', ...(docs ? [`${docs}#build`] : [])] }, []),
+    ...workspaceTasks(
+      commands,
+      { generate: ['generate'], build: ['build', 'check:deploy', ...(docs ? [`${docs}#build`] : [])] },
+      [],
+    ),
     ...tasks,
   };
 }
@@ -397,7 +409,7 @@ export function remyWorkspace({ root = process.cwd(), app, tasks = {}, ci = [] }
           commands,
           {
             generate: [`${name}#generate`],
-            build: [`${name}#build`, ...found.docs.map((docs) => `${docs}#build`)],
+            build: [`${name}#build`, `${name}#check:deploy`, ...found.docs.map((docs) => `${docs}#build`)],
           },
           ci,
         ),
