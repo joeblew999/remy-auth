@@ -1,6 +1,7 @@
 import { env } from 'cloudflare:workers';
 import { getSessionCookie } from 'better-auth/cookies';
 import { once } from '@joeblew999/remy-ui/api/guard';
+import { replicated } from '@joeblew999/remy-ui/replicas';
 import { getLocale } from '@joeblew999/remy-ui/locale';
 import { auth } from '../auth/auth.server';
 import { notesStore } from '../notes/store';
@@ -18,7 +19,7 @@ import type { ApiContext } from './router';
  * knows people only by account ID.
  */
 export const apiContext = (request: Request): ApiContext => {
-  const notes = notesStore(env.DEMO_DB);
+  const notes = notesStore(replicated(env.DEMO_DB, 'DEMO_DB'));
   return {
     locale: getLocale(),
     release: env.CF_VERSION_METADATA?.id ?? 'local',

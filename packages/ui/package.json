@@ -41,6 +41,7 @@
     "./start": "./src/start.ts",
     "./csp-report": "./src/csp-report.ts",
     "./cloudflare": "./src/cloudflare.ts",
+    "./replicas": "./src/replicas.ts",
     "./samples": "./src/samples.js",
     "./checks": "./src/checks.js",
     "./problem.checks": "./src/problem.checks.js",
