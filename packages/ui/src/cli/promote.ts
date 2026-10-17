@@ -1,5 +1,5 @@
 import { commentOnCommit, repo } from './github.ts';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { deploy, deployDocs, versions } from './cloudflare.ts';
 import { describeRun, installed, latestRun, where } from './flow.ts';

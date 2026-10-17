@@ -1,7 +1,6 @@
 // Checks for the typed, validated search params on the formats page (./search-params.tsx).
 // Plain JavaScript like ../checks.js; Node's Intl is the oracle for the formatted text.
 import { test, expect } from '@playwright/test';
-import { locales } from '@joeblew999/remy-ui/runtime';
 import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { localizedPath, collectErrors, behaviourLocales, formatTag } from '@joeblew999/remy-ui/checks';
@@ -39,6 +38,7 @@ async function expectChosen(page, locale, values) {
  */
 export function searchParamsChecks({ serverRendered = true } = {}) {
   const { currency, count, calendar, numbering } = other;
+  /** @type {[search: string, normalised: string, values: typeof defaults][]} */
   const cases = [
     ['?currency=XYZ&count=abc&calendar=nope&numbering=nope', '', defaults],
     [`?currency=${defaults.currency}&count=${defaults.count}&calendar=${defaults.calendar}&numbering=${defaults.numbering}`, '', defaults],

@@ -118,7 +118,7 @@ export function languageInput(file: string, read: (file: string) => string | und
   // The tooling (the command line, task scripts) prints dates and runs translators, but renders no page.
   if (/^packages\/ui\/src\/cli\/|^tasks\/|\.sh$/.test(file)) return false;
   if (/(^|\/)(messages|project\.inlang)\/|paraglide|locale|language|direction|i18n|intl|fonts?\b/i.test(file)) return true;
-  if (/\.css$/.test(file)) return true;
+  if (file.endsWith('.css')) return true;
   if (!/\.(tsx?|jsx?|mjs)$/.test(file)) return false;
   const text = read(file);
   // A deleted file decides by its name alone (above): its code runs nowhere now, and whatever used it changed too and

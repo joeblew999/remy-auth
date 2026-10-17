@@ -4,13 +4,9 @@ import { m } from '@joeblew999/remy-ui/messages';
 import { procedures, routeOf } from '@joeblew999/remy-ui/api/coverage';
 import { policyOf } from '@joeblew999/remy-ui/api/guard-core';
 import { router } from '../src/api/router';
-import { environments } from '@joeblew999/remy-ui/environment';
-import { clearOutbox, mailerFor, readOutbox, unreachable } from '@joeblew999/remy-ui/mail';
-import { DEMO_SIGN_IN_CODE, environmentOf, fixedSignInCode, policyFor, publishedCodeFor } from '../src/auth/environment';
+import { DEMO_SIGN_IN_CODE } from '../src/auth/environment';
 import { seededPeople } from '../src/auth/seed';
 import { product } from '../src/product';
-import { writableFieldProblems } from '../src/auth/fields';
-import { authOptions, personMayEdit } from '../src/auth/options';
 import { capturedMail, latestCode, local, newEmail, ownAddress, permitted, seededSignIn, sendCode, signIn, signedInAsSeeded, visitor } from './people';
 
 // Signing in (.plans/auth-service.md), on the real Worker with Better Auth and the local D1: nothing is

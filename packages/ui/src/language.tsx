@@ -72,7 +72,11 @@ export function LanguageHint({ locale, path = '', preferred }: { locale: Locale;
         onClick={() => setLocale(preferred, { reload: false })}>
         {m.continue_in({ language: localeName(preferred) }, { locale: preferred })}
       </a>
-      <Button variant="outline" size="sm" lang={locale} dir={getTextDirection(locale)} onClick={() => { setLocale(locale, { reload: false }); setDismissed(true); }}>
+      <Button variant="outline" size="sm" lang={locale} dir={getTextDirection(locale)} onClick={() => {
+        // Only a custom async strategy makes setLocale return a promise; the cookie strategy is synchronous.
+        void setLocale(locale, { reload: false });
+        setDismissed(true);
+      }}>
         {m.keep_language({ language: localeName(locale) }, { locale })}
       </Button>
     </div>

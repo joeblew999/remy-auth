@@ -2,7 +2,6 @@
 // before an in-app navigation, in the page's language; a made reservation no longer asks.
 // Plain JavaScript like ../checks.js.
 import { test, expect } from '@playwright/test';
-import { locales } from '@joeblew999/remy-ui/runtime';
 import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { localizedPath, collectErrors, hydrated, behaviourLocales } from '@joeblew999/remy-ui/checks';

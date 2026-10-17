@@ -21,7 +21,7 @@ function digitMap() {
     const format = new Intl.NumberFormat('en', { numberingSystem: system, useGrouping: false });
     const digits = Array.from({ length: 10 }, (_, digit) => format.format(digit));
     // Decimal systems only: one character per digit (algorithmic systems such as Roman numerals are left out).
-    if (digits.every(digit => [...digit].length === 1)) digits.forEach((digit, value) => nativeDigits!.set(digit, String(value)));
+    if (digits.every(digit => Array.from(digit).length === 1)) digits.forEach((digit, value) => nativeDigits!.set(digit, String(value)));
   }
   return nativeDigits;
 }
@@ -29,7 +29,7 @@ function digitMap() {
 /** `text` with every native digit replaced by its ASCII digit, so "۱۲" and "١٢" read as "12". */
 export function asciiDigits(text: string): string {
   const map = digitMap();
-  return [...text].map(character => map.get(character) ?? character).join('');
+  return Array.from(text, character => map.get(character) ?? character).join('');
 }
 
 /**

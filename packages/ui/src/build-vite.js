@@ -39,7 +39,7 @@ export function buildStamp({ root = process.cwd(), packages = [], scope = '@joeb
   const uncommitted = commit ? git(root, 'status', '--porcelain') : '';
   const changes = uncommitted ? createHash('sha256').update(uncommitted).update(git(root, 'diff', 'HEAD')).digest('hex').slice(0, 7) : '';
   const named = [...Object.keys({ ...app.dependencies, ...app.devDependencies }).filter(name => name.startsWith(scope)), ...packages];
-  const versions = Object.fromEntries([...new Set(named)].sort().flatMap(name => {
+  const versions = Object.fromEntries([...new Set(named)].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)).flatMap(name => {
     const version = installedVersion(name, root);
     return version ? [[name, version]] : [];
   }));

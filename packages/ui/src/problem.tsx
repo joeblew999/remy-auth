@@ -1,4 +1,4 @@
-import { useRouter, type ErrorComponentProps } from '@tanstack/react-router';
+import { useRouter } from '@tanstack/react-router';
 import { getLocale } from './locale';
 import { m } from './paraglide/messages.js';
 import { Shell } from './shell';
@@ -20,7 +20,7 @@ export function NotFound() {
  * itself: messages and stacks stay in the Worker's logs. Retry re-runs the failed loaders
  * (router.invalidate() also resets the error boundary).
  */
-export function ErrorPage(_: ErrorComponentProps) {
+export function ErrorPage() {
   const router = useRouter();
   const locale = getLocale();
   return <Problem missing={false}>

@@ -24,7 +24,7 @@ export function AppShell({ locale, path = '/app', preferred, children }: { local
   return <div className="[--header-height:calc(--spacing(14))]">
     <SkipLink locale={locale} />
     <SidebarProvider className="flex flex-col">
-      <SiteHeader locale={locale} path={path} />
+      <SiteHeader locale={locale} />
       <div className="flex flex-1">
         <AppSidebar locale={locale} />
         <SidebarInset>

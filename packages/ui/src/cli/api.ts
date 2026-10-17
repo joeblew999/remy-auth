@@ -12,7 +12,7 @@ export async function spec(args: string[]): Promise<void> {
   const response = await fetch(specUrl, { headers: { Accept: 'application/json' } });
   if (!response.ok) fail(`api spec: ${specUrl.href} answered ${response.status}${response.status === 404 ? ': this app serves no contract API at /api (an app mounts one with @joeblew999/remy-ui/api/server)' : ''}`);
   const document = await response.json() as { openapi?: string; info: { title: string; version: string }; paths?: Record<string, Record<string, { summary?: string }>> };
-  if (!/^3\.1\./.test(document.openapi ?? '')) fail(`api spec: ${specUrl.href} is not an OpenAPI 3.1 document`);
+  if (!(document.openapi ?? '').startsWith('3.1.')) fail(`api spec: ${specUrl.href} is not an OpenAPI 3.1 document`);
   if (!urls) { console.log(JSON.stringify(document, null, 2)); return; }
   console.log(`${document.info.title} ${document.info.version}`);
   console.log(`Reference: ${new URL('/api/doc', origin).href}`);

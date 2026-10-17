@@ -116,7 +116,6 @@ Shortcuts to the tools themselves, as package.json defines them.
 | `npm run logs` | `wrangler tail --format json` |
 | `npm run errors` | `wrangler tail --format json --status error` |
 | `npm run wrangler` | `wrangler` |
-| `npm run browser` | `chrome-devtools` |
 | `npm run browser:start` | `chrome-devtools start --isolated --headless --no-usage-statistics --no-performance-crux` |
 | `npm run browser:stop` | `chrome-devtools stop` |
 | `npm run web` | `modern-web-guidance` |

@@ -82,7 +82,8 @@ export function WebMCP({ site, lang: locale }: { site: string; lang: string }) {
           required: ['url'],
         },
         async execute({ url }: { url: string }) {
-          router.push(url);
+          // Awaited, so a navigation that fails reaches the agent as the tool's error, not as "opened".
+          await router.push(url);
           return `opened ${url}`;
         },
       },

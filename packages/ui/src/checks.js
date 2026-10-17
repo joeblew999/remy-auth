@@ -76,7 +76,6 @@ export function collectErrors(page) {
  */
 export function publicPageChecks({ paths, prerendered = false, oneLanguage = { locale: baseLocale, paths: [] }, sitemap = true, home }) {
   for (const locale of checkedLocales) {
-    const o = { locale };
     test(`${locale}: home page is complete without JavaScript`, async ({ browser, baseURL }) => {
       const context = await browser.newContext({ javaScriptEnabled: false });
       const page = await context.newPage();
@@ -161,7 +160,8 @@ export function sitemapChecks({ paths, oneLanguage = { locale: baseLocale, paths
     const single = oneLanguage.paths.filter(path => langsOf(path).length === 1).map(path => `${baseURL}${localizedPath(path, oneLanguage.locale)}`);
     const translated = oneLanguage.paths.filter(path => langsOf(path).length > 1);
     const translatedUrls = translated.flatMap(path => langsOf(path).map(locale => `${baseURL}${localizedPath(path, locale)}`));
-    expect([...urls].sort()).toEqual([...localized, ...single, ...translatedUrls].sort());
+    const byCodeUnit = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+    expect([...urls].sort(byCodeUnit)).toEqual([...localized, ...single, ...translatedUrls].sort(byCodeUnit));
     for (const url of urls) {
       const response = await request.get(url);
       expect(response.status(), url).toBe(200);

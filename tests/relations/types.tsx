@@ -24,7 +24,7 @@ export async function typed() {
   const can = (await engine.canFor('NOTE', null, [note.id])).get(note.id)!;
   can.EDIT_NOTE satisfies boolean;
   // @ts-expect-error a note's permissions hold a note's actions only: creating one is about no note
-  can.CREATE_NOTE;
+  can.CREATE_NOTE satisfies boolean;
 
   return <>
     <Allowed can={note.can} action="EDIT_NOTE">an action the note carries</Allowed>

@@ -22,7 +22,7 @@ const model = () => process.env.I18N_MODEL ?? 'sonnet';
 const jobs = () => Number(process.env.I18N_JOBS ?? 4);
 const languageName = (locale: string) => new Intl.DisplayNames(['en'], { type: 'language' }).of(locale) ?? locale;
 
-type AgentReport = { structured_output?: unknown; subtype?: string; result?: unknown; duration_ms?: number; duration_api_ms?: number; num_turns?: number; usage?: { output_tokens?: number } };
+type AgentReport = { structured_output?: unknown; subtype?: string; result?: string; duration_ms?: number; duration_api_ms?: number; num_turns?: number; usage?: { output_tokens?: number } };
 
 /**
  * Claude Code headless, from a scratch directory (no CLAUDE.md, hooks, settings, MCP servers or

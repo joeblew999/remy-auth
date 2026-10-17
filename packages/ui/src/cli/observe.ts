@@ -36,7 +36,7 @@ async function setup() {
   const account: string | undefined = process.env.CLOUDFLARE_ACCOUNT_ID || config.account_id || (JSON.parse(wrangler('whoami', '--json')) as { accounts?: { id: string }[] }).accounts?.[0]?.id;
   if (!token || !account) fail('No Cloudflare credentials: npx wrangler login, or set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID.');
   const observed = (path: string) => path.startsWith('/ai-gateway/') || path.startsWith('/workers/observability/');
-  async function api(method: string, path: string, options: { query?: Record<string, unknown>; body?: unknown; token?: string } = {}): Promise<Json> {
+  async function api(method: string, path: string, options: { query?: Record<string, string | number | undefined>; body?: unknown; token?: string } = {}): Promise<Json> {
     const url = new URL(`https://api.cloudflare.com/client/v4/accounts/${account}${path}`);
     for (const [key, value] of Object.entries(options.query ?? {})) if (value !== undefined) url.searchParams.set(key, String(value));
     const bearer = options.token ?? (observed(path) ? observeToken : token);

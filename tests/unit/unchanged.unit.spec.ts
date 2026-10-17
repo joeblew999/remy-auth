@@ -19,7 +19,7 @@ test("the app's own code runs browser and audits; new-app only when its inputs c
 
 test('the packages, the dependencies and the workflows run every part', () => {
   for (const files of [['packages/ui/src/checks.js'], ['package-lock.json'], ['.github/workflows/ci.yml'], ['.node-version']]) {
-    for (const part of ['browser', 'audits', 'new-app'] as const) expect(affects(part, files), `${part} ${files}`).toBe(true);
+    for (const part of ['browser', 'audits', 'new-app'] as const) expect(affects(part, files), `${part} ${files.join(',')}`).toBe(true);
   }
 });
 

@@ -75,7 +75,7 @@ export function notes(version: string): string {
   const lines = text.split('\n'); const out: string[] = []; let inside = false;
   for (const line of lines) {
     if (line.startsWith(`## [${version}]`)) { inside = true; continue; }
-    if (/^## \[/.test(line)) inside = false;
+    if (line.startsWith('## [')) inside = false;
     if (inside) out.push(line);
   }
   const section = out.join('\n');

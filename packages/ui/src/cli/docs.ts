@@ -165,6 +165,8 @@ async function synced(instance: string): Promise<void> {
   } catch (error) {
     created = false;
     const reason = String((error as { stderr?: string }).stderr ?? (error as Error).message).split('\n').find(line => /error|✘/i.test(line)) ?? 'unknown';
+    // Wrangler colours its error lines: the escape character is the point, to strip its SGR codes.
+    // oxlint-disable-next-line eslint/no-control-regex -- matches ANSI colour codes (ESC [ ... m) on purpose
     console.log(`No new sync started (${reason.replace(/\x1b\[[0-9;]*m/g, '').trim()}); waiting for the running one.`);
   }
   const deadline = Date.now() + 15 * 60_000;

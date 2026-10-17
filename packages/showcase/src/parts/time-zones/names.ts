@@ -1,5 +1,4 @@
 import type { Locale } from '@joeblew999/remy-ui/runtime';
-import { formatLocale } from '@joeblew999/remy-ui/locale-info';
 import { samples } from '@joeblew999/remy-ui/samples';
 
 // A time zone's path, canonical name and localized name: plain functions, apart from the time-zone page

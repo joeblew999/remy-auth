@@ -1,3 +1,4 @@
+// oxlint-disable-next-line typescript/triple-slash-reference -- a script of ambient virtual-module declarations cannot be imported, and the package ships as source to apps whose tsconfig does not include it
 /// <reference path="./build-virtual.d.ts" />
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';

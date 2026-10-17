@@ -11,7 +11,7 @@ import { ModeToggle } from '../../../theme';
 import { useRemyApp } from '../../../app-config';
 
 /** sidebar-16's SiteHeader: the sidebar toggle (tablets and desktops; on phones the bottom bar's More opens it), the breadcrumb with the app's name, and the language menu where the block has its search form. */
-export function SiteHeader({ locale, path }: { locale: Locale; path: string }) {
+export function SiteHeader({ locale }: { locale: Locale }) {
   const { toggleSidebar } = useSidebar();
   const app = useRemyApp();
   return (
