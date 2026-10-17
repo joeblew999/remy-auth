@@ -58,10 +58,8 @@ owner), which an agent uses by hand; nothing in the repository depends on it.
   new version; production moves only with `dev:promote`). Every other branch: deploy `npx wrangler preview`.
   On 2026-10-17 the branches rule was missing, so no branch got a preview although these docs said so;
   it was added through the connector.
-- **The databases' read copies** are a setting of each D1 database on Cloudflare, also changed only through
-  the connector: read replication `auto` on all six (production's, staging's and the Previews' `remy-auth*`),
-  set on 2026-10-17. The code reads through them by itself (`@joeblew999/remy-ui/replicas`: each request's
-  D1 session, the `remy-d1` bookmark cookie); with the setting off it reads the primary, as before. The
-  Worker runs with Smart Placement (`wrangler.jsonc`, checked by `npx remy verify tooling`).
+- **Every D1 database keeps read copies and lives in production's region**: the platform's rule, which
+  `npx remy cloudflare provisioned` asks Cloudflare about before every deploy, the Previews' databases
+  included, and refuses on, naming the fix. Neither is a setting Wrangler's configuration can hold.
 - **Production, staging and the `npx remy cloudflare …` commands** run on the owner's Mac, which has the
   token.

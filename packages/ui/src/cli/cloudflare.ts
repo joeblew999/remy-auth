@@ -42,6 +42,37 @@ export async function provisioned(environment = process.env.CLOUDFLARE_ENV || un
     ...((config.r2_buckets ?? []) as R2[]).filter(bucket => !bucket.bucket_name).map(bucket => `R2 bucket ${bucket.binding} has no bucket_name`),
   ];
   if (missing.length) fail(`Not deploying${environment ? ` ${environment}` : ''}: Wrangler would create these by itself.\n${missing.map(line => `  ${line}`).join('\n')}\nCreate each on the owner's request and put its id in the Wrangler configuration.`);
+  databasesRight(unstable_readConfig({}) as Databases, config as Databases, environment);
+}
+
+type Databases = { d1_databases?: { binding: string; database_name?: string; database_id?: string }[]; previews?: Databases };
+/** What Cloudflare says of one D1 database (wrangler d1 info --json): where its primary runs, and its read copies. */
+export type DatabaseInfo = { name: string; running_in_region?: string; read_replication?: { mode?: string } };
+
+/**
+ * The platform's rule for every D1 database an app uses, the Previews' included: it keeps read copies
+ * (@joeblew999/remy-ui/replicas reads through them), and it lives where production's first one does,
+ * so no environment pays an ocean crossing per write that production does not. A rule, not settings:
+ * Wrangler's configuration cannot record either (its D1 entries take a name, an id and migrations), so
+ * nothing is written per database; production's database is the reference. One line per database that breaks it.
+ */
+export function databaseProblems(databases: DatabaseInfo[], reference: string | undefined): string[] {
+  return databases.flatMap(db => [
+    ...(db.read_replication?.mode === 'auto' ? [] : [`${db.name}: read replication ${db.read_replication?.mode ?? 'not reported'}; turn it on (dashboard: D1, the database, Settings, Read replication)`]),
+    ...(reference && db.running_in_region && db.running_in_region !== reference ? [`${db.name}: runs in ${db.running_in_region}, production's in ${reference}; a database's region is chosen only when it is made, so make it again there (npx wrangler d1 create <name> --location ${reference.toLowerCase()}), migrate it, and put its id in wrangler.jsonc`] : []),
+  ]);
+}
+
+/** Asks Cloudflare about every database production, this deployment and the Previews use, and refuses on any that breaks the rule. */
+function databasesRight(production: Databases, deployed: Databases, environment?: string): void {
+  const listed = [production, deployed, production.previews ?? {}].flatMap(config => config.d1_databases ?? []).filter(db => db.database_id);
+  const unique = [...new Map(listed.map(db => [db.database_id, db])).values()];
+  const info = (id: string): DatabaseInfo => JSON.parse(execFileSync(join(process.cwd(), 'node_modules', '.bin', 'wrangler'), ['d1', 'info', id, '--json'], { encoding: 'utf8' }));
+  const infos = unique.map(db => ({ ...info(db.database_id!), name: db.database_name ?? db.binding }));
+  const reference = infos.find(db => db.name === production.d1_databases?.[0]?.database_name)?.running_in_region;
+  const problems = databaseProblems(infos, reference);
+  if (problems.length) fail(`Not deploying${environment ? ` ${environment}` : ''}: these databases break the platform's rule (read copies, production's region).\n${problems.map(line => `  ${line}`).join('\n')}`);
+  console.log(`${infos.length} database${infos.length === 1 ? '' : 's'}: read copies on, all in ${reference ?? 'one region'}.`);
 }
 
 /** The entries Wrangler writes to WRANGLER_OUTPUT_FILE_PATH, as far as this reads them. */
@@ -272,6 +303,6 @@ export const commands: Subcommands = {
   preview: { what: '[alias] [--keep]: this build as a throwaway Worker <name>-check-<alias> (production untouched), the browser checks against it, then deleted unless --keep (a machine signed in to Cloudflare; from Claude\'s cloud, push the branch instead)', run: async rest => { await preview(rest.find(part => !part.startsWith('--')), rest.includes('--keep')); } },
   'preview-delete': { what: '[name]: list the throwaway check Workers, or delete one; never production', run: rest => previewDelete(rest[0]) },
   wait: { what: '<origin> <wrangler-output-file>: until the origin serves the uploaded version, every home-page asset included', run: rest => { const [origin, output] = rest; if (!origin || !output) fail('remy cloudflare wait <origin> <wrangler-output-file>'); return waitFor(origin, output); } },
-  provisioned: { what: 'refuse when a D1, KV or R2 binding names no existing resource', run: () => provisioned() },
+  provisioned: { what: 'refuse when a D1, KV or R2 binding names no existing resource, or a D1 database (the Previews\' included) keeps no read copies', run: () => provisioned() },
 };
 export const main = dispatch('cloudflare', commands);

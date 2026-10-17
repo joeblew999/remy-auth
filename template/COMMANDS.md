@@ -42,7 +42,7 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy cloudflare preview` | [alias] [--keep]: this build as a throwaway Worker &lt;name&gt;-check-&lt;alias&gt; (production untouched), the browser checks against it, then deleted unless --keep (a machine signed in to Cloudflare; from Claude's cloud, push the branch instead) |
 | `npx remy cloudflare preview-delete` | [name]: list the throwaway check Workers, or delete one; never production |
 | `npx remy cloudflare wait` | &lt;origin&gt; &lt;wrangler-output-file&gt;: until the origin serves the uploaded version, every home-page asset included |
-| `npx remy cloudflare provisioned` | refuse when a D1, KV or R2 binding names no existing resource |
+| `npx remy cloudflare provisioned` | refuse when a D1, KV or R2 binding names no existing resource, or a D1 database (the Previews' included) keeps no read copies |
 | `npx remy setup` | npm ci, the pinned skills, the agents' rules, MCP registration, the guard, the pre-push hook (npm run ci), then the installation's checks (npm run setup); preconditions: those alone |
 | `npx remy verify` | the installation's checks and the release gate |
 | `npx remy verify all` | everything: the installation's checks, every language, the consumers (the release gate; dev:release runs it); the default |
