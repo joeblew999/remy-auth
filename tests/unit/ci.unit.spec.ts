@@ -6,8 +6,8 @@ import { jobParts } from '../../packages/ui/src/cli/ci';
 // the workflow's job list is held to the parts and shards ci defines, so the two cannot drift apart.
 
 test("the workflow runs exactly ci's jobs, one npm run ci line each", () => {
-  const workflow = readFileSync('.github/workflows/google.yml', 'utf8');
+  const workflow = readFileSync('.github/workflows/ci.yml', 'utf8');
   expect(workflow).toContain('npm run ci -- ${{ matrix.part }}');
   const listed = [...workflow.matchAll(/^\s+part: (.+)$/gm)].map(match => match[1]!.trim());
-  expect([...listed].sort(), `google.yml runs ${listed.join(', ')}; ci expects ${jobParts().join(', ')}`).toEqual([...jobParts()].sort());
+  expect([...listed].sort(), `ci.yml runs ${listed.join(', ')}; ci expects ${jobParts().join(', ')}`).toEqual([...jobParts()].sort());
 });

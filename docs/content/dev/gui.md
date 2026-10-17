@@ -24,21 +24,15 @@ bindings and observability. Vite generates `dist/server/wrangler.json` and
 Both local preview and Wrangler deployment consume the generated production build.
 Development uses the same Worker source and Cloudflare runtime with hot reload.
 
-| Task | Target |
-| --- | --- |
-| `npm run dev` | Local Workers, hot reload, port 5173 |
-| `npm run build` | Build and Wrangler deployment dry run; no upload |
-| `npm run preview` | Build, then serve the production artifact on Cloudflare's local host at `PREVIEW_PORT` (4173) |
-| `dev:change`, `dev:land`, `dev:promote`, `dev:release` | The flow ([how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), [tasks](./tasks.md)); its checks run on the same local host |
-| `npm run ci` | What GitHub runs, the same way: types and unit, level 1, Google's audits and the consumers, each skipped when a branch's changes (against `origin/main`) cannot affect it (counting uncommitted work), level 1 in English and Arabic when nothing that changed can differ by language, then what each took (`npx remy last ci` prints the record). It installs Playwright's pinned Chromium and, on Linux, Noto CJK when missing. GitHub runs each part as its own job (`npm run ci -- every --shard 1/3` and so on), so `npm run ci -- <part>` reproduces any red job exactly; `--all` skips nothing |
-| `npm run browser` (Chrome DevTools MCP) | Not CI: the agent's own browser on a laptop, for looking at pages by hand. The checks never use it; Lighthouse runs directly in `npm run ci` |
-| `npm run test -- google` / `npm run test -- cwv` | Google's level: Lighthouse audits locally; Core Web Vitals on a throwaway Cloudflare Worker |
-| `npx remy cloudflare deploy` | Build, then upload production to the authenticated Cloudflare account; `dev:promote` runs it |
-| `npx remy cloudflare staging` | The same for the staging environment: its own Worker (`origins.staging`) and resources; `dev:land` runs it |
-| `npx remy cloudflare preview` | Deploy this commit as a throwaway Worker, run level 1 against it, delete it |
-| A pull request or any branch other than `main` (from Claude's cloud too: [working from Claude's cloud](./agents.md#working-from-claudes-cloud)) | Cloudflare's Workers Builds runs `npm run build` and `npx wrangler preview`: a throwaway Cloudflare Preview at `https://<branch>-remy-auth.gedw99.workers.dev`, named in a comment on the pull request. Previews have none of production's bindings (the `previews` block in `wrangler.jsonc`). A push to `main` runs `npx wrangler versions upload`: a new version, production unchanged |
-| `npm run test -- remote [origin]` | Same tests against a deployment; no local server or deployment |
-| `npm run test -- report [remote]` | Open the last local or remote run's HTML report, including Lighthouse reports |
+Every command for the app, its checks and its deployments, with what each does: [Commands](./commands.mdx).
+In short, the app runs locally on port 5173 with hot reload (`npm run dev`) and as the production build on
+4173 (`npm run preview`), and the checks run on that same local host. Previews on Cloudflare: every branch
+other than `main` (a pull request's too) is built by Cloudflare's Workers Builds (`npm run build`, then
+`npx wrangler preview`) and served at `https://<branch>-remy-auth.gedw99.workers.dev`, named in a comment on the
+pull request; previews have none of production's bindings (the `previews` block in `wrangler.jsonc`), and a push to
+`main` uploads a new version without moving production. From Claude's cloud, see
+[working from Claude's cloud](./agents.md#working-from-claudes-cloud). The agent's own browser on a laptop
+(`npm run browser`, Chrome DevTools) is not CI: the checks never use it.
 
 The flow does not run the whole suite against a deployment: the deploys end with the live smoke,
 and GitHub runs the suite after every landing. To run all of it against a deployed URL on purpose, a

@@ -32,8 +32,8 @@ export function preview(): void { build(); tool(bin('wrangler'), ['dev', '--ip',
 
 export const what = 'the app itself: run it, build it, preview the build';
 export const commands: Subcommands = {
-  dev: { what: "Vite's dev server with hot reload (npm run dev)", run: () => dev() },
+  dev: { what: "Vite's dev server on local Workers with hot reload, port 5173 (npm run dev)", run: () => dev() },
   build: { what: "the production build, then Wrangler's deployment dry run; no upload (npm run build)", run: () => build() },
-  preview: { what: "build, then the production artifact on Cloudflare's local host at PREVIEW_PORT (npm run preview)", run: () => preview() },
+  preview: { what: "build, then the production artifact on Cloudflare's local host at PREVIEW_PORT, 4173 by default; the browser checks run on the same (npm run preview)", run: () => preview() },
 };
 export const main = dispatch('app', commands);

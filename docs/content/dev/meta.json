@@ -3,6 +3,7 @@
   "pages": [
     "index",
     "agents",
+    "commands",
     "development",
     "how-we-work",
     "tooling",

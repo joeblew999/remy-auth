@@ -9,55 +9,12 @@
 // did it: .plans/done/tooling-in-typescript.md; remy-auth-app is the first consumer on it.
 import { configure } from './config.ts';
 import { begin } from './timing.ts';
-import type { Tool } from './commands.ts';
+import { tools } from './tools.ts';
+import { help, writeCommands } from './help.ts';
 
-// Every command is a module that exports its one line (`what`), its subcommands as data when it has any
-// (`commands`, which its main dispatches on) and `main` (commands.ts): the type here demands them, so
-// `remy help` reads the modules and a command cannot exist without its line. The flow is the first:
-// `remy flow <step>` (flow.ts), each step its own module behind it.
-const tools: Record<string, () => Promise<Tool>> = {
-  flow: () => import('./flow.ts'),
-  guard: () => import('./register.ts'),
-  'guard-hook': () => import('./guard-hook.ts'),
-  allowed: () => import('./allowed.ts'),
-  check: () => import('./check.ts'),
-  plans: () => import('./plans.ts'),
-  i18n: () => import('./i18n.ts'),
-  cloudflare: () => import('./cloudflare.ts'),
-  setup: () => import('./setup.ts'),
-  verify: () => import('./verify.ts'),
-  skills: () => import('./skills.ts'),
-  mcp: () => import('./mcp.ts'),
-  rules: () => import('./rules.ts'),
-  packages: () => import('./packages.ts'),
-  app: () => import('./dev.ts'),
-  test: () => import('./test.ts'),
-  ci: () => import('./ci.ts'),
-  last: () => import('./timing.ts'),
-  docs: () => import('./docs.ts'),
-  observe: () => import('./observe.ts'),
-  shots: () => import('./shots.ts'),
-  api: () => import('./api.ts'),
-  upgrade: () => import('./upgrade.ts'),
-};
-
-/**
- * `remy help` (or no command, or an unknown one): every command, one line each, read from the modules
- * themselves; a command with subcommands names them, and says each one's line when run without one.
- * package.json's scripts are the everyday entry (npm run lists them).
- */
-async function help(out: (line: string) => void): Promise<void> {
-  const width = Math.max(...Object.keys(tools).map(key => key.length));
-  out("remy <command> [args]   (npm run lists this app's scripts; a command run without a subcommand says its own)");
-  for (const [command, load] of Object.entries(tools)) {
-    const tool = await load();
-    out(`  ${command.padEnd(width)}  ${tool.what}${tool.commands ? ` — ${Object.keys(tool.commands).join(' · ')}` : ''}`);
-  }
-  out("A flow step also answers bare (remy land …), as the scripts of apps on 0.15 say; the template's say remy flow <step>.");
-}
 
 const [name = '', ...args] = process.argv.slice(2);
-if (name === 'help' || name === '--help' || name === '-h') { await help(console.log); process.exit(0); }
+if (name === 'help' || name === '--help' || name === '-h') { if (args.includes('--write')) await writeCommands(); else await help(console.log); process.exit(0); }
 // A bare step name is the flow's (the scripts of apps on 0.15: "dev:land": "remy land").
 const steps = ['status', 'start', 'change', 'land', 'promote', 'release', 'done'];
 const load = tools[name] ?? (steps.includes(name) ? () => import('./flow.ts').then(flow => ({ main: (rest: string[]) => flow.main([name, ...rest]) })) : undefined);

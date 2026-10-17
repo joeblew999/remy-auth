@@ -6,7 +6,7 @@ import { affects, inert } from '../../packages/ui/src/cli/unchanged';
 
 test('plans, the docs content and Markdown outside the packages change nothing any level checks', () => {
   for (const file of ['.plans/now.md', '.plans/done/gui.md', 'docs/content/dev/gui.md', 'docs/content/users/index.mdx', 'README.md', 'CHANGELOG.md']) expect(inert(file), file).toBe(true);
-  for (const file of ['src/routes/index.tsx', 'packages/ui/README.md', 'package.json', '.github/workflows/google.yml']) expect(inert(file), file).toBe(false);
+  for (const file of ['src/routes/index.tsx', 'packages/ui/README.md', 'package.json', '.github/workflows/ci.yml']) expect(inert(file), file).toBe(false);
   for (const level of ['every', 'google', 'consumers'] as const) expect(affects(level, ['.plans/auth-service.md', 'README.md']), level).toBe(false);
 });
 
@@ -18,7 +18,7 @@ test("the app's own code runs every and google; consumers only when its inputs c
 });
 
 test('the packages, the dependencies and the workflows run every level', () => {
-  for (const files of [['packages/ui/src/checks.js'], ['package-lock.json'], ['.github/workflows/google.yml'], ['.node-version']]) {
+  for (const files of [['packages/ui/src/checks.js'], ['package-lock.json'], ['.github/workflows/ci.yml'], ['.node-version']]) {
     for (const level of ['every', 'google', 'consumers'] as const) expect(affects(level, files), `${level} ${files}`).toBe(true);
   }
 });

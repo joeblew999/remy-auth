@@ -68,7 +68,7 @@ Everything else is the package, which one version bump upgrades.
    docs. Once the
    repository is on GitHub (step 7), work goes through [the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest):
    `dev:land` for every finished change, `dev:promote` for production and the docs.
-7. CI: `.github/workflows/google.yml` calls remy-auth's shared workflow at the same tag (every language, Google's
+7. CI: `.github/workflows/ci.yml` calls remy-auth's shared workflow at the same tag (every language, Google's
    audits on every push to `main`). Grant the new repository read access in the `@joeblew999/remy-ui`
    package's settings ("Manage Actions access"), or `npm ci` fails there.
 
@@ -186,33 +186,12 @@ forward to them.
   uses the Claude login on the machine.
 - An app with no inlang project and no docs sites gets "nothing to check" and exit 0.
 
-| Command | Does |
-| --- | --- |
-| `remy i18n check` | Both checks; a WARNING and exit 0 while coding (the check runs it), exit 1 with `I18N_STRICT=1` (the release) |
-| `remy i18n check messages` | The catalogs' gaps, and languages that differ from the platform's (`de unlisted`); `--list` one line per gap (`es missing nav_more`) |
-| `remy i18n check docs` | The docs' gaps; `--list` one line per gap (`es stale docs/content/dev/gui.es.md`) |
-| `remy i18n translate` | Messages, then docs, written with their records and left for the change's commit; `dev:land` runs it before the check; by hand, `REMY_FLOW=hand` in front |
-| `remy i18n translate messages` | The catalogs' gaps, one language per agent call |
-| `remy i18n translate docs [files]` | The docs' gaps, one page per agent call; named translation files are redone in full |
+The two commands, `npx remy i18n check` and `npx remy i18n translate`, with their options: [Commands](./commands.mdx).
 
-Settings: `I18N_MODEL` (default `sonnet`), `I18N_JOBS` (4).
 
 ### Cloudflare
 
-`npx remy cloudflare <command>`; each says in its header comment whether it is local or remote (and production).
-
-| Command | Does |
-| --- | --- |
-| `deploy` | Build with `DEPLOY_ORIGIN`, upload, wait for the new version (`the wait for the new version`), then its live smoke check. No tests before it: `dev:promote` runs it after the flow's checks. It refuses when a D1, KV or R2 binding names no existing resource: Wrangler would create one during the deploy, and creating resources is the owner's (`preview` refuses the same way) |
-| `preview [alias] [--keep]` | Deploy this commit as a throwaway Worker `<worker>-check-<commit>` (production untouched), run level 1 against it, delete it; `--keep` keeps it |
-| `preview-delete [name]` | List check Workers, or delete one by name; never the production Worker |
-| `urls [origin]` | Print the production (or a given) origin's pages and `/healthz`, for reports |
-| `staging` | `deploy` for the staging environment: builds with `CLOUDFLARE_ENV=staging` (`env.staging` in the Wrangler configuration) and uploads its own Worker at `origins.staging`; production is untouched. What staging permits beyond production is the app's [environment table](./auth.md#environments-one-table) |
-| `versions [origins…]` | Ask each deployment (the origins in `remy.config.ts`, or the origins given) what it is running: service, environment, commit, how far that is from this checkout, when it was deployed. [Asked, never remembered](./gui.md#which-version-is-deployed) |
-| `docs-deploy` | The docs Worker: build, deploy, publish its pages to Ask AI's index; `dev:promote` runs it |
-| `npm run test -- remote [origin]` | Level 1 against a deployment, by a person (`REMY_FLOW=hand`): the flow's deploys end with the live smoke, and GitHub runs the suite |
-| `npm run observe -- events\|ai-usage\|ai-check\|gateway` | Stored Workers Logs, AI Gateway usage, AI setup check, the gateway's settings ([tooling](./tooling.md#the-docs-answers-on-cloudflare-ai-search-and-ai-gateway)) |
-| `npm run upgrade -- <version>` | Move an app to one shared release: the package version and the CI workflow's tag together, then the installation's checks |
+Every `npx remy cloudflare …` command, and `npx remy test remote`, `npx remy observe` and `npx remy upgrade`, with what each does and refuses: [Commands](./commands.mdx). Each says in its header comment whether it is local or remote (and production).
 
 Credentials come from Wrangler's login, or from the keychain through fnox
 ([tooling](./tooling.md#secrets-fnox)).

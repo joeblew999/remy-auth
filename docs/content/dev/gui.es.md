@@ -1,7 +1,7 @@
 ---
 title: "Prueba mínima de GUI"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "513edd76 0f3bda7f 0e8ef4b6 2a9d9497 917db7e6 222ea1f3 655a09ab 1d2bc14b 6b0fddca"
+translatedFrom: "513edd76 5d5de609 0e8ef4b6 2a9d9497 917db7e6 222ea1f3 655a09ab 1d2bc14b 6b0fddca"
 ---
 
 ```sh
@@ -25,21 +25,15 @@ los bindings y la observabilidad. Vite genera `dist/server/wrangler.json` y
 Tanto la preview local como el deployment de Wrangler consumen la build de producción generada.
 El desarrollo usa el mismo código fuente del Worker y el mismo runtime de Cloudflare con hot reload.
 
-| Tarea | Objetivo |
-| --- | --- |
-| `npm run dev` | Workers local, hot reload, puerto 5173 |
-| `npm run build` | Build y ensayo (dry run) del deployment de Wrangler; sin subida |
-| `npm run preview` | Build y luego sirve el artefacto de producción en el host local de Cloudflare en `PREVIEW_PORT` (4173) |
-| `dev:change`, `dev:land`, `dev:promote`, `dev:release` | El flujo ([cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest), [tareas](./tasks.md)); sus comprobaciones se ejecutan en el mismo host local |
-| `npm run ci` | Lo que ejecuta GitHub, de la misma manera: tipos y unitarias, nivel 1, las auditorías de Google y los consumidores, cada uno omitido cuando los cambios de una rama (respecto a `origin/main`) no pueden afectarle (contando el trabajo sin confirmar), nivel 1 en inglés y árabe cuando nada de lo que ha cambiado puede diferir según el idioma, y después lo que tardó cada uno (`npx remy last ci` imprime el registro). Instala el Chromium fijado de Playwright y, en Linux, Noto CJK si falta. GitHub ejecuta cada parte como un job propio (`npm run ci -- every --shard 1/3` y así sucesivamente), de modo que `npm run ci -- <part>` reproduce exactamente cualquier job en rojo; `--all` no omite nada |
-| `npm run browser` (Chrome DevTools MCP) | No es CI: el navegador propio del agente en un portátil, para mirar páginas a mano. Las comprobaciones nunca lo usan; Lighthouse se ejecuta directamente en `npm run ci` |
-| `npm run test -- google` / `npm run test -- cwv` | El nivel de Google: auditorías de Lighthouse en local; Core Web Vitals en un Worker de Cloudflare desechable |
-| `npx remy cloudflare deploy` | Build y luego sube producción a la cuenta de Cloudflare autenticada; `dev:promote` lo ejecuta |
-| `npx remy cloudflare staging` | Lo mismo para el entorno de staging: su propio Worker (`origins.staging`) y sus propios recursos; `dev:land` lo ejecuta |
-| `npx remy cloudflare preview` | Despliega este commit como un Worker desechable, ejecuta el nivel 1 contra él y lo elimina |
-| Una pull request o cualquier rama distinta de `main` (también desde la nube de Claude: [trabajar desde la nube de Claude](./agents.md#working-from-claudes-cloud)) | Workers Builds de Cloudflare ejecuta `npm run build` y `npx wrangler preview`: una Cloudflare Preview desechable en `https://<branch>-remy-auth.gedw99.workers.dev`, indicada en un comentario de la pull request. Las previews no tienen ninguno de los bindings de producción (el bloque `previews` de `wrangler.jsonc`). Un push a `main` ejecuta `npx wrangler versions upload`: una versión nueva, con producción sin cambios |
-| `npm run test -- remote [origin]` | Las mismas pruebas contra un deployment; sin servidor local ni deployment |
-| `npm run test -- report [remote]` | Abre el informe HTML de la última ejecución local o remota, incluidos los informes de Lighthouse |
+Todos los comandos de la aplicación, sus comprobaciones y sus deployments, con lo que hace cada uno: [Comandos](./commands.mdx).
+En resumen, la aplicación se ejecuta en local en el puerto 5173 con hot reload (`npm run dev`) y como build de producción en
+el 4173 (`npm run preview`), y las comprobaciones se ejecutan en ese mismo host local. Previews en Cloudflare: cada rama
+distinta de `main` (también la de una pull request) la compila Workers Builds de Cloudflare (`npm run build` y luego
+`npx wrangler preview`) y se sirve en `https://<branch>-remy-auth.gedw99.workers.dev`, indicada en un comentario de la
+pull request; las previews no tienen ninguno de los bindings de producción (el bloque `previews` de `wrangler.jsonc`), y un push a
+`main` sube una versión nueva sin mover producción. Desde la nube de Claude, consulta
+[trabajar desde la nube de Claude](./agents.md#working-from-claudes-cloud). El navegador propio del agente en un portátil
+(`npm run browser`, Chrome DevTools) no es CI: las comprobaciones nunca lo usan.
 
 El flujo no ejecuta toda la suite contra un deployment: los deploys terminan con el smoke en vivo,
 y GitHub ejecuta la suite después de cada landing. Para ejecutarla toda contra una URL desplegada a

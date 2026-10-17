@@ -17,5 +17,6 @@ for (const name of Object.keys(showcase)) if (platform[name] && platform[name] !
 npm('install', '--package-lock-only', '--no-audit', '--no-fund', '--loglevel=error');
 execFileSync('npm', ['pkg', 'set', `dependencies.@joeblew999/remy-ui=${version}`], { cwd: 'template', stdio: ['ignore', 'ignore', 'inherit'] });
 const retag = (file: string, pattern: RegExp) => { if (!existsSync(file)) return; writeFileSync(file, readFileSync(file, 'utf8').replace(pattern, `$1v${version}`)); };
-retag('template/.github/workflows/google.yml', /(google\.yml@)v\d+\.\d+\.\d+/g);
+// The shared workflow is ci.yml from the release after 0.15.1 (it was google.yml): the new tag gets the new name.
+if (existsSync('template/.github/workflows/ci.yml')) writeFileSync('template/.github/workflows/ci.yml', readFileSync('template/.github/workflows/ci.yml', 'utf8').replace(/workflows\/(?:google|ci)\.yml@v\d+\.\d+\.\d+/g, `workflows/ci.yml@v${version}`));
 execFileSync(process.execPath, ['scripts/template-check.ts'], { stdio: 'inherit' });

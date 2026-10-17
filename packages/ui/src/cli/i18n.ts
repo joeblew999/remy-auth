@@ -13,6 +13,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parts } from './page.ts';
+import type { Subcommands } from './commands.ts';
 
 export type Gap = { language: string; kind: string; what: string };
 const gapLine = (gap: Gap) => `${gap.language} ${gap.kind} ${gap.what}`;
@@ -176,7 +177,9 @@ export function docsGaps(cwd = process.cwd()): { gaps: Gap[]; sites: number } {
   const sites = existsSync(content) ? readdirSync(content, { withFileTypes: true }).filter(entry => entry.isDirectory() && existsSync(join(content, entry.name, 'i18n.json'))).map(entry => join(content, entry.name)) : [];
   if (!sites.length) return { gaps: [], sites: 0 };
   const language = /\.[a-z]{2,3}(-[A-Za-z]{2,4})?\.mdx?$/;
-  const files = (where: string) => (git(cwd, 'ls-files', '-co', '--exclude-standard', '--', relative(cwd, where)) ?? '').split('\n').filter(Boolean);
+  // What git knows that is there now: a page deleted or renamed but not yet committed is still in git's index, and
+  // counting it made a renamed page both missing and an orphan (2026-10-17, dev:change renaming .mdx to .md).
+  const files = (where: string) => (git(cwd, 'ls-files', '-co', '--exclude-standard', '--', relative(cwd, where)) ?? '').split('\n').filter(Boolean).filter(file => existsSync(join(cwd, file)));
   const stale = (english: string, translation: string) => {
     const recorded = madeFrom(readFileSync(join(cwd, translation), 'utf8'));
     return !recorded || recorded.join(' ') !== pagePrints(readFileSync(join(cwd, english), 'utf8')).join(' ');
@@ -260,6 +263,11 @@ export async function checkAll(strict = process.env.I18N_STRICT === '1', cwd = p
 }
 
 export const what = "translations: check [messages|docs] [--list] (offline, read-only), translate [messages|docs] (the machine's Claude; dev:land runs it in the change)";
+/** The subcommands, for remy help and the Commands page; main dispatches on the same two words. */
+export const commands: Subcommands = {
+  check: { what: '[messages|docs] [--list]: the offline checks, read-only, no git history: a warning (exit 0) while coding and in npm run ci, exit 1 with I18N_STRICT=1 (the release); --list prints one line per gap', run: rest => main(['check', ...rest]) },
+  translate: { what: '[messages|docs] [files…]: what the checks list, by the machine\'s Claude (I18N_MODEL, default sonnet; I18N_JOBS at a time, default 4): only the changed sections and keys, with their records; named translation files redone in full; dev:land runs it in the change', run: rest => main(['translate', ...rest]) },
+};
 export async function main(args: string[]): Promise<void> {
   const [command, which, ...rest] = args;
   const list = args.includes('--list');

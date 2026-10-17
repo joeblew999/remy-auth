@@ -8,7 +8,7 @@
 #   permissions: {}
 #   jobs:
 #     checks:
-#       uses: joeblew999/remy-auth/.github/workflows/google.yml@vX.Y.Z
+#       uses: joeblew999/remy-auth/.github/workflows/ci.yml@vX.Y.Z
 #       permissions: { contents: write, packages: write }
 #
 # Every step is a package.json script, so the caller's own package.json decides what runs. The release
@@ -16,7 +16,8 @@
 # made locally with npm run dev:release is left alone; a repository that publishes no packages never
 # tags. npm ci reads @joeblew999/remy-ui from GitHub Packages with the run's token (the app's .npmrc),
 # once the package grants the repository read access ("Manage Actions access").
-name: Checks and release
+# Named for what it runs (`npm run ci`); called google.yml until 2026-10-17.
+name: CI
 
 on:
   push:

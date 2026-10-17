@@ -5,6 +5,8 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { whenChanged } from './unchanged.ts';
+import { writeCommands } from './help.ts';
+import { rightEndings } from './page.ts';
 import { checkAll as translations } from './i18n.ts';
 import { check as plans } from './plans.ts';
 
@@ -70,6 +72,11 @@ export const parts: Record<string, () => void | Promise<unknown>> = {
   'single-copies': singleCopies,
   routes,
   types,
+  // COMMANDS.md, the docs' Commands page, written from the command line itself (help.ts), before the unit
+  // checks, which fail when it is stale.
+  commands: () => writeCommands(),
+  // Each docs page's ending (.md, or .mdx when it uses a component), here and in the blank app: renamed, never asked.
+  endings: () => { for (const line of rightEndings(['docs/content', 'template/docs/content'])) console.log(`endings: ${line}`); },
   unit,
   translations: () => translations(false),
   docs,

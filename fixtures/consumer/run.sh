@@ -75,7 +75,7 @@ step 'docs checks'
 # has, so everywhere else (a Mac, a cloud agent, GitHub after merge) the fixture stops before it (2026-10-17).
 if [ -n "${REMY_REHEARSE_PUBLISH:-}" ]; then
   # As a release runs it: no GITHUB_TOKEN in the environment (the tool finds its own token).
-  # In CI the release job hands the token over as NODE_AUTH_TOKEN (google.yml); on a machine, gh's login.
+  # In CI the release job hands the token over as NODE_AUTH_TOKEN (ci.yml); on a machine, gh's login.
   if [ -n "${CI:-}" ] && [ -n "${GITHUB_ACTIONS:-}" ]; then
     env -u GITHUB_TOKEN NODE_AUTH_TOKEN="$GITHUB_TOKEN" npm run packages -- publish --dry-run
   else

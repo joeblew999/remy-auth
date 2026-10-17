@@ -104,7 +104,7 @@ export const commands: Subcommands = {
   smoke: { what: 'tier 1: every page answers, the home page hydrates', run: () => smoke() },
   google: { what: "Google's Lighthouse audits (level 2; one run at a time on this machine)", run: () => google() },
   cwv: { what: '[alias]: Core Web Vitals on a throwaway preview Worker', run: rest => cwv(rest[0]) },
-  remote: { what: '[origin]: the suite against a deployment (the production origin by default)', run: rest => remoteSuite(rest[0]) },
+  remote: { what: '[origin]: the browser checks against a deployment: production by default, Google\'s audits included; any other origin (a preview, staging) our checks only', run: rest => remoteSuite(rest[0]) },
   live: { what: '[origin]: the smoke against a deployment (every deploy ends with it)', run: rest => live(rest[0]) },
   consumers: { what: 'the repositories this one serves: the blank app and the consumer fixture', run: () => consumers() },
   report: { what: '[remote]: open the last HTML report, local or remote', run: rest => report(rest[0] === 'remote' ? 'remote' : 'local') },

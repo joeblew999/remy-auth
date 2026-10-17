@@ -6,6 +6,9 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+- CI: the shared workflow is `.github/workflows/ci.yml` (it was `google.yml`), named for what it runs,
+  `npm run ci`. Apps move to it with this release: `remy upgrade` rewrites the `uses:` line.
+
 ### Changed
 - The flow is one command, `remy flow <step>` (`status`, `start`, `change`, `land`, `promote`, `release`,
   `done`), dispatched from the table in `flow.ts` like every other command; the blank app's scripts say

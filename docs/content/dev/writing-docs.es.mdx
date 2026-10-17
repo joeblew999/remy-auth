@@ -1,7 +1,7 @@
 ---
 title: "Escribir la documentación"
 description: "Cómo se organiza y se escribe la documentación de una app de Remy con Fumadocs: carpetas, frontmatter, medios, componentes, traducciones y la CLI."
-translatedFrom: "51e67f5c 388e2406 aead1cbc 49fde5b9 4aa38436 7803a3b4 b55cde46 5b494455 3ce796f4"
+translatedFrom: "51e67f5c 388e2406 aead1cbc 49fde5b9 4aa38436 7803a3b4 93a4091e 5b494455 3ce796f4"
 ---
 
 Todas las apps de Remy guardan su documentación de la misma manera, de modo que las tareas compartidas y la CLI de Fumadocs funcionan en cada una.
@@ -104,6 +104,10 @@ para una grabación corta de la página.
 </Tabs>
 
 ## Componentes [#components]
+
+Una página es `.md` (simple, se lee igual en el sitio, por un agente y en la skill `remy`) a menos que use un componente;
+entonces es `.mdx` (solo el sitio las lee). Nadie lo elige: `npm run dev:change` renombra una página, sus traducciones y
+los enlaces que apuntan a ella cuando su contenido necesita la otra extensión.
 
 En páginas `.mdx`: `<Callout>` (o `:::note`, `:::warning` en cualquier página), `<Cards>` y `<Card>`, `<Tabs>`
 y `<Tab>`, `<Steps>` y `<Step>`, `<Accordions>` y `<Accordion>`, `<Files>`, `<Folder>` y

@@ -104,6 +104,10 @@ for a short recording of the page.
 
 ## Components
 
+A page is `.md` (plain, read the same on the site, by an agent and in the `remy` skill) unless it uses a component,
+then `.mdx` (the site alone reads those). Nobody picks: `npm run dev:change` renames a page, its translations and
+the links to it when its content needs the other ending.
+
 In `.mdx` pages: `<Callout>` (or `:::note`, `:::warning` in any page), `<Cards>` and `<Card>`, `<Tabs>`
 and `<Tab>`, `<Steps>` and `<Step>`, `<Accordions>` and `<Accordion>`, `<Files>`, `<Folder>` and
 `<File>`, a ` ```mermaid ` diagram, and a type table read from our TypeScript:

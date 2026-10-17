@@ -20,7 +20,8 @@ const rows = pages.map(page => {
   const file = [`${page}.md`, `${page}.mdx`].find(name => existsSync(join(docs, name)));
   if (!file) throw new Error(`skill.mjs: docs/content/dev/${page}.md(x) is missing`);
   const text = readFileSync(join(docs, file), 'utf8');
-  writeFileSync(join(out, 'references', `${page}.md`), text);
+  // The Commands page is the website's window on COMMANDS.md; an agent reads the repo's own COMMANDS.md (CLAUDE.md imports it).
+  writeFileSync(join(out, 'references', `${page}.md`), text.replace(/\[([^\]]+)\]\(\.\/commands\.mdx[^)]*\)/g, '$1 (`COMMANDS.md` at the repo root)'));
   const { title, description } = front(text);
   return `- [${title}](references/${page}.md): ${description}`;
 });
@@ -37,6 +38,6 @@ developer docs. Read "How we work" first; open the others when the task touches 
 
 ${rows.join('\n')}
 
-Run project commands through \`npm run <script>\`; \`npm run\` lists them.
+Every command, generated from the command line: \`COMMANDS.md\` at the repo root (CLAUDE.md imports it). Run them through \`npm run <script>\`.
 `);
 console.log(`skills/remy: SKILL.md and ${pages.length} references (${version})`);
