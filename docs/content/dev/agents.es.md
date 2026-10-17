@@ -1,7 +1,7 @@
 ---
 title: "Agentes: empieza aquí"
 description: "Dónde empieza un agente de IA en este repositorio: los documentos que son dueños de las reglas, en orden de lectura, los sitios en producción y el flujo por el que pasa cada tarea."
-translatedFrom: "d8d6bb0c f91dc1f7"
+translatedFrom: "f145cd6e f91dc1f7"
 ---
 
 **Para agentes de IA** (Claude Code, Codex, cualquier otro) que trabajan en este repositorio, y para las

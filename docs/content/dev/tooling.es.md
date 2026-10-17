@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "Las herramientas detrás de los comandos: dónde se explica cada área, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación. Todos los comandos están en Comandos."
-translatedFrom: "cccfd094 fb75f597 226f2d81 82be72a9 6077bbda ec3067e7 1ff06e1d 067ae0a5 e6b13d48 bdbd896f e18bd963 e58ce74e 4087c066 73b31a8d b245c9d0 ab72ce36"
+translatedFrom: "cccfd094 78f11071 226f2d81 82be72a9 6077bbda ec3067e7 caee390a e1b0dbc2 e6b13d48 844adefc e18bd963 7f8682df 4087c066 73b31a8d e8ab792f 2135ef72"
 ---
 
 ## Las herramientas [#the-tooling]

@@ -1,7 +1,7 @@
 ---
 title: "Ejecutar, previsualizar y probar la app"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "633d518a 9addc553 0bf2533c 2a9d9497 21aba997 316407e6 222ea1f3 655a09ab fba690a6 73202548"
+translatedFrom: "633d518a 9addc553 5cbb94fc 20e32575 2dd62d59 8bb92a84 c01161f6 fdbfb49e fba690a6 73202548"
 ---
 
 :::note

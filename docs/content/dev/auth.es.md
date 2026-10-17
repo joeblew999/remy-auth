@@ -1,7 +1,7 @@
 ---
 title: "Inicio de sesión y permisos"
 description: "Cómo una app de Remy obtiene el inicio de sesión, los roles y los permisos basados en relaciones de remy-auth y su paquete: el guard, el motor de relaciones, el componente Allowed, los entornos, el correo y las comprobaciones que aporta cada uno."
-translatedFrom: "e4a4893b 11a05eab 8793c16f 3c366d63 a23b4622 1f3c842d 321b0ff7 04dc5b91 a75b5026 b5e68f6c f2b3d098"
+translatedFrom: "e4a4893b 4209246f cf63a85f 532ce43c a23b4622 1f3c842d 321b0ff7 f5533007 a75b5026 32ebfb01 f2b3d098"
 ---
 
 remy-auth existe para que Better Auth funcione bien con TanStack y oRPC en cada app de Remy: una app

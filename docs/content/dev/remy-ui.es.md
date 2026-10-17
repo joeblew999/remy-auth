@@ -1,7 +1,7 @@
 ---
 title: "El paquete de UI (@joeblew999/remy-ui)"
 description: "La interfaz que comparten todas las apps de Remy: shadcn de fábrica, fuentes, catálogos de Paraglide, las páginas del sitio y de la app, el pegamento de TanStack Start y sus comprobaciones."
-translatedFrom: "f3f6cb00 ce14fe94 f12a28fb 9c6f92b3 62bc7837 3f747e59 6d53a8c9"
+translatedFrom: "f3f6cb00 ce14fe94 f759cfe1 59e743ca 62bc7837 3f747e59 b0dc1c9c"
 ---
 
 La interfaz que comparten todas las apps de Remy: componentes y tema de shadcn de fábrica, fuentes,

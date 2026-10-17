@@ -1,7 +1,7 @@
 ---
 title: "Proyectos: estructura, apps nuevas y publicación"
 description: "Qué guarda todo proyecto de Remy en el mismo lugar, cómo empezar una app nueva, la publicación de paquetes, las traducciones, Cloudflare y los planes. Todos los comandos están en Comandos."
-translatedFrom: "3ff1ce70 ffed0063 f341441b 72b80ae7 c0217a27 4e9524a9 39363a65 b248b01b"
+translatedFrom: "114c19e8 180b034a dd9e60f8 72b80ae7 c0217a27 19dcbc6c 39363a65 b248b01b"
 ---
 
 La herramienta es `remy`, el bin de `@joeblew999/remy-ui` (`packages/ui/src/cli`, un módulo de TypeScript por

@@ -1,7 +1,7 @@
 ---
 title: "Desarrolladores: empieza aquí"
 description: "Para desarrolladores que construyen Remy o una app sobre él: autenticación compartida para las apps de Remy, Better Auth en Cloudflare Workers, el paquete compartido remy-ui y por dónde empezar."
-translatedFrom: "15c7d6a6 48bae343 d60c8461 88eb7fe7 c3e96873 c0d418f2"
+translatedFrom: "15c7d6a6 e881ac6c e7540b9e 88eb7fe7 c3e96873 c0d418f2"
 ---
 
 **Para desarrolladores** que construyen Remy, o una app sobre su paquete de UI compartido. ¿Usas la app? Lee la

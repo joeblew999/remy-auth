@@ -1,7 +1,7 @@
 ---
 title: "Cómo trabajamos"
 description: "Cómo trabajan aquí las personas y los agentes: las herramientas del proyecto primero, encuestas antes de elegir herramientas, shadcn y TanStack, puertas de control, planes y traducciones."
-translatedFrom: "56df3445 04014f31 790e3737 0ed0ead4 d8386d74 94b8f1c6 4dca6b46 4aece31e f3262ad2 b2a387bd 7ccf075c 23e9a303 c8f062fe d17b438c 01c70038 d7ee26c1 5cbd4b38 b5662e6a 34b38603"
+translatedFrom: "56df3445 507816d3 3f2365df 8f1562d0 d8386d74 aae80ce5 2ee9c947 20ea1d8b f3262ad2 b2a387bd 81204f9d 23e9a303 c8f062fe 50565b20 7b380d3d 3bc5691c ef341620 3b1944b4 228311cb"
 ---
 
 Este documento es el dueño de cómo trabajan las personas y los agentes: los hábitos que ha pedido el
