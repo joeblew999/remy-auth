@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from 'vite-plus/test';
 import { bookmarkCookie, replicated, withReplicas } from '../../packages/ui/src/replicas';
 
 // D1 read replication (packages/ui/src/replicas.ts): a request reads through a D1 session, which may answer

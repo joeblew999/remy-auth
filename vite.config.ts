@@ -15,12 +15,9 @@ export default remyApp({
     cli: { command: 'tsc -p packages/ui/src/cli', cache: { input: [{ auto: true }, '!packages/ui/cli/**'] } },
     // The plain-function checks, the bin's among them, which runs the built command line.
     'check:unit': {
-      command: 'TEST_TARGET=unit playwright test --project=unit --pass-with-no-tests',
+      command: 'vp test',
       dependsOn: ['cli', 'check:commands', 'generate'],
-      cache: {
-        input: [{ auto: true }, '!test-results/**', '!playwright-report/**'],
-        output: [{ auto: true }, '!test-results/**', '!playwright-report/**'],
-      },
+      cache: { input: [{ auto: true }, '!node_modules/.vite/**'], output: [{ auto: true }, '!node_modules/.vite/**'] },
     },
     // The release's publish (GitHub's release job, for a version tag): each package whose version is new on its
     // registry, then the GitHub release (`vp run publish --release vX.Y.Z`).

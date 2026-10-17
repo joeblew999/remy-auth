@@ -27,7 +27,7 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy guard` | register the flow's guard and the status hook with Claude (--check: is it registered) |
 | `npx remy guard-hook` | the Claude PreToolUse hook the guard registers: refuses a heavy check outside the flow, naming the step |
 | `npx remy allowed` | &lt;task&gt;: may this heavy task run now (the gate the flow sets; refused with exit 1 outside it) |
-| `npx remy check` | the check (vp run check), or one part: plans · single-copies · routes · types · commands · endings · unit · translations · docs |
+| `npx remy check` | the check (vp run check), or one part: plans · single-copies · routes · types · commands · endings · translations · docs |
 | `npx remy plans` | the plans rule on this app's .plans/: few, short, closed |
 | `npx remy plans status` | [--json]: now.md's open items, the open plans with their status line and last commit (STALE after 14 days), the parked ones |
 | `npx remy plans check` | now.md exists, every link under .plans/ resolves, every open plan is linked from now.md; instant (the check runs it) |

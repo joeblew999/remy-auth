@@ -72,15 +72,12 @@ export function remyTasks({ root = process.cwd(), tasks = {} } = {}) {
     'check:commands': `REMY_FLOW=ci ${remy} check commands`,
     'check:endings': `REMY_FLOW=ci ${remy} check endings`,
     'check:translations': `${remy} check translations`,
-    // The checks that are plain functions (tests/**/*.unit.spec.ts): no Worker, no browser.
+    // The checks that are plain functions (tests/**/*.unit.spec.ts), on Vite Plus's test runner: no Worker, no browser.
+    // Vitest's own cache (its temporary files among them) is neither input nor output.
     'check:unit': {
-      command: 'TEST_TARGET=unit playwright test --project=unit --pass-with-no-tests',
+      command: 'vp test',
       dependsOn: ['check:commands', 'generate'],
-      // Playwright's record of its last run and its report: temporary, neither input nor output.
-      cache: {
-        input: [{ auto: true }, '!test-results/**', '!playwright-report/**'],
-        output: [{ auto: true }, '!test-results/**', '!playwright-report/**'],
-      },
+      cache: { input: [{ auto: true }, '!node_modules/.vite/**'], output: [{ auto: true }, '!node_modules/.vite/**'] },
     },
     // The check: Vite Plus's own (format, lint, types) once everything it reads exists, the app and its docs built
     // (the route tree, every docs page compiling, translations included), and the project's own checks passed.
@@ -119,4 +116,6 @@ export const style = {
   // Vite Plus's type check runs inside its lint (typeAware and typeCheck), so `vp check` is format, lint and types.
   // template/ and fixtures/ are other apps' source in remy-auth, checked as installed apps by the new-app test.
   lint: { options: { typeAware: true, typeCheck: true }, ignorePatterns: ['template/**', 'fixtures/**'] },
+  // vp test: the plain-function checks only; tests/*.spec.ts are the browser checks, Playwright's.
+  test: { include: ['tests/**/*.unit.spec.ts'], passWithNoTests: true },
 };

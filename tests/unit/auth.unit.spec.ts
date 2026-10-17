@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from 'vite-plus/test';
 import { environments } from '@joeblew999/remy-ui/environment';
 import { clearOutbox, mailerFor, readOutbox, unreachable } from '@joeblew999/remy-ui/mail';
 import {

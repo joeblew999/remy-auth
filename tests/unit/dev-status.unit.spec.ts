@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from 'vite-plus/test';
 import { compose } from '../../packages/ui/src/cli/feedback';
 
 // vp run status composes from facts their owners answer (.plans/dev-feedback.md); given facts, it says

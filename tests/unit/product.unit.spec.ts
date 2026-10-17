@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from 'vite-plus/test';
 import { readFileSync } from 'node:fs';
 import { codeMail } from '../../src/auth/code-mail';
 import { product } from '../../src/product';

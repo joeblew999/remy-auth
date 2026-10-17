@@ -67,10 +67,6 @@ export function types(): void {
   tool('tsc', []);
 }
 
-/** The checks that are plain functions (the *.unit.spec.ts files under tests): no build, no Worker, no browser. */
-export const unit = (): void =>
-  tool('playwright', ['test', '--project=unit', '--pass-with-no-tests'], { env: { TEST_TARGET: 'unit' } });
-
 /** The docs Worker's check (build, binding types, types) when the app has docs and something in them changed since it last passed. */
 export function docs(): void {
   if (!existsSync('docs')) return;
@@ -113,7 +109,6 @@ export const parts: Record<string, () => void | Promise<unknown>> = {
       process.exit(1);
     }
   },
-  unit,
   translations: () => translations(false),
   docs,
 };

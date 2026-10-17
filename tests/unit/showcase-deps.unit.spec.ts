@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from 'vite-plus/test';
 import { readdirSync, readFileSync } from 'node:fs';
 
 // The showcase declares what it imports, at the platform's exact versions, so an app installing both gets one

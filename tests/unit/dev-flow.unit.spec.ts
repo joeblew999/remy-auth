@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from 'vite-plus/test';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 
 // The flow's gate (allowed.ts) refuses a heavy command that nobody said they were running. The pages

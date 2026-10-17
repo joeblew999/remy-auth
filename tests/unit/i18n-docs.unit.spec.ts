@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from 'vite-plus/test';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { broken, pageFrom } from '../../packages/ui/src/cli/page';
 

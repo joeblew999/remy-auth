@@ -44,30 +44,35 @@ export function remyApp({
   // The app's own strings, when it has them (project.inlang at its root): compiled into src/paraglide, whose
   // runtime follows the platform's language (followLocale in the app's config).
   const catalog = existsSync(resolve(root, appCatalog.project)) ? [paraglideVitePlugin(appCatalog)] : [];
+  // Under Vite Plus's test runner (vp test sets VITEST) the app's plugins stay out: the plain-function checks run in
+  // Node, and Cloudflare's plugin would move them into the Workers runtime.
+  const testing = Boolean(process.env.VITEST);
   return defineConfig({
     ...style,
     run: { tasks: remyTasks({ root, tasks }) },
-    plugins: [
-      // TanStack Devtools: first, as its docs require; strips the devtools from production builds.
-      devtools(),
-      ...plugins,
-      ...catalog,
-      parts.plugin,
-      // What this build is (`virtual:remy-build`): /healthz answers with it and the page carries it.
-      remyBuild({ root, ...build }),
-      cloudflare({ viteEnvironment: { name: 'ssr' }, ...cloudflareOptions }),
-      // Fallback faces sized to the web fonts (size-adjust and ascent/descent overrides), so the swap to
-      // Geist keeps the layout and LCP; fonts.css lists them. Before Tailwind.
-      FontaineTransform.vite({ fallbacks: { 'Geist Variable': ['Arial'] } }),
-      tailwindcss(),
-      // The stylesheet inlined in the HTML, so the first paint needs no CSS fetch.
-      tanstackStart({
-        ...start,
-        server: { build: { inlineCss: true }, ...start.server },
-        router: { virtualRouteConfig: parts.routes, ...start.router },
-      }),
-      viteReact(),
-    ],
+    plugins: testing
+      ? []
+      : [
+          // TanStack Devtools: first, as its docs require; strips the devtools from production builds.
+          devtools(),
+          ...plugins,
+          ...catalog,
+          parts.plugin,
+          // What this build is (`virtual:remy-build`): /healthz answers with it and the page carries it.
+          remyBuild({ root, ...build }),
+          cloudflare({ viteEnvironment: { name: 'ssr' }, ...cloudflareOptions }),
+          // Fallback faces sized to the web fonts (size-adjust and ascent/descent overrides), so the swap to
+          // Geist keeps the layout and LCP; fonts.css lists them. Before Tailwind.
+          FontaineTransform.vite({ fallbacks: { 'Geist Variable': ['Arial'] } }),
+          tailwindcss(),
+          // The stylesheet inlined in the HTML, so the first paint needs no CSS fetch.
+          tanstackStart({
+            ...start,
+            server: { build: { inlineCss: true }, ...start.server },
+            router: { virtualRouteConfig: parts.routes, ...start.router },
+          }),
+          viteReact(),
+        ],
     server: { host: '127.0.0.1', port, strictPort: true },
   });
 }

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from 'vite-plus/test';
 import { ended, span, took } from '../../packages/ui/src/cli/feedback';
 
 // vp run land says what each of its parts took (owner, 2026-10-10, of a landing usable after 40 seconds

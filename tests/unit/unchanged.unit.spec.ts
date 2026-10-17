@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from 'vite-plus/test';
 import { affects, inert } from '../../packages/ui/src/cli/unchanged';
 
 // A pull request runs only the parts its changes can affect (owner, 2026-10-17: one changed Markdown

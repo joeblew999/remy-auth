@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from 'vite-plus/test';
 import { readFileSync } from 'node:fs';
 import { jobTasks } from '../../packages/ui/src/cli/ci';
 

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from 'vite-plus/test';
 import { pagePrints } from '../../packages/ui/src/cli/i18n';
 
 // The formatter (vp fmt) lines up a table's columns and nothing else in a page's words: a translation made from the

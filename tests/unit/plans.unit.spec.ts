@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from 'vite-plus/test';
 import { links, nowItems } from '../../packages/ui/src/cli/plans';
 
 // The plans rule's reading of Markdown, as plain functions (the whole rule runs on every check as

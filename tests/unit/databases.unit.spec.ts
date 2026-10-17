@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from 'vite-plus/test';
 import { databaseProblems } from '../../packages/ui/src/cli/cloudflare';
 
 // The platform's rule for every D1 database (npx remy cloudflare provisioned, before every deploy): read copies on,
