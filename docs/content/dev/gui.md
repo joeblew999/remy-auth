@@ -34,6 +34,7 @@ Development uses the same Worker source and Cloudflare runtime with hot reload.
 | `npx remy cloudflare deploy` | Build, then upload production to the authenticated Cloudflare account; `dev:promote` runs it |
 | `npx remy cloudflare staging` | The same for the staging environment: its own Worker (`origins.staging`) and resources; `dev:land` runs it |
 | `npx remy cloudflare preview` | Deploy this commit as a throwaway Worker, run level 1 against it, delete it |
+| A pull request (`.github/workflows/preview.yml`) | `npm run preview:pr -- pr-<number> --keep` with `CLOUDFLARE_ENV=staging`: a Worker `remy-auth-staging-check-pr-<number>` on staging's data, checked at level 1 and named in a comment on the pull request; replaced on each push, deleted (`npm run preview:pr-delete -- pr-<number>`) when it closes. Needs the repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` |
 | `npm run test -- remote [origin]` | Same tests against a deployment; no local server or deployment |
 | `npm run test -- report [remote]` | Open the last local or remote run's HTML report, including Lighthouse reports |
 

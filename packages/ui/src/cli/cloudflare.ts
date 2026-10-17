@@ -4,7 +4,7 @@
 // same through `remy cloudflare <deploy|staging|versions|urls|docs-deploy>`. Wrangler does the work.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -209,8 +209,12 @@ const workerName = async (): Promise<string> => (await workerConfig()).name;
  */
 export async function preview(alias?: string, keep = false): Promise<string> {
   const { name: worker, config } = await workerConfig();
-  const host = (process.env.DEPLOY_ORIGIN ?? '').replace(/^https:\/\//, '');
-  if (!host.startsWith(`${worker}.`) || !host.endsWith('.workers.dev')) fail(`preview needs origins.production on workers.dev as https://${worker}.<subdomain>.workers.dev (got ${process.env.DEPLOY_ORIGIN})`);
+  // With CLOUDFLARE_ENV=staging (a pull request's preview) the Worker is the staging one, with staging's
+  // databases and settings, so its origin is staging's; otherwise production's, whose bindings it takes.
+  const staging = process.env.CLOUDFLARE_ENV === 'staging';
+  const base = staging ? process.env.STAGING_ORIGIN : process.env.DEPLOY_ORIGIN;
+  const host = (base ?? '').replace(/^https:\/\//, '');
+  if (!host.startsWith(`${worker}.`) || !host.endsWith('.workers.dev')) fail(`preview needs origins.${staging ? 'staging' : 'production'} on workers.dev as https://${worker}.<subdomain>.workers.dev (got ${base})`);
   const part = (alias ?? execFileSync('git', ['rev-parse', '--short=7', 'HEAD'], { encoding: 'utf8' }).trim()).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/^-+|-+$/g, '').slice(0, 20);
   const name = `${worker}-check-${part}`;
   const origin = `https://${name}.${host.slice(worker.length + 1)}`;
@@ -240,6 +244,8 @@ export async function preview(alias?: string, keep = false): Promise<string> {
     if (ok < 10) fail(`preview: ${origin} did not answer steadily within 2 minutes`);
     tool('playwright', ['test', '--project=ours'], { env: { TEST_BASE_URL: origin, TEST_TARGET: 'remote', CHECK_LOCALES: process.env.CHECK_LOCALES ?? process.env.QUICK_LOCALES ?? 'en,ar' } });
     console.log(`Preview passed level 1: ${origin}`);
+    // In GitHub Actions the job's later steps read the origin (the pull request's comment names it).
+    if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `origin=${origin}\n`);
     return origin;
   } finally { if (!keep) await remove(); }
 }
@@ -256,6 +262,8 @@ export async function previewDelete(name?: string): Promise<void> {
     for (const script of answer.result ?? []) if (script.id.startsWith(`${worker}-check-`)) console.log(`  ${script.id}`);
     return;
   }
+  // An alias alone (pr-18) names the Worker preview made for it: <worker>-check-pr-18.
+  if (!name.startsWith(`${worker}-check-`)) name = `${worker}-check-${name.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/^-+|-+$/g, '').slice(0, 20)}`;
   if (!name.startsWith(`${worker}-check-`) || name === `${worker}-check-`) fail(`preview-delete only deletes check Workers named ${worker}-check-<name> (got ${name})`);
   console.log(`Target: Cloudflare (remote), deleting Worker ${name}`);
   tool('wrangler', ['delete', '--name', name, '--force']);
@@ -269,7 +277,7 @@ export const commands: Subcommands = {
   versions: { what: '[origins…]: a row per deployment, each commit placed against this checkout', run: async rest => { const { table, unanswered } = await versions(rest.length ? rest : undefined); console.log(table); if (unanswered) process.exit(1); } },
   urls: { what: '[origin]: the URLs a deployment answers at', run: async rest => { await urls(rest[0]); } },
   preview: { what: '[alias] [--keep]: a throwaway Worker <name>-check-<alias> with this build, deleted after its checks unless kept', run: async rest => { await preview(rest.find(part => !part.startsWith('--')), rest.includes('--keep')); } },
-  'preview-delete': { what: '[name]: delete a preview Worker', run: rest => previewDelete(rest[0]) },
+  'preview-delete': { what: '[name|alias]: delete a preview Worker', run: rest => previewDelete(rest[0]) },
   wait: { what: '<origin> <wrangler-output-file>: until the origin serves the uploaded version, every home-page asset included', run: rest => { const [origin, output] = rest; if (!origin || !output) fail('remy cloudflare wait <origin> <wrangler-output-file>'); return waitFor(origin, output); } },
   provisioned: { what: 'refuse when a D1, KV or R2 binding names no existing resource', run: () => provisioned() },
 };
