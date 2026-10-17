@@ -1,17 +1,15 @@
 // A repository that publishes packages of its own (npm workspaces that are not private), remy-auth and
-// any other Remy repo alike: `remy packages check|upgrade|pack|notes|bumped|publish|tag|release`. The
+// any other Remy repo alike: `remy packages check|upgrade|pack|notes|bumped|publish|tag`. The
 // workspace list in package.json drives them; remy.config.ts's `release` names the package whose
-// version tags a release, and its title. `remy flow release` (STEP 4) is `release` here: every gate, then
-// the tag, which publishes.
+// version tags a release, and its title. The release script names the order; `tag` is its last step, and GitHub's
+// release job publishes from the tag.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { dispatch, type Subcommands } from './commands.ts';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { translationGaps } from './i18n.ts';
-import { cwv } from './test.ts';
-import { verifySetup } from './verify.ts';
-import { bin } from './config.ts';
+import { bin, releaseConfig } from './config.ts';
 
 function fail(message: string): never {
   console.error(message);
@@ -52,11 +50,11 @@ export function workspaces(): { all: Workspace[]; published: (Workspace & { regi
 
 /** The lead package (remy.config.ts's release.package): the one whose version names a release. */
 function lead(): { name: string; version: string; title: string } {
-  const name = process.env.RELEASE_PACKAGE;
+  const name = releaseConfig().package;
   if (!name) fail('release.package is not in remy.config.ts: the package whose version names the release');
   const found = workspaces().published.find((item) => item.name === name);
   if (!found) fail(`${name} is not a published workspace here.`);
-  return { name, version: found.version, title: process.env.RELEASE_TITLE ?? name };
+  return { name, version: found.version, title: releaseConfig().title ?? name };
 }
 
 /** npm-check-updates over this repository's own dependencies (the root's and every workspace's); its own workspaces and the platform package are never touched. */
@@ -83,11 +81,11 @@ function ncu(...extra: string[]): void {
 /** Preview the latest versions, changing nothing. */
 export const check = (): void => ncu();
 
-/** Move the pins to the latest versions, majors included, install, then the installation's checks. */
-export async function upgrade(): Promise<void> {
+/** Move the pins to the latest versions, majors included, and install (vp run setup checks the installation after). */
+export function upgrade(): void {
   ncu('--upgrade');
   tool('npm', ['install', '--prefer-online', '--strict-peer-deps']);
-  await verifySetup();
+  console.log('packages: upgraded and installed; vp run setup checks the installation.');
 }
 
 /**
@@ -100,6 +98,7 @@ const shipsWhatItNames = (): void => {
     const manifest = JSON.parse(readFileSync(join(item.location, 'package.json'), 'utf8')) as {
       bin?: string | Record<string, string>;
       exports?: unknown;
+      files?: string[];
     };
     const targets: string[] = [];
     const walk = (value: unknown): void => {
@@ -108,23 +107,18 @@ const shipsWhatItNames = (): void => {
     };
     walk(manifest.bin);
     walk(manifest.exports);
+    // And every folder or file its `files` list ships (remy-ui's skills/, which the skills:build task makes).
+    for (const entry of manifest.files ?? []) if (!entry.startsWith('!')) targets.push(entry);
     const missing = targets.filter((target) => !target.includes('*') && !existsSync(join(item.location, target)));
     if (missing.length)
       fail(
-        `packages: ${item.name} names files that are not built: ${missing.join(', ')}. vp run publish builds them first (its tasks).`,
+        `packages: ${item.name} names files that are not built: ${missing.join(', ')}. vp run publish builds them first (its tasks: generate, cli, skills:build).`,
       );
   }
 };
-/** What the package ships that is made from the docs: the remy skill (remy-auth only), before any pack or publish. */
-const shipped = async (): Promise<void> => {
-  const { buildSkill } = await import('./skills.ts');
-  await buildSkill();
-};
-
 /** A tarball of each published package, here, for a scratch app to install before any release. */
 export async function pack(): Promise<void> {
   shipsWhatItNames();
-  await shipped();
   const { published } = workspaces();
   if (!published.length) {
     console.log('pack: this repository publishes no packages (no workspace that is not private).');
@@ -214,7 +208,6 @@ export async function publish(options: { release?: string; dryRun?: boolean } = 
     // An app's own .npmrc (the blank app's) reads ${GITHUB_TOKEN} and outranks the user config written below.
     const env = { GITHUB_TOKEN: token, NODE_AUTH_TOKEN: token };
     shipsWhatItNames();
-    await shipped();
     for (const item of workspaces().published) {
       const host = item.registry.replace(/^https:\/\//, '').replace(/\/$/, '');
       const npmrc = join(scratch, 'npmrc');
@@ -271,7 +264,7 @@ export async function publish(options: { release?: string; dryRun?: boolean } = 
   }
 }
 
-/** The release's last step, after the gates: on a clean main that is not behind origin, tag the lead's version, push main and the tag, then publish with the release. */
+/** The release's last step, after the gates: on a clean main that is not behind origin, tag the lead's version, then push main and the tag. */
 export async function tag(): Promise<void> {
   const { name, version, title } = lead();
   if (git('branch', '--show-current') !== 'main') fail('Release from main.');
@@ -286,42 +279,35 @@ export async function tag(): Promise<void> {
   execFileSync('git', ['tag', '-a', `v${version}`, '-m', `${title} ${version}`]);
   execFileSync('git', ['push', 'origin', 'main'], { stdio: 'inherit' });
   execFileSync('git', ['push', 'origin', `v${version}`], { stdio: 'inherit' });
-  await publish({ release: `v${version}` });
+  // GitHub's release job publishes from the tag (vp run publish --release vX.Y.Z), once, with the registries' tokens.
+  console.log(`packages: v${version} tagged and pushed; GitHub's release job publishes it.`);
 }
 
 /**
- * The release: the gates one after another (translations strict, every changed package bumped, the
- * release gate with every check in every language, the app's own release checks, Google's audits
- * locally and Core Web Vitals on a Cloudflare preview), then the tag. About five minutes.
+ * What a release needs before its checks run (remy release check), the cheap things first so nothing long runs for a
+ * release that cannot happen: a package to release, its notes in CHANGELOG.md, a version not yet tagged, translations
+ * complete, every changed package bumped.
  */
-/** What a release needs before its checks run (`remy flow prepare release`): translations complete, versions bumped. */
 export async function releaseReady(): Promise<void> {
+  if (!workspaces().published.length)
+    fail('release: this repository publishes no packages, so it has nothing to release.');
+  const { name, version } = lead();
+  notes(version);
+  if (quiet('git', ['rev-parse', '-q', '--verify', `refs/tags/v${version}`]))
+    fail(`release: v${version} is already tagged; bump ${name}'s version.`);
   if ((await translationGaps()).length)
     fail('release: translations are incomplete or stale (npx remy i18n check); land, which translates, first.');
   bumped();
 }
 
-/**
- * The release's own part, after `vp run ci` and `vp run release-checks` passed (its script runs both, Vite Plus's):
- * Core Web Vitals on a throwaway preview, then the tag.
- */
-export async function release(): Promise<void> {
-  // The release is what runs the gated commands: said first, before the gate asks (2026-10-11, the first
-  // release refused itself with the marker set after it).
-  process.env.REMY_FLOW ??= 'release';
-  await cwv('release');
-  await tag();
-}
-
-export const what =
-  'a repository that publishes packages: updates, the pack, the notes, the publish, the tag, the release';
+export const what = 'a repository that publishes packages: updates, the pack, the notes, the publish, the tag';
 export const commands: Subcommands = {
   check: {
     what: "package updates available for the repository's own dependencies (npm-check-updates; never its own packages); nothing changed",
     run: () => check(),
   },
   upgrade: {
-    what: "upgrade every package, major versions included, then the installation's checks",
+    what: 'upgrade every package, major versions included, and install (vp run setup checks the installation)',
     run: () => upgrade(),
   },
   pack: {
@@ -347,12 +333,8 @@ export const commands: Subcommands = {
     },
   },
   tag: {
-    what: "on a clean main: the lead package's version as the tag, pushed with main, then the publish",
+    what: "on a clean main: the lead package's version as the tag, pushed with main (GitHub's release job publishes it)",
     run: () => tag(),
-  },
-  release: {
-    what: "the release, after vp run ci: the app's release-checks script, Core Web Vitals on a preview, the tag (vp run release runs it)",
-    run: () => release(),
   },
 };
 export const main = dispatch('packages', commands);

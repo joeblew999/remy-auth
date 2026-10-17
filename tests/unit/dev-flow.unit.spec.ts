@@ -1,62 +1,24 @@
 import { test, expect } from 'vite-plus/test';
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { flowScripts, hookFiles, taskNames } from '../../packages/ui/src/tasks.js';
 
-// The flow's gate (allowed.ts) refuses what costs money or ships when nobody said they were running it. The pages
-// never give one bare: in a fenced shell block, the translator or Core Web Vitals is written with REMY_FLOW=hand in
-// front (a person's decision at a terminal) or not as a command at all. On 2026-10-10 eight lines on six pages gave
-// a gated command bare, and three installation tasks ended in the refusal.
+// What runs, in what order and when, is in plain sight: the scripts and the Vite Plus tasks (tasks.js, one source for
+// remy-auth, the blank app and every app remy upgrade moves); the command line underneath is leaves, each doing what
+// it is asked (owner, 2026-10-17: "in that configuration file of VP, you see everything. Everything else underneath
+// it should be pretty dumb").
 
-const heavy = /^(?:[A-Z_]+=\S+\s+)*(?:npx\s+remy\s+i18n\s+translate\b|npx\s+remy\s+test\s+cwv\b)/;
-const walk = (dir: string): string[] =>
-  readdirSync(dir).flatMap((name) => {
-    const path = `${dir}/${name}`;
-    return statSync(path).isDirectory() ? walk(path) : [path];
-  });
+const cli = readdirSync('packages/ui/src/cli')
+  .filter((file) => file.endsWith('.ts'))
+  .map((name) => [name, readFileSync(`packages/ui/src/cli/${name}`, 'utf8')] as const);
 
-test('no English page gives a heavy command bare in a shell block: REMY_FLOW=hand in front, or not as a command', () => {
-  const translation = /\.[a-z]{2,3}(?:-[A-Za-z]{2,4})?\.mdx?$/;
-  const pages = [
-    ...walk('apps/docs/content').filter((file) => /\.mdx?$/.test(file) && !translation.test(file)),
-    'README.md',
-    'AGENTS.md',
-  ].filter((file) => existsSync(file));
-  expect(pages.length).toBeGreaterThan(5);
-  const bare = pages.flatMap((file) => {
-    let fenced = false;
-    return readFileSync(file, 'utf8')
-      .split('\n')
-      .flatMap((line, index) => {
-        if (/^\s*(```|~~~)/.test(line)) {
-          fenced = !fenced;
-          return [];
-        }
-        return fenced && heavy.test(line.trim()) && !/^REMY_FLOW=hand\b/.test(line.trim())
-          ? [`${file}:${index + 1}: ${line.trim()}`]
-          : [];
-      });
-  });
-  expect(bare).toEqual([]);
-});
-
-// The flow's steps are scripts that run Vite Plus between their own parts, never the other way round: land and a
-// release prepare (what changes the files, or what would stop them), then vp run ci (a release, its release-checks too),
-// then their own part; setup
-// installs, then vp run check. The installation's own checks run no check and no browser (owner, 2026-10-11, of a
-// setup that ran the browser suite: "Setup takes 2 minutes. This is clearly wrong").
-test('the flow runs vp run ci or vp run check between its own parts, in remy-auth and in every app', () => {
+test('every repository has the same flow scripts and Git hooks, from tasks.js', () => {
   for (const [file, remy] of [
     ['package.json', 'node packages/ui/src/cli/remy.ts'],
     ['template/package.json', 'remy'],
   ] as const) {
     const { scripts } = JSON.parse(readFileSync(file, 'utf8')) as { scripts: Record<string, string> };
-    expect(scripts.land, file).toBe(`${remy} flow prepare land && vp run ci && ${remy} flow land`);
-    expect(scripts.release, file).toBe(
-      `${remy} flow prepare release && REMY_REHEARSE_PUBLISH=1 CHECK_LOCALES=all vp run ci && vp run release-checks && ${remy} flow release`,
-    );
-    expect(scripts.setup, file).toBe(`${remy} setup && vp run check`);
-    // What remy upgrade writes into an app is what remy-auth and the template have: one source, tasks.js.
     expect(scripts, file).toMatchObject(flowScripts(remy));
+    // A script and a task cannot share a name: Vite Plus runs the task.
     for (const name of taskNames()) expect(scripts[name], `${file}: ${name} is a task`).toBeUndefined();
   }
   expect(JSON.parse(readFileSync('template/package.json', 'utf8')).scripts).toEqual({
@@ -66,13 +28,36 @@ test('the flow runs vp run ci or vp run check between its own parts, in remy-aut
   for (const folder of ['.vite-hooks', 'template/.vite-hooks'])
     for (const [name, text] of Object.entries(hookFiles))
       expect(readFileSync(`${folder}/${name}`, 'utf8'), `${folder}/${name}`).toBe(text);
-  const verify = readFileSync('packages/ui/src/cli/verify.ts', 'utf8');
-  const setupChecks = verify.slice(verify.indexOf('export async function verifySetup()'));
-  expect(setupChecks.slice(0, setupChecks.indexOf('\n}'))).not.toMatch(/check\(\)|every\(\)|consumers\(\)/);
-  // Nothing of the command line's runs Vite Plus's task runner: the scripts do.
-  for (const name of readdirSync('packages/ui/src/cli').filter((file) => file.endsWith('.ts')))
-    expect(readFileSync(`packages/ui/src/cli/${name}`, 'utf8'), name).not.toMatch(
-      // vp run itself, or npm run, whose scripts may run it (the release's npm run release-checks did, 2026-10-17).
-      /['"]vp['"],\s*\[\s*['"]run['"]|['"]npm['"],\s*\[\s*['"]run['"]/,
+});
+
+test('the flow scripts run Vite Plus between the command line steps, never the other way round', () => {
+  const scripts = flowScripts('remy');
+  expect(scripts.land).toBe('remy land start && vp run translate && vp run ci && remy land finish');
+  expect(scripts.release).toMatch(/^remy release check && CHECK_LOCALES=all vp run ci && vp run release-checks/);
+  expect(scripts.setup).toMatch(/&& vp run check$/);
+  // Nothing of the command line runs Vite Plus's task runner, or npm run, whose scripts may (the release's
+  // npm run release-checks did, 2026-10-17).
+  for (const [name, text] of cli)
+    expect(text, name).not.toMatch(/['"]vp['"],\s*\[\s*['"]run['"]|['"]npm['"],\s*\[\s*['"]run['"]/);
+});
+
+test('the command line hands nothing on through the environment, and reads no switch of its own', () => {
+  // A command passes a child what it needs in that child's own env (spawn's env), never by writing its own process's:
+  // configure() did, for every command, so values reached children by a route nobody could see.
+  for (const [name, text] of cli)
+    expect(text, name).not.toMatch(
+      /process\.env\.[A-Z_]+\s*(\?\?)?=(?!=)|process\.env\[[^\]]+\]\s*=(?!=)|Object\.assign\(process\.env/,
     );
+  // The switches the old flow kept in the environment are gone, everywhere code reads them.
+  const gone =
+    /\b(REMY_FLOW|REMY_RECORD|REMY_SKIP_CI|REMY_REHEARSE_PUBLISH|QUICK_LOCALES|BEHAVIOUR_LOCALES|I18N_STRICT|I18N_INLANG|I18N_DOCS_DIR|I18N_MODEL|I18N_JOBS|PUBLIC_ORIGIN|REMY_WRANGLER_CONFIG)\b/;
+  const code = [
+    ...cli,
+    ...['tasks.js', 'checks.js', 'playwright.js', 'app-vite.js'].map(
+      (name) => [name, readFileSync(`packages/ui/src/${name}`, 'utf8')] as const,
+    ),
+    ['run.sh', readFileSync('fixtures/consumer/run.sh', 'utf8')] as const,
+    ['vite.config.ts', readFileSync('vite.config.ts', 'utf8')] as const,
+  ];
+  for (const [name, text] of code) expect(text.match(gone)?.[0], name).toBeUndefined();
 });

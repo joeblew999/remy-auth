@@ -1,5 +1,5 @@
 // Verification. `remy verify setup` is what an installation must satisfy, about a minute, no browser:
-// the dependencies, MCP registration, the guard, the CLI versions and the tooling invariants;
+// the dependencies, MCP registration, the status hook, the CLI versions and the tooling invariants;
 // `remy setup` and the upgrades end with it (`remy verify` alone runs it). The gate before a landing or a
 // release is `vp run ci`, Vite Plus's, never a command of ours.
 import assert from 'node:assert/strict';
@@ -10,7 +10,7 @@ import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { register } from './mcp.ts';
-import { main as guard } from './register.ts';
+import { main as hooks } from './register.ts';
 import { pins, remySkillPath } from './skills.ts';
 import { appDir } from './config.ts';
 
@@ -46,6 +46,16 @@ export function doctor(): void {
  */
 export async function tooling(): Promise<void> {
   const manifest = readJson('package.json');
+  // No script left from 0.15: one that shares a task's name stops vp run for both, and names a command this release
+  // has no more. An upgrade from 0.15 runs 0.15's own code, which never rewrote them; the second upgrade does.
+  const { taskNames } = await import('@joeblew999/remy-ui/workspace');
+  const shared = new Set(taskNames());
+  const old = Object.keys(manifest.scripts ?? {}).filter((name) => shared.has(name) || /^dev:[a-z]+$/.test(name));
+  assert.deepEqual(
+    old,
+    [],
+    `package.json has scripts from an older release (${old.join(', ')}): run npx remy upgrade <version> once more`,
+  );
   const lock = readJson('package-lock.json');
   for (const section of ['dependencies', 'devDependencies', 'optionalDependencies']) {
     assert.deepEqual(
@@ -166,7 +176,7 @@ export async function tooling(): Promise<void> {
 export async function verifySetup(): Promise<void> {
   tool('npm', ['ls', '--depth=0'], 'npm ls');
   await register(true);
-  guard(['--check']);
+  hooks(['--check']);
   doctor();
   await tooling();
 }
@@ -174,7 +184,7 @@ export async function verifySetup(): Promise<void> {
 export const what = "the installation's checks";
 export const commands: Subcommands = {
   setup: {
-    what: "the installation's checks: npm ls, MCP, the guard, doctor, tooling (remy setup ends with them); the default",
+    what: "the installation's checks: npm ls, MCP, the status hook, doctor, tooling (vp run setup runs them); the default",
     run: () => verifySetup(),
   },
   tooling: {

@@ -39,9 +39,9 @@ only. The rest ask the Worker which environment it is (`/healthz`) and expect wh
 and one press signs in as one of them; against production none of it exists. The remote test task can
 also target an already-running local preview to check the external-server path.
 
-The commands are the package's (`remy`), driven by this project's `remy.config.ts` (the origins, the
-ports); this repository's own are its `package.json` scripts (`local`, `generate`, `release-checks`,
-`test:consumers`; [projects](./projects.md#choosing-the-version-released-development-or-local)). The Playwright
+The commands are the package's (`remy`), each reading this project's `remy.config.ts` for what it needs (the
+origins, the ports); this repository's own are its tasks (`vite.config.ts`: `new-app`, `skills:build`,
+`release-checks`, `publish`) and scripts. The Playwright
 configuration is the package's `playwrightConfig()`.
 
 There is one Worker configuration with one named environment, `staging` (`env.staging` in
@@ -267,10 +267,10 @@ can show (owner, 2026-10-17: "you really need to decide what is tested and what 
 - What does differ in every language is checked in every language: the catalogs and their plurals (the unit checks),
   the sitemap, hreflang and the language switcher, and the casing and hyphenation samples.
 - A release runs every check in every language (`CHECK_LOCALES=all`, its script sets it). By hand, `CHECK_LOCALES`
-  takes `all`, `quick` (English and Arabic) or a comma-separated list; `BEHAVIOUR_LOCALES` overrides the second rule.
+  takes `all`, `quick` (English and Arabic) or a comma-separated list.
 What the checks cover is the checks themselves: `tests/` and the package's
 `@joeblew999/remy-ui/checks` (each check's title says what it proves); the flow's steps that run them are in
-[how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). In short: every page in every
+[how we work](./how-we-work.md#the-flow-four-steps-in-plain-sight). In short: every page in every
 language without JavaScript (language, direction, metadata, links), catalogs and plurals, the formats
 values against Intl, entry redirects and the language hint, hydration, the demo form and the API,
 HTTP statuses, the sitemap and `hreflang`, security headers and the CSP nonce, narrow screens, and
@@ -285,7 +285,7 @@ Google's level covers site pages only (app pages are noindex by design): Lightho
 (`npx remy test cwv`), not localhost.
 
 Limits: no organizations, OAuth tokens or cross-app sign-in yet, so only remy-auth's own pages know
-who is signed in ([the auth plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/auth-service.md)). The site is served from its workers.dev address (`DEPLOY_ORIGIN`); the production public origin and
+who is signed in ([the auth plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/auth-service.md)). The site is served from its workers.dev address (`origins.production` in remy.config.ts); the production public origin and
 Search Console are owner decisions ([now](https://github.com/joeblew999/remy-auth/blob/main/.plans/now.md)).
 
 Known tooling notices: Node may print the Chrome DevTools localStorage experimental

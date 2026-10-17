@@ -1,7 +1,7 @@
 ---
 title: "Agentes: empieza aquí"
 description: "Dónde empieza un agente de IA en este repositorio: los documentos que son dueños de las reglas, en orden de lectura, los sitios en producción y el flujo por el que pasa cada tarea."
-translatedFrom: "ad9a54ae bb42d425"
+translatedFrom: "ceb16193 bb42d425"
 ---
 
 **Para agentes de IA** (Claude Code, Codex, cualquier otro) que trabajan en este repositorio, y para las
@@ -10,7 +10,7 @@ documento que es su dueño; esta página es el orden de lectura. El `AGENTS.md` 
 solo apuntan aquí ([dónde viven las reglas](./how-we-work.md#where-rules-live)). Lee los documentos de
 abajo antes de cambiar nada, y síguelos por encima de tus propios valores predeterminados.
 
-Cuando dos páginas no coinciden, gana [la tabla del flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest),
+Cuando dos páginas no coinciden, gana [la tabla del flujo](./how-we-work.md#the-flow-four-steps-in-plain-sight),
 y la página que no coincide es un error: corrígelo en la página en la que estás
 ([si ves algo, corrígelo](./how-we-work.md#see-something-fix-it-or-write-it-down-in-the-same-landing)).
 Una contradicción entre páginas nunca es motivo para detenerse, ni para preguntarle al dueño cuál es correcta.
@@ -38,7 +38,7 @@ las traducciones que están al lado (`*.es.md`).
 
 Empieza con `vp run status` (qué está pasando) y
 [las herramientas propias del proyecto](./how-we-work.md#use-the-projects-own-tools-first), y termina
-siguiendo [el flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest):
+siguiendo [el flujo](./how-we-work.md#the-flow-four-steps-in-plain-sight):
 `vp run check` después de cada cambio, `vp run land "<what changed>"` cuando el trabajo
 está terminado y la comprobación está en verde.
 

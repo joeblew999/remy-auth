@@ -66,15 +66,8 @@ export const checkedLocales = !asked
  * them in all thirteen only multiplied the time (owner, 2026-10-17: the "every language" job took
  * 5.5 minutes, 81% of it these repeats). Checks of what does depend on the language (fonts and
  * scripts, hyphenation, direction, formats, the catalogs) keep iterating `checkedLocales`.
- * BEHAVIOUR_LOCALES (comma-separated) overrides, e.g. to run them all again.
  */
-export const behaviourLocales = process.env.BEHAVIOUR_LOCALES
-  ? checkedLocales.filter((locale) =>
-      process.env.BEHAVIOUR_LOCALES.split(',')
-        .map((value) => value.trim())
-        .includes(locale),
-    )
-  : pair(checkedLocales);
+export const behaviourLocales = pair(checkedLocales);
 import { m } from './paraglide/messages.js';
 import { samples } from './samples.js';
 

@@ -40,3 +40,5 @@ export declare const stampEnv: string[];
 export function workspaceOf(root: string): string | undefined;
 /** The platform package's generate task by name, when the workspace holds the package. */
 export function platformGenerate(workspace: string): string[];
+/** What a person runs, by its Vite Plus name, with what it does (COMMANDS.md's first table). */
+export function frontDoor(remy?: string): [string, string][];

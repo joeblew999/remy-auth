@@ -1,12 +1,14 @@
 // `remy upgrade <version>` (an app, not remy-auth): move to one shared release. The package at that
 // exact version, the shared CI workflow at its tag, the flow's scripts and Vite Plus's Git hooks as that release
-// has them, then the skills of that release, the agents' rules block, the guard, and the installation's checks.
+// has them, then the skills of that release, the agents' rules block, the status hook, and the installation's checks.
+// One command, not a script of steps: `vp run upgrade <version>` hands the version to a script's last command only,
+// and the install that needs it comes first.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { chmodSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { register } from './mcp.ts';
-import { main as guard } from './register.ts';
+import { main as hooks } from './register.ts';
 import { rules } from './rules.ts';
 import { installSkills } from './skills.ts';
 import { verifySetup } from './verify.ts';
@@ -67,7 +69,7 @@ export async function upgrade(version: string | undefined): Promise<void> {
   installSkills();
   rules();
   await register(false);
-  guard([]);
+  hooks([]);
   await verifySetup();
   console.log(`upgrade: on @joeblew999/remy-ui ${version}.`);
 }
@@ -131,5 +133,5 @@ export async function scriptsAndHooks(): Promise<void> {
 }
 
 export const what =
-  "<version>: this app onto a release of the platform: the package, the workflow's tag, the skills, the rules, the guard, the installation's checks (vp run upgrade)";
+  "<version>: this app onto a release of the platform: the package, the workflow's tag, the skills, the rules, the status hook, the installation's checks (vp run upgrade)";
 export const main = (args: string[]): Promise<void> => upgrade(args[0]);

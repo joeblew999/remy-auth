@@ -9,6 +9,7 @@
 import { mkdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
+import { origins } from './config.ts';
 
 export async function shots(args: string[]): Promise<void> {
   const require = createRequire(`${process.cwd()}/package.json`);
@@ -25,7 +26,7 @@ export async function shots(args: string[]): Promise<void> {
   const valued = new Set(['origin', 'out', 'locale']);
   const paths = args.filter((arg, i) => !arg.startsWith('--') && !valued.has(args[i - 1]?.slice(2) ?? ''));
   const all = has('all');
-  const origin = value('origin') ?? process.env.DEPLOY_ORIGIN;
+  const origin = value('origin') ?? origins().production;
   const out = value('out') ?? `${process.env.TMPDIR ?? '/tmp'}/remy-shots`;
   if (!origin) throw new Error('shots needs --origin or origins.production in remy.config.ts');
   let pages = paths;

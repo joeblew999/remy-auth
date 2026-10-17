@@ -9,7 +9,7 @@ reading order. The root `AGENTS.md` and `CLAUDE.md` only point here
 ([where rules live](./how-we-work.md#where-rules-live)). Read the documents below before changing
 anything, and follow them over your own defaults.
 
-When two pages disagree, [the flow's table](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)
+When two pages disagree, [the flow's table](./how-we-work.md#the-flow-four-steps-in-plain-sight)
 wins, and the page that disagrees is a bug: fix it in the landing you are on
 ([see something: fix it](./how-we-work.md#see-something-fix-it-or-write-it-down-in-the-same-landing)).
 A contradiction between pages is never a reason to stop, or to ask the owner which is right.
@@ -35,7 +35,7 @@ read those, not the translations beside them (`*.es.md`).
 
 Start with `vp run status` (what is going on) and
 [the project's own tools](./how-we-work.md#use-the-projects-own-tools-first), and finish through
-[the flow](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest): `vp run check`
+[the flow](./how-we-work.md#the-flow-four-steps-in-plain-sight): `vp run check`
 after every change, `vp run land "<what changed>"` when the work is finished and the check is
 green.
 

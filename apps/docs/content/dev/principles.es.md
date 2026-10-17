@@ -1,7 +1,7 @@
 ---
 title: "Arquitectura y principios de desarrollo"
 description: "Lo que el código debe ser: propiedad, una única fuente de verdad, gates de pruebas, código generado y decisiones del dueño."
-translatedFrom: "052958b0 44ce0926 b2dee8c7"
+translatedFrom: "052958b0 82fc4aa9 b2dee8c7"
 ---
 
 Este documento es el dueño de lo que el código debe ser. Cómo trabajan las personas y los agentes día a día vive en
@@ -40,7 +40,7 @@ Este documento es el dueño de lo que el código debe ser. Cómo trabajan las pe
   ([cómo trabajamos](./how-we-work.md#when-the-owner-delegates-decisions)). Producción (`vp run promote`), un release
   (`vp run release`), aprovisionar y abrir issues upstream también esperan la solicitud explícita del dueño.
   Hacer landing (`vp run land`, incluyendo staging) no: es el paso que da todo cambio terminado, por
-  quien lo haya hecho ([el flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)).
+  quien lo haya hecho ([el flujo](./how-we-work.md#the-flow-four-steps-in-plain-sight)).
 - No mockees Better Auth, D1 ni el runtime de Workers. Las conveniencias de desarrollo (personas creadas mediante seed,
   un selector de inicio de sesión para ellas, un código de inicio de sesión fijo, correo capturado) solo se permiten detrás de una
   única tabla de políticas por entorno ([de remy-auth](./auth.md#environments-one-table)) cuyo valor por defecto, y cuyo valor para cualquier entorno desconocido, es

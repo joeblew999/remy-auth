@@ -22,12 +22,31 @@ package follows [Semantic Versioning](https://semver.org/).
 - A worktree's own ports reach the tasks (`localPorts()`), so two worktrees' checks never share one.
 - CI: the shared workflow is `.github/workflows/ci.yml` (it was `google.yml`).
 
+### Changed: the configuration shows what runs; the command line is leaves
+- The flow's scripts name every step in order (COMMANDS.md prints them): `land` is `remy land start && vp run translate
+  && vp run ci && remy land finish`; `promote`, `release` and `setup` likewise. Each `remy` command does the one job it
+  names and decides nothing else.
+- Gone: `remy flow` (its steps are `remy land`, `remy promote`, `remy release` and `remy status`), the guard and its
+  hook (`remy guard`, `remy guard-hook`, `remy allowed`, `REMY_FLOW`, `REMY_FLOW=hand`), the timing records
+  (`remy last`; `vp run --last-details` says where the time goes), and the environment the commands used to set for one
+  another (DEPLOY_ORIGIN and the rest: each command reads remy.config.ts for what it needs).
+- Gone as hidden switches: `REMY_SKIP_CI` (Vite Plus's `VP_GIT_HOOKS=0`), `REMY_REHEARSE_PUBLISH` (the release runs
+  `vp run publish:rehearse`), `QUICK_LOCALES`, `BEHAVIOUR_LOCALES`, `I18N_STRICT` (`remy i18n check --strict`),
+  `I18N_MODEL` and `I18N_JOBS` (`remy i18n translate --model --jobs`), `I18N_INLANG`, `I18N_DOCS_DIR`.
+- `remy hooks` registers the one Claude hook left (the session's `remy status`) and removes the old guard hook.
+- The browser checks run in one language per way the app draws text (9 of 13); a release runs every language.
+- Nothing of ours runs git inside a task, so Vite Plus's cache holds across commits: a docs-only change reruns no
+  browser check.
+- `remy packages tag` tags and pushes; GitHub's release job publishes from the tag.
+- `vp run promote` refuses a commit GitHub has no run for (it used to promote on staging alone): production takes
+  only a commit whose checks passed. It installs as the lockfile says before deploying (`vp install --frozen-lockfile`).
+
 ### Upgrading an app
 - `npx remy upgrade <version>` rewrites the app's scripts to the flow's (its own are kept; one that shares a
   task's name goes, `release-checks` becomes `release-checks:app`), writes `.vite-hooks/`, gives
   `docs/vite.config.ts` its `root`, and moves the workflow to `ci.yml`. From 0.15.x, run it twice: the first run
-  is 0.15's own code, which installs this release; the second, this release's, rewrites the scripts (`remy`
-  says so on every command until it has).
+  is 0.15's own code, which installs this release; the second, this release's, rewrites the scripts
+  (`npx remy verify` names any script left from 0.15). Until then the old hooks' commands still answer harmlessly.
 - Cloudflare's build command for the app is now `npx vp run build`.
 - Node as `.node-version` says, and npm as `devEngines` pins it (`vp env`).
 

@@ -1,15 +1,13 @@
-// The browser checks against a deployment (`remy test remote|live|cwv`): what Vite Plus has no tool for. The checks
-// on the local build are Vite Plus's tasks (vp run test:browser, test:audits), Playwright run directly. Core Web
-// Vitals make a throwaway Worker on Cloudflare, so the gate (allowed.ts) asks for the flow's word first.
+// The browser checks Vite Plus has no tool for (`remy test remote|live|audits|cwv`): against a deployment, the audits
+// under one machine-wide speed lock, Core Web Vitals on a throwaway Worker. The checks on the local build are Vite
+// Plus's tasks (vp run test:browser), Playwright run directly. Each does what it is asked and nothing more.
 import { spawnSync } from 'node:child_process';
 import { dispatch, type Subcommands } from './commands.ts';
 import { mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { gate } from './allowed.ts';
 import { preview, previewDelete } from './cloudflare.ts';
-import { warn } from './timing.ts';
-import { appDir, bin } from './config.ts';
+import { appDir, bin, origins } from './config.ts';
 
 // Playwright from the app's folder, where its playwright.config.ts is (apps/remy-auth in remy-auth; an app's own root).
 function playwright(args: string[], env: Record<string, string>): void {
@@ -50,13 +48,11 @@ function flaky(results: string): void {
     return;
   }
   const found = flakyIn(report);
-  if (found.length) warn(`${found.length} flaky, passed only on its retry: ${found.join('; ')}`);
+  if (found.length) console.error(`test: ${found.length} flaky, passed only on its retry: ${found.join('; ')}`);
 }
-/** The quick languages: `quick`, which the checks resolve (checks.js: the base language and the first right-to-left one); QUICK_LOCALES names others. */
-export const quickLocales = () => ({
-  CHECK_LOCALES: process.env.CHECK_LOCALES ?? process.env.QUICK_LOCALES ?? 'quick',
-});
-const remote = (origin = process.env.TEST_BASE_URL ?? process.env.DEPLOY_ORIGIN) => {
+/** The quick languages for a deployment's checks (checks.js: the base language and the first right-to-left one), unless CHECK_LOCALES says. */
+export const quickLocales = () => ({ CHECK_LOCALES: process.env.CHECK_LOCALES ?? 'quick' });
+const remote = (origin = process.env.TEST_BASE_URL ?? origins().production) => {
   if (!origin) {
     console.error('test: pass TEST_BASE_URL, or put origins.production in remy.config.ts');
     process.exit(1);
@@ -115,17 +111,12 @@ async function withSpeedLock<T>(work: () => T): Promise<T> {
 }
 
 /**
- * The suite against a deployment. Against production (the default) everything, Google's audits included; against
- * any other origin (a preview, staging) our checks only: those are hidden from search engines on purpose, which
- * Google's crawlability audit rightly reports (a branch preview, 2026-10-17).
+ * Our checks against a deployment (production by default); `--audits` adds Google's, which judge the production site:
+ * a preview or staging is hidden from search engines on purpose, which Google's crawlability audit rightly reports.
  */
-export function remoteSuite(origin?: string): void {
-  const production = !origin || origin === process.env.DEPLOY_ORIGIN;
-  if (!production)
-    console.log(
-      `test remote: ${origin} is not production, so our checks only (Google's audits judge the production site).`,
-    );
-  playwright(production ? [] : ['--project=ours'], remote(origin));
+export function remoteSuite(args: string[]): void {
+  const origin = args.find((arg) => !arg.startsWith('--'));
+  playwright(args.includes('--audits') ? [] : ['--project=ours'], remote(origin));
 }
 /** The smoke checks against a deployment (the deploys run it once the new version is live). */
 export function live(origin?: string): void {
@@ -133,7 +124,6 @@ export function live(origin?: string): void {
 }
 /** Google's Core Web Vitals (speed) on a throwaway Cloudflare Worker of this commit, deleted whatever happens. */
 export async function cwv(alias?: string): Promise<void> {
-  gate('test:cwv');
   const origin = await preview(alias, true);
   const name = new URL(origin).hostname.split('.')[0]!;
   try {
@@ -159,8 +149,8 @@ export const what =
   'the browser checks Vite Plus has no tool for: against a deployment (the suite, the smoke), Core Web Vitals on a preview, and the local audits under one lock (the local build: vp run test:browser)';
 export const commands: Subcommands = {
   remote: {
-    what: "[origin]: the browser checks against a deployment: production by default, Google's audits included; any other origin (a preview, staging) our checks only",
-    run: (rest) => remoteSuite(rest[0]),
+    what: "[origin] [--audits]: our browser checks against a deployment (production by default); --audits adds Google's, which judge production",
+    run: (rest) => remoteSuite(rest),
   },
   live: { what: '[origin]: the smoke against a deployment (every deploy ends with it)', run: (rest) => live(rest[0]) },
   audits: {

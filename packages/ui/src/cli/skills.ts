@@ -6,7 +6,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node
 import { join } from 'node:path';
 import { dispatch, type Subcommands } from './commands.ts';
 import { spawnSync } from 'node:child_process';
-import { docsDir } from './config.ts';
+import { docsDir, origins } from './config.ts';
 
 export const skillsCli = 'skills@1.7.0';
 
@@ -103,7 +103,7 @@ export const commands: Subcommands = {
     run: () => installSkills(),
   },
   build: {
-    what: 'remy-auth: the remy skill the package ships, from the developer docs as AI tools read them (llms.txt); packing runs it',
+    what: 'remy-auth: the remy skill the package ships, from the docs build as AI tools read it (llms.txt); the skills:build task runs it',
     run: () => buildSkill(),
   },
   list: { what: 'the pins and what is installed', run: () => listSkills() },
@@ -126,8 +126,9 @@ export async function buildSkill(): Promise<void> {
     console.log('skills build: only remy-auth makes the remy skill (from its developer docs).');
     return;
   }
-  const { build, serveBuilt } = await import('./docs.ts');
-  build();
+  // The docs' build is the skills:build task's dependency (vite.config.ts): served here, never built here.
+  const { built, serveBuilt } = await import('./docs.ts');
+  built();
   const { origin: base, stop } = await serveBuilt();
   const text = async (path: string) => {
     const response = await fetch(base + path);
@@ -152,8 +153,8 @@ export async function buildSkill(): Promise<void> {
       writeFileSync(join(out, 'references', `${page.slug}.md`), body);
     }
     const { version } = JSON.parse(readFileSync('packages/ui/package.json', 'utf8')) as { version: string };
-    const live = process.env.DOCS_ORIGIN
-      ? ` The newest docs, for any version: ${process.env.DOCS_ORIGIN}/dev/llms.txt (and its MCP server, ${process.env.DOCS_ORIGIN}/api/mcp/dev).`
+    const live = origins().docs
+      ? ` The newest docs, for any version: ${origins().docs}/dev/llms.txt (and its MCP server, ${origins().docs}/api/mcp/dev).`
       : '';
     writeFileSync(
       join(out, 'SKILL.md'),

@@ -262,7 +262,7 @@ function appTasks(root, { remy }) {
       command: `CI=\${CI:-1} PREVIEW_PORT=${port} playwright test --project=ours`,
       dependsOn: ['build', 'browsers'],
       cache: {
-        env: ['CHECK_LOCALES', 'BEHAVIOUR_LOCALES', 'COLOR_SCHEME'],
+        env: ['CHECK_LOCALES', 'COLOR_SCHEME'],
         untrackedEnv: ['PREVIEW_PORT', ...network],
         input: browserInputs,
         output: [],
@@ -324,6 +324,15 @@ function workspaceTasks({ remy, check }, before, ciAfterCheck) {
     'release-checks': { command: 'echo "release-checks: this repository adds none"', cache: false },
     // Each package the repository publishes (the tag's CI job runs this), after what the packages ship is generated.
     publish: { command: `${remy} packages publish`, dependsOn: [...before.generate], cache: false },
+    // The publish rehearsed (vp run release runs it): every registry takes its token, nothing is uploaded.
+    'publish:rehearse': {
+      command: `${remy} packages publish --dry-run`,
+      dependsOn: [...before.generate],
+      cache: false,
+    },
+    // The translations a change made stale or missing, by the machine's Claude (vp run land runs it): it writes the
+    // files it reads, so Vite Plus never caches it; with nothing to translate it says so in a second.
+    translate: { command: `${remy} i18n translate`, cache: false },
   };
 }
 
@@ -362,19 +371,69 @@ export function remyTasks({ root = process.cwd(), tasks = {} } = {}) {
 export const flowScripts = (remy = 'remy') => ({
   // Vite Plus's Git hooks, installed by every install (the dispatcher, .vite-hooks/_; the hooks are hookFiles).
   prepare: 'vp config --no-agent',
-  status: `${remy} flow status`,
-  land: `${remy} flow prepare land && vp run ci && ${remy} flow land`,
-  promote: `${remy} flow promote`,
-  release: `${remy} flow prepare release && REMY_REHEARSE_PUBLISH=1 CHECK_LOCALES=all vp run ci && vp run release-checks && ${remy} flow release`,
-  setup: `${remy} setup && vp run check`,
+  // What is going on: one screen, a report.
+  status: `${remy} status`,
+  // A landing: the work on a branch with main in it, the translations it made stale, every check, then the commit, its
+  // pull request merged when GitHub agrees, and staging. `vp run land "<what changed>"`: the words go to the last step.
+  land: `${remy} land start && vp run translate && vp run ci && ${remy} land finish`,
+  // Production, on the owner's word: from a pushed main GitHub passed, installed as its lockfile says, the app then the
+  // docs, then what is live.
+  promote: `${remy} promote check && vp install --frozen-lockfile && ${remy} cloudflare deploy && ${remy} cloudflare docs-deploy && ${remy} promote done`,
+  // A release, on the owner's word: every check in every language, the repository's own release checks, the publish
+  // rehearsed, Core Web Vitals on a throwaway Worker, then the tag, from which GitHub's release job publishes.
+  release: `${remy} release check && CHECK_LOCALES=all vp run ci && vp run release-checks && vp run publish:rehearse && ${remy} test cwv && ${remy} packages tag`,
+  // An installation: what it needs, the dependencies, the agents' skills, rules, MCP servers and status hook, the
+  // installation's checks, then the check.
+  setup: `${remy} setup check && ${remy} setup install && ${remy} skills install && ${remy} rules && ${remy} mcp register && ${remy} hooks && ${remy} verify && vp run check`,
 });
+
+/**
+ * What a person runs, by its Vite Plus name, each with what it does (COMMANDS.md's first table and `remy help`): the
+ * app's tasks and the flow's scripts, described here beside their definitions, so the description cannot drift from
+ * what runs. A script's line ends with its steps as written, the order in plain sight.
+ */
+export const frontDoor = (remy = 'remy') => {
+  const scripts = flowScripts(remy);
+  const steps = (name) => `(${scripts[name].replaceAll(`${remy} `, 'remy ').replaceAll(' && ', ' → ')})`;
+  return [
+    ['vp run dev', 'the app with hot reload, its local state (.dev.vars, the migrations) and generated files first'],
+    ['vp run build', 'the production build, after the same; no upload'],
+    [
+      'vp run preview',
+      "the production build on Cloudflare's local host, at this checkout's port (4173 unless a worktree's own)",
+    ],
+    [
+      'vp run check',
+      "after every change: everything generated, both builds, Wrangler's deployment dry run, the project's own checks, the unit checks, then vp check (format, lint, types)",
+    ],
+    ['vp run fix', "what the check only verifies, written: COMMANDS.md and each docs page's ending"],
+    [
+      'vp run ci',
+      "what GitHub runs, the same here: the check, the browser checks, Google's audits, a new app (each its own task, as GitHub's jobs: vp run test:browser --shard 1/3)",
+    ],
+    [
+      'vp run status',
+      `what is going on: main and GitHub's verdicts, pull requests, deployments, worktrees, translations ${steps('status')}`,
+    ],
+    [
+      'vp run land "<what changed>"',
+      `when the work is finished: a branch with main in it, the translations, every check, one commit through a pull request merged when GitHub agrees, then staging ${steps('land')}`,
+    ],
+    ['vp run promote', `the owner's: production and the docs from a pushed main GitHub passed ${steps('promote')}`],
+    [
+      'vp run release',
+      `the owner's: every check in every language, the release checks, the publish rehearsed, Core Web Vitals, then the tag GitHub publishes from ${steps('release')}`,
+    ],
+    ['vp run setup', `an installation, then the check ${steps('setup')}`],
+  ];
+};
 
 /** The Git hooks every repository commits (.vite-hooks/), which Vite Plus's dispatcher runs. */
 export const hookFiles = {
   'pre-commit':
     '#!/bin/sh\n# Before a commit: the staged files formatted and their lint fixes applied (vite.config.ts, staged).\nvp staged\n',
   'pre-push':
-    '#!/bin/sh\n# Before a push: what its pull request will run, first. The flow\'s own steps (vp run land: REMY_FLOW is set) ran it\n# already; REMY_SKIP_CI=1 skips it once, on purpose.\n[ -n "$REMY_FLOW" ] || [ -n "$REMY_SKIP_CI" ] && exit 0\nexec vp run ci\n',
+    "#!/bin/sh\n# Before a push: what its pull request will run, first; what nothing touched comes from Vite Plus's cache (a landing\n# ran it just now). VP_GIT_HOOKS=0 skips every hook, Vite Plus's own switch.\nexec vp run ci\n",
 };
 
 /** The names an app's own script may not have: the shared tasks' (a script and a task cannot share one). */

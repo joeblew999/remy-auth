@@ -6,7 +6,7 @@
 // differ, and the record names exactly which sections or keys (owner, 2026-10-17: translating took ages;
 // it used to judge staleness from git history, which needed the whole history and one writer on main).
 // A gap is one line, "<language> <kind> <what>", which the translators read with --list; without it,
-// counts per language and kind. Exit 1 on any gap with I18N_STRICT (the release gate), a warning otherwise.
+// counts per language and kind. Exit 1 on any gap with --strict, a warning otherwise (a release refuses gaps itself).
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
@@ -213,12 +213,10 @@ export function pluralGaps(locale: string, english: Record<string, unknown>, cat
  * routes, so a catalog lists exactly those).
  */
 export async function messagesGaps(cwd = process.cwd()): Promise<{ gaps: Gap[]; english?: string; locales: number }> {
-  const inlang =
-    process.env.I18N_INLANG ??
-    git(cwd, 'ls-files', '--', '*project.inlang/settings.json')
-      ?.split('\n')
-      .filter(Boolean)[0]
-      ?.replace(/\/settings\.json$/, '');
+  const inlang = git(cwd, 'ls-files', '--', '*project.inlang/settings.json')
+    ?.split('\n')
+    .filter(Boolean)[0]
+    ?.replace(/\/settings\.json$/, '');
   const settingsFile = inlang ? join(cwd, inlang, 'settings.json') : undefined;
   if (!settingsFile || !existsSync(settingsFile)) return { gaps: [], locales: 0 };
   const settings = readJson(settingsFile) as {
@@ -398,10 +396,10 @@ export function checkDocs(list: boolean, cwd = process.cwd()): boolean {
 }
 
 /**
- * Both checks: exit 1 on a gap with I18N_STRICT (the translation step, the release gate), a WARNING and
- * exit 0 while coding (the check runs it on every change).
+ * Both checks: a WARNING and exit 0 while coding (the check runs it on every change, and an English edit is stale
+ * until its landing translates it); exit 1 on a gap with --strict. A release refuses gaps itself (remy release check).
  */
-export async function checkAll(strict = process.env.I18N_STRICT === '1', cwd = process.cwd()): Promise<boolean> {
+export async function checkAll(strict = false, cwd = process.cwd()): Promise<boolean> {
   const messages = await checkMessages(false, cwd);
   const docs = checkDocs(false, cwd);
   if (messages && docs) return true;
@@ -415,11 +413,11 @@ export const what =
 /** The subcommands, for remy help and the Commands page; main dispatches on the same two words. */
 export const commands: Subcommands = {
   check: {
-    what: '[messages|docs] [--list]: the offline checks, read-only, no git history: a warning (exit 0) while coding and in vp run ci, exit 1 with I18N_STRICT=1 (the release); --list prints one line per gap',
+    what: '[messages|docs] [--list] [--strict]: the offline checks, read-only, no git history: a warning (exit 0) while coding and in vp run ci, exit 1 with --strict; --list prints one line per gap',
     run: (rest) => main(['check', ...rest]),
   },
   translate: {
-    what: "[messages|docs] [files…]: what the checks list, by the machine's Claude (I18N_MODEL, default sonnet; I18N_JOBS at a time, default 4): only the changed sections and keys, with their records; named translation files redone in full; vp run land runs it in the change",
+    what: "[messages|docs] [files…]: what the checks list, by the machine's Claude (--model, default sonnet; --jobs at a time, default 8): only the changed sections and keys, with their records; named translation files redone in full; vp run land runs it in the change",
     run: (rest) => main(['translate', ...rest]),
   },
 };
@@ -427,8 +425,6 @@ export async function main(args: string[]): Promise<void> {
   const [command, which, ...rest] = args;
   const list = args.includes('--list');
   if (command === 'translate') {
-    const { gate } = await import('./allowed.ts');
-    gate('i18n:translate');
     const { translate } = await import('./translate.ts');
     return translate([which, ...rest].filter((part): part is string => part !== undefined));
   }
@@ -436,6 +432,11 @@ export async function main(args: string[]): Promise<void> {
     console.error('remy i18n: check [messages|docs] [--list] | translate [messages|docs] [files...]');
     process.exit(2);
   }
-  const ok = which === 'messages' ? await checkMessages(list) : which === 'docs' ? checkDocs(list) : await checkAll();
+  const ok =
+    which === 'messages'
+      ? await checkMessages(list)
+      : which === 'docs'
+        ? checkDocs(list)
+        : await checkAll(args.includes('--strict'));
   if (!ok) process.exit(1);
 }

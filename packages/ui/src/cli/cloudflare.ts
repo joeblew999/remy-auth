@@ -1,5 +1,5 @@
-// Cloudflare, as functions of the steps (`remy flow land` deploys staging, `remy flow promote` production and
-// the docs; `remy flow status` asks what each deployment runs): the deploy, the check that nothing would be
+// Cloudflare (`remy land finish` deploys staging, the promote script production and the docs, `remy status` asks
+// what each deployment runs): the deploy, the check that nothing would be
 // created by it, the wait for the new version, what runs where, and an app's page URLs. By hand, the
 // same through `remy cloudflare <deploy|staging|versions|urls|docs-deploy>`. Wrangler does the work.
 import { quickLocales } from './test.ts';
@@ -12,7 +12,7 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { publish } from './docs.ts';
 import { dispatch, type Subcommands } from './commands.ts';
-import { appDir, bin, docsDir } from './config.ts';
+import { appDir, bin, docsDir, origins as projectOrigins } from './config.ts';
 // The commit each deploy's build names (build-vite.js): worked out here, outside the build, which never runs git.
 import { gitStamp } from '@joeblew999/remy-ui/build/vite';
 
@@ -215,13 +215,13 @@ export const smoke = (origin: string): void =>
  * environment of the Wrangler configuration and the upload is its Worker.
  */
 export async function deploy(environment?: 'staging'): Promise<void> {
-  const origin = environment === 'staging' ? process.env.STAGING_ORIGIN : process.env.DEPLOY_ORIGIN;
+  const origin = environment === 'staging' ? projectOrigins().staging : projectOrigins().production;
   if (!origin)
     fail(`deploy: ${environment === 'staging' ? 'origins.staging' : 'origins.production'} is not in remy.config.ts`);
-  const env: Record<string, string> = environment ? { CLOUDFLARE_ENV: environment, DEPLOY_ORIGIN: origin } : {};
-  Object.assign(process.env, env);
+  // The environment the Cloudflare Vite plugin builds and Wrangler uploads (staging), handed to those two only.
+  const env: Record<string, string> = environment ? { CLOUDFLARE_ENV: environment } : {};
   await provisioned(environment);
-  tool('vp', ['build', '.'], { env: { ...env, ...gitStamp(appDir()), PUBLIC_ORIGIN: origin } });
+  tool('vp', ['build', '.'], { env: { ...env, ...gitStamp(appDir()) } });
   await provisioned(environment);
   const scratch = mkdtempSync(join(tmpdir(), 'remy-deploy-'));
   try {
@@ -239,7 +239,7 @@ export async function deploy(environment?: 'staging'): Promise<void> {
 export async function deployDocs(): Promise<void> {
   const docs = docsDir();
   if (!docs) return;
-  const docsOrigin = process.env.DOCS_ORIGIN;
+  const docsOrigin = projectOrigins().docs;
   if (!docsOrigin) fail('deploy docs: origins.docs is not in remy.config.ts');
   tool('vp', ['build', '.'], { cwd: docs, env: gitStamp(docs) });
   tool('wrangler', ['deploy', '-c', 'dist/server/wrangler.json'], { cwd: docs });
@@ -284,7 +284,7 @@ type Health = {
  * from this checkout, when it was deployed. Nothing is written down anywhere, so nothing can drift.
  */
 export async function versions(
-  origins = [process.env.DEPLOY_ORIGIN, process.env.STAGING_ORIGIN, process.env.DOCS_ORIGIN].filter(
+  origins = [projectOrigins().production, projectOrigins().staging, projectOrigins().docs].filter(
     (o): o is string => !!o,
   ),
 ): Promise<{ table: string; unanswered: number }> {
@@ -350,7 +350,7 @@ export async function versions(
 }
 
 /** The production (or a given) origin's pages and health URL, for reports: the package's paths in the base language. */
-export async function urls(origin = process.env.DEPLOY_ORIGIN): Promise<void> {
+export async function urls(origin = projectOrigins().production): Promise<void> {
   if (!origin) fail('urls: pass an origin or put origins.production in remy.config.ts');
   const resolve = createRequire(join(process.cwd(), 'package.json')).resolve;
   const load = (specifier: string) => import(pathToFileURL(resolve(specifier)).href);
@@ -391,10 +391,10 @@ const workerName = async (): Promise<string> => (await workerConfig()).name;
  */
 export async function preview(alias?: string, keep = false): Promise<string> {
   const { name: worker, config } = await workerConfig();
-  const host = (process.env.DEPLOY_ORIGIN ?? '').replace(/^https:\/\//, '');
+  const host = (projectOrigins().production ?? '').replace(/^https:\/\//, '');
   if (!host.startsWith(`${worker}.`) || !host.endsWith('.workers.dev'))
     fail(
-      `preview needs origins.production on workers.dev as https://${worker}.<subdomain>.workers.dev (got ${process.env.DEPLOY_ORIGIN})`,
+      `preview needs origins.production on workers.dev as https://${worker}.<subdomain>.workers.dev (got ${projectOrigins().production})`,
     );
   const part = (alias ?? execFileSync('git', ['rev-parse', '--short=7', 'HEAD'], { encoding: 'utf8' }).trim())
     .toLowerCase()
@@ -410,7 +410,7 @@ export async function preview(alias?: string, keep = false): Promise<string> {
     );
   };
   try {
-    tool('vp', ['build', '.'], { env: { ...gitStamp(appDir()), PUBLIC_ORIGIN: origin } });
+    tool('vp', ['build', '.'], { env: gitStamp(appDir()) });
     await provisioned();
     const scratch = mkdtempSync(join(tmpdir(), 'remy-preview-'));
     try {
@@ -480,11 +480,11 @@ export const what =
   'Cloudflare: production and staging deploys, the docs Worker, throwaway previews, what each deployment runs';
 export const commands: Subcommands = {
   deploy: {
-    what: "production from this checkout (DEPLOY_ORIGIN): upload, wait for the new version, then its live smoke; refuses a D1, KV or R2 binding with no existing resource, since creating resources is the owner's (vp run promote runs it)",
+    what: "production from this checkout (origins.production): upload, wait for the new version, then its live smoke; refuses a D1, KV or R2 binding with no existing resource, since creating resources is the owner's (vp run promote runs it)",
     run: () => deploy(),
   },
   staging: {
-    what: "the same for staging (CLOUDFLARE_ENV=staging, the Wrangler configuration's env.staging): its own Worker at origins.staging, production untouched (vp run land runs it on a machine signed in to Cloudflare)",
+    what: "the same for staging (CLOUDFLARE_ENV=staging, the Wrangler configuration's env.staging): its own Worker at origins.staging, production untouched (remy land finish runs it on a machine signed in to Cloudflare)",
     run: () => deploy('staging'),
   },
   'docs-deploy': {

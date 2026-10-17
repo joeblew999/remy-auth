@@ -17,9 +17,19 @@ export default remyWorkspace({
     // Cached on what a new app is made of (the blank app, the fixture, the packages, the lockfile, the developer docs
     // its remy skill is built from), so a change to
     // remy-auth's own app or its product docs runs it no more (~3 minutes). It writes nothing here: its app lives in a scratch folder.
+    // The remy skill the package ships, read from the docs as AI tools read them (llms.txt), from the docs build
+    // Vite Plus already has: before, the skill rebuilt the whole docs site itself on every new-app run (27 s).
+    'skills:build': {
+      command: 'node packages/ui/src/cli/remy.ts skills build',
+      dependsOn: ['@joeblew999/remy-auth-docs#build'],
+      cache: {
+        input: [{ auto: true }, '!packages/ui/skills/**', '!**/.wrangler/**'],
+        output: ['packages/ui/skills/**'],
+      },
+    },
     'new-app': {
       command: 'bash fixtures/consumer/run.sh',
-      dependsOn: ['@joeblew999/remy-ui#generate', '@joeblew999/remy-ui#cli'],
+      dependsOn: ['@joeblew999/remy-ui#generate', '@joeblew999/remy-ui#cli', 'skills:build'],
       cache: {
         input: [
           'template/**',
@@ -33,15 +43,19 @@ export default remyWorkspace({
           '!packages/ui/skills/**',
         ],
         output: [],
-        env: ['REMY_REHEARSE_PUBLISH'],
-        untrackedEnv: [...network, 'GITHUB_TOKEN', 'NODE_AUTH_TOKEN', 'REMY_FLOW', 'PREVIEW_PORT'],
+        untrackedEnv: [...network, 'GITHUB_TOKEN', 'NODE_AUTH_TOKEN', 'PREVIEW_PORT', 'DOCS_PREVIEW_PORT'],
       },
     },
     // The release's publish (GitHub's release job, for a version tag): each package whose version is new on its
     // registry, then the GitHub release (`vp run publish --release vX.Y.Z`).
     publish: {
       command: 'node packages/ui/src/cli/remy.ts packages publish',
-      dependsOn: ['@joeblew999/remy-ui#generate', '@joeblew999/remy-ui#cli'],
+      dependsOn: ['@joeblew999/remy-ui#generate', '@joeblew999/remy-ui#cli', 'skills:build'],
+      cache: false,
+    },
+    'publish:rehearse': {
+      command: 'node packages/ui/src/cli/remy.ts packages publish --dry-run',
+      dependsOn: ['@joeblew999/remy-ui#generate', '@joeblew999/remy-ui#cli', 'skills:build'],
       cache: false,
     },
     // remy-auth's own release checks (vp run release runs them): the blank app's pins, then shadcn's files as its CLI

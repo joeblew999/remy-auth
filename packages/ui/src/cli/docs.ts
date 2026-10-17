@@ -10,7 +10,7 @@ import { dirname, join, relative } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { main as observe } from './observe.ts';
 import { dispatch, type Subcommands } from './commands.ts';
-import { bin, docsDir } from './config.ts';
+import { bin, docsDir, origins, ports } from './config.ts';
 
 function fail(message: string): never {
   console.error(message);
@@ -75,17 +75,23 @@ const generated = (): string => {
 const previewName = () =>
   `${(JSON.parse(readFileSync(join(docs(), '.remy-docs', 'wrangler.json'), 'utf8')) as { name: string }).name}-preview`;
 
-export const dev = (): void => tool(bin('vp'), ['dev', '.']);
-export const build = (): void => tool(bin('vp'), ['build', '.']);
-/** Build (which writes .remy-docs/), binding types, types. */
+/**
+ * The docs' production build must already be there (the docs package's build task: vp run check builds it, and a
+ * task that needs it names it in its dependsOn): a docs command never builds by itself, so nothing builds twice and
+ * nothing builds out of Vite Plus's sight (2026-10-17: the skill rebuilt the whole site on every new-app run).
+ */
+export function built(): void {
+  if (!existsSync(join(docs(), 'dist', 'server', 'wrangler.json')))
+    fail(
+      `docs: no build in ${relative(process.cwd(), docs()) || '.'}/dist: vp run check builds it (the docs' build task).`,
+    );
+}
 /**
  * The built docs on local Workers, as their checks and AI tools see them (/dev/llms.txt, each page's .md), at
  * DOCS_PREVIEW_PORT: the one way to serve them (`remy docs serve`, and the remy skill's build), so nobody runs
  * Wrangler by hand to look (2026-10-17). Resolves once they answer; `stop` ends the server.
  */
-export async function serveBuilt(
-  port = Number(process.env.DOCS_PREVIEW_PORT ?? 4174),
-): Promise<{ origin: string; stop: () => void }> {
+export async function serveBuilt(port = ports().docsPreview): Promise<{ origin: string; stop: () => void }> {
   const server = spawn(
     bin('wrangler'),
     ['dev', '-c', 'dist/server/wrangler.json', '--local', '--ip', '127.0.0.1', '--port', String(port)],
@@ -112,9 +118,9 @@ export async function serveBuilt(
   return { origin, stop };
 }
 
-/** `remy docs serve`: build, then serve the built docs here until stopped (Ctrl-C). */
+/** `remy docs serve`: the built docs here until stopped (Ctrl-C). */
 async function serve(): Promise<void> {
-  build();
+  built();
   const { origin, stop } = await serveBuilt();
   console.log(
     `docs: the built docs at ${origin} (AI tools read ${origin}/llms.txt, ${origin}/dev/llms.txt, each page's .md); Ctrl-C stops them.`,
@@ -130,21 +136,16 @@ async function serve(): Promise<void> {
 const docsChecks = (): string =>
   join(dirname(dirname(bin('playwright'))), '@joeblew999', 'remy-ui', 'src', 'docs', 'playwright.config.js');
 
-export function check(): void {
-  build();
-  tool(bin('wrangler'), ['types', '-c', '.remy-docs/wrangler.json']);
-  tool(bin('tsc'), ['-p', '.']);
-}
 /** The docs' browser checks on a local build, at the docs preview port. */
 export function test(): void {
-  build();
+  built();
   tool(bin('playwright'), ['test', '-c', docsChecks(), '--project=ours'], {
-    env: { PREVIEW_PORT: process.env.DOCS_PREVIEW_PORT ?? '4174' },
+    env: { PREVIEW_PORT: String(ports().docsPreview) },
   });
 }
 /** The docs' checks against their deployment (DOCS_TEST_URL, else the docs origin), then every MCP server's tools. */
 export function testRemote(): void {
-  const origin = process.env.DOCS_TEST_URL ?? process.env.DOCS_ORIGIN;
+  const origin = process.env.DOCS_TEST_URL ?? origins().docs;
   if (!origin) fail('docs test remote: DOCS_TEST_URL, or origins.docs in remy.config.ts');
   generated();
   tool(bin('playwright'), ['test', '-c', docsChecks()], {
@@ -165,7 +166,7 @@ export function testRemote(): void {
 }
 /** A preview Worker of the docs, answers paused. */
 export function preview(): void {
-  build();
+  built();
   generated();
   const name = previewName();
   tool(bin('wrangler'), ['deploy', '-c', 'dist/server/wrangler.json', '--name', name]);
@@ -195,11 +196,9 @@ export async function publish(): Promise<void> {
     return;
   }
   const { bucket, instance } = docsConfig.ask;
-  const origin = process.env.DOCS_ORIGIN;
+  const origin = origins().docs;
   if (!origin)
-    fail(
-      'docs publish: DOCS_ORIGIN (origins.docs in remy.config.ts) is the live docs Worker whose .md pages it publishes',
-    );
+    fail('docs publish: origins.docs in remy.config.ts is the live docs Worker whose .md pages it publishes');
   const token = (JSON.parse(wrangler('auth', 'token', '--json')) as { token: string }).token;
   const account = (JSON.parse(wrangler('whoami', '--json')) as { accounts: { id: string }[] }).accounts[0]!.id;
   console.log(`Target: Cloudflare (remote), R2 bucket ${bucket} (PRODUCTION), then AI Search ${instance}`);
@@ -404,9 +403,8 @@ export const commands: Subcommands = {
     what: "…: the docs Worker's logs and its AI Gateway (remy observe, with the docs' configuration)",
     run: (rest) => {
       generated();
-      process.env.REMY_WRANGLER_CONFIG = join(docs(), '.remy-docs', 'wrangler.json');
       process.chdir(docs());
-      return observe(rest);
+      return observe([...rest, '--config', join(docs(), '.remy-docs', 'wrangler.json')]);
     },
   },
 };

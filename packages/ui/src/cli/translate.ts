@@ -1,6 +1,6 @@
 // The translator (`remy i18n translate`, which `vp run land` runs in the change, before its commit): the
 // machine's Claude Code, headless and with no tools, translates exactly the gaps the checks list (i18n.ts),
-// one language (messages) or one page (docs) per call, I18N_JOBS at a time, and writes the files it asked
+// one language (messages) or one page (docs) per call, --jobs at a time (default 8), and writes the files it asked
 // for with the record of what each was made from; nothing else, and no commit (the change commits them
 // with the English, one push, one run of the checks). A stale page whose sections still line up gets only
 // its changed sections translated again. What it writes is written only when it is the thing asked for
@@ -28,7 +28,6 @@ import {
   type Gap,
 } from './i18n.ts';
 import { pageFrom } from './page.ts';
-import { lap, note } from './timing.ts';
 import { docsPrompt, messagesPrompt } from './prompts.ts';
 import { docsContent } from './config.ts';
 
@@ -38,8 +37,9 @@ function refuse(message: string): never {
   console.error(message);
   process.exit(2);
 }
-const model = () => process.env.I18N_MODEL ?? 'sonnet';
-const jobs = () => Number(process.env.I18N_JOBS ?? 4);
+// --model and --jobs, given to translate (the command's own flags, never the environment).
+let model = 'sonnet';
+let jobs = 8;
 const languageName = (locale: string) => new Intl.DisplayNames(['en'], { type: 'language' }).of(locale) ?? locale;
 
 type AgentReport = {
@@ -74,7 +74,7 @@ async function agent(system: string, schema: object, input: string, what: string
           '',
           '--no-session-persistence',
           '--model',
-          model(),
+          model,
           '--system-prompt',
           system,
           '--output-format',
@@ -106,7 +106,9 @@ async function agent(system: string, schema: object, input: string, what: string
     console.error(
       `  ${what}: the agent took ${Math.round((report.duration_ms ?? 0) / 1000)} s (${Math.round((report.duration_api_ms ?? 0) / 1000)} s in the API, ${report.num_turns ?? '?'} turn(s), ${report.usage?.output_tokens ?? '?'} tokens written)`,
     );
-    note(`${what}, ${report.usage?.output_tokens ?? '?'} tokens written:`, report.duration_ms ?? 0);
+    console.log(
+      `  ${what}: ${Math.round((report.duration_ms ?? 0) / 1000)} s, ${report.usage?.output_tokens ?? '?'} tokens written`,
+    );
     if (report.structured_output === undefined || report.structured_output === null)
       throw new Error(
         `the agent returned no result (${report.subtype ?? 'no subtype'}): ${String(report.result ?? '').slice(0, 300)}`,
@@ -174,11 +176,9 @@ export async function translateMessages(): Promise<boolean> {
     console.log('Messages: nothing to translate.');
     return true;
   }
-  const inlang =
-    process.env.I18N_INLANG ??
-    git('ls-files', '--', '*project.inlang/settings.json')
-      .split('\n')[0]!
-      .replace(/\/settings\.json$/, '');
+  const inlang = git('ls-files', '--', '*project.inlang/settings.json')
+    .split('\n')[0]!
+    .replace(/\/settings\.json$/, '');
   const settings = JSON.parse(readFileSync(join(inlang, 'settings.json'), 'utf8')) as {
     'plugin.inlang.messageFormat'?: { pathPattern: string };
   };
@@ -186,12 +186,12 @@ export async function translateMessages(): Promise<boolean> {
   const fileOf = (locale: string) => join(dirname(inlang), pattern.replace('{locale}', locale));
   const english = JSON.parse(readFileSync(englishFile, 'utf8')) as Record<string, unknown>;
   const locales = [...new Set(work.map((gap) => gap.language))].sort();
-  console.log(`Messages: translating ${locales.length} languages with ${model()} (${jobs()} at a time)...`);
+  console.log(`Messages: translating ${locales.length} languages with ${model} (${jobs} at a time)...`);
   const numbers = [...Array(1001).keys(), 1.5];
   const categories = (locale: string, type: 'cardinal' | 'ordinal') => [
     ...new Set(numbers.map((n) => new Intl.PluralRules(locale, { type }).select(n))),
   ];
-  let ok = await all(locales, jobs(), async (locale) => {
+  let ok = await all(locales, jobs, async (locale) => {
     const file = fileOf(locale);
     if (!existsSync(file)) writeJson(file, {});
     const whole = work.some((gap) => gap.language === locale && gap.kind === 'catalog');
@@ -411,16 +411,20 @@ export async function translateDocs(redo: string[] = []): Promise<boolean> {
     ...uiLanguages.map((lang) => () => ui(lang)),
     ...menus.map((gap) => () => menu(gap)),
   ];
-  console.log(`Docs: ${units.length} translations with ${model()} (${jobs()} at a time)...`);
-  return all(units, jobs(), (unit) => unit());
+  console.log(`Docs: ${units.length} translations with ${model} (${jobs} at a time)...`);
+  return all(units, jobs, (unit) => unit());
 }
 
 /** Both, messages then docs: what `vp run land` runs in the change, before its commit. */
 export async function translate(args: string[]): Promise<void> {
+  const flag = (name: string) => {
+    const at = args.indexOf(name);
+    return at >= 0 ? args.splice(at, 2)[1] : undefined;
+  };
+  model = flag('--model') ?? model;
+  jobs = Number(flag('--jobs') ?? jobs);
   const [which, ...rest] = args;
   const messages = which === undefined || which === 'messages' ? await translateMessages() : true;
-  if (which === undefined || which === 'messages') lap('messages');
   const docs = which === undefined || which === 'docs' ? await translateDocs(rest) : true;
-  if (which === undefined || which === 'docs') lap('docs');
   if (!messages || !docs) process.exit(1);
 }
