@@ -18,8 +18,10 @@ export function playwrightConfig({ webServer, testDir = './tests', timezoneId = 
   return defineConfig({
     testDir,
     fullyParallel: true,
-    // PLAYWRIGHT_WORKERS caps the browsers this run starts, for machines running several agents at once.
-    ...(process.env.PLAYWRIGHT_WORKERS ? { workers: Number(process.env.PLAYWRIGHT_WORKERS) } : {}),
+    // PLAYWRIGHT_WORKERS caps the browsers this run starts, for machines running several agents at once. In
+    // CI the runner is ours alone, so one browser per core rather than Playwright's half (GitHub's runner for
+    // a public repository has four cores; the "every language" job used two of them, 2026-10-17).
+    ...(process.env.PLAYWRIGHT_WORKERS ? { workers: Number(process.env.PLAYWRIGHT_WORKERS) } : process.env.CI ? { workers: '100%' } : {}),
     reporter: unit ? [['list']] : [['list'], ['html', { open: 'never', outputFolder: `playwright-report/${remote ? 'remote' : 'local'}` }]],
     use: { baseURL: target.origin, ...devices['Desktop Chrome'], channel: 'chrome', timezoneId, colorScheme: process.env.COLOR_SCHEME ?? 'light' },
     // Two levels. "ours": the app's own checks, fast, gate every local release.

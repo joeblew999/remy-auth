@@ -238,7 +238,14 @@ runs them on server-rendered ones.
 ## Evidence and limits
 
 Two levels: level 1 is every check of ours in every language (`npm run test -- every`); level 2 is Google's
-(`npm run test -- google`, `npm run test -- cwv`). What the checks cover is the checks themselves: `tests/` and the package's
+(`npm run test -- google`, `npm run test -- cwv`). A check of something that depends on the language (fonts and
+scripts, hyphenation, direction, formats, the catalogs) runs in every checked language (`checkedLocales`); a check
+of behaviour that does not (the security policy, noindex, search params, the demo form, error pages, API answers)
+runs in the base language and the first right-to-left one (`behaviourLocales`; `BEHAVIOUR_LOCALES` overrides).
+On a pull request each level first asks what changed and is skipped, saying so, when nothing it checks did
+(`packages/ui/src/cli/changes.ts`, with its unit checks): plans, the docs content and Markdown outside the
+packages run none; the blank app and the fixture run only the consumers level. Pushes to `main` and tags run
+everything. `REMY_FLOW=hand REMY_CHANGES_BASE=origin/main npm run test -- every` shows locally what a pull request would skip. What the checks cover is the checks themselves: `tests/` and the package's
 `@joeblew999/remy-ui/checks` (each check's title says what it proves); the flow's steps that run them are in
 [how we work](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). In short: every page in every
 language without JavaScript (language, direction, metadata, links), catalogs and plurals, the formats

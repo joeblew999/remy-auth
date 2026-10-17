@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 import { locales, cookieName } from '@joeblew999/remy-ui/runtime';
 import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
-import { collectErrors, localizedPath, checkedLocales } from '@joeblew999/remy-ui/checks';
+import { collectErrors, localizedPath, behaviourLocales } from '@joeblew999/remy-ui/checks';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -18,7 +18,7 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
  * that breaks the contract is refused in the browser: the page shows the failure, never the data.
  */
 export function reservationApiChecks({ path = '/app/demo', endpoint = '/api/reservations' } = {}) {
-  for (const locale of checkedLocales) {
+  for (const locale of behaviourLocales) {
     const o = { locale };
     test(`${locale}: POST ${endpoint} answers invalid input with the typed 400 in this language`, async ({ request }) => {
       const headers = { 'Accept-Language': locale };

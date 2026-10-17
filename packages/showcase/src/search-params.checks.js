@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 import { locales } from '@joeblew999/remy-ui/runtime';
 import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
-import { localizedPath, collectErrors, checkedLocales, formatTag } from '@joeblew999/remy-ui/checks';
+import { localizedPath, collectErrors, behaviourLocales, formatTag } from '@joeblew999/remy-ui/checks';
 import { allChoices, choiceKinds, searchDefaults as defaults } from '@joeblew999/remy-ui/locale-data';
 
 // The defaults and choices come from the same derived module the page and its schema read
@@ -50,7 +50,7 @@ export function searchParamsChecks({ serverRendered = true } = {}) {
     [`?utm_source=x&count=000${count}`, `?utm_source=x&count=${count}`, { ...defaults, count }],
   ];
 
-  for (const locale of checkedLocales) {
+  for (const locale of behaviourLocales) {
     const path = localizedPath('/formats', locale);
 
     test(`${locale}: invalid search params fall back to defaults and the URL is normalised`, async ({ page, request, baseURL }) => {

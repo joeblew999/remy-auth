@@ -7,7 +7,7 @@ import { locales, baseLocale } from '@joeblew999/remy-ui/runtime';
 import { m } from '@joeblew999/remy-ui/messages';
 import { samples } from '@joeblew999/remy-ui/samples';
 import { ownValues, choicesFor, choiceKinds } from '@joeblew999/remy-ui/locale-data';
-import { checkedLocales, collectErrors, digits, direction, endonym, foreignDigits, formatTag, hydrated, localizedPath, weekday } from '@joeblew999/remy-ui/checks';
+import { behaviourLocales, checkedLocales, collectErrors, digits, direction, endonym, foreignDigits, formatTag, hydrated, localizedPath, weekday } from '@joeblew999/remy-ui/checks';
 import { navigationBlockingChecks } from './navigation-blocking.checks.js';
 import { preloadChecks } from './preload.checks.js';
 import { searchParamsChecks } from './search-params.checks.js';
@@ -112,7 +112,7 @@ export function appNavChecks() {
 }
 
 export function demoChecks() {
-  for (const locale of checkedLocales) {
+  for (const locale of behaviourLocales) {
     const o = { locale };
     test(`${locale}: demo counter, reservation form and language switch work after hydration`, async ({ page, context }) => {
       const errors = collectErrors(page);
