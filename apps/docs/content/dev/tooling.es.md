@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "Las herramientas detrás de los comandos: dónde se explica cada área, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación. Todos los comandos están en Comandos."
-translatedFrom: "cccfd094 113130b3 6571f238 f9b70434 5e5918fc f46ad939 ec3067e7 587898fa 26a45452 e6b13d48 74939670 e18bd963 15aa2d19 2b38612e db051b04 f3413842 bc4d7058"
+translatedFrom: "cccfd094 113130b3 a3eba987 000c7e0a 5e5918fc 4028da1a ec3067e7 587898fa 26a45452 e6b13d48 74939670 e18bd963 15aa2d19 2b38612e db051b04 f3413842 bc4d7058"
 ---
 
 ## Las herramientas [#the-tooling]
@@ -48,10 +48,10 @@ fiarte de cualquier resultado.
   proyectos, no solo en este: un proyecto con su propio `.node-version` obtiene ese Node; uno sin él obtiene el predeterminado
   de `vp` (la última LTS) en lugar del Node instalado antes. `vp env default <version>` fija ese predeterminado.
   El paso de sesión de `.claude/settings.json` no hace nada allí.
-- **Un checkout hecho antes del 17 de octubre de 2026** tiene un `.claude/settings.json` escrito por `remy guard` (entonces no
-  se versionaba). Bórralo antes de hacer pull, o el pull se rechaza; luego `vp install` y `npx remy guard`.
+- **Un checkout hecho antes del 17 de octubre de 2026** tiene un `.claude/settings.json` escrito por el antiguo `remy guard` (entonces no
+  se versionaba). Bórralo antes de hacer pull, o el pull se rechaza; luego `vp install` y `npx remy hooks`.
 
-`remy guard` escribe sus hooks, con las rutas de esta máquina, en `.claude/settings.local.json`, que no se versiona.
+`remy hooks` escribe el hook de estado, con las rutas de esta máquina, en `.claude/settings.local.json`, que no se versiona (y elimina el antiguo hook del guard donde una máquina aún lo tenga).
 Las instrucciones propias de Vite Plus para agentes se cargan en cada sesión de Claude desde el paquete instalado
 (`CLAUDE.md` importa `node_modules/vite-plus/AGENTS.md`), y sus docs de la versión instalada están en
 `node_modules/vite-plus/docs`: léelas antes de cambiar cómo se construye, comprueba o ejecuta cualquier cosa.
@@ -94,19 +94,21 @@ en qué orden y qué hace innecesario una caché: las tareas son las del paquete
 `vite.config.ts` de una app, `remyWorkspace()` en la raíz de remy-auth, ambos de `packages/ui/src/tasks.js`), cada una
 una herramienta: Vite, Wrangler, Playwright, `tsc`, `vp test`, `vp check`, o un comando `remy` para un trabajo para el que Vite Plus
 no tiene herramienta (las comprobaciones propias del proyecto, los navegadores, el bloqueo de las auditorías). Nada nuestro ejecuta `vp run`
-(una comprobación unitaria lo rechaza): los pasos del flujo son los scripts (`land`, `release`, `setup`), que ejecutan su
-propia parte, luego `vp run ci` o `vp run check`, y después el resto. `vp run --last-details` dice por qué cada tarea
+(una comprobación unitaria lo rechaza), y nada nuestro pasa un valor a través del entorno: los pasos del flujo son los
+scripts (`land`, `promote`, `release`, `setup`), cada uno una cadena de hojas `remy` y tareas de Vite Plus escritas en orden
+([Comandos](./commands.mdx) imprime los pasos de cada uno). `vp run --last-details` dice por qué cada tarea
 se ejecutó o vino de la caché; las entradas, salidas y entorno de una tarea están en su configuración `cache`.
 
 Los comandos `remy` (`npx remy <command>`) son un módulo cada uno en `packages/ui/src/cli`: `npx remy help`
 lista todos los comandos, una línea cada uno, y un comando ejecutado sin argumentos dice
 cuáles son los suyos (`npx remy docs`).
-El flujo es uno de ellos, `remy flow <step>`, que los scripts `status`, `land`, `promote` y `release` invocan.
+Cada uno hace el único trabajo que nombra: `remy land start|finish`, `remy promote check|done` y `remy release check` son los
+extremos de los pasos del flujo, nunca una secuencia de otros comandos.
 
 Todos los scripts y comandos, con lo que hace cada uno, están en **[Comandos](./commands.mdx)**, generada a partir de la
 propia línea de comandos, así que no puede quedar desactualizada; ninguna página los lista a mano. Dónde se explica cada área:
 
-- El flujo y quién ejecuta cada paso: [cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest)
+- El flujo y quién ejecuta cada paso: [cómo trabajamos](./how-we-work.md#the-flow-four-steps-in-plain-sight)
 - La app, las comprobaciones locales y remotas, las previsualizaciones: [la GUI](./run-and-test.md)
 - La estructura del proyecto, una app nueva, las traducciones, un repositorio que publica paquetes: [proyectos](./projects.md)
 - El Worker de documentación sobre el `docs/` de una app: [escribir docs](./writing-docs.mdx)
@@ -127,7 +129,7 @@ de las actualizaciones del registro. Los pins de Node y de las fuentes de skills
 
 ### Verificación [#verification]
 
-El flujo, sus pasos y quién ejecuta cada uno: [cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
+El flujo, sus pasos y quién ejecuta cada uno: [cómo trabajamos](./how-we-work.md#the-flow-four-steps-in-plain-sight).
 
 Una instalación termina con `npx remy verify` (sus comprobaciones de `setup`; `vp run setup`, `npx remy packages upgrade`
 y `vp run upgrade` lo ejecutan): alrededor de un minuto, sin navegador. Son las dependencias frente al lockfile,

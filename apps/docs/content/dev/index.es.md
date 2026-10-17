@@ -1,7 +1,7 @@
 ---
 title: "Desarrolladores: empieza aquí"
 description: "Para desarrolladores que construyen Remy o una app sobre él: autenticación compartida para las apps de Remy, Better Auth en Cloudflare Workers, el paquete compartido remy-ui y por dónde empezar."
-translatedFrom: "15c7d6a6 e881ac6c 6c6aa90b 88eb7fe7 c3e96873 c0d418f2"
+translatedFrom: "15c7d6a6 e881ac6c 6c6aa90b 88eb7fe7 ec1b7e3b c0d418f2"
 ---
 
 **Para desarrolladores** que construyen Remy, o una app sobre su paquete de UI compartido. ¿Usas la app? Lee la
@@ -65,7 +65,7 @@ Cómo iniciar, reanudar y recargar Codex o Claude Code, en VS Code o en una term
 ## Comandos cotidianos [#everyday-commands]
 
 Todos los comandos, generados a partir de la propia línea de comandos, están en [Comandos](./commands.mdx). Lo que ejecutas día a
-día, y quién ejecuta producción y una publicación, está en [el flujo](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
+día, y quién ejecuta producción y una publicación, está en [el flujo](./how-we-work.md#the-flow-four-steps-in-plain-sight).
 
 La vista previa local y el despliegue remoto usan el mismo build y la misma configuración de Wrangler.
 Consulta los [comandos locales/remotos](./run-and-test.md#one-scaffold-for-local-and-cloudflare)

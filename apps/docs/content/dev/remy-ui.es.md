@@ -1,7 +1,7 @@
 ---
 title: "El paquete de UI (@joeblew999/remy-ui)"
 description: "La interfaz que comparten todas las apps de Remy: shadcn de fábrica, fuentes, catálogos de Paraglide, las páginas del sitio y de la app, el pegamento de TanStack Start y sus comprobaciones."
-translatedFrom: "f3f6cb00 fc413994 aa3e15e4 59e743ca 62bc7837 4dcf0c05 e77fb7f1"
+translatedFrom: "f3f6cb00 fc413994 aa3e15e4 59e743ca 62bc7837 4b877b76 e77fb7f1"
 ---
 
 La interfaz que comparten todas las apps de Remy: componentes y tema de shadcn de fábrica, fuentes,
@@ -148,10 +148,10 @@ polaco, turco y alemán) están escritos por un agente y sin revisar.
 ## Publicación [#publishing]
 
 El paquete es `@joeblew999/remy-ui` en GitHub Packages (ahí el scope debe coincidir con el
-propietario de GitHub). `vp run release` hace toda la publicación desde esta máquina y se
-detiene en el primer fallo; sus puertas, en orden, son `remy packages release` en
-[Comandos](./commands.mdx). Core Web Vitals se miden en frío sobre un Worker de Cloudflare
-desechable: las primeras visitas tras un despliegue, que es donde una página lenta sale más cara.
+propietario de GitHub). `vp run release` ejecuta desde esta máquina las comprobaciones de la publicación,
+deteniéndose en el primer fallo, y después crea el tag; sus pasos, en orden, están en [Comandos](./commands.mdx),
+y el job de publicación de GitHub publica a partir del tag. Core Web Vitals se miden en frío sobre un Worker de
+Cloudflare desechable: las primeras visitas tras un despliegue, que es donde una página lenta sale más cara.
 CI (`.github/workflows/ci.yml`) repite las auditorías de Google sobre el tag.
 
 Antes de publicar, un solo commit: la versión en `packages/ui/package.json` (y en

@@ -1,7 +1,7 @@
 ---
 title: "Ejecutar, previsualizar y probar la app"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "633d518a 397ebf73 5cbb94fc 2bff6ee3 55966c34 7066b78a 3ef97f39 fdbfb49e dbc3fd29 9c983078"
+translatedFrom: "633d518a c59f8fdd 5cbb94fc 2bff6ee3 55966c34 7066b78a 3ef97f39 fdbfb49e dbc3fd29 c47ef58f"
 ---
 
 :::note
@@ -40,9 +40,9 @@ el destino local. El resto le preguntan al Worker qué entorno es (`/healthz`) y
 y una pulsación inicia sesión como una de ellas; contra producción nada de eso existe. La tarea de pruebas
 remotas también puede apuntar a una preview local ya en ejecución para comprobar la ruta del servidor externo.
 
-Los comandos son los del paquete (`remy`), controlados por el `remy.config.ts` de este proyecto (los origins, los
-puertos); los propios de este repositorio son sus scripts de `package.json` (`local`, `generate`, `release-checks`,
-`test:consumers`; [proyectos](./projects.md#choosing-the-version-released-development-or-local)). La configuración de Playwright
+Los comandos son los del paquete (`remy`), y cada uno lee el `remy.config.ts` de este proyecto para lo que necesita (los
+origins, los puertos); los propios de este repositorio son sus tareas (`vite.config.ts`: `new-app`, `skills:build`,
+`release-checks`, `publish`) y sus scripts. La configuración de Playwright
 es el `playwrightConfig()` del paquete.
 
 Existe una única configuración de Worker con un entorno con nombre, `staging` (`env.staging` en
@@ -270,11 +270,11 @@ puede demostrar (propietario, 2026-10-17: "you really need to decide what is tes
 - Lo que sí difiere en cada idioma se comprueba en todos: los catálogos y sus plurales (las comprobaciones unitarias),
   el sitemap, hreflang y el selector de idioma, y las muestras de mayúsculas/minúsculas y de separación silábica.
 - Una release ejecuta todas las comprobaciones en todos los idiomas (`CHECK_LOCALES=all`, su script lo establece). A mano, `CHECK_LOCALES`
-  acepta `all`, `quick` (inglés y árabe) o una lista separada por comas; `BEHAVIOUR_LOCALES` sustituye la segunda regla.
+  acepta `all`, `quick` (inglés y árabe) o una lista separada por comas.
 
 Lo que cubren las comprobaciones son las propias comprobaciones: `tests/` y el
 `@joeblew999/remy-ui/checks` del paquete (el título de cada comprobación dice qué demuestra); los pasos del flujo que las ejecutan están en
-[cómo trabajamos](./how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest). En resumen: cada página en cada
+[cómo trabajamos](./how-we-work.md#the-flow-four-steps-in-plain-sight). En resumen: cada página en cada
 idioma sin JavaScript (idioma, dirección, metadatos, enlaces), catálogos y plurales, los valores de formatos
 frente a Intl, las redirecciones de entrada y la sugerencia de idioma, la hidratación, el formulario de demo y la API,
 los estados HTTP, el sitemap y `hreflang`, las cabeceras de seguridad y el nonce de CSP, las pantallas estrechas, y
@@ -289,7 +289,7 @@ Lo de Google cubre solo las páginas de sitio (las páginas de app son noindex p
 (`npx remy test cwv`), no en localhost.
 
 Límites: todavía no hay organizaciones, tokens OAuth ni inicio de sesión entre apps, así que solo las páginas propias de remy-auth saben quién ha iniciado sesión
-([el plan de autenticación](https://github.com/joeblew999/remy-auth/blob/main/.plans/auth-service.md)). El sitio se sirve desde su dirección de workers.dev (`DEPLOY_ORIGIN`); el origin público de producción y
+([el plan de autenticación](https://github.com/joeblew999/remy-auth/blob/main/.plans/auth-service.md)). El sitio se sirve desde su dirección de workers.dev (`origins.production` en remy.config.ts); el origin público de producción y
 Search Console son decisiones del propietario ([now](https://github.com/joeblew999/remy-auth/blob/main/.plans/now.md)).
 
 Avisos de herramientas conocidos: Node puede imprimir el aviso experimental de localStorage de Chrome DevTools;
