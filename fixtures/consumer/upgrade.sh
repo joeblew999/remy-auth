@@ -39,6 +39,14 @@ if [ -n "$tarball" ]; then
   echo "upgrade-test: tarball without a token: $(curl -s -o /dev/null -w '%{http_code}' "$tarball"), with: $(curl -s -L -o "$out/create.tgz" -w '%{http_code} %{url_effective}' -H "Authorization: Bearer $GITHUB_TOKEN" "$tarball" | sed -E 's#\?.*##')"
   tar -xzOf "$out/create.tgz" package/package.json 2>/dev/null | node -e "let s='';process.stdin.on('data',(d)=>(s+=d)).on('end',()=>{try{console.log('upgrade-test: the tarball\'s createConfig', JSON.stringify(JSON.parse(s).createConfig))}catch(e){console.log('upgrade-test: the tarball has no readable package.json')}})"
 fi
+# Vite Plus swallows its fallback's error (create/bin.js: readPackageJsonFromTarball(...).catch(() => null)); on
+# GitHub's runner only, its throwaway copies print it instead, so the log says why (temporary, issue #44).
+if [ -n "${GITHUB_ACTIONS:-}" ]; then
+  for bin in $(find "$HOME" "$root/node_modules/.pnpm" -path '*vite-plus*/dist/create/bin.js' 2>/dev/null); do
+    sed -i 's#readPackageJsonFromTarball(meta.dist.tarball, meta.dist.integrity).catch(() => null)#readPackageJsonFromTarball(meta.dist.tarball, meta.dist.integrity).catch((error) => (console.error("upgrade-test: vp create fallback failed:", error?.stack ?? error), null))#' "$bin"
+    echo "upgrade-test: patched $bin: $(grep -c 'vp create fallback failed' "$bin")"
+  done
+fi
 mkdir -p "$out/make"
 (cd "$out/make" && env "npm_config_@joeblew999:registry=$packages" "npm_config_//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN" \
   VP_SKIP_INSTALL=1 vp create "@joeblew999:app@$previous" --directory app --no-interactive --no-git --no-agent --no-editor --no-hooks)
