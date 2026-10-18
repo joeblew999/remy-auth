@@ -31,7 +31,6 @@ playwright-report/
 # Temporary git worktrees that agents create; machine-local.
 .claude/worktrees/
 
-.remy-docs/
 /packages/remy-ui/skills/
 # The command line as an app runs it, emitted from packages/remy-cli/src by its build task.
 /packages/remy-cli/dist/

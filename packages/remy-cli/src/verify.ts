@@ -11,7 +11,7 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { register } from './mcp.ts';
 import { pins, remySkillPath } from './skills.ts';
-import { appDir } from './config.ts';
+import { appDir, bin } from './config.ts';
 
 type Json = Record<string, any>;
 const readJson = (file: string): Json => JSON.parse(readFileSync(file, 'utf8'));
@@ -27,19 +27,19 @@ function tool(command: string, args: string[], what = command): void {
 /** The versions of the CLIs the tooling runs, without contacting a Cloudflare account. */
 export function doctor(): void {
   console.log(`node ${process.version}`);
-  tool('npm', ['--version'], 'npm');
-  for (const bin of ['wrangler', 'chrome-devtools-mcp', 'modern-web-guidance', 'codex']) {
-    const path = join(process.cwd(), 'node_modules', '.bin', bin);
+  tool('pnpm', ['--version'], 'pnpm');
+  for (const name of ['wrangler', 'chrome-devtools-mcp', 'modern-web-guidance', 'codex']) {
+    const path = bin(name);
     if (existsSync(path)) {
-      process.stdout.write(`${bin} `);
-      tool(path, ['--version'], bin);
-    } else console.log(`${bin}: not installed`);
+      process.stdout.write(`${name} `);
+      tool(path, ['--version'], name);
+    } else console.log(`${name}: not installed`);
   }
 }
 
 /**
  * The invariants every Remy app keeps that npm, Wrangler and the agents' tools do not check
- * themselves: every package.json matches the lockfile; the Worker's configuration keeps previews off
+ * themselves: the Worker's configuration keeps previews off
  * and observability on; the workflows name only commands that exist; every installed skill comes
  * from a pinned source, at its pin, with its Claude link.
  */
@@ -51,32 +51,13 @@ export async function tooling(): Promise<void> {
   assert.deepEqual(
     old,
     [],
-    `package.json has scripts from an older release (${old.join(', ')}): run npx remy upgrade <version> once more`,
+    `package.json has scripts from an older release (${old.join(', ')}): run pnpm remy upgrade <version> once more`,
   );
-  const lock = readJson('package-lock.json');
-  for (const section of ['dependencies', 'devDependencies', 'optionalDependencies']) {
-    assert.deepEqual(
-      lock.packages?.['']?.[section] ?? {},
-      manifest[section] ?? {},
-      `${section}: package-lock.json differs from package.json; run npm install`,
-    );
-  }
-  for (const [location, locked] of Object.entries(lock.packages ?? {}) as [string, Json][]) {
-    if (!location || location.startsWith('node_modules/') || location.includes('/node_modules/')) continue;
-    if (!existsSync(`${location}/package.json`)) continue;
-    const workspace = readJson(`${location}/package.json`);
-    for (const section of ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']) {
-      assert.deepEqual(
-        locked?.[section] ?? {},
-        workspace[section] ?? {},
-        `${location} ${section}: package-lock.json differs from its package.json; run npm install`,
-      );
-    }
-  }
-  console.log('Every package.json matches the lockfile.');
+  // The lockfile is pnpm's to hold to package.json: `vp install --frozen-lockfile` (setup, CI, Cloudflare) refuses one
+  // that differs.
 
   const { unstable_readConfig } = (await import(
-    pathToFileURL(createRequire(join(process.cwd(), 'package.json')).resolve('wrangler')).href
+    pathToFileURL(createRequire(import.meta.url).resolve('wrangler')).href
   )) as typeof import('wrangler');
   const config = unstable_readConfig({ config: join(appDir(), 'wrangler.jsonc') }) as Json;
   // preview_urls makes every uploaded version and alias public, old ones without the app's later fixes. Only a
@@ -153,13 +134,13 @@ export async function tooling(): Promise<void> {
       `Invalid pinned skill source: ${pin.source}`,
     );
     const entries = Object.entries(skills).filter(([, skill]) => skill.source === `${owner}/${repo}`);
-    assert.ok(entries.length > 0, `Missing skill pack: ${owner}/${repo}; npx remy skills install`);
+    assert.ok(entries.length > 0, `Missing skill pack: ${owner}/${repo}; pnpm remy skills install`);
     for (const [name, skill] of entries) {
       assert.match(name, /^[a-z0-9][a-z0-9-]*$/, 'Invalid skill directory name');
       assert.equal(skill.ref, ref, `${name}: installed source differs from the pin`);
       const canonical = `.agents/skills/${name}`;
       const link = `.claude/skills/${name}`;
-      assert.ok(existsSync(`${canonical}/SKILL.md`), `${name}: not installed here; npx remy skills install`);
+      assert.ok(existsSync(`${canonical}/SKILL.md`), `${name}: not installed here; pnpm remy skills install`);
       assert.ok(readFileSync(`${canonical}/SKILL.md`, 'utf8').trim(), `${name}: empty SKILL.md`);
       assert.ok(lstatSync(link).isSymbolicLink(), `${name}: Claude path must be a symlink`);
       assert.equal(realpathSync(link), realpathSync(canonical), `${name}: incorrect Claude target`);
@@ -171,7 +152,7 @@ export async function tooling(): Promise<void> {
 
 /** What an installation must satisfy, in seconds, no build: the check is vp run ready, which vp run setup runs next. */
 export async function verifySetup(): Promise<void> {
-  tool('npm', ['ls', '--depth=0'], 'npm ls');
+  tool('pnpm', ['ls', '--depth=0'], 'pnpm ls');
   await register(true);
   doctor();
   await tooling();
@@ -180,7 +161,7 @@ export async function verifySetup(): Promise<void> {
 export const what = "the installation's checks";
 export const commands: Subcommands = {
   setup: {
-    what: "the installation's checks: npm ls, MCP, doctor, tooling (vp run setup runs them); the default",
+    what: "the installation's checks: pnpm ls, MCP, doctor, tooling (vp run setup runs them); the default",
     run: () => verifySetup(),
   },
   tooling: {

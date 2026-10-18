@@ -20,7 +20,7 @@ import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { File, Files, Folder } from 'fumadocs-ui/components/files';
 import { Banner } from 'fumadocs-ui/components/banner';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
-import { collections } from '@remy-docs-app/.remy-docs/collections.ts';
+import { collections } from '@remy-docs-app/collections.ts';
 import type { DocsPageData } from './source.server';
 import { WebMCP } from '../components/webmcp';
 import { Mermaid } from '../components/mermaid';

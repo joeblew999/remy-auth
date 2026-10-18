@@ -1,4 +1,4 @@
-// The docs Worker, @joeblew999/remy-ui's, over an app's docs/ (`remy docs …`, npx remy docs): run it
+// The docs Worker, @joeblew999/remy-ui's, over an app's docs/ (`remy docs …`, pnpm remy docs): run it
 // (dev), build and check it, test it locally or against its deployment (every MCP server's tools
 // included), a preview Worker, Ask AI's answers paused or resumed (an emergency stop, seconds), its
 // pages published to the index, what Ask AI needs on Cloudflare (printed, created never), its logs and
@@ -145,10 +145,11 @@ export function testRemote(): void {
   tool(bin('playwright'), ['test', '-c', docsChecks()], {
     env: { TEST_TARGET: 'remote', TEST_BASE_URL: origin },
   });
-  const hasApi = (JSON.parse(readFileSync(join(docs(), '.remy-docs', 'app.json'), 'utf8')) as { api?: unknown }).api;
+  // An API reference only when docs.config.ts names the contract it documents.
+  const hasApi = /^\s*contract:\s*['"]/m.test(readFileSync(join(docs(), 'docs.config.ts'), 'utf8'));
   for (const server of ['docs', 'dev', ...(hasApi ? ['reference'] : [])])
-    tool('npx', [
-      '-y',
+    tool('pnpm', [
+      'dlx',
       '@modelcontextprotocol/inspector@2.8.0',
       '--cli',
       `${origin}/api/mcp/${server}`,
@@ -274,7 +275,7 @@ async function synced(instance: string): Promise<void> {
     if (!created && watched.length === 0) break;
     if (Date.now() > deadline)
       fail(
-        `docs publish: the sync of ${instance} is still running after 15 minutes (npx wrangler ai-search jobs list ${instance})`,
+        `docs publish: the sync of ${instance} is still running after 15 minutes (pnpm wrangler ai-search jobs list ${instance})`,
       );
     if (polls % 6 === 0)
       console.log(`  waiting for the sync of ${instance} (${watched.length ? 'running' : 'not listed yet'})…`);
@@ -337,18 +338,18 @@ export async function provision(): Promise<void> {
   console.log(
     `Ask AI for ${service} needs, on the Cloudflare account wrangler is logged in to (nothing is created here):`,
   );
-  console.log(`  1. the R2 bucket its pages go to:    npx wrangler r2 bucket create ${ask.bucket}`);
+  console.log(`  1. the R2 bucket its pages go to:    pnpm wrangler r2 bucket create ${ask.bucket}`);
   console.log(
-    `  2. the AI Search instance over it:   npx wrangler ai-search create ${ask.instance} --type r2 --source ${ask.bucket}`,
+    `  2. the AI Search instance over it:   pnpm wrangler ai-search create ${ask.instance} --type r2 --source ${ask.bucket}`,
   );
   console.log(
-    `  3. its AI Gateway, ${ask.gateway}: set it as the instance's gateway (dashboard: AI Search, ${ask.instance}, Settings), then npx remy docs observe gateway show`,
+    `  3. its AI Gateway, ${ask.gateway}: set it as the instance's gateway (dashboard: AI Search, ${ask.instance}, Settings), then pnpm remy docs observe gateway show`,
   );
   console.log(
     `  4. the rate limit: namespace ${ask.rateLimitNamespace}, a number unique on the account (Workers rate limiting needs no creating)`,
   );
   console.log(
-    'Then, once Cloudflare has deployed the docs from main: npx remy docs publish puts the pages in the bucket.',
+    'Then, once Cloudflare has deployed the docs from main: pnpm remy docs publish puts the pages in the bucket.',
   );
 }
 /** The docs app for a new repository, from remy-auth's template at a tag. */
@@ -358,7 +359,7 @@ export function init(ref: string | undefined): void {
       'remy docs init <ref>: the remy-auth tag to take the docs app from, e.g. v0.14.0 (match your @joeblew999/remy-ui version)',
     );
   if (existsSync('docs')) fail('docs/ exists already');
-  const result = spawnSync('npx', ['-y', 'giget@3.3.1', `gh:joeblew999/remy-auth/template/docs#${ref}`, 'docs'], {
+  const result = spawnSync('pnpm', ['dlx', 'giget@3.3.1', `gh:joeblew999/remy-auth/template/docs#${ref}`, 'docs'], {
     stdio: 'inherit',
   });
   if (result.status !== 0) process.exit(result.status ?? 1);

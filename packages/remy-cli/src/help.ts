@@ -84,16 +84,16 @@ export async function commandsMarkdown(dir = '.'): Promise<string> {
     '',
     '## Everything the command line does',
     '',
-    'Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand lists its own.',
+    'Each as `pnpm remy <command> [<subcommand>]`; a command run without a subcommand lists its own.',
     '',
     '| Command | What it does |',
     '| --- | --- |',
   );
   for (const name of listed()) {
     const tool = await tools[name]!();
-    lines.push(`| \`npx remy ${name}\` | ${cell(tool.what)} |`);
+    lines.push(`| \`pnpm remy ${name}\` | ${cell(tool.what)} |`);
     for (const [sub, { what }] of Object.entries(tool.commands ?? {}))
-      lines.push(`| \`npx remy ${name} ${sub}\` | ${cell(what)} |`);
+      lines.push(`| \`pnpm remy ${name} ${sub}\` | ${cell(what)} |`);
   }
   const front = new Set(frontDoor(scripts).map(([command]) => command.split(' ')[2]));
   const others = Object.entries(scripts).filter(([name, command]) => !front.has(name) && !/remy(\.ts)? /.test(command));

@@ -3,7 +3,7 @@
   "include": ["src/**/*", "tests/**/*", "scripts/**/*", "*.ts", "worker-configuration.d.ts"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "types": ["vite/client", "node"],
+    "types": ["vite-plus/client", "node"],
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",

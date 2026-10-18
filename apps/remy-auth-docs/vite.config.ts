@@ -4,14 +4,9 @@ import { defineConfig } from 'vite-plus';
 import { docsConfig } from './docs.config.ts';
 
 // This app's docs Worker: @joeblew999/remy-ui's, over content/ and docs.config.ts, documenting this app's API with
-// the app's own words (../remy-auth's catalog), and its tasks, all of them here. Its generated files (.remy-docs/) are
-// written when this configuration is loaded, which every vp command does.
+// the app's own words (../remy-auth's catalog), and its tasks, all of them here.
 export default defineConfig({
-  ...remyDocs(docsConfig, {
-    contract: '@joeblew999/remy-auth-contract',
-    root: import.meta.dirname,
-    app: `${import.meta.dirname}/../remy-auth`,
-  }),
+  ...remyDocs(docsConfig, { root: import.meta.dirname, app: `${import.meta.dirname}/../remy-auth` }),
   run: {
     tasks: {
       // The Worker's binding types, after the shared catalogs the pages' words come from.
@@ -28,7 +23,7 @@ export default defineConfig({
         command: 'vp build',
         dependsOn: ['generate', 'clean'],
         cache: {
-          input: [{ auto: true }, '!.remy-docs/**', '!dist/**', '!.wrangler/**'],
+          input: [{ auto: true }, '!dist/**', '!.wrangler/**'],
           output: ['dist/**'],
           env: ['REMY_COMMIT', 'REMY_CHANGES', 'WORKERS_CI_COMMIT_SHA'],
           untrackedEnv: network,

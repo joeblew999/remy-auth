@@ -39,6 +39,8 @@ export const docsConfig = defineDocsConfig({
   /** Where the source lives: "Edit on GitHub" and links to files that are not docs pages. */
   repository: 'https://github.com/joeblew999/remy-auth',
   branch: 'main',
+  /** The API contract /reference documents. */
+  contract: '@joeblew999/remy-auth-contract',
   /** This app's pages on adding its docs to AI tools, for app users and for developers. */
   aiHelp: { docs: '/docs/ai-assistants', dev: '/dev/ai-tools' },
   /** Ask AI: its AI Search instance, the R2 bucket it reads, its AI Gateway and its rate limit. */

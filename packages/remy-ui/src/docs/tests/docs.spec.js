@@ -87,8 +87,8 @@ for (const site of docsConfig.ask ? ['docs', 'dev'] : []) {
 }
 
 // One test per page, so they run at the same time.
-// The reference only for an app with an API (the preset's .remy-docs/app.json).
-const { api } = JSON.parse(readFileSync(join(process.cwd(), '.remy-docs', 'app.json'), 'utf8'));
+// The reference only for an app with an API (docs.config.ts names its contract).
+const api = Boolean(docsConfig.contract);
 for (const path of [...hydratePaths, ...(api ? ['/reference'] : []), ...(docsConfig.ask ? ['/docs/ask'] : [])]) {
   test(`${path} hydrates with no errors and no Content-Security-Policy violations`, async ({ page }) => {
     const errors = [];

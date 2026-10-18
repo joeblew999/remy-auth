@@ -374,7 +374,7 @@ export async function checkMessages(list: boolean, cwd = process.cwd()): Promise
   if (list) console.log(gaps.map(gapLine).join('\n'));
   else
     console.log(
-      `Messages: gaps against ${english} (npx remy i18n check messages --list for every key):\n${summary(gaps)}`,
+      `Messages: gaps against ${english} (pnpm remy i18n check messages --list for every key):\n${summary(gaps)}`,
     );
   return false;
 }
@@ -391,7 +391,7 @@ export function checkDocs(list: boolean, cwd = process.cwd()): boolean {
     return true;
   }
   if (list) console.log(gaps.map(gapLine).join('\n'));
-  else console.log(`Docs: gaps (npx remy i18n check docs --list for every file):\n${summary(gaps)}`);
+  else console.log(`Docs: gaps (pnpm remy i18n check docs --list for every file):\n${summary(gaps)}`);
   return false;
 }
 

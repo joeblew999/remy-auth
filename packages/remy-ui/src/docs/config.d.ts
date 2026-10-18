@@ -15,6 +15,8 @@ export type RemyDocsConfig = {
   /** Where the source lives: "Edit on GitHub" and links to files that are not docs pages. */
   repository: string;
   branch: string;
+  /** The package of the app's oRPC contract, which /reference documents; an app without an API leaves it out. */
+  contract?: string;
   /**
    * The app's own pages on adding its docs to AI tools (llms.txt, the MCP servers), for app users and for
    * developers: the "For AI tools" links. Without them, those links go to each part's llms.txt.

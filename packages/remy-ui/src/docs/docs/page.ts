@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start';
-import { collections, type SiteName } from '@remy-docs-app/.remy-docs/collections.ts';
+import { collections, type SiteName } from '@remy-docs-app/collections.ts';
 import { docsPage, type DocsPageData } from './source.server';
 import { docsUrl } from './table.js';
 import { docsConfig } from '@remy-docs-app/docs.config.ts';

@@ -4,7 +4,7 @@
 // when asked: nothing is copied into the environment for others to read (configure() did, for every command, so a
 // value reached a child by a route no one could see; owner, 2026-10-17: "everything else underneath it should be
 // pretty dumb").
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, relative, resolve } from 'node:path';
 import { loadEnv } from 'vite-plus';
@@ -83,10 +83,32 @@ export function docsContent(cwd = process.cwd()): string {
   return relative(cwd, join(docsDir(cwd) ?? join(cwd, 'docs'), 'content'));
 }
 
-/** An installed tool's binary: node_modules/.bin, from this folder up, as Node resolves packages (a workspace installs once, at its root). */
+/** The package each command the command line runs comes from: its own dependencies (packages/remy-cli/package.json). */
+const owners: Record<string, string> = {
+  wrangler: 'wrangler',
+  playwright: '@playwright/test',
+  ncu: 'npm-check-updates',
+  codex: '@openai/codex',
+  'chrome-devtools-mcp': 'chrome-devtools-mcp',
+  'modern-web-guidance': 'modern-web-guidance',
+};
+
+/**
+ * A tool's command: the app's own (node_modules/.bin, from this folder up: what the app lists), else the command line's
+ * own dependency's, by its package.json's bin, which pnpm links for the packages a package lists and no others.
+ */
 export function bin(name: string, cwd = process.cwd()): string {
   for (let dir = cwd; ; dir = dirname(dir)) {
     const file = join(dir, 'node_modules', '.bin', name);
-    if (existsSync(file) || dir === dirname(dir)) return file;
+    if (existsSync(file)) return file;
+    if (dir === dirname(dir)) break;
   }
+  const owner = owners[name];
+  if (owner) {
+    const manifest = createRequire(import.meta.url).resolve(`${owner}/package.json`);
+    const { bin: bins } = JSON.parse(readFileSync(manifest, 'utf8')) as { bin?: string | Record<string, string> };
+    const target = typeof bins === 'string' ? bins : bins?.[name];
+    if (target) return join(dirname(manifest), target);
+  }
+  return join(cwd, 'node_modules', '.bin', name);
 }

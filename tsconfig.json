@@ -15,7 +15,7 @@
   "exclude": ["packages/remy-ui/src/docs"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "types": ["vite/client", "node"],
+    "types": ["vite-plus/client", "node"],
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",

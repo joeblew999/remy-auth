@@ -3,7 +3,7 @@
 // on demand) is free of server-only code and of devtools. Works against the local artifact and a
 // deployed URL alike; locally it also proves the crawl reached every script in the build output.
 import { test, expect } from '@playwright/test';
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync, realpathSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { locales } from './paraglide/runtime.js';
@@ -50,9 +50,12 @@ export const devtoolsMarkers = [
   },
 ];
 
-/** The installed package's root directory, resolved from the app (or through the package that depends on it). */
+/**
+ * The installed package's root directory, resolved from the app (or through the package that depends on it), as Node
+ * resolves it: from the depending package's real folder, where pnpm puts that package's own dependencies beside it.
+ */
 function packageRoot(name, from) {
-  let dir = from ? packageRoot(from) : process.cwd();
+  let dir = from ? realpathSync(packageRoot(from)) : process.cwd();
   for (;;) {
     const candidate = join(dir, 'node_modules', name);
     if (existsSync(join(candidate, 'package.json'))) return candidate;

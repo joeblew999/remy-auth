@@ -19,8 +19,8 @@ export function preconditions(): void {
   if (spawnSync('git', ['rev-parse', '--git-dir'], { stdio: 'ignore' }).status !== 0)
     problems.push('not a git repository: run git init (the translation and plans tools read git history)');
   if (!existsSync('package.json')) problems.push(`no package.json: start from the blank app (${recipe})`);
-  else if (!existsSync('package-lock.json'))
-    problems.push('no package-lock.json: run npm install once and commit it (setup runs npm ci, which needs it)');
+  else if (!existsSync('pnpm-lock.yaml'))
+    problems.push('no pnpm-lock.yaml: run vp install once and commit it (setup installs exactly what it says)');
   if (!existsSync(join(appDir(), 'wrangler.jsonc')))
     problems.push(`no wrangler.jsonc: the Worker's name and bindings; the blank app has one (${recipe})`);
   if (problems.length) {
@@ -42,15 +42,15 @@ function githubToken(): string | undefined {
   }
 }
 
-/** The dependencies as the lockfile says (npm ci, whose install runs vp config: Vite Plus's Git hooks), with GitHub Packages' token. */
+/** The dependencies as the lockfile says (vp install, with pnpm; its install runs vp config: Vite Plus's Git hooks), with GitHub Packages' token. */
 export function install(): void {
   const token = githubToken();
-  const result = spawnSync('npm', ['ci', '--no-audit', '--no-fund', '--loglevel=error'], {
+  const result = spawnSync('vp', ['install', '--frozen-lockfile'], {
     stdio: 'inherit',
     env: { ...process.env, ...(token ? { GITHUB_TOKEN: token } : {}) },
   });
   if (result.status !== 0) {
-    console.error('setup: npm ci failed');
+    console.error('setup: vp install failed');
     process.exit(result.status ?? 1);
   }
 }
@@ -62,7 +62,7 @@ export const commands: Subcommands = {
     run: () => preconditions(),
   },
   install: {
-    what: "npm ci with GitHub Packages' token (its install runs vp config: Vite Plus's Git hooks)",
+    what: "vp install --frozen-lockfile with GitHub Packages' token (its install runs vp config: Vite Plus's Git hooks)",
     run: () => install(),
   },
 };

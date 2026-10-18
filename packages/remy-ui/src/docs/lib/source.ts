@@ -5,7 +5,7 @@ import { defineI18n } from 'fumadocs-core/i18n';
 import { createFromSource } from 'fumadocs-core/search/server';
 import usersI18n from '@remy-docs-app/content/users/i18n.json' with { type: 'json' };
 import devI18n from '@remy-docs-app/content/dev/i18n.json' with { type: 'json' };
-import { devDocs, usersDocs, type SiteName } from '@remy-docs-app/.remy-docs/collections.ts';
+import { devDocs, usersDocs, type SiteName } from '@remy-docs-app/collections.ts';
 
 // The two docs sites on the server (.plans/docs-for-consumers.md, "Fumadocs fully"), each as Fumadocs'
 // TanStack Start template builds one: a loader, its llms output and its search. Each site's languages

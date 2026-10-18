@@ -4,7 +4,6 @@ test-results/
 playwright-report/
 .wrangler/
 worker-configuration.d.ts
-docs/.remy-docs/
 # Generated per machine by npx remy mcp register.
 .mcp.json
 .codex/

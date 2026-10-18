@@ -20,8 +20,13 @@
     "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
-    "@orpc/contract": "2.0.0-beta.42",
-    "zod": "4.6.5"
+    "@orpc/contract": "catalog:",
+    "@orpc/openapi": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@joeblew999/remy-showcase": "workspace:*",
+    "@joeblew999/remy-ui": "workspace:*"
   },
   "peerDependencies": {
     "@joeblew999/remy-showcase": ">=0.1.0",

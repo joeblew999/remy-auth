@@ -1,7 +1,7 @@
 import { createServerOnlyFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
 import { sites } from '../lib/source';
-import type { SiteName } from '@remy-docs-app/.remy-docs/collections.ts';
+import type { SiteName } from '@remy-docs-app/collections.ts';
 import { branch, docsSites, repository } from './table.js';
 
 // A docs page's data on the server, all from its site's Fumadocs loader (src/lib/source.ts): head data,

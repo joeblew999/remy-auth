@@ -9,12 +9,35 @@
     "auth:provision": "node scripts/auth-provision.ts"
   },
   "dependencies": {
-    "@joeblew999/remy-auth-contract": "*",
-    "@joeblew999/remy-showcase": "*",
-    "@joeblew999/remy-ui": "*",
-    "better-auth": "1.7.6"
+    "@inlang/paraglide-js": "catalog:",
+    "@joeblew999/remy-auth-contract": "workspace:*",
+    "@joeblew999/remy-showcase": "workspace:*",
+    "@joeblew999/remy-ui": "workspace:*",
+    "@orpc/client": "catalog:",
+    "@orpc/contract": "catalog:",
+    "@orpc/server": "catalog:",
+    "@orpc/tanstack-query": "catalog:",
+    "@tanstack/react-devtools": "catalog:",
+    "@tanstack/react-form": "catalog:",
+    "@tanstack/react-query": "catalog:",
+    "@tanstack/react-query-devtools": "catalog:",
+    "@tanstack/react-router": "catalog:",
+    "@tanstack/react-router-devtools": "catalog:",
+    "@tanstack/react-start": "catalog:",
+    "better-auth": "catalog:",
+    "cn": "catalog:",
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "auth": "1.7.6"
+    "@playwright/test": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "auth": "catalog:",
+    "vite-plus": "catalog:",
+    "wrangler": "catalog:"
   }
 }

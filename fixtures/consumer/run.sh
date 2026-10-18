@@ -12,14 +12,17 @@ preview=${PREVIEW_PORT:-4173}; docs=${DOCS_PREVIEW_PORT:-4174}
 started=$(date +%s); mark=$started; took=""
 step() { local now; now=$(date +%s); took="$took, $1 $((now - mark)) s"; mark=$now; }
 
-# 1. The platform, its command line and the showcase as npm serves them, each with a version no registry has (build metadata, so
-#    the showcase's peer range still holds), so npm can never substitute a published copy (it did once: the
-#    scratch tarball was 0.13.0, the published version).
+# 1. The platform, its command line and the showcase as a registry serves them: packed by pnpm in the workspace (which
+#    writes each catalog: and workspace: version in), each with a version no registry has (build metadata, so the
+#    showcase's peer range still holds), so the install can never take a published copy. The version is set for the
+#    pack and put back after, whatever happens.
+set_version() { node -e "const f=process.argv[1],p=require(f);p.version=process.argv[2];require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')" "$1" "$2"; }
 pack() { # <folder> <name> -> the tarball's path
-  local v; v="$(node -p "require('./packages/$1/package.json').version")+dev.$sha"
-  # tar, not rsync: every machine that runs ci has it (a cloud agent's container had no rsync, 2026-10-17).
-  mkdir -p "$out/$1" && tar -C "packages/$1" --exclude=node_modules -cf - . | tar -C "$out/$1" -xf -
-  (cd "$out/$1" && npm pkg set version="$v" && npm pack --silent --pack-destination "$out" > /dev/null)
+  local dir="$root/packages/$1" was v
+  was="$(node -p "require('$dir/package.json').version")"; v="$was+dev.$sha"
+  set_version "$dir/package.json" "$v"
+  (cd "$dir" && pnpm pack --pack-destination "$out" > /dev/null) || { set_version "$dir/package.json" "$was"; exit 1; }
+  set_version "$dir/package.json" "$was"
   echo "$out/$2-$v.tgz"
 }
 ui=$(pack remy-ui joeblew999-remy-ui)
@@ -33,7 +36,13 @@ step pack
 #    contract workspace and the docs' API reference.
 cp -R template "$out/app" && cp -R fixtures/consumer/files/. "$out/app/"
 cd "$out/app"
-npm pkg set "dependencies.@joeblew999/remy-ui=file:$ui" "dependencies.@joeblew999/remy-cli=file:$cli" "dependencies.@joeblew999/remy-showcase=file:$showcase" "dependencies.@joeblew999/remy-fixture-contract=*" "workspaces[1]=packages/*"
+# Every copy of the three, wherever named (the app, its docs, the fixture's contract, remy-cli's own), is the tarball:
+# pnpm's overrides; the fixture's packages/ join the workspace.
+node -e "const f='package.json',p=require('./'+f);p.dependencies['@joeblew999/remy-showcase']='file:$showcase';p.dependencies['@joeblew999/remy-fixture-contract']='workspace:*';require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')"
+node -e "const f='docs/package.json',p=require('./'+f);p.dependencies['@joeblew999/remy-fixture-contract']='workspace:*';require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')"
+sed -i.bak -e "s#^  - docs\$#  - docs\n  - packages/*#" -e "s#^  ['\"]@joeblew999/remy-cli['\"]: .*#  '@joeblew999/remy-cli': 'file:$cli'#" -e "s#^  ['\"]@joeblew999/remy-ui['\"]: .*#  '@joeblew999/remy-ui': 'file:$ui'#" -e "s#^overrides:\$#overrides:\n  \"@joeblew999/remy-ui\": \"file:$ui\"\n  \"@joeblew999/remy-cli\": \"file:$cli\"\n  \"@joeblew999/remy-showcase\": \"file:$showcase\"#" pnpm-workspace.yaml
+rm -f pnpm-workspace.yaml.bak
+grep -q "packages/\*" pnpm-workspace.yaml
 # A part another package offers, listed by its package (its routes, modules and checks come from the tarball).
 node -e "const f='src/parts.json',p=require('./'+f);p.push('@joeblew999/remy-showcase/time-zones');require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')"
 sed -i.bak "s#...remyDocs(docsConfig, { root: import.meta.dirname }),#...remyDocs(docsConfig, { root: import.meta.dirname, contract: '@joeblew999/remy-fixture-contract' }),#" docs/vite.config.ts
@@ -44,7 +53,7 @@ git init -q && git add -A && git -c user.name=remy -c user.email=remy@localhost 
 # 3. What a new repository runs: install, the skills and the tooling invariants, the check (types, tests
 #    included), the quick browser checks and the docs.
 export GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token)}"
-npm install --prefer-offline --no-audit --no-fund --loglevel=error
+vp install
 step install
 # What the script wrote above (src/parts.json), in the app's style, which needs the installed configuration.
 vp fmt src/parts.json > /dev/null
@@ -56,20 +65,20 @@ skills="${TMPDIR:-/tmp}/remy-fixture-skills/$key"
 if [ -f "$skills/skills-lock.json" ]; then
   cp -R "$skills/." .
 else
-  npx remy skills install > /dev/null
+  pnpm remy skills install > /dev/null
   # Written aside, then moved into place: an interrupted or concurrent run never leaves half a cache.
   mkdir -p "$skills.$$" && cp -R skills-lock.json .agents .claude "$skills.$$/"
   # Another run may have written it meanwhile: mv would then move this copy inside that one.
   if [ -e "$skills" ]; then rm -rf "$skills.$$"; else mv "$skills.$$" "$skills"; fi
 fi
-npx remy verify tooling
+pnpm remy verify tooling
 step 'skills and tooling'
 vp run ready
 step 'vp run ready'
 # The new app's browser checks in the quick languages, through its own vp run ci (this run is inside ci's new-app part).
 CHECK_LOCALES=quick PREVIEW_PORT=$((preview + 100)) vp run test:browser
 step 'browser checks'
-DOCS_PREVIEW_PORT=$((docs + 100)) npx remy docs test
+DOCS_PREVIEW_PORT=$((docs + 100)) pnpm remy docs test
 step 'docs checks'
 summary="new-app: the blank app and a package it owns install, build and pass on this commit's platform ($version) in $(( $(date +%s) - started )) s: ${took#, }."
 echo "$summary"

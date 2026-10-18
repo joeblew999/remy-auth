@@ -67,9 +67,9 @@ export const remySkillPath = './node_modules/@joeblew999/remy-ui/skills';
 const agents = ['--agent', 'codex', 'claude-code'];
 
 function skillsTool(args: string[]): void {
-  const result = spawnSync('npx', ['--yes', skillsCli, ...args], { stdio: 'inherit' });
+  const result = spawnSync('pnpm', ['dlx', skillsCli, ...args], { stdio: 'inherit' });
   if (result.status !== 0) {
-    console.error(`skills: npx ${skillsCli} ${args.join(' ')} failed`);
+    console.error(`skills: pnpm dlx ${skillsCli} ${args.join(' ')} failed`);
     process.exit(result.status ?? 1);
   }
 }

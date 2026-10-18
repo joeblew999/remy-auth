@@ -10,9 +10,8 @@ import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { publish } from './docs.ts';
 import { dispatch, type Subcommands } from './commands.ts';
-import { appDir, bin, docsDir, origins as projectOrigins } from './config.ts';
+import { appDir, bin, origins as projectOrigins } from './config.ts';
 // The commit each deploy's build names (build-vite.js): worked out here, outside the build, which never runs git.
 import { gitStamp } from '@joeblew999/remy-ui/build/vite';
 
@@ -40,7 +39,7 @@ function tool(name: string, args: string[], options: { cwd?: string; env?: Recor
  */
 export async function provisioned(environment = process.env.CLOUDFLARE_ENV || undefined): Promise<void> {
   const { unstable_readConfig } = (await import(
-    pathToFileURL(createRequire(join(process.cwd(), 'package.json')).resolve('wrangler')).href
+    pathToFileURL(createRequire(import.meta.url).resolve('wrangler')).href
   )) as typeof import('wrangler');
   const config = unstable_readConfig({ config: join(appDir(), 'wrangler.jsonc'), env: environment });
   type Binding = { binding: string };
@@ -92,7 +91,7 @@ export function databaseProblems(databases: DatabaseInfo[], reference: string | 
         ]),
     ...(reference && db.running_in_region && db.running_in_region !== reference
       ? [
-          `${db.name}: runs in ${db.running_in_region}, production's in ${reference}; a database's region is chosen only when it is made, so make it again there (npx wrangler d1 create <name> --location ${reference.toLowerCase()}), migrate it, and put its id in wrangler.jsonc`,
+          `${db.name}: runs in ${db.running_in_region}, production's in ${reference}; a database's region is chosen only when it is made, so make it again there (pnpm wrangler d1 create <name> --location ${reference.toLowerCase()}), migrate it, and put its id in wrangler.jsonc`,
         ]
       : []),
   ]);
@@ -330,7 +329,7 @@ export async function urls(origin = projectOrigins().production): Promise<void> 
 /** The Worker's name in the Wrangler configuration. */
 async function workerConfig(): Promise<{ name: string; config: Record<string, unknown> }> {
   const { unstable_readConfig } = (await import(
-    pathToFileURL(createRequire(join(process.cwd(), 'package.json')).resolve('wrangler')).href
+    pathToFileURL(createRequire(import.meta.url).resolve('wrangler')).href
   )) as typeof import('wrangler');
   const config = unstable_readConfig({ config: join(appDir(), 'wrangler.jsonc') }) as Record<string, unknown>;
   const name = config.name as string | undefined;

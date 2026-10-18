@@ -1,10 +1,6 @@
 {
   "name": "remy-auth-workspace",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "type": "module",
   "scripts": {
     "prepare": "vp config --no-agent",
@@ -26,18 +22,24 @@
     "template:check": "node scripts/template-check.ts"
   },
   "devDependencies": {
-    "@fumadocs/cli": "1.7.0",
-    "github-slugger": "2.0.0",
-    "shadcn": "4.21.0",
-    "vite-plus": "1.3.0"
-  },
-  "overrides": {
-    "vite": "npm:@voidzero-dev/vite-plus-core@1.3.0"
+    "@fumadocs/cli": "catalog:",
+    "@joeblew999/remy-cli": "workspace:*",
+    "@joeblew999/remy-ui": "workspace:*",
+    "@types/node": "catalog:",
+    "github-slugger": "catalog:",
+    "remark-directive": "catalog:",
+    "remark-parse": "catalog:",
+    "remark-stringify": "catalog:",
+    "shadcn": "catalog:",
+    "typescript": "catalog:",
+    "unified": "catalog:",
+    "vfile": "catalog:",
+    "vite-plus": "catalog:"
   },
   "devEngines": {
     "packageManager": {
-      "name": "npm",
-      "version": "11.19.1",
+      "name": "pnpm",
+      "version": "12.14.0",
       "onFail": "download"
     }
   },

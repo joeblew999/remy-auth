@@ -76,3 +76,17 @@ test('the command line hands nothing on through the environment, and reads no sw
   ];
   for (const [name, text] of code) expect(text.match(gone)?.[0], name).toBeUndefined();
 });
+
+test("the blank app's catalog has the workspace's versions, so a new app installs what remy-auth checked", () => {
+  const entries = (file: string) =>
+    Object.fromEntries(
+      [...readFileSync(file, 'utf8').matchAll(/^ {2}['"]?([^'":]+)['"]?: ['"]([^'"]+)['"]$/gm)].map((match) => [
+        match[1]!,
+        match[2]!,
+      ]),
+    );
+  const ours = entries('pnpm-workspace.yaml');
+  const blank = entries('template/pnpm-workspace.yaml');
+  for (const [name, version] of Object.entries(blank))
+    if (!name.startsWith('@joeblew999/') && !name.startsWith('vite')) expect(version, name).toBe(ours[name]);
+});

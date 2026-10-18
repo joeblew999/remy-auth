@@ -1,9 +1,6 @@
 {
   "name": "my-app",
   "private": true,
-  "workspaces": [
-    "docs"
-  ],
   "type": "module",
   "scripts": {
     "prepare": "vp config --no-agent",
@@ -14,13 +11,28 @@
     "upgrade": "remy upgrade"
   },
   "dependencies": {
-    "@joeblew999/remy-cli": "0.15.1",
-    "@joeblew999/remy-ui": "0.15.1"
+    "@joeblew999/remy-cli": "catalog:",
+    "@joeblew999/remy-ui": "catalog:",
+    "@tanstack/react-devtools": "catalog:",
+    "@tanstack/react-query-devtools": "catalog:",
+    "@tanstack/react-router": "catalog:",
+    "@tanstack/react-router-devtools": "catalog:",
+    "@tanstack/react-start": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@playwright/test": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "vite-plus": "catalog:",
+    "wrangler": "catalog:"
   },
   "devEngines": {
     "packageManager": {
-      "name": "npm",
-      "version": "11.19.1",
+      "name": "pnpm",
+      "version": "12.14.0",
       "onFail": "download"
     }
   }

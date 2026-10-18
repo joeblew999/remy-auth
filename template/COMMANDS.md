@@ -18,76 +18,76 @@ Day to day: `vp run ready` after every edit; when the work is finished, git and 
 
 ## Everything the command line does
 
-Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand lists its own.
+Each as `pnpm remy <command> [<subcommand>]`; a command run without a subcommand lists its own.
 
 | Command | What it does |
 | --- | --- |
-| `npx remy release` | what a release needs before its checks (vp run release runs it first) |
-| `npx remy release check` | a clean main, the translations complete, every changed package bumped |
-| `npx remy plans` | the plans rule on this app's .plans/: few, short, closed |
-| `npx remy plans status` | [--json]: now.md's open items, the open plans with their status line and last commit (STALE after 14 days), the parked ones |
-| `npx remy plans check` | now.md exists, every link under .plans/ resolves, every open plan is linked from now.md; instant (the check runs it) |
-| `npx remy plans close` | &lt;plan&gt; "&lt;what shipped&gt;": into done/ with its closing line, links to it repointed, its now.md item struck; staged, never committed |
-| `npx remy plans park` | &lt;plan&gt; "&lt;why&gt;": the same into parked/ |
-| `npx remy plans open` | &lt;plan&gt; "&lt;why now&gt;": a parked plan back into .plans/; its now.md item is yours to add |
-| `npx remy i18n` | translations: check [messages\|docs] [--list] (offline, read-only), translate [messages\|docs] (the machine's Claude; vp run translate runs it, before a commit) |
-| `npx remy i18n check` | [messages\|docs] [--list] [--strict]: the offline checks, read-only, no git history: a warning (exit 0) while coding and in vp run ci, exit 1 with --strict; --list prints one line per gap |
-| `npx remy i18n translate` | [messages\|docs] [files…]: what the checks list, by the machine's Claude (--model, default sonnet; --jobs at a time, default 8): only the changed sections and keys, with their records; named translation files redone in full; vp run translate runs it, before a commit |
-| `npx remy cloudflare` | Cloudflare's builds deploy main (the app, its docs) and each branch's Preview; here: throwaway previews, what each deployment runs, the resources a binding needs |
-| `npx remy cloudflare versions` | [origins…]: what each deployment runs, asked and never remembered: service, environment, commit and how far it is from this checkout, when it was deployed |
-| `npx remy cloudflare urls` | [origin]: the URLs a deployment answers at |
-| `npx remy cloudflare preview` | [alias] [--keep]: this build as a throwaway Worker &lt;name&gt;-check-&lt;alias&gt; (production untouched), the browser checks against it, then deleted unless --keep (a machine signed in to Cloudflare; from Claude's cloud, push the branch instead) |
-| `npx remy cloudflare preview-delete` | [name]: list the throwaway check Workers, or delete one; never production |
-| `npx remy cloudflare provisioned` | refuse when a D1, KV or R2 binding names no existing resource, or a D1 database (the Previews' included) keeps no read copies |
-| `npx remy setup` | an installation's first steps: what it needs, then the dependencies (vp run setup runs the rest) |
-| `npx remy setup check` | what setup needs before it can start: git, package.json and its lockfile, wrangler.jsonc |
-| `npx remy setup install` | npm ci with GitHub Packages' token (its install runs vp config: Vite Plus's Git hooks) |
-| `npx remy verify` | the installation's checks |
-| `npx remy verify setup` | the installation's checks: npm ls, MCP, doctor, tooling (vp run setup runs them); the default |
-| `npx remy verify tooling` | the lockfile, wrangler.jsonc's observability, placement and preview_urls, the workflows, the skill pins |
-| `npx remy verify doctor` | the tooling's versions |
-| `npx remy skills` | the pinned official agent skills for Codex and Claude |
-| `npx remy skills install` | every pinned skill, and the platform's remy skill from the installed package |
-| `npx remy skills build` | remy-auth: the remy skill the package ships, from the docs build as AI tools read it (llms.txt); the skills:build task runs it |
-| `npx remy skills list` | the pins and what is installed |
-| `npx remy skills remove` | the installed skills removed |
-| `npx remy mcp` | the MCP servers for Claude and Codex, registered per machine |
-| `npx remy mcp register` | write .mcp.json and .codex/config.toml for this machine |
-| `npx remy mcp verify` | the registration as it should be, written if not |
-| `npx remy mcp status` | what each client has registered |
-| `npx remy rules` | the platform's rules block in AGENTS.md, written or refreshed in place |
-| `npx remy packages` | a repository that publishes packages: updates, the pack, the notes, the publish, the tag |
-| `npx remy packages check` | package updates available for the repository's own dependencies (npm-check-updates; never its own packages); nothing changed |
-| `npx remy packages upgrade` | upgrade every package, major versions included, and install (vp run setup checks the installation) |
-| `npx remy packages pack` | pack each published workspace, as the publish would: a tarball a scratch app installs before any release |
-| `npx remy packages notes` | &lt;version&gt;: the CHANGELOG section of a version, as the GitHub release's notes |
-| `npx remy packages bumped` | every published package whose files changed since the last release tag has a new version |
-| `npx remy packages publish` | [--release vX.Y.Z] [--dry-run]: each registry accepts its token, then each workspace whose version is new on its registry, then the GitHub release from its CHANGELOG notes; the tag's CI job runs the same |
-| `npx remy packages tag` | on a clean main: the lead package's version as the tag, pushed with main (GitHub's release job publishes it) |
-| `npx remy test` | the browser checks Vite Plus has no tool for: against a deployment (the suite, the smoke), Core Web Vitals on a preview, and the local audits under one lock (the local build: vp run test:browser) |
-| `npx remy test remote` | [origin] [--audits]: our browser checks against a deployment (production by default); --audits adds Google's, which judge production |
-| `npx remy test live` | [origin]: the smoke against a deployment (every deploy ends with it) |
-| `npx remy test audits` | [playwright options]: Google's audits on the local build, one speed measurement at a time on this machine (vp run test:audits runs it) |
-| `npx remy test cwv` | [alias]: Core Web Vitals on a throwaway preview Worker (the release runs it) |
-| `npx remy browsers` | what a browser check needs on this machine: Playwright's Chromium, and on Linux a Han font |
-| `npx remy docs` | the docs Worker, @joeblew999/remy-ui's, over this app's docs/ |
-| `npx remy docs serve` | the built docs here at DOCS_PREVIEW_PORT (4174), as their checks and AI tools see them: llms.txt, each page's .md (preview is Cloudflare's) |
-| `npx remy docs test` | [remote]: the docs' browser checks on a local build, or against the deployment with every MCP server's tools |
-| `npx remy docs preview` | a preview Worker of the docs, answers paused |
-| `npx remy docs answers` | on\|off: Ask AI's answers resumed, or stopped in seconds |
-| `npx remy docs publish` | the bucket holds exactly the live docs pages, the index's sync waited for, then the fixed questions (after Cloudflare deployed the docs) |
-| `npx remy docs questions` | the fixed questions (docs/content/questions.json) each find their page in the index; search only |
-| `npx remy docs provision` | what Ask AI needs on Cloudflare, printed, created never |
-| `npx remy docs init` | &lt;ref&gt;: a docs/ for this app from remy-auth's template at that tag |
-| `npx remy docs observe` | …: the docs Worker's logs and its AI Gateway (remy observe, with the docs' configuration) |
-| `npx remy observe` | a Worker's logs and its AI Gateway |
-| `npx remy observe events` | [event] [--since 24h] [--limit 10]: the Worker's log events |
-| `npx remy observe ai-usage` | [--since 7d]: Ask AI's usage through the gateway |
-| `npx remy observe ai-check` | Ask AI answers through its gateway |
-| `npx remy observe gateway` | [show \| rate-limit off \| rate-limit &lt;requests&gt;/&lt;seconds&gt; \| logs on\|off]: the AI Gateway's settings |
-| `npx remy shots` | [path] [--phone] [--dark] [--locale en,ar] [--video] [--all] [--out dir] [--origin url]: screenshots (or a WebM) of a page as a visitor sees it; --all every page, desktop and phone, light and dark, en and ar (npx remy shots) |
-| `npx remy api` | spec [origin] [--urls]: the OpenAPI document a Worker generates from its contract |
-| `npx remy upgrade` | &lt;version&gt;: this app onto a release of the platform: the package, the workflow's tag, the scripts, hooks and configuration of the blank app, the skills, the rules, the installation's checks (vp run upgrade) |
+| `pnpm remy release` | what a release needs before its checks (vp run release runs it first) |
+| `pnpm remy release check` | a clean main, the translations complete, every changed package bumped |
+| `pnpm remy plans` | the plans rule on this app's .plans/: few, short, closed |
+| `pnpm remy plans status` | [--json]: now.md's open items, the open plans with their status line and last commit (STALE after 14 days), the parked ones |
+| `pnpm remy plans check` | now.md exists, every link under .plans/ resolves, every open plan is linked from now.md; instant (the check runs it) |
+| `pnpm remy plans close` | &lt;plan&gt; "&lt;what shipped&gt;": into done/ with its closing line, links to it repointed, its now.md item struck; staged, never committed |
+| `pnpm remy plans park` | &lt;plan&gt; "&lt;why&gt;": the same into parked/ |
+| `pnpm remy plans open` | &lt;plan&gt; "&lt;why now&gt;": a parked plan back into .plans/; its now.md item is yours to add |
+| `pnpm remy i18n` | translations: check [messages\|docs] [--list] (offline, read-only), translate [messages\|docs] (the machine's Claude; vp run translate runs it, before a commit) |
+| `pnpm remy i18n check` | [messages\|docs] [--list] [--strict]: the offline checks, read-only, no git history: a warning (exit 0) while coding and in vp run ci, exit 1 with --strict; --list prints one line per gap |
+| `pnpm remy i18n translate` | [messages\|docs] [files…]: what the checks list, by the machine's Claude (--model, default sonnet; --jobs at a time, default 8): only the changed sections and keys, with their records; named translation files redone in full; vp run translate runs it, before a commit |
+| `pnpm remy cloudflare` | Cloudflare's builds deploy main (the app, its docs) and each branch's Preview; here: throwaway previews, what each deployment runs, the resources a binding needs |
+| `pnpm remy cloudflare versions` | [origins…]: what each deployment runs, asked and never remembered: service, environment, commit and how far it is from this checkout, when it was deployed |
+| `pnpm remy cloudflare urls` | [origin]: the URLs a deployment answers at |
+| `pnpm remy cloudflare preview` | [alias] [--keep]: this build as a throwaway Worker &lt;name&gt;-check-&lt;alias&gt; (production untouched), the browser checks against it, then deleted unless --keep (a machine signed in to Cloudflare; from Claude's cloud, push the branch instead) |
+| `pnpm remy cloudflare preview-delete` | [name]: list the throwaway check Workers, or delete one; never production |
+| `pnpm remy cloudflare provisioned` | refuse when a D1, KV or R2 binding names no existing resource, or a D1 database (the Previews' included) keeps no read copies |
+| `pnpm remy setup` | an installation's first steps: what it needs, then the dependencies (vp run setup runs the rest) |
+| `pnpm remy setup check` | what setup needs before it can start: git, package.json and its lockfile, wrangler.jsonc |
+| `pnpm remy setup install` | vp install --frozen-lockfile with GitHub Packages' token (its install runs vp config: Vite Plus's Git hooks) |
+| `pnpm remy verify` | the installation's checks |
+| `pnpm remy verify setup` | the installation's checks: pnpm ls, MCP, doctor, tooling (vp run setup runs them); the default |
+| `pnpm remy verify tooling` | the lockfile, wrangler.jsonc's observability, placement and preview_urls, the workflows, the skill pins |
+| `pnpm remy verify doctor` | the tooling's versions |
+| `pnpm remy skills` | the pinned official agent skills for Codex and Claude |
+| `pnpm remy skills install` | every pinned skill, and the platform's remy skill from the installed package |
+| `pnpm remy skills build` | remy-auth: the remy skill the package ships, from the docs build as AI tools read it (llms.txt); the skills:build task runs it |
+| `pnpm remy skills list` | the pins and what is installed |
+| `pnpm remy skills remove` | the installed skills removed |
+| `pnpm remy mcp` | the MCP servers for Claude and Codex, registered per machine |
+| `pnpm remy mcp register` | write .mcp.json and .codex/config.toml for this machine |
+| `pnpm remy mcp verify` | the registration as it should be, written if not |
+| `pnpm remy mcp status` | what each client has registered |
+| `pnpm remy rules` | the platform's rules block in AGENTS.md, written or refreshed in place |
+| `pnpm remy packages` | a repository that publishes packages: updates, the pack, the notes, the publish, the tag |
+| `pnpm remy packages check` | package updates available for the repository's own dependencies (npm-check-updates; never its own packages); nothing changed |
+| `pnpm remy packages upgrade` | upgrade every package, major versions included, and install (vp run setup checks the installation) |
+| `pnpm remy packages pack` | pack each published workspace, as the publish would: a tarball a scratch app installs before any release |
+| `pnpm remy packages notes` | &lt;version&gt;: the CHANGELOG section of a version, as the GitHub release's notes |
+| `pnpm remy packages bumped` | every published package whose files changed since the last release tag has a new version |
+| `pnpm remy packages publish` | [--release vX.Y.Z] [--dry-run]: each registry accepts its token, then each workspace whose version is new on its registry, then the GitHub release from its CHANGELOG notes; the tag's CI job runs the same |
+| `pnpm remy packages tag` | on a clean main: the lead package's version as the tag, pushed with main (GitHub's release job publishes it) |
+| `pnpm remy test` | the browser checks Vite Plus has no tool for: against a deployment (the suite, the smoke), Core Web Vitals on a preview, and the local audits under one lock (the local build: vp run test:browser) |
+| `pnpm remy test remote` | [origin] [--audits]: our browser checks against a deployment (production by default); --audits adds Google's, which judge production |
+| `pnpm remy test live` | [origin]: the smoke against a deployment (every deploy ends with it) |
+| `pnpm remy test audits` | [playwright options]: Google's audits on the local build, one speed measurement at a time on this machine (vp run test:audits runs it) |
+| `pnpm remy test cwv` | [alias]: Core Web Vitals on a throwaway preview Worker (the release runs it) |
+| `pnpm remy browsers` | what a browser check needs on this machine: Playwright's Chromium, and on Linux a Han font |
+| `pnpm remy docs` | the docs Worker, @joeblew999/remy-ui's, over this app's docs/ |
+| `pnpm remy docs serve` | the built docs here at DOCS_PREVIEW_PORT (4174), as their checks and AI tools see them: llms.txt, each page's .md (preview is Cloudflare's) |
+| `pnpm remy docs test` | [remote]: the docs' browser checks on a local build, or against the deployment with every MCP server's tools |
+| `pnpm remy docs preview` | a preview Worker of the docs, answers paused |
+| `pnpm remy docs answers` | on\|off: Ask AI's answers resumed, or stopped in seconds |
+| `pnpm remy docs publish` | the bucket holds exactly the live docs pages, the index's sync waited for, then the fixed questions (after Cloudflare deployed the docs) |
+| `pnpm remy docs questions` | the fixed questions (docs/content/questions.json) each find their page in the index; search only |
+| `pnpm remy docs provision` | what Ask AI needs on Cloudflare, printed, created never |
+| `pnpm remy docs init` | &lt;ref&gt;: a docs/ for this app from remy-auth's template at that tag |
+| `pnpm remy docs observe` | …: the docs Worker's logs and its AI Gateway (remy observe, with the docs' configuration) |
+| `pnpm remy observe` | a Worker's logs and its AI Gateway |
+| `pnpm remy observe events` | [event] [--since 24h] [--limit 10]: the Worker's log events |
+| `pnpm remy observe ai-usage` | [--since 7d]: Ask AI's usage through the gateway |
+| `pnpm remy observe ai-check` | Ask AI answers through its gateway |
+| `pnpm remy observe gateway` | [show \| rate-limit off \| rate-limit &lt;requests&gt;/&lt;seconds&gt; \| logs on\|off]: the AI Gateway's settings |
+| `pnpm remy shots` | [path] [--phone] [--dark] [--locale en,ar] [--video] [--all] [--out dir] [--origin url]: screenshots (or a WebM) of a page as a visitor sees it; --all every page, desktop and phone, light and dark, en and ar (pnpm remy shots) |
+| `pnpm remy api` | spec [origin] [--urls]: the OpenAPI document a Worker generates from its contract |
+| `pnpm remy upgrade` | &lt;version&gt;: this app onto a release of the platform: the package, the workflow's tag, the scripts, hooks and configuration of the blank app, the skills, the rules, the installation's checks (vp run upgrade) |
 
 ## The other scripts
 

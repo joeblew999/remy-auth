@@ -26,8 +26,14 @@
     "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
-    "@joeblew999/remy-ui": "*",
-    "vite-plus": "1.3.0",
-    "wrangler": "4.137.0"
+    "@joeblew999/remy-ui": "workspace:*",
+    "@openai/codex": "catalog:",
+    "@playwright/test": "catalog:",
+    "chrome-devtools-mcp": "catalog:",
+    "modern-web-guidance": "catalog:",
+    "npm-check-updates": "catalog:",
+    "smol-toml": "catalog:",
+    "vite-plus": "catalog:",
+    "wrangler": "catalog:"
   }
 }

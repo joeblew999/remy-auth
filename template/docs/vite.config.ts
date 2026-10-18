@@ -4,7 +4,7 @@ import { defineConfig } from 'vite-plus';
 import { docsConfig } from './docs.config.ts';
 
 // This app's docs Worker: @joeblew999/remy-ui's, over content/ and docs.config.ts, and its tasks, all of them here.
-// With an API, name its contract's package so /reference documents it: remyDocs(docsConfig, { contract: '@you/my-app-contract' }).
+// With an API, docs.config.ts names its contract's package (contract: '@you/my-app-contract') so /reference documents it.
 export default defineConfig({
   ...remyDocs(docsConfig, { root: import.meta.dirname }),
   run: {
@@ -22,7 +22,7 @@ export default defineConfig({
         command: 'vp build',
         dependsOn: ['generate', 'clean'],
         cache: {
-          input: [{ auto: true }, '!.remy-docs/**', '!dist/**', '!.wrangler/**'],
+          input: [{ auto: true }, '!dist/**', '!.wrangler/**'],
           output: ['dist/**'],
           env: ['REMY_COMMIT', 'REMY_CHANGES', 'WORKERS_CI_COMMIT_SHA'],
           untrackedEnv: network,

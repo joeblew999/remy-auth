@@ -1,7 +1,8 @@
 import { defineDocs } from 'fumadocs-mdx/macro';
 
-// The two docs collections (.plans/docs-for-consumers.md, "Fumadocs fully"): product docs for the app's
-// users (/docs) and developer docs (/dev), compiled by fumadocs-mdx. Browser-safe: the page renders its
+// This app's two docs collections, product docs for its users (content/users, at /docs) and
+// developer docs (content/dev, at /dev), compiled by fumadocs-mdx (its macro compiles this file, which is why it lives
+// here and not in @joeblew999/remy-ui: the macro never compiles node_modules). Browser-safe: the page renders its
 // compiled Markdown from here; the loaders, which the browser never loads, are in source.ts.
 // Each call spells its options out: the macro reads them statically.
 export const usersDocs = defineDocs({

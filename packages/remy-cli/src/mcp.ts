@@ -15,19 +15,19 @@ type Json = Record<string, unknown>;
 /** The server as this install runs it: Google's Chrome DevTools MCP over stdio, isolated and headless, telemetry off. */
 function server(root: string): { command: string; args: string[] } {
   return {
-    command: join(root, 'node_modules', '.bin', 'chrome-devtools-mcp'),
+    command: bin('chrome-devtools-mcp', root),
     args: ['--isolated', '--headless', '--no-usage-statistics', '--no-performance-crux'],
   };
 }
 
 /** Write (or with `check`, only verify) both clients' registration. */
 export async function register(check = false, root = process.cwd()): Promise<void> {
-  const { parse, stringify } = createRequire(join(root, 'package.json'))('smol-toml') as {
+  const { parse, stringify } = createRequire(import.meta.url)('smol-toml') as {
     parse: (text: string) => Json;
     stringify: (value: Json) => string;
   };
   const { command, args } = server(root);
-  assert.ok(existsSync(command), `${command}: chrome-devtools-mcp is not installed (npm ci)`);
+  assert.ok(existsSync(command), `${command}: chrome-devtools-mcp is not installed (vp install)`);
   const targets = [
     {
       file: '.codex/config.toml',
@@ -54,7 +54,7 @@ export async function register(check = false, root = process.cwd()): Promise<voi
     if (check)
       assert.ok(
         same,
-        `${target.file}: Chrome DevTools is not registered as this install runs it; npx remy mcp register`,
+        `${target.file}: Chrome DevTools is not registered as this install runs it; pnpm remy mcp register`,
       );
     else if (!same) {
       if (original !== undefined) writeFileSync(`${path}.bak`, original);

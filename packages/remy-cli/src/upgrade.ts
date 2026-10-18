@@ -44,14 +44,14 @@ export async function upgrade(version: string | undefined): Promise<void> {
   const blank = fetchBlank(version);
   // The platform and its command line, released together under the same number.
   const install = spawnSync(
-    'npm',
-    ['install', '--save-exact', `@joeblew999/remy-ui@${version}`, `@joeblew999/remy-cli@${version}`],
+    'vp',
+    ['add', '--save-exact', `@joeblew999/remy-ui@${version}`, `@joeblew999/remy-cli@${version}`],
     {
       stdio: 'inherit',
       env: { ...process.env, ...(token ? { GITHUB_TOKEN: token } : {}) },
     },
   );
-  if (install.status !== 0) fail('upgrade: npm install failed');
+  if (install.status !== 0) fail('upgrade: vp add failed');
   // The shared CI workflow at the same tag, when the app calls it.
   const retag = (file: string, pattern: RegExp) => {
     const text = readFileSync(file, 'utf8');
@@ -93,8 +93,8 @@ export async function upgrade(version: string | undefined): Promise<void> {
 function fetchBlank(version: string): string {
   const blank = mkdtempSync(join(tmpdir(), 'remy-blank-'));
   const got = spawnSync(
-    'npx',
-    ['-y', 'giget@3.3.1', `gh:joeblew999/remy-auth/template#v${version}`, blank, '--force'],
+    'pnpm',
+    ['dlx', 'giget@3.3.1', `gh:joeblew999/remy-auth/template#v${version}`, blank, '--force'],
     {
       stdio: 'inherit',
     },
@@ -135,6 +135,13 @@ export function scriptsAndHooks(blank: string, version: string): void {
       `upgrade: ${config} is the blank app's, with its tasks written out (yours is ${config}.before-upgrade: move any plugins or options you added)`,
     );
   }
+  // The files every app has now, the blank app's when the app has none: pnpm's workspace (its catalog), the docs'
+  // Fumadocs collections and the docs Worker's own Wrangler configuration.
+  for (const file of ['pnpm-workspace.yaml', join('docs', 'collections.ts'), join('docs', 'wrangler.jsonc')])
+    if (existsSync(join(blank, file)) && !existsSync(file) && (file === 'pnpm-workspace.yaml' || existsSync('docs'))) {
+      cpSync(join(blank, file), file);
+      console.log(`upgrade: ${file} is the blank app's (check its names: the Worker's, the catalog's versions)`);
+    }
   // Where the app is deployed is its .env now (Vite's file): the blank app's when the app has none, with remy.config.ts's
   // origins written in.
   if (!existsSync('.env') && existsSync(join(blank, '.env'))) {
@@ -169,7 +176,7 @@ export function scriptsAndHooks(blank: string, version: string): void {
   if (existsSync('CLAUDE.md') && !readFileSync('CLAUDE.md', 'utf8').includes(vitePlusRules))
     writeFileSync('CLAUDE.md', `${readFileSync('CLAUDE.md', 'utf8').replace(/\n?$/, '\n')}${vitePlusRules}\n`);
   console.log(
-    "upgrade: the flow is vp run (COMMANDS.md); Cloudflare's build command for this app is: npx vp run build",
+    "upgrade: the flow is vp run (COMMANDS.md); Cloudflare's build command for this app is: pnpm vp run build",
   );
 }
 

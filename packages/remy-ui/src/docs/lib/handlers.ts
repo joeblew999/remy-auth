@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { generateOGImage } from 'fumadocs-ui/og/takumi';
 import { reference, referenceSearch, sites } from './source';
 import { llmsSummary } from './sections';
-import type { SiteName } from '@remy-docs-app/.remy-docs/collections.ts';
+import type { SiteName } from '@remy-docs-app/collections.ts';
 import { docsConfig } from '@remy-docs-app/docs.config.ts';
 
 // The server routes Fumadocs' CLI writes (`docs:cli feature llms|og|mcp`), once for both docs sites:

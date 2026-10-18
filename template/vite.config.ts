@@ -21,7 +21,6 @@ const written = [
   '!**/routeTree.gen.ts',
   '!**/worker-configuration.d.ts',
   '!**/node_modules/**',
-  '!**/.remy-docs/**',
   '!**/dist/**',
   '!**/test-results/**',
   '!**/playwright-report/**',
@@ -29,7 +28,7 @@ const written = [
 ];
 
 // The installed dependencies, which no task reads as files: their lockfile, so a dependency update builds again.
-const lockfile = { pattern: 'package-lock.json', base: 'workspace' } as const;
+const lockfile = { pattern: 'pnpm-lock.yaml', base: 'workspace' } as const;
 
 export default defineConfig({
   ...style,

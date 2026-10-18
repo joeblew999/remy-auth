@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { lighthouseChecks } from '../../checks.js';
 
 // Google's audits on the docs Worker, over the app's own pages (run from its docs/): each site's first page
@@ -14,7 +15,7 @@ lighthouseChecks({
   pages: [
     { path: guide ? `/docs/${guide}` : '/docs', device: 'mobile' },
     { path: dev ? `/dev/${dev}` : '/dev', device: 'mobile' },
-    ...(JSON.parse(readFileSync(join(process.cwd(), '.remy-docs', 'app.json'), 'utf8')).api
+    ...((await import(pathToFileURL(join(process.cwd(), 'docs.config.ts')).href)).docsConfig.contract
       ? [{ path: '/reference', device: 'desktop' }]
       : []),
   ],

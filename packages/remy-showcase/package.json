@@ -34,14 +34,18 @@
     "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
-    "@playwright/test": "1.63.0",
-    "@tanstack/react-form": "1.33.5",
-    "@tanstack/react-query": "5.103.2",
-    "@tanstack/react-router": "1.170.39",
-    "@tanstack/react-start": "1.168.58",
-    "lucide-react": "1.48.0",
-    "react": "19.3.1",
-    "zod": "4.6.5"
+    "@playwright/test": "catalog:",
+    "@tanstack/react-form": "catalog:",
+    "@tanstack/react-query": "catalog:",
+    "@tanstack/react-router": "catalog:",
+    "@tanstack/react-start": "catalog:",
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@joeblew999/remy-ui": "workspace:*",
+    "@types/react": "catalog:"
   },
   "peerDependencies": {
     "@joeblew999/remy-ui": ">=0.15.1"

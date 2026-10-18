@@ -2,7 +2,7 @@ import { createServerOnlyFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
 import { env } from 'cloudflare:workers';
 import { logContext, requestIdHeader, writeLog } from '../worker';
-import type { SiteName } from '@remy-docs-app/.remy-docs/collections.ts';
+import type { SiteName } from '@remy-docs-app/collections.ts';
 import { askMaxLength, type AskResult } from './ask-limits';
 import { docsAnswerFolder, docsPage } from './docs/source.server';
 import { docsObjectForKey } from './docs/table.js';

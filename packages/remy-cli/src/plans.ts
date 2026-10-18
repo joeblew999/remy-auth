@@ -266,7 +266,7 @@ type Move = 'close' | 'park' | 'open';
 function move(kind: Move, word: string, args: string[]): void {
   const [name, ...note] = args;
   const reason = note.join(' ').trim();
-  if (!name || !reason) fail(`Usage: npx remy plans ${kind} <plan> "<${kind === 'close' ? 'what shipped' : 'why'}>"`);
+  if (!name || !reason) fail(`Usage: pnpm remy plans ${kind} <plan> "<${kind === 'close' ? 'what shipped' : 'why'}>"`);
   if (!existsSync(plansDir)) fail('No .plans/ here.');
   const from: Record<Move, string[]> = {
     close: [plansDir, join(plansDir, 'parked')],

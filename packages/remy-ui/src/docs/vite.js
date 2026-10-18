@@ -1,4 +1,5 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cloudflare } from '@cloudflare/vite-plugin';
@@ -16,10 +17,9 @@ import { remyBuild } from '../build-vite.js';
 // An app's whole docs Worker from its docs.config.ts (.plans/thin-apps.md, group 2): its docs/vite.config.ts
 // is `export default remyDocs(docsConfig, { contract: '<its contract package>' })`. The Worker itself is this
 // package's src/docs (Fumadocs' TanStack Start template, on Cloudflare's Vite plugin instead of Nitro); the
-// app keeps content/, docs.config.ts and its Worker's wrangler.jsonc (name, bindings, the package's server as main).
-// Two things are generated into the app's .remy-docs/ (gitignored): collections.ts, the Fumadocs collections,
-// compiled by fumadocs-mdx's macro, which never compiles node_modules, so they cannot stay in the package; and the
-// route tree beside the package's routes (TanStack Start's srcDirectory is the package's src/docs).
+// app keeps content/, docs.config.ts, collections.ts (Fumadocs' collections, compiled by fumadocs-mdx's macro,
+// which never compiles node_modules) and its Worker's wrangler.jsonc (name, bindings, the package's server as main).
+// Nothing is written when this configuration loads.
 
 const packageDocs = fileURLToPath(new URL('.', import.meta.url));
 
@@ -31,26 +31,17 @@ function repositoryFolder(root) {
 }
 
 /**
- * The docs Worker's Vite configuration for the app whose docs/ it runs in. `contract`: the package of the
- * app's oRPC contract, which /reference documents; an app without an API leaves it out. `app`: the folder of the app
- * whose strings the pages name (:ui[key]), its docs/ folder's parent unless given (remy-auth: ../remy-auth).
- * Vite's configuration only: the docs' tasks are their own vite.config.ts's, written out there.
+ * The docs Worker's Vite configuration for the app whose docs/ it runs in, from its docs.config.ts (`contract`: the
+ * package of its oRPC contract, which /reference documents). `app`: the folder of the app whose strings the pages
+ * name (:ui[key]), its docs/ folder's parent unless given (remy-auth: ../remy-auth). Vite's configuration only: the
+ * docs' tasks are their own vite.config.ts's, written out there.
  */
-export function remyDocs(docsConfig, { contract, root = process.cwd(), app: appRoot = resolve(root, '..') } = {}) {
+export function remyDocs(docsConfig, { root = process.cwd(), app: appRoot = resolve(root, '..') } = {}) {
+  const { contract } = docsConfig;
   // An app without an API has no reference: no /reference, tab, llms entry or MCP server (__REMY_DOCS_API__).
   const api = Boolean(contract);
   const app = root.endsWith('/') ? root : `${root}/`;
   const srcDirectory = relative(root, packageDocs).replace(/\/$/, '');
-  // Written while this configuration is evaluated, before any task could make them; each file only when its text
-  // changed, so loading the configuration rewrites nothing.
-  const generated = join(root, '.remy-docs');
-  mkdirSync(generated, { recursive: true });
-  const write = (name, text) => {
-    const file = join(generated, name);
-    if (!existsSync(file) || readFileSync(file, 'utf8') !== text) writeFileSync(file, text);
-  };
-  write('collections.ts', readFileSync(join(packageDocs, 'lib/collections.source.ts'), 'utf8'));
-  write('app.json', `${JSON.stringify({ api })}\n`);
   return defineConfig({
     plugins: [
       // What this build is (`virtual:remy-build`): the docs Worker's /healthz answers with it, as an app's does.
@@ -68,13 +59,13 @@ export function remyDocs(docsConfig, { contract, root = process.cwd(), app: appR
           });
         },
       },
-      // Fumadocs MDX compiles content/ for the collections (.remy-docs/collections.ts); before Start's plugin.
+      // Fumadocs MDX compiles content/ for the collections (the app's collections.ts); before Start's plugin.
       // Beyond its defaults (GFM, heading ids, images, code and npm tabs): the app's own words (:ui[key], from its
       // Paraglide catalog: remark-ui-words.js), callouts (:::note), Mermaid
       // (```mermaid), type tables from TypeScript (<auto-type-table>) and steps. GitHub's "default" code
       // themes keep 4.5:1 comment contrast on both backgrounds, which Lighthouse's accessibility audit requires.
       fumadocsMdx({
-        macro: { include: ['**/.remy-docs/collections.ts'] },
+        macro: { include: [join(root, 'collections.ts')] },
         globalOptions: {
           mdxOptions: {
             remarkPlugins: (plugins) => [
@@ -101,7 +92,13 @@ export function remyDocs(docsConfig, { contract, root = process.cwd(), app: appR
     resolve: {
       alias: [
         // The app's own modules the Worker imports (app-modules.d.ts): its contract, and its docs/ files.
-        { find: /^@remy-docs-app\/contract$/, replacement: contract ?? join(packageDocs, 'empty-contract.ts') },
+        // The contract as the docs app installed it (its own dependency), resolved from its folder.
+        {
+          find: /^@remy-docs-app\/contract$/,
+          replacement: contract
+            ? createRequire(join(root, 'package.json')).resolve(contract)
+            : join(packageDocs, 'empty-contract.ts'),
+        },
         { find: /^@remy-docs-app\//, replacement: app },
       ],
     },

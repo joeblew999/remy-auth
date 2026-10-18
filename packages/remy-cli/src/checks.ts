@@ -7,32 +7,32 @@ import { writeCommands } from './help.ts';
 import { checkAll as translations } from './i18n.ts';
 import { rightEndings } from './page.ts';
 import { check as plans } from './plans.ts';
-import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { docsDir } from './config.ts';
 
 /**
  * The packages that break when installed twice (React's hooks, TanStack's router and query types, the
  * MDX stringifier Fumadocs builds with) have one version in this install. The list is the package's
- * own (@joeblew999/remy-ui's package.json, "remy.singleCopy"); npm's hoisting decides the rest.
+ * own (@joeblew999/remy-ui's package.json, "remy.singleCopy"); pnpm's store says what is installed: one folder per
+ * package and version in node_modules/.pnpm (`react@19.3.1`, `@tanstack+react-router@1.170.39_<its peers>`).
  */
 export function singleCopies(): void {
   const { remy } = JSON.parse(
     readFileSync(join(process.cwd(), 'node_modules/@joeblew999/remy-ui/package.json'), 'utf8'),
   ) as { remy?: { singleCopy?: string[] } };
+  const store = readdirSync(join(process.cwd(), 'node_modules/.pnpm'));
   const problems: string[] = [];
   for (const name of remy?.singleCopy ?? []) {
-    const found = JSON.parse(
-      execFileSync('npm', ['query', `#${name}`], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }),
-    ) as { version: string; location: string }[];
-    const versions = [...new Set(found.map((item) => item.version))];
-    if (versions.length > 1)
-      problems.push(`${name}: ${versions.join(', ')} (${found.map((item) => item.location).join(', ')})`);
+    const prefix = `${name.replace('/', '+')}@`;
+    const versions = [
+      ...new Set(store.filter((dir) => dir.startsWith(prefix)).map((dir) => dir.slice(prefix.length).split('_')[0])),
+    ];
+    if (versions.length > 1) problems.push(`${name}: ${versions.join(', ')}`);
   }
   if (problems.length) {
     console.error(
-      `single copies: installed more than once, which breaks at run or type-check time:\n  ${problems.join('\n  ')}\nThe versions come from @joeblew999/remy-ui; remove this app's own pins of them, then npm install.`,
+      `single copies: installed more than once, which breaks at run or type-check time:\n  ${problems.join('\n  ')}\nThe versions come from @joeblew999/remy-ui; pin this app's own to the same, then vp install.`,
     );
     process.exit(1);
   }

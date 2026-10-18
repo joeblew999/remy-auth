@@ -7,7 +7,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { dispatch, type Subcommands } from './commands.ts';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { translationGaps } from './i18n.ts';
 import { bin, releaseConfig } from './config.ts';
 
@@ -32,14 +32,20 @@ export type Workspace = {
   publishConfig?: { registry?: string };
 };
 
-/** Every workspace package.json declares, and the ones that are published (not private), with each one's registry. */
+/** Every workspace package (pnpm's list, the root left out), and the ones that are published (not private), with each one's registry. */
 export function workspaces(): { all: Workspace[]; published: (Workspace & { registry: string })[] } {
-  const manifest = JSON.parse(readFileSync('package.json', 'utf8')) as { workspaces?: string[] };
-  const all: Workspace[] = manifest.workspaces?.length
-    ? JSON.parse(
-        execFileSync('npm', ['query', '.workspace'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] }),
-      )
-    : [];
+  const listed = JSON.parse(
+    execFileSync('pnpm', ['ls', '-r', '--depth', '-1', '--json'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'inherit'],
+    }),
+  ) as { path: string }[];
+  const all: Workspace[] = listed
+    .filter((item) => item.path !== process.cwd())
+    .map((item) => ({
+      ...(JSON.parse(readFileSync(join(item.path, 'package.json'), 'utf8')) as Workspace),
+      location: relative(process.cwd(), item.path),
+    }));
   return {
     all,
     published: all
@@ -86,7 +92,7 @@ export const check = (): void => ncu();
 /** Move the pins to the latest versions, majors included, and install (vp run setup checks the installation after). */
 export function upgrade(): void {
   ncu('--upgrade');
-  tool('npm', ['install', '--prefer-online', '--strict-peer-deps']);
+  tool('vp', ['install']);
   console.log('packages: upgraded and installed; vp run setup checks the installation.');
 }
 
@@ -126,7 +132,8 @@ export async function pack(): Promise<void> {
     console.log('pack: this repository publishes no packages (no workspace that is not private).');
     return;
   }
-  for (const item of published) tool('npm', ['pack', '--workspace', item.name]);
+  // pnpm's pack writes each catalog: and workspace: version in, as its publish does.
+  for (const item of published) tool('pnpm', ['--dir', item.location, 'pack', '--pack-destination', process.cwd()]);
 }
 
 /** CHANGELOG.md's section for a version; fails when it is missing or empty. */
@@ -239,9 +246,19 @@ export async function publish(options: { release?: string; dryRun?: boolean } = 
       );
       if (view.status === 0) console.log(`${item.name}@${item.version} is already published.`);
       else if (/E404/.test(`${view.stdout}${view.stderr}`))
+        // pnpm's publish: it writes each catalog: and workspace: version in.
         tool(
-          'npm',
-          ['publish', '--workspace', item.name, '--ignore-scripts', ...rc, ...(options.dryRun ? ['--dry-run'] : [])],
+          'pnpm',
+          [
+            '--dir',
+            item.location,
+            'publish',
+            '--no-git-checks',
+            '--ignore-scripts',
+            '--registry',
+            item.registry,
+            ...(options.dryRun ? ['--dry-run'] : []),
+          ],
           { env: withRc },
         );
       else
@@ -306,7 +323,7 @@ export async function releaseReady(): Promise<void> {
     fail(`release: v${version} is already tagged; bump ${name}'s version.`);
   if ((await translationGaps()).length)
     fail(
-      'release: translations are incomplete or stale (npx remy i18n check); vp run translate, through a pull request, first.',
+      'release: translations are incomplete or stale (pnpm remy i18n check); vp run translate, through a pull request, first.',
     );
   bumped();
 }

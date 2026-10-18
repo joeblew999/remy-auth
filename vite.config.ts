@@ -75,7 +75,7 @@ export default defineConfig({
             'fixtures/**',
             'apps/remy-auth-docs/content/dev/**',
             'packages/**',
-            'package-lock.json',
+            'pnpm-lock.yaml',
             '!**/node_modules/**',
             '!**/paraglide/**',
             '!packages/remy-cli/dist/**',
