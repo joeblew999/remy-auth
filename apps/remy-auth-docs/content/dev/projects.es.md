@@ -1,7 +1,7 @@
 ---
 title: "Proyectos: estructura, apps nuevas y publicación"
 description: "Qué guarda todo proyecto de Remy en el mismo lugar, cómo empezar una app nueva, la publicación de paquetes, las traducciones, Cloudflare y los planes. Todos los comandos están en Comandos."
-translatedFrom: "76024556 ae418fe2 a5d3acab b93fcb78 9d994a34 335e995b de907ca6 bf100d42"
+translatedFrom: "76024556 ae418fe2 a5d3acab b93fcb78 ebcccdb4 335e995b de907ca6 bf100d42"
 ---
 
 La herramienta es `remy` (y `remy-check`), los bins de `@joeblew999/remy-cli` (`packages/remy-cli/src`, un
@@ -152,8 +152,8 @@ script `release`.
 
 El flujo son los scripts y las tareas de Vite Plus; cada paso y quién lo ejecuta: [cómo trabajamos](./how-we-work.md#the-flow-the-standard-way-in-plain-sight); todos los comandos: [Comandos](./commands.mdx).
 
-`vp run ci` ejecuta todas las comprobaciones, las de navegador, las auditorías de Google y, en remy-auth, la prueba de app nueva
-(`vp run new-app`, `fixtures/consumer/run.sh`): los demás repositorios a los que este sirve, probados tal como los reciben. Copia
+`vp run release` ejecuta, después de `vp run ci`, la prueba de app nueva de remy-auth
+(`vp run new-app`, `fixtures/consumer/run.sh`; no forma parte de `vp run ci`, así que un push no la espera): los demás repositorios a los que este sirve, probados tal como los reciben. Copia
 `template/` a una carpeta temporal y le superpone `fixtures/consumer/files` (archivos terminados: un paquete propio de la app,
 su API y una parte del showcase; una comprobación unitaria los contrasta con la app en blanco), empaqueta remy-ui, remy-cli y el
 showcase en su `vendor/` con `pnpm pack` (cada uno con una versión que ningún registro tiene), y luego instala y ejecuta las

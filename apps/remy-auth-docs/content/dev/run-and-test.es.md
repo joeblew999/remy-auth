@@ -1,7 +1,7 @@
 ---
 title: "Ejecutar, previsualizar y probar la app"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "d324c35e c82e5d5e 8dfe66ef d9d6a7c6 b892dd27 48c95f5f 90a87f8d fdbfb49e b0e4dfb0 3654b8a2"
+translatedFrom: "d324c35e c82e5d5e 8dfe66ef d9d6a7c6 b892dd27 48c95f5f 90a87f8d fdbfb49e b0e4dfb0 e04ebe8b"
 ---
 
 :::note
@@ -262,7 +262,7 @@ las ejecuta sobre páginas renderizadas en servidor.
 ## Evidencia y límites [#evidence-and-limits]
 
 `vp run ci` ejecuta todas las comprobaciones (`vp run ready`), luego las comprobaciones de navegador (`test:browser`), después las auditorías de Lighthouse de Google
-(`test:audits`) y, en remy-auth, una app nueva sobre el paquete de este commit (`new-app`), una tras otra: las
+(`test:audits`), una tras otra (una release añade además una app nueva sobre los paquetes de este commit, `new-app`): las
 auditorías miden la velocidad, así que nunca se ejecutan junto a otra ejecución de navegador. GitHub ejecuta las mismas tareas como jobs en paralelo (las
 comprobaciones de navegador en tres fragmentos, `vp run test:browser --shard 1/3`). Los Core Web Vitals se miden sobre un deployment, a
 mano (`pnpm remy test cwv`: producción, o el origin de una preview). No hay niveles que elegir y ninguna parte decide omitirse, y lo que nada ha tocado sale de la caché de Vite Plus en lugar de ejecutarse de nuevo. Qué se prueba se decide una sola vez, según lo que una comprobación

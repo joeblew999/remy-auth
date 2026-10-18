@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "Las herramientas detrás de los comandos: dónde se explica cada área, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación. Todos los comandos están en Comandos."
-translatedFrom: "cccfd094 6df0c778 1199049a 3a5be9af 40ea278b 92b06ba2 ec3067e7 0d9cf50a 595035a6 b65ea71a bf6a65d1 926b760f 48b91b14 0988b006 a5cad7e7 cfd124fa 5ee1f825"
+translatedFrom: "cccfd094 6df0c778 1199049a 3a5be9af 40ea278b 53e17a88 ec3067e7 0d9cf50a 595035a6 b65ea71a bf6a65d1 926b760f 48b91b14 0988b006 a5cad7e7 cfd124fa 5ee1f825"
 ---
 
 ## Las herramientas [#the-tooling]
@@ -154,7 +154,7 @@ No se aprovisiona nada en Cloudflare.
 
 La puerta antes de un push o un release es `vp run ci`, la misma aquí que en GitHub (el hook del push la ejecuta): `vp run ready`, nuestras comprobaciones
 de navegador contra el build de producción en Workers locales (`vp run test:browser`; todos los idiomas en un release),
-las auditorías de Google (`vp run test:audits`) y, en remy-auth, una app nueva (`vp run new-app`). Ninguna de ellas despliega nada:
+las auditorías de Google (`vp run test:audits`); un release añade una app nueva con los paquetes de este commit (`vp run new-app`). Ninguna de ellas despliega nada:
 desplegar es hacer push. Consulta [la prueba de la GUI](./run-and-test.md) para el alcance y los comandos.
 
 
