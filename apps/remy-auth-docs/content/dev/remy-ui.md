@@ -159,7 +159,7 @@ section from the pending changesets), `scripts/version.ts` (the blank app's pins
 `packages/create/templates/app/.github/workflows/ci.yml`'s tag, moved to remy-ui's new version, then the lockfile), the translations
 complete (`remy i18n check --strict`), every check (`vp run ci`), the new-app test, then `vp run release:push`
 (the commit "Release vX.Y.Z", pushed to main). Its steps are on [Commands](./commands.mdx).
-A push to main runs one job on GitHub, the release (never a cloud session, which can push no tag), and no checks, since the push's hook ran them:
+A push to main runs the checks and the new-app test on GitHub, then, only when they pass, the release job (never a cloud session, which can push no tag):
 `vp run release:publish` (`changeset publish`, after the packages are generated and packed and the `remy` skill made),
 then, once per version, the tag `vX.Y.Z` and `gh release create` with GitHub's generated notes. The workspaces depend on each other with `workspace:*`, which
 pnpm's publish writes as the version, and the contract's peer range is open-ended. Core Web Vitals are measured on a

@@ -218,12 +218,14 @@ its own ports (`PREVIEW_PORT`, `DOCS_PREVIEW_PORT`).
 | After every change | `vp run ready` | whoever is coding; the only step waited for | Vite Plus's tasks: everything generated, the app and the docs built, Wrangler's deployment dry run, the project's own checks, the unit checks, then `vp check` (format, lint, types); what has not changed comes from Vite Plus's cache | ~8 s unchanged, ~50 s from nothing |
 | The change leaves the machine | `vp run translate` (when text changed), `git commit`, `git push` | whoever did the work, on their own, as soon as it is finished | the translations the change made stale, in the same commit; the commit (its hook: `vp staged`); the push to `main` (its hook: `vp run ci`, from the cache where nothing changed; `VP_GIT_HOOKS=0` skips it) | a few minutes: what changed here, in the push's hook |
 | Production | a push to `main`: Cloudflare deploys it | nobody; every push to `main` goes live | Cloudflare's Git builds (Workers Builds) build and deploy the app and the docs from each push to `main`, and every other branch's Preview from its own push ([on Cloudflare](./run-and-test.md#on-cloudflare)); the docs Worker gives Ask AI's index its new pages itself, on the first request after each new version | a few minutes after the push |
-| A release | `vp run release` | the owner, or an agent the owner asked in that session | `changeset version` (the versions and changelogs from the pending changesets) → `node scripts/version.ts` (the blank app re-pinned) → `remy i18n check --strict` (translations complete) → `vp run ci` → `vp run new-app` → `vp run release:push` (the commit "Release vX.Y.Z", pushed to main); GitHub's release job, the only job a push to main runs, publishes (`vp run release:publish`: `changeset publish`), tags vX.Y.Z and makes the GitHub release | ~5 min |
+| A release | `vp run release` | the owner, or an agent the owner asked in that session | `changeset version` (the versions and changelogs from the pending changesets) → `node scripts/version.ts` (the blank app re-pinned) → `remy i18n check --strict` (translations complete) → `vp run ci` → `vp run new-app` → `vp run release:push` (the commit "Release vX.Y.Z", pushed to main); GitHub's release job publishes once the push's checks and new-app test pass there (`vp run release:publish`: `changeset publish`), tags vX.Y.Z and makes the GitHub release | ~5 min |
 
-GitHub's checks do not run on a push to `main`, by the owner's choice: `vp run ci` runs the same here, and the
-push's hook runs it before anything leaves the machine. A push to main runs only its release job, which publishes what is new (nothing, after most
-pushes); the checks run for Dependabot's pull requests, and by hand (`gh workflow run ci.yml`). No pull requests of ours, auto-merge or branch
-rules: `main` takes the push.
+GitHub runs the checks on every push to `main` (issue #43, owner, 2026-10-18): the push's hook runs `vp run ci` here
+first, but a hook can be skipped, and GitHub's run cannot. Its jobs are the parts of `vp run ci` in parallel, plus the
+new-app test; the release job runs after them and only when they all pass, publishing what is new (nothing, after most
+pushes). The checks also run for Dependabot's pull requests, and by hand (`gh workflow run ci.yml`). Cloudflare still
+deploys a push at once, without waiting for them (issue #43's later steps). No pull requests of ours, auto-merge or
+branch rules: `main` takes the push.
 
 - **Who runs a step is in the table, and it is never a question.** An agent pushes its own
   finished work to `main` without asking: its push ran `vp run ci` first, and nothing red is pushed. The owner's word is for a release, the one step whose column says so, and for provisioning

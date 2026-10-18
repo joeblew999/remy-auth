@@ -1,7 +1,7 @@
 ---
 title: "El paquete de UI (@joeblew999/remy-ui)"
 description: "La interfaz que comparten todas las apps de Remy: shadcn de fábrica, fuentes, catálogos de Paraglide, las páginas del sitio y de la app, el pegamento de TanStack Start y sus comprobaciones."
-translatedFrom: "f3f6cb00 55bce48d f06f2f97 f8202a97 b1e33dec fa9000cd 415c4606"
+translatedFrom: "f3f6cb00 55bce48d f06f2f97 f8202a97 b1e33dec e8e6d1b1 415c4606"
 ---
 
 La interfaz que comparten todas las apps de Remy: componentes y tema de shadcn de fábrica, fuentes,
@@ -167,7 +167,7 @@ a partir de los changesets pendientes), `scripts/version.ts` (las versiones fija
 el tag de `packages/create/templates/app/.github/workflows/ci.yml`, llevados a la nueva versión de remy-ui, y después el lockfile), las traducciones
 completas (`remy i18n check --strict`), todas las comprobaciones (`vp run ci`), la prueba de la app nueva y, por último, `vp run release:push`
 (el commit «Release vX.Y.Z», subido a main). Sus pasos están en [Comandos](./commands.mdx).
-Un push a main ejecuta un solo job en GitHub, la publicación (nunca una sesión en la nube, que no puede subir ningún tag), y ninguna comprobación, ya que el hook del push las ejecutó:
+Un push a main ejecuta en GitHub las comprobaciones y la prueba de la app nueva y, solo si pasan, el job de publicación (nunca una sesión en la nube, que no puede subir ningún tag):
 `vp run release:publish` (`changeset publish`, después de generar y construir los paquetes y de crear la skill `remy`),
 y luego, una vez por versión, el tag `vX.Y.Z` y `gh release create` con las notas generadas por GitHub. Los workspaces dependen unos de otros con `workspace:*`, que el
 publish de pnpm escribe como la versión, y el rango de peer del contrato es abierto. Core Web Vitals se miden sobre un

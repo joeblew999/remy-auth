@@ -20,9 +20,9 @@
 # Named for what it runs (`vp run ci`); called google.yml until 2026-10-17.
 name: CI
 
-# A push to main runs only the release job, which publishes what Changesets versioned and nothing else: the push's own
-# hook ran `vp run ci` before anything left the machine (owner, 2026-10-18). The checks run for a pull request, so
-# Dependabot's (the pinned actions, .github/dependabot.yml) arrives checked, and by hand (gh workflow run ci.yml).
+# Every push to main runs the checks here, where no hook can be skipped (issue #43): the release job publishes only once
+# they and the new-app test pass. A pull request runs the checks too, so Dependabot's (the pinned actions,
+# .github/dependabot.yml) arrives checked; and by hand (gh workflow run ci.yml).
 on:
   push:
     branches: [main]
@@ -38,8 +38,6 @@ jobs:
   # the script). Playwright's Chromium is the browsers task (playwright install chromium); a Linux runner has no Han
   # font, which the font checks need, so it is installed here.
   checks:
-    # Not for a push: its hook ran them (vp run ci) before it left the machine.
-    if: github.event_name != 'push'
     strategy:
       fail-fast: false
       matrix:
@@ -112,12 +110,56 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
+  # The new-app test (vp run new-app, fixtures/consumer/run.sh): a new app made with vp create from this commit's
+  # packed packages installs, builds and passes its checks. remy-auth's own (apps that call this workflow have no such
+  # test), and the release waits for it, so nothing is published that a new app cannot use.
+  new-app:
+    if: github.repository == 'joeblew999/remy-auth'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: voidzero-dev/setup-vp@68f39c78aaf39be468cabd2afb09c162574c84af # v1.21.2
+        with:
+          cache: true
+          registry-url: https://npm.pkg.github.com
+          scope: '@joeblew999'
+      - run: sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: node_modules/.vite/task-cache
+          key: vite-task-${{ runner.os }}-${{ runner.arch }}-new-app-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            vite-task-${{ runner.os }}-${{ runner.arch }}-new-app-
+            vite-task-${{ runner.os }}-${{ runner.arch }}-
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - run: vp run new-app
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - if: success()
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: node_modules/.vite/task-cache
+          key: vite-task-${{ runner.os }}-${{ runner.arch }}-new-app-${{ github.run_id }}-${{ github.run_attempt }}
+
   # Changesets' own way to publish: on main, each package whose version is not on its registry yet is published
   # (changeset publish); a push that versioned nothing publishes nothing, in seconds. Then the release's tag (vX.Y.Z, the
   # platform's version, which apps' workflows and remy upgrade name) and its GitHub release, made here with GitHub's
   # token. Only in remy-auth, the repository that releases with Changesets.
   release:
     if: github.event_name == 'push' && github.repository == 'joeblew999/remy-auth'
+    # Only from a commit every check and the new-app test passed, here.
+    needs: [checks, new-app]
     runs-on: ubuntu-latest
     permissions:
       contents: write
