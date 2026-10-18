@@ -321,11 +321,13 @@ storage, dashboards and alert delivery are open work in the observability plan.
 Two Cloudflare products sit behind the docs' Ask AI (the docs Worker), and they are easy to mix up:
 
 - **AI Search** is the index (`remy-docs-pages`, remy-auth's; every name here is `docs.config.ts`'s
-  `ask`). It reads the docs itself from the R2 bucket `remy-docs` (one Markdown file per docs page and language, `<site>/<lang>/<page>.md`, synced hourly
-  and whenever `docs publish` asks),
+  `ask`). It reads the docs itself from the R2 bucket `remy-docs` (one Markdown file per docs page and language, `<site>/<lang>/<page>.md`, synced every
+  15 minutes),
   finds the passages that match a question, and asks a Workers AI model to write the answer.
-- **R2** holds the files AI Search reads. `docs publish` makes the bucket hold exactly the docs
-  pages: it puts each one and deletes anything else, so a removed page leaves the answers too.
+- **R2** holds the files AI Search reads. The docs Worker makes the bucket hold exactly the docs pages, on the
+  first request after each new version (remy-ui's `docs/publish.server.ts`, through its `DOCS_PAGES` binding, so no
+  token): it puts each one, marked with the version, and deletes anything else, so a removed page leaves the answers
+  too.
 - **AI Gateway** is the meter in front of the model. Every model call AI Search makes passes through
   it (`remy-docs`), and it logs each one with its cost, tokens and time (and the question). It holds
   no docs. Spend limits and rate limits live here; `pnpm remy docs observe ai-usage` and `ai-check` read it.
@@ -338,7 +340,7 @@ The docs' commands (`pnpm remy docs …`: publish, questions, answers, observe) 
 Two things that list cannot say: the `observe` commands need the gateway's token, so run them as
 `fnox exec -- pnpm remy docs observe …`; and `CLOUDFLARE_ENV=ask vp -C apps/remy-auth-docs dev` (an app's:
 `vp -C docs dev`) runs the local docs Worker with answers from the live index (its `wrangler.jsonc`'s `env.ask`).
-Every deploy of the docs gives the index the new pages: its `deploy` script ends with `remy docs publish`.
+Every deploy of the docs gives the index the new pages by itself, within the next sync (15 minutes).
 
 Tokens: see [secrets](#secrets-fnox) below.
 

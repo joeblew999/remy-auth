@@ -20,7 +20,9 @@ export default defineConfig({
   webServer: remote
     ? undefined
     : {
-        command: `wrangler dev -c dist/server/wrangler.json --local --ip 127.0.0.1 --port ${process.env.PREVIEW_PORT ?? '4174'}`,
+        // Wrangler's local state in the docs app's own .wrangler, never inside the build it serves (dist/), which a
+        // cached task reads.
+        command: `wrangler dev -c dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --port ${process.env.PREVIEW_PORT ?? '4174'}`,
         url: `${origin}/healthz`,
         cwd: process.cwd(),
         reuseExistingServer: false,

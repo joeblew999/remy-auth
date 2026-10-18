@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "Las herramientas detrás de los comandos: dónde se explica cada área, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación. Todos los comandos están en Comandos."
-translatedFrom: "cccfd094 6df0c778 208b7760 3a5be9af 40ea278b 53e17a88 ec3067e7 0d9cf50a 595035a6 b65ea71a bf6a65d1 926b760f 48b91b14 0988b006 a5cad7e7 e10291bb 5ee1f825"
+translatedFrom: "cccfd094 6df0c778 208b7760 3a5be9af 40ea278b 53e17a88 ec3067e7 0d9cf50a 595035a6 b65ea71a bf6a65d1 926b760f 48b91b14 0988b006 a5cad7e7 97411dca 5ee1f825"
 ---
 
 ## Las herramientas [#the-tooling]
@@ -323,11 +323,12 @@ Dos productos de Cloudflare están detrás de Ask AI de la documentación (el Wo
 
 - **AI Search** es el índice (`remy-docs-pages`, el de remy-auth; cada nombre aquí es el `ask` de
   `docs.config.ts`). Lee los docs directamente desde el bucket R2
-  `remy-docs` (un archivo Markdown por página de docs e idioma, `<site>/<lang>/<page>.md`, sincronizado cada hora
-  y cuando `docs publish` lo solicita), encuentra los pasajes que coinciden con una pregunta y le pide a un modelo de Workers AI
+  `remy-docs` (un archivo Markdown por página de docs e idioma, `<site>/<lang>/<page>.md`, sincronizado cada 15 minutos),
+  encuentra los pasajes que coinciden con una pregunta y le pide a un modelo de Workers AI
   que escriba la respuesta.
-- **R2** contiene los archivos que lee AI Search. `docs publish` hace que el bucket contenga exactamente
-  las páginas de docs: coloca cada una y elimina cualquier otra cosa, así que una página eliminada también
+- **R2** contiene los archivos que lee AI Search. El Worker de docs hace que el bucket contenga exactamente las
+  páginas de docs, en la primera solicitud después de cada nueva versión (el `docs/publish.server.ts` de remy-ui, a través de su binding `DOCS_PAGES`, así que sin
+  token): coloca cada una, marcada con la versión, y elimina cualquier otra cosa, así que una página eliminada también
   deja de estar en las respuestas.
 - **AI Gateway** es el medidor delante del modelo. Cada llamada al modelo que hace AI Search pasa por
   él (`remy-docs`), y registra cada una con su costo, tokens y tiempo (y la pregunta). No contiene
@@ -341,7 +342,7 @@ Los comandos de la documentación (`pnpm remy docs …`: publish, questions, ans
 Hay dos cosas que esa lista no puede decir: los comandos `observe` necesitan el token del gateway, así que ejecútalos como
 `fnox exec -- pnpm remy docs observe …`; y `CLOUDFLARE_ENV=ask vp -C apps/remy-auth-docs dev` (el de una app:
 `vp -C docs dev`) ejecuta el Worker de docs local con respuestas del índice real (el `env.ask` de su `wrangler.jsonc`).
-Cada despliegue de la documentación da al índice las páginas nuevas: su script `deploy` termina con `remy docs publish`.
+Cada despliegue de la documentación da al índice las páginas nuevas por sí solo, en la siguiente sincronización (15 minutos).
 
 Tokens: consulta [secretos](#secrets-fnox) más abajo.
 

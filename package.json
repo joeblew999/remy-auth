@@ -9,7 +9,7 @@
     "preview": "vp run remy-auth#preview",
     "test:browser": "vp run remy-auth#test:browser",
     "test:audits": "vp run remy-auth#test:audits",
-    "ci": "vp run ready && vp run test:browser && vp run test:audits",
+    "ci": "vp run ready && vp run test:browser && vp run test:docs && vp run test:audits",
     "translate": "node packages/remy-cli/src/remy.ts i18n translate",
     "release": "changeset version && node scripts/version.ts && node packages/remy-cli/src/remy.ts i18n check --strict && vp run ci && vp run new-app && vp run release:push",
     "setup": "vp install && skills experimental_install && skills experimental_sync && node packages/remy-cli/src/remy.ts rules && vp run ready",
@@ -17,7 +17,8 @@
     "ui:components": "shadcn add button card input label badge alert field separator direction skeleton empty sidebar breadcrumb collapsible dropdown-menu avatar sheet tooltip navigation-menu use-mobile table spinner tabs --overwrite --yes -c apps/remy-auth",
     "ui:blocks": "shadcn add @shadcn/sidebar-16 -c packages/remy-ui --diff src/blocks/sidebar-16/components/app-sidebar.tsx && shadcn add @shadcn/sidebar-16 -c packages/remy-ui --diff src/blocks/sidebar-16/components/nav-main.tsx && shadcn add @shadcn/sidebar-16 -c packages/remy-ui --diff src/blocks/sidebar-16/components/site-header.tsx",
     "ui:theme": "shadcn apply nova --only theme --yes -c apps/remy-auth",
-    "release:push": "V=$(node -p \"require('./packages/remy-ui/package.json').version\") && git add -A && git commit --allow-empty -m \"Release v$V\" && git push origin main"
+    "release:push": "V=$(node -p \"require('./packages/remy-ui/package.json').version\") && git add -A && git commit --allow-empty -m \"Release v$V\" && git push origin main",
+    "test:docs": "vp run @joeblew999/remy-auth-docs#test:browser"
   },
   "devDependencies": {
     "@changesets/cli": "catalog:",

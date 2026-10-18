@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,6 +7,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import viteReact from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import { docsTableOf } from './docs/table-core.js';
 import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import remarkDirective from 'remark-directive';
 import { remarkUiWords } from './remark-ui-words.js';
@@ -28,6 +29,34 @@ function repositoryFolder(root) {
   for (let dir = resolve(root); dir !== dirname(dir); dir = dirname(dir))
     if (existsSync(join(dir, '.git'))) return relative(dir, resolve(root)) || '.';
   return 'docs';
+}
+
+/**
+ * What Ask AI's index holds, worked out when the build starts, because only the build sees which translation files
+ * exist: each page in each of its languages as [the bucket's key, the page's Markdown path]. The Worker writes them to
+ * its bucket itself after each new version (publish.server.ts). Nothing without docsConfig.ask.
+ */
+function askObjects(docsConfig, root) {
+  if (!docsConfig.ask) return [];
+  const json = (file) => JSON.parse(readFileSync(join(root, 'content', file), 'utf8'));
+  const folder = repositoryFolder(root);
+  const repositoryRoot = resolve(root, relative(folder, '.') || '.');
+  const table = docsTableOf(
+    {
+      users: { meta: json('users/meta.json'), i18n: json('users/i18n.json') },
+      dev: { meta: json('dev/meta.json'), i18n: json('dev/i18n.json') },
+    },
+    docsConfig,
+    folder,
+  );
+  return table.docsTable.flatMap((row) =>
+    table
+      .docsLangs(row, (file) => existsSync(join(repositoryRoot, file)))
+      .map((lang) => [
+        table.docsObjectKey(row.site, row.slug, lang),
+        `${table.docsUrl(row.site, row.slug || 'index', lang)}.md`,
+      ]),
+  );
 }
 
 /**
@@ -102,7 +131,11 @@ export function remyDocs(docsConfig, { root = process.cwd(), app: appRoot = reso
         { find: /^@remy-docs-app\//, replacement: app },
       ],
     },
-    define: { __REMY_DOCS_API__: JSON.stringify(api), __REMY_DOCS_FOLDER__: JSON.stringify(repositoryFolder(root)) },
+    define: {
+      __REMY_DOCS_API__: JSON.stringify(api),
+      __REMY_DOCS_FOLDER__: JSON.stringify(repositoryFolder(root)),
+      __REMY_DOCS_ASK_OBJECTS__: JSON.stringify(askObjects(docsConfig, root)),
+    },
     server: { host: '127.0.0.1', port: 5174, strictPort: true },
   });
 }

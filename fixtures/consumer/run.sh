@@ -51,7 +51,7 @@ step 'vp run ready'
 # The new app's browser checks in the quick languages, as its own vp run ci runs them.
 CHECK_LOCALES=quick PREVIEW_PORT=$((preview + 100)) vp run test:browser
 step 'browser checks'
-DOCS_PREVIEW_PORT=$((docs + 100)) pnpm remy docs test
+DOCS_PREVIEW_PORT=$((docs + 100)) vp run test:docs
 step 'docs checks'
 summary="new-app: the blank app and a package it owns install, build and pass on this commit's platform ($version) in $(( $(date +%s) - started )) s: ${took#, }."
 echo "$summary"

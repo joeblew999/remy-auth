@@ -149,12 +149,12 @@ It's bloody confusing"). The words, one meaning each:
 - **Two Workers, one per app, each with its own Git build**, both at the repository's `main`: `remy-auth`
   (root `/apps/remy-auth`) and `remy-auth-docs` (root `/apps/remy-auth-docs`), each with its own `wrangler.jsonc`.
   Each build installs with pnpm (from `pnpm-lock.yaml`, the build variable `PNPM_VERSION` as in `devEngines`,
-  `NODE_VERSION` as in `.node-version`), then runs `pnpm vp run build`, then the package's own script: `pnpm run deploy` on `main`,
-  `pnpm run deploy:preview` elsewhere (the app; the docs' Previews run `pnpm wrangler preview`). The app's scripts
+  `NODE_VERSION` as in `.node-version`), then runs `pnpm vp run build`, then the app's own script, `pnpm run deploy` on `main` and
+  `pnpm run deploy:preview` elsewhere (the docs: `pnpm wrangler deploy` and `pnpm wrangler preview`). The app's scripts
   apply its databases' migrations first (`wrangler d1 migrations apply … --remote`, the Previews' through
   `previews.wrangler.jsonc`), then upload, so a new table goes live with the code that needs it and a failing
-  migration leaves the old version live; the docs' `deploy` uploads, then publishes the pages to Ask AI's index
-  (`remy docs publish`). Which script each build runs lives on Cloudflare; what the scripts do is in the repository.
+  migration leaves the old version live. The docs need no step of their own: the docs Worker writes its pages to
+  Ask AI's bucket itself on the first request after each new version (its `DOCS_PAGES` binding). Which script each build runs lives on Cloudflare; what the scripts do is in the repository.
 - **From the owner's Mac** (signed in to Cloudflare): Wrangler itself (`pnpm wrangler deployments list`,
   `pnpm wrangler tail`, reading only); migrations and Ask AI's index need nobody, since the deploys run them. **From Claude's cloud** (no Cloudflare login for Wrangler): push, and Cloudflare
   builds; the Cloudflare connector shows a build and its log, changes the build settings and starts a rebuild.

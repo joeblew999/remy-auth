@@ -9,6 +9,7 @@
     "react": "catalog:"
   },
   "devDependencies": {
+    "@playwright/test": "catalog:",
     "@types/node": "catalog:",
     "vite-plus": "catalog:",
     "wrangler": "catalog:"

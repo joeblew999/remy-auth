@@ -53,6 +53,8 @@ jobs:
             task: test:browser --shard 2/3
           - name: browser 3/3
             task: test:browser --shard 3/3
+          - name: docs
+            task: test:docs
           - name: audits
             task: test:audits
     name: ${{ matrix.name }}

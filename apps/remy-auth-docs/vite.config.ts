@@ -29,6 +29,26 @@ export default defineConfig({
           untrackedEnv: network,
         },
       },
+      // The docs' browser checks on the production build (remy-ui's docs checks, Playwright run directly, the built
+      // Worker on Cloudflare's local runtime at DOCS_PREVIEW_PORT, 4174). Ask AI's search is Cloudflare's only, so
+      // answers take their "no answer" path here.
+      browsers: { command: 'playwright install chromium', cache: false },
+      'test:browser': {
+        command: `CI=\${CI:-1} PREVIEW_PORT=\${DOCS_PREVIEW_PORT:-4174} playwright test -c ../../packages/remy-ui/src/docs/playwright.config.js --project=ours`,
+        dependsOn: ['build', 'browsers'],
+        cache: {
+          // Named, not traced: Wrangler writes a scratch folder beside the configuration it serves (dist/server/.wrangler)
+          // on every run, which a traced input would count. What the checks test is the build and the checks.
+          input: [
+            'dist/**',
+            '!dist/**/.wrangler/**',
+            '../../packages/remy-ui/src/docs/tests/**',
+            '../../packages/remy-ui/src/docs/playwright.config.js',
+          ],
+          output: [],
+          untrackedEnv: ['DOCS_PREVIEW_PORT', ...network],
+        },
+      },
       // Wrangler's deployment dry run on the build (no upload): the Worker as Cloudflare would take it.
       'check:deploy': {
         command: 'wrangler deploy --dry-run',

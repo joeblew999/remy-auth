@@ -12,6 +12,8 @@
   "preview_urls": false,
   // Ask AI: its AI Search instance and its rate limit (docs.config.ts's ask names the bucket and gateway too).
   "ai_search": [{ "binding": "DOCS_SEARCH", "instance_name": "remy-docs-pages" }],
+  // The bucket Ask AI's index reads: the Worker writes its own pages there after each new version (publish.server.ts).
+  "r2_buckets": [{ "binding": "DOCS_PAGES", "bucket_name": "remy-docs" }],
   "ratelimits": [{ "name": "ASK_LIMIT", "namespace_id": "4281", "simple": { "limit": 10, "period": 60 } }],
   // Working on answers (CLOUDFLARE_ENV=ask vp -C apps/remy-auth-docs dev): the same Worker locally, AI Search remote.
   // Never deployed.

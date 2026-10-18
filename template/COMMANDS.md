@@ -11,7 +11,7 @@ Day to day: `vp run ready` after every edit; when the work is finished, git and 
 | `vp run preview` | the production build on Cloudflare's local host, at PREVIEW_PORT (4173) |
 | `vp run ready` | after every change: everything generated, the builds, Wrangler's deployment dry run, the project's own checks, the unit checks, then vp check (format, lint, types) |
 | `vp run fix` | what the checks only verify, written: COMMANDS.md and each docs page's ending |
-| `vp run ci` | what GitHub runs, the same here, each part one of GitHub's jobs (vp run test:browser --shard 1/3) (vp run ready → vp run test:browser → vp run test:audits) |
+| `vp run ci` | what GitHub runs, the same here, each part one of GitHub's jobs (vp run test:browser --shard 1/3) (vp run ready → vp run test:browser → vp run test:docs → vp run test:audits) |
 | `vp run translate` | before a commit that changed text: the translations it made stale or missing (remy i18n translate) |
 | `vp run setup` | an installation: the dependencies, the skills (skills-lock.json), the agents' rules, then every check (pnpm config set --location global //npm.pkg.github.com/:_authToken "$(gh auth token)" → vp install → skills experimental_install → skills experimental_sync → remy rules → vp run ready) |
 
@@ -41,9 +41,8 @@ Each as `pnpm remy <command> [<subcommand>]`; a command run without a subcommand
 | `pnpm remy test cwv` | [origin]: Core Web Vitals on a deployment, production unless a Preview's origin is given |
 | `pnpm remy docs` | the docs Worker, @joeblew999/remy-ui's, over this app's docs/ |
 | `pnpm remy docs serve` | the built docs here at DOCS_PREVIEW_PORT (4174), as their checks and AI tools see them: llms.txt, each page's .md (a Preview of a pushed branch is Cloudflare's) |
-| `pnpm remy docs test` | [remote]: the docs' browser checks on a local build, or against the deployment with every MCP server's tools |
+| `pnpm remy docs test` | remote: the docs' browser checks against the deployment, with every MCP server's tools (the local build's: vp run test:docs) |
 | `pnpm remy docs answers` | on\|off: Ask AI's answers resumed, or stopped in seconds |
-| `pnpm remy docs publish` | the bucket holds exactly the live docs pages, the index's sync waited for, then the fixed questions (after Cloudflare deployed the docs) |
 | `pnpm remy docs questions` | the fixed questions (docs/content/questions.json) each find their page in the index; search only |
 | `pnpm remy docs provision` | what Ask AI needs on Cloudflare, printed, created never |
 | `pnpm remy docs observe` | …: the docs Worker's logs and its AI Gateway (remy observe, with the docs' configuration) |
@@ -61,3 +60,4 @@ The repository's own tools, as package.json defines them, each run as `vp run <s
 | Script | Runs |
 | --- | --- |
 | `vp run prepare` | `vp config --no-agent` |
+| `vp run test:docs` | `vp run docs#test:browser` |
