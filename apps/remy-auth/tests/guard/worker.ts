@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { guardMiddleware, guardProblems } from '@joeblew999/remy-ui/api/guard-core';
 import { contract as contract1, RPCHandler as RPCHandler1, server as server1 } from './v1/orpc';
 
-// The guard (packages/remy-ui/src/api/guard-core.js) on both oRPC majors, in the Workers runtime: one Worker
+// The guard (packages/remy-ui/src/api/guard-core.ts) on both oRPC majors, in the Workers runtime: one Worker
 // holding the app's oRPC 2 and oRPC 1.15.4 (./v1, installed there alone) side by side, each with the
 // same small router behind the same guard code. tests/guard.spec.ts starts it and reads what each
 // major did. Only the lines marked "major" differ: how a policy is written into a procedure's meta.

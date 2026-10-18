@@ -54,7 +54,7 @@ secrets are managed through Cloudflare. Local data is not uploaded by deployment
 
 ## Two kinds of page
 
-[`packages/remy-ui/src/paths.js`](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/src/paths.js) is the one list of pages and says what
+[`packages/remy-ui/src/paths.ts`](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/src/paths.ts) is the one list of pages and says what
 each kind promises; the two are never mixed.
 
 - **Site pages** (`sitePaths`: the home and formats) are for Google: complete in the server's HTML

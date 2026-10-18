@@ -1,5 +1,5 @@
 import { HeadContent, Outlet, Scripts, createRootRoute, useRouterState } from '@tanstack/react-router';
-import { docsLangOfPath } from '../docs/table.js';
+import { docsLangOfPath } from '../docs/table.ts';
 import '../styles.css';
 
 // The docs document. Each page's own language sets <html lang> (/docs/es/... is Spanish); right-to-left

@@ -12,11 +12,11 @@ import {
   shouldRedirect,
   type Locale,
 } from './paraglide/runtime.js';
-import { preferredFromHeader, preferredFromNavigator } from './matching.js';
+import { preferredFromHeader, preferredFromNavigator } from './matching.ts';
 import { alternates } from './seo';
 import { withObservability } from './worker';
 import { withReplicas } from './replicas';
-import { isAppPath } from './paths.js';
+import { isAppPath } from './paths.ts';
 import { pageTitle, registeredApp } from './app-config';
 
 // TanStack Router and Start glue over Paraglide's official integration

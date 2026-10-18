@@ -72,7 +72,7 @@ test('the command line hands nothing on through the environment, and reads no sw
     /\b(REMY_FLOW|REMY_RECORD|REMY_SKIP_CI|REMY_REHEARSE_PUBLISH|QUICK_LOCALES|BEHAVIOUR_LOCALES|I18N_STRICT|I18N_INLANG|I18N_DOCS_DIR|I18N_MODEL|I18N_JOBS|PUBLIC_ORIGIN|REMY_WRANGLER_CONFIG)\b/;
   const code = [
     ...cli,
-    ...['checks.js', 'playwright.js', 'app-vite.js'].map(
+    ...['checks.ts', 'playwright.ts', 'app-vite.ts'].map(
       (name) => [name, readFileSync(`packages/remy-ui/src/${name}`, 'utf8')] as const,
     ),
     ['run.sh', readFileSync('fixtures/consumer/run.sh', 'utf8')] as const,

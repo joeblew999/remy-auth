@@ -1,5 +1,5 @@
 import type { Locale } from './paraglide/runtime.js';
-import { ownValues } from './locale-data.js';
+import { ownValues } from './locale-data.ts';
 
 // Every language's own values and the formats page's choices (the union over all languages) come
 // from one plain-JavaScript module, which the shared checks read too.
@@ -12,7 +12,7 @@ export {
   maxCount,
   type ChoiceKind,
   type OwnValues,
-} from './locale-data.js';
+} from './locale-data.ts';
 
 /** A locale's own calendar, digit, clock, week, region, currency and plural conventions, derived from the locale. */
 export type LocaleInfo = {

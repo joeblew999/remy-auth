@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { buildChecks } from '../../build.checks.js';
+import { buildChecks } from '@joeblew999/remy-ui/build.checks';
 
 // What is ours in the docs Worker (Fumadocs is tested by Fumadocs): the head search engines read
 // (<html lang>, canonical, hreflang: docs/page.ts), Ask AI's chat route (routes/api/chat.$site.ts) when the

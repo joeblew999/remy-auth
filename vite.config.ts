@@ -44,7 +44,7 @@ export default defineConfig({
       // run the command line as an installed app does (remy-cli's dist/); vp test reports Vitest's own caches itself.
       'check:unit': {
         command: 'vp test',
-        dependsOn: ['check:commands', 'remy-auth#generate', '@joeblew999/remy-cli#build'],
+        dependsOn: ['check:commands', 'remy-auth#generate', '@joeblew999/remy-cli#pack', '@joeblew999/remy-ui#pack'],
       },
       // Every check, after every change: Vite Plus's own (format, lint, types) once everything it reads exists (the
       // app and its docs built: the route tree, every docs page compiling, translations included), Wrangler's
@@ -81,7 +81,12 @@ export default defineConfig({
       // no more (~3 minutes). It writes nothing here: its app lives in a scratch folder.
       'new-app': {
         command: 'bash fixtures/consumer/run.sh',
-        dependsOn: ['@joeblew999/remy-ui#generate', '@joeblew999/remy-cli#build', 'skills:build'],
+        dependsOn: [
+          '@joeblew999/remy-ui#pack',
+          '@joeblew999/remy-cli#pack',
+          '@joeblew999/remy-showcase#pack',
+          'skills:build',
+        ],
         cache: {
           input: [
             'template/**',
@@ -91,7 +96,7 @@ export default defineConfig({
             'pnpm-lock.yaml',
             '!**/node_modules/**',
             '!**/paraglide/**',
-            '!packages/remy-cli/dist/**',
+            '!packages/*/dist/**',
             '!packages/remy-ui/skills/**',
           ],
           output: [],
@@ -102,7 +107,12 @@ export default defineConfig({
       // version is new on its registry (pnpm publish), after what the packages ship is generated and built.
       'release:publish': {
         command: 'changeset publish',
-        dependsOn: ['@joeblew999/remy-ui#generate', '@joeblew999/remy-cli#build', 'skills:build'],
+        dependsOn: [
+          '@joeblew999/remy-ui#pack',
+          '@joeblew999/remy-cli#pack',
+          '@joeblew999/remy-showcase#pack',
+          'skills:build',
+        ],
         cache: false,
       },
     },

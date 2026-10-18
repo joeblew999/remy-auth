@@ -47,9 +47,7 @@ async function appDocs(): Promise<{
   const { docsConfig } = (await import(pathToFileURL(join(docs(), 'docs.config.ts')).href)) as {
     docsConfig: DocsConfig;
   };
-  const { docsTableOf } = (await import(
-    pathToFileURL(join(root, 'node_modules', '@joeblew999', 'remy-ui', 'src', 'docs', 'docs', 'table-core.js')).href
-  )) as typeof import('@joeblew999/remy-ui/docs/table-core');
+  const { docsTableOf } = await import('@joeblew999/remy-ui/docs/table-core');
   const table = docsTableOf(
     {
       users: { meta: json('content/users/meta.json'), i18n: json('content/users/i18n.json') },

@@ -5,7 +5,7 @@ import { OpenAPIReferenceHandlerPlugin } from '@orpc/openapi/plugins';
 import type { AnyRouter, Context, Router } from '@orpc/server';
 import { CORSHandlerPlugin } from '@orpc/server/plugins';
 import { ZodToJsonSchemaConverter } from '@orpc/zod';
-import { apiPrefix, statusesOf } from './coverage.js';
+import { apiPrefix, statusesOf } from './coverage.ts';
 
 // The server half of an app's contract-first API (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/openapi-contracts.md): oRPC's
 // OpenAPIHandler behind one TanStack Start server route, with the OpenAPI document generated from

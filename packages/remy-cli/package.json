@@ -8,15 +8,29 @@
     "directory": "packages/remy-cli"
   },
   "bin": {
-    "remy": "./dist/remy.js",
-    "remy-check": "./dist/checks.js"
+    "remy": "./src/remy.ts",
+    "remy-check": "./src/checks.ts"
   },
   "files": [
     "dist",
     "README.md"
   ],
   "type": "module",
+  "exports": {
+    "./checks": "./src/checks.ts",
+    "./remy": "./src/remy.ts",
+    "./package.json": "./package.json"
+  },
   "publishConfig": {
+    "bin": {
+      "remy": "./dist/remy.mjs",
+      "remy-check": "./dist/checks.mjs"
+    },
+    "exports": {
+      "./checks": "./dist/checks.mjs",
+      "./remy": "./dist/remy.mjs",
+      "./package.json": "./package.json"
+    },
     "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {

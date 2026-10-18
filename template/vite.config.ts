@@ -39,9 +39,13 @@ export default defineConfig({
   defaultPackage: '.',
   run: {
     tasks: {
-      // What the type check needs and git does not hold: the app's compiled strings and the Worker's binding types.
+      // What the type check needs and git does not hold: the app's compiled strings (Paraglide's compiler, with the
+      // options of remy-ui's app-catalog.ts, which the app's Vite plugin uses) and the Worker's binding types.
       generate: {
-        command: ['node node_modules/@joeblew999/remy-ui/src/app-catalog.js', 'wrangler types'],
+        command: [
+          'paraglide-js compile --project ./project.inlang --outdir ./src/paraglide --strategy baseLocale --emit-ts-declarations --no-emit-git-ignore',
+          'wrangler types',
+        ],
         dependsOn: ['docs#generate'],
         cache: { input: [{ auto: true }, ...written, lockfile], untrackedEnv: network },
       },

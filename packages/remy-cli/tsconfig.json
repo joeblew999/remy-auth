@@ -1,20 +1,18 @@
 {
-  "//": "The command line's TypeScript project: emitted to dist/ (JavaScript and declarations) by this package's build task, because Node strips types from nothing under node_modules, so an app that installs the package runs the JavaScript; remy-auth runs the source.",
+  "//": "The command line's TypeScript project, for the type check only: vp pack (this package's vite.config.ts) builds dist/.",
   "include": ["src/*.ts"],
   "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist",
     "lib": ["ES2022"],
     "types": ["node"],
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "rewriteRelativeImportExtensions": true,
     "erasableSyntaxOnly": true,
     "verbatimModuleSyntax": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
-    "declaration": true
+    "noEmit": true,
+    "allowImportingTsExtensions": true
   }
 }

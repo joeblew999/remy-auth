@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { extractLocaleFromCookie, type Locale } from './paraglide/runtime.js';
 import { formatLocale } from './locale-info';
-import { preferredFromNavigator } from './matching.js';
+import { preferredFromNavigator } from './matching.ts';
 
 // Browser-only pieces for prerendered apps, which learn the visitor's languages after hydration
 // so their static HTML never depends on them.

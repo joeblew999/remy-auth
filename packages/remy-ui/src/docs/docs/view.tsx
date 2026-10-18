@@ -29,7 +29,7 @@ import { askUrl } from './page';
 import Link from 'fumadocs-core/link';
 import { buttonVariants } from '../components/ui/button';
 import { MessageCircleIcon } from 'lucide-react';
-import { docsUrl } from './table.js';
+import { docsUrl } from './table.ts';
 import { docsConfig } from '@remy-docs-app/docs.config.ts';
 import { sectionTabs } from '../lib/sections';
 import { AiLinks } from '../components/ai-links';

@@ -5,7 +5,7 @@ import { logContext, requestIdHeader, writeLog } from '../worker';
 import type { SiteName } from '@remy-docs-app/collections.ts';
 import { askMaxLength, type AskResult } from './ask-limits';
 import { docsAnswerFolder, docsPage } from './docs/source.server';
-import { docsObjectForKey } from './docs/table.js';
+import { docsObjectForKey } from './docs/table.ts';
 import { service } from './service';
 import { docsConfig } from '@remy-docs-app/docs.config.ts';
 

@@ -2,7 +2,7 @@ import { createServerOnlyFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
 import { sites } from '../lib/source';
 import type { SiteName } from '@remy-docs-app/collections.ts';
-import { branch, docsSites, repository } from './table.js';
+import { branch, docsSites, repository } from './table.ts';
 
 // A docs page's data on the server, all from its site's Fumadocs loader (src/lib/source.ts): head data,
 // the page tree for DocsLayout, the languages it is translated into, and the map that turns the

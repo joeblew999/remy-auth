@@ -106,7 +106,7 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `app-checks` | One call per kind of app for the shared check set over the app's own pages: `serverAppChecks({ service, sitePaths, appPaths, home, oneLanguage, cspEnforced })` (server-rendered: redirecting entry URLs, CSP, fonts) and `prerenderedAppChecks({ service, sitePaths, appPaths, home })` (static entry pages), both with the build stamp and the product's name (`versions.checks`); the app adds only checks for what it adds. An app showing the showcase pages also calls `showcaseChecks({ product })` (`@joeblew999/remy-showcase/showcase.checks`; `product` is its `brand`); `problemChecks` is `problem.checks` |
 | `playwright` | `playwrightConfig()`, the shared Playwright configuration |
 | `api/server` | `apiHandlers` (oRPC's OpenAPIHandler as a Start server route's handlers, with the reference page at `/api/doc` and the generated document at `/api/openapi.json`; `errorStatuses`, the HTTP status of each of the API's own error codes, since oRPC keeps statuses out of the errors; `origins`, the registered apps' exact origins allowed by oRPC's CORSHandlerPlugin, none by default; an answer to a request with credentials, and every 401, is `no-store`), `generateSpec(router, info, errorStatuses)` (the OpenAPI 3.1 document), `ApiInfo`, `ErrorStatuses` |
-| `api/guard` | The guard for the installed oRPC, which an app's router imports: `guard()` (the router's root middleware: `implement(contract).$context<...>().use(guard<User>())`), `GuardContext` (the context's `getSession()`: the caller's session or null, asked only when a policy needs it, as oRPC's Better Auth guide shares it; and `relations`, the app's relation engine, for procedures whose policy is an action), `once` (that lookup, run at most once per call), `signedIn(context)` (the person a `session` or action procedure runs for), `noSession` (the context of an app that signs nobody in); and everything in `api/guard-core` and `api/policy`. Plain JavaScript, because an app's checks load its router in Node |
+| `api/guard` | The guard for the installed oRPC, which an app's router imports: `guard()` (the router's root middleware: `implement(contract).$context<...>().use(guard<User>())`), `GuardContext` (the context's `getSession()`: the caller's session or null, asked only when a policy needs it, as oRPC's Better Auth guide shares it; and `relations`, the app's relation engine, for procedures whose policy is an action), `once` (that lookup, run at most once per call), `signedIn(context)` (the person a `session` or action procedure runs for), `noSession` (the context of an app that signs nobody in); and everything in `api/guard-core` and `api/policy`. Built into `dist/` by `vp pack`, because an app's checks load its router in Node |
 | `api/guard-core` | The guard itself, with no oRPC import, so it runs on oRPC 1 and 2: `Policy` (`public`: anyone, and the answer names no person; `session`: a signed-in person, and the answer is their own; `{ action }`: a signed-in person holding a relation the app's vocabulary grants that action to, on the object the input's `id` names), `guardMiddleware({ ORPCError })` (enforces each procedure's `meta.policy`; for an action it asks the relation engine, answers 404 for a missing object before 403, and a procedure that declares no policy never runs), `guardProblems(router, { personFields, vocabulary })` (what is wrong, one sentence each: no policy, no guard in front, a public answer that names a person, a personal answer without `meta.personal` saying who receives it, an action the vocabulary does not define or whose input cannot name its object), `policyOf`, `actionOf`, `isGuarded`, `walk`, `personFields` |
 | `api/policy` | What a contract procedure declares for the guard, as oRPC metadata: `policy('public' \| 'session')`, `personal('<who receives it>')`, and `actions(vocabulary)`, which gives `may('EDIT_NOTE')` for exactly the actions the app's vocabulary defines, as in `oc.meta(may('EDIT_NOTE'))` |
 | `api/relations` | The relation engine: who may do what is answered by relations, from the app's own tables in its own D1. `defineVocabulary({ objectTypes, relations, actions, grants })` (the app's vocabulary as data, in remy-sport's row shapes: a relation is derived from a table row, through a parent, from a platform role, or held by everyone), `relationEngine(vocabulary, db)` (`can`, `canAll`, `canFor` for a whole list's permission maps, `holds`, `heldAmong`, `objectsHeldBy`, `usersHolding`, `audienceFor`, `objectExists`), `vocabularyProblems` and `schemaProblems` (the vocabulary against itself and against the schema its migrations build), and the types `Can`, `ActionCode`, `ActionOn` that carry an app's action names to its contract and its pages |
@@ -127,7 +127,7 @@ one copy by the app's `pnpm-workspace.yaml` overrides
 
 ## Language
 
-Language behaviour is Paraglide's: strategies `url`, `cookie`, `custom-chinese` (Paraglide's own custom-strategy hook, in `matching.js`), `preferredLanguage`, `baseLocale`,
+Language behaviour is Paraglide's: strategies `url`, `cookie`, `custom-chinese` (Paraglide's own custom-strategy hook, in `matching.ts`), `preferredLanguage`, `baseLocale`,
 every locale prefixed in the URL, configured once in `paraglide.mjs`, which compiles
 `messages/*.json` during type generation and the Vite build. Pass `{ locale }` explicitly to every
 message call; there is no process-wide locale. A server-rendered app runs the middleware and passes
@@ -143,6 +143,15 @@ GitHub owner there), released with `@joeblew999/remy-cli` under the same version
 `.changeset/config.json`); the showcase and the contract version on their own and are published when a changeset
 bumped them. Neither is published in this form yet.
 
+What plain Node loads from an installed app (the Vite configurations, Playwright's checks and what they share, the
+command line) is TypeScript built by `vp pack` (tsdown) into each package's `dist/`, because Node and Playwright compile
+no TypeScript under `node_modules`; each package's `vite.config.ts` lists those files (`pack.entry`). The rest
+(components, routes, Worker code, CSS, the catalogs) ships as source, which the app's own Vite compiles. tsdown's
+`devExports` keeps two maps in each `package.json`: `exports` (and remy-cli's `bin`) name the source, which remy-auth
+runs straight from the workspace, and `publishConfig` names `dist/`, which pnpm publishes in their place. A package
+that imports its own files by its own name (`@joeblew999/remy-ui/messages`) gets the one copy an app has, never a
+second bundled in.
+
 Every change to a published package carries a changeset, written with it: `pnpm changeset` (which packages, patch,
 minor or major, and one line for the changelog), committed as `.changeset/<name>.md`. `vp run release`, from this
 machine, stopping at the first failure: `changeset version` (the new versions and each package's `CHANGELOG.md`
@@ -151,7 +160,7 @@ section from the pending changesets), `scripts/version.ts` (the blank app's pins
 complete (`remy i18n check --strict`), every check (`vp run ci`), the new-app test, then `vp run release:push`
 (the commit "Release vX.Y.Z", pushed to main). Its steps are on [Commands](./commands.mdx).
 A push to main runs one job on GitHub, the release (never a cloud session, which can push no tag), and no checks, since the push's hook ran them:
-`vp run release:publish` (`changeset publish`, after the packages are generated and built and the `remy` skill made),
+`vp run release:publish` (`changeset publish`, after the packages are generated and packed and the `remy` skill made),
 then, once per version, the tag `vX.Y.Z` and `gh release create` with GitHub's generated notes. The workspaces depend on each other with `workspace:*`, which
 pnpm's publish writes as the version, and the contract's peer range is open-ended. Core Web Vitals are measured on a
 deployment (production, or a branch's Preview): pages as visitors get them from Cloudflare.

@@ -4,9 +4,9 @@ import remarkParse from 'remark-parse';
 import remarkDirective from 'remark-directive';
 import remarkStringify from 'remark-stringify';
 import { VFile } from 'vfile';
-import { remarkUiWords } from '../../packages/remy-ui/src/docs/remark-ui-words.js';
+import { remarkUiWords } from '../../packages/remy-ui/src/docs/remark-ui-words.ts';
 
-// The guide names the app's pages and buttons with :ui[key] (packages/remy-ui/src/docs/remark-ui-words.js): the word
+// The guide names the app's pages and buttons with :ui[key] (packages/remy-ui/src/docs/remark-ui-words.ts): the word
 // comes from the app's catalog in the page's language, so the guide and the app cannot call one thing two ways.
 
 const render = (markdown: string, path: string) =>

@@ -20,7 +20,7 @@ learns who is signed in is the next piece; open work is the [issues](https://git
 ## Where to look
 
 Two live sites, each with site pages for Google and app pages under `/app`;
-[paths.js](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/src/paths.js) defines both kinds. Swap `/en` for `/es` or `/ar` anywhere.
+[paths.ts](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/src/paths.ts) defines both kinds. Swap `/en` for `/es` or `/ar` anywhere.
 
 | Site | Rendering | Open |
 | --- | --- | --- |

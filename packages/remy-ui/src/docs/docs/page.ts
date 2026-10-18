@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
 import { collections, type SiteName } from '@remy-docs-app/collections.ts';
 import { docsPage, type DocsPageData } from './source.server';
-import { docsUrl } from './table.js';
+import { docsUrl } from './table.ts';
 import { docsConfig } from '@remy-docs-app/docs.config.ts';
 
 /** A docs page from its site's loader on the server (source.server.ts); undefined when the site has no such page. */

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The new-app test (README.md): the new-app task (vp run new-app; vp run ci's last part) runs it from remy-auth's
-# root, after remy-ui's catalogs, remy-cli's build and the remy skill (the task's dependsOn).
+# root, after the packages' vp pack and the remy skill (the task's dependsOn).
 set -euo pipefail
 root=$(pwd)
 out=$(mktemp -d); trap 'rm -rf "$out"' EXIT

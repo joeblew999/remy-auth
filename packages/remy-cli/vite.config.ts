@@ -1,17 +1,20 @@
 import { defineConfig } from 'vite-plus';
 
-// The command line as an installed app runs it: dist/, JavaScript and declarations, which the package ships (Node
-// strips types from nothing under node_modules; remy-auth runs the source).
+// The command line as an installed app runs it: dist/, built by vp pack (tsdown), because Node strips types from
+// nothing under node_modules. devExports: package.json's bin names the source, which remy-auth runs; publishConfig's
+// names dist/, which pnpm publishes in its place.
 export default defineConfig({
+  pack: {
+    entry: ['src/remy.ts', 'src/checks.ts'],
+    platform: 'node',
+    dts: false,
+    exports: { devExports: true, bin: { remy: './src/remy.ts', 'remy-check': './src/checks.ts' } },
+  },
   run: {
     tasks: {
-      // dist/ emptied first, every time: a cache hit restores the build's files over what is there and removes
-      // nothing, so a command whose source is gone would stay behind and ship.
-      clean: { command: `node -e "require('node:fs').rmSync('dist', { recursive: true, force: true })"`, cache: false },
-      build: {
-        command: 'tsc -p .',
-        dependsOn: ['clean'],
-        cache: { input: [{ auto: true }, '!dist/**'], output: ['dist/**'] },
+      pack: {
+        command: 'vp pack',
+        cache: { input: [{ auto: true }, '!dist/**', '!package.json'], output: ['dist/**'] },
       },
     },
   },

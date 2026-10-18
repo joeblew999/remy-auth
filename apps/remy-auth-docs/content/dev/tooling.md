@@ -107,11 +107,11 @@ remain part of the service milestone. Both apps are live on Cloudflare at the or
 
 Every app has the same tasks and scripts, as `vp create vite:monorepo` lays them out; `vp run` lists them. Vite
 Plus decides what runs, in what order, and what a cache makes unnecessary. Each package's tasks are written out in its
-own `vite.config.ts` (`apps/remy-auth`, `apps/remy-auth-docs`, `packages/remy-ui`, `packages/remy-cli`; an app's
+own `vite.config.ts` (`apps/remy-auth`, `apps/remy-auth-docs`, `packages/remy-ui`, `packages/remy-cli`, `packages/remy-showcase`; an app's
 blank copy in `template/`), the repository's checks and `ready` in the root's, and nothing makes a task in code
 (owner, 2026-10-17: "in that configuration file of VP, you see everything"). `remyApp()` and `remyDocs()` return Vite's
 configuration only, and `@joeblew999/remy-ui/vite-plus` the plain shared settings (`style`, `network`). Each task is
-one tool: Vite, Wrangler, Playwright, `tsc`, `vp test`, `vp check`, Changesets, or a `remy-check` command for the
+one tool: Vite, Wrangler, Playwright, `vp pack`, `vp test`, `vp check`, Changesets, or a `remy-check` command for the
 project's own checks, which no tool does. Nothing of ours runs `vp run`
 (a unit check refuses it), and nothing of ours hands a value on through the environment: the root `package.json`'s
 scripts (`ci`, `translate`, `release`, `setup`) are each a chain of standard tools, `remy` leaves and Vite Plus tasks

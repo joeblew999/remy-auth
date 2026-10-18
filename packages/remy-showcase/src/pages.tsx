@@ -25,7 +25,7 @@ import { LanguagesIcon, ListChecksIcon, PaletteIcon, PanelsTopLeftIcon } from 'l
 // The site frame lives in ./shell (re-exported here), so a page that needs only the frame
 // does not download these pages.
 
-export { sitePaths, appPaths, allPaths } from './paths.js';
+export { sitePaths, appPaths, allPaths } from './paths.ts';
 
 export { SkipLink, ZoneBadge, SiteShell, Shell, Intro } from '@joeblew999/remy-ui/shell';
 export { Group, Row, NameList } from '@joeblew999/remy-ui/rows';

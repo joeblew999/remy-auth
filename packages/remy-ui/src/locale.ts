@@ -15,7 +15,7 @@ export type { Locale } from './paraglide/runtime.js';
 import type { Locale } from './paraglide/runtime.js';
 import { getLocale as platformLocale } from './paraglide/runtime.js';
 // Registers the custom-chinese strategy wherever the locale helpers load (server and browser).
-import './matching.js';
+import './matching.ts';
 
 /** The locale's name in its own language (its endonym), from the runtime's CLDR data. */
 export function localeName(locale: Locale, inLocale: Locale = locale): string {

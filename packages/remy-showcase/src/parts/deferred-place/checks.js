@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
 import { m } from '@joeblew999/remy-ui/messages';
 import { checkedLocales, formatTag, localizedPath } from '@joeblew999/remy-ui/checks';
 import { samples } from '@joeblew999/remy-ui/samples';
-import { deferredPlaceChecks } from './place.checks.js';
+import { deferredPlaceChecks } from '@joeblew999/remy-showcase/parts/deferred-place/place.checks';
 import { problemChecks } from '@joeblew999/remy-ui/problem.checks';
 
 /** `path` is the de-localized page with the place; `from` a page linking to it through `link` (a message key). */

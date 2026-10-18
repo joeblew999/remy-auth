@@ -90,7 +90,7 @@ and write only what they do not provide.
 - **Compose, do not restyle.** Use variants and semantic tokens; follow the installed shadcn skill's
   rules (Separator, Skeleton, Badge, Empty, Alert, Field instead of hand-made equivalents).
 - **Two kinds of page:** site pages for Google and app pages under `/app`, never mixed;
-  [paths.js](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/src/paths.js) defines both.
+  [paths.ts](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/src/paths.ts) defines both.
 - **Adopt the TanStack library instead of our own code** (Form, Router's Zod adapter, Table, Devtools
   and so on), install its agent skills, then delete the code it replaces.
 - Before writing any UI code, ask: does shadcn, TanStack or Paraglide already do this? If yes, use it.

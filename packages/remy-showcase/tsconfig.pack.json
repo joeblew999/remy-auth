@@ -1,0 +1,17 @@
+{
+  "//": "The files vp pack builds (vite.config.ts's packed), for their declarations: the workspace's TypeScript, narrowed to them. Packing only: the type check is the workspace's (../../tsconfig.json).",
+  "extends": "../../tsconfig.json",
+  "include": [],
+  "files": [
+    "src/device-place.checks.ts",
+    "src/navigation-blocking.checks.ts",
+    "src/parts/deferred-place/place.checks.ts",
+    "src/parts/deferred-place/server-functions.checks.ts",
+    "src/parts/status-card/card.checks.ts",
+    "src/paths.ts",
+    "src/preload.checks.ts",
+    "src/reservation.checks.ts",
+    "src/search-params.checks.ts",
+    "src/showcase.checks.ts"
+  ]
+}

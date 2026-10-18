@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { lighthouseChecks } from '../../checks.js';
+import { lighthouseChecks } from '@joeblew999/remy-ui/checks';
 
 // Google's audits on the docs Worker, over the app's own pages (run from its docs/): each site's first page
 // after the index on a phone, and the API reference on a desktop.
