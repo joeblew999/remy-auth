@@ -94,7 +94,12 @@ export function upgrade(version: string | undefined, installed = false): void {
     });
     // The platform and its command line, released together under the same number, set where the app keeps them.
     const install = platformAt(version)
-      ? spawnSync('vp', ['install'], { stdio: 'inherit', env: { ...process.env, GITHUB_TOKEN: token } })
+      ? // --no-frozen-lockfile: an upgrade changes the lockfile, which pnpm refuses by default wherever CI is set
+        // (GitHub, agents' sessions: ERR_PNPM_LOCKFILE_CONFIG_MISMATCH in the upgrade test).
+        spawnSync('vp', ['install', '--no-frozen-lockfile'], {
+          stdio: 'inherit',
+          env: { ...process.env, GITHUB_TOKEN: token },
+        })
       : spawnSync('vp', ['add', '--save-exact', `@joeblew999/remy-ui@${version}`, `@joeblew999/remy-cli@${version}`], {
           stdio: 'inherit',
           env: { ...process.env, GITHUB_TOKEN: token },
@@ -154,6 +159,13 @@ export function upgrade(version: string | undefined, installed = false): void {
       }
     }
   scriptsAndHooks(blank, version);
+  // The lockfile as the migrator and the blank app's files left the app, so its next install, frozen wherever CI is
+  // set (vp run setup in an agent's session or on GitHub), finds nothing to change.
+  const settle = spawnSync('vp', ['install', '--no-frozen-lockfile'], {
+    stdio: 'inherit',
+    env: { ...process.env, GITHUB_TOKEN: token },
+  });
+  if (settle.status !== 0) fail('upgrade: the install after the upgrade failed');
   console.log(`upgrade: on @joeblew999/remy-ui ${version}. Next: vp run setup (the skills, the rules, every check).`);
 }
 
