@@ -39,6 +39,9 @@ if [ -n "$tarball" ]; then
   echo "upgrade-test: tarball without a token: $(curl -s -o /dev/null -w '%{http_code}' "$tarball"), with: $(curl -s -L -o "$out/create.tgz" -w '%{http_code} %{url_effective}' -H "Authorization: Bearer $GITHUB_TOKEN" "$tarball" | sed -E 's#\?.*##')"
   tar -xzOf "$out/create.tgz" package/package.json 2>/dev/null | node -e "let s='';process.stdin.on('data',(d)=>(s+=d)).on('end',()=>{try{console.log('upgrade-test: the tarball\'s createConfig', JSON.stringify(JSON.parse(s).createConfig))}catch(e){console.log('upgrade-test: the tarball has no readable package.json')}})"
 fi
+# How GitHub Packages answers the package list asked both ways: as npm asks (the slash encoded, %2f) and as vp create
+# asks (a plain slash). Temporary, issue #44.
+echo "upgrade-test: GitHub Packages, @joeblew999%2fcreate: $(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $GITHUB_TOKEN" -H 'accept: application/json' "$packages/@joeblew999%2fcreate"), @joeblew999/create: $(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $GITHUB_TOKEN" -H 'accept: application/json' "$packages/@joeblew999/create"), without a token: $(curl -s -o /dev/null -w '%{http_code}' -H 'accept: application/json' "$packages/@joeblew999/create")"
 # Vite Plus swallows its fallback's error (create/bin.js: readPackageJsonFromTarball(...).catch(() => null)); on
 # GitHub's runner only, its throwaway copies print it instead, so the log says why (temporary, issue #44).
 if [ -n "${GITHUB_ACTIONS:-}" ]; then

@@ -3,6 +3,7 @@
 // (GitHub Packages), every other version of our scope passes through from there, with the token in GITHUB_TOKEN.
 // Usage: node registry.mjs <port> <upstream or -> <package.json>=<tarball>... It answers until the test ends.
 import { createServer } from 'node:http';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
 const [port, upstream, ...pairs] = process.argv.slice(2);
@@ -36,7 +37,15 @@ createServer(async (request, response) => {
   if (ours) {
     packument.versions = {
       ...packument.versions,
-      [ours.manifest.version]: { ...ours.manifest, dist: { tarball: `${base}${ours.path}` } },
+      // As GitHub Packages serves a version: its own fields only (createConfig stripped, so vp create has to read it
+      // from the tarball, as it must from GitHub; issue #44), and the tarball's integrity.
+      [ours.manifest.version]: {
+        ...Object.fromEntries(Object.entries(ours.manifest).filter(([key]) => key !== 'createConfig')),
+        dist: {
+          tarball: `${base}${ours.path}`,
+          integrity: `sha512-${createHash('sha512').update(ours.tarball).digest('base64')}`,
+        },
+      },
     };
     packument['dist-tags'] = {
       ...packument['dist-tags'],
