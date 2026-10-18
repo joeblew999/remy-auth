@@ -14,7 +14,7 @@ Everything in `src/components`, `src/hooks` and `src/styles/globals.css` is what
 CLI writes (monorepo layout: the app's `components.json` routes `shadcn add` here), including `cn`
 from shadcn's own `cn` package; nothing there is edited by hand. `vp run ui:components` and
 `vp run ui:theme` regenerate them and `vp run ui:verify` fails on any drift (see
-[docs/gui.md](./run-and-test.md#shadcn-stock)). Blocks are owned copies in `src/blocks`.
+[run and test](./run-and-test.md#shadcn-stock)). Blocks are owned copies in `src/blocks`.
 
 ## Usage
 
@@ -27,9 +27,9 @@ that order and declares the package's own `@source`:
 @source "../src";
 ```
 
-`fonts.css` names fontaine's fallback faces; add `FontaineTransform.vite({ fallbacks: { 'Geist
-Variable': ['Arial'] } })` before Tailwind in the Vite config (remy-auth's
-[`vite.config.ts`](https://github.com/joeblew999/remy-auth/blob/main/vite.config.ts) is the example).
+`fonts.css` names fontaine's fallback faces, which `remyApp()` generates (fontaine runs before Tailwind there), so
+an app's [`vite.config.ts`](https://github.com/joeblew999/remy-auth/blob/main/apps/remy-auth/vite.config.ts) adds
+nothing for them.
 
 Every page is one of two kinds, never mixed (`paths`' `isAppPath` is the rule; each app lists its own):
 
@@ -58,13 +58,13 @@ prerendered example):
   `themeChecks` fail without it.
 - **A route for every path in `appPaths` and `sitePaths`**, each a few lines over the shared page (the
   showcase's Clock spreads `clockRouteOptions` from `@joeblew999/remy-showcase/clock-route`).
-- **`tests/smoke.spec.ts`**, one `smokeChecks(...)` call: `vp run test:browser --grep smoke` and the live smoke after
-  every deploy run it, and fail with "No tests found" without it.
-- **`.plans/now.md`**, the one ordered list of open work (`remy plans check`, in the check).
+- **`tests/smoke.spec.ts`**, one `smokeChecks(...)` call: `vp run test:browser --grep smoke` and the smoke against a
+  deployment (`pnpm remy test live <origin>`) run it, and fail with "No tests found" without it.
+- **`.plans/now.md`**, the one ordered list of open work (`remy plans check`, in `vp run ready`).
 - **Installs and upgrades through the package's commands**, never by hand: `vp run setup` (install,
-  skills, MCP, the installation's checks) and `vp run upgrade <version>` (the exact package version
-  and the CI workflow at the same tag, then the same checks). Both take GitHub Packages' token from
-  `gh auth token`.
+  skills, MCP, the installation's checks) and `vp run upgrade <version>` (remy-ui and remy-cli at that version, the
+  CI workflow at the same tag, the blank app's scripts, hooks and configuration, then the same checks). Both take
+  GitHub Packages' token from `gh auth token` and write it into the machine's pnpm configuration.
 
 ## Exports
 
@@ -81,7 +81,9 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `app-config` | `defineRemyApp` and its types (`RemyApp`, `NavItem`): the app's name, source and navigation for every frame; `useRemyApp`, `usePreferredLocale`. `brand` is [the product's name](./run-and-test.md#the-products-name), the one place it is written: every message that says it takes it as `{product}`; `pageTitle(title, brand)` is a page's title as the browser tab shows it |
 | `root` | `remyRoot(app, { devtools })`: the root route's options (the document in the page's language and direction, `AppProviders`, the language to offer, the problem pages); `RemyRouterContext`, `preferredLocale`. An app's `__root.tsx` is `createRootRouteWithContext<RemyRouterContext>()(remyRoot(remyApp, { devtools: <TanStackDevtools … /> }))`: the devtools stay in the app's file, where TanStack's Vite plugin strips them from production builds |
 | `router` | `remyRouter(routeTree)`: the router every app makes (the locale rewrite, a QueryClient per request with Query's SSR integration, intent preloading, the CSP nonce) |
-| `app/vite` | `remyApp({ plugins, start, cloudflare, port, build })`: an app's whole `vite.config.ts` (TanStack Devtools, the parts, the build stamp, Cloudflare, Fontaine, Tailwind, Start, React; the app's own catalog when it has `project.inlang`) |
+| `app/vite` | `remyApp({ plugins, start, cloudflare, port, build, root })`: an app's Vite configuration, and only that (TanStack Devtools, the parts, the build stamp, Cloudflare, Fontaine, Tailwind, Start, React; the app's own catalog when it has `project.inlang`); the app's `vite.config.ts` spreads it and writes its tasks out beside it |
+| `docs/vite` | `remyDocs(docsConfig, { root, app })`: the docs Worker's Vite configuration over an app's `docs/`, likewise Vite's only |
+| `vite-plus` | Plain shared settings for a `vite.config.ts`: `style` (the formatter, the linter with its type check, the commit hook's step; spread at the workspace's root) and `network` (the proxy and certificate variables a cached task that downloads needs, untracked in its cache key) |
 | `providers` | `AppProviders`: what an app's root renders its pages in (direction, theme, the app's `defineRemyApp` config, the `preferred` language) |
 | `language` | `LanguageSwitcher` (plain links, site pages), `LanguageMenu` (shadcn DropdownMenu, app pages), `LanguageHint` |
 | `messages`, `runtime` | Compiled Paraglide messages and runtime |
@@ -97,7 +99,7 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `versions` | `BuildStamp` (one quiet line: the environment off production, the product's name, the commit, and a reload control when the deployment has moved on under the page) and `Versions` (this app, its docs Worker and the `deployments` the app lists in `defineRemyApp`, each answering for itself, and the packages of this build). Stock shadcn parts; put either anywhere inside `AppProviders` |
 | `cloudflare` | `placeFromCloudflare` |
 | `problem` | The localized problem pages: `Problem`, `NotFound`, `ErrorPage`, `problemPages` (one spread line per page route) |
-| `parts`, `parts/vite`, `parts/checks` | Parts ([plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md)): an app lists them in `src/parts.json`, one per line: the platform's by name, another package's as `<package>/<name>`. `remyParts()` in `vite.config.ts` (its `plugin` among the plugins, its `routes` as `tanstackStart({ router: { virtualRouteConfig } })`) mounts each listed part's routes beside `src/routes` and generates `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` in the test file runs each listed part's checks. The platform's part is `seo-routes` (robots.txt and the sitemap); the showcase offers `time-zones`, `deferred-place` and `status-card` (`@joeblew999/remy-showcase/<name>`); see [Writing a part](#writing-a-part) |
+| `parts`, `parts/vite`, `parts/checks` | Parts ([plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md)): an app lists them in `src/parts.json`, one per line: the platform's by name, another package's as `<package>/<name>`. `remyApp()` (through the package's `parts/vite`, `remyParts()`: its `plugin` among the plugins, its `routes` as `tanstackStart({ router: { virtualRouteConfig } })`) mounts each listed part's routes beside `src/routes` and generates `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` in the test file runs each listed part's checks. The platform's part is `seo-routes` (robots.txt and the sitemap); the showcase offers `time-zones`, `deferred-place` and `status-card` (`@joeblew999/remy-showcase/<name>`); see [Writing a part](#writing-a-part) |
 | `rows`, `zod-csp` | `Group`, `Row`, `NameList`: label/value rows; Zod's jitless switch (AppProviders imports it) |
 | `invalidate` | `invalidateEverything(router, queryClient)`: every loader and query stale and reloaded (after logout or a role change; the status card's refresh) |
 | `samples` | The fixed values the pages render |
@@ -117,11 +119,13 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `environment` | `environments({ production: {...}, local: {...} })`: an app's table of what each environment permits, one row per capability; `permits(env, 'capability')`, `policyFor`, `environmentOf`. The environment is declared (`ENVIRONMENT`), and anything absent or unknown is production |
 | `mail` | `mailerFor({ capture, binding, from })`: mail through Cloudflare Email Service (the Worker's `send_email` binding), or kept in the Worker's outbox where the environment captures it (`readOutbox`, `clearOutbox`); a refusal says who the mail was for and why; a message to an address no mail can reach (`unreachable`: the reserved test and example domains) is never sent |
 
-The package's dependencies are the platform's one dependency set, pinned exactly: the framework (React,
-TanStack Start, Router and Query), the toolchain (Vite, Wrangler, Tailwind, TypeScript) and the tools the
-shared tasks and checks run (Playwright, Lighthouse, the DevTools MCP server, npm-check-updates). An app
-names only the package; `remy.singleCopy` in its `package.json` lists those that break when installed twice,
-which the check's single-copies part keeps ([projects](./projects.md#choosing-the-version-released-development-or-local)).
+The package's dependencies, at the catalog's versions, are what it imports and runs: the framework (React,
+TanStack Start, Router and Query), the toolchain (Vite, Wrangler, Tailwind, TypeScript) and the checks' tools
+(Playwright, Lighthouse); the command line's own tools (the DevTools MCP server, the Codex CLI, npm-check-updates)
+are `@joeblew999/remy-cli`'s. An app lists what it imports itself, at the same catalog versions;
+`remy.singleCopy` in this package's `package.json` lists those that break when installed twice, which the app's
+`pnpm-workspace.yaml` overrides keep to one copy and the check's single-copies part proves
+([projects](./projects.md#choosing-the-version-released-development-or-local)).
 
 ## Language
 
@@ -137,26 +141,27 @@ Chinese, Hindi, Amharic, Polish, Turkish and German) is agent-authored and unrev
 ## Publishing
 
 The package is `@joeblew999/remy-ui` on GitHub Packages (the scope must equal the
-GitHub owner there). `vp run release` does the release's checks from this machine, stopping at the first
-failure, then tags it; its steps, in order, are on [Commands](./commands.mdx), and GitHub's release job publishes
-from the tag. Core Web Vitals are
-measured cold on a throwaway Cloudflare Worker: the first visits after a deploy, which is what a slow page costs
-most. CI (`.github/workflows/ci.yml`) repeats Google's audits on the tag.
+GitHub owner there), released with `@joeblew999/remy-cli` under the same version; the showcase and the contract are
+published when their versions were bumped. Neither is published in this form yet. `vp run release` does the
+release's checks from this machine, stopping at the first failure, then tags it; its steps, in order, are on
+[Commands](./commands.mdx), and GitHub's release job publishes from the tag (never a cloud session). Core Web Vitals
+are measured on a deployment (production, or a branch's Preview): pages as visitors get them from Cloudflare. CI
+(`.github/workflows/ci.yml`) repeats Google's audits on the tag.
 
-Before releasing, one commit: the version in `packages/remy-ui/package.json` (and in
-`packages/remy-auth-contract/package.json` when the contract changed) and the CHANGELOG section. No other file
-names a version: the workspaces depend on each other with `"*"` and the contract's peer range is
-open-ended. The task refuses a dirty tree, a branch other than main, or an existing tag.
+Before releasing, one commit: the version (`vp run ui:version X.Y.Z` writes it in remy-ui, remy-cli and the blank
+app's pins; `packages/remy-auth-contract/package.json` too when the contract changed) and the CHANGELOG section. The
+workspaces depend on each other with `workspace:*`, which pnpm's publish writes as the version, and the contract's
+peer range is open-ended. `remy release check` refuses a dirty tree, a branch other than main, stale translations or
+a changed package without a new version.
 
-Consumers add to their `.npmrc`:
+A consumer's `.npmrc` only names the registry:
 
 ```
 @joeblew999:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
-and install through `vp run setup`, which takes a `read:packages` token from `gh auth token`
-(or `GITHUB_TOKEN` in the shell). Released versions are in the
+pnpm reads no token from a repository's `.npmrc`, so `vp run setup` (and `remy upgrade`) writes a `read:packages`
+token, from `GITHUB_TOKEN` in the shell or `gh auth token`, into the machine's own pnpm configuration. Released versions are in the
 [changelog](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
 
 ## Writing a part

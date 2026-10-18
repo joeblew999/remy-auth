@@ -5,16 +5,19 @@ description: "The tools behind the commands: where each area is explained, pinne
 
 ## The tooling
 
-`package.json` is the entry, as in every TypeScript project: its scripts run every project command.
-Node is pinned by `.node-version` and `package.json`'s `engines`; every tool is a dependency of
-`@joeblew999/remy-ui`, so every app that installs the package gets the same versions with no pin of its
-own: Wrangler, Playwright, TypeScript, the Chrome DevTools tools, the Modern Web Guidance CLI, the
-Codex CLI. `gh` is the machine's, and Claude Code (the translator) is the machine's own, the one the
+The repository is a standard Vite Plus monorepo, as `vp create vite:monorepo` makes one, on pnpm: every project
+command is a task written out in its package's `vite.config.ts` or a script in the root `package.json`, run as
+`vp run <name>`. Node is pinned by `.node-version` and `package.json`'s `engines`, pnpm by `devEngines` (12.14.0,
+which `vp install` downloads and runs). Every version is written once, in `pnpm-workspace.yaml`'s catalog, and each
+package lists what it imports (`catalog:`, or `workspace:*` for a package of this repository), with `pnpm-lock.yaml`
+beside it; the tools the shared tasks run (Wrangler, Playwright, the Chrome DevTools tools, the Modern Web Guidance
+CLI, the Codex CLI, npm-check-updates) are `@joeblew999/remy-cli`'s dependencies, so every app gets the same ones.
+`vp migrate --full` reports nothing to change and `vp env doctor` passes. `gh` is the machine's, and Claude Code (the translator) is the machine's own, the one the
 subscription is logged into. A script that is one tool is written as that tool (`"logs": "wrangler
 tail --format json"`); anything with logic is TypeScript, a `remy` command of the package
 (`packages/remy-cli/src`, type-checked on every check) or, for what is one app's own, a `scripts/*.ts` of
 that app ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/tooling-in-typescript.md)).
-`npx remy verify doctor` prints the versions of the CLIs the tooling runs.
+`pnpm remy verify doctor` prints the versions of the CLIs the tooling runs.
 
 ### Vite Plus: the machine's `vp`, in managed mode
 
@@ -23,16 +26,16 @@ Vite Plus is one tool, and its command is always `vp`. It is installed in two pl
 | | On the machine (global) | In the repo (local) |
 | --- | --- | --- |
 | How it gets there | once per machine: `curl -fsSL https://vite.plus \| bash` | the `vite-plus` package in `package.json`, in `node_modules` |
-| What it does | picks Node and npm: the Node `.node-version` pins (26.10.0) | the tools: build, lint, format, type check, tests, the task runner |
+| What it does | picks Node and the package manager: the Node `.node-version` pins (26.10.0), the pnpm `devEngines` pins | the tools: build, lint, format, type check, tests, the task runner |
 | Who sets the version | whoever installed it | the repo, so every machine gets the same |
 
 You only type `vp`. The machine's `vp` puts the pinned Node in place, then runs the repo's version of the tools.
 Every machine that works on the repo (your Mac, Claude's cloud, GitHub) has both, with the machine's `vp` in
-**managed mode**; without it, `node` and `npm` are whatever the machine happens to have, and nothing says so.
+**managed mode**; without it, `node` is whatever the machine happens to have, and nothing says so.
 
 ```sh
 curl -fsSL https://vite.plus | bash   # once per machine: the global vp (say yes to managing Node)
-vp env on                             # managed mode: node and npm follow .node-version
+vp env on                             # managed mode: node follows .node-version
 vp env current                        # must say: Version 26.10.0, Source .node-version, Mode managed
 vp install                            # the dependencies, on that Node
 ```
@@ -48,27 +51,26 @@ trusting any result.
   default (the latest LTS) rather than the Node installed before. `vp env default <version>` sets that default.
   The session step in `.claude/settings.json` does nothing there.
 - **A checkout made before 17 October 2026** has a `.claude/settings.json` written by the old `remy guard` (it was
-  not committed then). Delete it before pulling, or the pull refuses; then `vp install` and `npx remy hooks`.
+  not committed then). Delete it before pulling, or the pull refuses; then `vp install`. The guard and the Claude
+  hooks of ours are gone; a `.claude/settings.local.json` they left is the machine's to delete.
 
-`remy hooks` writes the status hook, with this machine's paths, to `.claude/settings.local.json`, which is not
-committed (and removes the old guard hook where a machine still has it).
 Vite Plus's own instructions for agents load in every Claude session from the installed package
 (`CLAUDE.md` imports `node_modules/vite-plus/AGENTS.md`), and its docs for the installed version are in
 `node_modules/vite-plus/docs`: read those before changing how anything is built, checked or run.
 
 Better Auth runs in remy-auth's own Worker on a D1 database (`DB` in `wrangler.jsonc`), with its
 options in `src/auth/options.ts` (both in `apps/remy-auth/`). Its scripts are the app's own, in
-`apps/remy-auth/package.json`; the `local` task is the package's, from the app's `scripts/local.ts`:
+`apps/remy-auth/package.json`, and so is the `local` task (`apps/remy-auth/vite.config.ts`, running the app's
+`scripts/local.ts`); from the root each is `remy-auth#<name>`:
 
 ```sh
-vp run auth:generate <name>        # LOCAL: what the options need beyond migrations/, as the next numbered migration
-vp run local                          # LOCAL: .dev.vars when missing, migrations/ and migrations-demo/ on Wrangler's local D1 databases, the guard's fixture
-vp run auth:mail you@example.com   # LOCAL: the sign-in codes captured for an address, from the running Worker
-vp run auth:provision                 # Prints what the deployed sign-in needs on Cloudflare; creates nothing
+vp run remy-auth#auth:generate <name>        # LOCAL: what the options need beyond migrations/, as the next numbered migration
+vp run remy-auth#local                       # LOCAL: .dev.vars when missing, migrations/ and migrations-demo/ on Wrangler's local D1 databases, the guard's fixture
+vp run remy-auth#auth:mail you@example.com   # LOCAL: the sign-in codes captured for an address, from the running Worker
+vp run remy-auth#auth:provision              # Prints what the deployed sign-in needs on Cloudflare; creates nothing
 ```
 
-`vp run local` (the `local` task, which `vp run dev`, `vp run build` and everything after them run
-first) writes `.dev.vars`, applies the migrations and installs the guard's oRPC v1 fixture (`tests/guard/v1`),
+The `local` task (which `vp run dev`, `vp run build` and everything after them run first) writes `.dev.vars`, applies the migrations and installs the guard's oRPC v1 fixture (`tests/guard/v1`),
 so dev, preview and every check start on the current schema with nothing to remember. `auth:generate`
 runs the pinned CLI through `src/auth/cli.ts`, which compares the options with a throwaway SQLite
 database built from `migrations/`, so it writes only what is not there yet; change the options, then
@@ -76,39 +78,43 @@ generate, never edit Better Auth's tables by hand. To sign in locally: `vp run d
 `/en/app/account` and press one of the seeded people, or enter any address and read its code with
 `auth:mail`. No mail is sent locally: the local environment keeps it in the Worker's outbox instead
 (the environment table in `src/auth/environment.ts`, [explained](./auth.md#environments-one-table);
-staging has the seeded people too and sends mail for real; any other environment is production,
-where mail is sent through Cloudflare Email Service and nobody is seeded). The deployed
-database, its migrations and the `BETTER_AUTH_SECRET` Worker secret are created on the owner's
-request only: `auth:provision` prints the steps, and until the database exists the deploy refuses,
-because Wrangler would otherwise create it by itself.
+staging, every branch's Preview, has the seeded people too and sends mail for real; any other environment is
+production, where mail is sent through Cloudflare Email Service and nobody is seeded). The deployed
+databases, their migrations and the `BETTER_AUTH_SECRET` Worker secret are created on the owner's
+request only: `auth:provision` prints the steps, and `pnpm remy cloudflare provisioned` refuses while a binding
+names a database that does not exist, because Wrangler's deploy would otherwise create it by itself.
 
 These are developer/operator tools. Remy end-user CLI login and delegated API calls
-remain part of the service milestone. Both apps are live on Cloudflare; the production deploy uploads to
-`origins.production` in [remy.config.ts](https://github.com/joeblew999/remy-auth/blob/main/remy.config.ts), and `vp run promote` runs it, on the owner's request only.
+remain part of the service milestone. Both apps are live on Cloudflare at the origins in the app's `.env`
+(`VITE_DEPLOY_ORIGIN`, `VITE_DOCS_ORIGIN`); a push to `main` deploys them ([on Cloudflare](./run-and-test.md#on-cloudflare)).
 
 ### The scripts and commands
 
 Every app has the same tasks and scripts, as `vp create vite:monorepo` lays them out; `vp run` lists them. Vite
 Plus decides what runs, in what order, and what a cache makes unnecessary. Each package's tasks are written out in its
 own `vite.config.ts` (`apps/remy-auth`, `apps/remy-auth-docs`, `packages/remy-ui`, `packages/remy-cli`; an app's
-blank copy in `template/`), the repository's checks and `ready` in the root's, and nothing makes a task in code. Each
-task is one
-tool: Vite, Wrangler, Playwright, `tsc`, `vp test`, `vp check`, or a `remy` command for a job Vite Plus has
+blank copy in `template/`), the repository's checks and `ready` in the root's, and nothing makes a task in code
+(owner, 2026-10-17: "in that configuration file of VP, you see everything"). `remyApp()` and `remyDocs()` return Vite's
+configuration only, and `@joeblew999/remy-ui/vite-plus` the plain shared settings (`style`, `network`). Each task is
+one tool: Vite, Wrangler, Playwright, `tsc`, `vp test`, `vp check`, or a `remy` command for a job Vite Plus has
 no tool for (the project's own checks, the browsers, the audits' lock). Nothing of ours runs `vp run`
-(a unit check refuses it), and nothing of ours hands a value on through the environment: the flow's steps are the
-scripts (`land`, `promote`, `release`, `setup`), each a chain of `remy` leaves and Vite Plus tasks written out in order
-([Commands](./commands.mdx) prints each one's steps). `vp run --last-details` says why each task
-ran or came from the cache; a task's inputs, outputs and environment are in its `cache` settings.
+(a unit check refuses it), and nothing of ours hands a value on through the environment: the root `package.json`'s
+scripts (`ci`, `translate`, `release`, `setup`) are each a chain of `remy` leaves and Vite Plus tasks written out in
+order ([Commands](./commands.mdx) prints each one's steps). Vite Plus's own commands work as they do anywhere:
+`vp install`, `vp dev`, `vp check`, `vp test`, `vp build`, `vp preview`, `vp run <name>`, `vp run -r build`.
+`vp run --last-details` says why each task ran or came from the cache; a task's inputs, outputs and environment are in
+its `cache` settings.
 
-The `remy` commands (`npx remy <command>`) are one module each in `packages/remy-cli/src`: `npx remy help`
-lists every command, one line each, and a command run without arguments says its own (`npx remy docs`).
-Each does the one job it names: `remy land start|finish`, `remy promote check|done` and `remy release check` are the
-ends of the flow's steps, never a sequence of other commands.
+The `remy` and `remy-check` commands are `@joeblew999/remy-cli`'s (`packages/remy-cli/src`, one module each),
+released with `@joeblew999/remy-ui` under the same version; in an app they run as `pnpm remy …`, and remy-auth's
+tasks run them from source (`node packages/remy-cli/src/remy.ts`). `pnpm remy help` lists every command, one line
+each, and a command run without arguments says its own (`pnpm remy docs`). Each does the one job it names; none
+wraps git, GitHub or a deploy (owner, 2026-10-18: "No more crazy magic stuff").
 
 Every script and command, with what each does, is on **[Commands](./commands.mdx)**, generated from the
 command line itself, so it cannot drift; no page lists them by hand. Where each area is explained:
 
-- The flow and who runs each step: [how we work](./how-we-work.md#the-flow-four-steps-in-plain-sight)
+- The flow and who runs each step: [how we work](./how-we-work.md#the-flow-the-standard-way-in-plain-sight)
 - The app, local and remote checks, previews: [the GUI](./run-and-test.md)
 - The project layout, a new app, translations, a repository that publishes packages: [projects](./projects.md)
 - The docs Worker over an app's `docs/`: [writing docs](./writing-docs.mdx)
@@ -117,30 +123,28 @@ command line itself, so it cannot drift; no page lists them by hand. Where each 
 
 ### Package upgrades
 
-`npx remy packages upgrade` uses the locally pinned `npm-check-updates` to move npm
-dependencies past existing version pins, saves exact versions, installs them and
-refreshes `package-lock.json`, then runs the installation's checks.
-Peer conflicts fail visibly; the command does not use npm's `--force` or
-`--legacy-peer-deps`. Review the manifest/lockfile diff and any major-version
+`pnpm remy packages upgrade` uses the pinned `npm-check-updates` to move every dependency (the root's and every
+workspace package's) to its latest version, majors included, saving exact versions, then installs them
+(`vp install`, which refreshes `pnpm-lock.yaml`); `vp run setup` checks the installation after.
+Peer conflicts fail visibly; nothing forces them. Review the manifest/lockfile diff and any major-version
 migration requirements. If installation fails after manifest updates, resolve the
 reported conflict before using `vp run setup`; no automatic rollback discards your edits.
-Workspace dependencies are upgraded too; the local `@joeblew999/remy-ui` and `@joeblew999/remy-auth-contract` references are excluded
-from registry upgrades. Node and the skill-source pins are managed separately.
+The repository's own packages and the platform's two (`@joeblew999/remy-ui`, `@joeblew999/remy-cli`) are never touched. Node, pnpm and the
+skill-source pins are managed separately.
 
 ### Verification
 
-The flow, its steps and who runs each: [how we work](./how-we-work.md#the-flow-four-steps-in-plain-sight).
+The flow, its steps and who runs each: [how we work](./how-we-work.md#the-flow-the-standard-way-in-plain-sight).
 
-An installation ends with `npx remy verify` (its `setup` checks; `vp run setup`, `npx remy packages upgrade`
-and `vp run upgrade` run it): about a minute, no browser. Those are the dependencies against the lockfile,
-MCP registration, the flow's guard, the CLI versions and the tooling invariants (`npx remy verify tooling`);
-they use the existing local installation and provision nothing on Cloudflare. `vp run setup` runs
-`vp run ready` after them.
+An installation ends with `pnpm remy verify` (its `setup` checks; `vp run setup` and `vp run upgrade` run it): about a
+minute, no browser. Those are the dependencies against the lockfile (`pnpm ls`), MCP registration, the CLI versions
+and the tooling invariants (`pnpm remy verify tooling`); they use the existing local installation and provision
+nothing on Cloudflare. `vp run setup` runs `vp run ready` after them.
 
-The gate before a landing or a release is `vp run ci`, the same here as on GitHub: the check, every browser
-check of ours in every language against the production build in local Workers (`vp run test:browser`),
+The gate before a push or a release is `vp run ci`, the same here as on GitHub (the push's hook runs it): `vp run ready`, our browser
+checks against the production build in local Workers (`vp run test:browser`; every language in a release),
 Google's audits (`vp run test:audits`) and, in remy-auth, a new app (`vp run new-app`). A release adds Core
-Web Vitals on a throwaway Worker (`npx remy test cwv`). No deployment is performed. See
+Web Vitals on production (`pnpm remy test cwv`). Nothing is deployed by any of them: deploying is a push. See
 [the GUI proof](./run-and-test.md) for scope and commands.
 
 
@@ -149,7 +153,8 @@ Web Vitals on a throwaway Worker (`npx remy test cwv`). No deployment is perform
 ### VS Code Codex extension
 
 Open this repository in VS Code and use the Codex sidebar. The extension ships
-its own executable; the project's npm CLI installation serves terminal users.
+its own executable; the project's pinned Codex CLI (`@openai/codex`, a dependency of `@joeblew999/remy-cli`)
+serves terminal users.
 The [Codex CLI and IDE extension share MCP configuration](https://developers.openai.com/learn/docs-mcp).
 Our project registration writes `.codex/config.toml`; trust the project in Codex
 so that project configuration can load. VS Code's `.vscode/mcp.json` configures
@@ -157,34 +162,34 @@ its own MCP client and is not the Codex extension's configuration file.
 
 After changing skills or MCP configuration:
 
-1. Run `npx remy mcp register` in the repository terminal.
+1. Run `pnpm remy mcp register` in the repository terminal.
 2. Save your work, open the Command Palette (`Cmd+Shift+P` on macOS), and run
    **Developer: Reload Window**.
 3. Reopen the Codex sidebar and continue the conversation. Verify that the agent
    can call the newly configured tools; registration alone does not prove a connection.
 
-`npx codex resume --last` launches a terminal session; it does not reload the extension.
+`codex resume --last` launches a terminal session; it does not reload the extension.
 The installed `code` CLI has no documented reload-window flag, so reloading uses
 VS Code's built-in command rather than a shell wrapper that pretends to restart it.
 
 ### Terminal agents
 
-After `vp run setup`, use the installed Codex or Claude Code CLI:
+After `vp run setup`, use the installed Codex or Claude Code CLI. The pinned Codex is remy-cli's dependency, so
+in remy-auth it runs from that package (`vp -C packages/remy-cli exec codex`):
 
 ```sh
-npx codex             # New Codex conversation
-npx codex resume --last      # Resume latest Codex conversation in this project
-claude            # New Claude conversation
-claude --continue     # Resume latest Claude conversation in this project
+vp -C packages/remy-cli exec codex                 # New Codex conversation
+vp -C packages/remy-cli exec codex resume --last   # Resume latest Codex conversation
+claude                                             # New Claude conversation
+claude --continue                                  # Resume latest Claude conversation in this project
 ```
 
 To reload skills and MCP configuration, exit the current agent with `/exit`, then
-run its `:resume` script from your terminal. Use `/mcp` inside the agent to check the
-connection. Pass additional upstream options after `--`, for example
-`npx codex -- --help`. Setup installs the pinned official
-[`@openai/codex` CLI](https://learn.chatgpt.com/docs/codex/cli) locally, and the
-Codex scripts use that executable directly rather than relying on your shell PATH.
-`npx remy packages upgrade` updates it alongside the other dependencies. Authenticate when
+resume it from your terminal as above. Use `/mcp` inside the agent to check the
+connection. Setup installs the pinned official
+[`@openai/codex` CLI](https://learn.chatgpt.com/docs/codex/cli) locally, and the `remy` commands
+that call it find that executable themselves rather than relying on your shell PATH.
+`pnpm remy packages upgrade` updates it alongside the other dependencies. Authenticate when
 prompted. Claude Code is installed separately; launching Codex does not require it.
 
 
@@ -199,11 +204,11 @@ skills are not installed: they live only on its v2 alpha branches and describe t
 the 1.x we pin; add them when we move to Form 2. Install the skills locally:
 
 ```sh
-npx remy skills install
-npx remy skills list
+pnpm remy skills install
+pnpm remy skills list
 ```
 
-To reinstall from scratch, run `npx remy skills remove` then `npx remy skills install`.
+To reinstall from scratch, run `pnpm remy skills remove` then `pnpm remy skills install`.
 
 Skills live in `.agents/skills/`; `.claude/skills/` links to the same files.
 
@@ -213,17 +218,17 @@ Beside the pinned skills, `remy skills install` installs `remy` from the install
 (`./node_modules/@joeblew999/remy-ui/skills`), so its version is the package's: the rules of the
 version an app runs, offline. It is every page of these developer docs exactly as the docs Worker serves them to
 AI tools (`/dev/llms.txt`, each page's `.md`: includes resolved, components as text), made by `remy skills build`
-when the package is packed or published (never in the quick check). So the skill, `llms.txt`, each page's
+(the root's `skills:build` task, which the new-app test and the publish run first; never `vp run ready`). So the skill, `llms.txt`, each page's
 Markdown and the MCP servers are one text from one source: a page cannot reach one and miss another. The live
-docs (`/dev/llms.txt`, `/api/mcp/dev`) always have the newest; the skill says so. In an app, `npx remy rules` keeps a marked
+docs (`/dev/llms.txt`, `/api/mcp/dev`) always have the newest; the skill says so. In an app, `pnpm remy rules` keeps a marked
 block in `AGENTS.md` pointing its agents at the skill and naming the version; `vp run setup` and
 `vp run upgrade` run it, so an upgrade changes the rules the agents read in the same step.
 remy-auth's own `AGENTS.md` is a pointer to [Agents: start here](./agents.md).
 The installer records provenance in `skills-lock.json`. Re-running installation
 restores the selected skills from the pinned sources; update their source commits deliberately to adopt upstream
 changes. Only `skills-lock.json` is committed; the installed skills and their Claude links are
-ignored and recreated by `vp run setup` or `npx remy skills install`.
-`npx remy skills list` shows what is installed; [the skills plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/agent-skills.md)
+ignored and recreated by `vp run setup` or `pnpm remy skills install`.
+`pnpm remy skills list` shows what is installed; [the skills plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/agent-skills.md)
 tracks dependencies without an official skill. Reload an existing agent session
 if newly installed skills are not yet visible.
 
@@ -233,7 +238,7 @@ To add a source, only from the library's own maintainers:
    `https://github.com/<owner>/<repo>/tree/<commit>`, using the
    commit from `git ls-remote https://github.com/<owner>/<repo> HEAD`, naming the skills to take
    rather than `'*'` when the repository also ships contributor-only skills.
-2. Run `npx remy skills remove`, `npx remy skills install` and `npx remy verify tooling`
+2. Run `pnpm remy skills remove`, `pnpm remy skills install` and `pnpm remy verify tooling`
    (seconds), which reads the pins and rejects installed skills from unpinned sources.
 
 
@@ -251,9 +256,9 @@ contain machine-specific paths and are gitignored; rerun registration after movi
 Unrelated settings and servers are preserved. Changed existing files receive a
 `.bak` recovery copy; TOML serialization can normalize formatting and comments.
 
-The server uses the pinned npm package, an isolated headless Chrome profile, and
+The server uses the pinned `chrome-devtools-mcp` package, an isolated headless Chrome profile, and
 has tool telemetry and CrUX uploads disabled. The MCP process is separate from the
-CLI's `browser:start`/`browser:stop` session; the agent client manages its lifetime.
+`chrome-devtools start`/`stop` session below; the agent client manages its lifetime.
 
 Reload the agent after registration. Codex only loads project configuration in a
 trusted project. Claude may show **Pending approval** for a new project MCP server;
@@ -270,23 +275,24 @@ the clients see (Claude also checks connectivity for approved servers).
 Google's [Chrome DevTools agent tools](https://developer.chrome.com/docs/devtools/agents)
 provide browser interaction, screenshots, accessibility inspection, network/cookie
 debugging, Lighthouse and performance analysis. Install Google Chrome separately;
-the browser is not installed by project setup. The CLI is experimental and pinned with
-the other npm tools, so `npx remy packages upgrade` updates it too.
+the browser is not installed by project setup. The CLI (`chrome-devtools`, from the `chrome-devtools-mcp` package)
+is experimental and a dependency of `@joeblew999/remy-cli` with the other tools, so `pnpm remy packages upgrade`
+updates it too; in remy-auth it runs from that package:
 
 ```sh
-npx chrome-devtools start                           # Isolated, headless Chrome session
-npx chrome-devtools -- new_page http://localhost:3000
-npx chrome-devtools -- list_pages
-npx chrome-devtools -- take_snapshot 1              # Use the returned page ID
-npx chrome-devtools -- click 1 "UID_FROM_SNAPSHOT"
-npx chrome-devtools stop
+vp -C packages/remy-cli exec chrome-devtools start --isolated --usageStatistics=false --performanceCrux=false
+vp -C packages/remy-cli exec chrome-devtools new_page http://localhost:5173/en
+vp -C packages/remy-cli exec chrome-devtools list_pages
+vp -C packages/remy-cli exec chrome-devtools take_snapshot 1              # Use the returned page ID
+vp -C packages/remy-cli exec chrome-devtools click 1 "UID_FROM_SNAPSHOT"
+vp -C packages/remy-cli exec chrome-devtools stop
 ```
 
-Run `npx chrome-devtools start -- --headless=false` for a visible window. Start once
+`start` is headless by default; add `--headless=false` for a visible window. Start once
 per session; subsequent CLI calls reuse the background daemon. Starting again
-restarts that daemon. These sessions use a temporary Chrome profile; the start script
-disables tool usage telemetry and CrUX URL uploads. Stop the session when finished.
-Use `npx chrome-devtools -- --help` for upstream commands.
+restarts that daemon. `--isolated` gives the session a temporary Chrome profile; the two `false` flags
+turn off tool usage telemetry and CrUX URL uploads. Stop the session when finished.
+`chrome-devtools --help` lists the upstream commands.
 
 
 ## Modern web implementation guidance
@@ -298,14 +304,14 @@ forms, accessibility, performance, passkeys and browser compatibility. The main
 `chrome-extensions` skill is omitted because this project is a web service and UI.
 
 ```sh
-npx modern-web-guidance -- search "animate a dialog modal backdrop"
-npx modern-web-guidance -- retrieve "GUIDE_ID_FROM_SEARCH"
-npx modern-web-guidance -- list
+vp -C packages/remy-cli exec modern-web-guidance search "animate a dialog modal backdrop"
+vp -C packages/remy-cli exec modern-web-guidance retrieve "GUIDE_ID_FROM_SEARCH"
+vp -C packages/remy-cli exec modern-web-guidance list
 ```
 
-Use the locally pinned `web` script in this repo in place of the upstream
-skill's `npx modern-web-guidance@latest` examples. `npx remy packages upgrade` updates the CLI;
-`npx remy skills install` restores the commit-pinned skill. Google's alternative `skills`
+Use the pinned CLI (remy-cli's dependency, as above) in place of the upstream
+skill's `modern-web-guidance@latest` examples. `pnpm remy packages upgrade` updates the CLI;
+`pnpm remy skills install` restores the commit-pinned skill. Google's alternative `skills`
 installer keeps our existing `.agents` and `.claude` layout without a second
 installer or automatic skill updates. If a search returns no matches, use `list` to browse guide IDs.
 Browser support defaults to the skill's **Baseline Widely available** policy, with fallbacks for newer features.
@@ -320,12 +326,12 @@ A GUI Worker entry now emits request IDs, status and timing without logging URLs
 headers or cookies. Sign-in's durable audit records are not implemented.
 
 ```sh
-npx wrangler tail --format json -- --help
-npx wrangler tail --format json --status error -- --help
+pnpm wrangler tail --format json -- --help
+pnpm wrangler tail --format json --status error -- --help
 ```
 
-Both use the configured Worker; `npx wrangler tail --format json` also accepts an explicit Worker name.
-`npx wrangler tail --format json --status error` filters Worker invocation failures, not all HTTP error responses. Durable audit
+Both use the configured Worker; `pnpm wrangler tail --format json` also accepts an explicit Worker name.
+`pnpm wrangler tail --format json --status error` filters Worker invocation failures, not all HTTP error responses. Durable audit
 storage, dashboards and alert delivery are open work in the observability plan.
 
 ### The docs answers on Cloudflare: AI Search and AI Gateway
@@ -340,16 +346,18 @@ Two Cloudflare products sit behind the docs' Ask AI (the docs Worker), and they 
   pages: it puts each one and deletes anything else, so a removed page leaves the answers too.
 - **AI Gateway** is the meter in front of the model. Every model call AI Search makes passes through
   it (`remy-docs`), and it logs each one with its cost, tokens and time (and the question). It holds
-  no docs. Spend limits and rate limits live here; `npx remy docs observe ai-usage` and `ai-check` read it.
+  no docs. Spend limits and rate limits live here; `pnpm remy docs observe ai-usage` and `ai-check` read it.
 
 Local or remote: the docs pages, the Ask AI page and all checks run locally; answering
 exist only on Cloudflare (AI Search has no local version). Every command says in its header comment
 whether it is local or remote (and production).
 
-The docs' commands (`npx remy docs …`: publish, questions, answers, observe) are on [Commands](./commands.mdx).
+The docs' commands (`pnpm remy docs …`: publish, questions, answers, observe) are on [Commands](./commands.mdx).
 Two things that list cannot say: the `observe` commands need the gateway's token, so run them as
-`fnox exec -- npx remy docs observe …`; and `CLOUDFLARE_ENV=ask vp -C docs dev` runs the local docs
-Worker with answers from the live index.
+`fnox exec -- pnpm remy docs observe …`; and `CLOUDFLARE_ENV=ask vp -C apps/remy-auth-docs dev` (an app's:
+`vp -C docs dev`) runs the local docs Worker with answers from the live index (its `wrangler.jsonc`'s `env.ask`).
+After a docs change reaches production, `pnpm remy docs publish`, on a machine signed in to Cloudflare, gives the
+index the new pages.
 
 Tokens: see [secrets](#secrets-fnox) below.
 
@@ -357,16 +365,17 @@ Costs: indexing is a few embeddings (a full reindex about $0.0005); a search wit
 nothing; an answer about $0.0001 to $0.0007, and $0 when AI Search's cache has it.
 
 Ask AI is each app's choice: `docs.config.ts`'s `ask` names its AI Search instance, R2 bucket, AI Gateway
-and rate-limit namespace, and the docs Worker's Cloudflare configuration is generated from it
-(`docs/.remy-docs/wrangler.json`). Without `ask` the docs have no Ask AI page, button or bindings.
-`npx remy docs provision` prints the commands that create an app's resources and creates nothing:
+and rate-limit namespace, and the docs Worker's own `wrangler.jsonc` declares the same instance and rate limit as
+its bindings (`ai_search`, `ratelimits`). Without `ask` the docs have no Ask AI page or button, and their
+`wrangler.jsonc` no such bindings (the blank app's has none).
+`pnpm remy docs provision` prints the commands that create an app's resources and creates nothing:
 that costs money and is the owner's.
 
 Stored history and the AI answers, read only, from Cloudflare's own APIs. The Worker, its AI Search
 instance and that instance's AI Gateway come from its Wrangler configuration, so an including app gets its own:
 
 The `observe` commands (on [Commands](./commands.mdx)) read Workers Logs and the AI Gateway; run them as
-`fnox exec -- npx remy observe …`, for the token.
+`fnox exec -- pnpm remy observe …`, for the token.
 
 ### Secrets: fnox
 
@@ -376,7 +385,7 @@ Workers Logs access. For those, the commands read tokens from the environment:
 - `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`: the shared Cloudflare token and account, the
   same keychain items in every joeblew999 repo. [`fnox.toml`](https://github.com/joeblew999/remy-auth/blob/main/fnox.toml) names them (values stay
   in the macOS keychain, never in the file); `fnox` is the machine's. Run a command with them:
-  `fnox exec -- npx remy observe ai-usage`. Set one with `fnox set -p keychain CLOUDFLARE_API_TOKEN <token>` (never
+  `fnox exec -- pnpm remy observe ai-usage`. Set one with `fnox set -p keychain CLOUDFLARE_API_TOKEN <token>` (never
   omit `-p keychain`: without it the value is written to `fnox.toml` in plain text). It reads Workers Logs
   and AI Gateway, so it needs **Workers Observability Read** and **AI Gateway Edit**; AI Search is read
   with Wrangler's login.

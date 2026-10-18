@@ -14,8 +14,8 @@ wins, and the page that disagrees is a bug: fix it in the change you are on
 ([see something: fix it](./how-we-work.md#see-something-fix-it-or-write-it-down-in-the-same-change)).
 A contradiction between pages is never a reason to stop, or to ask the owner which is right.
 
-Live: the app <https://remy-auth.gedw99.workers.dev> (staging, with the automatic sign-in:
-<https://remy-auth-staging.gedw99.workers.dev>); the developer docs <https://remy-auth-docs.gedw99.workers.dev/dev>
+Live: the app <https://remy-auth.gedw99.workers.dev> (each pushed branch's Preview, with the automatic sign-in:
+`https://<branch>-remy-auth.gedw99.workers.dev`); the developer docs <https://remy-auth-docs.gedw99.workers.dev/dev>
 (the product guide `/docs`, the API reference `/reference`; MCP servers `/api/mcp/dev`, `/api/mcp/reference`,
 `/api/mcp/docs`; everything for AI tools at `/llms.txt`). These pages' source is `apps/remy-auth-docs/content/dev/*.md`:
 read those, not the translations beside them (`*.es.md`).
@@ -36,14 +36,14 @@ read those, not the translations beside them (`*.es.md`).
 Start with the standard commands (`git status`, `git log`, `gh pr list`, `gh run list`: what is going on) and
 [the project's own tools](./how-we-work.md#use-the-projects-own-tools-first), and finish through
 [the flow](./how-we-work.md#the-flow-the-standard-way-in-plain-sight): `vp run ready`
-after every change; when the work is finished and the check is green, `vp run translate` if text changed, then
-`git commit`, `git push`, `gh pr create` and `gh pr merge --auto --squash`, without asking. GitHub merges once its
-checks pass, and Cloudflare deploys `main` by itself.
+after every change; when the work is finished and `vp run ready` is green, `vp run translate` if text changed, then
+`git commit`, `git push` (its hook runs `vp run ci`), `gh pr create` and its squash merge once green
+(`gh pr merge --auto --squash` once the owner turns auto-merge on), without asking; then `git switch main && git pull`. A push to `main` is the deploy: Cloudflare builds it.
 
 ## Working from Claude's cloud
 
 An agent in Claude's cloud (Claude on the web or the phone) has no Cloudflare token: `wrangler` and the
-`npx remy cloudflare` commands cannot sign in there, and nothing in the flow needs them (Cloudflare's own builds
+`pnpm remy cloudflare` commands cannot sign in there, and nothing in the flow needs them (Cloudflare's own builds
 deploy). It has the **Cloudflare connector** instead, used by hand; nothing in the repository depends on it. `gh`'s
 GraphQL commands (`gh pr create`, `gh pr merge`) are refused there: use the REST equivalents in
 [the flow](./how-we-work.md#the-flow-the-standard-way-in-plain-sight).

@@ -41,11 +41,13 @@ Two live sites, each with site pages for Google and app pages under `/app`;
 
 ## Get started
 
-Node as `.node-version` says (26), then from this checkout:
+The machine's `vp` in managed mode, which gives this checkout the Node `.node-version` names (26) and the pnpm
+`devEngines` names ([developer tooling](./tooling.md#vite-plus-the-machines-vp-in-managed-mode)), then from this
+checkout:
 
 ```sh
-npm install          # once, for the lockfile and the remy bin
-vp run setup        # the pinned skills, MCP, the flow's guard, the installation's checks
+vp install          # once: the dependencies from pnpm-lock.yaml, and the Git hooks
+vp run setup        # the pinned skills, MCP, the installation's checks, then vp run ready
 vp run dev          # http://127.0.0.1:5173/en
 ```
 
@@ -63,14 +65,15 @@ Starting, resuming and reloading Codex or Claude Code, in VS Code or a terminal,
 ## Everyday commands
 
 Every command, generated from the command line itself, is on [Commands](./commands.mdx). What you run day to
-day, and who runs production and a release, is [the flow](./how-we-work.md#the-flow-four-steps-in-plain-sight).
+day, and who runs production and a release, is [the flow](./how-we-work.md#the-flow-the-standard-way-in-plain-sight).
+Every task is written out in its package's `vite.config.ts`, and `vp run` lists them with the root's scripts.
 
-Local preview and remote deployment use the same build and Wrangler configuration.
-See [local/remote commands](./run-and-test.md#one-scaffold-for-local-and-cloudflare)
-for deployment and running the same tests against a deployed URL.
+Local preview and remote deployment use the same build and Wrangler configuration; deploying is a push, which
+Cloudflare builds. See [local/remote commands](./run-and-test.md#one-scaffold-for-local-and-cloudflare)
+and [on Cloudflare](./run-and-test.md#on-cloudflare) for deployment and running the same tests against a deployed URL.
 
 Review dependency changes after upgrading. Node is pinned in `.node-version` and `package.json`'s
-`engines`; the skill-source commits are in the package (`packages/remy-cli/src/skills.ts`), which every
+`engines`, pnpm in `devEngines`, every other version once in `pnpm-workspace.yaml`'s catalog; the skill-source commits are in the package (`packages/remy-cli/src/skills.ts`), which every
 app installs ([projects](./projects.md)).
 
 ## Project documentation

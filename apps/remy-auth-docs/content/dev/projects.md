@@ -3,18 +3,23 @@ title: "Projects: layout, new apps and publishing"
 description: "What every Remy project keeps in the same place, how to start a new app, publishing packages, translations, Cloudflare and plans. Every command is on Commands."
 ---
 
-The tooling is `remy`, the bin of `@joeblew999/remy-ui` (`packages/remy-cli/src`, one TypeScript module per
-command); an app gets it with the package (`npm install`, at the package's version) and names it in its
-`package.json` scripts, the same ones in every app (`"land": "remy land start && vp run translate && vp run ci && remy land finish"`), with Vite Plus's tasks between its steps. An app says once, in
-`remy.config.ts`, where it is deployed and its ports:
+The tooling is `remy` (and `remy-check`), the bins of `@joeblew999/remy-cli` (`packages/remy-cli/src`, one
+TypeScript module per command), released with `@joeblew999/remy-ui` under the same version. An app gets both with
+`vp install`, at the version in its catalog, runs the command as `pnpm remy …`, and names it in its `package.json`
+scripts and `vite.config.ts` tasks, the same ones in every app (`"ci": "vp run ready && vp run test:browser && vp run test:audits"`).
+Each value lives in the file of the tool that reads it, never in one of ours: where the app and its docs are
+deployed is Vite's `.env` (the command line reads it with Vite's `loadEnv`), each Worker's settings its
+`wrangler.jsonc`, the environment of each deployment Wrangler's `vars` (production, the `previews` section, a local
+`.dev.vars`):
 
-```ts
-import type { RemyProject } from '@joeblew999/remy-ui/project';
-
-export default {
-  origins: { production: 'https://your-app.your-subdomain.workers.dev', docs: 'https://your-app-docs.your-subdomain.workers.dev' },
-} satisfies RemyProject;
+```sh
+# .env
+VITE_DEPLOY_ORIGIN=https://your-app.your-subdomain.workers.dev
+VITE_DOCS_ORIGIN=https://your-app-docs.your-subdomain.workers.dev
 ```
+
+`remy.config.ts` is only for a repository that publishes packages: its `release` (remy-auth's names
+`@joeblew999/remy-ui`), typed by `@joeblew999/remy-cli/project`.
 
 ### The layout
 
@@ -23,27 +28,29 @@ layout is the paths the commands and the package read, so a file anywhere else i
 checker of its own keeps it. An app is one folder: in its own repository, the repository's root. remy-auth,
 which also owns the packages, is a workspace of the same pieces side by side: the app's files below are in
 `apps/remy-auth/`, the docs are `apps/remy-auth-docs/` (not `docs/`), the packages `packages/*` (`remy-ui`, `remy-cli`, the contract and the showcase), each folder named after its
-package, and the root holds `package.json`'s workspaces and scripts, `remy.config.ts`, the root `vite.config.ts`
-(the shared style and the repository's checks, `ready`) and the repository files (`.plans/`, `.github/`,
-`template/`), as `vp create vite:monorepo` lays a workspace out.
+package, and the root holds `pnpm-workspace.yaml` (the packages and the catalog), `package.json`'s scripts,
+`remy.config.ts`, the root `vite.config.ts` (the shared style and the repository's checks, `ready`) and the
+repository files (`.plans/`, `.github/`, `template/`), as `vp create vite:monorepo` lays a workspace out.
 The commands find the app by its `wrangler.jsonc` and the docs by their `docs.config.ts`, so they run from
 the root either way.
 
 | Path | Read by | Holds |
 | --- | --- | --- |
-| `package.json`'s `scripts`, `remy.config.ts`, `.node-version` | Vite Plus (`vp run`), `remy` | the flow's steps (the scripts; every other name is a task); the origins and release package; the Node version |
-| `package.json`, `package-lock.json` | npm, `remy` (workspaces) | the app's dependencies; `workspaces` when it owns packages |
-| `wrangler.jsonc` | wrangler, the Cloudflare Vite plugin, `remy cloudflare` | the Worker's name, bindings and assets |
-| `vite.config.ts`, `tsconfig.json`, `playwright.config.ts` | Vite Plus (the tasks it writes out, `vp check`), Playwright (`vp run test:browser`) | the build (`remyApp()`), every task, types and browser checks |
-| `.vite-hooks/` (`pre-commit`, `pre-push`) | Git, through Vite Plus (`vp config`, the `prepare` script) | the hooks: `vp staged` before a commit, `vp run ci` before a push outside the flow; written by `remy upgrade` |
+| `package.json`'s `scripts`, `.node-version` (remy-auth's) | Vite Plus (`vp run`) | the scripts that compose the tasks (`ci`, `translate`, `release`, `setup`; an app's `upgrade`); the Node version |
+| `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `.npmrc` | pnpm (through `vp install`), `remy` | what each package imports (`catalog:`, `workspace:*`), pnpm's version (`devEngines`); the workspace's packages, the catalog of versions, the single-copy overrides; GitHub Packages as the `@joeblew999` registry |
+| `.env` | Vite (`import.meta.env`), `remy` (`loadEnv`) | where the app and its docs are deployed (`VITE_DEPLOY_ORIGIN`, `VITE_DOCS_ORIGIN`) |
+| `remy.config.ts` | `remy packages`, `remy release` | the release package, in a repository that publishes packages |
+| `wrangler.jsonc` | wrangler, the Cloudflare Vite plugin, Cloudflare's Git builds, `remy cloudflare` | the Worker's name, bindings, assets and environment (`vars`, `previews`) |
+| `vite.config.ts`, `tsconfig.json`, `playwright.config.ts` | Vite Plus (the tasks written out there, `vp check`), Playwright (`vp run test:browser`) | the build (`remyApp()`), every task, types and browser checks |
+| `.vite-hooks/` (`pre-commit`, `pre-push`) | Git, through Vite Plus (`vp config`, the `prepare` script) | the hooks: `vp staged` before a commit, `vp run ci` before a push (`VP_GIT_HOOKS=0` skips them); copied by `remy upgrade` |
 | `fnox.toml`, `skills-lock.json` | fnox, `remy skills` | secret names; the pinned skills |
 | `src/routes/`, `src/routeTree.gen.ts` | TanStack Start (the tree is generated) | the product's pages |
 | `src/parts.json` | the package's `remyParts()` | the shared parts the app lists (none without the file; the blank app lists `seo-routes`) |
 | `src/api/` | the app's `api.$` route | the product's procedures, if it has an API |
-| `tests/` (`smoke.spec.ts` by name) | `remy test`, the live smoke after a deploy | the shared checks with the app's settings, and its own |
+| `tests/` (`smoke.spec.ts` by name) | `remy test` (`remy test live`: the smoke against a deployment) | the shared checks with the app's settings, and its own |
 | `public/` | Vite | favicon, `_headers` |
-| `dist/` (`dist/client/assets`) | the deploys, the checks | build output, never committed |
-| `docs/` (`docs.config.ts`, `vite.config.ts`, `tsconfig.json`, `package.json`, `content/{users,dev,ui}/` with `i18n.json` and `meta.json`, `content/questions.json`; generated `.remy-docs/`, `dist/`) | `remy docs`, `remy i18n` | the app's docs: its identity and pages; the Worker is the package's |
+| `dist/` (`dist/client/assets`) | Wrangler (the deploy, its dry run), the checks | build output, never committed |
+| `docs/` (`docs.config.ts` with its `contract`, `collections.ts`, `wrangler.jsonc`, `vite.config.ts`, `tsconfig.json`, `package.json`, `content/{users,dev,ui}/` with `i18n.json` and `meta.json`, `content/questions.json`; built `dist/`) | its own tasks, `remy docs`, `remy i18n` | the app's docs: its identity and pages, Fumadocs' collections (committed), the docs Worker's settings; the Worker's code is the package's |
 | `packages/<name>/` with `README.md` | `remy plans`, `remy packages` | packages the repo publishes, if any |
 | `messages/`, `project.inlang/` | the app preset, the app's `generate` task, `remy i18n` | the app's own strings, if any (compiled into `src/paraglide/`) |
 | `.plans/` (`now.md`, `done/`, `parked/`) | `remy plans` | the repo's plans |
@@ -57,43 +64,52 @@ in remy-auth at the release tag: the layout above with only the repo's own files
 home page in every language, a docs index per site, the layout's config files at a few lines each).
 Everything else is the package, which one version bump upgrades.
 
-1. Prerequisites: Node as `.node-version` says, `gh auth login` with a token that has `read:packages`,
-   Google Chrome (the checks use it), and `wrangler login` before the first deploy.
-2. `npx -y giget@3.3.1 gh:joeblew999/remy-auth/template#vX.Y.Z <name>`, then `cd <name>` and `git init`
+1. Prerequisites: the machine's `vp` in managed mode ([developer tooling](./tooling.md#vite-plus-the-machines-vp-in-managed-mode)),
+   Node 26, `gh auth login` with a token that has `read:packages`, and Google Chrome (the checks use it).
+2. `vpx giget@3.3.1 gh:joeblew999/remy-auth/template#vX.Y.Z <name>`, then `cd <name>` and `git init`
    (the translation and plans tools read git history; `vp run setup` says so if it is missing).
 3. Name the app: replace `my-app` and `My app` (`grep -rn -i "my.app" --exclude-dir=node_modules .`):
-   `package.json`, `wrangler.jsonc`, `src/service.ts`, `remy.config.ts`'s origins, `docs/docs.config.ts` (the
-   product's name and source, which the app's frame reads too) and `messages/en.json`.
-4. Node as `.node-version` says, then `GITHUB_TOKEN=$(gh auth token) npm install` once to write
-   `package-lock.json`, then `vp run setup` (npm ci, the pinned skills and the `remy` skill, the
-   `AGENTS.md` rules block, MCP registration, the status hook, the installation's checks).
-5. Commit everything, `package-lock.json`, `skills-lock.json` and `src/routeTree.gen.ts` included. The
-   blank app's strings come translated; after the English changes (`messages/en.json`, the docs), commit it
-   and translate this once by hand, `npx remy i18n translate`, which writes the other
-   languages (it never commits: commit them with the rest); from then on `vp run land` does it.
-6. The first deploy, by hand: `npx remy cloudflare deploy`, and `npx remy cloudflare docs-deploy` for the
-   docs. Once the
-   repository is on GitHub (step 7), work goes through [the flow](./how-we-work.md#the-flow-four-steps-in-plain-sight):
-   `vp run land` for every finished change, `vp run promote` for production and the docs.
-7. CI: `.github/workflows/ci.yml` calls remy-auth's shared workflow at the same tag (every language, Google's
-   audits on every push to `main`). Grant the new repository read access in the `@joeblew999/remy-ui`
-   package's settings ("Manage Actions access"), or `npm ci` fails there.
+   `package.json`, `wrangler.jsonc`, `src/service.ts`, `.env`'s origins, `docs/wrangler.jsonc`,
+   `docs/docs.config.ts` (the product's name and source, which the app's frame reads too) and `messages/en.json`.
+4. GitHub Packages' token into this machine's pnpm configuration, once (pnpm reads no token from a repository's
+   `.npmrc`, which only names the registry): `pnpm config set --location user //npm.pkg.github.com/:_authToken "$(gh auth token)"`.
+   Then `vp install` once to write `pnpm-lock.yaml`, then `vp run setup` (the install from the lockfile, the pinned
+   skills and the `remy` skill, the `AGENTS.md` rules block, MCP registration, the installation's checks, then
+   `vp run ready`).
+5. Commit everything, `pnpm-lock.yaml`, `skills-lock.json` and `src/routeTree.gen.ts` included. The
+   blank app's strings come translated; after the English changes (`messages/en.json`, the docs), run
+   `vp run translate`, which writes the other languages (it never commits: commit them with the rest); from then on
+   it runs before every commit that changes text.
+6. Deploying is a push: connect the repository to Cloudflare's Git builds, one per Worker (the app at the root, the
+   docs at `docs/`), with remy-auth's build settings ([on Cloudflare](./run-and-test.md#on-cloudflare); `remy upgrade`
+   prints the build command). Creating the databases and secrets a binding names is the owner's
+   (`pnpm remy cloudflare provisioned` says what is missing). From then on work goes through
+   [the flow](./how-we-work.md#the-flow-the-standard-way-in-plain-sight): a pull request for every finished change,
+   and every push to `main` deploys.
+7. CI: `.github/workflows/ci.yml` calls remy-auth's shared workflow at the same tag. Grant the new repository read
+   access in the `@joeblew999/remy-ui` and `@joeblew999/remy-cli` packages' settings ("Manage Actions access"), or
+   its install fails there.
 
 Then the app grows in its own files: pages in `src/routes/` (a page beside a parent's path, such as
 `videos.$videoId` next to `videos`, is `videos_.$videoId.tsx`: TanStack nests `videos.$videoId` inside
 `videos`, which then needs an `<Outlet />`), their links in `src/remy-app.tsx`, strings in `messages/en.json`
 (`m` from `src/paraglide/messages.js`), an API as a contract package and `src/api/` (every procedure that
 takes input documents an error, or `apiChecks` fails: the package's `api/coverage` rule), docs in
-`docs/content/`. Move to a new release with `vp run upgrade <version>` (the package, the CI
-workflow's tag, the flow's scripts and the Git hooks together; it names Cloudflare's build command, which lives
-on Cloudflare). Two local browser runs at once share `PREVIEW_PORT` and the second fails to
+`docs/content/`. Move to a new release with `vp run upgrade <version>`: `@joeblew999/remy-ui` and
+`@joeblew999/remy-cli` at that version (`vp add`), the CI workflow's tag, the blank app's scripts, `.vite-hooks/` and
+`vite.config.ts` files (an old one kept as `vite.config.ts.before-upgrade`, to move its own plugins and options
+back), `pnpm-workspace.yaml`, the docs' `collections.ts` and `wrangler.jsonc` where the app has none,
+`remy.config.ts`'s old origins moved into `.env`, then the skills, the rules and the installation's checks; it
+prints Cloudflare's build command, which lives on Cloudflare. An app on 0.15.1 installs the two packages at the new
+version by hand first, since 0.15.1's upgrade cannot. Two local browser runs at once share `PREVIEW_PORT` and the second fails to
 start its server: give each shell its own (`PREVIEW_PORT=4232 vp run …`).
 
 ### A repository that publishes packages
 
 A repository may also publish packages of its own (a contract, a UI package), as remy-auth does; that
-costs no command of its own. Its packages are npm workspaces (`packages/<name>/`, `package.json`'s
-`workspaces`), and each one that is not `private` is published by `remy packages`, whose subcommands are on [Commands](./commands.mdx).
+costs no command of its own. Its packages are the workspace's (`packages/<name>/`, listed in
+`pnpm-workspace.yaml`), and each one that is not `private` is published by `remy packages` (pnpm's pack and publish,
+which write each `catalog:` and `workspace:` version in), whose subcommands are on [Commands](./commands.mdx).
 
 In `remy.config.ts`: `release.package` (the package whose version names the release) and
 `release.title`. A package's `exports` name every subpath its users import (`"./video": "./src/video.ts"`);
@@ -106,34 +122,40 @@ writes it everywhere it appears (the package and the blank app's pins).
 
 ### Choosing the version: released, development or local
 
-remy-auth's `vp run release` publishes `@joeblew999/remy-ui` X.Y.Z and the command line beside it,
-`@joeblew999/remy-cli` (the `remy` and `remy-check` commands), and tags the same commit `vX.Y.Z`. A consumer pins
-both in its `package.json` (and its CI workflow's tag), and `vp run upgrade X.Y.Z` moves them, with the scripts, hooks
-and configuration of the blank app at that tag. To work against remy-auth's own checkout,
-`npm link ../remy-auth/packages/remy-ui ../remy-auth/packages/remy-cli` (and `npm unlink` back).
+remy-auth's `vp run release` checks and tags the commit `vX.Y.Z`; GitHub's release job then publishes
+`@joeblew999/remy-ui` X.Y.Z and the command line beside it, `@joeblew999/remy-cli` (the `remy` and `remy-check`
+commands), always the same version, with the showcase and the contract when their versions were bumped. Neither is
+published in this form yet, and publishing is the release job's, never a cloud session's. A consumer pins both in
+its catalog (`pnpm-workspace.yaml`, and its CI workflow's tag), and `vp run upgrade X.Y.Z` moves them, with the
+scripts, hooks and configuration of the blank app at that tag. To try remy-auth's own checkout in an app, do what
+the new-app test does: `pnpm pack` the packages in remy-auth and point the app's catalog and overrides at the
+tarballs (`file:./vendor/remy-ui.tgz`).
 
-The platform supplies every npm package the app and the tasks need, at one version: they are
-`@joeblew999/remy-ui`'s own dependencies (the framework, the toolchain, the checks' tools), so an app's
-`package.json` names the package, its own packages and whatever its product adds. `the check's single-copies part`
-(`vp run ready`'s `check:single-copies`) fails when a package that breaks when installed twice (React, TanStack Router and
-Query, the MDX stringifier; the package's `remy.singleCopy` list) is: remove the app's own pin. An app's own
-preparation is a task in its own `vite.config.ts`: a `local` task (the local state it needs before it runs, which its
+Each package lists what it imports, at the catalog's version (`catalog:`): an app's `package.json` names the two
+platform packages, the framework packages its own files import, the tools its tasks call (Wrangler, Playwright,
+Vite Plus), its own packages and whatever its product adds. The tools the shared tasks run are remy-cli's
+dependencies. A package that breaks when installed twice (React, TanStack Router and Query, the MDX stringifier:
+`remy.singleCopy` in remy-ui's `package.json`) has one copy through `pnpm-workspace.yaml`'s `overrides`, at the
+catalog's version; the check's single-copies part (`vp run ready`'s `check:single-copies`) fails when pnpm's store
+holds more than one version of any of them. An app's own preparation is a task in its own `vite.config.ts`: a `local` task (the local state it needs before it runs, which its
 `dev` and `build` name first; remy-auth writes its `.dev.vars` and migrates its local D1 there) and its `generate`
 (its own catalog, `project.inlang`, compiled with the Worker's types). Its own release checks are steps of its
 `release` script.
 
-The flow is the scripts and Vite Plus's tasks; each step, and who runs it: [how we work](./how-we-work.md#the-flow-four-steps-in-plain-sight); every command: [Commands](./commands.mdx).
+The flow is the scripts and Vite Plus's tasks; each step, and who runs it: [how we work](./how-we-work.md#the-flow-the-standard-way-in-plain-sight); every command: [Commands](./commands.mdx).
 
-`vp run ci` runs the browser checks, Google's audits and, in remy-auth, the new-app test (`vp run new-app`,
-`fixtures/consumer`): the other repositories this one serves, tested as they get it. It builds the blank app and a
-package it owns from this commit's platform (the package from a tarball with a version of its own, the tasks from a
-copy outside any `node_modules`, the template's `.npmrc`) and runs install, skills (installed once per pinned list,
-then reused), the tooling invariants, the check, the quick browser checks and the docs (~3 min, mostly the install);
-Vite Plus caches it on what a new app is made of, so a change to remy-auth's own app or product docs runs it no more.
+`vp run ci` runs every check, the browser checks, Google's audits and, in remy-auth, the new-app test
+(`vp run new-app`, `fixtures/consumer/run.sh`): the other repositories this one serves, tested as they get it. It
+copies `template/` to a scratch folder and lays `fixtures/consumer/files` over it (finished files: a package the app
+owns, its API and a showcase part; a unit check holds them to the blank app's), packs remy-ui, remy-cli and the
+showcase into its `vendor/` with `pnpm pack` (each with a version no registry has), then installs and runs the
+skills (installed once per pinned list, then reused), the tooling invariants, the app's `vp run ready`, the quick
+browser checks and the docs' checks (about 93 s); Vite Plus caches it on what a new app is made of, so a change to
+remy-auth's own app or product docs runs it no more.
 A change that would break another repository fails there, not in that repository. Tests are type-checked with
 the app (`tsconfig.json` includes `tests/`). Google's audits are
-`vp run test:audits` (Lighthouse, local; CI whenever a change can affect it, and on every push to main and every tag) and Core Web Vitals is
-`npx remy test cwv` (on a throwaway Cloudflare Worker); the release runs both.
+`vp run test:audits` (Lighthouse, local; part of `vp run ci`, so of every push) and Core Web Vitals is
+`pnpm remy test cwv` (on a deployment: production, or a branch's Preview); the release runs both.
 
 Where checks run: the shared package's own behaviour is proven once, in remy-auth, before each
 release. An app built on the package runs a contract set (its pages render, site and app pages stay
@@ -157,14 +179,14 @@ One layout in every app, so the same `remy i18n` commands work everywhere (the r
 Two pipelines, one for each kind of text, the same pattern in both: detect offline from each
 translation's record of what it was made from, translate with the machine's Claude Code (headless, no
 tools), write the translations and their records (the change commits them). Both are TypeScript in the package
-(`packages/remy-cli/src/i18n.ts`, `translate.ts`: `remy i18n check`, `remy i18n translate`); the tasks below
-forward to them.
+(`packages/remy-cli/src/i18n.ts`, `translate.ts`: `remy i18n check`, `remy i18n translate`); the
+`check:translations` task and the `translate` script run them.
 
 - **UI messages** (Paraglide): the catalogs, locales and base locale come from inlang's own
-  `settings.json` (the one project git knows). Detected: missing catalogs and keys
-  (`jq`), lost or invented `{placeholders}` (`@lingual/i18n-check`), keys whose English differs from the
-  catalog's record (`translated-from/<locale>.json` beside it), plural categories the locale needs (`Intl.PluralRules`,
-  `tasks/i18n/messages/plurals.mjs`: no upstream tool checks them).
+  `settings.json` (the one project git knows). Detected (`packages/remy-cli/src/i18n.ts`): missing catalogs and
+  keys, lost or invented `{placeholders}`, keys whose English differs from the catalog's record
+  (`translated-from/<locale>.json` beside it), plural categories the locale needs (`Intl.PluralRules`: no upstream
+  tool checks them).
 - **Docs** (Fumadocs): the folder is the docs package's `content/` (`docs/content`, or `apps/remy-auth-docs/content` in remy-auth); each site with an
   `i18n.json` translates every English page into each of its languages. Detected: missing pages, stale
   ones (their `translatedFrom` frontmatter: a fingerprint per English section), orphans, and Fumadocs UI's own text (`ui/<lang>.json` against `ui/en.json`).
@@ -177,19 +199,19 @@ forward to them.
   uses the Claude login on the machine.
 - An app with no inlang project and no docs sites gets "nothing to check" and exit 0.
 
-The two commands, `npx remy i18n check` and `npx remy i18n translate`, with their options: [Commands](./commands.mdx).
+The two commands, `pnpm remy i18n check` and `pnpm remy i18n translate`, with their options: [Commands](./commands.mdx).
 
 
 ### Cloudflare
 
-Every `npx remy cloudflare …` command, and `npx remy test remote`, `npx remy observe` and `npx remy upgrade`, with what each does and refuses: [Commands](./commands.mdx). Each says in its header comment whether it is local or remote (and production).
+Every `pnpm remy cloudflare …` command, and `pnpm remy test remote`, `pnpm remy observe` and `pnpm remy upgrade`, with what each does and refuses: [Commands](./commands.mdx). Each says in its header comment whether it is local or remote (and production).
 
 Credentials come from Wrangler's login, or from the keychain through fnox
 ([tooling](./tooling.md#secrets-fnox)).
 
 ### Plans
 
-The plans rule ([how we work](./how-we-work.md#plans-few-short-closed)) as commands (`npx remy plans …`), the same in
+The plans rule ([how we work](./how-we-work.md#plans-few-short-closed)) as commands (`pnpm remy plans …`), the same in
 every project: `.plans/now.md` is the one ordered list, `.plans/*.md` the few open plan files,
 `.plans/done/` and `.plans/parked/` the rest, `.plans/stability-log.md` optional. A project with no
 `.plans/` passes `plans check` and has nothing to list.

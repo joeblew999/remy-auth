@@ -101,7 +101,7 @@ Better Auth or the database. How another Worker learns who is signed in at remy-
 
 The normal way is everywhere: an address, then the six-digit code mailed to it. The automatic way is
 beside it where the environment allows: the seeded people, listed on the sign-in form with what each
-holds, one press each, with no inbox. Local and staging have both; production has only the normal
+holds, one press each, with no inbox. Local and staging (every branch's Preview) have both; production has only the normal
 way. Both are Better Auth's own sign-in: a code is asked for and redeemed, and only Better Auth makes
 a session.
 
@@ -124,8 +124,10 @@ staging has the same people on a real deployment, and mails a real address its c
 names those IDs: that is all an app's seed ever knows about a person. Nothing here creates a session
 outside Better Auth.
 
-Staging is its own Worker with its own databases and secret (`env.staging` in `wrangler.jsonc`,
-deployed by every `vp run land` through `remy cloudflare staging`), so nothing done there touches production's data. It holds
+Staging is every branch's Preview, `https://<branch>-remy-auth.gedw99.workers.dev`, which Cloudflare builds from each
+push to a branch other than `main`; there is no staging Worker. The Previews have their own databases and secret
+(the `previews` section of `wrangler.jsonc`, `ENVIRONMENT: "staging"`), shared by every Preview, so nothing done
+there touches production's data. It holds
 fixtures and what visitors write. Never copy production's data into it: anybody who finds it can sign
 in as a seeded person.
 

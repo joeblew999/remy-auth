@@ -16,5 +16,9 @@ All of it for AI tools: https://remy-auth-docs.gedw99.workers.dev/llms.txt; how 
 Gemini CLI): https://remy-auth-docs.gedw99.workers.dev/dev/ai-tools.
 
 The docs' source is [apps/remy-auth-docs/content](apps/remy-auth-docs/content) (`users/` for the product guide, `dev/` for developers), served by
-the docs Worker in [apps/remy-auth-docs/](apps/remy-auth-docs). The tooling is [packages/remy-cli/src](packages/remy-cli/src) (`vp run`); every command, generated from it: [COMMANDS.md](COMMANDS.md). Agents start at [apps/remy-auth-docs/content/dev/agents.md](apps/remy-auth-docs/content/dev/agents.md); open work is in
+the docs Worker in [apps/remy-auth-docs/](apps/remy-auth-docs). The repository is a standard Vite Plus monorepo on pnpm
+(`vp install`, then `vp run <name>`): every task is written out in its package's `vite.config.ts`, the root
+`package.json`'s scripts compose them, and the command line they call is [packages/remy-cli](packages/remy-cli/src)
+(`remy`). Every command, generated from them: [COMMANDS.md](COMMANDS.md). Deploying is a push: Cloudflare builds `main`
+into production and every other branch into its Preview. Agents start at [apps/remy-auth-docs/content/dev/agents.md](apps/remy-auth-docs/content/dev/agents.md); open work is in
 [.plans/now.md](.plans/now.md); releases in [CHANGELOG.md](CHANGELOG.md).

@@ -4,7 +4,7 @@ description: "How a Remy app's docs are laid out and written with Fumadocs: fold
 ---
 
 Every Remy app keeps its docs the same way, so the shared tasks and the Fumadocs CLI work in each one.
-There are two docs sites, served by the docs Worker (the `docs/` app, apart from the app Worker): the guide
+There are two docs sites, served by the docs Worker (an app's `docs/`, `apps/remy-auth-docs/` in remy-auth, apart from the app Worker): the guide
 for the app's users at `/docs`, and these developer docs at `/dev`.
 Each has its own languages, search, `llms.txt` and Ask AI folder.
 
@@ -92,7 +92,7 @@ the catalog and the guide follows; the translator keeps the markers as they are.
 
 :::note
 Take them with the project's own tool, so they show the real app:
-`npx remy shots /formats --out docs/public/media` for a picture, and add `--video`
+`pnpm remy shots /formats --out docs/public/media` for a picture, and add `--video`
 for a short recording of the page.
 :::
 
@@ -114,8 +114,8 @@ for a short recording of the page.
 ## Components
 
 A page is `.md` (plain, read the same on the site, by an agent and in the `remy` skill) unless it uses a component,
-then `.mdx` (the site alone reads those). Nobody picks: `vp run ready` renames a page, its translations and
-the links to it when its content needs the other ending.
+then `.mdx` (the site alone reads those). Nobody picks: `vp run ready` fails when a page's content needs the other ending,
+and `vp run fix` renames the page, its translations and the links to it.
 
 In `.mdx` pages: `<Callout>` (or `:::note`, `:::warning` in any page), `<Cards>` and `<Card>`, `<Tabs>`
 and `<Tab>`, `<Steps>` and `<Step>`, `<Accordions>` and `<Accordion>`, `<Files>`, `<Folder>` and
@@ -138,6 +138,7 @@ the package, reviewed like any other. Apps take the Worker from the package and 
 
 ## Translations
 
-Write English only. `vp run land` translates what your change made stale, in the same commit
-([translations: in the change](./how-we-work.md#translations-in-the-change)); `npx remy i18n check docs` lists what each
+Write English only. `vp run translate`, before the commit, translates what your change made stale, so the
+translations go in the same commit
+([translations: in the change](./how-we-work.md#translations-in-the-change)); `pnpm remy i18n check docs` lists what each
 language still needs.

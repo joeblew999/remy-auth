@@ -13,8 +13,9 @@ This document owns what the code must be. How people and agents work day to day 
   Check what already exists before writing custom code. Keep wrappers thin; add
   custom behavior only for a concrete unmet requirement and document the gap.
 - Keep behaviour local to its owner and visible at the entry point.
-- `package.json` is the entry: its scripts run every project command; Node is pinned by
-  `.node-version`, every tool is a dependency. Do not import the retired `joeblew999/.github` task
+- The entry is Vite Plus's: the tasks written out in each package's `vite.config.ts` and the root `package.json`'s
+  scripts that compose them run every project command (`vp run <name>`); Node is pinned by `.node-version`, pnpm by
+  `devEngines`, and every tool is a dependency at the catalog's version (`pnpm-workspace.yaml`). Do not import the retired `joeblew999/.github` task
   library or control other repos through shared scripts.
 - Development uses local storage. Startup must not provision production identities,
   import sample data or silently change app registrations.
@@ -38,8 +39,8 @@ This document owns what the code must be. How people and agents work day to day 
   owner. Ask; do not choose, unless the owner has delegated them
   ([how we work](./how-we-work.md#when-the-owner-delegates-decisions)). A release
   (`vp run release`), provisioning and filing upstream issues also wait for the owner's explicit request.
-  A pull request does not: opening it and merging it once GitHub's checks pass (`gh pr merge --auto --squash`)
-  is the step every finished change takes, by whoever made it, and Cloudflare deploys the merged `main` by itself
+  A pull request does not: opening it and merging it once it is green (`vp run ci`, which its push ran) is the step
+  every finished change takes, by whoever made it, and Cloudflare deploys the merged `main` from the push
   ([the flow](./how-we-work.md#the-flow-the-standard-way-in-plain-sight)).
 - Do not mock Better Auth, D1 or the Workers runtime. Development conveniences (seeded people,
   a sign-in picker for them, a fixed sign-in code, captured mail) are allowed only behind one
