@@ -4,8 +4,8 @@ Closed 2026-09-26: items 2-6 built on oRPC 1.15.4 (contract 0.2.0 published with
 
 Status: decided 2026-09-25 (2.0 rechecked 2026-09-26) under the owner's delegation, from a scored survey with scratch proofs
 (below). It builds on the [TanStack move](tanstack.md), on main since release 0.9.0. Owner:
-remy-auth. Executor/Reviewer roles as in [plans and roles](../../apps/docs/content/dev/principles.md#plans-and-roles). Tools were chosen by
-survey, as [how we work](../../apps/docs/content/dev/how-we-work.md) requires.
+remy-auth. Executor/Reviewer roles as in [plans and roles](../../apps/remy-auth-docs/content/dev/principles.md#plans-and-roles). Tools were chosen by
+survey, as [how we work](../../apps/remy-auth-docs/content/dev/how-we-work.md) requires.
 
 ## Goal
 
@@ -90,20 +90,20 @@ Query, Zod 4, fetch on Workers, maturity, size)
 5. **Checks** in both apps: coverage, a schema-violating response rejected, invalid input giving
    the typed 400 in every locale.
 6. **Ship** with both levels, releases and both deploys, then a hands-on pass as in
-   [how we work](../../apps/docs/content/dev/how-we-work.md#multi-agent-work).
+   [how we work](../../apps/remy-auth-docs/content/dev/how-we-work.md#multi-agent-work).
 
 ## Progress and decisions, 2026-09-25 (branch contract-api)
 
 Done in remy-auth, under the owner's delegation: item 2 (package `api/*` and `api:spec`), item 3
-without the release (the contract is `packages/contract/`, private; its
-[README](../../packages/contract/README.md) says how to publish it), and item 5's checks for remy-auth
+without the release (the contract is `packages/remy-auth-contract/`, private; its
+[README](../../packages/remy-auth-contract/README.md) says how to publish it), and item 5's checks for remy-auth
 (`apiChecks`, `reservationApiChecks`, the status card's check on `/api/status`). Items 4 and 6: see
 the next section. Decisions, each with its reason:
 
 | Decision | Choice | Why |
 | --- | --- | --- |
 | Paths | Contract routes carry the full path (`/api/status`); the handler has no prefix | The document shows the real URLs, and a consumer's link needs only the origin |
-| Where the reservation shapes live | `reservationInput`, `reservationFieldErrors`, `reservationConfirmation` stay in `packages/ui/src/reservation.ts` beside the rules; the contract imports them and takes `@joeblew999/remy-ui` as a peer | `DemoPage` is shared by both apps; one home for the reservation, and the UI package never depends on an app's contract |
+| Where the reservation shapes live | `reservationInput`, `reservationFieldErrors`, `reservationConfirmation` stay in `packages/remy-ui/src/reservation.ts` beside the rules; the contract imports them and takes `@joeblew999/remy-ui` as a peer | `DemoPage` is shared by both apps; one home for the reservation, and the UI package never depends on an app's contract |
 | Invalid input | Broken rules are the typed `INVALID_RESERVATION` (400, first broken rule per field, in the asked language); a body of the wrong shape is oRPC's own `BAD_REQUEST` (400), which the generated document lists as the undefined-error alternative | The rules' messages depend on the language, so they cannot be the contract's input schema; the input schema stays language-neutral |
 | Language of an API call | Paraglide's `routeStrategies`: `/api/*` uses `preferredLanguage`, then `baseLocale`; the app's client sends the page's language as Accept-Language | Paraglide owns language; no redirect of `/api` documents and no cookie deciding for another tab; plain HTTP clients get standard content negotiation |
 | Policy | `meta.policy`, `'public'` for both endpoints until refined C's guard exists | The coverage rule needs a policy to check now; the type widens to the guard's actions later |
@@ -181,14 +181,14 @@ socket or rate-limits.
 
 | Where | 1.15.4 | 2.0 |
 | --- | --- | --- |
-| `packages/contract/src/index.ts` | `.route({ method, path, summary, tags })` on both procedures | `.meta(openapi({ ... }))` from `@orpc/openapi`, or the `.route` extension import |
-| `packages/contract/src/index.ts` | `INVALID_RESERVATION: { status: 400, ... }` | no `status` in errors; `errorStatusMap: { ...COMMON_ERROR_STATUS_MAP, INVALID_RESERVATION: 400 }` on the handler |
-| `packages/ui/src/api/server.ts` | `CORSPlugin({ origin: [...origins] })` | `CORSHandlerPlugin`; keep the explicit origins (2.0 defaults to `*`, our wildcard guard stays) |
-| `packages/ui/src/api/server.ts` | `OpenAPIReferencePlugin({ schemaConverters, specGenerateOptions: { info } })` | `OpenAPIReferenceHandlerPlugin({ provider, spec })`; generator takes `converters` and `base: { info }`; pass `version: '3.1.1'` to keep today's document, or accept 3.2 |
-| `packages/ui/src/api/server.ts` | `@orpc/zod/zod4` | `@orpc/zod` (Zod 4 only) |
-| `packages/ui/src/api/server.ts` | `missing.status` for the 404 answer | check whether `ORPCError` still carries `status` in 2.0; if not, use the status map |
-| `packages/ui/src/api/client.ts` | `@orpc/openapi-client/fetch`, `OpenAPILink(contract, { url })` | `@orpc/openapi/fetch`, `{ origin, url }` with `url` a path |
-| `packages/ui/src/api/client.ts` | `ResponseValidationPlugin` | `ResponseValidationLinkPlugin` (alias kept) |
+| `packages/remy-auth-contract/src/index.ts` | `.route({ method, path, summary, tags })` on both procedures | `.meta(openapi({ ... }))` from `@orpc/openapi`, or the `.route` extension import |
+| `packages/remy-auth-contract/src/index.ts` | `INVALID_RESERVATION: { status: 400, ... }` | no `status` in errors; `errorStatusMap: { ...COMMON_ERROR_STATUS_MAP, INVALID_RESERVATION: 400 }` on the handler |
+| `packages/remy-ui/src/api/server.ts` | `CORSPlugin({ origin: [...origins] })` | `CORSHandlerPlugin`; keep the explicit origins (2.0 defaults to `*`, our wildcard guard stays) |
+| `packages/remy-ui/src/api/server.ts` | `OpenAPIReferencePlugin({ schemaConverters, specGenerateOptions: { info } })` | `OpenAPIReferenceHandlerPlugin({ provider, spec })`; generator takes `converters` and `base: { info }`; pass `version: '3.1.1'` to keep today's document, or accept 3.2 |
+| `packages/remy-ui/src/api/server.ts` | `@orpc/zod/zod4` | `@orpc/zod` (Zod 4 only) |
+| `packages/remy-ui/src/api/server.ts` | `missing.status` for the 404 answer | check whether `ORPCError` still carries `status` in 2.0; if not, use the status map |
+| `packages/remy-ui/src/api/client.ts` | `@orpc/openapi-client/fetch`, `OpenAPILink(contract, { url })` | `@orpc/openapi/fetch`, `{ origin, url }` with `url` a path |
+| `packages/remy-ui/src/api/client.ts` | `ResponseValidationPlugin` | `ResponseValidationLinkPlugin` (alias kept) |
 | `src/router.tsx` | SSR hydration serializer | `RPCJsonSerializer` in place of `StandardRPCJsonSerializer` if we pass one |
 | Wire format | v1 | v1 links cannot call a v2 server: release remy-auth, the contract and remy-auth-app together |
 

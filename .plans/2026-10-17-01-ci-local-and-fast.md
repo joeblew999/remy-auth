@@ -44,7 +44,7 @@ On a PR, GitHub still starts the after-merge jobs (one workflow for every event)
 
 ### Skip what a change cannot affect
 
-`packages/ui/src/cli/unchanged.ts` (unit-checked): plans, docs content and Markdown outside the packages
+`packages/remy-cli/src/unchanged.ts` (unit-checked): plans, docs content and Markdown outside the packages
 run nothing; the blank app and the fixture run only consumers; unknown paths run everything. On a PR
 it compares the merge commit with its base parent; locally on a branch, with `origin/main`; on main,
 with `--all` or on a push, nothing is skipped.

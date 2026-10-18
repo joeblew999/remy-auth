@@ -3,7 +3,7 @@
 Closed 2026-09-26: the mechanism and four parts (time-zones, deferred-place, seo-routes, status-card) in remy-ui 0.11.0; leave-guard, search-params and observability stay package modules (reasons below); "Writing a part" is in docs/content/dev/remy-ui.md. remy-auth-app adopts parts when it wants them.
 
 Status: proposed 2026-09-25 under the owner's delegation. Owner: remy-auth. Executor/Reviewer roles
-as in [plans and roles](../../apps/docs/content/dev/principles.md#plans-and-roles). Owner, 2026-09-25: parts of the GUI (some for operations,
+as in [plans and roles](../../apps/remy-auth-docs/content/dev/principles.md#plans-and-roles). Owner, 2026-09-25: parts of the GUI (some for operations,
 some for testing) will be wanted again and again; adding and removing them from any Remy app must
 be child's play.
 
@@ -66,7 +66,7 @@ level 1 with both parts, and with either removed; each needs one line to add or 
 leaves no code in `dist/client` and no callable server function; with candidate 1 the removed card
 stayed in the bundle and its server function still answered 200.
 
-Found by the spike, to design in: a part's route file under `packages/ui/src/parts/` is still
+Found by the spike, to design in: a part's route file under `packages/remy-ui/src/parts/` is still
 type-checked by remy-auth's `tsconfig` when remy-auth leaves the part out (7 errors; the build
 passes), so the package's own typecheck must include every part; links between parts (the
 location card links to `/time-zones/$`) fail at runtime when the target part is absent, so parts
@@ -81,12 +81,12 @@ unknown names, duplicates and missing `requires` fail the build and the checks);
 (`./parts/vite`) mounts listed parts' route directories with `rootRoute('__root.tsx', [physical('', '.'), physical('', <part>/routes)...])`
 and generates `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` (`./parts/checks`) runs listed
 parts' checks. The generated route tree keeps every route ID and path. **Converted:** `time-zones`
-(route moved to `packages/ui/src/parts/time-zones/routes/`; its checks split out of `problemChecks`'s
+(route moved to `packages/remy-ui/src/parts/time-zones/routes/`; its checks split out of `problemChecks`'s
 call). To let a part's route render pages, `problem-pages` moved into the package (`./problem`) and
 `usePreferred` too (`./preferred`); problem pages stay always-on (every route uses them), so they
 are a package module, not a removable part.
 
-Decided: remy-auth's `tsconfig` excludes `packages/ui/src/parts/*/routes`; a listed part's route is
+Decided: remy-auth's `tsconfig` excludes `packages/remy-ui/src/parts/*/routes`; a listed part's route is
 still type-checked because the route tree imports it, and an unlisted one is not (the spike's
 7 errors are gone). With `time-zones` removed the build passes and no zone route chunk ships; the
 typecheck still fails on `src/showcase/deferred-place.tsx`'s typed `Link` to `/time-zones/$` (at

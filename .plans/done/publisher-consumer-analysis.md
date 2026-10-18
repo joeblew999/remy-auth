@@ -5,7 +5,7 @@ Closed 2026-09-26: analysis used (package moves, drift fixes, new-consumer recip
 Status: analysis for [publisher-consumer.md](publisher-consumer.md), 2026-09-25. Read only: no code
 changed, no test run, nothing on Cloudflare. Evidence is file paths in remy-auth (here) and in
 remy-auth-app (`../remy-auth-app/`, at `d62f804`, on `@joeblew999/remy-ui` 0.10.5 and
-`tasks?ref=v0.10.5`). remy-auth `main` is at `330c3b7` with `packages/ui/package.json` 0.10.6
+`tasks?ref=v0.10.5`). remy-auth `main` is at `330c3b7` with `packages/remy-ui/package.json` 0.10.6
 (unreleased; latest tag `v0.10.5`).
 
 Headline: the approach holds (one package, one include, three `[env]` inputs, zero task overrides in
@@ -20,7 +20,7 @@ remy-auth-app; nothing generates it today.
 
 | # | Step | Kind | Evidence |
 | --- | --- | --- | --- |
-| 1 | Install mise >= 2026.9.12, `gh auth login` (token with `read:packages`), Google Chrome, `wrangler login` later for deploys | prerequisite | `mise.toml` `min_version`; `tasks/project.toml` `project:setup` env; `packages/ui/src/playwright.js` (`channel: 'chrome'`) |
+| 1 | Install mise >= 2026.9.12, `gh auth login` (token with `read:packages`), Google Chrome, `wrangler login` later for deploys | prerequisite | `mise.toml` `min_version`; `tasks/project.toml` `project:setup` env; `packages/remy-ui/src/playwright.js` (`channel: 'chrome'`) |
 | 2 | `mise.toml`: `[tools] node`, `[settings] task.timings`, `[task_config] includes = ["git::…/remy-auth.git//tasks?ref=vX.Y.Z"]`, `[env] PREVIEW_PORT`, `PUBLIC_ORIGIN`, `DEPLOY_ORIGIN` | copy (22 lines) | `../remy-auth-app/mise.toml` |
 | 3 | Optional `mise.dev.toml` (`ref=main`), gitignored `mise.local.toml` (`../remy-auth/tasks`) | copy | `../remy-auth-app/mise.dev.toml`, `docs/content/dev/projects.md` |
 | 4 | `.npmrc` with the GitHub Packages registry and `${GITHUB_TOKEN}` | copy (2 lines) | `../remy-auth-app/.npmrc`, `docs/content/dev/remy-ui.md` l.99 |
@@ -59,7 +59,7 @@ packages the tasks need (`docs/content/dev/projects.md` names seven, the real li
 | D4 | `vite.config.ts` vs remy-auth `vite.config.ts` | Same `FontaineTransform` fallbacks, `tailwindcss()`, `inlineCss`, `viteReact()`, host `127.0.0.1`; the consumer adds Cloudflare's prerender Worker and the page list (every path x locale, per-locale `404.html`) | **Move** the page list into the package (`prerenderPages({ notFoundPath })` next to `allPaths` in `@joeblew999/remy-ui/paths`, pure data, 15 lines). Plugin order stays in each config: the two apps differ (SSR vs prerender) and the plugins are upstream's |
 | D5 | `playwright.config.ts` | One call to `playwrightConfig()`; remy-auth passes `wrangler dev --local` | **Own**: already shared |
 | D6 | `wrangler.jsonc` | No `preview_urls: false` and no `redact_query_string` (remy-auth has both; `scripts/verify-tooling.mjs` asserts the second, but only for remy-auth) | **Move** the assertions into a shared check or `project:verify` step for every consumer; add both keys to the template |
-| D7 | `public/_headers` | Byte-identical to remy-auth's | **Own** (Cloudflare reads it from `public/`), but add a shared check that `/assets/*` answers `immutable`; no check covers it today (`packages/ui/src/checks.js` has none) |
+| D7 | `public/_headers` | Byte-identical to remy-auth's | **Own** (Cloudflare reads it from `public/`), but add a shared check that `/assets/*` answers `immutable`; no check covers it today (`packages/remy-ui/src/checks.js` has none) |
 | D8 | `src/styles.css` | Same three imports as remy-auth, plus `@source "../node_modules/@joeblew999/remy-ui/src"` | **Move**: a package `tailwind.css` that imports the three and declares `@source "./"` (Tailwind resolves `@source` relative to the file that holds it), so a consumer writes one import and its own `@source "../src"`. Verify with a build |
 | D9 | `src/routes/sitemap[.]xml.ts`, `robots[.]txt.ts` vs remy-auth's | Two implementations of the same XML (remy-auth adds docs and cache headers) | **Move** a `sitemapXml({ origin, extra })` and `robotsTxt(origin)` into `@joeblew999/remy-ui/seo`; routes become one-liners |
 | D10 | `src/problem.tsx` vs remy-auth `src/problem.tsx` | Consumer's is a bare `<main>`; remy-auth's uses shadcn `Empty`, `Shell`, retry | **Move** remy-auth's into the package (`./problem`); both use it |
@@ -79,7 +79,7 @@ Found while reading, most urgent first:
 - **`cf:preview` on `main` breaks every consumer without docs.** `tasks/cf/preview` waits for ten
   200s from `$origin/en/docs`; remy-auth-app has no docs, so it fails after 2 minutes, and so does
   `project:test:cwv`. Probe `/healthz` (already served by `withObservability`) or the base-locale
-  home (`localizeUrl('/')`, as `packages/ui/src/playwright.js` does). Must be fixed before the next
+  home (`localizeUrl('/')`, as `packages/remy-ui/src/playwright.js` does). Must be fixed before the next
   release tag.
 - **The consumer on the tag has old tasks.** `git diff --stat v0.10.5 HEAD -- tasks` shows 12 files
   (throwaway-Worker `cf:preview`, `cf:preview-delete`, `GATE=1` `cf:deploy`, `cf:events`,
@@ -189,10 +189,10 @@ Net: 4 wrappers and the cwv log parsing go; two scripts move; no new scripts.
 | --- | --- | --- | --- |
 | 1 | Fix `cf:preview`'s `/en/docs` probe (use `/healthz` or the base-locale home) before tagging 0.10.6 | S | `tasks/cf/preview` |
 | 2 | Recipe fixes in the consumer: `min_version`, shell-read `PREVIEW_PORT`, `PUBLIC_ORIGIN` from it, `preview_urls: false`, `redact_query_string`, README refresh | S | `../remy-auth-app/mise.toml`, `wrangler.jsonc`, `README.md` |
-| 3 | App name once: package helpers and `observabilityChecks` default to wrangler's `name`; vite derives the prerender name | M | `packages/ui/src/worker.ts`, `tanstack.tsx`, `checks.js`; consumer |
+| 3 | App name once: package helpers and `observabilityChecks` default to wrangler's `name`; vite derives the prerender name | M | `packages/remy-ui/src/worker.ts`, `tanstack.tsx`, `checks.js`; consumer |
 | 4 | Template repo + one recipe in `docs/content/dev/tooling.md` and `docs/content/dev/projects.md`; prove with a throwaway second consumer made from the recipe alone (the plan's gate) | M | GitHub setting on remy-auth-app; docs |
-| 5 | Shared check sets: `prerenderedAppChecks` (D12), immutable-assets and wrangler-observability checks (D6, D7) | M | `packages/ui/src/checks.js` |
-| 6 | Package moves: `prerenderPages` (D4), `tailwind.css` (D8), `sitemapXml`/`robotsTxt` (D9), `Problem` (D10) | M | `packages/ui/src/` |
+| 5 | Shared check sets: `prerenderedAppChecks` (D12), immutable-assets and wrangler-observability checks (D6, D7) | M | `packages/remy-ui/src/checks.js` |
+| 6 | Package moves: `prerenderPages` (D4), `tailwind.css` (D8), `sitemapXml`/`robotsTxt` (D9), `Problem` (D10) | M | `packages/remy-ui/src/` |
 | 7 | Tasks: `project:after-deploy` hook, `skills:verify`, `project:tasks-refresh`, `cf:preview --cwv`, drop the 4 wrappers | S-M | `tasks/` |
 | 8 | Reusable CI workflow, called by remy-auth and a consumer workflow | M | `.github/workflows/` |
 | 9 | Docs and AI answers into package and tasks, per-consumer names from `[env]`; owner sets each spend limit | L | item 4 |

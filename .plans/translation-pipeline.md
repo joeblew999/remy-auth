@@ -152,7 +152,7 @@ network denied (curl exit 7 confirmed the block). Nothing was written in the rep
 
 **Criteria, in order:** mise installs and pins every tool; configured once in the shared `tasks/`,
 identical in every app that includes it; each task a short run over the tool; fits today's layout
-(`docs/i18n/<locale>/<repo path>`, `packages/ui/messages/<locale>.json` through `project.inlang`) with
+(`docs/i18n/<locale>/<repo path>`, `packages/remy-ui/messages/<locale>.json` through `project.inlang`) with
 no glue; checks offline with no key; replaces our code rather than sitting beside it; fewest tools.
 
 ### Findings that decide it
@@ -291,7 +291,7 @@ proved in step 1 of the plan.
 **Config lives in one shared place.** Tools, pins, tasks, the plural test and the translator prompt are
 in `tasks/`, included by git reference. An app's `mise.toml` keeps only `node` and two `[env]` inputs:
 `I18N_DOCS_TABLE = "src/docs/table.js"` (kept, since the docs table stays the one list of docs) and a new
-`I18N_MESSAGES = "packages/ui/messages"`. Locales come from the layout itself (`docs/i18n/<locale>/`,
+`I18N_MESSAGES = "packages/remy-ui/messages"`. Locales come from the layout itself (`docs/i18n/<locale>/`,
 `messages/<locale>.json`, which `project.inlang` already drives). There is no `i18n.json`, no lockfile,
 no symlinks and no generated config.
 

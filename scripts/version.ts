@@ -11,11 +11,16 @@ if (!version || !/^\d+\.\d+\.\d+$/.test(version)) {
 }
 const npm = (...args: string[]) => execFileSync('npm', args, { stdio: ['ignore', 'ignore', 'inherit'] });
 npm('pkg', 'set', `version=${version}`, '--workspace', '@joeblew999/remy-ui');
+// The command line is released with the platform, under the same number.
+npm('pkg', 'set', `version=${version}`, '--workspace', '@joeblew999/remy-cli');
 npm('pkg', 'set', `peerDependencies.@joeblew999/remy-ui=>=${version}`, '--workspace', '@joeblew999/remy-showcase');
 npm('pkg', 'set', `peerDependencies.@joeblew999/remy-ui=>=${version}`, '--workspace', '@joeblew999/remy-auth-contract');
 // The showcase declares what it imports, at the platform's exact versions (tests/unit/showcase-deps.unit.spec.ts).
-const platform = JSON.parse(readFileSync('packages/ui/package.json', 'utf8')).dependencies as Record<string, string>;
-const showcase = JSON.parse(readFileSync('packages/showcase/package.json', 'utf8')).dependencies as Record<
+const platform = JSON.parse(readFileSync('packages/remy-ui/package.json', 'utf8')).dependencies as Record<
+  string,
+  string
+>;
+const showcase = JSON.parse(readFileSync('packages/remy-showcase/package.json', 'utf8')).dependencies as Record<
   string,
   string
 >;
@@ -23,10 +28,14 @@ for (const name of Object.keys(showcase))
   if (platform[name] && platform[name] !== showcase[name])
     npm('pkg', 'set', `dependencies.${name}=${platform[name]}`, '--workspace', '@joeblew999/remy-showcase');
 npm('install', '--package-lock-only', '--no-audit', '--no-fund', '--loglevel=error');
-execFileSync('npm', ['pkg', 'set', `dependencies.@joeblew999/remy-ui=${version}`], {
-  cwd: 'template',
-  stdio: ['ignore', 'ignore', 'inherit'],
-});
+execFileSync(
+  'npm',
+  ['pkg', 'set', `dependencies.@joeblew999/remy-ui=${version}`, `dependencies.@joeblew999/remy-cli=${version}`],
+  {
+    cwd: 'template',
+    stdio: ['ignore', 'ignore', 'inherit'],
+  },
+);
 // The shared workflow is ci.yml from the release after 0.15.1 (it was google.yml): the new tag gets the new name.
 if (existsSync('template/.github/workflows/ci.yml'))
   writeFileSync(

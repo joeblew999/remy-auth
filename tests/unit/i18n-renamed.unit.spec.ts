@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, renameSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { docsGaps, pagePrints, withRecord } from '../../packages/ui/src/cli/i18n';
+import { docsGaps, pagePrints, withRecord } from '../../packages/remy-cli/src/i18n';
 
 // A page renamed (or deleted) but not yet committed is still in git's index; the checker counted it, so a
 // renamed page was both "missing" and an "orphan" and the translator went looking for it (2026-10-17).

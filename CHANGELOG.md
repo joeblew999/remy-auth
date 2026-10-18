@@ -6,6 +6,22 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed: a Vite Plus monorepo as `vp create` makes one
+- The command line is its own package, `@joeblew999/remy-cli` (the `remy` and `remy-check` commands), and an app
+  installs it beside `@joeblew999/remy-ui`. `remy.config.ts`'s type comes from `@joeblew999/remy-cli/project`.
+- Every task is written out in its own package's `vite.config.ts`: an app's `defineConfig({ ...remyApp(), run: { tasks
+  } })`, its docs' `defineConfig({ ...remyDocs(), run: { tasks } })`. `remyApp()` and `remyDocs()` return Vite's
+  configuration only; `remyTasks()`, `remyWorkspace()` and `@joeblew999/remy-ui/workspace` are gone. What is shared is
+  plain settings, `@joeblew999/remy-ui/vite-plus` (`style`, `network`), with Vite Plus's own lint plugin.
+- `vp run ready` is every check (it was `vp run check`, too close to Vite Plus's own `vp check`). `vp run ci` is a
+  script, `vp run ready && vp run test:browser && vp run test:audits`, whose parts are GitHub's jobs.
+- `remy upgrade` takes the scripts, hooks and `vite.config.ts` files from the blank app at the release's tag.
+- No worktree ports worked out when the configuration loads, and no `ports` in `remy.config.ts`: the previews are
+  at `PREVIEW_PORT` and `DOCS_PREVIEW_PORT` (4173, 4174). `release-checks` is gone: a repository's own release checks
+  are steps of its `release` script.
+- remy-auth's folders are its packages' names: `apps/remy-auth-docs`, `packages/remy-ui`, `packages/remy-cli`,
+  `packages/remy-auth-contract`, `packages/remy-showcase`.
+
 ### Changed: Vite Plus runs everything
 - Every app is a Vite Plus project (`vp`, the toolchain the package already uses): `remyApp()` in its
   `vite.config.ts` gives it the tasks (`generate`, `build`, `dev`, `preview`, `browsers`, `test:browser`,
@@ -19,7 +35,6 @@ package follows [Semantic Versioning](https://semver.org/).
   the flow), installed by the `prepare` script.
 - The old scripts and commands are gone: `dev:<step>`, `remy check`, `remy ci`, `remy app`, `remy dev`, the
   `remy flow` steps `start`, `change` and `done` (Claude Code's own worktrees do that), `remy verify all`.
-- A worktree's own ports reach the tasks (`localPorts()`), so two worktrees' checks never share one.
 - CI: the shared workflow is `.github/workflows/ci.yml` (it was `google.yml`).
 
 ### Changed: the configuration shows what runs; the command line is leaves
@@ -73,7 +88,7 @@ package follows [Semantic Versioning](https://semver.org/).
 0.14.0 was prepared on main and never published; its changes ship here.
 
 ### Changed
-- No mise. `package.json` is the entry: its scripts run every command (`npm run dev:status|start|change|land|promote|release|done`, `npm run dev|build|preview|test|setup|packages|docs|…`). The tooling is `remy`, the package's bin (`packages/ui/src/cli`, TypeScript; an app runs the JavaScript emitted from it), with `remy.config.ts` for an app's origins, ports and release package and `.node-version` for Node. The shared workflow runs on `setup-node` and `npm run`; the blank app has no `mise.toml`; an app moves to a release with `npm run upgrade -- <version>`. The deploy's wait ends only when the home page's every asset answers.
+- No mise. `package.json` is the entry: its scripts run every command (`npm run dev:status|start|change|land|promote|release|done`, `npm run dev|build|preview|test|setup|packages|docs|…`). The tooling is `remy`, the package's bin (`packages/remy-cli/src`, TypeScript; an app runs the JavaScript emitted from it), with `remy.config.ts` for an app's origins, ports and release package and `.node-version` for Node. The shared workflow runs on `setup-node` and `npm run`; the blank app has no `mise.toml`; an app moves to a release with `npm run upgrade -- <version>`. The deploy's wait ends only when the home page's every asset answers.
 
 ## [0.14.0] - 2026-10-09
 
@@ -713,7 +728,7 @@ remy-auth-app).
 - `@joeblew999/remy-ui/runtime`: the generated runtime as plain JavaScript for build configs.
 
 ### Changed
-- The compiler options live in `packages/ui/paraglide.mjs`, shared by the Vite plugin and
+- The compiler options live in `packages/remy-ui/paraglide.mjs`, shared by the Vite plugin and
   `mise run ui:generate`. The remembered-choice cookie is Paraglide's `PARAGLIDE_LOCALE`.
 
 ## [0.1.0] - 2026-09-24

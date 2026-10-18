@@ -56,7 +56,7 @@ test("a person signs in with an emailed code, and the session reaches the API ov
   // A wrong code signs nobody in.
   const wrong = await signIn(person, email, code === '000000' ? '111111' : '000000');
   expect(wrong.status()).toBe(400);
-  // No session cookie. (The attempt is a write, so the read-replica bookmark, packages/ui/src/replicas.ts, may move.)
+  // No session cookie. (The attempt is a write, so the read-replica bookmark, packages/remy-ui/src/replicas.ts, may move.)
   expect(wrong.headers()['set-cookie'] ?? '').not.toMatch(/session/);
   expect((await person.get('/api/me')).status()).toBe(401);
 

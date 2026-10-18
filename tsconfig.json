@@ -1,9 +1,9 @@
 {
   "//": "The workspace's TypeScript: the packages, the unit checks, the root's scripts and configs. The shared package's routing is typed by an app's registered routes, so the app's route tree and router come in (they bring the routes' modules). Each app has its own project too (apps/*/tsconfig.json), which Vite Plus's type check uses for the app's files.",
   "include": [
-    "packages/ui/src/**/*",
-    "packages/showcase/src/**/*",
-    "packages/contract/src/**/*",
+    "packages/remy-ui/src/**/*",
+    "packages/remy-showcase/src/**/*",
+    "packages/remy-auth-contract/src/**/*",
     "tests/**/*",
     "scripts/**/*",
     "*.ts",
@@ -12,7 +12,7 @@
     "apps/remy-auth/src/routeTree.gen.ts",
     "apps/remy-auth/src/router.tsx"
   ],
-  "exclude": ["packages/ui/src/docs"],
+  "exclude": ["packages/remy-ui/src/docs"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "types": ["vite/client", "node"],

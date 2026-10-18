@@ -1,0 +1,7 @@
+{
+  // shadcn's aliases for this package (its components.json names @joeblew999/remy-ui/*): where `shadcn add -c
+  // packages/remy-ui` and the app's `shadcn add` write. It holds no files: they type-check in the root's project, once
+  // (Vite Plus's type check, which a second project for the same files breaks).
+  "compilerOptions": { "paths": { "@joeblew999/remy-ui/*": ["./src/*"] } },
+  "files": []
+}

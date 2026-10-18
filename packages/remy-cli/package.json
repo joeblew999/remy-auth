@@ -1,0 +1,32 @@
+{
+  "name": "@joeblew999/remy-cli",
+  "version": "0.15.1",
+  "description": "The Remy command line (remy, remy-check): status, landing, deploys, translations, checks and setup for every Remy app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joeblew999/remy-auth.git",
+    "directory": "packages/remy-cli"
+  },
+  "bin": {
+    "remy": "./dist/remy.js",
+    "remy-check": "./dist/checks.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "type": "module",
+  "exports": {
+    "./project": {
+      "types": "./dist/config.d.ts",
+      "default": "./dist/config.js"
+    }
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "dependencies": {
+    "@joeblew999/remy-ui": "*",
+    "wrangler": "4.137.0"
+  }
+}

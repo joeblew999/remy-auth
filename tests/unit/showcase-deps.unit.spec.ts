@@ -9,8 +9,8 @@ import { readdirSync, readFileSync } from 'node:fs';
 const read = (file: string) => JSON.parse(readFileSync(file, 'utf8')) as { dependencies?: Record<string, string> };
 
 test("the showcase's dependencies are the platform's, at the platform's exact versions", () => {
-  const platform = read('packages/ui/package.json').dependencies ?? {};
-  const showcase = read('packages/showcase/package.json').dependencies ?? {};
+  const platform = read('packages/remy-ui/package.json').dependencies ?? {};
+  const showcase = read('packages/remy-showcase/package.json').dependencies ?? {};
   const differing = Object.entries(showcase)
     .filter(([name, version]) => platform[name] !== version)
     .map(([name, version]) => `${name}: ${version} here, ${platform[name] ?? 'absent'} in @joeblew999/remy-ui`);
@@ -21,7 +21,7 @@ test("the showcase's dependencies are the platform's, at the platform's exact ve
 });
 
 test('every package the showcase imports is one it declares, or the platform itself', () => {
-  const declared = new Set(Object.keys(read('packages/showcase/package.json').dependencies ?? {}));
+  const declared = new Set(Object.keys(read('packages/remy-showcase/package.json').dependencies ?? {}));
   const imported = new Set<string>();
   const walk = (dir: string): void => {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -36,6 +36,6 @@ test('every package the showcase imports is one it declares, or the platform its
         }
     }
   };
-  walk('packages/showcase/src');
+  walk('packages/remy-showcase/src');
   expect([...imported].filter((name) => !declared.has(name)).sort()).toEqual([]);
 });

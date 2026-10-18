@@ -36,7 +36,7 @@ must not be done in a hardcoded way."
 
 ## For the agent
 
-Read `packages/ui/src/pages.tsx` (FormatsContent), `showcase/search-params.tsx`, `locale-info.ts`,
+Read `packages/remy-ui/src/pages.tsx` (FormatsContent), `showcase/search-params.tsx`, `locale-info.ts`,
 `samples.js`, `checks.js` (formatsChecks), [hard-localisation.md](hard-localisation.md) and
 [fonts.md](fonts.md). Deliver: an inventory of every area and control with what is derived and what
 is hardcoded today, a survey for region data (currency), a design against requirements 1 to 6,
@@ -55,7 +55,7 @@ and milestones with gates. Owner decisions only if a choice costs money or chang
   (one 2025 release), `country-to-currency` 3.0.1 (ISO 3166 alpha-2 to ISO 4217, MIT, released
   2026-06, 16 kB unpacked, already has Bulgaria on EUR). Chosen: `country-to-currency`, keyed by
   `Intl.Locale(locale).maximize().region`.
-- **One source, plain JavaScript.** `packages/ui/src/locale-data.js` (+ `.d.ts`) derives each
+- **One source, plain JavaScript.** `packages/remy-ui/src/locale-data.js` (+ `.d.ts`) derives each
   locale's own values and every control's choices; `locale-info.ts` re-exports it and adds
   `region`, `currency`, `counts` to `LocaleInfo`. Plain JavaScript because the shared checks load
   from `node_modules` untranspiled, and they must read the same module (requirement 4).

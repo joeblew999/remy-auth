@@ -1,4 +1,4 @@
--- The showcase's notes demo (packages/contract/src/notes.ts holds its relation vocabulary, which names
+-- The showcase's notes demo (packages/remy-auth-contract/src/notes.ts holds its relation vocabulary, which names
 -- these tables and columns; tests/notes.spec.ts fails when the two disagree). A person is only ever
 -- an account ID here: this database knows nothing else about anybody.
 create table "note" ("id" text not null primary key, "author_id" text not null, "title" text not null, "body" text not null, "created_at" text not null, "updated_at" text not null);

@@ -1,11 +1,9 @@
-import type { RemyProject } from '@joeblew999/remy-ui/project';
+import type { RemyProject } from '@joeblew999/remy-cli/project';
 
-// Where this app is deployed and its local ports: the one place the tooling (vp run dev:*) reads
-// them. A worktree computes its own ports from its name.
+// Where this app is deployed: the one place the tooling (remy cloudflare, remy test) reads it.
 export default {
   origins: {
     production: 'https://my-app.example.workers.dev',
     docs: 'https://my-app-docs.example.workers.dev',
   },
-  ports: { preview: 4173, docsPreview: 4174 },
 } satisfies RemyProject;

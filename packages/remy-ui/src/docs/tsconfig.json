@@ -1,0 +1,15 @@
+{
+  "//": "remy-auth's own check of the docs Worker in this folder, the way an app checks it: against remy-auth's apps/remy-auth-docs/ (docs.config.ts, the generated collections and Worker types). Editors and Vite+'s type check find it as these files' nearest tsconfig. Never published (package.json files); apps extend tsconfig.base.json.",
+  "extends": "./tsconfig.base.json",
+  "include": [
+    "./**/*",
+    "../../../../apps/remy-auth-docs/*.ts",
+    "../../../../apps/remy-auth-docs/.remy-docs/*.ts",
+    "../../../../apps/remy-auth-docs/worker-configuration.d.ts"
+  ],
+  "compilerOptions": {
+    "paths": {
+      "@remy-docs-app/*": ["../../../../apps/remy-auth-docs/*"]
+    }
+  }
+}

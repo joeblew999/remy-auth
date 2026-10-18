@@ -9,7 +9,7 @@ import {
   staleKeys,
   withRecord,
   withoutRecord,
-} from '../../packages/ui/src/cli/i18n';
+} from '../../packages/remy-cli/src/i18n';
 
 // Each translation records what it was made from (i18n.ts): staleness is the record against the English,
 // with no git history, so a Mac, a cloud agent and GitHub's shallow checkout agree; and the record names
@@ -62,7 +62,7 @@ test('a spliced section keeps the blank line before the next heading (it was los
 });
 
 test("a docs menu's words are its title and its separators' and links' labels, put back in their places", async () => {
-  const { menuIn, menuWords } = await import('../../packages/ui/src/cli/i18n');
+  const { menuIn, menuWords } = await import('../../packages/remy-cli/src/i18n');
   const menu = { title: 'Remy product guide', pages: ['index', '---Help---', 'faq', '[API reference](/reference)'] };
   expect(menuWords(menu)).toEqual({ title: 'Remy product guide', 'pages.1': 'Help', 'pages.3': 'API reference' });
   const spanish = menuIn(menu, { title: 'Guía de Remy', 'pages.1': 'Ayuda', 'pages.3': 'Referencia de la API' });

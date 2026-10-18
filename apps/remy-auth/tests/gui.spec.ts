@@ -67,7 +67,7 @@ buildBoundaryChecks({
     {
       name: 'request.cf',
       pattern: /[\w$)\]]\.cf\b/,
-      source: '../../packages/showcase/src/parts/deferred-place/place.server.ts',
+      source: '../../packages/remy-showcase/src/parts/deferred-place/place.server.ts',
     },
     {
       name: 'TanStack Devtools (the shell hosting the panels)',
@@ -119,11 +119,11 @@ async function formatsExtra(page: Page, locale: string) {
 
 // Checks that belong to this repository: server rendering itself, in each catalog's language. The
 // catalogs' completeness, placeholders and plurals are i18n:messages:check (tasks/i18n).
-const settings = JSON.parse(readFileSync('../../packages/ui/project.inlang/settings.json', 'utf8'));
+const settings = JSON.parse(readFileSync('../../packages/remy-ui/project.inlang/settings.json', 'utf8'));
 const catalogs: Record<string, Record<string, any>> = Object.fromEntries(
   (settings.locales as string[]).map((locale) => [
     locale,
-    JSON.parse(readFileSync(`../../packages/ui/messages/${locale}.json`, 'utf8')),
+    JSON.parse(readFileSync(`../../packages/remy-ui/messages/${locale}.json`, 'utf8')),
   ]),
 );
 test.use({ timezoneId: 'Asia/Tokyo' });

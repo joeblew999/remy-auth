@@ -2,9 +2,9 @@ import { test, expect } from 'vite-plus/test';
 import { mkdtempSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { needsMdx, rightEndings } from '../../packages/ui/src/cli/page';
+import { needsMdx, rightEndings } from '../../packages/remy-cli/src/page';
 
-// A docs page is .md unless it uses a component, then .mdx; vp run check renames it, so nobody has to know (owner, 2026-10-17).
+// A docs page is .md unless it uses a component, then .mdx; vp run ready renames it, so nobody has to know (owner, 2026-10-17).
 
 test('a page needs MDX for a component, not for a tag in code or plain text', () => {
   expect(needsMdx('Hello <Tabs items={["a"]}>')).toBe(true);

@@ -10,10 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CspReportRouteImport } from './../../../packages/ui/src/app-routes/csp-report'
+import { Route as CspReportRouteImport } from './../../../packages/remy-ui/src/app-routes/csp-report'
 import { Route as FormatsRouteImport } from './routes/formats'
-import { Route as RobotsChar91DotChar93txtRouteImport } from './../../../packages/ui/src/parts/seo-routes/routes/robots[.]txt'
-import { Route as SitemapChar91DotChar93xmlRouteImport } from './../../../packages/ui/src/parts/seo-routes/routes/sitemap[.]xml'
+import { Route as RobotsChar91DotChar93txtRouteImport } from './../../../packages/remy-ui/src/parts/seo-routes/routes/robots[.]txt'
+import { Route as SitemapChar91DotChar93xmlRouteImport } from './../../../packages/remy-ui/src/parts/seo-routes/routes/sitemap[.]xml'
 import { Route as ApiDotsplatRouteImport } from './routes/api.$'
 import { Route as AppDotindexRouteImport } from './routes/app.index'
 import { Route as AppDotaccountRouteImport } from './routes/app.account'
@@ -27,7 +27,7 @@ import { Route as AppDotsettingsRouteImport } from './routes/app.settings'
 import { Route as DevDotmailRouteImport } from './routes/dev.mail'
 import { Route as DevDotpeopleRouteImport } from './routes/dev.people'
 import { Route as DocsDotsplatRouteImport } from './routes/docs.$'
-import { Route as TimeZonesDotsplatRouteImport } from './../../../packages/showcase/src/parts/time-zones/routes/time-zones.$'
+import { Route as TimeZonesDotsplatRouteImport } from './../../../packages/remy-showcase/src/parts/time-zones/routes/time-zones.$'
 import { Route as ApiDotauthDotsplatRouteImport } from './routes/api.auth.$'
 
 const IndexRoute = IndexRouteImport.update({

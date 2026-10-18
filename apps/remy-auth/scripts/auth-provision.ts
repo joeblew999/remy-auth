@@ -23,7 +23,7 @@ the send_email binding beside it must allow. Its domain has to be enabled for se
 
 A later migration is step 2 or 5 again, before the deploy that needs it.
 
-Staging (every vp run land deploys it) is the same five steps on its own resources, with --env staging:
+Staging (Cloudflare's staging build deploys main to it) is the same five steps on its own resources, with --env staging:
 databases remy-auth-staging and remy-auth-demo-staging, their ids in wrangler.jsonc under env.staging,
 then for each binding
      npx wrangler d1 migrations apply <DB|DEMO_DB> --remote --env staging

@@ -36,7 +36,7 @@ Ordered by risk to the next slice:
    (`create-auth`, `better-auth-best-practices`, `wrangler`, `workers-best-practices`)
    before adding anything.
 2. **Paraglide JS 2.x**: SSR locale strategy, message compilation, the
-   `packages/ui` export of generated messages.
+   `packages/remy-ui` export of generated messages.
 3. **Playwright Test authoring** (`@playwright/test` 1.63): fixtures, projects,
    `webServer`, remote targets. Decide whether `playwright-cli` is sufficient.
 4. **Tailwind CSS 4**: CSS-first config and the `@tailwindcss/vite` plugin.
@@ -72,7 +72,7 @@ For each gap, in order:
 
 ## Adding an accepted skill
 
-Follow [the steps in the tooling reference](../../apps/docs/content/dev/tooling.md#agent-skills). Afterwards
+Follow [the steps in the tooling reference](../../apps/remy-auth-docs/content/dev/tooling.md#agent-skills). Afterwards
 `git status` must show only the intended additions.
 
 ## Deliverable
