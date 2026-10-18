@@ -47,7 +47,8 @@ echo "upgrade-test: GitHub Packages, @joeblew999%2fcreate: $(curl -s -o /dev/nul
 if [ -n "${GITHUB_ACTIONS:-}" ]; then
   for bin in $(find "$HOME" "$root/node_modules/.pnpm" -path '*vite-plus*/dist/create/bin.js' 2>/dev/null); do
     sed -i 's#readPackageJsonFromTarball(meta.dist.tarball, meta.dist.integrity).catch(() => null)#readPackageJsonFromTarball(meta.dist.tarball, meta.dist.integrity).catch((error) => (console.error("upgrade-test: vp create fallback failed:", error?.stack ?? error), null))#' "$bin"
-    echo "upgrade-test: patched $bin: $(grep -c 'vp create fallback failed' "$bin")"
+    sed -i 's#^\tif (!templates) return null;#\tconsole.error("upgrade-test: readOrgManifest", resolvedVersion, "fields:", Object.keys(meta).join(" "), "createConfig undefined:", meta.createConfig === void 0, "dist:", JSON.stringify(meta.dist), "templates:", JSON.stringify(templates));\n\tif (!templates) return null;#' "$bin"
+    echo "upgrade-test: patched $bin: $(grep -c 'vp create fallback failed' "$bin") $(grep -c 'upgrade-test: readOrgManifest' "$bin")"
   done
 fi
 mkdir -p "$out/make"
