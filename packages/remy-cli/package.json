@@ -1,6 +1,6 @@
 {
   "name": "@joeblew999/remy-cli",
-  "version": "0.15.1",
+  "version": "0.16.0",
   "description": "The Remy command line (remy, remy-check): checks, translations, releases, Cloudflare questions and setup for every Remy app",
   "repository": {
     "type": "git",

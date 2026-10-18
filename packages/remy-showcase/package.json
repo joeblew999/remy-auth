@@ -1,6 +1,6 @@
 {
   "name": "@joeblew999/remy-showcase",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "remy-auth's showcase pages on the Remy platform: the home and formats pages, the app pages (formats, clock, demo, location, settings, account), their navigation, the demo reservation and their checks. For the apps that show them; the platform (@joeblew999/remy-ui) knows nothing of it",
   "repository": {
     "type": "git",
@@ -48,6 +48,6 @@
     "@types/react": "catalog:"
   },
   "peerDependencies": {
-    "@joeblew999/remy-ui": ">=0.15.1"
+    "@joeblew999/remy-ui": ">=0.16.0"
   }
 }

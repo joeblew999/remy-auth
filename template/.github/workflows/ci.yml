@@ -16,7 +16,7 @@ permissions: {}
 
 jobs:
   checks:
-    uses: joeblew999/remy-auth/.github/workflows/google.yml@v0.15.1
+    uses: joeblew999/remy-auth/.github/workflows/ci.yml@v0.16.0
     permissions:
       contents: write
       packages: write

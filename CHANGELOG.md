@@ -6,6 +6,13 @@ package follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-10-18
+
+### Removed: the build stamp's uncommitted-changes marker
+- `/healthz`'s `build.changes`, the `+` beside a commit in `<Versions>` and the `build_changes` message are gone, with
+  `gitStamp` and `REMY_COMMIT`/`REMY_CHANGES`: a deployment is always Cloudflare's build of a pushed commit, named by
+  `WORKERS_CI_COMMIT_SHA`.
+
 ### Changed: a Vite Plus monorepo as `vp create` makes one
 - The command line is its own package, `@joeblew999/remy-cli` (the `remy` and `remy-check` commands), and an app
   installs it beside `@joeblew999/remy-ui`. `remy.config.ts`'s type comes from `@joeblew999/remy-cli/project`.
