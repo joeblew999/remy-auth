@@ -7,9 +7,22 @@ import { defineConfig } from 'vite-plus';
 // scripts compose them (`vp run ci`, `vp run release`).
 const check = 'node packages/remy-cli/src/checks.ts';
 const remy = 'node packages/remy-cli/src/remy.ts';
+// What shadcn writes: its components, hooks and theme in remy-ui, and its utilities in the app.
+const shadcnFiles = [
+  'packages/remy-ui/src/components',
+  'packages/remy-ui/src/hooks',
+  'packages/remy-ui/src/styles',
+  'apps/remy-auth/src/lib',
+];
 
 export default defineConfig({
   ...style,
+  // Before a commit (vp staged): the shared style's formatting and lint fixes, and the shadcn check when a commit
+  // stages a file shadcn writes.
+  staged: {
+    ...style.staged,
+    [`{${shadcnFiles.join(',')}}/**`]: 'vp run check:shadcn',
+  },
   // Bare `vp dev`, `vp build` and `vp preview` here act on the app (Vite Plus's own tools, without its tasks' preparation:
   // `vp run dev` and `vp run build` are those).
   defaultPackage: './apps/remy-auth',
@@ -21,6 +34,13 @@ export default defineConfig({
       'check:commands': `${check} commands`,
       'check:endings': `${check} endings`,
       'check:translations': `${check} translations`,
+      // The shadcn components and theme are exactly shadcn's: its own commands write them again, and git says whether
+      // anything differs (a hand edit fails, and git diff shows it). It downloads and rewrites what it checks, so it
+      // is never cached: the pre-commit hook runs it when a commit stages one of those files (staged, below).
+      'check:shadcn': {
+        command: `vp run ui:theme && vp run ui:components && vp fmt ${shadcnFiles.join(' ')} && git diff --exit-code -- ${shadcnFiles.join(' ')}`,
+        cache: false,
+      },
       // The plain-function checks (tests/**/*.unit.spec.ts) on Vite Plus's test runner: no Worker, no browser. They
       // run the command line as an installed app does (remy-cli's dist/). Vitest's own caches (hidden folders under
       // node_modules) are neither input nor output.
@@ -85,7 +105,7 @@ export default defineConfig({
           untrackedEnv: [...network, 'GITHUB_TOKEN', 'NODE_AUTH_TOKEN', 'PREVIEW_PORT', 'DOCS_PREVIEW_PORT'],
         },
       },
-      // The release's publish (GitHub's release job, for a version tag): Changesets publishes each package whose
+      // The release's publish (GitHub's release job, on a push to main): Changesets publishes each package whose
       // version is new on its registry (pnpm publish), after what the packages ship is generated and built.
       'release:publish': {
         command: 'changeset publish',

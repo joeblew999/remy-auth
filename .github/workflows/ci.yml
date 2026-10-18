@@ -1,4 +1,4 @@
-# The checks, on GitHub for a pull request or by hand, in parallel; the release for a version tag. Every job is one
+# The checks, on GitHub for a pull request or by hand, in parallel; the release (publishing) for a push to main. Every job is one
 # part of `vp run ci` (the root package.json script), `vp run <part>`, the same command anywhere: `vp run ci` locally runs them all in turn (every check, the
 # browser checks, Google's audits). Vite Plus's task cache, kept between runs, replays what nothing changed; nothing of ours
 # decides what to skip.
@@ -16,17 +16,17 @@
 # runs. vp install reads @joeblew999/remy-ui from GitHub Packages with the run's token, put where pnpm reads it (pnpm
 # expands no variable in a repository's .npmrc), once the package grants the repository read access ("Manage Actions
 # access").
-# The release job runs only for a tag: vp run release ran every check and tagged; this job publishes what Changesets
-# versioned (changeset publish, pnpm publish for each package whose version is new) and makes the GitHub release.
+# The release job runs for a push to main: vp run release ran every check and pushed; this job publishes what Changesets
+# versioned (changeset publish, pnpm publish for each package whose version is new), then tags it and makes the GitHub release.
 # Named for what it runs (`vp run ci`); called google.yml until 2026-10-17.
 name: CI
 
-# Not on a push to main: the push's own hook ran `vp run ci` before anything left the machine (owner, 2026-10-18).
-# A version tag, to publish; a pull request, so Dependabot's (the pinned actions, .github/dependabot.yml) arrives
-# checked; and by hand (gh workflow run ci.yml).
+# A push to main runs only the release job, which publishes what Changesets versioned and nothing else: the push's own
+# hook ran `vp run ci` before anything left the machine (owner, 2026-10-18). The checks run for a pull request, so
+# Dependabot's (the pinned actions, .github/dependabot.yml) arrives checked, and by hand (gh workflow run ci.yml).
 on:
   push:
-    tags: ['v*']
+    branches: [main]
   pull_request:
   workflow_dispatch:
   workflow_call:
@@ -39,8 +39,8 @@ jobs:
   # the script). Playwright's Chromium is the browsers task (playwright install chromium); a Linux runner has no Han
   # font, which the font checks need, so it is installed here.
   checks:
-    # Not for a release's tag: vp run release ran every check before it tagged.
-    if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+    # Not for a push: its hook ran them (vp run ci) before it left the machine.
+    if: github.event_name != 'push'
     strategy:
       fail-fast: false
       matrix:
@@ -111,16 +111,18 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
+  # Changesets' own way to publish: on main, each package whose version is not on its registry yet is published
+  # (changeset publish); a push that versioned nothing publishes nothing, in seconds. Then the release's tag (vX.Y.Z, the
+  # platform's version, which apps' workflows and remy upgrade name) and its GitHub release, made here with GitHub's
+  # token. Only in a repository that releases with Changesets (remy-auth).
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'push' && hashFiles('.changeset/config.json') != ''
     runs-on: ubuntu-latest
     permissions:
       contents: write
       packages: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
       - uses: voidzero-dev/setup-vp@68f39c78aaf39be468cabd2afb09c162574c84af # v1.21.2
         with:
           cache: true
@@ -130,10 +132,14 @@ jobs:
           vp install --frozen-lockfile
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # Each package whose version is new on its registry (changeset publish, after what the packages ship is
-      # generated and built), then the GitHub release, its notes GitHub's own.
+      # changeset publish publishes only what the registry lacks (nothing, after most pushes). The platform's version
+      # tag and GitHub release follow once, when that version has none yet.
       - run: vp run release:publish
-      - run: gh release create "$TAG" --title "$TAG" --generate-notes --verify-tag
+      - run: |
+          TAG="v$(node -p "require('./packages/remy-ui/package.json').version")"
+          if git ls-remote --exit-code --tags origin "$TAG" > /dev/null; then echo "$TAG is released already."; exit 0; fi
+          git tag "$TAG"
+          git push origin "$TAG"
+          gh release create "$TAG" --title "$TAG" --generate-notes --verify-tag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ github.ref_name }}

@@ -120,7 +120,7 @@ scripts in [`package.json`](https://github.com/joeblew999/remy-auth/blob/main/pa
 vp run ui:components       # Re-add every shadcn component (extend the list there to add one)
 vp run ui:theme            # Rewrite globals.css with shadcn's default theme
 vp run ui:blocks           # Diff each owned block against upstream, in place
-vp run ui:verify           # Re-run both and fail on any difference (runs before every release)
+vp run check:shadcn        # Re-run both and fail on any difference (the pre-commit hook, when a commit stages one)
 ```
 
 Blocks are owned copies, as shadcn intends; sidebar-16's README says what was changed. The

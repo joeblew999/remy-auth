@@ -1,7 +1,7 @@
 ---
 title: "El paquete de UI (@joeblew999/remy-ui)"
 description: "La interfaz que comparten todas las apps de Remy: shadcn de fábrica, fuentes, catálogos de Paraglide, las páginas del sitio y de la app, el pegamento de TanStack Start y sus comprobaciones."
-translatedFrom: "f3f6cb00 46cbc789 60a401ce c77f7598 62bc7837 1d4123ab 415c4606"
+translatedFrom: "f3f6cb00 55bce48d 60a401ce c77f7598 62bc7837 f3ccfb1b 415c4606"
 ---
 
 La interfaz que comparten todas las apps de Remy: componentes y tema de shadcn de fábrica, fuentes,
@@ -15,8 +15,8 @@ TanStack Start y las comprobaciones de Playwright que lo demuestran. Los consumi
 Todo lo que hay en `src/components`, `src/hooks` y `src/styles/globals.css` es lo que escribe la CLI
 de shadcn fijada en una versión concreta (diseño de monorepo: el `components.json` de la app
 encamina `shadcn add` hacia aquí), incluido `cn`, del propio paquete `cn` de shadcn; nada de eso se
-edita a mano. `vp run ui:components` y `vp run ui:theme` los regeneran, y `vp run ui:verify`
-falla ante cualquier desviación (ver [ejecutar y probar](./run-and-test.md#shadcn-stock)). Los bloques son
+edita a mano. `vp run ui:components` y `vp run ui:theme` los regeneran, y `vp run check:shadcn` (el hook de pre-commit, cuando un commit incluye alguno) falla ante cualquier desviación (ver
+[ejecutar y probar](./run-and-test.md#shadcn-stock)). Los bloques son
 copias propias en `src/blocks`.
 
 ## Uso [#usage]
@@ -157,11 +157,11 @@ minor o major, y una línea para el registro de cambios), confirmado como `.chan
 máquina, se detiene en el primer fallo: `changeset version` (las versiones nuevas y la sección de `CHANGELOG.md` de cada paquete
 a partir de los changesets pendientes), `scripts/version.ts` (las versiones fijadas de la app en blanco, `template/pnpm-workspace.yaml` y
 el tag de `template/.github/workflows/ci.yml`, llevados a la nueva versión de remy-ui, y después el lockfile), las traducciones
-completas (`remy i18n check --strict`), todas las comprobaciones (`vp run ci`), la prueba de la app nueva, `vp run ui:verify` y, por último, `vp run release:tag`
-(el commit «Release vX.Y.Z», el tag anotado, y main y el tag subidos). Sus pasos están en [Comandos](./commands.mdx).
-Un tag ejecuta un solo job en GitHub, la publicación (nunca una sesión en la nube), y ninguna comprobación, ya que la publicación las ejecutó:
+completas (`remy i18n check --strict`), todas las comprobaciones (`vp run ci`), la prueba de la app nueva y, por último, `vp run release:push`
+(el commit «Release vX.Y.Z», subido a main). Sus pasos están en [Comandos](./commands.mdx).
+Un push a main ejecuta un solo job en GitHub, la publicación (nunca una sesión en la nube, que no puede subir ningún tag), y ninguna comprobación, ya que el hook del push las ejecutó:
 `vp run release:publish` (`changeset publish`, después de generar y construir los paquetes y de crear la skill `remy`),
-y luego `gh release create` con las notas generadas por GitHub. Los workspaces dependen unos de otros con `workspace:*`, que el
+y luego, una vez por versión, el tag `vX.Y.Z` y `gh release create` con las notas generadas por GitHub. Los workspaces dependen unos de otros con `workspace:*`, que el
 publish de pnpm escribe como la versión, y el rango de peer del contrato es abierto. Core Web Vitals se miden sobre un
 despliegue (producción, o el Preview de una rama): las páginas tal como las reciben los visitantes desde Cloudflare.
 

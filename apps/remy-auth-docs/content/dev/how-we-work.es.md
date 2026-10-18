@@ -1,7 +1,7 @@
 ---
 title: "Cómo trabajamos"
 description: "Cómo trabajan aquí las personas y los agentes: las herramientas del proyecto primero, encuestas antes de elegir herramientas, shadcn y TanStack, puertas de control, planes y traducciones."
-translatedFrom: "56df3445 507816d3 68aa8d11 c2d8f54e d8386d74 aae80ce5 6dc5958a 20ea1d8b f3262ad2 d16df021 0ce59218 d41caa8c c8f062fe bd8be1c4 5f043aaa 19f6274f 93ebb4e5 980904cb 707ec1cc"
+translatedFrom: "56df3445 507816d3 68aa8d11 c2d8f54e d8386d74 aae80ce5 5d55d686 20ea1d8b f3262ad2 d16df021 0ce59218 d41caa8c c8f062fe e2db1e26 5f043aaa 19f6274f 93ebb4e5 980904cb 707ec1cc"
 ---
 
 Este documento es el dueño de cómo trabajan las personas y los agentes: los hábitos que ha pedido el
@@ -94,8 +94,8 @@ perfeccionando, y escribimos solo lo que ellos no ofrecen.
 
 - **La CLI de shadcn escribe cada componente y el tema.** Los componentes vienen de
   `vp run ui:components`, el tema de `vp run ui:theme` (el estilo Nova por defecto de shadcn,
-  neutral, Geist: sin preset, sin marca propia). `vp run ui:verify` hace fallar la publicación ante
-  cualquier edición manual. El repositorio usa el layout de monorepo de shadcn, así que `shadcn add`
+  neutral, Geist: sin preset, sin marca propia). `vp run check:shadcn` (el hook de pre-commit lo ejecuta cuando un commit incluye uno de esos archivos) falla ante cualquier edición manual. El repositorio usa
+  el layout de monorepo de shadcn, así que `shadcn add`
   ejecutado en la app escribe en el paquete compartido.
 - **Busca un bloque de shadcn antes de construir un layout o una pantalla:**
   `./node_modules/.bin/shadcn search @shadcn -t registry:block`. Añádelo con `shadcn add`, conserva su
@@ -237,10 +237,11 @@ Propietario, 2026-10-09: «El 95% del tiempo ha sido comprobar y el 5% codificar
 | Después de cada cambio | `vp run ready` | quien esté codificando; el único paso que se espera | las tareas de Vite Plus: todo lo generado, la app y la documentación construidas, el ensayo de despliegue de Wrangler, las comprobaciones propias del proyecto, las comprobaciones unitarias, y luego `vp check` (formato, lint, tipos); lo que no ha cambiado sale de la caché de Vite Plus | ~8 s sin cambios, ~50 s desde cero |
 | El cambio deja la máquina | `vp run translate` (cuando cambió el texto), `git commit`, `git push` | quien hizo el trabajo, por su cuenta, en cuanto termina | las traducciones que el cambio dejó desactualizadas, en el mismo commit; el commit (su hook: `vp staged`); el push a `main` (su hook: `vp run ci`, desde la caché donde nada cambió; `VP_GIT_HOOKS=0` lo omite) | unos minutos: lo que cambió aquí, en el hook del push |
 | Producción | un push a `main`: Cloudflare lo despliega | nadie; cada push a `main` sale en vivo | las builds de Git de Cloudflare (Workers Builds) construyen y despliegan la app y la documentación a partir de cada push a `main`, y el Preview de cada otra rama a partir de su propio push ([en Cloudflare](./run-and-test.md#on-cloudflare)); tras un cambio de documentación, `pnpm remy docs publish` (una máquina con sesión iniciada en Cloudflare) da al índice de Ask AI las páginas nuevas | unos minutos tras el push |
-| Una publicación | `vp run release` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `changeset version` (las versiones y los changelogs a partir de los changesets pendientes) → `node scripts/version.ts` (la app en blanco vuelve a fijarse) → `remy i18n check --strict` (traducciones completas) → `vp run ci` → `vp run new-app` → `vp run ui:verify` → `vp run release:tag` (el commit "Release vX.Y.Z", su etiqueta, y se empujan main y la etiqueta); el job de publicación de GitHub, el único job que ejecuta una etiqueta, publica (`vp run release:publish`: `changeset publish`) y crea la release de GitHub | ~5 min |
+| Una publicación | `vp run release` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `changeset version` (las versiones y los changelogs a partir de los changesets pendientes) → `node scripts/version.ts` (la app en blanco vuelve a fijarse) → `remy i18n check --strict` (traducciones completas) → `vp run ci` → `vp run new-app` → `vp run release:push` (el commit "Release vX.Y.Z", empujado a main); el job de release de GitHub, el único job que ejecuta un push a main, publica (`vp run release:publish`: `changeset publish`), crea la etiqueta vX.Y.Z y la release de GitHub | ~5 min |
 
-El workflow de CI de GitHub no se ejecuta en un push a `main`, por decisión del propietario: `vp run ci` ejecuta lo mismo aquí, y el hook del push lo ejecuta antes de que
-nada salga de la máquina. Sí se ejecuta para una etiqueta de versión (el job de publicación), para los pull requests de Dependabot y a mano (`gh workflow run ci.yml`). Sin pull requests nuestros, auto-merge ni reglas de rama: `main` recibe el push.
+Las comprobaciones de GitHub no se ejecutan en un push a `main`, por decisión del propietario: `vp run ci` ejecuta lo mismo aquí, y el hook del push lo ejecuta antes de que
+nada salga de la máquina. Un push a main ejecuta solo su job de release, que publica lo nuevo (nada, tras la mayoría de los
+pushes); las comprobaciones se ejecutan para los pull requests de Dependabot y a mano (`gh workflow run ci.yml`). Sin pull requests nuestros, auto-merge ni reglas de rama: `main` recibe el push.
 
 - **Quién ejecuta un paso está en la tabla, y nunca es una pregunta.** Un agente empuja su propio
   trabajo terminado a `main` sin preguntar: su push ejecutó antes `vp run ci`, y nada en rojo se empuja. La palabra del propietario es para una publicación, el único paso cuya columna así lo dice, y para el aprovisionamiento

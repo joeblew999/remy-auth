@@ -13,7 +13,7 @@ them. Consumers are remy-auth (server-rendered) and
 Everything in `src/components`, `src/hooks` and `src/styles/globals.css` is what the pinned shadcn
 CLI writes (monorepo layout: the app's `components.json` routes `shadcn add` here), including `cn`
 from shadcn's own `cn` package; nothing there is edited by hand. `vp run ui:components` and
-`vp run ui:theme` regenerate them and `vp run ui:verify` fails on any drift (see
+`vp run ui:theme` regenerate them and `vp run check:shadcn` (the pre-commit hook, when a commit stages one) fails on any drift (see
 [run and test](./run-and-test.md#shadcn-stock)). Blocks are owned copies in `src/blocks`.
 
 ## Usage
@@ -149,11 +149,11 @@ minor or major, and one line for the changelog), committed as `.changeset/<name>
 machine, stopping at the first failure: `changeset version` (the new versions and each package's `CHANGELOG.md`
 section from the pending changesets), `scripts/version.ts` (the blank app's pins, `template/pnpm-workspace.yaml` and
 `template/.github/workflows/ci.yml`'s tag, moved to remy-ui's new version, then the lockfile), the translations
-complete (`remy i18n check --strict`), every check (`vp run ci`), the new-app test, `vp run ui:verify`, then `vp run release:tag`
-(the commit "Release vX.Y.Z", the annotated tag, main and the tag pushed). Its steps are on [Commands](./commands.mdx).
-A tag runs one job on GitHub, the release (never a cloud session), and no checks, since the release ran them:
+complete (`remy i18n check --strict`), every check (`vp run ci`), the new-app test, then `vp run release:push`
+(the commit "Release vX.Y.Z", pushed to main). Its steps are on [Commands](./commands.mdx).
+A push to main runs one job on GitHub, the release (never a cloud session, which can push no tag), and no checks, since the push's hook ran them:
 `vp run release:publish` (`changeset publish`, after the packages are generated and built and the `remy` skill made),
-then `gh release create` with GitHub's generated notes. The workspaces depend on each other with `workspace:*`, which
+then, once per version, the tag `vX.Y.Z` and `gh release create` with GitHub's generated notes. The workspaces depend on each other with `workspace:*`, which
 pnpm's publish writes as the version, and the contract's peer range is open-ended. Core Web Vitals are measured on a
 deployment (production, or a branch's Preview): pages as visitors get them from Cloudflare.
 

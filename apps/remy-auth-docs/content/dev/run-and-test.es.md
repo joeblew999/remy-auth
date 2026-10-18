@@ -1,7 +1,7 @@
 ---
 title: "Ejecutar, previsualizar y probar la app"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "d324c35e c82e5d5e 8dfe66ef d9d6a7c6 b892dd27 48c95f5f 90a87f8d fdbfb49e b0e4dfb0 e749d4d9"
+translatedFrom: "d324c35e c82e5d5e 8dfe66ef d9d6a7c6 f7afc873 48c95f5f 90a87f8d fdbfb49e b0e4dfb0 e749d4d9"
 ---
 
 :::note
@@ -121,7 +121,7 @@ scripts de [`package.json`](https://github.com/joeblew999/remy-auth/blob/main/pa
 vp run ui:components       # Re-add every shadcn component (extend the list there to add one)
 vp run ui:theme            # Rewrite globals.css with shadcn's default theme
 vp run ui:blocks           # Diff each owned block against upstream, in place
-vp run ui:verify           # Re-run both and fail on any difference (runs before every release)
+vp run check:shadcn        # Re-run both and fail on any difference (the pre-commit hook, when a commit stages one)
 ```
 
 Los bloques son copias propias, tal como shadcn pretende; el README de sidebar-16 explica qué se cambió. El

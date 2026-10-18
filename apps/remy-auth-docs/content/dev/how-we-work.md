@@ -82,7 +82,7 @@ and write only what they do not provide.
 
 - **shadcn's CLI writes every component and the theme.** Components come from `vp run ui:components`,
   the theme from `vp run ui:theme` (shadcn's default Nova style, neutral, Geist: no preset, no
-  branding of our own). `vp run ui:verify` fails the release on any hand edit. The repository uses
+  branding of our own). `vp run check:shadcn` (the pre-commit hook runs it when a commit stages one of those files) fails on any hand edit. The repository uses
   shadcn's monorepo layout, so `shadcn add` run in the app writes into the shared package.
 - **Look for a shadcn block before building a layout or a screen:**
   `./node_modules/.bin/shadcn search @shadcn -t registry:block`. Add it with `shadcn add`, keep its
@@ -223,11 +223,11 @@ its own ports (`PREVIEW_PORT`, `DOCS_PREVIEW_PORT`).
 | After every change | `vp run ready` | whoever is coding; the only step waited for | Vite Plus's tasks: everything generated, the app and the docs built, Wrangler's deployment dry run, the project's own checks, the unit checks, then `vp check` (format, lint, types); what has not changed comes from Vite Plus's cache | ~8 s unchanged, ~50 s from nothing |
 | The change leaves the machine | `vp run translate` (when text changed), `git commit`, `git push` | whoever did the work, on their own, as soon as it is finished | the translations the change made stale, in the same commit; the commit (its hook: `vp staged`); the push to `main` (its hook: `vp run ci`, from the cache where nothing changed; `VP_GIT_HOOKS=0` skips it) | a few minutes: what changed here, in the push's hook |
 | Production | a push to `main`: Cloudflare deploys it | nobody; every push to `main` goes live | Cloudflare's Git builds (Workers Builds) build and deploy the app and the docs from each push to `main`, and every other branch's Preview from its own push ([on Cloudflare](./run-and-test.md#on-cloudflare)); after a docs change, `pnpm remy docs publish` (a machine signed in to Cloudflare) gives Ask AI's index the new pages | a few minutes after the push |
-| A release | `vp run release` | the owner, or an agent the owner asked in that session | `changeset version` (the versions and changelogs from the pending changesets) → `node scripts/version.ts` (the blank app re-pinned) → `remy i18n check --strict` (translations complete) → `vp run ci` → `vp run new-app` → `vp run ui:verify` → `vp run release:tag` (the commit "Release vX.Y.Z", its tag, main and the tag pushed); GitHub's release job, the only job a tag runs, publishes (`vp run release:publish`: `changeset publish`) and makes the GitHub release | ~5 min |
+| A release | `vp run release` | the owner, or an agent the owner asked in that session | `changeset version` (the versions and changelogs from the pending changesets) → `node scripts/version.ts` (the blank app re-pinned) → `remy i18n check --strict` (translations complete) → `vp run ci` → `vp run new-app` → `vp run release:push` (the commit "Release vX.Y.Z", pushed to main); GitHub's release job, the only job a push to main runs, publishes (`vp run release:publish`: `changeset publish`), tags vX.Y.Z and makes the GitHub release | ~5 min |
 
-GitHub's CI workflow does not run on a push to `main`, by the owner's choice: `vp run ci` runs the same here, and the
-push's hook runs it before anything leaves the machine. It runs for a version tag (the release job, which publishes),
-for Dependabot's pull requests, and by hand (`gh workflow run ci.yml`). No pull requests of ours, auto-merge or branch
+GitHub's checks do not run on a push to `main`, by the owner's choice: `vp run ci` runs the same here, and the
+push's hook runs it before anything leaves the machine. A push to main runs only its release job, which publishes what is new (nothing, after most
+pushes); the checks run for Dependabot's pull requests, and by hand (`gh workflow run ci.yml`). No pull requests of ours, auto-merge or branch
 rules: `main` takes the push.
 
 - **Who runs a step is in the table, and it is never a question.** An agent pushes its own

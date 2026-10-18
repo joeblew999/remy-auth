@@ -1,7 +1,7 @@
 ---
 title: "Proyectos: estructura, apps nuevas y publicación"
 description: "Qué guarda todo proyecto de Remy en el mismo lugar, cómo empezar una app nueva, la publicación de paquetes, las traducciones, Cloudflare y los planes. Todos los comandos están en Comandos."
-translatedFrom: "76024556 ae418fe2 a5d3acab b93fcb78 5eaa5e2b 335e995b de907ca6 bf100d42"
+translatedFrom: "76024556 ae418fe2 a5d3acab b3abd1e3 3ccca9ea 335e995b de907ca6 bf100d42"
 ---
 
 La herramienta es `remy` (y `remy-check`), los bins de `@joeblew999/remy-cli` (`packages/remy-cli/src`, un
@@ -125,14 +125,14 @@ cualquier otra cosa se rechaza en tiempo de build y en Playwright, cuyo mensaje 
 mapa de exports. Las cadenas propias de un paquete son su propio proyecto inlang, compilado por su build, cuyo runtime
 sigue el idioma de la plataforma con una sola llamada, `followLocale(runtime)` (`locale`); las herramientas de traducción encuentran
 el proyecto inlang del repositorio a través de git. Las comprobaciones que el repositorio añade a un release son pasos de su propio
-script `release`, después de `vp run ci` (remy-auth: `vp run ui:verify`). El `scripts/version.ts` de remy-auth, que se ejecuta después de
+script `release`, después de `vp run ci` (remy-auth: `vp run new-app`). El `scripts/version.ts` de remy-auth, que se ejecuta después de
 `changeset version`, vuelve a fijar la app en blanco a la versión nueva de remy-ui (el catálogo de `template/pnpm-workspace.yaml` y la tag de
 `template/.github/workflows/ci.yml`), y después el lockfile.
 
 ### Elegir la versión: publicada, de desarrollo o local [#choosing-the-version-released-development-or-local]
 
 El `vp run release` de remy-auth versiona los paquetes a partir de sus changesets, comprueba, hace commit ("Release vX.Y.Z") y
-etiqueta el commit como `vX.Y.Z` (`vp run release:tag`, que sube main y la tag); después el job de release de GitHub publica
+lo sube a main (`vp run release:push`); después el job de release de GitHub publica, etiqueta como `vX.Y.Z` y
 `@joeblew999/remy-ui` X.Y.Z y, a su lado, la línea de comandos, `@joeblew999/remy-cli` (los comandos `remy` y `remy-check`),
 siempre en la misma versión, junto con el showcase y el contrato cuando un changeset subió su versión. Todavía no se
 publica ninguno de los dos de esta forma, y publicar es cosa del job de release, nunca de una sesión en la nube. Quien consume

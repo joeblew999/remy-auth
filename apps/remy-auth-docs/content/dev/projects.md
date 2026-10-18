@@ -122,14 +122,14 @@ anything else is refused at build time and in Playwright, whose message names th
 export map. A package's own strings are its own inlang project, compiled by its build, whose runtime
 follows the platform's language with one call, `followLocale(runtime)` (`locale`); the translation tools find
 the repository's inlang project through git. Checks the repository adds to a release are steps of its own `release`
-script, after `vp run ci` (remy-auth: `vp run ui:verify`). remy-auth's `scripts/version.ts`, run after
+script, after `vp run ci` (remy-auth: `vp run new-app`). remy-auth's `scripts/version.ts`, run after
 `changeset version`, re-pins the blank app to remy-ui's new version (`template/pnpm-workspace.yaml`'s catalog and
 `template/.github/workflows/ci.yml`'s tag), then the lockfile.
 
 ### Choosing the version: released, development or local
 
 remy-auth's `vp run release` versions the packages from their changesets, checks, commits ("Release vX.Y.Z") and
-tags the commit `vX.Y.Z` (`vp run release:tag`, which pushes main and the tag); GitHub's release job then publishes
+pushes it to main (`vp run release:push`); GitHub's release job then publishes, tags it `vX.Y.Z` and
 `@joeblew999/remy-ui` X.Y.Z and the command line beside it, `@joeblew999/remy-cli` (the `remy` and `remy-check`
 commands), always the same version, with the showcase and the contract when a changeset bumped them. Neither is
 published in this form yet, and publishing is the release job's, never a cloud session's. A consumer pins both in

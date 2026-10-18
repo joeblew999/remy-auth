@@ -13,7 +13,7 @@ Day to day: `vp run ready` after every edit; when the work is finished, git and 
 | `vp run fix` | what the checks only verify, written: COMMANDS.md and each docs page's ending |
 | `vp run ci` | what GitHub runs, the same here, each part one of GitHub's jobs (vp run test:browser --shard 1/3) (vp run ready → vp run test:browser → vp run test:audits) |
 | `vp run translate` | before a commit that changed text: the translations it made stale or missing (remy i18n translate) |
-| `vp run release` | the owner's: the packages versioned from their changesets (pnpm changeset adds one), every check and a new app, then the tag GitHub publishes from (changeset version → node scripts/version.ts → remy i18n check --strict → vp run ci → vp run new-app → vp run ui:verify → vp run release:tag) |
+| `vp run release` | the owner's: the packages versioned from their changesets (pnpm changeset adds one), every check and a new app, then the push to main GitHub publishes from (changeset version → node scripts/version.ts → remy i18n check --strict → vp run ci → vp run new-app → vp run release:push) |
 | `vp run setup` | an installation: the dependencies, the skills (skills-lock.json), the agents' rules, then every check (vp install → skills experimental_install → skills experimental_sync → remy rules → vp run ready) |
 
 ## Everything the command line does
@@ -68,5 +68,4 @@ The repository's own tools, as package.json defines them, each run as `vp run <s
 | `vp run ui:components` | `shadcn add button card input label badge alert field separator direction skeleton empty sidebar breadcrumb collapsible dropdown-menu avatar sheet tooltip navigation-menu use-mobile table spinner tabs --overwrite --yes -c apps/remy-auth` |
 | `vp run ui:blocks` | `shadcn add @shadcn/sidebar-16 -c packages/remy-ui --diff src/blocks/sidebar-16/components/app-sidebar.tsx && shadcn add @shadcn/sidebar-16 -c packages/remy-ui --diff src/blocks/sidebar-16/components/nav-main.tsx && shadcn add @shadcn/sidebar-16 -c packages/remy-ui --diff src/blocks/sidebar-16/components/site-header.tsx` |
 | `vp run ui:theme` | `shadcn apply nova --only theme --yes -c apps/remy-auth` |
-| `vp run ui:verify` | `vp run ui:theme && vp run ui:components && vp fmt packages/remy-ui/src/components packages/remy-ui/src/hooks packages/remy-ui/src/styles apps/remy-auth/src/lib && git diff --exit-code -- packages/remy-ui/src/components packages/remy-ui/src/hooks packages/remy-ui/src/styles apps/remy-auth/src/lib` |
-| `vp run release:tag` | `V=$(node -p "require('./packages/remy-ui/package.json').version") && git add -A && git commit --allow-empty -m "Release v$V" && git tag -a "v$V" -m "v$V" && git push origin main "v$V"` |
+| `vp run release:push` | `V=$(node -p "require('./packages/remy-ui/package.json').version") && git add -A && git commit --allow-empty -m "Release v$V" && git push origin main` |
