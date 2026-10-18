@@ -60,7 +60,6 @@ prerendered example):
   showcase's Clock spreads `clockRouteOptions` from `@joeblew999/remy-showcase/clock-route`).
 - **`tests/smoke.spec.ts`**, one `smokeChecks(...)` call: `vp run test:browser --grep smoke` and the smoke against a
   deployment (`pnpm remy test live <origin>`) run it, and fail with "No tests found" without it.
-- **`now.md`**, the order the open GitHub issues are taken in.
 - **Installs and upgrades through the package's commands**, never by hand: `vp run setup` (install,
   skills, MCP, the installation's checks) and `vp run upgrade <version>` (remy-ui and remy-cli at that version, the
   CI workflow at the same tag, the blank app's scripts, hooks and configuration, then the same checks). Both take

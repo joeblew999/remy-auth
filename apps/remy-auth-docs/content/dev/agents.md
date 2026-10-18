@@ -31,7 +31,7 @@ read those, not the translations beside them (`*.es.md`).
 5. [Sign-in and permissions](./auth.md): the guard, the relation engine, `<Allowed>`, environments
    and mail: what every Remy app gets, and where remy-auth uses each itself.
 6. The [GitHub issue](https://github.com/joeblew999/remy-auth/issues) covering your
-   task (in [now.md](https://github.com/joeblew999/remy-auth/blob/main/now.md)'s order), and its [Executor/Reviewer roles](./principles.md#plans-and-roles).
+   task, and its [Executor/Reviewer roles](./principles.md#plans-and-roles).
 
 Start with the standard commands (`git status`, `git log`, `gh run list`: what is going on) and
 [the project's own tools](./how-we-work.md#use-the-projects-own-tools-first), and finish through

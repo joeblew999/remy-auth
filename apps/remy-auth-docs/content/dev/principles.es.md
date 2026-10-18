@@ -1,7 +1,7 @@
 ---
 title: "Arquitectura y principios de desarrollo"
 description: "Lo que el código debe ser: propiedad, una única fuente de verdad, gates de pruebas, código generado y decisiones del dueño."
-translatedFrom: "8e61490c 1774671b 27b91da2"
+translatedFrom: "8e61490c 1774671b 5fc3afa1"
 ---
 
 Este documento es el dueño de lo que el código debe ser. Cómo trabajan las personas y los agentes día a día vive en
@@ -50,8 +50,8 @@ Este documento es el dueño de lo que el código debe ser. Cómo trabajan las pe
 
 ## Planes y roles [#plans-and-roles]
 
-Los planes son [issues de GitHub](https://github.com/joeblew999/remy-auth/issues), uno por cada trabajo; [now.md](https://github.com/joeblew999/remy-auth/blob/main/now.md), en la raíz, es el orden
-en que se abordan. Lee el issue que cubre tu tarea antes de cambiar nada. Todo plan funciona con dos roles: el Reviewer
+Los planes son [issues de GitHub](https://github.com/joeblew999/remy-auth/issues), uno por cada trabajo.
+Lee el issue que cubre tu tarea antes de cambiar nada. Todo plan funciona con dos roles: el Reviewer
 define la aceptación, y el Executor implementa y verifica un hito acotado, y luego informa de
 las comprobaciones exactas ejecutadas, los archivos cambiados y las limitaciones. El issue de un plan se cierra solo después de
 la implementación, sus comprobaciones requeridas y la aceptación del Reviewer.

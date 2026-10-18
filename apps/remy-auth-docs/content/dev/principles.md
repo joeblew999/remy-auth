@@ -51,8 +51,8 @@ This document owns what the code must be. How people and agents work day to day 
 
 ## Plans and roles
 
-Plans are [GitHub issues](https://github.com/joeblew999/remy-auth/issues), one per piece of work; [now.md](https://github.com/joeblew999/remy-auth/blob/main/now.md) at the root is the order
-they are taken in. Read the issue covering your task before changing anything. Every plan works with two roles: the Reviewer
+Plans are [GitHub issues](https://github.com/joeblew999/remy-auth/issues), one per piece of work.
+Read the issue covering your task before changing anything. Every plan works with two roles: the Reviewer
 defines acceptance, and the Executor implements and verifies a bounded milestone, then reports the
 exact checks run, the files changed and the limitations. A plan's issue closes only after
 implementation, its required checks and the Reviewer's acceptance.

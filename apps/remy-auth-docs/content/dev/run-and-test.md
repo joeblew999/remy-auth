@@ -295,7 +295,7 @@ Google's level covers site pages only (app pages are noindex by design): Lightho
 
 Limits: no organizations, OAuth tokens or cross-app sign-in yet, so only remy-auth's own pages know
 who is signed in ([the auth plan](https://github.com/joeblew999/remy-auth/issues/38)). The site is served from its workers.dev address (`VITE_DEPLOY_ORIGIN` in the app's `.env`); the production public origin and
-Search Console are owner decisions ([now](https://github.com/joeblew999/remy-auth/blob/main/now.md)).
+Search Console are owner decisions.
 
 Known tooling notices: Node may print the Chrome DevTools localStorage experimental
 warning; pnpm runs no install script outside `allowBuilds` (`pnpm-workspace.yaml`) and may name the ones it

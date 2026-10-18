@@ -1,7 +1,7 @@
 ---
 title: "Desarrolladores: empieza aquí"
 description: "Para desarrolladores que construyen Remy o una app sobre él: autenticación compartida para las apps de Remy, Better Auth en Cloudflare Workers, el paquete compartido remy-ui y por dónde empezar."
-translatedFrom: "c26e1591 57a9efbc 0de6e796 88eb7fe7 f354609f 2ed527a4"
+translatedFrom: "a8b968c1 57a9efbc 0de6e796 88eb7fe7 f354609f 3befebe0"
 ---
 
 **Para desarrolladores** que construyen Remy, o una app sobre su paquete de UI compartido. ¿Usas la app? Lee la
@@ -17,7 +17,7 @@ obtiene del paquete compartido ([inicio de sesión y permisos](./auth.md)).
 a partir del paquete compartido `@joeblew999/remy-ui`. remy-auth inicia sesión a las personas con un código
 enviado por correo, protege su API mediante políticas, y decide quién puede hacer qué mediante relaciones,
 mostrado en su propia demo de notas. Cómo otra app sabe quién ha iniciado sesión es la siguiente pieza;
-el trabajo abierto está en las [incidencias](https://github.com/joeblew999/remy-auth/issues), en el orden de [now.md](https://github.com/joeblew999/remy-auth/blob/main/now.md).
+el trabajo abierto está en las [incidencias](https://github.com/joeblew999/remy-auth/issues).
 
 ## Dónde mirar [#where-to-look]
 
@@ -88,4 +88,4 @@ apps instalan ([proyectos](./projects.md)).
 - [Ejecutar, previsualizar y probar la app](./run-and-test.md): un Worker, objetivos de prueba locales y remotos, Cloudflare.
 - [Proyectos](./projects.md): la estructura que mantiene toda app, una app nueva, publicación, traducciones, Cloudflare y planes.
 - [Paquete de UI compartido](./remy-ui.md) y su [registro de cambios](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/CHANGELOG.md).
-- [Planes](https://github.com/joeblew999/remy-auth/issues): una incidencia de GitHub por cada trabajo abierto; [now.md](https://github.com/joeblew999/remy-auth/blob/main/now.md) es el orden en que se abordan.
+- [Planes](https://github.com/joeblew999/remy-auth/issues): una incidencia de GitHub por cada trabajo abierto.

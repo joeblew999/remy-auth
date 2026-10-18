@@ -1,7 +1,7 @@
 ---
 title: "El paquete de UI (@joeblew999/remy-ui)"
 description: "La interfaz que comparten todas las apps de Remy: shadcn de fábrica, fuentes, catálogos de Paraglide, las páginas del sitio y de la app, el pegamento de TanStack Start y sus comprobaciones."
-translatedFrom: "f3f6cb00 55bce48d 098c132b 09c2da80 62bc7837 a6127daf 415c4606"
+translatedFrom: "f3f6cb00 55bce48d f06f2f97 09c2da80 62bc7837 a6127daf 415c4606"
 ---
 
 La interfaz que comparten todas las apps de Remy: componentes y tema de shadcn de fábrica, fuentes,
@@ -66,7 +66,6 @@ Lo que tiene toda app basada en el paquete, para que las tareas y comprobaciones
   Reloj de la demostración (showcase) propaga `clockRouteOptions` desde `@joeblew999/remy-showcase/clock-route`).
 - **`tests/smoke.spec.ts`**, una sola llamada a `smokeChecks(...)`: `vp run test:browser --grep smoke` y la prueba de humo contra un despliegue
   (`pnpm remy test live <origin>`) lo ejecutan, y fallan con «No tests found» si no existe.
-- **`now.md`**, el orden en que se atienden las issues abiertas de GitHub.
 - **Instalaciones y actualizaciones mediante los comandos del paquete**, nunca a mano: `vp run setup` (instalar,
   skills, MCP, las comprobaciones de la instalación) y `vp run upgrade <version>` (remy-ui y remy-cli en esa versión, el
   workflow de CI en el mismo tag, los scripts, hooks y configuración de la app en blanco, y después las mismas comprobaciones). Ambos toman el token de GitHub Packages de

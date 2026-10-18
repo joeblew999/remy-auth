@@ -1,7 +1,7 @@
 ---
 title: "Cómo trabajamos"
 description: "Cómo trabajan aquí las personas y los agentes: las herramientas del proyecto primero, encuestas antes de elegir herramientas, shadcn y TanStack, puertas de control, planes y traducciones."
-translatedFrom: "56df3445 507816d3 de7f5b60 c2d8f54e d8386d74 d1cef651 5d55d686 20ea1d8b f3262ad2 d16df021 0ce59218 9cfce533 c8f062fe c543c74e 57b2c4f8 19f6274f 93ebb4e5 980904cb e25d8077"
+translatedFrom: "56df3445 507816d3 07baba6b c2d8f54e d8386d74 d1cef651 5d55d686 20ea1d8b f3262ad2 d16df021 0ce59218 a37bfcc6 c8f062fe c543c74e 94a10087 19f6274f 93ebb4e5 980904cb e25d8077"
 ---
 
 Este documento es el dueño de cómo trabajan las personas y los agentes: los hábitos que ha pedido el
@@ -31,10 +31,9 @@ a ti mismo ni a los devs». Así que la regla es general, no solo para herramien
   no espera nada, una comprobación que nadie ejecuta, una rama que nadie posee, un documento que dice
   algo que ya no es cierto) tiene dos opciones, ambas dentro del cambio en el que está: **arreglarlo**
   cuando es pequeño, o **abrir un
-  [issue de GitHub](https://github.com/joeblew999/remy-auth/issues)** (qué se vio, dónde, y qué lo arreglaría) y añadirlo a `now.md` en
-  su lugar. Mencionarlo solo en un chat o en un informe no es ninguna de las dos cosas.
-- **Todos se enteran a través del repo**: los issues son públicos y `now.md` está comiteado, así que lo que una persona vio
-  llega a todos los que hacen pull de main (`gh issue list` imprime los abiertos), y el siguiente cambio toma lo primero de `now.md`.
+  [issue de GitHub](https://github.com/joeblew999/remy-auth/issues)** (qué se vio, dónde, y qué lo arreglaría). Mencionarlo solo en un chat o en un informe no es ninguna de las dos cosas.
+- **Todos se enteran a través de GitHub**: los issues son públicos, así que lo que una persona vio
+  llega a todos (`gh issue list` imprime los abiertos).
 - **«Hecho» es el final de una barrida, no de una lista.** Antes de decirlo: ramas y worktrees
   (`git branch`, `git worktree list`), `pnpm wrangler deployments list`, `gh issue list`, una
   búsqueda de las palabras que el cambio retiró, la documentación que el cambio tocó. Muestra la barrida.
@@ -209,8 +208,8 @@ El layout y los comandos están en [proyectos](./projects.md#translations).
 
 Propietario, 2026-09-26: «qué agobiante y frustrante es tener tantos planes basura». El trabajo abierto son
 [issues de GitHub](https://github.com/joeblew999/remy-auth/issues), uno por cada trabajo; las investigaciones, los análisis y las revisiones van en el issue al que
-sirven, no en uno propio. [`now.md`](https://github.com/joeblew999/remy-auth/blob/main/now.md), en la raíz, es el orden en que se toman. Un
-trabajo terminado cierra su issue (`Closes #N` en el commit) y sale de `now.md`, en el mismo commit que su código.
+sirven, no en uno propio. Un trabajo terminado cierra su issue (`Closes #N` en el commit), en el mismo commit
+que su código.
 
 ## Cuando el propietario delega decisiones [#when-the-owner-delegates-decisions]
 
@@ -301,7 +300,7 @@ porque todos nuestros repos van a usar esto».
   trabajo: Wrangler, Playwright, gh, pnpm.
 - ¿No se encuentra ninguna herramienta? No escribas un script y sigas adelante. Abre un issue para hacer
   una encuesta
-  ([elige herramientas por encuesta](#choose-tools-by-survey-not-by-first-find)) y añádelo a `now.md`. Los agentes
+  ([elige herramientas por encuesta](#choose-tools-by-survey-not-by-first-find)). Los agentes
   abren estos issues al encontrarse con tales cosas; el propietario no tiene que pedirlo.
 - Todo lo que es más que una línea de una herramienta es TypeScript: un comando de `remy`
   (`packages/remy-cli/src`, con type-check en cada comprobación) o, para lo que es propio de una app, un

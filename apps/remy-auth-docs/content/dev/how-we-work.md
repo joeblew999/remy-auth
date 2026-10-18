@@ -27,10 +27,9 @@ is general, not only for missing tools:
 - An agent or developer who notices anything wrong, slow, missing or left over (a step that waits
   for nothing, a check nobody runs, a branch nobody owns, a doc that says what is no longer true) has
   two choices, both inside the change they are on: **fix it** when it is small, or **open a
-  [GitHub issue](https://github.com/joeblew999/remy-auth/issues)** (what was seen, where, and what would fix it) and add it to `now.md` in
-  its place. Mentioning it in a chat or a report alone is neither.
-- **Everyone hears it through the repo**: the issues are public and `now.md` is committed, so what one person saw
-  reaches everyone who pulls main (`gh issue list` prints the open ones), and the next change takes the top of `now.md`.
+  [GitHub issue](https://github.com/joeblew999/remy-auth/issues)** (what was seen, where, and what would fix it). Mentioning it in a chat or a report alone is neither.
+- **Everyone hears it through GitHub**: the issues are public, so what one person saw reaches everyone
+  (`gh issue list` prints the open ones).
 - **"Done" is the end of a sweep, not of a list.** Before saying it: branches and worktrees (`git branch`,
   `git worktree list`), `pnpm wrangler deployments list`, `gh issue list`, a
   search for the words the change retired, the docs the change touched. Show the sweep.
@@ -186,8 +185,8 @@ The layout and the commands are in [projects](./projects.md#translations).
 
 Owner, 2026-09-26: "how overwhelming and frustrating it is to have so much garbage plans". Open work is
 [GitHub issues](https://github.com/joeblew999/remy-auth/issues), one per piece of work; research, analyses and reviews go into the issue they
-serve, not one of their own. [`now.md`](https://github.com/joeblew999/remy-auth/blob/main/now.md) at the root is the order they are taken in. A finished
-piece closes its issue (`Closes #N` in the commit) and leaves `now.md`, in the same commit as its code.
+serve, not one of their own. A finished piece closes its issue (`Closes #N` in the commit), in the same commit
+as its code.
 
 ## When the owner delegates decisions
 
@@ -296,7 +295,7 @@ being turned into a mise task that uses a tool ... It's vital because all our re
   or reach for a throwaway script, it becomes a command of the package (`packages/remy-cli/src`, so every
   app gets it) that calls the tool that does the job: Wrangler, Playwright, gh, pnpm.
 - No tool found? Do not write a script and move on. Open an issue to survey for one
-  ([choose tools by survey](#choose-tools-by-survey-not-by-first-find)) and add it to `now.md`. Agents
+  ([choose tools by survey](#choose-tools-by-survey-not-by-first-find)). Agents
   open these issues as they meet such things; the owner does not have to ask.
 - Anything more than one line of a tool is TypeScript: a command of `remy` (`packages/remy-cli/src`,
   type-checked on every check) or, for what is one app's own, a `scripts/*.ts` of that app, never

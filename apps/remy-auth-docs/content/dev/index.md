@@ -15,7 +15,7 @@ package ([sign-in and permissions](./auth.md)).
 **Status:** the GUI foundation is live on Cloudflare in two apps built on TanStack Start, from the
 shared `@joeblew999/remy-ui` package. remy-auth signs people in with an emailed code, guards its API
 by policy, and decides who may do what by relations, shown in its own notes demo. How another app
-learns who is signed in is the next piece; open work is the [issues](https://github.com/joeblew999/remy-auth/issues), in [now.md](https://github.com/joeblew999/remy-auth/blob/main/now.md)'s order.
+learns who is signed in is the next piece; open work is the [issues](https://github.com/joeblew999/remy-auth/issues).
 
 ## Where to look
 
@@ -86,4 +86,4 @@ app installs ([projects](./projects.md)).
 - [Run, preview and test the app](./run-and-test.md): one Worker, local and remote test targets, Cloudflare.
 - [Projects](./projects.md): the layout every app keeps, a new app, publishing, translations, Cloudflare and plans.
 - [Shared UI package](./remy-ui.md) and its [changelog](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/CHANGELOG.md).
-- [Plans](https://github.com/joeblew999/remy-auth/issues): one GitHub issue per piece of open work; [now.md](https://github.com/joeblew999/remy-auth/blob/main/now.md) is the order they are taken in.
+- [Plans](https://github.com/joeblew999/remy-auth/issues): one GitHub issue per piece of open work.

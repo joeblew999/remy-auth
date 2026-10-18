@@ -1,7 +1,7 @@
 ---
 title: "Ejecutar, previsualizar y probar la app"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "d324c35e c82e5d5e 8dfe66ef d9d6a7c6 f7afc873 6b089ee9 90a87f8d fdbfb49e 4120a6b8 e48a67aa"
+translatedFrom: "d324c35e c82e5d5e 8dfe66ef d9d6a7c6 f7afc873 6b089ee9 90a87f8d fdbfb49e 4120a6b8 2355da95"
 ---
 
 :::note
@@ -296,7 +296,7 @@ Lo de Google cubre solo las páginas de sitio (las páginas de app son noindex p
 
 Límites: todavía no hay organizaciones, tokens OAuth ni inicio de sesión entre apps, así que solo las páginas propias de remy-auth saben quién ha iniciado sesión
 ([el plan de autenticación](https://github.com/joeblew999/remy-auth/issues/38)). El sitio se sirve desde su dirección de workers.dev (`VITE_DEPLOY_ORIGIN` en el `.env` de la app); el origin público de producción y
-Search Console son decisiones del propietario ([now](https://github.com/joeblew999/remy-auth/blob/main/now.md)).
+Search Console son decisiones del propietario.
 
 Avisos de herramientas conocidos: Node puede imprimir el aviso experimental de localStorage de Chrome DevTools;
 pnpm no ejecuta ningún script de instalación fuera de `allowBuilds` (`pnpm-workspace.yaml`) y puede nombrar los que
