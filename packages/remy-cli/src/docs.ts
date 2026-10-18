@@ -17,7 +17,9 @@ function fail(message: string): never {
   process.exit(1);
 }
 const docs = () => {
-  return docsDir() ?? fail('this app has no docs/ (remy docs init <ref> starts one)');
+  return (
+    docsDir() ?? fail('this app has no docs/ (vpx giget gh:joeblew999/remy-auth/template/docs#<tag> docs starts one)')
+  );
 };
 /** Wrangler's answer to a command, as text; throws with its stderr when it fails. */
 const wrangler = (...args: string[]): string =>
@@ -139,7 +141,7 @@ export function test(): void {
 /** The docs' checks against their deployment (DOCS_TEST_URL, else the docs origin), then every MCP server's tools. */
 export function testRemote(): void {
   const origin = process.env.DOCS_TEST_URL ?? origins().docs;
-  if (!origin) fail('docs test remote: DOCS_TEST_URL, or origins.docs in remy.config.ts');
+  if (!origin) fail("docs test remote: DOCS_TEST_URL, or VITE_DOCS_ORIGIN in the app's .env");
   tool(bin('playwright'), ['test', '-c', docsChecks()], {
     env: { TEST_TARGET: 'remote', TEST_BASE_URL: origin },
   });
@@ -179,7 +181,7 @@ export async function publish(): Promise<void> {
   const { bucket, instance } = docsConfig.ask;
   const origin = origins().docs;
   if (!origin)
-    fail('docs publish: origins.docs in remy.config.ts is the live docs Worker whose .md pages it publishes');
+    fail("docs publish: VITE_DOCS_ORIGIN in the app's .env is the live docs Worker whose .md pages it publishes");
   const token = (JSON.parse(wrangler('auth', 'token', '--json')) as { token: string }).token;
   const account = (JSON.parse(wrangler('whoami', '--json')) as { accounts: { id: string }[] }).accounts[0]!.id;
   console.log(`Target: Cloudflare (remote), R2 bucket ${bucket} (PRODUCTION), then AI Search ${instance}`);
@@ -341,19 +343,6 @@ export async function provision(): Promise<void> {
     'Then, once Cloudflare has deployed the docs from main: pnpm remy docs publish puts the pages in the bucket.',
   );
 }
-/** The docs app for a new repository, from remy-auth's template at a tag. */
-export function init(ref: string | undefined): void {
-  if (!ref)
-    fail(
-      'remy docs init <ref>: the remy-auth tag to take the docs app from, e.g. v0.14.0 (match your @joeblew999/remy-ui version)',
-    );
-  if (existsSync('docs')) fail('docs/ exists already');
-  const result = spawnSync('pnpm', ['dlx', 'giget@3.3.1', `gh:joeblew999/remy-auth/template/docs#${ref}`, 'docs'], {
-    stdio: 'inherit',
-  });
-  if (result.status !== 0) process.exit(result.status ?? 1);
-}
-
 export const what = "the docs Worker, @joeblew999/remy-ui's, over this app's docs/";
 export const commands: Subcommands = {
   serve: {
@@ -380,7 +369,6 @@ export const commands: Subcommands = {
     run: () => questions(),
   },
   provision: { what: 'what Ask AI needs on Cloudflare, printed, created never', run: () => provision() },
-  init: { what: "<ref>: a docs/ for this app from remy-auth's template at that tag", run: (rest) => init(rest[0]) },
   observe: {
     what: "…: the docs Worker's logs and its AI Gateway (remy observe, with the docs' configuration)",
     run: (rest) => {

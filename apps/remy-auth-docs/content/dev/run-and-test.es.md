@@ -1,14 +1,16 @@
 ---
 title: "Ejecutar, previsualizar y probar la app"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "633d518a dec1aa47 8dfe66ef d9d6a7c6 b892dd27 bc8d14fb 3c7eb567 fdbfb49e 0cc17ec9 7fd5481e"
+translatedFrom: "d324c35e c82e5d5e 8dfe66ef d9d6a7c6 b892dd27 48c95f5f 90a87f8d fdbfb49e b0e4dfb0 3654b8a2"
 ---
 
 :::note
-Google Chrome debe estar instalado. Todo se ejecuta localmente en el runtime de Workers, sobre la
+Las comprobaciones de navegador usan el Chromium propio de Playwright (la tarea `browsers` lo instala). Todo se ejecuta localmente en el runtime de Workers, sobre la
 D1 local de Wrangler; no se necesita ninguna cuenta de Cloudflare, base de datos remota ni credenciales de producción. Las pruebas
 de navegador son dueñas de `PREVIEW_PORT` (por defecto 4173; cada agente define el suyo) y se niegan a reutilizar
 un proceso no relacionado. Detén una preview manual antes de una comprobación de navegador; el servidor de desarrollo en el 5173 puede seguir en ejecución.
+El Chromium de las comprobaciones es el de Playwright (la tarea `browsers`: `playwright install chromium`); en Linux, los idiomas han
+también necesitan una fuente CJK: `sudo apt-get install -y --no-install-recommends fonts-noto-cjk`, como la ejecutan los jobs de navegador de GitHub.
 :::
 
 ## Un único scaffold para local y Cloudflare [#one-scaffold-for-local-and-cloudflare]
@@ -40,7 +42,7 @@ y una pulsación inicia sesión como una de ellas; contra producción nada de es
 remotas también puede apuntar a una preview local ya en ejecución para comprobar la ruta del servidor externo.
 
 Los comandos son los de remy-cli (`remy`), y cada uno lee lo que necesita donde se guarda (los origins: el `.env` de la app); los propios de este repositorio son sus tareas (el `vite.config.ts` de la raíz: `ready`, `new-app`, `skills:build`,
-`publish`) y sus scripts. La configuración de Playwright
+`release:publish`) y sus scripts. La configuración de Playwright
 es el `playwrightConfig()` del paquete.
 
 Existe una única configuración de Worker, `wrangler.jsonc`: producción, y su sección `previews` para la preview de cada rama
@@ -158,7 +160,7 @@ It's bloody confusing"). Las palabras, con un solo significado cada una:
   Después comprueba una preview: `pnpm remy test remote https://<branch>-remy-auth.gedw99.workers.dev` (solo nuestras comprobaciones: una
   preview se oculta a propósito de los buscadores, así que las auditorías de Google evalúan producción).
 - **Velocidad lejos de las bases de datos**: el Worker se ejecuta con Smart Placement (`wrangler.jsonc`, comprobado por
-  `pnpm remy verify tooling`), y cada petición lee a través de su propia sesión de D1, de modo que las lecturas vienen de la
+  `check:wrangler` en `vp run ready`), y cada petición lee a través de su propia sesión de D1, de modo que las lecturas vienen de la
   copia más cercana (`@joeblew999/remy-ui/replicas`; una comprobación unitaria rechaza el código de la app que use un binding de base de datos en bruto).
 - **Toda base de datos D1 mantiene copias de lectura y vive en la región de producción**: la regla de la plataforma, que
   `pnpm remy cloudflare provisioned` consulta a Cloudflare, incluidas las bases de datos de las previews, nombrando la corrección.
@@ -186,9 +188,9 @@ estuvo equivocado durante semanas).
   `defineRemyApp`) y los `deployments` que la app enumera ahí (un servicio al que llama), cada uno
   respondiendo por sí mismo, y luego los paquetes con los que se hizo este build. La página de Settings de
   remy-auth lo muestra.
-- **`pnpm remy cloudflare versions`** imprime una fila por deployment (los origins del `.env` de la app, o los origins
-  dados), situando cada commit respecto a este checkout: `= HEAD`, `3 behind HEAD`. Úsalo antes de
-  decir qué está en producción.
+- **`curl <origin>/healthz`** consulta un deployment (los origins están en el `.env` de la app), y
+  `pnpm wrangler deployments list` da la lista propia de Cloudflare de los deployments de un Worker. Pregunta antes de decir qué está
+  en vivo.
 
 Los conjuntos de comprobaciones compartidos lo demuestran en cada app: `/healthz` nombra el commit de este
 checkout en una ejecución local (un sello que quedó de un build anterior falla), y el marco ofrece el reload
@@ -244,7 +246,7 @@ los docs `apps/remy-auth-docs/`, todo un único workspace de pnpm (`pnpm-workspa
 - `src/router.tsx`: el `remyRouter` del paquete, un router y un cliente de TanStack Query nuevos por petición, con la integración SSR de Query. `src/routes/__root.tsx` es el `remyRoot` del paquete con la configuración de esta app; TanStack Devtools (paneles de Router y Query) se pasa ahí, en el propio archivo de la app, porque su plugin de Vite `devtools()` lo elimina de las builds de producción solo fuera de `node_modules`; la comprobación de frontera de build demuestra que ni devtools ni código exclusivo de servidor llegan al navegador.
 - `src/parts.json`: las [partes](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md) del paquete que usa esta app, una por línea (`@joeblew999/remy-showcase/time-zones`, `deferred-place` y `status-card` del showcase, y `seo-routes` de la plataforma); `remyApp()` (en `vite.config.ts`) monta sus rutas y `partChecks()` en `tests/gui.spec.ts` ejecuta sus comprobaciones.
 - `packages/remy-ui/` (en la raíz): todo lo que comparten ambas apps; su [README](./remy-ui.md) enumera las exportaciones.
-- `tests/`: las comprobaciones de navegador de la app: las comprobaciones compartidas del paquete (`@joeblew999/remy-ui/checks`, el `@joeblew999/remy-showcase/*.checks` del showcase) más las comprobaciones que solo posee este repositorio (catálogos, renderizados concurrentes en servidor, hidratación, sus filas de formatos adicionales); `lighthouse.spec.ts` es la parte `audits` de `vp run ci` y `performance.spec.ts` los Core Web Vitals de la release.
+- `tests/`: las comprobaciones de navegador de la app: las comprobaciones compartidas del paquete (`@joeblew999/remy-ui/checks`, el `@joeblew999/remy-showcase/*.checks` del showcase) más las comprobaciones que solo posee este repositorio (catálogos, renderizados concurrentes en servidor, hidratación, sus filas de formatos adicionales); `lighthouse.spec.ts` es la parte `audits` de `vp run ci` y `performance.spec.ts` los Core Web Vitals de un deployment (`pnpm remy test cwv`).
 
 El locale se pasa explícitamente a las funciones de mensaje compiladas; las peticiones concurrentes no comparten
 estado mutable de locale. Los catálogos son los `locales` en
@@ -262,8 +264,8 @@ las ejecuta sobre páginas renderizadas en servidor.
 `vp run ci` ejecuta todas las comprobaciones (`vp run ready`), luego las comprobaciones de navegador (`test:browser`), después las auditorías de Lighthouse de Google
 (`test:audits`) y, en remy-auth, una app nueva sobre el paquete de este commit (`new-app`), una tras otra: las
 auditorías miden la velocidad, así que nunca se ejecutan junto a otra ejecución de navegador. GitHub ejecuta las mismas tareas como jobs en paralelo (las
-comprobaciones de navegador en tres fragmentos, `vp run test:browser --shard 1/3`). Los Core Web Vitals sobre un deployment
-son cosa de la release (`pnpm remy test cwv`: producción, o el origin de una preview). No hay niveles que elegir y ninguna parte decide omitirse, y lo que nada ha tocado sale de la caché de Vite Plus en lugar de ejecutarse de nuevo. Qué se prueba se decide una sola vez, según lo que una comprobación
+comprobaciones de navegador en tres fragmentos, `vp run test:browser --shard 1/3`). Los Core Web Vitals se miden sobre un deployment, a
+mano (`pnpm remy test cwv`: producción, o el origin de una preview). No hay niveles que elegir y ninguna parte decide omitirse, y lo que nada ha tocado sale de la caché de Vite Plus en lugar de ejecutarse de nuevo. Qué se prueba se decide una sola vez, según lo que una comprobación
 puede demostrar (propietario, 2026-10-17: "you really need to decide what is tested and what isn't"):
 
 - Una comprobación de cómo se dibuja el texto (fuentes y escrituras, separación silábica, dirección, ajuste a un teléfono, formatos) se ejecuta en

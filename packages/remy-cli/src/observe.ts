@@ -1,12 +1,10 @@
-// Observability of a deployed Worker and its AI, read from Cloudflare's own APIs (`remy observe
-// events [event] [--since 24h] [--limit 10] | ai-usage [--since 7d] | ai-check | gateway [show |
-// rate-limit off | rate-limit <requests>/<seconds> | logs on|off]`): Workers Logs (the telemetry
-// query), AI Gateway logs and settings, the AI Search instance. Nothing is named here: the Worker and
+// The docs' AI, read from Cloudflare's own APIs (`remy observe ai-usage [--since 7d] | ai-check | gateway [show |
+// rate-limit off | rate-limit <requests>/<seconds> | logs on|off]`): AI Gateway logs and settings, the AI Search
+// instance. A Worker's logs are Wrangler's (`wrangler tail`) and the dashboard's Observability. Nothing is named here: the Worker and
 // its AI Search come from the Wrangler configuration (--config names one: remy docs observe names the docs Worker's
 // generated one; else the app's), and the gateway from the instance. Never prints a token.
 // Credentials: Wrangler's login reads AI Search, but it cannot ask for AI Gateway or Workers Logs
-// access, so those use CLOUDFLARE_API_TOKEN ("AI Gateway Edit", which includes reading, and "Workers
-// Observability Read"), from fnox (the macOS keychain): fnox exec -- pnpm remy observe …
+// access, so it uses CLOUDFLARE_API_TOKEN ("AI Gateway Edit", which includes reading), from fnox (the macOS keychain): fnox exec -- pnpm remy observe …
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
@@ -109,55 +107,6 @@ function duration(text: string | undefined): number {
 const percentile = (values: number[], p: number) =>
   values.length ? [...values].sort((a, b) => a - b)[Math.min(values.length - 1, Math.floor(p * values.length))]! : 0;
 const usd = (value: number) => `$${value.toFixed(4)}`;
-
-export async function events(args: string[]): Promise<void> {
-  const { config, api } = await setup();
-  const option = (name: string, fallback: string) => {
-    const index = args.indexOf(`--${name}`);
-    return index >= 0 ? (args[index + 1] ?? fallback) : fallback;
-  };
-  const event = args.find((arg, index) => !arg.startsWith('--') && !args[index - 1]?.startsWith('--'));
-  const to = Date.now();
-  const from = to - duration(option('since', '24h'));
-  const service = [{ key: '$metadata.service', operation: 'eq', type: 'string', value: config.name }];
-  const filters = event ? [...service, { key: 'event', operation: 'eq', type: 'string', value: event }] : service;
-  const counts = await api('POST', '/workers/observability/telemetry/query', {
-    body: {
-      queryId: 'remy-events-counts',
-      view: 'calculations',
-      timeframe: { from, to },
-      parameters: {
-        datasets: ['cloudflare-workers'],
-        filters: service,
-        calculations: [{ operator: 'count', alias: 'events' }],
-        groupBys: [
-          { type: 'string', value: 'event' },
-          { type: 'string', value: 'level' },
-        ],
-        limit: 50,
-      },
-    },
-  });
-  console.log(`${config.name}, last ${option('since', '24h')}: events by name and level`);
-  for (const aggregate of counts.result.calculations?.[0]?.aggregates ?? []) {
-    const group = Object.fromEntries(
-      (aggregate.groups as { key: string; value: string }[]).map((entry) => [entry.key, entry.value]),
-    );
-    console.log(`  ${String(aggregate.count).padStart(7)}  ${group.event ?? '(no event)'}  ${group.level ?? ''}`);
-  }
-  const list = await api('POST', '/workers/observability/telemetry/query', {
-    body: {
-      queryId: 'remy-events-list',
-      view: 'events',
-      limit: Number(option('limit', '10')),
-      timeframe: { from, to },
-      parameters: { datasets: ['cloudflare-workers'], filters, filterCombination: 'and' },
-    },
-  });
-  const found: Json[] = list.result.events?.events ?? [];
-  console.log(`\nLatest ${found.length}${event ? ` ${event}` : ''} events:`);
-  for (const entry of found) console.log(JSON.stringify(entry.source ?? entry));
-}
 
 export async function aiUsage(args: string[]): Promise<void> {
   const { api, aiSearch } = await setup();
@@ -331,9 +280,8 @@ export async function gateway(args: string[]): Promise<void> {
   show((await api('GET', `/ai-gateway/gateways/${id}`, { token: apiToken })).result);
 }
 
-export const what = "a Worker's logs and its AI Gateway";
+export const what = "the docs' AI Gateway (a Worker's logs: wrangler tail, or the dashboard's Observability)";
 export const commands: Subcommands = {
-  events: { what: "[event] [--since 24h] [--limit 10]: the Worker's log events", run: (rest) => events(rest) },
   'ai-usage': { what: "[--since 7d]: Ask AI's usage through the gateway", run: (rest) => aiUsage(rest) },
   'ai-check': { what: 'Ask AI answers through its gateway', run: () => aiCheck() },
   gateway: {

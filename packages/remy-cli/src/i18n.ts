@@ -397,7 +397,7 @@ export function checkDocs(list: boolean, cwd = process.cwd()): boolean {
 
 /**
  * Both checks: a WARNING and exit 0 while coding (the check runs it on every change, and an English edit is stale
- * until its landing translates it); exit 1 on a gap with --strict. A release refuses gaps itself (remy release check).
+ * until its landing translates it); exit 1 on a gap with --strict. A release runs it with --strict.
  */
 export async function checkAll(strict = false, cwd = process.cwd()): Promise<boolean> {
   const messages = await checkMessages(false, cwd);

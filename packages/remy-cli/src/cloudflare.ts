@@ -1,27 +1,17 @@
 // Cloudflare. The one way anything is deployed is a push: Cloudflare's Git builds (Workers Builds) deploy main to
-// production and every other branch to its Preview. Here, only what reads Cloudflare: what each deployment runs
-// (`remy cloudflare versions`), an app's page URLs, and the check that a binding names a resource that exists.
-import { execFileSync, spawnSync } from 'node:child_process';
+// production and every other branch to its Preview. What each deployment runs is Wrangler's (`wrangler deployments
+// list`, `curl <origin>/healthz`). Here, only the check that a binding names a resource that exists.
+import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { dispatch, type Subcommands } from './commands.ts';
-import { appDir, bin, origins as projectOrigins } from './config.ts';
+import { appDir, bin } from './config.ts';
 
 // A declaration, not a constant: tsc narrows after a call only to a function declared with its never type.
 function fail(message: string): never {
   console.error(message);
   process.exit(1);
-}
-
-/** A tool from this install, in the foreground; stops the step at its first failure. */
-function tool(name: string, args: string[], options: { cwd?: string; env?: Record<string, string> } = {}): void {
-  const result = spawnSync(bin(name), args, {
-    cwd: options.cwd ?? appDir(),
-    stdio: 'inherit',
-    env: { ...process.env, ...options.env },
-  });
-  if (result.status !== 0) fail(`${name} ${args.join(' ')}: failed`);
 }
 
 /**
@@ -115,149 +105,9 @@ function databasesRight(production: Databases, deployed: Databases, environment?
   );
 }
 
-/** The smoke checks against a live origin: the deploy proves itself with the tools, not by hand. */
-export const smoke = (origin: string): void =>
-  tool('playwright', ['test', '--project=ours', '--grep', 'smoke [a-zA-Z-]+:'], {
-    env: { TEST_TARGET: 'remote', TEST_BASE_URL: origin },
-  });
-
-const git = (...args: string[]) => {
-  try {
-    return execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
-  } catch {
-    return '';
-  }
-};
-
-/** Where a deployed commit is from here; a deployment can be older or newer than the branch you hold. */
-function distance(commit: string | undefined): string {
-  if (!commit) return 'no commit in its stamp';
-  if (!git('cat-file', '-t', commit)) return 'unknown to this checkout';
-  const behind = git('rev-list', '--count', `${commit}..HEAD`);
-  const ahead = git('rev-list', '--count', `HEAD..${commit}`);
-  if (behind === '0' && ahead === '0') return '= HEAD';
-  return [behind !== '0' && `${behind} behind HEAD`, ahead !== '0' && `${ahead} ahead of HEAD`]
-    .filter(Boolean)
-    .join(', ');
-}
-
-type Health = {
-  service?: string;
-  environment?: string;
-  release?: string;
-  deployedAt?: string;
-  build?: { commit?: string };
-  error?: string;
-};
-
-/**
- * Ask each deployment what it is running, one row each: service, environment, commit, how far that is
- * from this checkout, when it was deployed. Nothing is written down anywhere, so nothing can drift.
- */
-export async function versions(
-  origins = [projectOrigins().production, projectOrigins().docs].filter((o): o is string => !!o),
-): Promise<{ table: string; unanswered: number }> {
-  if (!origins.length) fail('versions: pass an origin, or put origins in remy.config.ts');
-  const ask = async (origin: string): Promise<Health> => {
-    try {
-      const response = await fetch(new URL('/healthz', origin), {
-        cache: 'no-store',
-        signal: AbortSignal.timeout(10_000),
-      });
-      return response.ok ? ((await response.json()) as Health) : { error: `HTTP ${response.status}` };
-    } catch (error) {
-      return {
-        error:
-          (error as { cause?: { code?: string } }).cause?.code ??
-          (error instanceof Error ? error.message : String(error)),
-      };
-    }
-  };
-  const rows: string[][] = [['ORIGIN', 'SERVICE', 'ENVIRONMENT', 'COMMIT', 'FROM HERE', 'DEPLOYED', 'RELEASE']];
-  let unanswered = 0;
-  for (const [index, answer] of (await Promise.all(origins.map(ask))).entries()) {
-    const origin = new URL(origins[index]!).origin;
-    if (answer.error) {
-      unanswered++;
-      rows.push([origin, `no answer (${answer.error})`, '', '', '', '', '']);
-      continue;
-    }
-    const { build } = answer;
-    if (!build) {
-      rows.push([
-        origin,
-        answer.service ?? '',
-        '?',
-        'no stamp',
-        'deployed before the build stamp',
-        '',
-        answer.release ?? '',
-      ]);
-      continue;
-    }
-    const commit = build.commit ? build.commit.slice(0, 7) : '';
-    rows.push([
-      origin,
-      answer.service ?? '',
-      answer.environment ?? '',
-      commit,
-      distance(build.commit),
-      (answer.deployedAt ?? '').slice(0, 16).replace('T', ' '),
-      answer.release ?? '',
-    ]);
-  }
-  const widths = rows[0]!.map((_, column) => Math.max(...rows.map((row) => row[column]!.length)));
-  const lines = rows.map((row) =>
-    row
-      .map((cell, column) => cell.padEnd(widths[column]!))
-      .join('  ')
-      .trimEnd(),
-  );
-  if (git('status', '--porcelain'))
-    lines.push('', 'This checkout has uncommitted changes: HEAD is its last commit, not what is on disk.');
-  return { table: lines.join('\n'), unanswered };
-}
-
-/** The production (or a given) origin's pages and health URL, for reports: the package's paths in the base language. */
-export async function urls(origin = projectOrigins().production): Promise<void> {
-  if (!origin) fail('urls: pass an origin or put origins.production in remy.config.ts');
-  const resolve = createRequire(join(process.cwd(), 'package.json')).resolve;
-  const load = (specifier: string) => import(pathToFileURL(resolve(specifier)).href);
-  const { sitePaths, appPaths } = (await load('@joeblew999/remy-ui/paths')) as {
-    sitePaths: string[];
-    appPaths: string[];
-  };
-  const { baseLocale, localizeUrl } = (await load('@joeblew999/remy-ui/runtime')) as {
-    baseLocale: string;
-    localizeUrl: (url: URL, options: { locale: string }) => URL;
-  };
-  const page = (path: string) => localizeUrl(new URL(path || '/', origin), { locale: baseLocale }).href;
-  console.log(`Origin: ${new URL(origin).origin}`);
-  console.log('Site pages:');
-  for (const path of sitePaths) console.log(`  ${page(path)}`);
-  console.log('App pages:');
-  for (const path of appPaths) console.log(`  ${page(path)}`);
-  console.log(`Health: ${new URL('/healthz', origin).href}`);
-}
-
-/** The Worker's name in the Wrangler configuration. */
 export const what =
-  "Cloudflare's builds deploy every push (main to production, a branch to its Preview); here: what each deployment runs, its URLs, the resources a binding needs";
+  "Cloudflare's builds deploy every push (main to production, a branch to its Preview); here: the resources a binding needs";
 export const commands: Subcommands = {
-  versions: {
-    what: '[origins…]: what each deployment runs, asked and never remembered: service, environment, commit and how far it is from this checkout, when it was deployed',
-    run: async (rest) => {
-      const { table, unanswered } = await versions(rest.length ? rest : undefined);
-      console.log(table);
-      if (unanswered) process.exit(1);
-    },
-  },
-  urls: {
-    what: '[origin]: the URLs a deployment answers at',
-    run: async (rest) => {
-      await urls(rest[0]);
-    },
-  },
   provisioned: {
     what: "refuse when a D1, KV or R2 binding names no existing resource, or a D1 database (the Previews' included) keeps no read copies",
     run: () => provisioned(),

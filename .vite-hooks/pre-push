@@ -1,4 +1,4 @@
 #!/bin/sh
-# Before a push: what its pull request will run, first; what nothing touched comes from Vite Plus's cache (a landing
-# ran it just now). VP_GIT_HOOKS=0 skips every hook, Vite Plus's own switch.
+# Before a push: vp run ci, what GitHub runs; what nothing touched comes from Vite Plus's cache. VP_GIT_HOOKS=0 skips
+# every hook, Vite Plus's own switch.
 exec vp run ci

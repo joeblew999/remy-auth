@@ -1,14 +1,11 @@
-# The heavy checks (every language, Google's audits, the repositories this one serves) on every push to
-# main, in parallel, on GitHub: remy-auth's shared workflow, at the tag of the tasks and package
-# (vp run upgrade moves it). Locally the check is vp run ready, in seconds. Its release job runs only for tags, which an app that publishes no packages never makes.
+# The checks on GitHub, in parallel: remy-auth's shared workflow, at the tag of the tasks and package (vp run upgrade
+# moves it), the same as vp run ci here. Its release job runs only for tags, which an app never makes.
 # The shared workflow is called ci.yml from the release after 0.15.1 (google.yml before); a release and
 # `remy upgrade` write the right name with the tag.
 name: CI
 
+# Not on a push to main: the push's own hook ran `vp run ci` first. A pull request (Dependabot's), or by hand.
 on:
-  push:
-    branches: [main]
-    tags: ['v*']
   pull_request:
   workflow_dispatch:
 

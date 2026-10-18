@@ -28,7 +28,7 @@ export async function shots(args: string[]): Promise<void> {
   const all = has('all');
   const origin = value('origin') ?? origins().production;
   const out = value('out') ?? `${process.env.TMPDIR ?? '/tmp'}/remy-shots`;
-  if (!origin) throw new Error('shots needs --origin or origins.production in remy.config.ts');
+  if (!origin) throw new Error("shots needs --origin or VITE_DEPLOY_ORIGIN in the app's .env");
   let pages = paths;
   if (all) {
     const { sitePaths, appPaths } = (await import(

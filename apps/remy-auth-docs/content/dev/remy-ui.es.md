@@ -1,7 +1,7 @@
 ---
 title: "El paquete de UI (@joeblew999/remy-ui)"
 description: "La interfaz que comparten todas las apps de Remy: shadcn de fábrica, fuentes, catálogos de Paraglide, las páginas del sitio y de la app, el pegamento de TanStack Start y sus comprobaciones."
-translatedFrom: "f3f6cb00 46cbc789 60a401ce abda4f78 62bc7837 1b480316 415c4606"
+translatedFrom: "f3f6cb00 46cbc789 60a401ce c77f7598 62bc7837 d7c958f1 415c4606"
 ---
 
 La interfaz que comparten todas las apps de Remy: componentes y tema de shadcn de fábrica, fuentes,
@@ -127,10 +127,9 @@ Todas bajo `@joeblew999/remy-ui/`, como TSX y CSS para consumidores de Vite y Ta
 
 Las dependencias del paquete, en las versiones del catálogo, son lo que importa y ejecuta: el framework (React,
 TanStack Start, Router y Query), la cadena de herramientas (Vite, Wrangler, Tailwind, TypeScript) y las herramientas de las
-comprobaciones (Playwright, Lighthouse); las herramientas propias de la línea de comandos (el servidor MCP de DevTools, la CLI de Codex, npm-check-updates)
-son de `@joeblew999/remy-cli`. Una app lista lo que importa ella misma, en las mismas versiones del catálogo;
-`remy.singleCopy` en el `package.json` de este paquete lista las que se rompen si se instalan dos veces, que los
-`overrides` del `pnpm-workspace.yaml` de la app mantienen en una sola copia y que la parte de copias únicas de la comprobación demuestra
+comprobaciones (Playwright, Lighthouse); las herramientas que ejecutan las tareas compartidas (Wrangler, Playwright) son también las de `@joeblew999/remy-cli`.
+Una app lista lo que importa ella misma, en las mismas versiones del catálogo; las que se rompen si se instalan dos veces se mantienen en
+una sola copia mediante los `overrides` del `pnpm-workspace.yaml` de la app
 ([proyectos](./projects.md#choosing-the-version-released-development-or-local)).
 
 ## Idioma [#language]
@@ -149,18 +148,22 @@ polaco, turco y alemán) están escritos por un agente y sin revisar.
 ## Publicación [#publishing]
 
 El paquete es `@joeblew999/remy-ui` en GitHub Packages (ahí el scope debe coincidir con el
-propietario de GitHub), publicado con `@joeblew999/remy-cli` bajo la misma versión; la demostración (showcase) y el contrato se
-publican cuando se subió su versión. Ninguno de los dos se publica todavía en esta forma. `vp run release` ejecuta desde esta máquina las
-comprobaciones de la publicación, deteniéndose en el primer fallo, y después crea el tag; sus pasos, en orden, están en
-[Comandos](./commands.mdx), y el job de publicación de GitHub publica a partir del tag (nunca una sesión en la nube). Core Web Vitals
-se miden sobre un despliegue (producción, o el Preview de una rama): las páginas tal como las reciben los visitantes desde Cloudflare. CI
-(`.github/workflows/ci.yml`) repite las auditorías de Google sobre el tag.
+propietario de GitHub), publicado con `@joeblew999/remy-cli` bajo la misma versión (el grupo `fixed` de Changesets en
+`.changeset/config.json`); la demostración (showcase) y el contrato llevan su propia versión y se publican cuando un changeset
+las subió. Ninguno de los dos se publica todavía en esta forma.
 
-Antes de publicar, un solo commit: la versión (`vp run ui:version X.Y.Z` la escribe en remy-ui, remy-cli y en las
-versiones fijadas de la app en blanco; también en `packages/remy-auth-contract/package.json` cuando el contrato cambió) y la sección del CHANGELOG. Los
-workspaces dependen unos de otros con `workspace:*`, que el publish de pnpm escribe como la versión, y el rango de peer del
-contrato es abierto. `remy release check` rechaza un árbol sucio, una rama distinta de main, traducciones obsoletas o
-un paquete cambiado sin una versión nueva.
+Todo cambio en un paquete publicado lleva un changeset, escrito junto con él: `pnpm changeset` (qué paquetes, patch,
+minor o major, y una línea para el registro de cambios), confirmado como `.changeset/<name>.md`. `vp run release`, desde esta
+máquina, se detiene en el primer fallo: `changeset version` (las versiones nuevas y la sección de `CHANGELOG.md` de cada paquete
+a partir de los changesets pendientes), `scripts/version.ts` (las versiones fijadas de la app en blanco, `template/pnpm-workspace.yaml` y
+el tag de `template/.github/workflows/ci.yml`, llevados a la nueva versión de remy-ui, y después el lockfile), las traducciones
+completas (`remy i18n check --strict`), todas las comprobaciones en todos los idiomas, `vp run ui:verify` y, por último, `vp run release:tag`
+(el commit «Release vX.Y.Z», el tag anotado, y main y el tag subidos). Sus pasos están en [Comandos](./commands.mdx).
+Un tag ejecuta un solo job en GitHub, la publicación (nunca una sesión en la nube), y ninguna comprobación, ya que la publicación las ejecutó:
+`vp run release:publish` (`changeset publish`, después de generar y construir los paquetes y de crear la skill `remy`),
+y luego `gh release create` con las notas generadas por GitHub. Los workspaces dependen unos de otros con `workspace:*`, que el
+publish de pnpm escribe como la versión, y el rango de peer del contrato es abierto. Core Web Vitals se miden sobre un
+despliegue (producción, o el Preview de una rama): las páginas tal como las reciben los visitantes desde Cloudflare.
 
 El `.npmrc` de un consumidor solo nombra el registro:
 
@@ -168,9 +171,10 @@ El `.npmrc` de un consumidor solo nombra el registro:
 @joeblew999:registry=https://npm.pkg.github.com
 ```
 
-pnpm no lee ningún token del `.npmrc` de un repositorio, así que `vp run setup` (y `remy upgrade`) escribe un token con `read:packages`,
-tomado de `GITHUB_TOKEN` en el shell o de `gh auth token`, en la configuración de pnpm de la propia máquina. Las versiones publicadas están en el
-[registro de cambios](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
+pnpm no lee ningún token del `.npmrc` de un repositorio, así que el `vp run setup` de una app escribe un token con `read:packages`, tomado
+de `gh auth token`, en la configuración de pnpm de la propia máquina (`pnpm config set --location user`); el workflow de GitHub pone
+su token ahí del mismo modo antes de `vp install --frozen-lockfile`. Las versiones publicadas están en el
+[registro de cambios](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/CHANGELOG.md), que escribe Changesets.
 
 ## Escribir una parte [#writing-a-part]
 

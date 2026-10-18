@@ -47,15 +47,16 @@ checkout:
 
 ```sh
 vp install          # once: the dependencies from pnpm-lock.yaml, and the Git hooks
-vp run setup        # the pinned skills, MCP, the installation's checks, then vp run ready
+vp run setup        # the install, the pinned skills (skills-lock.json), the agents' rules, then vp run ready
 vp run dev          # http://127.0.0.1:5173/en
 ```
 
 Open [localhost:5173/en](http://127.0.0.1:5173/en); switch to Spanish or try the demo.
 
-Setup installs the pinned **Codex CLI**; authenticate when prompted. **Claude Code**
-is optional and installed separately.
-Install **Google Chrome** before setup; browser checks use the installed Chrome.
+The MCP servers for Claude and Codex are committed (`.mcp.json`, `.codex/config.toml`); the **Codex CLI** runs as
+`pnpm dlx @openai/codex`, and **Claude Code** is installed separately.
+The browser checks use Playwright's own Chromium, which the `browsers` task installs (on Linux, add the font
+`fonts-noto-cjk`).
 
 ## Work with an agent
 
@@ -84,5 +85,5 @@ app installs ([projects](./projects.md)).
 - [Developer tooling](./tooling.md): the pinned tools, secrets, agent skills, MCP and browser tools.
 - [Run, preview and test the app](./run-and-test.md): one Worker, local and remote test targets, Cloudflare.
 - [Projects](./projects.md): the layout every app keeps, a new app, publishing, translations, Cloudflare and plans.
-- [Shared UI package](./remy-ui.md) and its [changelog](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
+- [Shared UI package](./remy-ui.md) and its [changelog](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/CHANGELOG.md).
 - [Plans](https://github.com/joeblew999/remy-auth/tree/main/.plans): [.plans/now.md](https://github.com/joeblew999/remy-auth/blob/main/.plans/now.md) is the only list of what is open and where it stands.

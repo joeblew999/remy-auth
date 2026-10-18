@@ -32,7 +32,7 @@ is general, not only for missing tools:
 - **Everyone hears it through the repo**: `.plans/now.md` is committed, so what one person saw reaches
   everyone who pulls main (`pnpm remy plans status` prints its open items), and the next change takes the top of it.
 - **"Done" is the end of a sweep, not of a list.** Before saying it: branches and worktrees (`git branch`,
-  `git worktree list`), `pnpm remy cloudflare versions`, `pnpm remy plans check`, a
+  `git worktree list`), `pnpm wrangler deployments list`, `pnpm remy plans check`, a
   search for the words the change retired, the docs the change touched. Show the sweep.
 
 ## Use the project's own tools first
@@ -175,7 +175,7 @@ its translations together: one commit, one push, one run of the checks.
 - `remy i18n check` only reads, offline, so it is safe anywhere and in any number of worktrees.
   `remy i18n translate` is never a `depends`.
 - Stale or missing is a warning while coding and in `vp run ci` (its `ready` part), and an error at
-  release (`remy release check`, the release's first step).
+  release (`remy i18n check --strict`, before the release's checks).
 - A structural change (a rename, a sweep) that touches docs translations is followed by
   `pnpm remy i18n translate docs <file>…`, which brings those files fully in line with the
   English. Change a catalog's structure (every locale's file) in the same commit as `en.json`.
@@ -219,14 +219,16 @@ its own ports (`PREVIEW_PORT`, `DOCS_PREVIEW_PORT`).
 
 | Step | Command | Who runs it, and when | What runs | Time |
 | --- | --- | --- | --- | --- |
-| Look | `git status`, `git log`, `gh run list`, `pnpm wrangler deployments list`, `pnpm remy cloudflare versions` | everyone, first, and whenever they need to know | git and GitHub's own answers; what each deployment runs, read from its `/healthz`, placed against this checkout | seconds |
+| Look | `git status`, `git log`, `gh run list`, `pnpm wrangler deployments list`, `curl <origin>/healthz` | everyone, first, and whenever they need to know | git, GitHub's and Cloudflare's own answers; what a deployment runs, from its `/healthz` | seconds |
 | After every change | `vp run ready` | whoever is coding; the only step waited for | Vite Plus's tasks: everything generated, the app and the docs built, Wrangler's deployment dry run, the project's own checks, the unit checks, then `vp check` (format, lint, types); what has not changed comes from Vite Plus's cache | ~8 s unchanged, ~50 s from nothing |
 | The change leaves the machine | `vp run translate` (when text changed), `git commit`, `git push` | whoever did the work, on their own, as soon as it is finished | the translations the change made stale, in the same commit; the commit (its hook: `vp staged`); the push to `main` (its hook: `vp run ci`, from the cache where nothing changed; `VP_GIT_HOOKS=0` skips it) | a few minutes: what changed here, in the push's hook |
 | Production | a push to `main`: Cloudflare deploys it | nobody; every push to `main` goes live | Cloudflare's Git builds (Workers Builds) build and deploy the app and the docs from each push to `main`, and every other branch's Preview from its own push ([on Cloudflare](./run-and-test.md#on-cloudflare)); after a docs change, `pnpm remy docs publish` (a machine signed in to Cloudflare) gives Ask AI's index the new pages | a few minutes after the push |
-| A release | `vp run release` | the owner, or an agent the owner asked in that session | `remy release check` (a clean main, translations complete, versions bumped) → `CHECK_LOCALES=all vp run ci` (every language) → `vp run template:check` → `vp run ui:verify` → `vp run publish:rehearse` → `remy test cwv` → `remy packages tag`; GitHub's release job publishes from the tag | ~5 min |
+| A release | `vp run release` | the owner, or an agent the owner asked in that session | `changeset version` (the versions and changelogs from the pending changesets) → `node scripts/version.ts` (the blank app re-pinned) → `remy i18n check --strict` (translations complete) → `CHECK_LOCALES=all vp run ci` (every language) → `vp run ui:verify` → `vp run release:tag` (the commit "Release vX.Y.Z", its tag, main and the tag pushed); GitHub's release job, the only job a tag runs, publishes (`vp run release:publish`: `changeset publish`) and makes the GitHub release | ~5 min |
 
-GitHub's CI workflow is off, by the owner's choice: `vp run ci` runs the same here, and the push's hook runs it before
-anything leaves the machine. No pull requests, auto-merge or branch rules: `main` takes the push.
+GitHub's CI workflow does not run on a push to `main`, by the owner's choice: `vp run ci` runs the same here, and the
+push's hook runs it before anything leaves the machine. It runs for a version tag (the release job, which publishes),
+for Dependabot's pull requests, and by hand (`gh workflow run ci.yml`). No pull requests of ours, auto-merge or branch
+rules: `main` takes the push.
 
 - **Who runs a step is in the table, and it is never a question.** An agent pushes its own
   finished work to `main` without asking: its push ran `vp run ci` first, and nothing red is pushed. The owner's word is for a release, the one step whose column says so, and for provisioning
@@ -239,7 +241,7 @@ anything leaves the machine. No pull requests, auto-merge or branch rules: `main
   something (the translator spends Claude's tokens) runs by name from a
   script, where anyone can see it.
 - **Nothing is handed on through the environment.** A `remy` command reads the value it needs from the file that
-  holds it (the app's `.env`, its `wrangler.jsonc`, `remy.config.ts`) and passes a child only what that child needs; no command sets variables for others to find, and no hidden
+  holds it (the app's `.env`, its `wrangler.jsonc`) and passes a child only what that child needs; no command sets variables for others to find, and no hidden
   switch changes what a command does (`tests/unit/dev-flow.unit.spec.ts` refuses both). The one setting a person
   gives is `CHECK_LOCALES` (`all`, `quick` or a list).
 - One area that looks wrong: `vp run test:browser --grep <words>` (the browser checks whose title
@@ -268,10 +270,10 @@ anything leaves the machine. No pull requests, auto-merge or branch rules: `main
 - **Where the time goes is Vite Plus's to say.** `vp run --last-details` names each task, whether it came from the
   cache and why it ran; a slow step is a number in that, not a feeling (owner, 2026-10-10: "how can it be
   6 minutes").
-- **GitHub's answer comes to you**, while its CI workflow is on. A red run comments on the commit (GitHub tells its
-  author), naming the run; `gh run list` and `gh run view <id>` show the rest. To reproduce a red
+- **GitHub's answer comes to you**, while its CI workflow is on. GitHub emails a red run's author itself;
+  `gh run list` and `gh run view <id>` show the rest. To reproduce a red
   job, a person runs `vp run <task>` (the job's name), the same command GitHub ran, since the workflow holds no
-  logic of its own (`remy verify tooling` checks every task a workflow names exists). An agent reads the
+  logic of its own. An agent reads the
   run's own log (`gh run view <id> --log-failed`) and runs the one area
   (`vp run test:browser --grep <words>`). Report what was tested and what was not; never call
   untested work verified.
@@ -325,8 +327,8 @@ and timing-sensitive checks failed well before that. So:
   and 4174; never 4190, which browsers block): `PREVIEW_PORT=4232 DOCS_PREVIEW_PORT=4233 vp run …`.
 - At most three agents run tests at the same time; research, writing and scratch spikes do not
   count. When more are needed, set `PLAYWRIGHT_WORKERS=2` for each.
-- Google's audits (`vp run test:audits`) and Core Web Vitals (`pnpm remy test cwv`) take a machine-wide lock, so a second
-  run waits rather than skewing the first.
+- Google's audits (`vp run test:audits`) run one page at a time (`--workers=1`), since two speed measurements at once
+  skew both; do not run two checkouts' audits, or an audit and Core Web Vitals (`pnpm remy test cwv`), at the same time.
 - Never chain one step after a check with `;`: the scripts chain with `&&`, so they stop at the first failure.
 
 ## Reporting to the owner
@@ -336,13 +338,14 @@ and timing-sensitive checks failed well before that. So:
   <https://remy-auth.gedw99.workers.dev>, and for the docs Worker its guide
   <https://remy-auth-docs.gedw99.workers.dev/docs>, developer docs
   <https://remy-auth-docs.gedw99.workers.dev/dev> and API reference
-  <https://remy-auth-docs.gedw99.workers.dev/reference>. `pnpm remy cloudflare urls` prints a deployment's.
+  <https://remy-auth-docs.gedw99.workers.dev/reference>. The origins are the app's `.env` (`VITE_DEPLOY_ORIGIN`,
+  `VITE_DOCS_ORIGIN`).
 - Every report about something the owner can look at gives its URLs: the live sites, the preview
   (a pushed branch's Cloudflare Preview, `https://<branch>-remy-auth.gedw99.workers.dev`) and a direct link to each page or
   feature discussed.
 - Say what was checked and what was not.
-- What is live is asked, not remembered: `pnpm remy cloudflare versions` prints what each deployment is running
-  and how far that is from your checkout (`wrangler deployments list` gives Cloudflare's own list). Say it from
+- What is live is asked, not remembered: `pnpm wrangler deployments list` gives Cloudflare's own list, and
+  `curl <origin>/healthz` what a deployment is running (its service and release). Say it from
   there, not from what you last merged.
 
 ## Many agents, one flow
@@ -368,5 +371,5 @@ The steps, what each runs and who runs it: [the flow's table](#the-flow-the-stan
 - **An agent never waits in the foreground** on `git push` (its hook runs `vp run ci`), a GitHub run or a Cloudflare
   build; it starts them in the background and acts on the result. Only `vp run ready` is waited for.
 - **Everything asynchronous comes back to everyone** ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/dev-feedback.md)):
-  a red GitHub job writes on the commit, naming itself; `gh run list` and `pnpm remy cloudflare versions`
+  GitHub emails a red job's author; `gh run list`, `pnpm wrangler deployments list` and `curl <origin>/healthz`
   show the rest to whoever asks.

@@ -16,7 +16,7 @@ test("the showcase's dependencies are the platform's, at the platform's exact ve
     .map(([name, version]) => `${name}: ${version} here, ${platform[name] ?? 'absent'} in @joeblew999/remy-ui`);
   expect(
     differing,
-    "vp run ui:version keeps them equal; a dependency the platform does not have is the showcase's own to pin",
+    "pin them to the platform's; a dependency the platform does not have is the showcase's own to pin",
   ).toEqual([]);
 });
 

@@ -46,7 +46,7 @@ It ships TypeScript source, as `@joeblew999/remy-ui` does: consumers' Vite bundl
 `tsc` checks it. A Playwright spec in a consumer must not import it (Playwright does not transpile
 TypeScript inside `node_modules`); the shared checks take plain values instead. The peer ranges name
 what it imports: the reservation shapes from `@joeblew999/remy-showcase` (0.1.0 on) and, from
-`@joeblew999/remy-ui`, the API's policy metadata (`api/policy`, new with contract 0.4.0; `ui:version`
+`@joeblew999/remy-ui`, the API's policy metadata (`api/policy`, new with contract 0.4.0; the release
 moves the floor to the release that first has it) and before that its coverage types (0.12.0 on).
 0.4.0 is written for oRPC 2 (2.0.0-beta.42): a client still on oRPC 1 reads its successful answers
 (checked by hand with 1.15.4's OpenAPILink), but sees a typed error as a plain 400. 0.2.1 imports them from `@joeblew999/remy-ui/reservation`, which 0.14.0

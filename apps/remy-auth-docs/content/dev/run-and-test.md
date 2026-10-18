@@ -4,10 +4,12 @@ description: "One Cloudflare Worker serves the site and the app; how to run it l
 ---
 
 :::note
-Google Chrome must be installed. Everything runs locally in the Workers runtime, on Wrangler's
+The browser checks use Playwright's own Chromium (the `browsers` task installs it). Everything runs locally in the Workers runtime, on Wrangler's
 local D1; no Cloudflare account, remote database or production credentials are needed. Browser
 tests own `PREVIEW_PORT` (default 4173; each agent sets its own) and refuse to reuse an unrelated
 process. Stop a manual preview before a browser check; the development server on 5173 can remain running.
+The checks' Chromium is Playwright's (the `browsers` task: `playwright install chromium`); on Linux the Han languages
+also need a CJK font: `sudo apt-get install -y --no-install-recommends fonts-noto-cjk`, as GitHub's browser jobs run it.
 :::
 
 ## One scaffold for local and Cloudflare
@@ -39,7 +41,7 @@ and one press signs in as one of them; against production none of it exists. The
 also target an already-running local preview to check the external-server path.
 
 The commands are remy-cli's (`remy`), each reading what it needs where it is kept (the origins: the app's `.env`); this repository's own are its tasks (the root `vite.config.ts`: `ready`, `new-app`, `skills:build`,
-`publish`) and scripts. The Playwright
+`release:publish`) and scripts. The Playwright
 configuration is the package's `playwrightConfig()`.
 
 There is one Worker configuration, `wrangler.jsonc`: production, and its `previews` section for every branch's
@@ -157,7 +159,7 @@ It's bloody confusing"). The words, one meaning each:
   Then check a Preview: `pnpm remy test remote https://<branch>-remy-auth.gedw99.workers.dev` (our checks only: a
   Preview is hidden from search engines on purpose, so Google's audits judge production).
 - **Speed far from the databases**: the Worker runs with Smart Placement (`wrangler.jsonc`, checked by
-  `pnpm remy verify tooling`), and every request reads through its own D1 session, so reads come from the
+  `check:wrangler` in `vp run ready`), and every request reads through its own D1 session, so reads come from the
   nearest copy (`@joeblew999/remy-ui/replicas`; a unit check refuses app code using a database binding raw).
 - **Every D1 database keeps read copies and lives in production's region**: the platform's rule, which
   `pnpm remy cloudflare provisioned` asks Cloudflare about, the Previews' databases included, naming the fix.
@@ -183,8 +185,8 @@ out of date (the design is remy-sport's, whose committed record of deployments w
   and the `deployments` the app lists there (a service it calls), each
   answering for itself, then the packages this build was made with. remy-auth's Settings page shows
   it.
-- **`pnpm remy cloudflare versions`** prints a row per deployment (the origins in the app's `.env`, or the origins
-  given), with each commit placed against this checkout: `= HEAD`, `3 behind HEAD`. Use it before saying what is
+- **`curl <origin>/healthz`** asks one deployment (the origins are in the app's `.env`), and
+  `pnpm wrangler deployments list` gives Cloudflare's own list of a Worker's deployments. Ask before saying what is
   live.
 
 The shared check sets prove it in every app: `/healthz` names this checkout's commit on a local run
@@ -239,7 +241,7 @@ own checks.
 - `src/router.tsx`: the package's `remyRouter`, a new router and TanStack Query client per request, with Query's SSR integration. `src/routes/__root.tsx` is the package's `remyRoot` with this app's config; TanStack Devtools (Router and Query panels) is passed in there, in the app's own file, because its `devtools()` Vite plugin strips it from production builds only outside `node_modules`; the build-boundary check proves no devtools or server-only code reaches the browser.
 - `src/parts.json`: the package's [parts](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md) this app uses, one per line (the showcase's `@joeblew999/remy-showcase/time-zones`, `deferred-place` and `status-card`, and the platform's `seo-routes`); `remyApp()` (in `vite.config.ts`) mounts their routes and `partChecks()` in `tests/gui.spec.ts` runs their checks.
 - `packages/remy-ui/` (at the root): everything both apps share; its [README](./remy-ui.md) lists the exports.
-- `tests/`: the app's browser checks: the package's shared checks (`@joeblew999/remy-ui/checks`, the showcase's `@joeblew999/remy-showcase/*.checks`) plus the checks only this repository owns (catalogs, concurrent server renders, hydration, its extra formats rows); `lighthouse.spec.ts` is `vp run ci`'s `audits` part and `performance.spec.ts` the release's Core Web Vitals.
+- `tests/`: the app's browser checks: the package's shared checks (`@joeblew999/remy-ui/checks`, the showcase's `@joeblew999/remy-showcase/*.checks`) plus the checks only this repository owns (catalogs, concurrent server renders, hydration, its extra formats rows); `lighthouse.spec.ts` is `vp run ci`'s `audits` part and `performance.spec.ts` Core Web Vitals on a deployment (`pnpm remy test cwv`).
 
 Locale is passed explicitly into compiled message functions; concurrent requests share no
 mutable locale state. The catalogs are the `locales` in
@@ -255,10 +257,10 @@ runs them on server-rendered ones.
 ## Evidence and limits
 
 `vp run ci` runs every check (`vp run ready`), then the browser checks (`test:browser`), then Google's Lighthouse audits
-(`test:audits`) and, in remy-auth, a brand-new app on this commit's package (`new-app`), one after the other: the
+(`test:audits`), one after the other (a release then adds a brand-new app on this commit's packages, `new-app`): the
 audits measure speed, so they never run beside another browser run. GitHub runs the same tasks as parallel jobs (the
-browser checks in three slices, `vp run test:browser --shard 1/3`). Core Web Vitals on a deployment
-are the release's (`pnpm remy test cwv`: production, or a Preview's origin). There are no levels to choose and no part decides to skip itself, and what
+browser checks in three slices, `vp run test:browser --shard 1/3`). Core Web Vitals are measured on a deployment, by
+hand (`pnpm remy test cwv`: production, or a Preview's origin). There are no levels to choose and no part decides to skip itself, and what
 nothing touched comes from Vite Plus's cache instead of running again. What is tested is decided once, by what a check
 can show (owner, 2026-10-17: "you really need to decide what is tested and what isn't"):
 

@@ -1,42 +1,18 @@
 // What the tooling reads about an app: where it is deployed, from the app's own .env (Vite's file, the one the app's
-// build reads: VITE_DEPLOY_ORIGIN, VITE_DOCS_ORIGIN), and, in a repository that publishes packages, its release package
-// (remy.config.ts). Each command asks for the value it needs (origins(), releaseConfig()), read from the file
+// build reads: VITE_DEPLOY_ORIGIN, VITE_DOCS_ORIGIN). Each command asks for the value it needs (origins()), read from the file
 // when asked: nothing is copied into the environment for others to read (configure() did, for every command, so a
 // value reached a child by a route no one could see; owner, 2026-10-17: "everything else underneath it should be
 // pretty dumb").
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { loadEnv } from 'vite-plus';
-
-export type RemyProject = {
-  /** For a repository that publishes packages: the one whose version names a release, and the release's title. */
-  release?: { package: string; title?: string };
-};
-
-export const defineRemyProject = (project: RemyProject): RemyProject => project;
-
-/** The nearest remy.config.ts, from `cwd` up (an app's own, or its workspace's), or nothing. */
-export function remyProject(cwd = process.cwd()): RemyProject {
-  for (let dir = resolve(cwd); ; dir = dirname(dir)) {
-    const file = join(dir, 'remy.config.ts');
-    if (existsSync(file)) {
-      const loaded = createRequire(import.meta.url)(file) as { default?: RemyProject } & RemyProject;
-      return loaded.default ?? loaded;
-    }
-    if (dir === dirname(dir)) return {};
-  }
-}
 
 /** Where the app and its docs are deployed: the app's .env as Vite reads it for a production build. */
 export function origins(cwd = process.cwd()): { production?: string; docs?: string } {
   const env = loadEnv('production', appDir(cwd), 'VITE_');
   return { production: env.VITE_DEPLOY_ORIGIN || undefined, docs: env.VITE_DOCS_ORIGIN || undefined };
 }
-
-/** The package whose version names a release, and the release's title. */
-export const releaseConfig = (cwd = process.cwd()): { package?: string; title?: string } =>
-  remyProject(cwd).release ?? {};
 
 /**
  * The local ports: the tasks' own (4173 for the app's preview, 4174 for the docs'), unless the shell names others
@@ -46,16 +22,6 @@ export const ports = (): { preview: number; docsPreview: number } => ({
   preview: Number(process.env.PREVIEW_PORT ?? 4173),
   docsPreview: Number(process.env.DOCS_PREVIEW_PORT ?? 4174),
 });
-
-/**
- * How to run remy in a checkout, for a hook or a child: the platform's own source where it is
- * (remy-auth), else the installed bin (an app; the package's emitted JavaScript, since Node strips
- * types from nothing under node_modules).
- */
-export function remyCommand(cwd = process.cwd()): string[] {
-  const source = join(cwd, 'packages', 'remy-cli', 'src', 'remy.ts');
-  return existsSync(source) ? [process.execPath, source] : [join(cwd, 'node_modules', '.bin', 'remy')];
-}
 
 /**
  * Where a repository's app and docs are, from its folders (never set): an app that is its own repository is the
@@ -87,10 +53,6 @@ export function docsContent(cwd = process.cwd()): string {
 const owners: Record<string, string> = {
   wrangler: 'wrangler',
   playwright: '@playwright/test',
-  ncu: 'npm-check-updates',
-  codex: '@openai/codex',
-  'chrome-devtools-mcp': 'chrome-devtools-mcp',
-  'modern-web-guidance': 'modern-web-guidance',
 };
 
 /**

@@ -121,10 +121,9 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 
 The package's dependencies, at the catalog's versions, are what it imports and runs: the framework (React,
 TanStack Start, Router and Query), the toolchain (Vite, Wrangler, Tailwind, TypeScript) and the checks' tools
-(Playwright, Lighthouse); the command line's own tools (the DevTools MCP server, the Codex CLI, npm-check-updates)
-are `@joeblew999/remy-cli`'s. An app lists what it imports itself, at the same catalog versions;
-`remy.singleCopy` in this package's `package.json` lists those that break when installed twice, which the app's
-`pnpm-workspace.yaml` overrides keep to one copy and the check's single-copies part proves
+(Playwright, Lighthouse); the tools the shared tasks run (Wrangler, Playwright) are also `@joeblew999/remy-cli`'s.
+An app lists what it imports itself, at the same catalog versions; those that break when installed twice are kept to
+one copy by the app's `pnpm-workspace.yaml` overrides
 ([projects](./projects.md#choosing-the-version-released-development-or-local)).
 
 ## Language
@@ -141,18 +140,22 @@ Chinese, Hindi, Amharic, Polish, Turkish and German) is agent-authored and unrev
 ## Publishing
 
 The package is `@joeblew999/remy-ui` on GitHub Packages (the scope must equal the
-GitHub owner there), released with `@joeblew999/remy-cli` under the same version; the showcase and the contract are
-published when their versions were bumped. Neither is published in this form yet. `vp run release` does the
-release's checks from this machine, stopping at the first failure, then tags it; its steps, in order, are on
-[Commands](./commands.mdx), and GitHub's release job publishes from the tag (never a cloud session). Core Web Vitals
-are measured on a deployment (production, or a branch's Preview): pages as visitors get them from Cloudflare. CI
-(`.github/workflows/ci.yml`) repeats Google's audits on the tag.
+GitHub owner there), released with `@joeblew999/remy-cli` under the same version (Changesets' `fixed` group in
+`.changeset/config.json`); the showcase and the contract version on their own and are published when a changeset
+bumped them. Neither is published in this form yet.
 
-Before releasing, one commit: the version (`vp run ui:version X.Y.Z` writes it in remy-ui, remy-cli and the blank
-app's pins; `packages/remy-auth-contract/package.json` too when the contract changed) and the CHANGELOG section. The
-workspaces depend on each other with `workspace:*`, which pnpm's publish writes as the version, and the contract's
-peer range is open-ended. `remy release check` refuses a dirty tree, a branch other than main, stale translations or
-a changed package without a new version.
+Every change to a published package carries a changeset, written with it: `pnpm changeset` (which packages, patch,
+minor or major, and one line for the changelog), committed as `.changeset/<name>.md`. `vp run release`, from this
+machine, stopping at the first failure: `changeset version` (the new versions and each package's `CHANGELOG.md`
+section from the pending changesets), `scripts/version.ts` (the blank app's pins, `template/pnpm-workspace.yaml` and
+`template/.github/workflows/ci.yml`'s tag, moved to remy-ui's new version, then the lockfile), the translations
+complete (`remy i18n check --strict`), every check in every language, `vp run ui:verify`, then `vp run release:tag`
+(the commit "Release vX.Y.Z", the annotated tag, main and the tag pushed). Its steps are on [Commands](./commands.mdx).
+A tag runs one job on GitHub, the release (never a cloud session), and no checks, since the release ran them:
+`vp run release:publish` (`changeset publish`, after the packages are generated and built and the `remy` skill made),
+then `gh release create` with GitHub's generated notes. The workspaces depend on each other with `workspace:*`, which
+pnpm's publish writes as the version, and the contract's peer range is open-ended. Core Web Vitals are measured on a
+deployment (production, or a branch's Preview): pages as visitors get them from Cloudflare.
 
 A consumer's `.npmrc` only names the registry:
 
@@ -160,9 +163,10 @@ A consumer's `.npmrc` only names the registry:
 @joeblew999:registry=https://npm.pkg.github.com
 ```
 
-pnpm reads no token from a repository's `.npmrc`, so `vp run setup` (and `remy upgrade`) writes a `read:packages`
-token, from `GITHUB_TOKEN` in the shell or `gh auth token`, into the machine's own pnpm configuration. Released versions are in the
-[changelog](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
+pnpm reads no token from a repository's `.npmrc`, so an app's `vp run setup` writes a `read:packages` token, from
+`gh auth token`, into the machine's own pnpm configuration (`pnpm config set --location user`); GitHub's workflow puts
+its token there the same way before `vp install --frozen-lockfile`. Released versions are in the
+[changelog](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/CHANGELOG.md), which Changesets writes.
 
 ## Writing a part
 

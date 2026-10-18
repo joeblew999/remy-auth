@@ -8,7 +8,6 @@ import { options as paraglide } from '../../packages/remy-ui/paraglide.mjs';
 // shared catalogs, which this repository owns (packages/remy-ui/messages), and the app's own tasks, all of them here.
 // Its folder is this file's, never the folder a tool happened to start in (Vite Plus loads every package's config
 // from the root).
-const remy = 'node ../../packages/remy-cli/src/remy.ts';
 
 // What a browser run reads that is not what it tests: its own results, Wrangler's local state, tools' caches.
 const browserInputs = [
@@ -79,8 +78,9 @@ export default defineConfig({
         dependsOn: ['build'],
         cache: false,
       },
-      // What a browser check needs on this machine: Playwright's Chromium and, on Linux, a Han font.
-      browsers: { command: `${remy} browsers`, cache: false },
+      // What a browser check needs on this machine: Playwright's Chromium (on Linux the Han languages also need a Han
+      // font, fonts-noto-cjk, which GitHub's workflow installs).
+      browsers: { command: 'playwright install chromium', cache: false },
       // The browser checks on the production build, one language per way of drawing text (CHECK_LOCALES=all: every
       // one), Playwright's own options passed through (`vp run remy-auth#test:browser --shard 1/3`). CI=1 unless set:
       // the same Playwright here as on GitHub, a browser per core.
@@ -94,10 +94,9 @@ export default defineConfig({
           output: [],
         },
       },
-      // Google's Lighthouse audits on the production build, under the machine's speed lock (two agents' audits at
-      // once skew both).
+      // Google's Lighthouse audits on the production build, one at a time (two at once skew both).
       'test:audits': {
-        command: `CI=\${CI:-1} PREVIEW_PORT=\${PREVIEW_PORT:-4173} ${remy} test audits`,
+        command: 'CI=${CI:-1} PREVIEW_PORT=${PREVIEW_PORT:-4173} playwright test --project=google --workers=1',
         dependsOn: ['build', 'browsers'],
         cache: { untrackedEnv: ['PREVIEW_PORT', ...network], input: browserInputs, output: [] },
       },

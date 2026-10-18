@@ -1,6 +1,6 @@
 // `remy rules`: the marked block in an app's AGENTS.md that points its agents at the platform's rules,
-// the `remy` skill from the installed @joeblew999/remy-ui (`remy skills install` puts it in
-// .agents/skills and .claude/skills), naming the version. Written or refreshed in place; the rest of
+// the `remy` skill from the installed @joeblew999/remy-ui (the skills CLI's `experimental_sync`, in vp run setup,
+// puts it in .agents/skills and .claude/skills), naming the version. Written or refreshed in place; the rest of
 // AGENTS.md is the app's. Not in remy-auth: its AGENTS.md is a pointer to the rules' source,
 // docs/content/dev/agents.md.
 import { join } from 'node:path';

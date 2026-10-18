@@ -15,15 +15,14 @@ test("remy-auth's flow is the blank app's, the command line run from its source"
   const blank = scriptsOf('template/package.json');
   const ours = scriptsOf('package.json');
   const fromSource = (text: string) => text.replaceAll('node packages/remy-cli/src/remy.ts ', 'remy ');
-  for (const name of ['prepare', 'translate', 'setup']) expect(fromSource(ours[name]!), name).toBe(blank[name]);
-  // remy-auth adds its own: the new-app test to ci, the blank app's pins and shadcn's files to the release.
-  expect(ours.ci).toBe(`${blank.ci} && vp run new-app`);
-  expect(fromSource(ours.release!)).toBe(
-    blank.release!.replace(
-      '&& vp run publish:rehearse',
-      '&& vp run template:check && vp run ui:verify && vp run publish:rehearse',
-    ),
-  );
+  for (const name of ['prepare', 'translate']) expect(fromSource(ours[name]!), name).toBe(blank[name]);
+  // An app's setup first puts GitHub Packages' token where pnpm reads it; remy-auth installs nothing from there.
+  expect(blank.setup!.endsWith(` && ${fromSource(ours.setup!)}`), 'setup').toBe(true);
+  // remy-auth adds its own release (an app publishes no packages), which runs the new-app test after ci.
+  expect(ours.ci).toBe(blank.ci);
+  expect(ours.release).toContain('vp run ci && vp run new-app && ');
+  expect(blank.release).toBeUndefined();
+  expect(ours.release).toMatch(/^changeset version && /);
   for (const name of readdirSync('template/.vite-hooks').filter((name) => name !== '_'))
     expect(readFileSync(`.vite-hooks/${name}`, 'utf8'), name).toBe(
       readFileSync(`template/.vite-hooks/${name}`, 'utf8'),
@@ -34,7 +33,6 @@ test('the flow scripts run Vite Plus between the command line steps, never the o
   const blank = scriptsOf('template/package.json');
   // No script of ours touches git: committing, pushing and merging are git's and GitHub's own commands.
   expect(blank.land).toBeUndefined();
-  expect(blank.release).toMatch(/^remy release check && CHECK_LOCALES=all vp run ci && /);
   expect(blank.setup).toMatch(/&& vp run ready$/);
   // Nothing of the command line runs Vite Plus's task runner, or npm run, whose scripts may.
   for (const [name, text] of cli)

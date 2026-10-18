@@ -21,4 +21,4 @@ the docs Worker in [apps/remy-auth-docs/](apps/remy-auth-docs). The repository i
 `package.json`'s scripts compose them, and the command line they call is [packages/remy-cli](packages/remy-cli/src)
 (`remy`). Every command, generated from them: [COMMANDS.md](COMMANDS.md). Deploying is a push: Cloudflare builds `main`
 into production and every other branch into its Preview. Agents start at [apps/remy-auth-docs/content/dev/agents.md](apps/remy-auth-docs/content/dev/agents.md); open work is in
-[.plans/now.md](.plans/now.md); releases in [CHANGELOG.md](CHANGELOG.md).
+[.plans/now.md](.plans/now.md); releases in [packages/remy-ui/CHANGELOG.md](packages/remy-ui/CHANGELOG.md).

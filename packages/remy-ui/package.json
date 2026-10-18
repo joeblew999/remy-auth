@@ -111,7 +111,6 @@
     "@fontsource-variable/vazirmatn": "catalog:",
     "@inlang/paraglide-js": "catalog:",
     "@modelcontextprotocol/server": "catalog:",
-    "@openai/codex": "catalog:",
     "@orpc/client": "catalog:",
     "@orpc/contract": "catalog:",
     "@orpc/openapi": "catalog:",
@@ -140,7 +139,6 @@
     "@types/unist": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "ai": "catalog:",
-    "chrome-devtools-mcp": "catalog:",
     "class-variance-authority": "catalog:",
     "cn": "catalog:",
     "country-to-currency": "catalog:",
@@ -155,8 +153,6 @@
     "lucide-react": "catalog:",
     "mdast-util-to-markdown": "catalog:",
     "mermaid": "catalog:",
-    "modern-web-guidance": "catalog:",
-    "npm-check-updates": "catalog:",
     "puppeteer-core": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
@@ -165,7 +161,6 @@
     "remark-gfm": "catalog:",
     "remark-rehype": "catalog:",
     "shadcn": "catalog:",
-    "smol-toml": "catalog:",
     "tailwindcss": "catalog:",
     "takumi-js": "catalog:",
     "tw-animate-css": "catalog:",
@@ -176,16 +171,5 @@
     "vite-plus": "catalog:",
     "wrangler": "catalog:",
     "zod": "catalog:"
-  },
-  "remy": {
-    "singleCopy": [
-      "react",
-      "react-dom",
-      "@tanstack/react-router",
-      "@tanstack/react-start",
-      "@tanstack/react-query",
-      "@tanstack/query-core",
-      "mdast-util-to-markdown"
-    ]
   }
 }

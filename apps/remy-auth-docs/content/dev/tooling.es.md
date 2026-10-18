@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "Las herramientas detrás de los comandos: dónde se explica cada área, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación. Todos los comandos están en Comandos."
-translatedFrom: "cccfd094 05929bce 14fa0896 70fe6514 81343dbe 766a0ddf ec3067e7 03919f95 f3b472f8 36cc5dee a9201e80 532209f9 c9aa85c0 e9ec8ccd a5cad7e7 68c1a5a6 5ee1f825"
+translatedFrom: "cccfd094 6df0c778 1199049a 3a5be9af 40ea278b 92b06ba2 ec3067e7 0d9cf50a 595035a6 b65ea71a bf6a65d1 926b760f 48b91b14 0988b006 a5cad7e7 cfd124fa 5ee1f825"
 ---
 
 ## Las herramientas [#the-tooling]
@@ -11,14 +11,12 @@ del proyecto es una tarea escrita en el `vite.config.ts` de su paquete o un scri
 `vp run <name>`. Node está fijado por `.node-version` y por el `engines` de `package.json`, pnpm por `devEngines` (12.14.0,
 que `vp install` descarga y ejecuta). Cada versión se escribe una sola vez, en el catálogo de `pnpm-workspace.yaml`, y cada
 paquete enumera lo que importa (`catalog:`, o `workspace:*` para un paquete de este repositorio), con `pnpm-lock.yaml`
-junto a él; las herramientas que ejecutan las tareas compartidas (Wrangler, Playwright, las herramientas de Chrome DevTools, la CLI de Modern Web Guidance,
-la CLI de Codex, npm-check-updates) son dependencias de `@joeblew999/remy-cli`, de modo que todas las apps obtienen las mismas.
-`vp migrate --full` no informa de nada que cambiar y `vp env doctor` pasa. `gh` es el de la máquina, y Claude Code (el traductor) es el propio de la máquina, aquel en el que
+junto a él; las herramientas que ejecutan las tareas compartidas (Wrangler, Playwright) son dependencias de `@joeblew999/remy-cli`, de modo que todas las apps obtienen las mismas. Las herramientas que ninguna tarea ejecuta (las herramientas de Chrome DevTools, la CLI de Modern Web Guidance, la CLI de Codex) no son dependencia de nadie: cada una se ejecuta como `pnpm dlx <name>`. `vp migrate --full` no informa de nada que cambiar y `vp env doctor` pasa. `gh` es el de la máquina, y Claude Code (el traductor) es el propio de la máquina, aquel en el que
 está iniciada la sesión de la suscripción. Un script que es una sola herramienta se escribe como esa herramienta (`"logs": "wrangler
 tail --format json"`); todo lo que tenga lógica es TypeScript, un comando `remy` del paquete
 (`packages/remy-cli/src`, con comprobación de tipos en cada check) o, para lo que es propio de una sola app, un `scripts/*.ts` de
 esa app ([el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/tooling-in-typescript.md)).
-`pnpm remy verify doctor` imprime las versiones de las CLI que ejecutan las herramientas.
+`vp env doctor` imprime las versiones de Node, del gestor de paquetes y de las herramientas de Vite Plus.
 
 ### Vite Plus: el `vp` de la máquina, en modo gestionado [#vite-plus-the-machines-vp-in-managed-mode]
 
@@ -67,8 +65,7 @@ opciones en `src/auth/options.ts` (ambos en `apps/remy-auth/`). Sus scripts son 
 ```sh
 vp run remy-auth#auth:generate <name>        # LOCAL: lo que las opciones necesitan además de migrations/, como la siguiente migración numerada
 vp run remy-auth#local                       # LOCAL: .dev.vars si falta, migrations/ y migrations-demo/ en las bases D1 locales de Wrangler, el fixture del guard
-vp run remy-auth#auth:mail you@example.com   # LOCAL: los códigos de inicio de sesión capturados para una dirección, desde el Worker en ejecución
-vp run remy-auth#auth:provision              # Imprime lo que el inicio de sesión desplegado necesita en Cloudflare; no crea nada
+curl 'http://127.0.0.1:5173/dev/mail?recipient=you@example.com'   # LOCAL: los códigos de inicio de sesión capturados para una dirección, desde el Worker en ejecución
 ```
 
 La tarea `local` (que `vp run dev`, `vp run build` y todo lo posterior ejecutan primero) escribe `.dev.vars`, aplica las migraciones e instala el fixture de oRPC v1 del guard (`tests/guard/v1`),
@@ -77,14 +74,28 @@ ejecuta la CLI fijada a través de `src/auth/cli.ts`, que compara las opciones c
 SQLite desechable construida a partir de `migrations/`, así que solo escribe lo que aún no está
 ahí; cambia las opciones y luego genera, nunca edites a mano las tablas de Better Auth. Para iniciar
 sesión localmente: `vp run dev`, abre `/en/app/account` y pulsa sobre una de las personas
-de ejemplo, o introduce cualquier dirección y lee su código con `auth:mail`. No se envía ningún correo
+de ejemplo, o introduce cualquier dirección y lee su código en el `/dev/mail` del Worker en ejecución (arriba; responde 404 en cualquier entorno que no sea el local). No se envía ningún correo
 localmente: el entorno local lo guarda en el buzón de salida del Worker en su lugar (la tabla de
 entornos en `src/auth/environment.ts`, [explicado](./auth.md#environments-one-table);
 staging, la Preview de cada rama, también tiene a las personas de ejemplo y envía correo de verdad; cualquier otro entorno es
 producción, donde el correo se envía a través de Cloudflare Email Service y no hay nadie de ejemplo). Las bases de datos
 desplegadas, sus migraciones y el secreto de Worker `BETTER_AUTH_SECRET` solo se crean a petición del
-propietario: `auth:provision` imprime los pasos, y `pnpm remy cloudflare provisioned` se niega mientras un binding
-nombre una base de datos que no existe, porque de otro modo el despliegue de Wrangler la crearía por sí mismo.
+propietario, con los comandos propios de Wrangler, en este orden (cada uno modifica la cuenta de Cloudflare):
+
+```sh
+pnpm wrangler d1 create remy-auth                     # then its database_id into wrangler.jsonc, beside "binding": "DB"
+pnpm wrangler d1 migrations apply DB --remote         # its tables; a later migration is this again, before the deploy that needs it
+openssl rand -base64 32 | pnpm wrangler secret put BETTER_AUTH_SECRET
+pnpm wrangler d1 create remy-auth-demo                # the showcase's notes demo: its database_id beside "binding": "DEMO_DB"
+pnpm wrangler d1 migrations apply DEMO_DB --remote
+pnpm wrangler email sending list                      # EMAIL_FROM's domain enabled for sending; if not:
+pnpm wrangler email sending enable <the address's domain>
+```
+
+La Preview de cada rama usa las bases de datos de la sección `previews` de `wrangler.jsonc` (`remy-auth-preview`,
+`remy-auth-demo-preview`), migradas del mismo modo con `--preview`, y su propio secreto
+(`pnpm wrangler preview base-config secret put BETTER_AUTH_SECRET`). `pnpm remy cloudflare provisioned` se niega mientras
+un binding nombre una base de datos que no existe, porque de otro modo el despliegue de Wrangler la crearía por sí mismo.
 
 Estas son herramientas para desarrolladores/operadores. El inicio de sesión de la CLI de Remy para usuarios finales y las llamadas
 delegadas a la API siguen siendo parte del hito del servicio. Ambas apps están en vivo en Cloudflare, en los orígenes del `.env` de la app
@@ -98,10 +109,10 @@ propio `vite.config.ts` (`apps/remy-auth`, `apps/remy-auth-docs`, `packages/remy
 en blanco de una app, en `template/`), las comprobaciones del repositorio y `ready` en el de la raíz, y nada crea una tarea en código
 (propietario, 2026-10-17: "in that configuration file of VP, you see everything"). `remyApp()` y `remyDocs()` devuelven solo
 la configuración de Vite, y `@joeblew999/remy-ui/vite-plus` los ajustes compartidos simples (`style`, `network`). Cada tarea es
-una herramienta: Vite, Wrangler, Playwright, `tsc`, `vp test`, `vp check`, o un comando `remy` para un trabajo para el que Vite Plus
-no tiene herramienta (las comprobaciones propias del proyecto, los navegadores, el bloqueo de las auditorías). Nada nuestro ejecuta `vp run`
+una herramienta: Vite, Wrangler, Playwright, `tsc`, `vp test`, `vp check`, Changesets, o un comando `remy-check` para las
+comprobaciones propias del proyecto, que ninguna herramienta hace. Nada nuestro ejecuta `vp run`
 (una comprobación unitaria lo rechaza), y nada nuestro pasa un valor a través del entorno: los scripts del `package.json` de la raíz
-(`ci`, `translate`, `release`, `setup`) son cada uno una cadena de hojas `remy` y tareas de Vite Plus escritas en
+(`ci`, `translate`, `release`, `setup`) son cada uno una cadena de herramientas estándar, hojas `remy` y tareas de Vite Plus escritas en
 orden ([Comandos](./commands.mdx) imprime los pasos de cada uno). Los comandos propios de Vite Plus funcionan como en cualquier parte:
 `vp install`, `vp dev`, `vp check`, `vp test`, `vp build`, `vp preview`, `vp run <name>`, `vp run -r build`.
 `vp run --last-details` dice por qué cada tarea se ejecutó o vino de la caché; las entradas, salidas y entorno de una tarea están en
@@ -125,29 +136,26 @@ propia línea de comandos, así que no puede quedar desactualizada; ninguna pág
 
 ### Actualizaciones de paquetes [#package-upgrades]
 
-`pnpm remy packages upgrade` usa el `npm-check-updates` fijado para mover todas las dependencias (las de la raíz y las de cada
-paquete del workspace) a su última versión, incluidas las mayores, guarda las versiones exactas y luego las instala
-(`vp install`, que refresca `pnpm-lock.yaml`); después, `vp run setup` comprueba la instalación.
-Los conflictos de peer fallan visiblemente; nada los fuerza. Revisa el diff del manifiesto/lockfile y cualquier requisito de migración
-de versión mayor. Si la instalación falla tras actualizar el manifiesto, resuelve el
-conflicto reportado antes de usar `vp run setup`; ningún rollback automático descarta tus cambios.
-Los paquetes propios del repositorio y los dos de la plataforma (`@joeblew999/remy-ui`, `@joeblew999/remy-cli`) nunca se tocan. Los pins de Node, pnpm y de las
-fuentes de skills se gestionan por separado.
+Comandos propios de pnpm: `pnpm outdated -r` lista lo que tiene una versión más reciente (la raíz y cada paquete del workspace),
+`pnpm update -r --latest` mueve cada dependencia a su última versión, incluidas las mayores, y refresca
+`pnpm-lock.yaml`. Todas las versiones están en el catálogo de `pnpm-workspace.yaml`, así que la actualización reescribe el catálogo. Los
+conflictos de peer fallan visiblemente; nada los fuerza. Revisa el diff del manifiesto y del lockfile y las notas de migración
+de cualquier versión mayor; luego, `vp run setup`. Node, pnpm y los skills (`skills-lock.json`) se actualizan por separado.
 
 ### Verificación [#verification]
 
 El flujo, sus pasos y quién ejecuta cada uno: [cómo trabajamos](./how-we-work.md#the-flow-the-standard-way-in-plain-sight).
 
-Una instalación termina con `pnpm remy verify` (sus comprobaciones de `setup`; `vp run setup` y `vp run upgrade` lo ejecutan): alrededor de un
-minuto, sin navegador. Son las dependencias frente al lockfile (`pnpm ls`), el registro de MCP, las versiones de las CLI
-y los invariantes de las herramientas (`pnpm remy verify tooling`); usan la instalación local existente y no aprovisionan
-nada en Cloudflare. `vp run setup` ejecuta `vp run ready` después de ellas.
+Una instalación es `vp run setup`: `vp install` (las dependencias frente al lockfile), los skills
+(`skills experimental_install`, `skills experimental_sync`), las reglas de los agentes (`remy rules`) y luego `vp run ready`.
+`vp env doctor` dice si Node, el gestor de paquetes y Vite Plus están como deben. Los invariantes de
+`wrangler.jsonc` (URLs de preview, smart placement, observabilidad) son la comprobación `check:wrangler`, parte de `vp run ready`.
+No se aprovisiona nada en Cloudflare.
 
 La puerta antes de un push o un release es `vp run ci`, la misma aquí que en GitHub (el hook del push la ejecuta): `vp run ready`, nuestras comprobaciones
 de navegador contra el build de producción en Workers locales (`vp run test:browser`; todos los idiomas en un release),
-las auditorías de Google (`vp run test:audits`) y, en remy-auth, una app nueva (`vp run new-app`). Un release añade Core
-Web Vitals en producción (`pnpm remy test cwv`). Ninguna de ellas despliega nada: desplegar es hacer push. Consulta
-[la prueba de la GUI](./run-and-test.md) para el alcance y los comandos.
+las auditorías de Google (`vp run test:audits`) y, en remy-auth, una app nueva (`vp run new-app`). Ninguna de ellas despliega nada:
+desplegar es hacer push. Consulta [la prueba de la GUI](./run-and-test.md) para el alcance y los comandos.
 
 
 ## Iniciar o recargar tu agente [#start-or-reload-your-agent]
@@ -155,20 +163,18 @@ Web Vitals en producción (`pnpm remy test cwv`). Ninguna de ellas despliega nad
 ### Extensión de Codex para VS Code [#vs-code-codex-extension]
 
 Abre este repositorio en VS Code y usa la barra lateral de Codex. La extensión incluye
-su propio ejecutable; la CLI de Codex fijada del proyecto (`@openai/codex`, una dependencia de `@joeblew999/remy-cli`)
-sirve a los usuarios de terminal.
+su propio ejecutable; en una terminal, `pnpm dlx @openai/codex` ejecuta la CLI de Codex (no es una dependencia del proyecto).
 [La CLI de Codex y la extensión de IDE comparten la configuración de MCP](https://developers.openai.com/learn/docs-mcp).
-Nuestro registro de proyecto escribe `.codex/config.toml`; confía en el proyecto en Codex
-para que la configuración del proyecto pueda cargarse. El `.vscode/mcp.json` de VS Code configura
+El `.codex/config.toml` versionado es el del proyecto; confía en el proyecto en Codex
+para que se cargue. El `.vscode/mcp.json` de VS Code configura
 su propio cliente MCP y no es el archivo de configuración de la extensión de Codex.
 
 Después de cambiar los skills o la configuración de MCP:
 
-1. Ejecuta `pnpm remy mcp register` en la terminal del repositorio.
-2. Guarda tu trabajo, abre la paleta de comandos (`Cmd+Shift+P` en macOS) y ejecuta
+1. Guarda tu trabajo, abre la paleta de comandos (`Cmd+Shift+P` en macOS) y ejecuta
    **Developer: Reload Window**.
-3. Vuelve a abrir la barra lateral de Codex y continúa la conversación. Verifica que el agente
-   pueda llamar a las herramientas recién configuradas; el registro por sí solo no demuestra una conexión.
+2. Vuelve a abrir la barra lateral de Codex y continúa la conversación. Verifica que el agente
+   pueda llamar a las herramientas recién configuradas; la configuración por sí sola no demuestra una conexión.
 
 `codex resume --last` lanza una sesión de terminal; no recarga la extensión.
 La CLI `code` instalada no tiene un flag documentado de reload-window, así que la recarga usa
@@ -176,72 +182,58 @@ el comando integrado de VS Code en lugar de un wrapper de shell que simule reini
 
 ### Agentes de terminal [#terminal-agents]
 
-Después de `vp run setup`, usa la CLI instalada de Codex o Claude Code. El Codex fijado es una dependencia de remy-cli, así que
-en remy-auth se ejecuta desde ese paquete (`vp -C packages/remy-cli exec codex`):
+Después de `vp run setup`, usa Codex o Claude Code:
 
 ```sh
-vp -C packages/remy-cli exec codex                 # New Codex conversation
-vp -C packages/remy-cli exec codex resume --last   # Resume latest Codex conversation
-claude                                             # New Claude conversation
-claude --continue                                  # Resume latest Claude conversation in this project
+pnpm dlx @openai/codex                 # New Codex conversation
+pnpm dlx @openai/codex resume --last   # Resume latest Codex conversation
+claude                                 # New Claude conversation
+claude --continue                      # Resume latest Claude conversation in this project
 ```
 
 Para recargar los skills y la configuración de MCP, sal del agente actual con `/exit` y luego
 retómalo desde tu terminal como arriba. Usa `/mcp` dentro del agente para comprobar la
-conexión. La configuración instala localmente la
-[`@openai/codex` CLI](https://learn.chatgpt.com/docs/codex/cli) oficial y fijada, y los comandos `remy`
-que la llaman encuentran ese ejecutable por sí mismos en lugar de depender del PATH de tu shell.
-`pnpm remy packages upgrade` la actualiza junto con las demás dependencias. Autentícate cuando
-se te solicite. Claude Code se instala por separado; lanzar Codex no lo requiere.
+conexión. Autentícate cuando se te solicite. Claude Code se instala por separado; lanzar Codex no lo requiere.
 
 
 ## Skills de agentes [#agent-skills]
 
-Las fuentes de los skills son los `pins` de
-[packages/remy-cli/src/skills.ts](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-cli/src/skills.ts): Better Auth, Cloudflare, Chrome DevTools, Modern Web
-Guidance, shadcn, Playwright CLI, GitHub release y TanStack Router/Start. Los skills de TanStack están
-nombrados uno por uno, incluido su skill `react-router` (los bindings de React), que reemplazó al
-skill de Remix con el mismo nombre: los skills se instalan planos por nombre, así que los dos no pueden
-coexistir. Los skills de TanStack Form no están instalados: solo existen en sus ramas alpha de v2 y
-describen la API alpha 2.0, no la 1.x que fijamos; añádelos cuando pasemos a Form 2. Instala los skills localmente:
+Los skills son los de la [CLI `skills`](https://github.com/vercel-labs/skills) estándar (una devDependency), y el
+`skills-lock.json` versionado es su fuente de verdad: cada skill con su repositorio de origen, el commit del que viene y su
+hash. Las fuentes son los propios mantenedores de las bibliotecas: Better Auth, Cloudflare, Chrome DevTools, Modern Web Guidance,
+shadcn, Playwright CLI, GitHub release y TanStack Router/Start. Los skills de TanStack están nombrados uno por uno, incluido su
+skill `react-router` (los bindings de React), que reemplazó al skill de Remix con el mismo nombre: los skills se instalan planos por nombre,
+así que los dos no pueden coexistir. Los skills de TanStack Form no están instalados: solo existen en sus ramas alpha de v2 y
+describen la API alpha 2.0, no la 1.x que fijamos; añádelos cuando pasemos a Form 2.
 
 ```sh
-pnpm remy skills install
-pnpm remy skills list
+pnpm skills experimental_install   # every skill skills-lock.json names, at its commit (vp run setup runs it)
+pnpm skills experimental_sync      # the skills installed packages ship, the platform's remy skill among them
+pnpm skills add <source>           # one more, recorded in skills-lock.json
+pnpm skills list                   # what is installed
+pnpm skills remove <name>          # one removed
 ```
 
-Para reinstalar desde cero, ejecuta `pnpm remy skills remove` y luego `pnpm remy skills install`.
-
-Skills viven en `.agents/skills/`; `.claude/skills/` enlaza a los mismos archivos.
+Los skills viven en `.agents/skills/`; `.claude/skills/` enlaza a los mismos archivos. Solo se hace commit de `skills-lock.json`;
+los skills instalados y sus enlaces de Claude están ignorados y se recrean con `vp run setup`. Recarga una sesión de agente
+existente si los skills recién instalados aún no son visibles. [El plan de skills](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/agent-skills.md)
+hace seguimiento de las dependencias sin un skill oficial.
 
 ### El skill `remy`: las reglas de la plataforma para los agentes de cada repositorio [#the-remy-skill-the-platforms-rules-for-every-repos-agents]
 
-Además de los skills fijados, `remy skills install` instala `remy` desde el paquete instalado
+Además de los skills fijados, `skills experimental_sync` instala `remy` desde el paquete instalado
 (`./node_modules/@joeblew999/remy-ui/skills`), así que su versión es la del paquete: las reglas de la
 versión que ejecuta una app, sin conexión. Es cada página de estos docs de desarrollo tal como el Worker de docs las sirve a
 las herramientas de IA (`/dev/llms.txt`, el `.md` de cada página: con los includes resueltos y los componentes como texto), generado por `remy skills build`
 (la tarea `skills:build` de la raíz, que la prueba de la app nueva y la publicación ejecutan primero; nunca `vp run ready`). Así, el skill, `llms.txt`, el
 Markdown de cada página y los servidores MCP son un mismo texto de una misma fuente: una página no puede llegar a uno y faltar en otro. Los docs
 en vivo (`/dev/llms.txt`, `/api/mcp/dev`) siempre tienen lo más reciente; el skill lo indica. En una app, `pnpm remy rules` mantiene un bloque
-marcado en `AGENTS.md` que dirige a sus agentes hacia el skill y nombra la versión; `vp run setup` y
-`vp run upgrade` lo ejecutan, así que una actualización cambia las reglas que leen los agentes en el mismo paso.
+marcado en `AGENTS.md` que dirige a sus agentes hacia el skill y nombra la versión; `vp run setup` lo ejecuta, así que una actualización
+(que termina con `vp run setup`) cambia las reglas que leen los agentes en el mismo paso.
 El propio `AGENTS.md` de remy-auth es un puntero a [Agentes: empieza aquí](./agents.md).
-El instalador registra la procedencia en `skills-lock.json`. Volver a ejecutar la instalación
-restaura los skills seleccionados desde las fuentes fijadas; actualiza sus commits de fuente deliberadamente
-para adoptar cambios upstream. Solo se hace commit de `skills-lock.json`; los skills instalados y sus
-enlaces de Claude están ignorados y se recrean con `vp run setup` o `pnpm remy skills install`.
-`pnpm remy skills list` muestra lo que está instalado; [el plan de skills](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/agent-skills.md)
-hace seguimiento de las dependencias sin un skill oficial. Recarga una sesión de agente existente
-si los skills recién instalados aún no son visibles.
 
-Para añadir una fuente, solo de los propios mantenedores de la biblioteca:
-
-1. Fíjala en `pins` en `packages/remy-cli/src/skills.ts` como
-   `https://github.com/<owner>/<repo>/tree/<commit>`, usando el
-   commit de `git ls-remote https://github.com/<owner>/<repo> HEAD`, nombrando los skills que se van a tomar
-   en lugar de `'*'` cuando el repositorio también incluya skills solo para contribuidores.
-2. Ejecuta `pnpm remy skills remove`, `pnpm remy skills install` y `pnpm remy verify tooling`
-   (segundos), que lee los pins y rechaza los skills instalados desde fuentes no fijadas.
+Para añadir una fuente, solo de los propios mantenedores de la biblioteca: `pnpm skills add <owner>/<repo>` (nombrando los skills que se van a tomar
+con `--skill` cuando el repositorio también incluya skills solo para contribuidores) y luego haz commit del `skills-lock.json` modificado.
 
 
 ## Registro de MCP [#mcp-registration]
@@ -251,25 +243,18 @@ DevTools usa ambos. Modern Web Guidance usa su CLI, y muchos skills de auth/Clou
 también funcionan a través de las CLI existentes; un skill no requiere automáticamente
 un servidor MCP.
 
-El registro (`packages/remy-cli/src/mcp.ts`) escribe la entrada `chrome-devtools` en
-`.codex/config.toml` y `.mcp.json`, locales del proyecto. Cada cliente lanza el `chrome-devtools-mcp`
-propio de la app (aislado, headless, telemetría desactivada) con una ruta absoluta. Los archivos generados
-contienen rutas específicas de la máquina y están en gitignore; vuelve a ejecutar el registro después de mover el checkout.
-Los ajustes y servidores no relacionados se conservan. Los archivos existentes modificados
-reciben una copia de recuperación `.bak`; la serialización TOML puede normalizar el formato y los comentarios.
+El registro está versionado, un archivo por cliente: `.mcp.json` (Claude) y `.codex/config.toml` (Codex), cada uno
+nombrando un único servidor, `chrome-devtools`, que se ejecuta como `pnpm dlx chrome-devtools-mcp@1.10.1 --isolated --headless
+--no-usage-statistics --no-performance-crux`: la versión fijada, un perfil de Chrome headless aislado, y la telemetría de herramientas
+y las subidas a CrUX desactivadas. Nada los escribe; cambia la versión ahí, a mano, en ambos. El proceso MCP es independiente
+de la sesión `chrome-devtools start`/`stop` de más abajo; el cliente del agente gestiona su ciclo de vida.
 
-El servidor usa el paquete `chrome-devtools-mcp` fijado, un perfil de Chrome headless aislado, y tiene
-desactivadas la telemetría de herramientas y las subidas a CrUX. El proceso MCP es independiente de la
-sesión `chrome-devtools start`/`stop` de más abajo; el cliente del agente gestiona su ciclo de vida.
-
-Recarga el agente después del registro. Codex solo carga la configuración del proyecto en un
+Recarga el agente después de un cambio. Codex solo carga la configuración del proyecto en un
 proyecto de confianza. Claude puede mostrar **Pending approval** para un nuevo servidor MCP del proyecto;
-revísalo en la interfaz `/mcp` de Claude. El registro no evita la confianza del cliente ni los ajustes
+revísalo en la interfaz `/mcp` de Claude. Los archivos no evitan la confianza del cliente ni los ajustes
 de aprobación. Consulta [la configuración de MCP de Codex](https://developers.openai.com/codex/mcp)
-y [los ámbitos de MCP de Claude](https://code.claude.com/docs/en/mcp).
-
-`remy mcp verify` comprueba la configuración, no una conexión en vivo. `remy mcp status` muestra lo que
-ven los clientes (Claude también comprueba la conectividad de los servidores aprobados).
+y [los ámbitos de MCP de Claude](https://code.claude.com/docs/en/mcp). `claude mcp list` y `codex mcp list` muestran lo que cada
+cliente tiene registrado (Claude también comprueba la conectividad de los servidores aprobados).
 
 
 ## Herramientas de navegador [#browser-tooling]
@@ -278,16 +263,15 @@ Las [herramientas de agente de Chrome DevTools](https://developer.chrome.com/doc
 ofrecen interacción con el navegador, capturas de pantalla, inspección de accesibilidad, depuración de
 red/cookies, Lighthouse y análisis de rendimiento. Instala Google Chrome por separado; la configuración
 del proyecto no instala el navegador. La CLI (`chrome-devtools`, del paquete `chrome-devtools-mcp`)
-es experimental y es una dependencia de `@joeblew999/remy-cli` junto con las demás herramientas, así que `pnpm remy packages upgrade`
-también la actualiza; en remy-auth se ejecuta desde ese paquete:
+es experimental y no es una dependencia del proyecto; se ejecuta con `pnpm dlx`, en la versión del servidor MCP:
 
 ```sh
-vp -C packages/remy-cli exec chrome-devtools start --isolated --usageStatistics=false --performanceCrux=false
-vp -C packages/remy-cli exec chrome-devtools new_page http://localhost:5173/en
-vp -C packages/remy-cli exec chrome-devtools list_pages
-vp -C packages/remy-cli exec chrome-devtools take_snapshot 1              # Use the returned page ID
-vp -C packages/remy-cli exec chrome-devtools click 1 "UID_FROM_SNAPSHOT"
-vp -C packages/remy-cli exec chrome-devtools stop
+pnpm --package=chrome-devtools-mcp@1.10.1 dlx chrome-devtools start --isolated --usageStatistics=false --performanceCrux=false
+pnpm --package=chrome-devtools-mcp@1.10.1 dlx chrome-devtools new_page http://localhost:5173/en
+pnpm --package=chrome-devtools-mcp@1.10.1 dlx chrome-devtools list_pages
+pnpm --package=chrome-devtools-mcp@1.10.1 dlx chrome-devtools take_snapshot 1              # Use the returned page ID
+pnpm --package=chrome-devtools-mcp@1.10.1 dlx chrome-devtools click 1 "UID_FROM_SNAPSHOT"
+pnpm --package=chrome-devtools-mcp@1.10.1 dlx chrome-devtools stop
 ```
 
 `start` es headless por defecto; añade `--headless=false` para una ventana visible. Inícialo una vez
@@ -306,18 +290,14 @@ principal `modern-web-guidance` está instalado para ambos agentes. El skill sep
 `chrome-extensions` se omite porque este proyecto es un servicio web y una UI.
 
 ```sh
-vp -C packages/remy-cli exec modern-web-guidance search "animate a dialog modal backdrop"
-vp -C packages/remy-cli exec modern-web-guidance retrieve "GUIDE_ID_FROM_SEARCH"
-vp -C packages/remy-cli exec modern-web-guidance list
+pnpm dlx modern-web-guidance search "animate a dialog modal backdrop"
+pnpm dlx modern-web-guidance retrieve "GUIDE_ID_FROM_SEARCH"
+pnpm dlx modern-web-guidance list
 ```
 
-Usa la CLI fijada (dependencia de remy-cli, como arriba) en lugar de los ejemplos
-`modern-web-guidance@latest` del skill original. `pnpm remy packages upgrade` actualiza la CLI;
-`pnpm remy skills install` restaura el skill fijado por commit. El instalador `skills` alternativo de Google
-mantiene nuestra estructura existente de `.agents` y `.claude` sin un segundo instalador ni
-actualizaciones automáticas de skills. Si una búsqueda no devuelve resultados, usa `list` para explorar los IDs de guías.
-La compatibilidad de navegadores usa por defecto la política **Baseline Widely available** del skill, con fallbacks
-para funciones más nuevas.
+La CLI no es una dependencia del proyecto; `skills experimental_install` restaura el skill fijado por commit. Si una búsqueda
+no devuelve resultados, usa `list` para explorar los IDs de guías. La compatibilidad de navegadores usa por defecto la política
+**Baseline Widely available** del skill, con fallbacks para funciones más nuevas.
 
 
 ## Observabilidad de Cloudflare [#cloudflare-observability]
@@ -380,8 +360,9 @@ Historial almacenado y las respuestas de IA, de solo lectura, desde las propias 
 Worker, su instancia de AI Search y el AI Gateway de esa instancia provienen de su configuración de Wrangler, así que
 una app que lo incluya obtiene el suyo propio:
 
-Los comandos `observe` (en [Comandos](./commands.mdx)) leen Workers Logs y AI Gateway; ejecútalos como
-`fnox exec -- pnpm remy observe …`, para el token.
+Los comandos `observe` (en [Comandos](./commands.mdx)) leen AI Gateway; ejecútalos como
+`fnox exec -- pnpm remy observe …`, para el token. Los logs de un Worker son los de Wrangler (`pnpm wrangler tail`, en vivo) o
+los de Observability del panel de Cloudflare.
 
 ### Secretos: fnox [#secrets-fnox]
 

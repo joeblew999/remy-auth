@@ -4,10 +4,7 @@ test-results/
 playwright-report/
 .wrangler/
 worker-configuration.d.ts
-# Generated per machine by npx remy mcp register.
-.mcp.json
-.codex/
-# Installed by npx remy skills install from skills-lock.json.
+# Installed from skills-lock.json by the skills CLI (vp run setup); not committed.
 .agents/skills/
 .claude/skills/
 .claude/settings.local.json

@@ -1,10 +1,9 @@
-// The browser checks Vite Plus has no tool for (`remy test remote|live|audits|cwv`): against a deployment, the audits
-// under one machine-wide speed lock, Core Web Vitals on a deployment. The checks on the local build are Vite
-// Plus's tasks (vp run test:browser), Playwright run directly. Each does what it is asked and nothing more.
+// The browser checks against a deployment (`remy test remote|live|cwv`): the origin from the app's .env, the
+// results' retried checks named. The checks on the local build are Vite Plus's tasks (vp run test:browser,
+// vp run test:audits), Playwright run directly. Each does what it is asked and nothing more.
 import { spawnSync } from 'node:child_process';
 import { dispatch, type Subcommands } from './commands.ts';
-import { mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { appDir, bin, origins } from './config.ts';
 
@@ -60,56 +59,6 @@ const remote = (origin = process.env.TEST_BASE_URL ?? origins().production) => {
 };
 
 /**
- * One speed measurement at a time on this machine (Google's audits, Core Web Vitals): a second run waits for the lock
- * rather than skewing the first. The lock is a directory; a file at its path (the mise-era flock, which
- * kept a release waiting 42 minutes on 2026-10-11) or a directory older than half an hour (a run that
- * died) is stale and taken over, and the wait says so every minute.
- */
-async function withSpeedLock<T>(work: () => T): Promise<T> {
-  const lock = join(tmpdir(), 'remy-speed.lock');
-  // Stale: a file (the mise-era flock), a directory older than half an hour, or one whose holder has gone
-  // (its pid file names a process that no longer runs: a run stopped part-way, 2026-10-17).
-  const holderGone = () => {
-    try {
-      const pid = Number(readFileSync(join(lock, 'pid'), 'utf8'));
-      if (!pid) return false;
-      process.kill(pid, 0);
-      return false;
-    } catch (error) {
-      return (error as NodeJS.ErrnoException).code === 'ESRCH';
-    }
-  };
-  const stale = () => {
-    try {
-      const info = statSync(lock);
-      return !info.isDirectory() || Date.now() - info.mtimeMs > 30 * 60_000 || holderGone();
-    } catch {
-      return false;
-    }
-  };
-  for (let waited = 0; ; waited++) {
-    if (stale()) {
-      console.log(`test: taking over a stale lock at ${lock}`);
-      rmSync(lock, { recursive: true, force: true });
-    }
-    try {
-      mkdirSync(lock);
-      writeFileSync(join(lock, 'pid'), String(process.pid));
-      break;
-    } catch {
-      if (waited % 30 === 0)
-        console.log(`test: another speed measurement runs on this machine (${lock}); waiting for it.`);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-    }
-  }
-  try {
-    return await work();
-  } finally {
-    rmSync(lock, { recursive: true, force: true });
-  }
-}
-
-/**
  * Our checks against a deployment (production by default); `--audits` adds Google's, which judge the production site:
  * a preview or staging is hidden from search engines on purpose, which Google's crawlability audit rightly reports.
  */
@@ -123,35 +72,24 @@ export function live(origin?: string): void {
 }
 /**
  * Google's Core Web Vitals (speed) on a deployment: production by default, or a branch's Preview
- * (https://<branch>-remy-auth.<subdomain>.workers.dev), measured one at a time on this machine.
+ * (https://<branch>-remy-auth.<subdomain>.workers.dev), one page at a time.
  */
-export async function cwv(origin?: string): Promise<void> {
+export function cwv(origin?: string): void {
   const target = remote(origin);
-  await withSpeedLock(() => playwright(['--project=google-cwv', '--no-deps'], target));
+  playwright(['--project=google-cwv', '--no-deps', '--workers=1'], target);
   console.log(`Core Web Vitals passed on ${target.TEST_BASE_URL}`);
 }
 
-/**
- * Google's audits on the local production build, under the machine's speed lock (the test:audits task runs it: a
- * lock is what Vite Plus has no tool for). Playwright's own options pass through.
- */
-export const audits = (args: string[]): Promise<void> =>
-  withSpeedLock(() => playwright(['--project=google', ...args], {}));
-
 export const what =
-  'the browser checks Vite Plus has no tool for: against a deployment (the suite, the smoke), Core Web Vitals on a deployment, and the local audits under one lock (the local build: vp run test:browser)';
+  "the browser checks against a deployment (the suite, the smoke, Core Web Vitals); the local build's are Playwright run directly (vp run test:browser, vp run test:audits)";
 export const commands: Subcommands = {
   remote: {
     what: "[origin] [--audits]: our browser checks against a deployment (production by default); --audits adds Google's, which judge production",
     run: (rest) => remoteSuite(rest),
   },
   live: { what: '[origin]: the smoke against a deployment (every deploy ends with it)', run: (rest) => live(rest[0]) },
-  audits: {
-    what: "[playwright options]: Google's audits on the local build, one speed measurement at a time on this machine (vp run test:audits runs it)",
-    run: (rest) => audits(rest),
-  },
   cwv: {
-    what: "[origin]: Core Web Vitals on a deployment, production unless a Preview's origin is given (the release runs it)",
+    what: "[origin]: Core Web Vitals on a deployment, production unless a Preview's origin is given",
     run: (rest) => cwv(rest[0]),
   },
 };

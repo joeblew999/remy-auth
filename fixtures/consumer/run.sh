@@ -40,30 +40,15 @@ step pack
 cd "$out/app"
 git init -q && git add -A && git -c user.name=remy -c user.email=remy@localhost commit -qm fixture && git branch -M main
 
-# 3. What a new repository runs: install, the skills and the tooling invariants, the check (types, tests
+# 3. What a new repository runs: install, the check (types, tests
 #    included), the quick browser checks and the docs.
 export GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token)}"
 vp install
 step install
-# The pinned skills are the same download for every repository, not part of what the fixture is for: install
-# them once per version of the pinned list and reuse them (~2 min of GitHub clones otherwise).
-# The key covers the pinned list and the package's own remy skill, so a changed skill is installed again.
-key=$( (cat "$root/packages/remy-cli/src/skills.ts"; find "$root/packages/remy-ui/skills" -type f -exec cat {} +) | shasum | cut -c1-12)
-skills="${TMPDIR:-/tmp}/remy-fixture-skills/$key"
-if [ -f "$skills/skills-lock.json" ]; then
-  cp -R "$skills/." .
-else
-  pnpm remy skills install > /dev/null
-  # Written aside, then moved into place: an interrupted or concurrent run never leaves half a cache.
-  mkdir -p "$skills.$$" && cp -R skills-lock.json .agents .claude "$skills.$$/"
-  # Another run may have written it meanwhile: mv would then move this copy inside that one.
-  if [ -e "$skills" ]; then rm -rf "$skills.$$"; else mv "$skills.$$" "$skills"; fi
-fi
-pnpm remy verify tooling
-step 'skills and tooling'
+# No agent skills: they are a developer's (vp run setup installs them), not part of what a new app is.
 vp run ready
 step 'vp run ready'
-# The new app's browser checks in the quick languages, through its own vp run ci (this run is inside ci's new-app part).
+# The new app's browser checks in the quick languages, as its own vp run ci runs them.
 CHECK_LOCALES=quick PREVIEW_PORT=$((preview + 100)) vp run test:browser
 step 'browser checks'
 DOCS_PREVIEW_PORT=$((docs + 100)) pnpm remy docs test

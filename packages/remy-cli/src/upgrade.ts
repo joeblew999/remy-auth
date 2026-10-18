@@ -1,6 +1,6 @@
 // `remy upgrade <version>` (an app, not remy-auth): move to one shared release. The package at that
 // exact version, the shared CI workflow at its tag, the flow's scripts and Vite Plus's Git hooks as that release
-// has them, then the skills of that release, the agents' rules block, and the installation's checks.
+// has them; then vp run setup, that release's setup script (the skills, the agents' rules block, every check).
 // One command, not a script of steps: `vp run upgrade <version>` hands the version to a script's last command only,
 // and the install that needs it comes first.
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -17,18 +17,13 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { register } from './mcp.ts';
-import { rules } from './rules.ts';
-import { installSkills } from './skills.ts';
-import { verifySetup } from './verify.ts';
-import { githubPackagesLogin } from './setup.ts';
 
 function fail(message: string): never {
   console.error(message);
   process.exit(1);
 }
 
-export async function upgrade(version: string | undefined): Promise<void> {
+export function upgrade(version: string | undefined): void {
   if (!version || !/^\d+\.\d+\.\d+$/.test(version))
     fail('remy upgrade <version>: a released version without the v, e.g. 0.15.0');
   if (existsSync('packages/remy-cli/src/remy.ts'))
@@ -43,7 +38,12 @@ export async function upgrade(version: string | undefined): Promise<void> {
       }
     })();
   const blank = fetchBlank(version);
-  githubPackagesLogin(token || undefined);
+  // GitHub Packages' token where pnpm reads it: this machine's pnpm configuration (pnpm expands no variable in a
+  // repository's .npmrc).
+  if (token)
+    spawnSync('pnpm', ['config', 'set', '--location', 'user', '//npm.pkg.github.com/:_authToken', token], {
+      stdio: 'ignore',
+    });
   // The platform and its command line, released together under the same number.
   const install = spawnSync(
     'vp',
@@ -84,11 +84,7 @@ export async function upgrade(version: string | undefined): Promise<void> {
     }
   scriptsAndHooks(blank, version);
   rmSync(blank, { recursive: true, force: true });
-  installSkills();
-  rules();
-  await register(false);
-  await verifySetup();
-  console.log(`upgrade: on @joeblew999/remy-ui ${version}.`);
+  console.log(`upgrade: on @joeblew999/remy-ui ${version}. Next: vp run setup (the skills, the rules, every check).`);
 }
 
 /** remy-auth's blank app (template/) at a release's tag, in a scratch folder. */
@@ -156,16 +152,10 @@ export function scriptsAndHooks(blank: string, version: string): void {
     writeFileSync('.env', text);
     console.log("upgrade: .env says where the app and its docs are deployed (from remy.config.ts's origins)");
   }
-  // remy.config.ts: its type is the command line's now, and the ports are the tasks' own (PREVIEW_PORT, 4173).
+  // remy.config.ts is read by nothing now: the origins are in .env, and releases are Changesets'.
   if (existsSync('remy.config.ts')) {
-    const before = readFileSync('remy.config.ts', 'utf8');
-    const after = before
-      .replace("'@joeblew999/remy-ui/project'", "'@joeblew999/remy-cli/project'")
-      .replace(/^\s*ports: \{[^}]*\},?\n/m, '');
-    if (after !== before) {
-      writeFileSync('remy.config.ts', after);
-      console.log('upgrade: remy.config.ts takes its type from @joeblew999/remy-cli/project, without ports');
-    }
+    rmSync('remy.config.ts');
+    console.log('upgrade: remy.config.ts removed (its origins are in .env)');
   }
   const ignore = existsSync('.gitignore') ? readFileSync('.gitignore', 'utf8') : '';
   if (!ignore.includes('.vite-hooks/_/'))
@@ -183,5 +173,5 @@ export function scriptsAndHooks(blank: string, version: string): void {
 }
 
 export const what =
-  "<version>: this app onto a release of the platform: the package, the workflow's tag, the scripts, hooks and configuration of the blank app, the skills, the rules, the installation's checks (vp run upgrade)";
-export const main = (args: string[]): Promise<void> => upgrade(args[0]);
+  "<version>: this app onto a release of the platform: the package, the workflow's tag, the scripts, hooks and configuration of the blank app, then vp run setup (vp run upgrade)";
+export const main = (args: string[]): void => upgrade(args[0]);

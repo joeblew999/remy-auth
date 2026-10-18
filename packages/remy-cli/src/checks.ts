@@ -7,43 +7,51 @@ import { writeCommands } from './help.ts';
 import { checkAll as translations } from './i18n.ts';
 import { rightEndings } from './page.ts';
 import { check as plans } from './plans.ts';
-import { readdirSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { join } from 'node:path';
-import { docsDir } from './config.ts';
+import { pathToFileURL } from 'node:url';
+import { appDir, docsDir } from './config.ts';
 
 /**
- * The packages that break when installed twice (React's hooks, TanStack's router and query types, the
- * MDX stringifier Fumadocs builds with) have one version in this install. The list is the package's
- * own (@joeblew999/remy-ui's package.json, "remy.singleCopy"); pnpm's store says what is installed: one folder per
- * package and version in node_modules/.pnpm (`react@19.3.1`, `@tanstack+react-router@1.170.39_<its peers>`).
+ * The Worker's configuration keeps what every Remy app keeps, which Wrangler does not check itself: preview URLs off
+ * unless Cloudflare's Previews are on, Smart Placement, and observability on (logs and traces, persisted, sampled,
+ * query strings redacted).
  */
-export function singleCopies(): void {
-  const { remy } = JSON.parse(
-    readFileSync(join(process.cwd(), 'node_modules/@joeblew999/remy-ui/package.json'), 'utf8'),
-  ) as { remy?: { singleCopy?: string[] } };
-  const store = readdirSync(join(process.cwd(), 'node_modules/.pnpm'));
+export async function wrangler(): Promise<void> {
+  const { unstable_readConfig } = (await import(
+    pathToFileURL(createRequire(import.meta.url).resolve('wrangler')).href
+  )) as typeof import('wrangler');
+  const config = unstable_readConfig({ config: join(appDir(), 'wrangler.jsonc') }) as Record<string, any>;
   const problems: string[] = [];
-  for (const name of remy?.singleCopy ?? []) {
-    const prefix = `${name.replace('/', '+')}@`;
-    const versions = [
-      ...new Set(store.filter((dir) => dir.startsWith(prefix)).map((dir) => dir.slice(prefix.length).split('_')[0])),
-    ];
-    if (versions.length > 1) problems.push(`${name}: ${versions.join(', ')}`);
+  const want = (ok: boolean, problem: string) => ok || problems.push(problem);
+  // preview_urls makes every uploaded version and alias public, old ones without the app's later fixes: on only
+  // with Cloudflare's Previews (a `previews` block), which is what gives each branch its preview URL.
+  if (config.previews === undefined)
+    want(config.preview_urls === false, 'preview_urls must be false (true only with a previews block)');
+  // Without Smart Placement a visitor far from the databases waits one ocean crossing per query (2026-10-17).
+  want(config.placement?.mode === 'smart', '"placement": { "mode": "smart" } (run the Worker near its databases)');
+  const observability = config.observability;
+  want(observability?.enabled === true, 'observability must be enabled');
+  want(observability?.redact_query_string === true, 'query-string redaction must be enabled');
+  want(observability?.logs?.invocation_logs === true, 'invocation logs must be enabled');
+  for (const signal of ['logs', 'traces']) {
+    const settings = observability?.[signal];
+    want(settings?.enabled === true && settings?.persist === true, `${signal} must be enabled and persist`);
+    const rate = settings?.head_sampling_rate;
+    want(Number.isFinite(rate) && rate > 0 && rate <= 1, `${signal}: a sampling rate above 0, at most 1`);
   }
   if (problems.length) {
-    console.error(
-      `single copies: installed more than once, which breaks at run or type-check time:\n  ${problems.join('\n  ')}\nThe versions come from @joeblew999/remy-ui; pin this app's own to the same, then vp install.`,
-    );
+    console.error(`wrangler.jsonc:\n  ${problems.join('\n  ')}`);
     process.exit(1);
   }
-  console.log(`single copies: one version each of ${remy?.singleCopy?.length ?? 0} packages.`);
+  console.log('wrangler.jsonc: preview URLs, placement and observability as every Remy app keeps them.');
 }
 
 const checks: Record<string, (write: boolean) => void | Promise<unknown>> = {
   // .plans/: few, short, closed, every link resolving and every open plan in now.md.
   plans: () => plans(),
-  // The packages that break when installed twice have one version each in this install.
-  'single-copies': () => singleCopies(),
+  // The Worker's configuration: preview URLs, placement, observability.
+  wrangler: () => wrangler(),
   // COMMANDS.md (here, and the blank app's in remy-auth) is what the command line and the tasks say.
   commands: async (write) => {
     await writeCommands(!write);

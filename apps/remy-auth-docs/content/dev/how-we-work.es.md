@@ -1,7 +1,7 @@
 ---
 title: "Cómo trabajamos"
 description: "Cómo trabajan aquí las personas y los agentes: las herramientas del proyecto primero, encuestas antes de elegir herramientas, shadcn y TanStack, puertas de control, planes y traducciones."
-translatedFrom: "56df3445 507816d3 26f16046 c2d8f54e d8386d74 aae80ce5 6dc5958a 20ea1d8b f3262ad2 d16df021 63d3e039 d41caa8c c8f062fe 81ef89fe 5f043aaa 19f6274f fef9ba98 085849a3 4d1a6674"
+translatedFrom: "56df3445 507816d3 68aa8d11 c2d8f54e d8386d74 aae80ce5 6dc5958a 20ea1d8b f3262ad2 d16df021 0ce59218 d41caa8c c8f062fe 5a298ab5 5f043aaa 19f6274f 93ebb4e5 980904cb 707ec1cc"
 ---
 
 Este documento es el dueño de cómo trabajan las personas y los agentes: los hábitos que ha pedido el
@@ -37,7 +37,7 @@ a ti mismo ni a los devs». Así que la regla es general, no solo para herramien
   llega a todos los que hacen pull de main (`pnpm remy plans status` imprime sus elementos abiertos), y
   el siguiente cambio toma lo primero de la lista.
 - **«Hecho» es el final de una barrida, no de una lista.** Antes de decirlo: ramas y worktrees
-  (`git branch`, `git worktree list`), `pnpm remy cloudflare versions`, `pnpm remy plans check`, una
+  (`git branch`, `git worktree list`), `pnpm wrangler deployments list`, `pnpm remy plans check`, una
   búsqueda de las palabras que el cambio retiró, la documentación que el cambio tocó. Muestra la barrida.
 
 ## Usa primero las herramientas propias del proyecto [#use-the-projects-own-tools-first]
@@ -199,7 +199,7 @@ inglés y sus traducciones: un commit, un push, una ejecución de las comprobaci
 - `remy i18n check` solo lee, sin conexión, así que es seguro en cualquier lugar y en cualquier número de worktrees.
   `remy i18n translate` nunca es un `depends`.
 - Desactualizado o faltante es un aviso mientras se avanza y en `vp run ci` (su parte `ready`), y un error al
-  publicar (`remy release check`, el primer paso de la publicación).
+  publicar (`remy i18n check --strict`, antes de las comprobaciones de la publicación).
 - Un cambio estructural (un renombrado, una barrida) que toca traducciones de documentación va seguido de
   `pnpm remy i18n translate docs <archivo>…`, que deja esos archivos totalmente alineados con el
   inglés. Cambia la estructura de un catálogo (el archivo de cada locale) en el mismo commit que `en.json`.
@@ -233,14 +233,14 @@ Propietario, 2026-10-09: «El 95% del tiempo ha sido comprobar y el 5% codificar
 
 | Paso | Comando | Quién lo ejecuta, y cuándo | Qué ejecuta | Tiempo |
 | --- | --- | --- | --- | --- |
-| Mirar | `git status`, `git log`, `gh run list`, `pnpm wrangler deployments list`, `pnpm remy cloudflare versions` | todos, primero, y siempre que necesiten saberlo | las propias respuestas de git y GitHub; qué ejecuta cada despliegue, leído de su `/healthz`, comparado con este checkout | segundos |
+| Mirar | `git status`, `git log`, `gh run list`, `pnpm wrangler deployments list`, `curl <origin>/healthz` | todos, primero, y siempre que necesiten saberlo | las propias respuestas de git, GitHub y Cloudflare; qué ejecuta un despliegue, leído de su `/healthz` | segundos |
 | Después de cada cambio | `vp run ready` | quien esté codificando; el único paso que se espera | las tareas de Vite Plus: todo lo generado, la app y la documentación construidas, el ensayo de despliegue de Wrangler, las comprobaciones propias del proyecto, las comprobaciones unitarias, y luego `vp check` (formato, lint, tipos); lo que no ha cambiado sale de la caché de Vite Plus | ~8 s sin cambios, ~50 s desde cero |
 | El cambio deja la máquina | `vp run translate` (cuando cambió el texto), `git commit`, `git push` | quien hizo el trabajo, por su cuenta, en cuanto termina | las traducciones que el cambio dejó desactualizadas, en el mismo commit; el commit (su hook: `vp staged`); el push a `main` (su hook: `vp run ci`, desde la caché donde nada cambió; `VP_GIT_HOOKS=0` lo omite) | unos minutos: lo que cambió aquí, en el hook del push |
 | Producción | un push a `main`: Cloudflare lo despliega | nadie; cada push a `main` sale en vivo | las builds de Git de Cloudflare (Workers Builds) construyen y despliegan la app y la documentación a partir de cada push a `main`, y el Preview de cada otra rama a partir de su propio push ([en Cloudflare](./run-and-test.md#on-cloudflare)); tras un cambio de documentación, `pnpm remy docs publish` (una máquina con sesión iniciada en Cloudflare) da al índice de Ask AI las páginas nuevas | unos minutos tras el push |
-| Una publicación | `vp run release` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `remy release check` (un main limpio, traducciones completas, versiones subidas) → `CHECK_LOCALES=all vp run ci` (todos los idiomas) → `vp run template:check` → `vp run ui:verify` → `vp run publish:rehearse` → `remy test cwv` → `remy packages tag`; el job de publicación de GitHub publica a partir de la etiqueta | ~5 min |
+| Una publicación | `vp run release` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `changeset version` (las versiones y los changelogs a partir de los changesets pendientes) → `node scripts/version.ts` (la app en blanco vuelve a fijarse) → `remy i18n check --strict` (traducciones completas) → `CHECK_LOCALES=all vp run ci` (todos los idiomas) → `vp run ui:verify` → `vp run release:tag` (el commit "Release vX.Y.Z", su etiqueta, y se empujan main y la etiqueta); el job de publicación de GitHub, el único job que ejecuta una etiqueta, publica (`vp run release:publish`: `changeset publish`) y crea la release de GitHub | ~5 min |
 
-El workflow de CI de GitHub está desactivado por decisión del propietario: `vp run ci` ejecuta lo mismo aquí, y el hook del push lo ejecuta antes de que
-nada salga de la máquina. Sin pull requests, auto-merge ni reglas de rama: `main` recibe el push.
+El workflow de CI de GitHub no se ejecuta en un push a `main`, por decisión del propietario: `vp run ci` ejecuta lo mismo aquí, y el hook del push lo ejecuta antes de que
+nada salga de la máquina. Sí se ejecuta para una etiqueta de versión (el job de publicación), para los pull requests de Dependabot y a mano (`gh workflow run ci.yml`). Sin pull requests nuestros, auto-merge ni reglas de rama: `main` recibe el push.
 
 - **Quién ejecuta un paso está en la tabla, y nunca es una pregunta.** Un agente empuja su propio
   trabajo terminado a `main` sin preguntar: su push ejecutó antes `vp run ci`, y nada en rojo se empuja. La palabra del propietario es para una publicación, el único paso cuya columna así lo dice, y para el aprovisionamiento
@@ -253,7 +253,7 @@ nada salga de la máquina. Sin pull requests, auto-merge ni reglas de rama: `mai
   algo (el traductor gasta tokens de Claude) se ejecuta por su nombre desde un
   script, donde cualquiera lo ve.
 - **Nada se pasa a través del entorno.** Un comando `remy` lee el valor que necesita del archivo que
-  lo contiene (el `.env` de la app, su `wrangler.jsonc`, `remy.config.ts`) y pasa a un hijo solo lo que ese hijo necesita; ningún comando fija variables para que otros las encuentren, y ningún interruptor oculto cambia lo que hace un comando (`tests/unit/dev-flow.unit.spec.ts` rechaza ambas cosas). El único ajuste que da una persona es `CHECK_LOCALES` (`all`, `quick` o una lista).
+  lo contiene (el `.env` de la app, su `wrangler.jsonc`) y pasa a un hijo solo lo que ese hijo necesita; ningún comando fija variables para que otros las encuentren, y ningún interruptor oculto cambia lo que hace un comando (`tests/unit/dev-flow.unit.spec.ts` rechaza ambas cosas). El único ajuste que da una persona es `CHECK_LOCALES` (`all`, `quick` o una lista).
 - Un área que parece mal: `vp run test:browser --grep <palabras>` (las comprobaciones de navegador
   cuyo título coincide). Es la única ejecución de navegador que no es propiedad de un paso.
 - Una regla que puede ser una función pertenece a `tests/**/*.unit.spec.ts` (sin build, sin Worker, sin
@@ -277,13 +277,12 @@ nada salga de la máquina. Sin pull requests, auto-merge ni reglas de rama: `mai
   en cualquier momento sin romper nada (propietario, 2026-10-17: «esta mierda entre primer plano y
   segundo plano me está jodiendo todo el maldito tiempo»).
 - **Dónde se va el tiempo lo dice Vite Plus.** `vp run --last-details` nombra cada tarea, si salió de la caché y por qué se ejecutó; un paso lento es un número ahí, no una sensación (propietario, 2026-10-10: «cómo puede ser 6 minutos»).
-- **La respuesta de GitHub viene a ti**, mientras su workflow de CI esté activado. Una ejecución en rojo comenta en el commit (GitHub se lo dice a
-  su autor), nombrando la ejecución; `gh run list` y `gh run view <id>` muestran el resto. Para
-  reproducir un job en rojo, una persona ejecuta `vp run <task>` (el nombre del job), el mismo comando
-  que ejecutó GitHub, ya que el workflow no contiene lógica propia (`remy verify tooling` comprueba
-  que exista cada tarea que un workflow nombra). Un agente lee el propio log de la ejecución
-  (`gh run view <id> --log-failed`) y ejecuta el área concreta (`vp run test:browser --grep <palabras>`).
-  Informa de qué se probó y qué no; nunca llames verificado a un trabajo no probado.
+- **La respuesta de GitHub viene a ti**, mientras su workflow de CI esté activado. GitHub envía por correo a quien escribió una ejecución en rojo;
+  `gh run list` y `gh run view <id>` muestran el resto. Para reproducir un job
+  en rojo, una persona ejecuta `vp run <task>` (el nombre del job), el mismo comando que ejecutó GitHub, ya que el workflow no contiene lógica propia. Un agente lee el propio log de la
+  ejecución (`gh run view <id> --log-failed`) y ejecuta el área concreta
+  (`vp run test:browser --grep <palabras>`). Informa de qué se probó y qué no; nunca llames verificado a un
+  trabajo no probado.
 - **Un despliegue que falla es la build de Cloudflare, y lo dice allí.** El merge ya ocurrió; el log de la build (las herramientas de builds del conector de Cloudflare, o el panel) nombra qué falló, y `pnpm remy test live <origin>` ejecuta el smoke contra un despliegue a mano. Una traducción fallida termina con código distinto de cero antes de que se comitee nada: nada traducido a medias llega a main.
 - Nunca encadenes un comando de control con `grep` o `tail` mediante un pipe: el pipe oculta su código
   de salida. Una vez esto publicó una versión cuyas comprobaciones habían fallado, y el 2026-10-10
@@ -338,8 +337,8 @@ las comprobaciones sensibles al tiempo fallaron mucho antes de eso. Así que:
   y 4174; nunca 4190, que los navegadores bloquean): `PREVIEW_PORT=4232 DOCS_PREVIEW_PORT=4233 vp run …`.
 - Como máximo tres agentes ejecutan pruebas al mismo tiempo; la investigación, la escritura y los
   spikes de prueba no cuentan. Cuando se necesitan más, pon `PLAYWRIGHT_WORKERS=2` para cada uno.
-- Las auditorías de Google (`vp run test:audits`) y Core Web Vitals (`pnpm remy test cwv`) toman un lock de toda la
-  máquina, así que una segunda ejecución espera en lugar de distorsionar la primera.
+- Las auditorías de Google (`vp run test:audits`) se ejecutan una página a la vez (`--workers=1`), porque dos mediciones de velocidad simultáneas
+  falsean ambas; no ejecutes las auditorías de dos checkouts, ni una auditoría y Core Web Vitals (`pnpm remy test cwv`), al mismo tiempo.
 - Nunca encadenes un paso después de una comprobación con `;`: los scripts encadenan con `&&`, así que se detienen en el primer fallo.
 
 ## Informar al propietario [#reporting-to-the-owner]
@@ -349,12 +348,13 @@ las comprobaciones sensibles al tiempo fallaron mucho antes de eso. Así que:
   app <https://remy-auth.gedw99.workers.dev>, y para el Worker de documentación su guía
   <https://remy-auth-docs.gedw99.workers.dev/docs>, documentación para desarrolladores
   <https://remy-auth-docs.gedw99.workers.dev/dev> y referencia de la API
-  <https://remy-auth-docs.gedw99.workers.dev/reference>. `pnpm remy cloudflare urls` imprime las de un despliegue.
+  <https://remy-auth-docs.gedw99.workers.dev/reference>. Los orígenes están en el `.env` de la app (`VITE_DEPLOY_ORIGIN`,
+  `VITE_DOCS_ORIGIN`).
 - Todo informe sobre algo que el propietario pueda mirar da sus URL: los sitios en vivo, la vista previa
   (el Preview de Cloudflare de una rama empujada, `https://<rama>-remy-auth.gedw99.workers.dev`) y un enlace directo a cada página o funcionalidad comentada.
 - Di qué se comprobó y qué no.
-- Lo que está en vivo se pregunta, no se recuerda: `pnpm remy cloudflare versions` imprime qué está ejecutando
-  cada despliegue y cuán lejos está eso de tu checkout (`wrangler deployments list` da la lista propia de Cloudflare). Dilo a partir de ahí, no de lo que mezclaste
+- Lo que está en vivo se pregunta, no se recuerda: `pnpm wrangler deployments list` da la lista propia de Cloudflare, y
+  `curl <origin>/healthz` lo que ejecuta un despliegue (su servicio y su versión). Dilo a partir de ahí, no de lo que mezclaste
   la última vez.
 
 ## Muchos agentes, un flujo [#many-agents-one-flow]
@@ -383,6 +383,6 @@ Los pasos, qué ejecuta cada uno y quién lo ejecuta: [la tabla del flujo](#the-
 - **Un agente nunca espera en primer plano** a `git push` (su hook ejecuta `vp run ci`), una ejecución de GitHub o una build de
   Cloudflare; los inicia en segundo plano y actúa sobre el resultado. Solo se espera a `vp run ready`.
 - **Todo lo asíncrono vuelve a todos**
-  ([el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/dev-feedback.md)): un job de
-  GitHub en rojo escribe en el commit, nombrándose a sí mismo; `gh run list` y `pnpm remy cloudflare versions`
+  ([el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/dev-feedback.md)): GitHub envía un correo
+  al autor de un job en rojo; `gh run list`, `pnpm wrangler deployments list` y `curl <origin>/healthz`
   muestran el resto a quien lo pregunte.

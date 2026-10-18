@@ -30,11 +30,18 @@ const frontDoor = (scripts: Record<string, string>): [string, string][] => {
       'vp run translate',
       `before a commit that changed text: the translations it made stale or missing${steps('translate')}`,
     ],
+    ...(scripts.release
+      ? ([
+          [
+            'vp run release',
+            `the owner's: the packages versioned from their changesets (pnpm changeset adds one), every check in every language, then the tag GitHub publishes from${steps('release')}`,
+          ],
+        ] as [string, string][])
+      : []),
     [
-      'vp run release',
-      `the owner's: every check in every language, the release checks, the publish rehearsed, Core Web Vitals, then the tag GitHub publishes from${steps('release')}`,
+      'vp run setup',
+      `an installation: the dependencies, the skills (skills-lock.json), the agents' rules, then every check${steps('setup')}`,
     ],
-    ['vp run setup', `an installation, then every check${steps('setup')}`],
   ];
 };
 
@@ -74,7 +81,7 @@ export async function commandsMarkdown(dir = '.'): Promise<string> {
     '',
     '## What you run',
     '',
-    "Day to day: `vp run ready` after every edit; when the work is finished, git and GitHub's own commands: `git commit`, `git push` to main (its hook runs `vp run ci` first). `vp run release` is the owner's; Cloudflare deploys main by itself. `vp dev`, `vp build`, `vp preview` and `vp check` are Vite Plus's own tools, without the app's preparation; `vp run` lists every task and script, and `vp run --last-details` says what the last run did.",
+    "Day to day: `vp run ready` after every edit; when the work is finished, git and GitHub's own commands: `git commit`, `git push` to main (its hook runs `vp run ci` first). Cloudflare deploys main by itself. `vp dev`, `vp build`, `vp preview` and `vp check` are Vite Plus's own tools, without the app's preparation; `vp run` lists every task and script, and `vp run --last-details` says what the last run did.",
     '',
     '| Command | What it does |',
     '| --- | --- |',

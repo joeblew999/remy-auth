@@ -3,7 +3,7 @@ import { network, style } from '@joeblew999/remy-ui/vite-plus';
 import { defineConfig } from 'vite-plus';
 
 // This app: the shared Vite configuration (@joeblew999/remy-ui/app/vite), the shared style, and every task, all of them
-// here. The flow (vp run ci, translate, release, setup) is package.json's scripts; the docs' tasks are
+// here. The flow (vp run ci, translate, setup) is package.json's scripts; the docs' tasks are
 // docs/vite.config.ts's.
 
 // What a browser run reads that is not what it tests: its own results, Wrangler's local state, tools' caches.
@@ -75,8 +75,9 @@ export default defineConfig({
         dependsOn: ['build'],
         cache: false,
       },
-      // What a browser check needs on this machine: Playwright's Chromium and, on Linux, a Han font.
-      browsers: { command: 'remy browsers', cache: false },
+      // What a browser check needs on this machine: Playwright's Chromium (on Linux the Han languages also need a Han
+      // font, fonts-noto-cjk, which GitHub's workflow installs).
+      browsers: { command: 'playwright install chromium', cache: false },
       // The browser checks on the production build, one language per way of drawing text (CHECK_LOCALES=all: every
       // one), Playwright's own options passed through (`vp run test:browser --shard 1/3`). CI=1 unless set: the same
       // Playwright here as on GitHub, a browser per core.
@@ -90,15 +91,15 @@ export default defineConfig({
           output: [],
         },
       },
-      // Google's Lighthouse audits on the production build, under the machine's speed lock.
+      // Google's Lighthouse audits on the production build, one at a time (two at once skew both).
       'test:audits': {
-        command: 'CI=${CI:-1} PREVIEW_PORT=${PREVIEW_PORT:-4173} remy test audits',
+        command: 'CI=${CI:-1} PREVIEW_PORT=${PREVIEW_PORT:-4173} playwright test --project=google --workers=1',
         dependsOn: ['build', 'browsers'],
         cache: { untrackedEnv: ['PREVIEW_PORT', ...network], input: browserInputs, output: [] },
       },
       // The project's own checks (remy-check). A check never writes: `vp run fix` writes what two of them report.
       'check:plans': 'remy-check plans',
-      'check:single-copies': 'remy-check single-copies',
+      'check:wrangler': 'remy-check wrangler',
       'check:commands': 'remy-check commands',
       'check:endings': 'remy-check endings',
       'check:translations': 'remy-check translations',
@@ -122,7 +123,7 @@ export default defineConfig({
           'docs#build',
           'docs#check:deploy',
           'check:plans',
-          'check:single-copies',
+          'check:wrangler',
           'check:commands',
           'check:endings',
           'check:translations',
@@ -131,10 +132,6 @@ export default defineConfig({
       },
       // What the checks only verify, written: the commands list (COMMANDS.md) and each docs page's ending.
       fix: { command: ['remy-check commands --write', 'remy-check endings --write'], cache: false },
-      // Each package this repository publishes, if any (GitHub's release job, for a version tag), and the same
-      // rehearsed (vp run release): every registry takes its token, nothing is uploaded.
-      publish: { command: 'remy packages publish', dependsOn: ['generate'], cache: false },
-      'publish:rehearse': { command: 'remy packages publish --dry-run', dependsOn: ['generate'], cache: false },
     },
   },
 });

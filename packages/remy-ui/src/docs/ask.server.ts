@@ -34,7 +34,7 @@ export const answerQuestion = createServerOnlyFn(
     if (!question) return { status: 'empty' };
     const request = getRequest();
     const started = Date.now();
-    // One `ask` event per question (npx remy observe events -- ask): its outcome, how long the model call took,
+    // One `ask` event per question (wrangler tail, or the dashboard's Observability: event ask): its outcome, how long the model call took,
     // how many sources it cited and the page's language. Never the question itself.
     const log = (outcome: string, fields: Record<string, unknown> = {}, level: 'info' | 'error' = 'info') =>
       writeLog({

@@ -1,7 +1,7 @@
 ---
 title: "Desarrolladores: empieza aquí"
 description: "Para desarrolladores que construyen Remy o una app sobre él: autenticación compartida para las apps de Remy, Better Auth en Cloudflare Workers, el paquete compartido remy-ui y por dónde empezar."
-translatedFrom: "15c7d6a6 57a9efbc af6f9a6d 88eb7fe7 f354609f c0d418f2"
+translatedFrom: "15c7d6a6 57a9efbc 0de6e796 88eb7fe7 f354609f 831ba7b9"
 ---
 
 **Para desarrolladores** que construyen Remy, o una app sobre su paquete de UI compartido. ¿Usas la app? Lee la
@@ -49,15 +49,16 @@ checkout:
 
 ```sh
 vp install          # once: the dependencies from pnpm-lock.yaml, and the Git hooks
-vp run setup        # the pinned skills, MCP, the installation's checks, then vp run ready
+vp run setup        # the install, the pinned skills (skills-lock.json), the agents' rules, then vp run ready
 vp run dev          # http://127.0.0.1:5173/en
 ```
 
 Abre [localhost:5173/en](http://127.0.0.1:5173/en); cambia a español o prueba la demo.
 
-La configuración instala la **Codex CLI** fijada en su versión; autentícate cuando se te solicite. **Claude Code**
-es opcional y se instala aparte.
-Instala **Google Chrome** antes de la configuración; las comprobaciones de navegador usan el Chrome instalado.
+Los servidores MCP para Claude y Codex están incluidos en el repositorio (`.mcp.json`, `.codex/config.toml`); la **Codex CLI** se ejecuta con
+`pnpm dlx @openai/codex`, y **Claude Code** se instala aparte.
+Las comprobaciones de navegador usan el Chromium propio de Playwright, que instala la tarea `browsers` (en Linux, añade la fuente
+`fonts-noto-cjk`).
 
 ## Trabajar con un agente [#work-with-an-agent]
 
@@ -86,5 +87,5 @@ apps instalan ([proyectos](./projects.md)).
 - [Herramientas de desarrollo](./tooling.md): las herramientas fijadas, los secretos, las skills de agentes, MCP y las herramientas de navegador.
 - [Ejecutar, previsualizar y probar la app](./run-and-test.md): un Worker, objetivos de prueba locales y remotos, Cloudflare.
 - [Proyectos](./projects.md): la estructura que mantiene toda app, una app nueva, publicación, traducciones, Cloudflare y planes.
-- [Paquete de UI compartido](./remy-ui.md) y su [registro de cambios](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
+- [Paquete de UI compartido](./remy-ui.md) y su [registro de cambios](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/CHANGELOG.md).
 - [Planes](https://github.com/joeblew999/remy-auth/tree/main/.plans): [.plans/now.md](https://github.com/joeblew999/remy-auth/blob/main/.plans/now.md) es la única lista de lo que está abierto y en qué punto está.

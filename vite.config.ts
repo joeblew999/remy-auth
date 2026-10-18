@@ -3,8 +3,8 @@ import { defineConfig } from 'vite-plus';
 
 // remy-auth's workspace: apps/* (the app, its docs), packages/* (remy-ui, remy-cli, the contract, the showcase). Each
 // package's tasks are in its own vite.config.ts; here, the style for all of them and the repository's own tasks: its
-// checks, `ready` (every check, the builds included), the new-app test, the release's checks and its publish. The
-// package.json scripts compose them (`vp run ci`, `vp run release`).
+// checks, `ready` (every check, the builds included), the new-app test and the release's publish. The package.json
+// scripts compose them (`vp run ci`, `vp run release`).
 const check = 'node packages/remy-cli/src/checks.ts';
 const remy = 'node packages/remy-cli/src/remy.ts';
 
@@ -17,7 +17,7 @@ export default defineConfig({
     tasks: {
       // The project's own checks (remy-check). A check never writes: `vp run fix` writes what two of them report.
       'check:plans': `${check} plans`,
-      'check:single-copies': `${check} single-copies`,
+      'check:wrangler': `${check} wrangler`,
       'check:commands': `${check} commands`,
       'check:endings': `${check} endings`,
       'check:translations': `${check} translations`,
@@ -44,7 +44,7 @@ export default defineConfig({
           '@joeblew999/remy-auth-docs#build',
           '@joeblew999/remy-auth-docs#check:deploy',
           'check:plans',
-          'check:single-copies',
+          'check:wrangler',
           'check:commands',
           'check:endings',
           'check:translations',
@@ -85,15 +85,10 @@ export default defineConfig({
           untrackedEnv: [...network, 'GITHUB_TOKEN', 'NODE_AUTH_TOKEN', 'PREVIEW_PORT', 'DOCS_PREVIEW_PORT'],
         },
       },
-      // The release's publish (GitHub's release job, for a version tag): each package whose version is new on its
-      // registry, then the GitHub release (`vp run publish --release vX.Y.Z`); rehearsed by `vp run release`.
-      publish: {
-        command: `${remy} packages publish`,
-        dependsOn: ['@joeblew999/remy-ui#generate', '@joeblew999/remy-cli#build', 'skills:build'],
-        cache: false,
-      },
-      'publish:rehearse': {
-        command: `${remy} packages publish --dry-run`,
+      // The release's publish (GitHub's release job, for a version tag): Changesets publishes each package whose
+      // version is new on its registry (pnpm publish), after what the packages ship is generated and built.
+      'release:publish': {
+        command: 'changeset publish',
         dependsOn: ['@joeblew999/remy-ui#generate', '@joeblew999/remy-cli#build', 'skills:build'],
         cache: false,
       },

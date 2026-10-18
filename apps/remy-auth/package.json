@@ -4,9 +4,7 @@
   "description": "remy-auth's app: the Worker (site, app and API) on @joeblew999/remy-ui.",
   "type": "module",
   "scripts": {
-    "auth:generate": "node scripts/auth-generate.ts",
-    "auth:mail": "node scripts/auth-mail.ts",
-    "auth:provision": "node scripts/auth-provision.ts"
+    "auth:generate": "node scripts/auth-generate.ts"
   },
   "dependencies": {
     "@inlang/paraglide-js": "catalog:",
