@@ -12,42 +12,32 @@ preview=${PREVIEW_PORT:-4173}; docs=${DOCS_PREVIEW_PORT:-4174}
 started=$(date +%s); mark=$started; took=""
 step() { local now; now=$(date +%s); took="$took, $1 $((now - mark)) s"; mark=$now; }
 
-# 1. The platform, its command line and the showcase as a registry serves them: packed by pnpm in the workspace (which
+# 1. The blank app with the fixture's own files over it: its finished package.json, docs, workspace and parts list (the
+#    blank app's, with a package it owns, its API and a part from the showcase; a unit check holds them to the blank
+#    app's), its contract package, its API and its checks. Nothing is edited here.
+cp -R template "$out/app" && cp -R fixtures/consumer/files/. "$out/app/"
+
+# 2. The platform, its command line and the showcase in the app's vendor/, packed by pnpm in the workspace (which
 #    writes each catalog: and workspace: version in), each with a version no registry has (build metadata, so the
 #    showcase's peer range still holds), so the install can never take a published copy. The version is set for the
 #    pack and put back after, whatever happens.
+mkdir -p "$out/app/vendor"
 set_version() { node -e "const f=process.argv[1],p=require(f);p.version=process.argv[2];require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')" "$1" "$2"; }
-pack() { # <folder> <name> -> the tarball's path
-  local dir="$root/packages/$1" was v
-  was="$(node -p "require('$dir/package.json').version")"; v="$was+dev.$sha"
-  set_version "$dir/package.json" "$v"
-  (cd "$dir" && pnpm pack --pack-destination "$out" > /dev/null) || { set_version "$dir/package.json" "$was"; exit 1; }
+pack() { # <folder>: packed to vendor/<folder>.tgz
+  local dir="$root/packages/$1" was file
+  was="$(node -p "require('$dir/package.json').version")"
+  set_version "$dir/package.json" "$was+dev.$sha"
+  file=$(cd "$dir" && pnpm pack --pack-destination "$out" --json | node -e "let s='';process.stdin.on('data',(d)=>(s+=d)).on('end',()=>console.log(JSON.parse(s).filename))") || { set_version "$dir/package.json" "$was"; exit 1; }
   set_version "$dir/package.json" "$was"
-  echo "$out/$2-$v.tgz"
+  mv "$file" "$out/app/vendor/$1.tgz"
 }
-ui=$(pack remy-ui joeblew999-remy-ui)
-cli=$(pack remy-cli joeblew999-remy-cli)
-showcase=$(pack remy-showcase joeblew999-remy-showcase)
-version=$(basename "$ui" .tgz); version=${version#joeblew999-remy-ui-}
+pack remy-ui
+pack remy-cli
+pack remy-showcase
+version="$(node -p "require('./packages/remy-ui/package.json').version")+dev.$sha"
 step pack
 
-
-# 2. The blank app, the fixture's own files, then only what differs from a new repository: the tarball, the
-#    contract workspace and the docs' API reference.
-cp -R template "$out/app" && cp -R fixtures/consumer/files/. "$out/app/"
 cd "$out/app"
-# Every copy of the three, wherever named (the app, its docs, the fixture's contract, remy-cli's own), is the tarball:
-# pnpm's overrides; the fixture's packages/ join the workspace.
-node -e "const f='package.json',p=require('./'+f);p.dependencies['@joeblew999/remy-showcase']='file:$showcase';p.dependencies['@joeblew999/remy-fixture-contract']='workspace:*';require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')"
-node -e "const f='docs/package.json',p=require('./'+f);p.dependencies['@joeblew999/remy-fixture-contract']='workspace:*';require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')"
-sed -i.bak -e "s#^  - docs\$#  - docs\n  - packages/*#" -e "s#^  ['\"]@joeblew999/remy-cli['\"]: .*#  '@joeblew999/remy-cli': 'file:$cli'#" -e "s#^  ['\"]@joeblew999/remy-ui['\"]: .*#  '@joeblew999/remy-ui': 'file:$ui'#" -e "s#^overrides:\$#overrides:\n  \"@joeblew999/remy-ui\": \"file:$ui\"\n  \"@joeblew999/remy-cli\": \"file:$cli\"\n  \"@joeblew999/remy-showcase\": \"file:$showcase\"#" pnpm-workspace.yaml
-rm -f pnpm-workspace.yaml.bak
-grep -q "packages/\*" pnpm-workspace.yaml
-# A part another package offers, listed by its package (its routes, modules and checks come from the tarball).
-node -e "const f='src/parts.json',p=require('./'+f);p.push('@joeblew999/remy-showcase/time-zones');require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')"
-sed -i.bak "s#...remyDocs(docsConfig, { root: import.meta.dirname }),#...remyDocs(docsConfig, { root: import.meta.dirname, contract: '@joeblew999/remy-fixture-contract' }),#" docs/vite.config.ts
-rm -f docs/vite.config.ts.bak
-grep -q "remy-fixture-contract" docs/vite.config.ts
 git init -q && git add -A && git -c user.name=remy -c user.email=remy@localhost commit -qm fixture && git branch -M main
 
 # 3. What a new repository runs: install, the skills and the tooling invariants, the check (types, tests
@@ -55,12 +45,10 @@ git init -q && git add -A && git -c user.name=remy -c user.email=remy@localhost 
 export GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token)}"
 vp install
 step install
-# What the script wrote above (src/parts.json), in the app's style, which needs the installed configuration.
-vp fmt src/parts.json > /dev/null
 # The pinned skills are the same download for every repository, not part of what the fixture is for: install
 # them once per version of the pinned list and reuse them (~2 min of GitHub clones otherwise).
 # The key covers the pinned list and the package's own remy skill, so a changed skill is installed again.
-key=$( (cat "$root/packages/remy-cli/src/skills.ts"; find "$out/remy-ui/skills" -type f -exec cat {} +) | shasum | cut -c1-12)
+key=$( (cat "$root/packages/remy-cli/src/skills.ts"; find "$root/packages/remy-ui/skills" -type f -exec cat {} +) | shasum | cut -c1-12)
 skills="${TMPDIR:-/tmp}/remy-fixture-skills/$key"
 if [ -f "$skills/skills-lock.json" ]; then
   cp -R "$skills/." .

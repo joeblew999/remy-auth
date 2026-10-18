@@ -91,7 +91,16 @@ catalog:
   zod: '4.6.5'
 
 # Vite is Vite Plus's core, everywhere.
+# One copy of each package that breaks when installed twice (remy-ui's remy.singleCopy), at the catalog's version,
+# whatever a dependency asks for.
 overrides:
+  mdast-util-to-markdown: 'catalog:'
+  '@tanstack/query-core': 'catalog:'
+  '@tanstack/react-query': 'catalog:'
+  '@tanstack/react-start': 'catalog:'
+  '@tanstack/react-router': 'catalog:'
+  react-dom: 'catalog:'
+  react: 'catalog:'
   vite@*: 'catalog:'
 peerDependencyRules:
   allowAny:

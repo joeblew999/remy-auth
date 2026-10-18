@@ -5,6 +5,9 @@ packages:
   - docs
 
 catalog:
+  mdast-util-to-markdown: '2.1.2'
+  '@tanstack/query-core': '5.103.2'
+  '@tanstack/react-query': '5.103.2'
   '@joeblew999/remy-cli': '0.15.1'
   '@joeblew999/remy-ui': '0.15.1'
   '@playwright/test': '1.63.0'
@@ -16,13 +19,23 @@ catalog:
   '@types/node': '26.6.2'
   '@types/react': '19.3.0'
   '@types/react-dom': '19.3.0'
+  fumadocs-mdx: '15.4.5'
   react: '19.3.1'
   react-dom: '19.3.1'
   vite-plus: '1.3.0'
   wrangler: '4.137.0'
 
 # Vite is Vite Plus's core, everywhere.
+# One copy of each package that breaks when installed twice (remy-ui's remy.singleCopy), at the catalog's version,
+# whatever a dependency asks for.
 overrides:
+  mdast-util-to-markdown: 'catalog:'
+  '@tanstack/query-core': 'catalog:'
+  '@tanstack/react-query': 'catalog:'
+  '@tanstack/react-start': 'catalog:'
+  '@tanstack/react-router': 'catalog:'
+  react-dom: 'catalog:'
+  react: 'catalog:'
   vite@*: 'npm:@voidzero-dev/vite-plus-core@1.3.0'
 peerDependencyRules:
   allowAny:

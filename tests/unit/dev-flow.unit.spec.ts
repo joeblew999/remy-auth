@@ -90,3 +90,59 @@ test("the blank app's catalog has the workspace's versions, so a new app install
   for (const [name, version] of Object.entries(blank))
     if (!name.startsWith('@joeblew999/') && !name.startsWith('vite')) expect(version, name).toBe(ours[name]);
 });
+
+test('every catalog: dependency in the blank app has its catalog entry', () => {
+  const catalog = new Set(
+    [...readFileSync('template/pnpm-workspace.yaml', 'utf8').matchAll(/^ {2}['"]?([^'":]+)['"]?: /gm)].map(
+      (match) => match[1]!,
+    ),
+  );
+  for (const file of ['template/package.json', 'template/docs/package.json']) {
+    const manifest = JSON.parse(readFileSync(file, 'utf8')) as Record<string, Record<string, string> | undefined>;
+    for (const section of ['dependencies', 'devDependencies'])
+      for (const [name, spec] of Object.entries(manifest[section] ?? {}))
+        if (spec === 'catalog:') expect(catalog.has(name), `${file}: ${name}`).toBe(true);
+  }
+});
+
+test("the new-app test's app is the blank app's, with only its named extras", () => {
+  const json = (file: string) => JSON.parse(readFileSync(file, 'utf8')) as Record<string, any>;
+  const blank = json('template/package.json');
+  const fixture = json('fixtures/consumer/files/package.json');
+  expect(fixture.dependencies).toEqual({
+    ...blank.dependencies,
+    '@joeblew999/remy-fixture-contract': 'workspace:*',
+    '@joeblew999/remy-showcase': 'catalog:',
+    '@orpc/server': 'catalog:',
+  });
+  expect({ ...fixture, dependencies: undefined }).toEqual({ ...blank, dependencies: undefined });
+  const docs = json('fixtures/consumer/files/docs/package.json');
+  expect(docs).toEqual({
+    ...json('template/docs/package.json'),
+    dependencies: {
+      ...json('template/docs/package.json').dependencies,
+      '@joeblew999/remy-fixture-contract': 'workspace:*',
+    },
+  });
+  expect(readFileSync('fixtures/consumer/files/docs/docs.config.ts', 'utf8')).toBe(
+    readFileSync('template/docs/docs.config.ts', 'utf8').replace(
+      "  branch: 'main',\n",
+      "  branch: 'main',\n  contract: '@joeblew999/remy-fixture-contract',\n",
+    ),
+  );
+  expect(json('fixtures/consumer/files/src/parts.json')).toEqual([
+    ...(json('template/src/parts.json') as unknown as string[]),
+    '@joeblew999/remy-showcase/time-zones',
+  ]);
+  const entries = (file: string) =>
+    Object.fromEntries(
+      [
+        ...readFileSync(file, 'utf8')
+          .split('\noverrides:')[0]!
+          .matchAll(/^ {2}['"]?([^'":]+)['"]?: ['"]([^'"]+)['"]$/gm),
+      ].map((match) => [match[1]!, match[2]!]),
+    );
+  const fixtureCatalog = entries('fixtures/consumer/files/pnpm-workspace.yaml');
+  for (const [name, version] of Object.entries(entries('template/pnpm-workspace.yaml')))
+    if (!name.startsWith('@joeblew999/')) expect(fixtureCatalog[name], name).toBe(version);
+});

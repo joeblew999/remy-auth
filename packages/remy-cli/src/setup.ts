@@ -30,7 +30,7 @@ export function preconditions(): void {
 }
 
 /** GitHub Packages' token (the shared UI): the shell's, else gh's login. */
-function githubToken(): string | undefined {
+export function githubToken(): string | undefined {
   if (process.env.GITHUB_TOKEN) return process.env.GITHUB_TOKEN;
   try {
     return (
@@ -42,9 +42,22 @@ function githubToken(): string | undefined {
   }
 }
 
+/**
+ * GitHub Packages' token in this machine's own pnpm configuration: pnpm reads no token from a repository's .npmrc
+ * (environment variables are not expanded in repository-controlled registry credentials), so the app's .npmrc only
+ * says where @joeblew999 packages come from.
+ */
+export function githubPackagesLogin(token = githubToken()): void {
+  if (!token) return;
+  spawnSync('pnpm', ['config', 'set', '--location', 'user', '//npm.pkg.github.com/:_authToken', token], {
+    stdio: 'ignore',
+  });
+}
+
 /** The dependencies as the lockfile says (vp install, with pnpm; its install runs vp config: Vite Plus's Git hooks), with GitHub Packages' token. */
 export function install(): void {
   const token = githubToken();
+  githubPackagesLogin(token);
   const result = spawnSync('vp', ['install', '--frozen-lockfile'], {
     stdio: 'inherit',
     env: { ...process.env, ...(token ? { GITHUB_TOKEN: token } : {}) },

@@ -21,6 +21,7 @@ import { register } from './mcp.ts';
 import { rules } from './rules.ts';
 import { installSkills } from './skills.ts';
 import { verifySetup } from './verify.ts';
+import { githubPackagesLogin } from './setup.ts';
 
 function fail(message: string): never {
   console.error(message);
@@ -42,6 +43,7 @@ export async function upgrade(version: string | undefined): Promise<void> {
       }
     })();
   const blank = fetchBlank(version);
+  githubPackagesLogin(token || undefined);
   // The platform and its command line, released together under the same number.
   const install = spawnSync(
     'vp',

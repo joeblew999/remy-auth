@@ -1,0 +1,55 @@
+# The new-app test's app: the blank app's workspace (template/pnpm-workspace.yaml), with the fixture's own package
+# (packages/contract), oRPC's server for its API, and the platform's packages from vendor/: this commit's, packed by
+# fixtures/consumer/run.sh, wherever any package names them (overrides).
+packages:
+  - docs
+  - packages/*
+
+catalog:
+  mdast-util-to-markdown: '2.1.2'
+  '@tanstack/query-core': '5.103.2'
+  '@tanstack/react-query': '5.103.2'
+  '@joeblew999/remy-cli': 'file:./vendor/remy-cli.tgz'
+  '@joeblew999/remy-showcase': 'file:./vendor/remy-showcase.tgz'
+  '@joeblew999/remy-ui': 'file:./vendor/remy-ui.tgz'
+  '@orpc/server': '2.0.0-beta.42'
+  '@playwright/test': '1.63.0'
+  '@tanstack/react-devtools': '0.10.13'
+  '@tanstack/react-query-devtools': '5.103.2'
+  '@tanstack/react-router': '1.170.39'
+  '@tanstack/react-router-devtools': '1.167.2'
+  '@tanstack/react-start': '1.168.58'
+  '@types/node': '26.6.2'
+  '@types/react': '19.3.0'
+  '@types/react-dom': '19.3.0'
+  fumadocs-mdx: '15.4.5'
+  react: '19.3.1'
+  react-dom: '19.3.1'
+  vite-plus: '1.3.0'
+  wrangler: '4.137.0'
+
+# Vite is Vite Plus's core, everywhere.
+# One copy of each package that breaks when installed twice (remy-ui's remy.singleCopy), at the catalog's version,
+# whatever a dependency asks for.
+overrides:
+  '@joeblew999/remy-cli': 'file:./vendor/remy-cli.tgz'
+  '@joeblew999/remy-showcase': 'file:./vendor/remy-showcase.tgz'
+  '@joeblew999/remy-ui': 'file:./vendor/remy-ui.tgz'
+  mdast-util-to-markdown: 'catalog:'
+  '@tanstack/query-core': 'catalog:'
+  '@tanstack/react-query': 'catalog:'
+  '@tanstack/react-start': 'catalog:'
+  '@tanstack/react-router': 'catalog:'
+  react-dom: 'catalog:'
+  react: 'catalog:'
+  vite@*: 'npm:@voidzero-dev/vite-plus-core@1.3.0'
+peerDependencyRules:
+  allowAny:
+    - vite
+  allowedVersions:
+    vite: '*'
+
+# The only packages whose install scripts run: esbuild's and workerd's binaries.
+allowBuilds:
+  esbuild: true
+  workerd: true

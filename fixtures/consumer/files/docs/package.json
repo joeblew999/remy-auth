@@ -1,0 +1,17 @@
+{
+  "name": "docs",
+  "private": true,
+  "description": "This app's docs: content/ and docs.config.ts over @joeblew999/remy-ui's docs Worker.",
+  "type": "module",
+  "dependencies": {
+    "@joeblew999/remy-fixture-contract": "workspace:*",
+    "@joeblew999/remy-ui": "catalog:",
+    "fumadocs-mdx": "catalog:",
+    "react": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vite-plus": "catalog:",
+    "wrangler": "catalog:"
+  }
+}
