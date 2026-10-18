@@ -44,6 +44,36 @@ function packagesToken(): string {
   }
 }
 
+const platform = ['@joeblew999/remy-ui', '@joeblew999/remy-cli'];
+
+/**
+ * The platform at `version` where an app from the blank app keeps it: its catalog (pnpm-workspace.yaml), which the
+ * app and its docs both name as `catalog:` (`vp add` would pin the app alone, and leave the docs on the old version:
+ * issue #44's upgrade test). A dependency an earlier upgrade's `vp add` pinned is named `catalog:` again. False for an
+ * app with no catalog entry for them, which `vp add` moves instead.
+ */
+export function platformAt(version: string): boolean {
+  if (!existsSync('pnpm-workspace.yaml')) return false;
+  const workspace = readFileSync('pnpm-workspace.yaml', 'utf8');
+  const pins = /^( {2}['"]@joeblew999\/remy-(?:ui|cli)['"]: )['"][^'"]*['"]$/gm;
+  if (!pins.test(workspace)) return false;
+  writeFileSync('pnpm-workspace.yaml', workspace.replace(pins, `$1'${version}'`));
+  for (const file of ['package.json', join('docs', 'package.json')]) {
+    if (!existsSync(file)) continue;
+    const manifest = JSON.parse(readFileSync(file, 'utf8')) as Record<string, Record<string, string> | undefined>;
+    let changed = false;
+    for (const section of ['dependencies', 'devDependencies'])
+      for (const name of platform)
+        if (manifest[section]?.[name] && manifest[section][name] !== 'catalog:') {
+          manifest[section][name] = 'catalog:';
+          changed = true;
+        }
+    if (changed) writeFileSync(file, `${JSON.stringify(manifest, null, 2)}\n`);
+  }
+  console.log(`upgrade: the catalog names @joeblew999/remy-ui and @joeblew999/remy-cli at ${version}`);
+  return true;
+}
+
 /** The version of remy-cli this app has installed, or nothing. */
 function installedCli(): string | undefined {
   const manifest = join('node_modules', '@joeblew999', 'remy-cli', 'package.json');
@@ -62,13 +92,14 @@ export function upgrade(version: string | undefined, installed = false): void {
     spawnSync('vp', ['pm', 'config', 'set', '--location', 'global', '//npm.pkg.github.com/:_authToken', token], {
       stdio: 'ignore',
     });
-    // The platform and its command line, released together under the same number.
-    const install = spawnSync(
-      'vp',
-      ['add', '--save-exact', `@joeblew999/remy-ui@${version}`, `@joeblew999/remy-cli@${version}`],
-      { stdio: 'inherit', env: { ...process.env, GITHUB_TOKEN: token } },
-    );
-    if (install.status !== 0) fail('upgrade: vp add failed');
+    // The platform and its command line, released together under the same number, set where the app keeps them.
+    const install = platformAt(version)
+      ? spawnSync('vp', ['install'], { stdio: 'inherit', env: { ...process.env, GITHUB_TOKEN: token } })
+      : spawnSync('vp', ['add', '--save-exact', `@joeblew999/remy-ui@${version}`, `@joeblew999/remy-cli@${version}`], {
+          stdio: 'inherit',
+          env: { ...process.env, GITHUB_TOKEN: token },
+        });
+    if (install.status !== 0) fail('upgrade: installing the release failed');
     // The rest by the release's own command line, just installed.
     const rest = spawnSync('vp', ['exec', 'remy', 'upgrade', version, '--installed'], {
       stdio: 'inherit',
