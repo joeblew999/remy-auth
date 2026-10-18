@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "Las herramientas detrás de los comandos: dónde se explica cada área, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación. Todos los comandos están en Comandos."
-translatedFrom: "cccfd094 085ef37e 208b7760 2bb0febe 40ea278b 53e17a88 ec3067e7 4c1d61ff 8d020f83 fa312d97 bf6a65d1 0c002941 e11c40cd 37adadcc da03f137 97411dca 5ee1f825"
+translatedFrom: "cccfd094 0d9bf3ee 208b7760 2bb0febe 40ea278b 53e17a88 ec3067e7 4c1d61ff 8d020f83 fa312d97 bf6a65d1 0c002941 e11c40cd 37adadcc da03f137 97411dca 5ee1f825"
 ---
 
 ## Las herramientas [#the-tooling]
@@ -11,7 +11,7 @@ del proyecto es una tarea escrita en el `vite.config.ts` de su paquete o un scri
 `vp run <name>`. Node está fijado por `.node-version` y por el `engines` de `package.json`, pnpm por `devEngines` (12.14.0,
 que `vp install` descarga y ejecuta). Cada versión se escribe una sola vez, en el catálogo de `pnpm-workspace.yaml`, y cada
 paquete enumera lo que importa (`catalog:`, o `workspace:*` para un paquete de este repositorio), con `pnpm-lock.yaml`
-junto a él; las herramientas que ejecutan las tareas compartidas (Wrangler, Playwright) son dependencias de `@joeblew999/remy-cli`, de modo que todas las apps obtienen las mismas. Las herramientas que ninguna tarea ejecuta (las herramientas de Chrome DevTools, la CLI de Modern Web Guidance, la CLI de Codex) no son dependencia de nadie: cada una se ejecuta como `vpx <name>`. `vp migrate --full` no informa de nada que cambiar y `vp env doctor` pasa. Un nuevo Vite Plus se instala con `vp upgrade <version>` y luego `vp migrate`, que vuelve a fijar juntos `vite-plus`, el alias `vite` y la versión fijada de `vitest` (nunca a mano); una app obtiene el de la versión publicada mediante `remy upgrade`, que ejecuta el migrador de esa versión (`vp dlx vite-plus@<version> migrate`). `gh` es el de la máquina, y Claude Code (el traductor) es el propio de la máquina, aquel en el que
+junto a él; las herramientas que ejecutan las tareas compartidas (Wrangler, Playwright) son dependencias de `@joeblew999/remy-cli`, de modo que todas las apps obtienen las mismas. Las herramientas que ninguna tarea ejecuta (las herramientas de Chrome DevTools, la CLI de Modern Web Guidance, la CLI de Codex) no son dependencia de nadie: cada una se ejecuta como `vpx <name>`. `vp migrate --full` no informa de nada que cambiar y `vp env doctor` pasa. Un nuevo Vite Plus se instala con `vp upgrade <version>` y luego `vp migrate`, que vuelve a fijar juntos `vite-plus`, el alias `vite` y la versión fijada de `vitest` (nunca a mano); una app obtiene la de la versión publicada mediante `remy upgrade`, que ejecuta el migrador de esa versión (`vp dlx --package=vite-plus@<version> vp migrate --no-interactive`, como lo ejecuta la guía de Vite Plus). `gh` es el de la máquina, y Claude Code (el traductor) es el propio de la máquina, aquel en el que
 está iniciada la sesión de la suscripción. Un script que es una sola herramienta se escribe como esa herramienta (`"logs": "wrangler
 tail --format json"`); todo lo que tenga lógica es TypeScript, un comando `remy` del paquete
 (`packages/remy-cli/src`, con comprobación de tipos en cada check) o, para lo que es propio de una sola app, un `scripts/*.ts` de

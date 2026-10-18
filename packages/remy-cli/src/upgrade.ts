@@ -87,7 +87,11 @@ export function upgrade(version: string | undefined, installed = false): void {
     readFileSync(join(blank, 'pnpm-workspace.yaml'), 'utf8'),
   )?.[1];
   if (vitePlus) {
-    const migrate = spawnSync('vp', ['dlx', `vite-plus@${vitePlus}`, 'migrate'], { stdio: 'inherit' });
+    // Exactly as Vite Plus's guide runs a target migrator (migrate.md, "Without the Global CLI"): the package named,
+    // since it ships two commands (vp, vpr), and no questions asked.
+    const migrate = spawnSync('vp', ['dlx', `--package=vite-plus@${vitePlus}`, 'vp', 'migrate', '--no-interactive'], {
+      stdio: 'inherit',
+    });
     if (migrate.status !== 0) fail(`upgrade: vite-plus@${vitePlus} migrate failed`);
   }
   // The shared CI workflow at the same tag, when the app calls it.
