@@ -1,0 +1,20 @@
+// The Previews' two databases, for one job only: applying their migrations before a Preview is uploaded (the app's
+// deploy:preview script). Wrangler applies migrations only to databases a configuration names at its top level, and
+// wrangler.jsonc names these in its `previews` section; a unit check holds this file to that section.
+{
+  "name": "remy-auth",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "remy-auth-preview",
+      "database_id": "3e8017ac-fcbc-404b-8d74-dfe599b50747",
+      "migrations_dir": "migrations",
+    },
+    {
+      "binding": "DEMO_DB",
+      "database_name": "remy-auth-demo-preview",
+      "database_id": "a2ea78c1-a910-4dab-ba55-ecf25eeb3eb3",
+      "migrations_dir": "migrations-demo",
+    },
+  ],
+}

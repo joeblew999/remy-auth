@@ -84,7 +84,7 @@ request only, with Wrangler's own commands, in this order (each changes the Clou
 
 ```sh
 pnpm wrangler d1 create remy-auth                     # then its database_id into wrangler.jsonc, beside "binding": "DB"
-pnpm wrangler d1 migrations apply DB --remote         # its tables; a later migration is this again, before the deploy that needs it
+pnpm wrangler d1 migrations apply DB --remote         # its tables; every later one, the deploy applies itself
 openssl rand -base64 32 | pnpm wrangler secret put BETTER_AUTH_SECRET
 pnpm wrangler d1 create remy-auth-demo                # the showcase's notes demo: its database_id beside "binding": "DEMO_DB"
 pnpm wrangler d1 migrations apply DEMO_DB --remote
@@ -338,8 +338,7 @@ The docs' commands (`pnpm remy docs …`: publish, questions, answers, observe) 
 Two things that list cannot say: the `observe` commands need the gateway's token, so run them as
 `fnox exec -- pnpm remy docs observe …`; and `CLOUDFLARE_ENV=ask vp -C apps/remy-auth-docs dev` (an app's:
 `vp -C docs dev`) runs the local docs Worker with answers from the live index (its `wrangler.jsonc`'s `env.ask`).
-After a docs change reaches production, `pnpm remy docs publish`, on a machine signed in to Cloudflare, gives the
-index the new pages.
+Every deploy of the docs gives the index the new pages: its `deploy` script ends with `remy docs publish`.
 
 Tokens: see [secrets](#secrets-fnox) below.
 

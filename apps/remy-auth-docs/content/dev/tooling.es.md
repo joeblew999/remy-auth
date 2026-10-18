@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "Las herramientas detrás de los comandos: dónde se explica cada área, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación. Todos los comandos están en Comandos."
-translatedFrom: "cccfd094 6df0c778 1199049a 3a5be9af 40ea278b 53e17a88 ec3067e7 0d9cf50a 595035a6 b65ea71a bf6a65d1 926b760f 48b91b14 0988b006 a5cad7e7 cfd124fa 5ee1f825"
+translatedFrom: "cccfd094 6df0c778 208b7760 3a5be9af 40ea278b 53e17a88 ec3067e7 0d9cf50a 595035a6 b65ea71a bf6a65d1 926b760f 48b91b14 0988b006 a5cad7e7 e10291bb 5ee1f825"
 ---
 
 ## Las herramientas [#the-tooling]
@@ -84,7 +84,7 @@ propietario, con los comandos propios de Wrangler, en este orden (cada uno modif
 
 ```sh
 pnpm wrangler d1 create remy-auth                     # then its database_id into wrangler.jsonc, beside "binding": "DB"
-pnpm wrangler d1 migrations apply DB --remote         # its tables; a later migration is this again, before the deploy that needs it
+pnpm wrangler d1 migrations apply DB --remote         # its tables; every later one, the deploy applies itself
 openssl rand -base64 32 | pnpm wrangler secret put BETTER_AUTH_SECRET
 pnpm wrangler d1 create remy-auth-demo                # the showcase's notes demo: its database_id beside "binding": "DEMO_DB"
 pnpm wrangler d1 migrations apply DEMO_DB --remote
@@ -341,8 +341,7 @@ Los comandos de la documentación (`pnpm remy docs …`: publish, questions, ans
 Hay dos cosas que esa lista no puede decir: los comandos `observe` necesitan el token del gateway, así que ejecútalos como
 `fnox exec -- pnpm remy docs observe …`; y `CLOUDFLARE_ENV=ask vp -C apps/remy-auth-docs dev` (el de una app:
 `vp -C docs dev`) ejecuta el Worker de docs local con respuestas del índice real (el `env.ask` de su `wrangler.jsonc`).
-Después de que un cambio de docs llegue a producción, `pnpm remy docs publish`, en una máquina con sesión iniciada en Cloudflare, da al
-índice las páginas nuevas.
+Cada despliegue de la documentación da al índice las páginas nuevas: su script `deploy` termina con `remy docs publish`.
 
 Tokens: consulta [secretos](#secrets-fnox) más abajo.
 

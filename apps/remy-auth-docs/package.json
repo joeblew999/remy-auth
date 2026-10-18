@@ -3,6 +3,9 @@
   "private": true,
   "description": "This app's docs: content/ and docs.config.ts over @joeblew999/remy-ui's docs Worker.",
   "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy && cd ../.. && node packages/remy-cli/src/remy.ts docs publish"
+  },
   "dependencies": {
     "@joeblew999/remy-auth-contract": "workspace:*",
     "@joeblew999/remy-ui": "workspace:*",

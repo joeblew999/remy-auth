@@ -1,7 +1,7 @@
 ---
 title: "Ejecutar, previsualizar y probar la app"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "d324c35e c82e5d5e 8dfe66ef d9d6a7c6 f7afc873 48c95f5f 90a87f8d fdbfb49e b0e4dfb0 e749d4d9"
+translatedFrom: "d324c35e c82e5d5e 8dfe66ef d9d6a7c6 f7afc873 4edef26b 90a87f8d fdbfb49e b0e4dfb0 e749d4d9"
 ---
 
 :::note
@@ -150,12 +150,14 @@ It's bloody confusing"). Las palabras, con un solo significado cada una:
 - **Dos Workers, uno por app, cada uno con su propia build de Git**, ambos sobre el `main` del repositorio: `remy-auth`
   (raíz `/apps/remy-auth`) y `remy-auth-docs` (raíz `/apps/remy-auth-docs`), cada uno con su propio `wrangler.jsonc`.
   Cada build instala con pnpm (a partir de `pnpm-lock.yaml`, la variable de build `PNPM_VERSION` como en `devEngines`,
-  `NODE_VERSION` como en `.node-version`), luego ejecuta `pnpm vp run build`, y después `pnpm wrangler deploy` en `main` o
-  `pnpm wrangler preview` en cualquier otra rama. Estos ajustes viven en Cloudflare, no en el repositorio: se escriben
-  aquí y solo se cambian a través del conector, para que coincidan.
+  `NODE_VERSION` como en `.node-version`), luego ejecuta `pnpm vp run build`, y después el script propio del paquete: `pnpm run deploy` en `main`,
+  `pnpm run deploy:preview` en cualquier otra rama (la app; las Previews de los docs ejecutan `pnpm wrangler preview`). Los scripts de la app
+  aplican primero las migraciones de sus bases de datos (`wrangler d1 migrations apply … --remote`, las de las Previews mediante
+  `previews.wrangler.jsonc`) y después suben el código, de modo que una tabla nueva pasa a estar en vivo junto con el código que la necesita y una
+  migración fallida deja en vivo la versión anterior; el `deploy` de los docs sube el código y después publica las páginas en el índice de Ask AI
+  (`remy docs publish`). Qué script ejecuta cada build vive en Cloudflare; lo que hacen los scripts está en el repositorio.
 - **Desde el Mac del propietario** (con sesión iniciada en Cloudflare): el propio Wrangler (`pnpm wrangler deployments list`,
-  `pnpm wrangler tail`, solo lectura), `pnpm remy docs publish` después de que cambien los docs (el índice de Ask AI) y
-  las migraciones de bases de datos remotas. **Desde la nube de Claude** (sin sesión de Cloudflare para Wrangler): push, y Cloudflare
+  `pnpm wrangler tail`, solo lectura); las migraciones y el índice de Ask AI no necesitan a nadie, porque los deploys los ejecutan. **Desde la nube de Claude** (sin sesión de Cloudflare para Wrangler): push, y Cloudflare
   compila; el conector de Cloudflare muestra una build y su log, cambia los ajustes de build e inicia un rebuild.
   Después comprueba una preview: `pnpm remy test remote https://<branch>-remy-auth.gedw99.workers.dev` (solo nuestras comprobaciones: una
   preview se oculta a propósito de los buscadores, así que las auditorías de Google evalúan producción).
