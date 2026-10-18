@@ -114,9 +114,9 @@ jobs:
   # Changesets' own way to publish: on main, each package whose version is not on its registry yet is published
   # (changeset publish); a push that versioned nothing publishes nothing, in seconds. Then the release's tag (vX.Y.Z, the
   # platform's version, which apps' workflows and remy upgrade name) and its GitHub release, made here with GitHub's
-  # token. Only in a repository that releases with Changesets (remy-auth).
+  # token. Only in remy-auth, the repository that releases with Changesets.
   release:
-    if: github.event_name == 'push' && hashFiles('.changeset/config.json') != ''
+    if: github.event_name == 'push' && github.repository == 'joeblew999/remy-auth'
     runs-on: ubuntu-latest
     permissions:
       contents: write
