@@ -13,7 +13,7 @@ permissions: {}
 
 jobs:
   checks:
-    uses: joeblew999/remy-auth/.github/workflows/ci.yml@v0.16.0
+    uses: joeblew999/remy-auth/.github/workflows/ci.yml@v0.17.0
     permissions:
       contents: write
       packages: write

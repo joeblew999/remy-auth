@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.17.0
+
+### Minor Changes
+
+- b2b5326: The packages Node loads are built with vp pack (dist/, publishConfig's exports) instead of hand-kept .js and .d.ts
+  files; new apps come from `vp create @joeblew999:app` (the new @joeblew999/create), and `remy upgrade` takes the
+  release's blank app the same way.
+
 All notable changes to the shared UI package `@joeblew999/remy-ui` are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 package follows [Semantic Versioning](https://semver.org/).
