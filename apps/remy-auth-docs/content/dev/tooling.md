@@ -12,7 +12,9 @@ which `vp install` downloads and runs). Every version is written once, in `pnpm-
 package lists what it imports (`catalog:`, or `workspace:*` for a package of this repository), with `pnpm-lock.yaml`
 beside it; the tools the shared tasks run (Wrangler, Playwright) are `@joeblew999/remy-cli`'s dependencies, so every
 app gets the same ones. Tools no task runs (the Chrome DevTools tools, the Modern Web Guidance CLI, the Codex CLI) are
-nobody's dependency: each runs as `pnpm dlx <name>`. `vp migrate --full` reports nothing to change and `vp env doctor` passes. `gh` is the machine's, and Claude Code (the translator) is the machine's own, the one the
+nobody's dependency: each runs as `pnpm dlx <name>`. `vp migrate --full` reports nothing to change and `vp env doctor` passes. A new Vite Plus is `vp upgrade <version>`
+then `vp migrate`, which re-pins `vite-plus`, the `vite` alias and the `vitest` pin together (never by hand); an app
+gets the release's through `remy upgrade`, which runs that version's migrator (`vp dlx vite-plus@<version> migrate`). `gh` is the machine's, and Claude Code (the translator) is the machine's own, the one the
 subscription is logged into. A script that is one tool is written as that tool (`"logs": "wrangler
 tail --format json"`); anything with logic is TypeScript, a `remy` command of the package
 (`packages/remy-cli/src`, type-checked on every check) or, for what is one app's own, a `scripts/*.ts` of

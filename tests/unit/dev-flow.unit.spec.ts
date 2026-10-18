@@ -11,6 +11,12 @@ const cli = readdirSync('packages/remy-cli/src')
 const scriptsOf = (file: string) =>
   (JSON.parse(readFileSync(file, 'utf8')) as { scripts: Record<string, string> }).scripts;
 
+test('a new app runs on the Node remy-auth runs on', () => {
+  expect(readFileSync('template/.node-version', 'utf8')).toBe(readFileSync('.node-version', 'utf8'));
+  const engines = (file: string) => (JSON.parse(readFileSync(file, 'utf8')) as { engines?: unknown }).engines;
+  expect(engines('template/package.json')).toEqual(engines('package.json'));
+});
+
 test("remy-auth's flow is the blank app's, the command line run from its source", () => {
   const blank = scriptsOf('template/package.json');
   const ours = scriptsOf('package.json');

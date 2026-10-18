@@ -41,7 +41,7 @@ export function upgrade(version: string | undefined): void {
   // GitHub Packages' token where pnpm reads it: this machine's pnpm configuration (pnpm expands no variable in a
   // repository's .npmrc).
   if (token)
-    spawnSync('pnpm', ['config', 'set', '--location', 'global', '//npm.pkg.github.com/:_authToken', token], {
+    spawnSync('vp', ['pm', 'config', 'set', '--location', 'global', '//npm.pkg.github.com/:_authToken', token], {
       stdio: 'ignore',
     });
   // The platform and its command line, released together under the same number.
@@ -54,6 +54,15 @@ export function upgrade(version: string | undefined): void {
     },
   );
   if (install.status !== 0) fail('upgrade: vp add failed');
+  // Vite Plus at the release's version, the way its docs say (guide/upgrade-project.md): that version's migrator
+  // re-pins vite-plus, the vite alias and the vitest pin together, in every workspace package.
+  const vitePlus = /^\s*vite-plus:\s*['"]?([^'"\s]+)/m.exec(
+    readFileSync(join(blank, 'pnpm-workspace.yaml'), 'utf8'),
+  )?.[1];
+  if (vitePlus) {
+    const migrate = spawnSync('vp', ['dlx', `vite-plus@${vitePlus}`, 'migrate'], { stdio: 'inherit' });
+    if (migrate.status !== 0) fail(`upgrade: vite-plus@${vitePlus} migrate failed`);
+  }
   // The shared CI workflow at the same tag, when the app calls it.
   const retag = (file: string, pattern: RegExp) => {
     const text = readFileSync(file, 'utf8');

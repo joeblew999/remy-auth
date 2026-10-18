@@ -99,6 +99,8 @@ overrides:
   react-dom: 'catalog:'
   react: 'catalog:'
   vite@*: 'catalog:'
+  # One Vitest, the one vp test runs (vp toolchain vitest); vp migrate moves it with vite-plus.
+  vitest@*: '5.0.5'
 peerDependencyRules:
   allowAny:
     - vite
@@ -108,3 +110,8 @@ peerDependencyRules:
 allowBuilds:
   esbuild: true
   workerd: true
+
+# Vite Plus manages Node and pnpm (its devEngines and .node-version); pnpm neither switches its own version nor
+# installs runtimes (guide/env.md).
+runtimeOnFail: ignore
+pmOnFail: ignore
