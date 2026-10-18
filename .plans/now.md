@@ -5,6 +5,10 @@ out because it's now gotten into a huge mess." One list, in order. Close an item
 main and live where that applies; then move its plan to [done/](done/) with a closing line. Big features
 wait in [parked/](parked/). What broke along the way is in the [stability log](stability-log.md).
 
+## Open 2026-10-18
+
+- [The Vite Plus audit](2026-10-18-01-vite-plus-audit.md): every page of Vite Plus's docs against this repository, as written.
+
 ## Closed 2026-10-18
 
 - ~~[Vite Plus all the way](done/2026-10-17-02-vite-plus.md)~~: a standard `vp` monorepo on pnpm; one way to deploy, a push.
