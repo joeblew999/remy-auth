@@ -16,7 +16,7 @@ nobody's dependency: each runs as `pnpm dlx <name>`. `vp migrate --full` reports
 subscription is logged into. A script that is one tool is written as that tool (`"logs": "wrangler
 tail --format json"`); anything with logic is TypeScript, a `remy` command of the package
 (`packages/remy-cli/src`, type-checked on every check) or, for what is one app's own, a `scripts/*.ts` of
-that app ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/tooling-in-typescript.md)).
+that app ([the plan](https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/tooling-in-typescript.md)).
 `vp env doctor` prints the versions of Node, the package manager and Vite Plus's tools.
 
 ### Vite Plus: the machine's `vp`, in managed mode
@@ -131,7 +131,7 @@ command line itself, so it cannot drift; no page lists them by hand. Where each 
 - The app, local and remote checks, previews: [the GUI](./run-and-test.md)
 - The project layout, a new app, translations, a repository that publishes packages: [projects](./projects.md)
 - The docs Worker over an app's `docs/`: [writing docs](./writing-docs.mdx)
-- Plans: [plans](./how-we-work.md#plans-few-short-closed); translations as a rule: [in the change](./how-we-work.md#translations-in-the-change)
+- Plans: [plans](./how-we-work.md#plans); translations as a rule: [in the change](./how-we-work.md#translations-in-the-change)
 - Agent skills, MCP, screenshots and the agents' own browser: below
 
 ### Package upgrades
@@ -215,7 +215,7 @@ pnpm skills remove <name>          # one removed
 
 Skills live in `.agents/skills/`; `.claude/skills/` links to the same files. Only `skills-lock.json` is committed;
 the installed skills and their Claude links are ignored and recreated by `vp run setup`. Reload an existing agent
-session if newly installed skills are not yet visible. [The skills plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/agent-skills.md)
+session if newly installed skills are not yet visible. [The skills plan](https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/agent-skills.md)
 tracks dependencies without an official skill.
 
 ### The `remy` skill: the platform's rules for every repo's agents
@@ -301,7 +301,7 @@ available** policy, with fallbacks for newer features.
 
 ## Cloudflare observability
 
-The [observability plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/observability.md) covers logs, traces, metrics,
+The [observability plan](https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/observability.md) covers logs, traces, metrics,
 D1 health, durable auth audit records, correlation, dashboards and alerts.
 `wrangler.jsonc` enables logs/traces and URL query redaction for the GUI Worker.
 A GUI Worker entry now emits request IDs, status and timing without logging URLs,

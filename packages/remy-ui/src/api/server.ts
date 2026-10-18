@@ -7,7 +7,7 @@ import { CORSHandlerPlugin } from '@orpc/server/plugins';
 import { ZodToJsonSchemaConverter } from '@orpc/zod';
 import { apiPrefix, statusesOf } from './coverage.js';
 
-// The server half of an app's contract-first API (.plans/openapi-contracts.md): oRPC's
+// The server half of an app's contract-first API (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/openapi-contracts.md): oRPC's
 // OpenAPIHandler behind one TanStack Start server route, with the OpenAPI document generated from
 // the router in-process (never committed) and oRPC's reference page. oRPC validates every input
 // (400) and every output (500 rather than a response the document does not promise).

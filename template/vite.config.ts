@@ -97,7 +97,6 @@ export default defineConfig({
         cache: { untrackedEnv: ['PREVIEW_PORT', ...network], input: browserInputs, output: [] },
       },
       // The project's own checks (remy-check). A check never writes: `vp run fix` writes what two of them report.
-      'check:plans': 'remy-check plans',
       'check:wrangler': 'remy-check wrangler',
       'check:commands': 'remy-check commands',
       'check:endings': 'remy-check endings',
@@ -121,7 +120,6 @@ export default defineConfig({
           'check:deploy',
           'docs#build',
           'docs#check:deploy',
-          'check:plans',
           'check:wrangler',
           'check:commands',
           'check:endings',

@@ -15,7 +15,7 @@ import { Separator } from '@joeblew999/remy-ui/components/separator';
 import { authClient } from './client';
 import type { SeededSignIn } from './people.server';
 
-// Signing in and out on the account page (.plans/auth-service.md, decision 1): an email address, then
+// Signing in and out on the account page (issue #38, decision 1): an email address, then
 // the one-time code Better Auth sends to it. TanStack Form with shadcn's Field components, like the
 // demo's form. Afterwards every loader and query runs again, so no page keeps what the last viewer saw.
 

@@ -1,6 +1,6 @@
 // Paraglide's `preferredLanguage` compares a whole tag, then the part before the first hyphen, so
 // es-MX and fa-IR already reach es and fa, but zh-Hant-HK and zh-HK would never reach zh-TW
-// (.plans/hard-localisation.md, "Verified 2026-09-25"). The fix inside Paraglide's own extension
+// (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/hard-localisation.md, "Verified 2026-09-25"). The fix inside Paraglide's own extension
 // point: one custom strategy, `custom-chinese`, placed before `preferredLanguage` in paraglide.mjs.
 // It answers only for Chinese written in Traditional characters (Intl.Locale's maximize() gives the
 // script: zh-HK → zh-Hant-HK), mapping it to zh-TW when that is a configured locale; Simplified

@@ -5,7 +5,7 @@ import { join } from 'node:path';
 // tests/unit/i18n-docs.unit.spec.ts holds every translated page in the repository to broken. On
 // 2026-10-09 the agent returned nothing for one page, the pipe lost its failure, and the word "null"
 // was committed as the Spanish "How we work": the docs stopped building on main and every check was
-// green (.plans/stability-log.md). The docs build stays the full check (Fumadocs' schema, the MDX
+// green (issue #41). The docs build stays the full check (Fumadocs' schema, the MDX
 // compiler); this is the part that needs no build, so it runs on every check.
 
 /** A page's frontmatter fields (the `key: value` lines between its `---` lines) and the text after them; undefined when it has no frontmatter. */

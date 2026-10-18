@@ -15,7 +15,7 @@ import { docsConfig } from '@remy-docs-app/docs.config.ts';
 // then does AI Search retrieve at most five chunks and write a short answer, from its cache when
 // the same question was asked recently. Any failure is "no answer", never a blank page. This Worker
 // never logs the question; the AI Gateway does keep every model call, question included, for 7 days:
-// its logs are our record of cost per call (decided 2026-09-25, .plans/observability.md).
+// its logs are our record of cost per call (decided 2026-09-25, plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/observability.md).
 
 /** The default Workers AI model of AI Search, named so a change of default does not change our answers unseen. */
 const model = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';

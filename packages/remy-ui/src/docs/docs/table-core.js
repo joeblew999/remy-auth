@@ -47,7 +47,7 @@ export function docsTableOf({ users, dev }, docsConfig, folder = 'docs') {
         );
 
   /**
-   * A page's object in the R2 bucket AI Search reads (.plans/done/docs-ai-sync.md): <site>/<lang>/<slug>.md,
+   * A page's object in the R2 bucket AI Search reads (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/docs-ai-sync.md): <site>/<lang>/<slug>.md,
    * index.md for the site's index. Ask AI answers from one folder (<site>/<lang>/).
    */
   const docsObjectKey = (site, slug, lang) => `${site}/${lang}/${slug || 'index'}.md`;

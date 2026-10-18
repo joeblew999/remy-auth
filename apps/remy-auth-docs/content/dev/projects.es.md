@@ -1,7 +1,7 @@
 ---
 title: "Proyectos: estructura, apps nuevas y publicación"
 description: "Qué guarda todo proyecto de Remy en el mismo lugar, cómo empezar una app nueva, la publicación de paquetes, las traducciones, Cloudflare y los planes. Todos los comandos están en Comandos."
-translatedFrom: "76024556 ae418fe2 f124ecbd b3abd1e3 3ccca9ea 335e995b de907ca6 bf100d42"
+translatedFrom: "76024556 86111c34 f124ecbd b3abd1e3 3ccca9ea 335e995b de907ca6 32f6ce2e"
 ---
 
 La herramienta es `remy` (y `remy-check`), los bins de `@joeblew999/remy-cli` (`packages/remy-cli/src`, un
@@ -29,8 +29,9 @@ en cualquier otro lugar simplemente no se encuentra; ninguna comprobación propi
 una carpeta: en su propio repositorio, la raíz del repositorio. remy-auth, que además es dueño de los
 paquetes, es un workspace con las mismas piezas lado a lado: los archivos de la app que se listan abajo
 están en `apps/remy-auth/`, la documentación en `apps/remy-auth-docs/` (no `docs/`), los paquetes en `packages/*` (`remy-ui`, `remy-cli`, el contrato y el showcase), cada carpeta con el nombre de su
-paquete, y la raíz contiene los scripts de `package.json`, `pnpm-workspace.yaml` (los paquetes y el catálogo), `.changeset/`, el `vite.config.ts` raíz (el estilo compartido y las comprobaciones del repositorio, `ready`) y
-los archivos del repositorio (`.plans/`, `.github/`, `template/`), tal como `vp create vite:monorepo` organiza un workspace. Los comandos encuentran la app por su
+paquete, y la raíz contiene `pnpm-workspace.yaml` (los paquetes y el catálogo), los scripts de `package.json`,
+`.changeset/`, el `vite.config.ts` raíz (el estilo compartido y las comprobaciones del repositorio, `ready`) y
+los archivos del repositorio (`now.md`, `.github/`, `template/`), tal como `vp create vite:monorepo` organiza un workspace. Los comandos encuentran la app por su
 `wrangler.jsonc` y la documentación por su `docs.config.ts`, así que se ejecutan desde la raíz en ambos
 casos.
 
@@ -53,7 +54,7 @@ casos.
 | `docs/` (`docs.config.ts` con su `contract`, `collections.ts`, `wrangler.jsonc`, `vite.config.ts`, `tsconfig.json`, `package.json`, `content/{users,dev,ui}/` con `i18n.json` y `meta.json`, `content/questions.json`; `dist/` generado) | sus propias tareas, `remy docs`, `remy i18n` | la documentación de la app: su identidad y sus páginas, las colecciones de Fumadocs (en commit), los ajustes del Worker de la documentación; el código del Worker es del paquete |
 | `packages/<name>/` con `README.md` (y `CHANGELOG.md`, de Changesets) | pnpm, Changesets | los paquetes que publica el repositorio, si los hay |
 | `messages/`, `project.inlang/` | el preset de la app, la tarea `generate` de la app, `remy i18n` | las cadenas propias de la app, si las hay (compiladas en `src/paraglide/`) |
-| `.plans/` (`now.md`, `done/`, `parked/`) | `remy plans` | los planes del repositorio |
+| `now.md` | personas y agentes | el orden en que se toman los issues abiertos de GitHub |
 | `AGENTS.md`, `.mcp.json`, `.codex/config.toml`, `.github/workflows/` | agentes; Claude y Codex; GitHub | el puntero de los agentes a la documentación; los servidores MCP; CI |
 | `packages/remy-cli/src/`, `template/`, `fixtures/consumer/` | el paquete; `giget`; `vp run new-app` | solo remy-auth: la propia línea de comandos, la app en blanco desde la que arranca un repositorio nuevo, y el fixture de consumidor que prueba ambos tal como los recibiría otro repositorio |
 
@@ -218,11 +219,7 @@ Las credenciales vienen del login de Wrangler, o del llavero a través de fnox
 
 ### Planes [#plans]
 
-La regla de los planes ([cómo trabajamos](./how-we-work.md#plans-few-short-closed)) como comandos (`pnpm remy plans …`), igual en
-todos los proyectos: `.plans/now.md` es la única lista ordenada, `.plans/*.md` los pocos archivos de plan abiertos,
-`.plans/done/` y `.plans/parked/` el resto, `.plans/stability-log.md` opcional. Un proyecto sin
-`.plans/` pasa `plans check` y no tiene nada que listar.
-
-Los comandos, con lo que hace cada uno, están en [Comandos](./commands.mdx).
-
-`close` y `park` cambian archivos y preparan el movimiento, pero nunca hacen commit: lee `git diff` y luego `vp run ready`.
+La regla de los planes ([cómo trabajamos](./how-we-work.md#plans)), igual en todos los proyectos: el trabajo abierto son los
+issues de GitHub del repositorio, uno por cada pieza de trabajo; `now.md` en la raíz es el orden en que se toman; una pieza terminada cierra su
+issue. Los de remy-auth: [issues](https://github.com/joeblew999/remy-auth/issues),
+[now.md](https://github.com/joeblew999/remy-auth/blob/main/now.md).

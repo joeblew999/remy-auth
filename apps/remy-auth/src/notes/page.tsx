@@ -24,7 +24,7 @@ import type { Locale } from '@joeblew999/remy-ui/locale';
 import { m } from '@joeblew999/remy-ui/messages';
 import { Intro } from '@joeblew999/remy-ui/shell';
 
-// The notes demo's page (.plans/auth-service.md): relations decide who may do what, and the page
+// The notes demo's page (issue #38): relations decide who may do what, and the page
 // decides nothing. Every control sits inside <Allowed>, which shows it only when the server's answer
 // for this viewer and this note (`note.can`, sent with the note) allows the action; nothing here
 // looks at who the viewer is. TanStack Form with shadcn's Field components, like the other forms.

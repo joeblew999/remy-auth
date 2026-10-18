@@ -16,8 +16,8 @@ import { partsFile, readParts } from './parts/list.js';
 // `sitePaths` and `appPaths`: both zones, their entry URLs, text, fonts, observability, CSP, the theme, which
 // build and whose name each page carries), and
 // nothing more: an app with pages of its own adds their checks. The home page's words are the app's to check (`home`); the structure is every app's
-// (.plans/thin-apps.md, group 4). Checks that are not in a set stay separate calls. Part-aware
-// (.plans/parts.md): what a listed part owns runs with partChecks() instead, never twice.
+// (issue #34, group 4). Checks that are not in a set stay separate calls. Part-aware
+// (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/parts.md): what a listed part owns runs with partChecks() instead, never twice.
 
 /** The app's listed parts: `parts` when given, else its src/parts.json when it has one, else none. */
 const listedParts = (parts) => parts ?? (existsSync(partsFile) ? readParts() : []);

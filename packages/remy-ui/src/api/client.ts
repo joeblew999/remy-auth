@@ -5,7 +5,7 @@ import { OpenAPILink } from '@orpc/openapi/fetch';
 import { createIsomorphicFn } from '@tanstack/react-start';
 import { getLocale } from '../paraglide/runtime.js';
 
-// The client half (.plans/openapi-contracts.md): the types are the contract itself, so nothing
+// The client half (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/openapi-contracts.md): the types are the contract itself, so nothing
 // is generated and nothing can drift, and every response is parsed against the contract before
 // use, so a response that breaks it is a typed error (oRPC's ValidationError), never wrong data.
 

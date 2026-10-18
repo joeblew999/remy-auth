@@ -7,7 +7,7 @@ const core = getAuthTables({});
 /**
  * What a person could write that nobody decided they may; empty when every field the options (or a
  * plugin) add to Better Auth's own tables is `input: false` or listed in `mayEdit` with its reason.
- * Better Auth's own columns are left to its endpoints. remy-sport's lesson (.plans/auth-service.md):
+ * Better Auth's own columns are left to its endpoints. remy-sport's lesson (issue #38):
  * `statusCode` was an additional field without `input: false`, so a referee awaiting approval
  * posted `{ statusCode: "ACTIVE" }` to /api/auth/update-user and approved themselves.
  */

@@ -22,12 +22,6 @@ Each as `pnpm remy <command> [<subcommand>]`; a command run without a subcommand
 
 | Command | What it does |
 | --- | --- |
-| `pnpm remy plans` | the plans rule on this app's .plans/: few, short, closed |
-| `pnpm remy plans status` | [--json]: now.md's open items, the open plans with their status line and last commit (STALE after 14 days), the parked ones |
-| `pnpm remy plans check` | now.md exists, every link under .plans/ resolves, every open plan is linked from now.md; instant (the check runs it) |
-| `pnpm remy plans close` | &lt;plan&gt; "&lt;what shipped&gt;": into done/ with its closing line, links to it repointed, its now.md item struck; staged, never committed |
-| `pnpm remy plans park` | &lt;plan&gt; "&lt;why&gt;": the same into parked/ |
-| `pnpm remy plans open` | &lt;plan&gt; "&lt;why now&gt;": a parked plan back into .plans/; its now.md item is yours to add |
 | `pnpm remy i18n` | translations: check [messages\|docs] [--list] (offline, read-only), translate [messages\|docs] (the machine's Claude; vp run translate runs it, before a commit) |
 | `pnpm remy i18n check` | [messages\|docs] [--list] [--strict]: the offline checks, read-only, no git history: a warning (exit 0) while coding and in vp run ci, exit 1 with --strict; --list prints one line per gap |
 | `pnpm remy i18n translate` | [messages\|docs] [files…]: what the checks list, by the machine's Claude (--model, default sonnet; --jobs at a time, default 8): only the changed sections and keys, with their records; named translation files redone in full; vp run translate runs it, before a commit |

@@ -1,4 +1,4 @@
-// The parts an app lists (.plans/parts.md): one name per line in the app's src/parts.json, read in
+// The parts an app lists (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/parts.md): one name per line in the app's src/parts.json, read in
 // plain Node by the Vite config (routes and the virtual modules) and by Playwright (checks), so the
 // browser bundle, the Worker, the routes and the checks all follow the same list.
 import { existsSync, readFileSync } from 'node:fs';

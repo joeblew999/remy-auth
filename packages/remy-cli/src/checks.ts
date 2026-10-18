@@ -1,12 +1,11 @@
 #!/usr/bin/env node
-// remy-check: the project's own checks, one per Vite Plus task (`check:plans`, `check:commands`…), each a plain tool:
+// remy-check: the project's own checks, one per Vite Plus task (`check:commands`, `check:wrangler`…), each a plain tool:
 // it reads, says what is wrong, and exits non-zero, and nothing else happens around it (no timing record, no
 // configuration loaded, unlike `remy`). A check never writes: `--write` fixes what it would report (the commands list,
 // the docs pages' endings), which is what `vp run fix` runs. remy-auth runs this source; an app the package's bin.
 import { writeCommands } from './help.ts';
 import { checkAll as translations } from './i18n.ts';
 import { rightEndings } from './page.ts';
-import { check as plans } from './plans.ts';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -48,8 +47,6 @@ export async function wrangler(): Promise<void> {
 }
 
 const checks: Record<string, (write: boolean) => void | Promise<unknown>> = {
-  // .plans/: few, short, closed, every link resolving and every open plan in now.md.
-  plans: () => plans(),
   // The Worker's configuration: preview URLs, placement, observability.
   wrangler: () => wrangler(),
   // COMMANDS.md (here, and the blank app's in remy-auth) is what the command line and the tasks say.

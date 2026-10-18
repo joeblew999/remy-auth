@@ -3,7 +3,7 @@
 remy-auth's API contract: the oRPC routes under `/api` with Zod 4 schemas for input, output and
 typed errors. remy-auth implements it; a client imports it and calls remy-auth through
 `contractClient` from `@joeblew999/remy-ui/api/client`, which validates every response against
-it. Why and how: [the contracts plan](../../.plans/openapi-contracts.md).
+it. Why and how: [the contracts plan](https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/openapi-contracts.md).
 
 | Procedure | Route | Who may call it | Errors |
 | --- | --- | --- | --- |

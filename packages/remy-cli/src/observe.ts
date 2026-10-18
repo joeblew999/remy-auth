@@ -165,7 +165,7 @@ export async function aiUsage(args: string[]): Promise<void> {
   for (const task of Object.keys(tasks).sort()) line(task, summary(tasks[task]!));
 }
 
-/** The AI setup against Cloudflare's advice for a gateway connected to AI Search, and our own decisions (.plans/done/observability.md). Fails on any FAIL; WARN is reported only. */
+/** The AI setup against Cloudflare's advice for a gateway connected to AI Search, and our own decisions (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/observability.md). Fails on any FAIL; WARN is reported only. */
 export async function aiCheck(): Promise<void> {
   const { config, api, aiSearch, wrangler } = await setup();
   const { namespace, instance, gateway: gatewayId } = await aiSearch();

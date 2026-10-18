@@ -1,7 +1,7 @@
 ---
 title: "El paquete de UI (@joeblew999/remy-ui)"
 description: "La interfaz que comparten todas las apps de Remy: shadcn de fábrica, fuentes, catálogos de Paraglide, las páginas del sitio y de la app, el pegamento de TanStack Start y sus comprobaciones."
-translatedFrom: "f3f6cb00 55bce48d 60a401ce c77f7598 62bc7837 a6127daf 415c4606"
+translatedFrom: "f3f6cb00 55bce48d 098c132b 09c2da80 62bc7837 a6127daf 415c4606"
 ---
 
 La interfaz que comparten todas las apps de Remy: componentes y tema de shadcn de fábrica, fuentes,
@@ -47,9 +47,9 @@ app lista las suyas):
 Las páginas propias de remy-auth (las páginas de inicio y de formatos, las de formatos, reloj, demo, ubicación, ajustes y
 cuenta de la app, sus listas de navegación, la reserva de demostración y sus comprobaciones) no son de la plataforma: son `@joeblew999/remy-showcase`
 (`packages/remy-showcase`, su README), para las apps que las muestran. Las tabletas y los ordenadores
-obtienen la barra lateral (que se contrae a iconos); los teléfonos obtienen la barra inferior
-(`blocks/bottom-nav`, piezas de shadcn de fábrica, ya que shadcn no tiene navegación inferior)
-con las páginas principales y Más, que abre la barra lateral. Por qué: [el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/mobile-navigation.md).
+  obtienen la barra lateral (que se contrae a iconos); los teléfonos obtienen la barra inferior
+  (`blocks/bottom-nav`, piezas de shadcn de fábrica, ya que shadcn no tiene navegación inferior)
+  con las páginas principales y Más, que abre la barra lateral. Por qué: [el plan](https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/mobile-navigation.md).
 
 Lo que tiene toda app basada en el paquete, para que las tareas y comprobaciones compartidas funcionen en ella
 (remy-auth-app es el ejemplo prerrenderizado):
@@ -66,7 +66,7 @@ Lo que tiene toda app basada en el paquete, para que las tareas y comprobaciones
   Reloj de la demostración (showcase) propaga `clockRouteOptions` desde `@joeblew999/remy-showcase/clock-route`).
 - **`tests/smoke.spec.ts`**, una sola llamada a `smokeChecks(...)`: `vp run test:browser --grep smoke` y la prueba de humo contra un despliegue
   (`pnpm remy test live <origin>`) lo ejecutan, y fallan con «No tests found» si no existe.
-- **`.plans/now.md`**, la única lista ordenada del trabajo pendiente (`remy plans check`, en `vp run ready`).
+- **`now.md`**, el orden en que se atienden las issues abiertas de GitHub.
 - **Instalaciones y actualizaciones mediante los comandos del paquete**, nunca a mano: `vp run setup` (instalar,
   skills, MCP, las comprobaciones de la instalación) y `vp run upgrade <version>` (remy-ui y remy-cli en esa versión, el
   workflow de CI en el mismo tag, los scripts, hooks y configuración de la app en blanco, y después las mismas comprobaciones). Ambos toman el token de GitHub Packages de
@@ -105,7 +105,7 @@ Todas bajo `@joeblew999/remy-ui/`, como TSX y CSS para consumidores de Vite y Ta
 | `versions` | `BuildStamp` (una línea discreta: el entorno cuando no es producción, el nombre del producto, el commit, y un control de recarga cuando el despliegue ha avanzado bajo la página) y `Versions` (esta app, su Worker de docs y los `deployments` que la app lista en `defineRemyApp`, cada uno respondiendo por sí mismo, y los paquetes de este build). Piezas de shadcn de fábrica; coloca cualquiera de las dos en cualquier lugar dentro de `AppProviders` |
 | `cloudflare` | `placeFromCloudflare` |
 | `problem` | Las páginas de problema localizadas: `Problem`, `NotFound`, `ErrorPage`, `problemPages` (una línea de propagación por cada ruta de página) |
-| `parts`, `parts/vite`, `parts/checks` | Partes ([plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md)): una app las lista en `src/parts.json`, una por línea: las de la plataforma por nombre, las de otro paquete como `<package>/<name>`. `remyApp()` (mediante el `parts/vite` del paquete, `remyParts()`: su `plugin` entre los plugins, sus `routes` como `tanstackStart({ router: { virtualRouteConfig } })`) monta las rutas de cada parte listada junto a `src/routes` y genera `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` en el archivo de pruebas ejecuta las comprobaciones de cada parte listada. La parte de la plataforma es `seo-routes` (robots.txt y el sitemap); la demostración (showcase) ofrece `time-zones`, `deferred-place` y `status-card` (`@joeblew999/remy-showcase/<name>`); ver [Escribir una parte](#writing-a-part) |
+| `parts`, `parts/vite`, `parts/checks` | Partes ([plan](https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/parts.md)): una app las lista en `src/parts.json`, una por línea: las de la plataforma por nombre, las de otro paquete como `<package>/<name>`. `remyApp()` (mediante el `parts/vite` del paquete, `remyParts()`: su `plugin` entre los plugins, sus `routes` como `tanstackStart({ router: { virtualRouteConfig } })`) monta las rutas de cada parte listada junto a `src/routes` y genera `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` en el archivo de pruebas ejecuta las comprobaciones de cada parte listada. La parte de la plataforma es `seo-routes` (robots.txt y el sitemap); la demostración (showcase) ofrece `time-zones`, `deferred-place` y `status-card` (`@joeblew999/remy-showcase/<name>`); ver [Escribir una parte](#writing-a-part) |
 | `rows`, `zod-csp` | `Group`, `Row`, `NameList`: filas de etiqueta/valor; el interruptor jitless de Zod (lo importa AppProviders) |
 | `invalidate` | `invalidateEverything(router, queryClient)`: todos los loaders y consultas marcados como obsoletos y recargados (tras cerrar sesión o un cambio de rol; la actualización de la tarjeta de estado) |
 | `samples` | Los valores fijos que renderizan las páginas |

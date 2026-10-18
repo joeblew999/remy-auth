@@ -3,7 +3,7 @@
 remy-auth's showcase pages on the Remy platform, for the apps that show them (remy-auth, and remy-auth-app as
 the prerendered example). The platform, `@joeblew999/remy-ui`, knows nothing of this package: it imports the
 platform only through the platform's exports, and nothing in the platform imports it
-([platform structure, fix 2](https://github.com/joeblew999/remy-auth/blob/main/.plans/platform-structure.md)).
+([platform structure, fix 2](https://github.com/joeblew999/remy-auth/issues/33)).
 
 | Export | What it holds |
 | --- | --- |

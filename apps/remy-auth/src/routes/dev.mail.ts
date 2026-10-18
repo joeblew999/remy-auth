@@ -3,7 +3,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { readOutbox } from '@joeblew999/remy-ui/mail';
 import { permits } from '../auth/environment';
 
-// The local outbox, read back (.plans/auth-service.md, "Development conveniences"): the newest mail
+// The local outbox, read back (issue #38, "Development conveniences"): the newest mail
 // captured for one address, for a developer signing in locally and for the checks (tests/people.ts).
 // It exists only where the environment table says mail is captured, which is the local environment
 // alone; anywhere else mail is really sent, there is nothing to read, and this answers 404, like a

@@ -21,7 +21,7 @@ import {
   visitor,
 } from './people';
 
-// Signing in (.plans/auth-service.md), on the real Worker with Better Auth and the local D1: nothing is
+// Signing in (issue #38), on the real Worker with Better Auth and the local D1: nothing is
 // mocked. The code is the one Better Auth made; the local environment writes it to its local_mail table
 // instead of mailing it (src/auth/mail.server.ts), and these checks read it back from the Worker itself
 // (/dev/mail, src/routes/dev.mail.ts; tests/people.ts). Only the local environment captures mail, so

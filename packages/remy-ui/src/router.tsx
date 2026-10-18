@@ -5,7 +5,7 @@ import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query
 import { localeRewrite } from './tanstack';
 
 /**
- * The router every app makes (.plans/thin-apps.md, group 5); its src/router.tsx is
+ * The router every app makes (issue #34, group 5); its src/router.tsx is
  * `export const getRouter = () => remyRouter(routeTree)` and TanStack's Register declaration.
  * One router per request on the server and one in the browser; routes carry no locale, the rewrite adds it.
  * Each router gets its own QueryClient, so no request ever sees another's cached queries. The SSR

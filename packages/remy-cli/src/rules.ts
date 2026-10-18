@@ -33,9 +33,9 @@ development principles, tooling, the UI package and writing docs.
 The flow is code, and the only way to work here: \`COMMANDS.md\` lists it first, then every command, generated
 from the command line itself (\`vp run fix\` writes it, \`vp run ready\` refuses it stale; never list commands by hand). The
 tooling refuses the heavy checks outside the flow's steps. Long steps run in the background; never wait on them.
-Seen something wrong, slow, missing or left over? Fix it in the same landing when small, or write it
-into \`.plans/now.md\` in that landing; everyone reads that list. "Done" is the end
-of a sweep (branches, deployments, plans, retired words, touched docs), not of a list.
+Seen something wrong, slow, missing or left over? Fix it in the same landing when small, or open a GitHub issue
+for it in that landing, in \`now.md\`'s order; everyone reads that list. "Done" is the end
+of a sweep (branches, deployments, issues, retired words, touched docs), not of a list.
 ${end}`;
   const current = existsSync('AGENTS.md') ? readFileSync('AGENTS.md', 'utf8') : '# Agent instructions\n';
   const marked = new RegExp(

@@ -1,4 +1,4 @@
-// The relation engine (.plans/auth-service.md): who may do what is answered by relations, not roles.
+// The relation engine (issue #38): who may do what is answered by relations, not roles.
 // You may edit this team because you coach it, not because you are a coach. An app hands its
 // vocabulary over as data (object types, relations with how each is derived, actions, and the grants
 // naming the relations that satisfy each action) and the engine answers from the app's own tables in

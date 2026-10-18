@@ -25,6 +25,6 @@ export const samples = {
   // A 63-letter German compound: with hyphens: auto and the page's language it must still fit 320 px.
   longWord: 'Rindfleischetikettierungsüberwachungsaufgabenübertragungsgesetz',
   // A date in another calendar is written with year, month and day fields, not dateStyle: the
-  // Hebrew calendar's dateStyle output in Hebrew is broken in Chrome and workerd (.plans/hard-localisation.md).
+  // Hebrew calendar's dateStyle output in Hebrew is broken in Chrome and workerd (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/hard-localisation.md).
   calendarDate: { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' },
 };

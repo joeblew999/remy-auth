@@ -72,7 +72,7 @@ export function withObservability<E extends ObservedEnv>(service: string, handle
         out.headers.append('Content-Security-Policy', "frame-ancestors 'none'");
         // Popups we open (sign-in providers) may keep their opener; no other window gets ours.
         out.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
-        // HTTPS only, for five minutes while the rollout proves itself; raised later (.plans/gui-portal.md, item 7).
+        // HTTPS only, for five minutes while the rollout proves itself; raised later (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/parked/gui-portal.md, item 7).
         out.headers.set('Strict-Transport-Security', 'max-age=31536000');
         writeLog({
           ...base,

@@ -1,4 +1,4 @@
-// The parts' Vite side (.plans/parts.md, candidate 2): a plugin that generates the `virtual:remy-parts`
+// The parts' Vite side (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/parts.md, candidate 2): a plugin that generates the `virtual:remy-parts`
 // modules from the app's list, and the route config that mounts each listed part's route directory
 // beside the app's own routes through TanStack's virtual file routes (physical()). A part left out of
 // the list leaves no route, no server function and no bundle code behind.

@@ -11,7 +11,7 @@ import { deployments } from './deployments';
 import { service } from './service';
 import { sitePaths } from './paths';
 
-// What the shared frame shows for this app (.plans/thin-apps.md, group 1): its name and source, the
+// What the shared frame shows for this app (issue #34, group 1): its name and source, the
 // showcase's pages (this app shows them; another app lists its own) with its own notes demo after
 // the account, and its docs Worker's origin.
 const account = showcaseAppNav.findIndex((item) => item.link.to === '/app/account') + 1;

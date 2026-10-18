@@ -16,8 +16,8 @@ import { clockDefaults } from './clock-route';
 // The showcase's navigation (remy-auth's own pages: formats, and the app's clock, demo, location, account
 // and settings), for the apps that show them: remy-auth and remy-auth-app put these in defineRemyApp. An
 // app with other pages writes its own lists the same way and never imports this module, so it never
-// type-checks these routes (.plans/thin-apps.md, group 1). The app's pages once, for both of its
-// navigations (.plans/done/mobile-navigation.md): the sidebar lists them all; the phone's bottom bar
+// type-checks these routes (issue #34, group 1). The app's pages once, for both of its
+// navigations (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/mobile-navigation.md): the sidebar lists them all; the phone's bottom bar
 // shows the core ones and More. Material 3 and Apple: a bottom bar holds three to five destinations.
 
 /** The site header's showcase link. */

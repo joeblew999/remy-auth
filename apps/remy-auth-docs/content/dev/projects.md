@@ -29,7 +29,7 @@ which also owns the packages, is a workspace of the same pieces side by side: th
 `apps/remy-auth/`, the docs are `apps/remy-auth-docs/` (not `docs/`), the packages `packages/*` (`remy-ui`, `remy-cli`, the contract and the showcase), each folder named after its
 package, and the root holds `pnpm-workspace.yaml` (the packages and the catalog), `package.json`'s scripts,
 `.changeset/`, the root `vite.config.ts` (the shared style and the repository's checks, `ready`) and the
-repository files (`.plans/`, `.github/`, `template/`), as `vp create vite:monorepo` lays a workspace out.
+repository files (`now.md`, `.github/`, `template/`), as `vp create vite:monorepo` lays a workspace out.
 The commands find the app by its `wrangler.jsonc` and the docs by their `docs.config.ts`, so they run from
 the root either way.
 
@@ -52,7 +52,7 @@ the root either way.
 | `docs/` (`docs.config.ts` with its `contract`, `collections.ts`, `wrangler.jsonc`, `vite.config.ts`, `tsconfig.json`, `package.json`, `content/{users,dev,ui}/` with `i18n.json` and `meta.json`, `content/questions.json`; built `dist/`) | its own tasks, `remy docs`, `remy i18n` | the app's docs: its identity and pages, Fumadocs' collections (committed), the docs Worker's settings; the Worker's code is the package's |
 | `packages/<name>/` with `README.md` (and `CHANGELOG.md`, Changesets') | pnpm, Changesets | packages the repo publishes, if any |
 | `messages/`, `project.inlang/` | the app preset, the app's `generate` task, `remy i18n` | the app's own strings, if any (compiled into `src/paraglide/`) |
-| `.plans/` (`now.md`, `done/`, `parked/`) | `remy plans` | the repo's plans |
+| `now.md` | people and agents | the order the open GitHub issues are taken in |
 | `AGENTS.md`, `.mcp.json`, `.codex/config.toml`, `.github/workflows/` | agents; Claude and Codex; GitHub | the agents' pointer at the docs; the MCP servers; CI |
 | `packages/remy-cli/src/`, `template/`, `fixtures/consumer/` | the package; `giget`; `vp run new-app` | remy-auth only: the command line itself, the blank app a new repo starts from, and the consumer fixture that tests both as another repo gets them |
 
@@ -217,11 +217,7 @@ Credentials come from Wrangler's login, or from the keychain through fnox
 
 ### Plans
 
-The plans rule ([how we work](./how-we-work.md#plans-few-short-closed)) as commands (`pnpm remy plans …`), the same in
-every project: `.plans/now.md` is the one ordered list, `.plans/*.md` the few open plan files,
-`.plans/done/` and `.plans/parked/` the rest, `.plans/stability-log.md` optional. A project with no
-`.plans/` passes `plans check` and has nothing to list.
-
-The commands, with what each does, are on [Commands](./commands.mdx).
-
-`close` and `park` change files and stage the move but never commit: read `git diff`, then `vp run ready`.
+The plans rule ([how we work](./how-we-work.md#plans)), the same in every project: open work is the repository's
+GitHub issues, one per piece of work; `now.md` at the root is the order they are taken in; a finished piece closes its
+issue. remy-auth's: [issues](https://github.com/joeblew999/remy-auth/issues),
+[now.md](https://github.com/joeblew999/remy-auth/blob/main/now.md).

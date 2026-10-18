@@ -1,4 +1,4 @@
-// Checks for an app's contract-first API (.plans/openapi-contracts.md): coverage of the router,
+// Checks for an app's contract-first API (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/openapi-contracts.md): coverage of the router,
 // the generated OpenAPI document and its reference page. Plain JavaScript, like ../checks.js; requests are plain JSON over HTTP.
 import { test, expect } from '@playwright/test';
 import { oc } from '@orpc/contract';

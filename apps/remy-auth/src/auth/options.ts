@@ -33,7 +33,7 @@ export type AuthDeps = {
 export const personMayEdit: Record<string, Record<string, string>> = {};
 
 /**
- * Better Auth's options for remy-auth, in one place for the Worker and the CLI (.plans/auth-service.md,
+ * Better Auth's options for remy-auth, in one place for the Worker and the CLI (issue #38,
  * decisions 1, 3 and 5). No Workers imports, so `auth generate` and the checks load it in Node.
  */
 export function authOptions({ database, secret, baseURL, sendCode, fixedCode }: AuthDeps) {

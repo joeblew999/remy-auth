@@ -1,7 +1,7 @@
 ---
 title: "Agentes: empieza aquí"
 description: "Dónde empieza un agente de IA en este repositorio: los documentos que son dueños de las reglas, en orden de lectura, los sitios en producción y el flujo por el que pasa cada tarea."
-translatedFrom: "54b09ad3 e03218b8"
+translatedFrom: "2dd68d40 e03218b8"
 ---
 
 **Para agentes de IA** (Claude Code, Codex, cualquier otro) que trabajan en este repositorio, y para las
@@ -32,8 +32,8 @@ lee eso, no las traducciones que están al lado (`*.es.md`).
    paso, trabajo multiagente. Registra ahí las reglas de trabajo, no en la memoria del agente.
 5. [Inicio de sesión y permisos](./auth.md): el guard, el motor de relaciones, `<Allowed>`, entornos
    y correo: lo que recibe toda app de Remy, y dónde remy-auth usa cada uno de ellos.
-6. El plan en [`.plans/`](https://github.com/joeblew999/remy-auth/tree/main/.plans) que cubre tu
-   tarea, y sus [roles de Executor/Reviewer](./principles.md#plans-and-roles).
+6. El [issue de GitHub](https://github.com/joeblew999/remy-auth/issues) que cubre tu
+   tarea (en el orden de [now.md](https://github.com/joeblew999/remy-auth/blob/main/now.md)), y sus [roles de Executor/Reviewer](./principles.md#plans-and-roles).
 
 Empieza con los comandos estándar (`git status`, `git log`, `gh run list`: qué está pasando) y
 [las herramientas propias del proyecto](./how-we-work.md#use-the-projects-own-tools-first), y termina

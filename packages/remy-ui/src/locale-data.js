@@ -2,7 +2,7 @@
 // script, calendars and digits from the runtime's CLDR data (Intl.Locale maximize, getCalendars,
 // getNumberingSystems), its plural forms from Intl.PluralRules, and its currency from its region.
 // The runtime has no currency-for-region API, so the region's currency comes from
-// country-to-currency (ISO 3166 to ISO 4217, maintained; surveyed in .plans/formats-consistency.md).
+// country-to-currency (ISO 3166 to ISO 4217, maintained; surveyed in the formats-consistency plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/formats-consistency.md).
 // Plain JavaScript like ./samples.js, so the page (through ./locale-info), the formats search schema
 // and the shared Playwright checks read the same module. Adding a locale to project.inlang adds its
 // calendar, digits, currency and plural forms to every page and check with no other edit.

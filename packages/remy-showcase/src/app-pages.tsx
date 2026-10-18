@@ -552,7 +552,7 @@ export type AccountAuth = {
 };
 
 /**
- * The account. With `auth` (an app that signs people in; remy-auth, .plans/auth-service.md): who is
+ * The account. With `auth` (an app that signs people in; remy-auth, issue #38): who is
  * signed in and the app's sign-out control, or the app's sign-in form. Without it: an honest empty state.
  */
 export function AccountPage({ locale, preferred, auth }: { locale: Locale; preferred?: Locale; auth?: AccountAuth }) {

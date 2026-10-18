@@ -6,7 +6,6 @@ import type { Tool } from './commands.ts';
 // (`commands`, which its main dispatches on) and `main` (commands.ts): the type here demands them, so
 // `remy help` reads the modules and a command cannot exist without its line.
 export const tools: Record<string, () => Promise<Tool>> = {
-  plans: () => import('./plans.ts'),
   i18n: () => import('./i18n.ts'),
   cloudflare: () => import('./cloudflare.ts'),
   skills: () => import('./skills.ts'),

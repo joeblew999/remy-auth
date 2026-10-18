@@ -8,7 +8,7 @@ imports the package and gets the back-end and front-end pieces, type-checked all
 remy-auth is its own Worker, and it uses every piece itself, in its own demo, so each one is shown
 working before any app takes it. This page says what the pieces are, how an app uses them, and where
 remy-auth uses them. The reasons and the open work are in
-[the auth plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/auth-service.md).
+[the auth plan](https://github.com/joeblew999/remy-auth/issues/38).
 
 ## The pieces, and where remy-auth uses each
 

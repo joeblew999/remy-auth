@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "Las herramientas detrás de los comandos: dónde se explica cada área, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación. Todos los comandos están en Comandos."
-translatedFrom: "cccfd094 6df0c778 208b7760 3a5be9af 40ea278b 53e17a88 ec3067e7 0d9cf50a 595035a6 b65ea71a bf6a65d1 926b760f 48b91b14 0988b006 a5cad7e7 97411dca 5ee1f825"
+translatedFrom: "cccfd094 6d145261 208b7760 acfc181c 40ea278b 53e17a88 ec3067e7 0d9cf50a 595035a6 fa312d97 bf6a65d1 926b760f 48b91b14 0988b006 da03f137 97411dca 5ee1f825"
 ---
 
 ## Las herramientas [#the-tooling]
@@ -15,7 +15,7 @@ junto a él; las herramientas que ejecutan las tareas compartidas (Wrangler, Pla
 está iniciada la sesión de la suscripción. Un script que es una sola herramienta se escribe como esa herramienta (`"logs": "wrangler
 tail --format json"`); todo lo que tenga lógica es TypeScript, un comando `remy` del paquete
 (`packages/remy-cli/src`, con comprobación de tipos en cada check) o, para lo que es propio de una sola app, un `scripts/*.ts` de
-esa app ([el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/tooling-in-typescript.md)).
+esa app ([el plan](https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/tooling-in-typescript.md)).
 `vp env doctor` imprime las versiones de Node, del gestor de paquetes y de las herramientas de Vite Plus.
 
 ### Vite Plus: el `vp` de la máquina, en modo gestionado [#vite-plus-the-machines-vp-in-managed-mode]
@@ -131,7 +131,7 @@ propia línea de comandos, así que no puede quedar desactualizada; ninguna pág
 - La app, las comprobaciones locales y remotas, las previsualizaciones: [la GUI](./run-and-test.md)
 - La estructura del proyecto, una app nueva, las traducciones, un repositorio que publica paquetes: [proyectos](./projects.md)
 - El Worker de documentación sobre el `docs/` de una app: [escribir docs](./writing-docs.mdx)
-- Planes: [planes](./how-we-work.md#plans-few-short-closed); las traducciones como regla: [en el cambio](./how-we-work.md#translations-in-the-change)
+- Planes: [planes](./how-we-work.md#plans); las traducciones como regla: [en el cambio](./how-we-work.md#translations-in-the-change)
 - Skills de agentes, MCP, capturas de pantalla y el navegador propio de los agentes: más abajo
 
 ### Actualizaciones de paquetes [#package-upgrades]
@@ -216,7 +216,7 @@ pnpm skills remove <name>          # one removed
 
 Los skills viven en `.agents/skills/`; `.claude/skills/` enlaza a los mismos archivos. Solo se hace commit de `skills-lock.json`;
 los skills instalados y sus enlaces de Claude están ignorados y se recrean con `vp run setup`. Recarga una sesión de agente
-existente si los skills recién instalados aún no son visibles. [El plan de skills](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/agent-skills.md)
+existente si los skills recién instalados aún no son visibles. [El plan de skills](https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/agent-skills.md)
 hace seguimiento de las dependencias sin un skill oficial.
 
 ### El skill `remy`: las reglas de la plataforma para los agentes de cada repositorio [#the-remy-skill-the-platforms-rules-for-every-repos-agents]
@@ -302,7 +302,7 @@ no devuelve resultados, usa `list` para explorar los IDs de guías. La compatibi
 
 ## Observabilidad de Cloudflare [#cloudflare-observability]
 
-[El plan de observabilidad](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/observability.md) cubre logs, trazas, métricas,
+[El plan de observabilidad](https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/observability.md) cubre logs, trazas, métricas,
 salud de D1, registros de auditoría de auth duraderos, correlación, dashboards y alertas.
 `wrangler.jsonc` habilita los logs/trazas y la redacción de query de URL para el Worker de la GUI.
 Una entrada del Worker de la GUI ahora emite IDs de solicitud, estado y tiempos sin registrar URLs,

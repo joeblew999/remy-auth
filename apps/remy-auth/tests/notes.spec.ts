@@ -8,7 +8,7 @@ import { collectErrors, hydrated, localizedPath } from '@joeblew999/remy-ui/chec
 import { m } from '@joeblew999/remy-ui/messages';
 import { local, newEmail, signedIn, signedInAsSeeded, visitor } from './people';
 
-// The notes demo (.plans/auth-service.md): relations decide who may do what, on the real Worker with
+// The notes demo (issue #38): relations decide who may do what, on the real Worker with
 // its own D1. The owner's two requirements are what is checked: the rules cannot go unused on the
 // server (every call is refused or allowed by the relation engine, through the guard), and the screen
 // offers exactly what the server allows. People sign in for real (tests/people.ts), so these run

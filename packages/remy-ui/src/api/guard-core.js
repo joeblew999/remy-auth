@@ -1,4 +1,4 @@
-// The guard (.plans/auth-service.md): who may call a procedure is the procedure's own `meta.policy`,
+// The guard (issue #38): who may call a procedure is the procedure's own `meta.policy`,
 // and one root middleware enforces it. Nothing here imports oRPC, so the same code runs on oRPC 1 and
 // on 2.0 (the app's oRPC hands in its ORPCError; ./guard.js binds the installed one), and Playwright
 // loads the rules in Node. Plain JavaScript, like ./coverage.js.

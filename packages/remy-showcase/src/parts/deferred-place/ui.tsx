@@ -15,7 +15,7 @@ import { timeZonePath } from '../time-zones/names';
 // so its code type-checks, and removing time-zones stays one line, whether or not the route exists.
 import { hasPart } from 'virtual:remy-parts';
 
-// The deferred-place part (.plans/parts.md): apps import it as `virtual:remy-parts/deferred-place/ui`,
+// The deferred-place part (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/parts.md): apps import it as `virtual:remy-parts/deferred-place/ui`,
 // which is `undefined` when the app does not list the part.
 
 /**

@@ -25,7 +25,7 @@ const langOf = (path) => {
  * Pages to hydrate, from each site's meta.json: its first page after the index, and that page's first
  * translation. Not the index pages: remy-auth's /dev index hits a Fumadocs hydration mismatch (its contents
  * popover shows the active heading on the client only, React #418, live since before thin-apps), parked in
- * .plans/thin-apps.md ("Parked while running").
+ * issue #34 ("Parked while running").
  */
 const hydratePaths = ['docs', 'dev'].flatMap((site) => {
   const { pages } = content(`${folder[site]}/meta.json`);

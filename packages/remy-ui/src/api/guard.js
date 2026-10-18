@@ -1,4 +1,4 @@
-// The guard for the installed oRPC (.plans/auth-service.md): what an app's router imports. The rules
+// The guard for the installed oRPC (issue #38): what an app's router imports. The rules
 // themselves are ./guard-core.js, which imports no oRPC and so runs on either major. Plain JavaScript,
 // because an app's checks load its router in Node, and Node does not read TypeScript from node_modules.
 import { ORPCError, os } from '@orpc/server';

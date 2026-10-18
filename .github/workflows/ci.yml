@@ -2,7 +2,7 @@
 # part of `vp run ci` (the root package.json script), `vp run <part>`, the same command anywhere: `vp run ci` locally runs them all in turn (every check, the
 # browser checks, Google's audits). Vite Plus's task cache, kept between runs, replays what nothing changed; nothing of ours
 # decides what to skip.
-# Every Remy repo runs this same workflow (.plans/thin-apps.md, group 6): remy-auth through the triggers
+# Every Remy repo runs this same workflow (issue #34, group 6): remy-auth through the triggers
 # below, any other repo by calling it at the tag its package is on, which `remy upgrade` moves with it:
 #
 #   on: { pull_request: {}, workflow_dispatch: {} }

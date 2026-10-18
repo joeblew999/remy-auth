@@ -2,7 +2,7 @@ import { createContext, useContext } from 'react';
 import type { LinkOptions } from '@tanstack/react-router';
 import type { Locale } from './paraglide/runtime.js';
 
-// What an app tells the shared frame about itself (.plans/thin-apps.md, group 1): its name, its source,
+// What an app tells the shared frame about itself (issue #34, group 1): its name, its source,
 // its pages' links and the language worth offering. The frame (shell.tsx, app-shell.tsx, the sidebar and
 // the phone's bottom bar) reads it here and names no route of its own beyond '/', which every app has.
 // No route imports in this module, so AppProviders and the frame's context cost an app nothing else.

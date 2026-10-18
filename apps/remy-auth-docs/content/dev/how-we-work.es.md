@@ -1,7 +1,7 @@
 ---
 title: "Cómo trabajamos"
 description: "Cómo trabajan aquí las personas y los agentes: las herramientas del proyecto primero, encuestas antes de elegir herramientas, shadcn y TanStack, puertas de control, planes y traducciones."
-translatedFrom: "56df3445 507816d3 68aa8d11 c2d8f54e d8386d74 aae80ce5 5d55d686 20ea1d8b f3262ad2 d16df021 0ce59218 d41caa8c c8f062fe c543c74e 5f043aaa 19f6274f 93ebb4e5 980904cb 707ec1cc"
+translatedFrom: "56df3445 507816d3 de7f5b60 c2d8f54e d8386d74 d1cef651 5d55d686 20ea1d8b f3262ad2 d16df021 0ce59218 9cfce533 c8f062fe c543c74e 57b2c4f8 19f6274f 93ebb4e5 980904cb e25d8077"
 ---
 
 Este documento es el dueño de cómo trabajan las personas y los agentes: los hábitos que ha pedido el
@@ -30,14 +30,13 @@ a ti mismo ni a los devs». Así que la regla es general, no solo para herramien
 - Un agente o desarrollador que note algo mal, lento, que falte o que haya quedado suelto (un paso que
   no espera nada, una comprobación que nadie ejecuta, una rama que nadie posee, un documento que dice
   algo que ya no es cierto) tiene dos opciones, ambas dentro del cambio en el que está: **arreglarlo**
-  cuando es pequeño, o **escribirlo en `.plans/now.md`** («Qué queda, en orden»: qué se vio, dónde, y
-  qué lo arreglaría), un archivo de plan cuando es grande. Mencionarlo solo en un chat o en un informe
-  no es ninguna de las dos cosas.
-- **Todos se enteran a través del repo**: `.plans/now.md` está comiteado, así que lo que una persona vio
-  llega a todos los que hacen pull de main (`pnpm remy plans status` imprime sus elementos abiertos), y
-  el siguiente cambio toma lo primero de la lista.
+  cuando es pequeño, o **abrir un
+  [issue de GitHub](https://github.com/joeblew999/remy-auth/issues)** (qué se vio, dónde, y qué lo arreglaría) y añadirlo a `now.md` en
+  su lugar. Mencionarlo solo en un chat o en un informe no es ninguna de las dos cosas.
+- **Todos se enteran a través del repo**: los issues son públicos y `now.md` está comiteado, así que lo que una persona vio
+  llega a todos los que hacen pull de main (`gh issue list` imprime los abiertos), y el siguiente cambio toma lo primero de `now.md`.
 - **«Hecho» es el final de una barrida, no de una lista.** Antes de decirlo: ramas y worktrees
-  (`git branch`, `git worktree list`), `pnpm wrangler deployments list`, `pnpm remy plans check`, una
+  (`git branch`, `git worktree list`), `pnpm wrangler deployments list`, `gh issue list`, una
   búsqueda de las palabras que el cambio retiró, la documentación que el cambio tocó. Muestra la barrida.
 
 ## Usa primero las herramientas propias del proyecto [#use-the-projects-own-tools-first]
@@ -84,8 +83,8 @@ sobre un framework elegido:
    justificarse frente a la forma estándar, no al revés.
 
 Propietario, 2026-09-26, tras descubrir que la documentación de Fumadocs estaba medio personalizada:
-«Es curioso cómo no te das cuenta hasta que te empujan».
-([la decisión de Fumadocs](https://github.com/joeblew999/remy-auth/blob/main/.plans/docs-for-consumers.md#decision-fumadocs-fully-2026-09-26)).
+«Es curioso cómo no te das cuenta hasta que te empujan»
+([la decisión de Fumadocs](https://github.com/joeblew999/remy-auth/issues/36)).
 
 ## UI: shadcn y TanStack hasta el final [#ui-shadcn-and-tanstack-all-the-way]
 
@@ -206,18 +205,12 @@ inglés y sus traducciones: un commit, un push, una ejecución de las comprobaci
 
 El layout y los comandos están en [proyectos](./projects.md#translations).
 
-## Planes: pocos, cortos, cerrados [#plans-few-short-closed]
+## Planes [#plans]
 
-Propietario, 2026-09-26: «qué agobiante y frustrante es tener tantos planes basura». El trabajo nuevo es
-una línea en `.plans/now.md`, en el orden en que se cierra. Un archivo de plan se escribe solo para
-trabajo lo bastante grande como para aparcarlo o para que se prolongue durante semanas; la
-investigación, los análisis y las revisiones van en el plan a que sirven, no en un archivo propio. Un
-plan se cierra el día que su trabajo se publica: una línea de cierre, y luego a `.plans/done/`. Las
-grandes funcionalidades esperan en `.plans/parked/`. Cerrar un plan no necesita un commit ni una
-ejecución de pruebas extra propia: agrupa el código en un único commit y una única ejecución
-completa al final.
-Los comandos `remy plans` ([Comandos](./commands.mdx)) hacen los movimientos y mantienen `.plans/`
-ordenado; `vp run ready` ejecuta `remy plans check` (su `check:plans`) en cada cambio ([proyectos](./projects.md#plans)).
+Propietario, 2026-09-26: «qué agobiante y frustrante es tener tantos planes basura». El trabajo abierto son
+[issues de GitHub](https://github.com/joeblew999/remy-auth/issues), uno por cada trabajo; las investigaciones, los análisis y las revisiones van en el issue al que
+sirven, no en uno propio. [`now.md`](https://github.com/joeblew999/remy-auth/blob/main/now.md), en la raíz, es el orden en que se toman. Un
+trabajo terminado cierra su issue (`Closes #N` en el commit) y sale de `now.md`, en el mismo commit que su código.
 
 ## Cuando el propietario delega decisiones [#when-the-owner-delegates-decisions]
 
@@ -298,7 +291,7 @@ porque todos nuestros repos van a usar esto».
 
 - Cada comprobación se ejecuta a través de un script o un comando de `remy` que envuelve la herramienta
   real: las comprobaciones (`pnpm remy test`, Playwright), el smoke en vivo contra un despliegue
-  (`pnpm remy test live`), `remy plans check`, `remy i18n check`, `pnpm remy shots` para mirar. (Las palabras del
+  (`pnpm remy test live`), `remy i18n check`, `pnpm remy shots` para mirar. (Las palabras del
   propietario de arriba dicen mise, que los scripts reemplazaron el 2026-10-11; la regla es la misma.)
   Nada de bucles de `curl`, scripts de un solo uso o greps improvisados para decidir si algo funciona:
   no se pueden repetir, las apps sobre el paquete no los reciben, y nadie los ve después.
@@ -306,16 +299,15 @@ porque todos nuestros repos van a usar esto».
   escribes los mismos comandos o recurres a un script descartable, se convierte en un comando del
   paquete (`packages/remy-cli/src`, para que cada app lo reciba) que llama a la herramienta que hace el
   trabajo: Wrangler, Playwright, gh, pnpm.
-- ¿No se encuentra ninguna herramienta? No escribas un script y sigas adelante. Añade una línea a
-  `.plans/now.md` para hacer una encuesta
-  ([elige herramientas por encuesta](#choose-tools-by-survey-not-by-first-find)); si la búsqueda o el
-  cambio es grande, escribe un plan en `.plans/` (o en `.plans/parked/`) tú mismo. Los agentes crean
-  estas líneas y planes al encontrarse con tales cosas; el propietario no tiene que pedirlo.
+- ¿No se encuentra ninguna herramienta? No escribas un script y sigas adelante. Abre un issue para hacer
+  una encuesta
+  ([elige herramientas por encuesta](#choose-tools-by-survey-not-by-first-find)) y añádelo a `now.md`. Los agentes
+  abren estos issues al encontrarse con tales cosas; el propietario no tiene que pedirlo.
 - Todo lo que es más que una línea de una herramienta es TypeScript: un comando de `remy`
   (`packages/remy-cli/src`, con type-check en cada comprobación) o, para lo que es propio de una app, un
   `scripts/*.ts` de esa app, nunca lógica en bash ni JavaScript sin tipos: lo que el compilador no
   puede ver, un agente se lo pierde (propietario, issue #9). Una herramienta de una línea es un script
-  de `package.json` ([el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/tooling-in-typescript.md)).
+  de `package.json` ([el plan](https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/tooling-in-typescript.md)).
 
 ## Ramas: solo para un Preview, borradas después [#branches-only-for-a-preview-deleted-after]
 
@@ -384,6 +376,6 @@ Los pasos, qué ejecuta cada uno y quién lo ejecuta: [la tabla del flujo](#the-
 - **Un agente nunca espera en primer plano** a `git push` (su hook ejecuta `vp run ci`), una ejecución de GitHub o una build de
   Cloudflare; los inicia en segundo plano y actúa sobre el resultado. Solo se espera a `vp run ready`.
 - **Todo lo asíncrono vuelve a todos**
-  ([el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/dev-feedback.md)): GitHub envía un correo
+  ([el plan](https://github.com/joeblew999/remy-auth/issues/37)): GitHub envía un correo
   al autor de un job en rojo; `gh run list`, `pnpm wrangler deployments list` y `curl <origin>/healthz`
   muestran el resto a quien lo pregunte.

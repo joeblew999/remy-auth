@@ -8,7 +8,7 @@ import { suggestedLocale, suggestedLocaleInBrowser } from './tanstack';
 import { getLocale, direction } from './locale';
 import type { RemyApp } from './app-config';
 
-// The root route every server-rendered app has (.plans/thin-apps.md, group 5): the document with the page's
+// The root route every server-rendered app has (issue #34, group 5): the document with the page's
 // language and direction, AppProviders with the app's config and the language worth offering, the problem
 // pages. The app's src/routes/__root.tsx is one call, with its stylesheet import and TanStack Devtools:
 //

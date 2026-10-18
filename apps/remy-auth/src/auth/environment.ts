@@ -5,7 +5,7 @@ import { seededPerson } from './seed';
  * What each environment permits: the one policy table (docs/content/dev/principles.md), in
  * remy-sport's shape. The Worker's `ENVIRONMENT` is "production" in wrangler.jsonc and "staging" in
  * its staging environment; a local `.dev.vars` (`vp run local`) says "local"; anything absent
- * or unknown is production. Every convenience is listed in .plans/auth-service.md.
+ * or unknown is production. Every convenience is listed in issue #38.
  *
  * Signing in works two ways, and an environment has either both or one. The normal way is
  * everywhere: an address, then the code mailed to it. The automatic way is local and staging only:

@@ -26,13 +26,13 @@ is general, not only for missing tools:
 
 - An agent or developer who notices anything wrong, slow, missing or left over (a step that waits
   for nothing, a check nobody runs, a branch nobody owns, a doc that says what is no longer true) has
-  two choices, both inside the change they are on: **fix it** when it is small, or **write it into
-  `.plans/now.md`** ("What is left, in order": what was seen, where, and what would fix it), a plan
-  file when it is big. Mentioning it in a chat or a report alone is neither.
-- **Everyone hears it through the repo**: `.plans/now.md` is committed, so what one person saw reaches
-  everyone who pulls main (`pnpm remy plans status` prints its open items), and the next change takes the top of it.
+  two choices, both inside the change they are on: **fix it** when it is small, or **open a
+  [GitHub issue](https://github.com/joeblew999/remy-auth/issues)** (what was seen, where, and what would fix it) and add it to `now.md` in
+  its place. Mentioning it in a chat or a report alone is neither.
+- **Everyone hears it through the repo**: the issues are public and `now.md` is committed, so what one person saw
+  reaches everyone who pulls main (`gh issue list` prints the open ones), and the next change takes the top of `now.md`.
 - **"Done" is the end of a sweep, not of a list.** Before saying it: branches and worktrees (`git branch`,
-  `git worktree list`), `pnpm wrangler deployments list`, `pnpm remy plans check`, a
+  `git worktree list`), `pnpm wrangler deployments list`, `gh issue list`, a
   search for the words the change retired, the docs the change touched. Show the sweep.
 
 ## Use the project's own tools first
@@ -73,7 +73,7 @@ Bend our system to the tool, not the tool to our system. Before building on a ch
    against the stock way, not the other way round.
 
 Owner, 2026-09-26, after the Fumadocs docs were found half-custom: "It's funny how you don't realise
-until you're pushed!" ([the Fumadocs decision](https://github.com/joeblew999/remy-auth/blob/main/.plans/docs-for-consumers.md#decision-fumadocs-fully-2026-09-26)).
+until you're pushed!" ([the Fumadocs decision](https://github.com/joeblew999/remy-auth/issues/36)).
 
 ## UI: shadcn and TanStack all the way
 
@@ -182,16 +182,12 @@ its translations together: one commit, one push, one run of the checks.
 
 The layout and the commands are in [projects](./projects.md#translations).
 
-## Plans: few, short, closed
+## Plans
 
-Owner, 2026-09-26: "how overwhelming and frustrating it is to have so much garbage plans". New work is
-one line in `.plans/now.md`, in the order it closes. A plan file is written only for work that is big
-enough to be parked or to run over weeks; research, analyses and reviews go into the plan they serve,
-not a file of their own. A plan closes the day its work ships: a closing line, then `.plans/done/`. Big
-features wait in `.plans/parked/`. Closing a plan needs no extra commit or test run of its own: batch the
-code into one commit and one full run at the end.
-The `remy plans` commands ([Commands](./commands.mdx)) do the moves and keep `.plans/` tidy; `vp run ready` runs
-`remy plans check` (its `check:plans`) on every change ([projects](./projects.md#plans)).
+Owner, 2026-09-26: "how overwhelming and frustrating it is to have so much garbage plans". Open work is
+[GitHub issues](https://github.com/joeblew999/remy-auth/issues), one per piece of work; research, analyses and reviews go into the issue they
+serve, not one of their own. [`now.md`](https://github.com/joeblew999/remy-auth/blob/main/now.md) at the root is the order they are taken in. A finished
+piece closes its issue (`Closes #N` in the commit) and leaves `now.md`, in the same commit as its code.
 
 ## When the owner delegates decisions
 
@@ -291,7 +287,7 @@ and "make sure you have something in docs about using your judgment about things
 being turned into a mise task that uses a tool ... It's vital because all our repos will be using this."
 
 - Every check runs through a script or a `remy` command that wraps the real tool: the checks
-  (`pnpm remy test`, Playwright), the live smoke against a deployment (`pnpm remy test live`), `remy plans check`,
+  (`pnpm remy test`, Playwright), the live smoke against a deployment (`pnpm remy test live`),
   `remy i18n check`, `pnpm remy shots` to look. (The owner's words above say mise, which the scripts
   replaced on 2026-10-11; the rule is the same.)
   No `curl` loops, one-off scripts or ad-hoc greps to decide whether something works: they cannot be
@@ -299,14 +295,13 @@ being turned into a mise task that uses a tool ... It's vital because all our re
 - Use judgement on everything done by hand, not only checks: the second time you type the same commands
   or reach for a throwaway script, it becomes a command of the package (`packages/remy-cli/src`, so every
   app gets it) that calls the tool that does the job: Wrangler, Playwright, gh, pnpm.
-- No tool found? Do not write a script and move on. Add a line to `.plans/now.md` to survey for one
-  ([choose tools by survey](#choose-tools-by-survey-not-by-first-find)); if the search or the change is big,
-  write a plan in `.plans/` (or `.plans/parked/`) yourself. Agents create these lines and plans as they
-  meet such things; the owner does not have to ask.
+- No tool found? Do not write a script and move on. Open an issue to survey for one
+  ([choose tools by survey](#choose-tools-by-survey-not-by-first-find)) and add it to `now.md`. Agents
+  open these issues as they meet such things; the owner does not have to ask.
 - Anything more than one line of a tool is TypeScript: a command of `remy` (`packages/remy-cli/src`,
   type-checked on every check) or, for what is one app's own, a `scripts/*.ts` of that app, never
   bash logic or untyped JavaScript: what the compiler cannot see, an agent misses (owner, issue #9).
-  A one-line tool is a `package.json` script ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/tooling-in-typescript.md)).
+  A one-line tool is a `package.json` script ([the plan](https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/tooling-in-typescript.md)).
 
 ## Branches: only for a Preview, deleted after
 
@@ -370,6 +365,6 @@ The steps, what each runs and who runs it: [the flow's table](#the-flow-the-stan
   Then push it to `main`.
 - **An agent never waits in the foreground** on `git push` (its hook runs `vp run ci`), a GitHub run or a Cloudflare
   build; it starts them in the background and acts on the result. Only `vp run ready` is waited for.
-- **Everything asynchronous comes back to everyone** ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/dev-feedback.md)):
+- **Everything asynchronous comes back to everyone** ([the plan](https://github.com/joeblew999/remy-auth/issues/37)):
   GitHub emails a red job's author; `gh run list`, `pnpm wrangler deployments list` and `curl <origin>/healthz`
   show the rest to whoever asks.

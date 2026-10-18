@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { seededSignIn } from '../auth/people.server';
 
-// The seeded sign-in, as data (.plans/auth-service.md, "Development conveniences"): the people this
+// The seeded sign-in, as data (issue #38, "Development conveniences"): the people this
 // environment offers to sign in as, what each holds, and the published code they sign in with. The
 // account page shows the same list. 404 wherever the environment table offers no seeded sign-in.
 export const Route = createFileRoute('/dev/people')({

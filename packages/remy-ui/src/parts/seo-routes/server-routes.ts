@@ -3,7 +3,7 @@
 /**
  * Crawl metadata changes only with a deployment and depends only on the request's origin, so
  * browsers and shared caches may keep it for an hour; `s-maxage` states the shared-cache lifetime
- * explicitly, ready for Workers Caching (.plans/caching.md). HTML pages stay no-store (localizedWorker).
+ * explicitly, ready for Workers Caching (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/caching.md). HTML pages stay no-store (localizedWorker).
  */
 export const crawlCache = 'public, max-age=3600, s-maxage=3600';
 

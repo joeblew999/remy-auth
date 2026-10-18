@@ -1,4 +1,4 @@
-// The contract coverage rule (.plans/openapi-contracts.md, "Type safety, layer by layer", 4): walk
+// The contract coverage rule (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/openapi-contracts.md, "Type safety, layer by layer", 4): walk
 // an oRPC contract or implemented router and list every procedure that lacks what an endpoint
 // needs. Plain JavaScript, like ../checks.js, so Playwright loads it from node_modules too.
 import { COMMON_ERROR_STATUS_MAP, getOpenAPIMeta } from '@orpc/openapi';

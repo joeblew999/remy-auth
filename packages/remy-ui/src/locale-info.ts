@@ -28,7 +28,7 @@ export type LocaleInfo = {
 };
 
 // Intl Locale Info (getCalendars, getNumberingSystems, getWeekInfo) is Baseline since 2026-07-21
-// and present in workerd; decided in .plans/hard-localisation.md: rely on it, no fallback. The
+// and present in workerd; decided in the hard-localisation plan (https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/hard-localisation.md): rely on it, no fallback. The
 // deprecated getters (weekInfo, calendars, ...) are never used.
 type LocaleWithInfo = Intl.Locale & {
   getCalendars(): string[];

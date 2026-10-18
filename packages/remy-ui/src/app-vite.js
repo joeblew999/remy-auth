@@ -1,4 +1,4 @@
-// An app's Vite configuration (.plans/thin-apps.md, group 5): its vite.config.ts is
+// An app's Vite configuration (issue #34, group 5): its vite.config.ts is
 // `export default defineConfig({ ...remyApp(), run: { tasks } })`, with its own extra plugins, TanStack Start options or port.
 // Vite's configuration only: the app's tasks are its own vite.config.ts's, written out there.
 // TanStack Start on Cloudflare's Vite plugin, per Cloudflare's and Paraglide's guides: the Worker entry is
@@ -34,7 +34,7 @@ export function remyApp({
   root = process.cwd(),
   build = {},
 } = {}) {
-  // The shared package's parts the app lists in src/parts.json (.plans/parts.md): their routes and the
+  // The shared package's parts the app lists in src/parts.json (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/parts.md): their routes and the
   // package's own (the CSP report endpoint) mount beside src/routes, and `virtual:remy-parts` says which.
   const parts = remyParts({ root });
   // The app's own strings, when it has them (project.inlang at its root): compiled into src/paraglide, whose

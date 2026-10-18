@@ -29,7 +29,6 @@ export default defineConfig({
   run: {
     tasks: {
       // The project's own checks (remy-check). A check never writes: `vp run fix` writes what two of them report.
-      'check:plans': `${check} plans`,
       'check:wrangler': `${check} wrangler`,
       'check:commands': `${check} commands`,
       'check:endings': `${check} endings`,
@@ -63,7 +62,6 @@ export default defineConfig({
           'remy-auth#check:deploy',
           '@joeblew999/remy-auth-docs#build',
           '@joeblew999/remy-auth-docs#check:deploy',
-          'check:plans',
           'check:wrangler',
           'check:commands',
           'check:endings',

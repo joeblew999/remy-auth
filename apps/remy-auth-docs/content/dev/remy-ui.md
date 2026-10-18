@@ -43,7 +43,7 @@ remy-auth's own pages (the home and formats pages, the app's formats, clock, dem
 account pages, their navigation lists, the demo reservation and their checks) are not the platform's: they
 are `@joeblew999/remy-showcase` (`packages/remy-showcase`, its README), for the apps that show them. Tablets and desktops get the sidebar (collapsing to icons);
   phones get the bottom bar (`blocks/bottom-nav`, stock shadcn parts, since shadcn has no bottom navigation)
-  with the core pages and More, which opens the sidebar. Why: [the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/mobile-navigation.md).
+  with the core pages and More, which opens the sidebar. Why: [the plan](https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/mobile-navigation.md).
 
 What every app on the package has, so the shared tasks and checks work in it (remy-auth-app is the
 prerendered example):
@@ -60,7 +60,7 @@ prerendered example):
   showcase's Clock spreads `clockRouteOptions` from `@joeblew999/remy-showcase/clock-route`).
 - **`tests/smoke.spec.ts`**, one `smokeChecks(...)` call: `vp run test:browser --grep smoke` and the smoke against a
   deployment (`pnpm remy test live <origin>`) run it, and fail with "No tests found" without it.
-- **`.plans/now.md`**, the one ordered list of open work (`remy plans check`, in `vp run ready`).
+- **`now.md`**, the order the open GitHub issues are taken in.
 - **Installs and upgrades through the package's commands**, never by hand: `vp run setup` (install,
   skills, MCP, the installation's checks) and `vp run upgrade <version>` (remy-ui and remy-cli at that version, the
   CI workflow at the same tag, the blank app's scripts, hooks and configuration, then the same checks). Both take
@@ -99,7 +99,7 @@ All under `@joeblew999/remy-ui/`, as TSX and CSS for Vite and Tailwind consumers
 | `versions` | `BuildStamp` (one quiet line: the environment off production, the product's name, the commit, and a reload control when the deployment has moved on under the page) and `Versions` (this app, its docs Worker and the `deployments` the app lists in `defineRemyApp`, each answering for itself, and the packages of this build). Stock shadcn parts; put either anywhere inside `AppProviders` |
 | `cloudflare` | `placeFromCloudflare` |
 | `problem` | The localized problem pages: `Problem`, `NotFound`, `ErrorPage`, `problemPages` (one spread line per page route) |
-| `parts`, `parts/vite`, `parts/checks` | Parts ([plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md)): an app lists them in `src/parts.json`, one per line: the platform's by name, another package's as `<package>/<name>`. `remyApp()` (through the package's `parts/vite`, `remyParts()`: its `plugin` among the plugins, its `routes` as `tanstackStart({ router: { virtualRouteConfig } })`) mounts each listed part's routes beside `src/routes` and generates `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` in the test file runs each listed part's checks. The platform's part is `seo-routes` (robots.txt and the sitemap); the showcase offers `time-zones`, `deferred-place` and `status-card` (`@joeblew999/remy-showcase/<name>`); see [Writing a part](#writing-a-part) |
+| `parts`, `parts/vite`, `parts/checks` | Parts ([plan](https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/parts.md)): an app lists them in `src/parts.json`, one per line: the platform's by name, another package's as `<package>/<name>`. `remyApp()` (through the package's `parts/vite`, `remyParts()`: its `plugin` among the plugins, its `routes` as `tanstackStart({ router: { virtualRouteConfig } })`) mounts each listed part's routes beside `src/routes` and generates `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` in the test file runs each listed part's checks. The platform's part is `seo-routes` (robots.txt and the sitemap); the showcase offers `time-zones`, `deferred-place` and `status-card` (`@joeblew999/remy-showcase/<name>`); see [Writing a part](#writing-a-part) |
 | `rows`, `zod-csp` | `Group`, `Row`, `NameList`: label/value rows; Zod's jitless switch (AppProviders imports it) |
 | `invalidate` | `invalidateEverything(router, queryClient)`: every loader and query stale and reloaded (after logout or a role change; the status card's refresh) |
 | `samples` | The fixed values the pages render |

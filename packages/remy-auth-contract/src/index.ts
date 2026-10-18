@@ -12,7 +12,7 @@ import { note, noteDraft, noteEdit, noteId, noteList, noteShare, notesVocabulary
 
 export * from './notes';
 
-// remy-auth's API, contract first (.plans/openapi-contracts.md): every endpoint the Worker serves
+// remy-auth's API, contract first (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/openapi-contracts.md): every endpoint the Worker serves
 // under /api is declared here with its method, path, input, output and errors as Zod 4 schemas, and
 // with who may call it (`policy`, which the server's guard enforces). The server implements this
 // object (src/api/router.ts), the OpenAPI document at /api/openapi.json is generated from it, and

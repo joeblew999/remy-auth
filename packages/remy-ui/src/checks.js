@@ -377,7 +377,10 @@ export function entryChecks({ paths, mode }) {
 
     // Skipped only while zh-TW is not a configured locale: the end-to-end proof once it is.
     test('Accept-Language zh-Hant-HK reaches zh-TW', async ({ request }) => {
-      test.skip(!locales.includes('zh-TW'), 'zh-TW is not a configured locale yet (.plans/hard-localisation.md)');
+      test.skip(
+        !locales.includes('zh-TW'),
+        'zh-TW is not a configured locale yet (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/hard-localisation.md)',
+      );
       for (const language of ['zh-Hant-HK', 'zh-HK', 'zh-TW'])
         for (const path of paths) {
           const response = await request.get(path || '/', {
@@ -967,7 +970,7 @@ const drawnBy = (font, name) =>
 
 /**
  * The scripts fonts.css leaves to the system's font on purpose: Han. Their web fonts measured 351 KB
- * (/ja) to 1,176 KB (/zh-TW/formats) on a first visit, over fontBudget (.plans/fonts.md, step 1), and
+ * (/ja) to 1,176 KB (/zh-TW/formats) on a first visit, over fontBudget (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/fonts.md, step 1), and
  * every desktop and phone system ships a Japanese and a Traditional Chinese font that Chrome picks
  * by the page's lang. Any other script still needs its web font: a new Greek or Korean page fails.
  */
@@ -983,7 +986,7 @@ const drawnBySystem = (font, script) =>
  * The most font bytes (resource timing's encodedBodySize) a first visit to one site page may
  * download, in every language. Measured 2026-09-26 on a local production build: 28.7 KB (Latin) to
  * 227.2 KB (/ar/formats); 300 KB leaves about a third of headroom and fails any Han web font
- * (351 KB for /ja, 1,176 KB for /zh-TW/formats). Raise it only with new numbers in .plans/fonts.md.
+ * (351 KB for /ja, 1,176 KB for /zh-TW/formats). Raise it only with new numbers in the fonts plan (https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/fonts.md).
  */
 export const fontBudget = 300 * 1024;
 const kb = (bytes) => `${(bytes / 1024).toFixed(1)} KB`;
