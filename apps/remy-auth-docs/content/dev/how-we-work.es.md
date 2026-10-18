@@ -1,7 +1,7 @@
 ---
 title: "Cómo trabajamos"
 description: "Cómo trabajan aquí las personas y los agentes: las herramientas del proyecto primero, encuestas antes de elegir herramientas, shadcn y TanStack, puertas de control, planes y traducciones."
-translatedFrom: "56df3445 507816d3 07baba6b c2d8f54e d8386d74 d1cef651 5d55d686 20ea1d8b f3262ad2 d16df021 0ce59218 a37bfcc6 c8f062fe c543c74e 94a10087 19f6274f 93ebb4e5 980904cb e25d8077"
+translatedFrom: "56df3445 507816d3 07baba6b c2d8f54e d8386d74 d1cef651 2c19b80c 20ea1d8b f3262ad2 d16df021 0ce59218 a37bfcc6 c8f062fe c543c74e 94a10087 19f6274f 93ebb4e5 980904cb e25d8077"
 ---
 
 Este documento es el dueño de cómo trabajan las personas y los agentes: los hábitos que ha pedido el
@@ -102,7 +102,7 @@ perfeccionando, y escribimos solo lo que ellos no ofrecen.
 - **Compón, no restilices.** Usa variantes y tokens semánticos; sigue las reglas de la skill de shadcn
   instalada (Separator, Skeleton, Badge, Empty, Alert, Field en lugar de equivalentes hechos a mano).
 - **Dos tipos de página:** páginas del sitio para Google y páginas de la app bajo `/app`, nunca
-  mezcladas; [paths.js](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/src/paths.js)
+  mezcladas; [paths.ts](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/src/paths.ts)
   define ambas.
 - **Adopta la librería de TanStack en lugar de nuestro propio código** (Form, el adaptador de Zod de
   Router, Table, Devtools y demás), instala sus skills de agente, y luego elimina el código que

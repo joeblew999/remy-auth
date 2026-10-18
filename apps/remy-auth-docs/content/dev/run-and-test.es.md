@@ -1,7 +1,7 @@
 ---
 title: "Ejecutar, previsualizar y probar la app"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "d324c35e 91377aae 8dfe66ef d9d6a7c6 f7afc873 6b089ee9 90a87f8d fdbfb49e 4120a6b8 2355da95"
+translatedFrom: "d324c35e 91377aae fb07a321 d9d6a7c6 f7afc873 6b089ee9 90a87f8d fdbfb49e 4120a6b8 2355da95"
 ---
 
 :::note
@@ -55,7 +55,7 @@ a través de Cloudflare. Los datos locales no se suben con el deployment.
 
 ## Dos tipos de página [#two-kinds-of-page]
 
-[`packages/remy-ui/src/paths.js`](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/src/paths.js) es la única lista de páginas y dice qué
+[`packages/remy-ui/src/paths.ts`](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/src/paths.ts) es la única lista de páginas y dice qué
 promete cada tipo; los dos nunca se mezclan.
 
 - **Las páginas de sitio** (`sitePaths`: el home y los formatos) son para Google: completas en el HTML del servidor

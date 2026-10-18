@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "Las herramientas detrás de los comandos: dónde se explica cada área, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación. Todos los comandos están en Comandos."
-translatedFrom: "cccfd094 085ef37e 208b7760 acfc181c 40ea278b 53e17a88 ec3067e7 4c1d61ff 8d020f83 fa312d97 bf6a65d1 0c002941 e11c40cd 37adadcc da03f137 97411dca 5ee1f825"
+translatedFrom: "cccfd094 085ef37e 208b7760 2bb0febe 40ea278b 53e17a88 ec3067e7 4c1d61ff 8d020f83 fa312d97 bf6a65d1 0c002941 e11c40cd 37adadcc da03f137 97411dca 5ee1f825"
 ---
 
 ## Las herramientas [#the-tooling]
@@ -105,11 +105,11 @@ delegadas a la API siguen siendo parte del hito del servicio. Ambas apps están 
 
 Todas las apps tienen las mismas tareas y scripts, tal como los dispone `vp create vite:monorepo`; `vp run` los lista. Vite
 Plus decide qué se ejecuta, en qué orden y qué hace innecesario una caché. Las tareas de cada paquete están escritas en su
-propio `vite.config.ts` (`apps/remy-auth`, `apps/remy-auth-docs`, `packages/remy-ui`, `packages/remy-cli`; la copia
-en blanco de una app, en `template/`), las comprobaciones del repositorio y `ready` en el de la raíz, y nada crea una tarea en código
+propio `vite.config.ts` (`apps/remy-auth`, `apps/remy-auth-docs`, `packages/remy-ui`, `packages/remy-cli`, `packages/remy-showcase`; la copia
+en blanco de una app, en `packages/create/templates/app/`), las comprobaciones del repositorio y `ready` en el de la raíz, y nada crea una tarea en código
 (propietario, 2026-10-17: "in that configuration file of VP, you see everything"). `remyApp()` y `remyDocs()` devuelven solo
 la configuración de Vite, y `@joeblew999/remy-ui/vite-plus` los ajustes compartidos simples (`style`, `network`). Cada tarea es
-una herramienta: Vite, Wrangler, Playwright, `tsc`, `vp test`, `vp check`, Changesets, o un comando `remy-check` para las
+una herramienta: Vite, Wrangler, Playwright, `vp pack`, `vp test`, `vp check`, Changesets, o un comando `remy-check` para las
 comprobaciones propias del proyecto, que ninguna herramienta hace. Nada nuestro ejecuta `vp run`
 (una comprobación unitaria lo rechaza), y nada nuestro pasa un valor a través del entorno: los scripts del `package.json` de la raíz
 (`ci`, `translate`, `release`, `setup`) son cada uno una cadena de herramientas estándar, hojas `remy` y tareas de Vite Plus escritas en

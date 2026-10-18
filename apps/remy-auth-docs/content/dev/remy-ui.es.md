@@ -1,7 +1,7 @@
 ---
 title: "El paquete de UI (@joeblew999/remy-ui)"
 description: "La interfaz que comparten todas las apps de Remy: shadcn de fábrica, fuentes, catálogos de Paraglide, las páginas del sitio y de la app, el pegamento de TanStack Start y sus comprobaciones."
-translatedFrom: "f3f6cb00 55bce48d f06f2f97 09c2da80 62bc7837 a6127daf 415c4606"
+translatedFrom: "f3f6cb00 55bce48d f06f2f97 f8202a97 b1e33dec fa9000cd 415c4606"
 ---
 
 La interfaz que comparten todas las apps de Remy: componentes y tema de shadcn de fábrica, fuentes,
@@ -112,7 +112,7 @@ Todas bajo `@joeblew999/remy-ui/`, como TSX y CSS para consumidores de Vite y Ta
 | `app-checks` | Una llamada por tipo de app para el conjunto de comprobaciones compartidas sobre las páginas propias de la app: `serverAppChecks({ service, sitePaths, appPaths, home, oneLanguage, cspEnforced })` (renderizada en servidor: URLs de entrada con redirección, CSP, fuentes) y `prerenderedAppChecks({ service, sitePaths, appPaths, home })` (páginas de entrada estáticas), ambas con el sello de build y el nombre del producto (`versions.checks`); la app solo añade comprobaciones para lo que ella añade. Una app que muestra las páginas de demostración (showcase) también llama a `showcaseChecks({ product })` (`@joeblew999/remy-showcase/showcase.checks`; `product` es su `brand`); `problemChecks` es `problem.checks` |
 | `playwright` | `playwrightConfig()`, la configuración compartida de Playwright |
 | `api/server` | `apiHandlers` (el OpenAPIHandler de oRPC como los handlers de una ruta de servidor de Start, con la página de referencia en `/api/doc` y el documento generado en `/api/openapi.json`; `errorStatuses`, el estado HTTP de cada uno de los códigos de error propios de la API, ya que oRPC mantiene los estados fuera de los errores; `origins`, los orígenes exactos de las apps registradas que permite el CORSHandlerPlugin de oRPC, ninguno por defecto; una respuesta a una solicitud con credenciales, y todo 401, es `no-store`), `generateSpec(router, info, errorStatuses)` (el documento OpenAPI 3.1), `ApiInfo`, `ErrorStatuses` |
-| `api/guard` | El guard para la versión de oRPC instalada, que importa el router de una app: `guard()` (el middleware raíz del router: `implement(contract).$context<...>().use(guard<User>())`), `GuardContext` (el `getSession()` del contexto: la sesión de quien llama o null, que se pide solo cuando una política lo necesita, tal como lo comparte la guía de Better Auth de oRPC; y `relations`, el motor de relaciones de la app, para los procedimientos cuya política es una acción), `once` (esa búsqueda, ejecutada como máximo una vez por llamada), `signedIn(context)` (la persona para la que se ejecuta un procedimiento `session` o de acción), `noSession` (el contexto de una app que no da sesión a nadie); y todo lo de `api/guard-core` y `api/policy`. JavaScript plano, porque las comprobaciones de una app cargan su router en Node |
+| `api/guard` | El guard para la versión de oRPC instalada, que importa el router de una app: `guard()` (el middleware raíz del router: `implement(contract).$context<...>().use(guard<User>())`), `GuardContext` (el `getSession()` del contexto: la sesión de quien llama o null, que se pide solo cuando una política lo necesita, tal como lo comparte la guía de Better Auth de oRPC; y `relations`, el motor de relaciones de la app, para los procedimientos cuya política es una acción), `once` (esa búsqueda, ejecutada como máximo una vez por llamada), `signedIn(context)` (la persona para la que se ejecuta un procedimiento `session` o de acción), `noSession` (el contexto de una app que no da sesión a nadie); y todo lo de `api/guard-core` y `api/policy`. Se compila en `dist/` con `vp pack`, porque las comprobaciones de una app cargan su router en Node |
 | `api/guard-core` | El propio guard, sin ninguna importación de oRPC, de modo que funciona tanto en oRPC 1 como en 2: `Policy` (`public`: cualquiera, y la respuesta no nombra a ninguna persona; `session`: una persona con sesión iniciada, y la respuesta es la suya propia; `{ action }`: una persona con sesión iniciada que posee una relación a la que el vocabulario de la app concede esa acción, sobre el objeto que nombra el `id` de la entrada), `guardMiddleware({ ORPCError })` (impone la `meta.policy` de cada procedimiento; para una acción pregunta al motor de relaciones, responde 404 para un objeto inexistente antes que 403, y un procedimiento que no declara ninguna política nunca se ejecuta), `guardProblems(router, { personFields, vocabulary })` (qué está mal, una frase por cada problema: sin política, sin guard por delante, una respuesta pública que nombra a una persona, una respuesta personal sin `meta.personal` que diga quién la recibe, una acción que el vocabulario no define o cuya entrada no puede nombrar su objeto), `policyOf`, `actionOf`, `isGuarded`, `walk`, `personFields` |
 | `api/policy` | Lo que un procedimiento del contrato declara para el guard, como metadatos de oRPC: `policy('public' \| 'session')`, `personal('<quién la recibe>')` y `actions(vocabulary)`, que da `may('EDIT_NOTE')` exactamente para las acciones que define el vocabulario de la app, como en `oc.meta(may('EDIT_NOTE'))` |
 | `api/relations` | El motor de relaciones: quién puede hacer qué se responde mediante relaciones, a partir de las tablas propias de la app en su propia D1. `defineVocabulary({ objectTypes, relations, actions, grants })` (el vocabulario de la app como datos, con las formas de fila de remy-sport: una relación se deriva de una fila de tabla, a través de un padre, de un rol de la plataforma, o la tiene todo el mundo), `relationEngine(vocabulary, db)` (`can`, `canAll`, `canFor` para los mapas de permisos de una lista entera, `holds`, `heldAmong`, `objectsHeldBy`, `usersHolding`, `audienceFor`, `objectExists`), `vocabularyProblems` y `schemaProblems` (el vocabulario contrastado consigo mismo y con el esquema que construyen sus migraciones), y los tipos `Can`, `ActionCode`, `ActionOn`, que llevan los nombres de acción de una app a su contrato y a sus páginas |
@@ -134,7 +134,7 @@ una sola copia mediante los `overrides` del `pnpm-workspace.yaml` de la app
 ## Idioma [#language]
 
 El comportamiento de idioma es el de Paraglide: estrategias `url`, `cookie`, `custom-chinese` (el
-propio hook de estrategia personalizada de Paraglide, en `matching.js`), `preferredLanguage`,
+propio hook de estrategia personalizada de Paraglide, en `matching.ts`), `preferredLanguage`,
 `baseLocale`, con cada locale prefijado en la URL, configurado una sola vez en `paraglide.mjs`, que
 compila `messages/*.json` durante la generación de tipos y el build de Vite. Pasa `{ locale }`
 explícitamente en cada llamada de mensaje; no existe un locale global para todo el proceso. Una app
@@ -151,11 +151,20 @@ propietario de GitHub), publicado con `@joeblew999/remy-cli` bajo la misma versi
 `.changeset/config.json`); la demostración (showcase) y el contrato llevan su propia versión y se publican cuando un changeset
 las subió. Ninguno de los dos se publica todavía en esta forma.
 
+Lo que Node carga directamente desde una app instalada (las configuraciones de Vite, las comprobaciones de Playwright y lo que comparten, la
+línea de comandos) es TypeScript compilado por `vp pack` (tsdown) en el `dist/` de cada paquete, porque Node y Playwright no compilan
+TypeScript bajo `node_modules`; el `vite.config.ts` de cada paquete lista esos archivos (`pack.entry`). El resto
+(componentes, rutas, código del Worker, CSS, los catálogos) se distribuye como código fuente, que compila el Vite de la propia app. El
+`devExports` de tsdown mantiene dos mapas en cada `package.json`: `exports` (y el `bin` de remy-cli) nombran el código fuente, que remy-auth
+ejecuta directamente desde el workspace, y `publishConfig` nombra `dist/`, que pnpm publica en su lugar. Un paquete
+que importa sus propios archivos por su propio nombre (`@joeblew999/remy-ui/messages`) obtiene la única copia que tiene una app, nunca una
+segunda empaquetada dentro.
+
 Todo cambio en un paquete publicado lleva un changeset, escrito junto con él: `pnpm changeset` (qué paquetes, patch,
 minor o major, y una línea para el registro de cambios), confirmado como `.changeset/<name>.md`. `vp run release`, desde esta
 máquina, se detiene en el primer fallo: `changeset version` (las versiones nuevas y la sección de `CHANGELOG.md` de cada paquete
-a partir de los changesets pendientes), `scripts/version.ts` (las versiones fijadas de la app en blanco, `template/pnpm-workspace.yaml` y
-el tag de `template/.github/workflows/ci.yml`, llevados a la nueva versión de remy-ui, y después el lockfile), las traducciones
+a partir de los changesets pendientes), `scripts/version.ts` (las versiones fijadas de la app en blanco, `packages/create/templates/app/pnpm-workspace.yaml` y
+el tag de `packages/create/templates/app/.github/workflows/ci.yml`, llevados a la nueva versión de remy-ui, y después el lockfile), las traducciones
 completas (`remy i18n check --strict`), todas las comprobaciones (`vp run ci`), la prueba de la app nueva y, por último, `vp run release:push`
 (el commit «Release vX.Y.Z», subido a main). Sus pasos están en [Comandos](./commands.mdx).
 Un push a main ejecuta un solo job en GitHub, la publicación (nunca una sesión en la nube, que no puede subir ningún tag), y ninguna comprobación, ya que el hook del push las ejecutó:

@@ -1,7 +1,7 @@
 ---
 title: "Desarrolladores: empieza aquí"
 description: "Para desarrolladores que construyen Remy o una app sobre él: autenticación compartida para las apps de Remy, Better Auth en Cloudflare Workers, el paquete compartido remy-ui y por dónde empezar."
-translatedFrom: "a8b968c1 57a9efbc 373d8e60 88eb7fe7 f354609f 3befebe0"
+translatedFrom: "a8b968c1 877cac98 373d8e60 88eb7fe7 f354609f 3befebe0"
 ---
 
 **Para desarrolladores** que construyen Remy, o una app sobre su paquete de UI compartido. ¿Usas la app? Lee la
@@ -22,7 +22,7 @@ el trabajo abierto está en las [incidencias](https://github.com/joeblew999/remy
 ## Dónde mirar [#where-to-look]
 
 Dos sitios en producción, cada uno con páginas de sitio para Google y páginas de app bajo `/app`;
-[paths.js](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/src/paths.js) define ambos tipos. Cambia `/en` por `/es` o `/ar` en cualquier lugar.
+[paths.ts](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/src/paths.ts) define ambos tipos. Cambia `/en` por `/es` o `/ar` en cualquier lugar.
 
 | Sitio | Renderizado | Abrir |
 | --- | --- | --- |

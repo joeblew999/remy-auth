@@ -1,0 +1,10 @@
+---
+'@joeblew999/remy-ui': minor
+'@joeblew999/remy-cli': minor
+'@joeblew999/create': minor
+'@joeblew999/remy-showcase': minor
+---
+
+The packages Node loads are built with vp pack (dist/, publishConfig's exports) instead of hand-kept .js and .d.ts
+files; new apps come from `vp create @joeblew999:app` (the new @joeblew999/create), and `remy upgrade` takes the
+release's blank app the same way.
