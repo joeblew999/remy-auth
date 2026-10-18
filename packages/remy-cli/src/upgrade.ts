@@ -3,6 +3,11 @@
 // has them; then vp run setup, that release's setup script (the skills, the agents' rules block, every check).
 // One command, not a script of steps: `vp run upgrade <version>` hands the version to a script's last command only,
 // and the install that needs it comes first.
+//
+// Two phases, so an upgrade is always done by the release it moves to (issue #44, as Angular's ng update does): the
+// command line the app has installed only installs the release's remy-ui and remy-cli, then hands over to the
+// newly installed `remy upgrade <version> --installed`, which does the rest with that release's own code. Without
+// it, a change to what the upgrade does reached apps one release late (0.17.0's moved blank app broke 0.16.0's).
 import { execFileSync, spawnSync } from 'node:child_process';
 import {
   chmodSync,
@@ -16,44 +21,66 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 
 function fail(message: string): never {
   console.error(message);
   process.exit(1);
 }
 
-export function upgrade(version: string | undefined): void {
+/**
+ * GitHub Packages' token: GITHUB_TOKEN (or NODE_AUTH_TOKEN) when set, else gh's when gh is installed and signed in;
+ * one sentence, not a stack trace, when there is neither.
+ */
+function packagesToken(): string {
+  const set = process.env.GITHUB_TOKEN || process.env.NODE_AUTH_TOKEN;
+  if (set) return set;
+  try {
+    return execFileSync('gh', ['auth', 'token'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  } catch {
+    return fail(
+      'upgrade: GitHub Packages needs a token: set GITHUB_TOKEN to one with read:packages, or install gh and run gh auth login',
+    );
+  }
+}
+
+/** The version of remy-cli this app has installed, or nothing. */
+function installedCli(): string | undefined {
+  const manifest = join('node_modules', '@joeblew999', 'remy-cli', 'package.json');
+  return existsSync(manifest) ? (JSON.parse(readFileSync(manifest, 'utf8')) as { version: string }).version : undefined;
+}
+
+export function upgrade(version: string | undefined, installed = false): void {
   if (!version || !/^\d+\.\d+\.\d+$/.test(version))
     fail('remy upgrade <version>: a released version without the v, e.g. 0.15.0');
   if (existsSync('packages/remy-cli/src/remy.ts'))
     fail('upgrade: this is remy-auth, which owns the package; an app upgrades.');
-  const token =
-    process.env.GITHUB_TOKEN ||
-    (() => {
-      try {
-        return execFileSync('gh', ['auth', 'token'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
-      } catch {
-        return '';
-      }
-    })();
-  const blank = fetchBlank(version);
-  // GitHub Packages' token where pnpm reads it: this machine's pnpm configuration (pnpm expands no variable in a
-  // repository's .npmrc).
-  if (token)
+  const token = packagesToken();
+  if (!installed) {
+    // GitHub Packages' token where pnpm reads it: this machine's pnpm configuration (pnpm expands no variable in a
+    // repository's .npmrc).
     spawnSync('vp', ['pm', 'config', 'set', '--location', 'global', '//npm.pkg.github.com/:_authToken', token], {
       stdio: 'ignore',
     });
-  // The platform and its command line, released together under the same number.
-  const install = spawnSync(
-    'vp',
-    ['add', '--save-exact', `@joeblew999/remy-ui@${version}`, `@joeblew999/remy-cli@${version}`],
-    {
+    // The platform and its command line, released together under the same number.
+    const install = spawnSync(
+      'vp',
+      ['add', '--save-exact', `@joeblew999/remy-ui@${version}`, `@joeblew999/remy-cli@${version}`],
+      { stdio: 'inherit', env: { ...process.env, GITHUB_TOKEN: token } },
+    );
+    if (install.status !== 0) fail('upgrade: vp add failed');
+    // The rest by the release's own command line, just installed.
+    const rest = spawnSync('vp', ['exec', 'remy', 'upgrade', version, '--installed'], {
       stdio: 'inherit',
-      env: { ...process.env, ...(token ? { GITHUB_TOKEN: token } : {}) },
-    },
-  );
-  if (install.status !== 0) fail('upgrade: vp add failed');
+      env: { ...process.env, GITHUB_TOKEN: token },
+    });
+    process.exit(rest.status ?? 1);
+  }
+  if (installedCli() !== version)
+    fail(
+      `upgrade: the installed remy-cli is ${installedCli() ?? 'missing'}, not ${version}: run remy upgrade ${version}`,
+    );
+  const blank = fetchBlank(version, token);
   // Vite Plus at the release's version, the way its docs say (guide/upgrade-project.md): that version's migrator
   // re-pins vite-plus, the vite alias and the vitest pin together, in every workspace package.
   const vitePlus = /^\s*vite-plus:\s*['"]?([^'"\s]+)/m.exec(
@@ -92,18 +119,20 @@ export function upgrade(version: string | undefined): void {
       }
     }
   scriptsAndHooks(blank, version);
-  rmSync(dirname(blank), { recursive: true, force: true });
   console.log(`upgrade: on @joeblew999/remy-ui ${version}. Next: vp run setup (the skills, the rules, every check).`);
 }
 
 /**
- * The blank app at a release, in a scratch folder: `vp create @joeblew999:app@<version>`, from @joeblew999/create on
- * GitHub Packages, as a new app is made. vp create reads a registry's address and token from .npmrc files and
- * npm_config_ variables only, not pnpm's own configuration, so both are handed to it here (the token is gh's).
+ * The blank app at a release, in a scratch folder removed when the upgrade ends, however it ends:
+ * `vp create @joeblew999:app@<version>`, from @joeblew999/create on GitHub Packages, as a new app is made. vp create
+ * reads a registry's address and token from .npmrc files and npm_config_ variables only, not pnpm's own
+ * configuration, so both are handed to it here. VP_SKIP_INSTALL: vp create installs the new app's dependencies
+ * itself, which the upgrade never needs; Vite Plus's own switch for that, read in vite-plus/dist/prompts-*.js
+ * (runViteInstall), not in its docs: if a Vite Plus upgrade drops it, the scratch app is installed again (slow, harmless).
  */
-function fetchBlank(version: string): string {
+function fetchBlank(version: string, token: string): string {
   const scratch = mkdtempSync(join(tmpdir(), 'remy-blank-'));
-  const token = execFileSync('gh', ['auth', 'token'], { encoding: 'utf8' }).trim();
+  process.on('exit', () => rmSync(scratch, { recursive: true, force: true }));
   const got = spawnSync(
     'vp',
     [
@@ -122,6 +151,7 @@ function fetchBlank(version: string): string {
       stdio: 'inherit',
       env: {
         ...process.env,
+        VP_SKIP_INSTALL: '1',
         'npm_config_@joeblew999:registry': 'https://npm.pkg.github.com',
         'npm_config_//npm.pkg.github.com/:_authToken': token,
       },
@@ -205,4 +235,4 @@ export function scriptsAndHooks(blank: string, version: string): void {
 
 export const what =
   "<version>: this app onto a release of the platform: the package, the workflow's tag, the scripts, hooks and configuration of the blank app, then vp run setup (vp run upgrade)";
-export const main = (args: string[]): void => upgrade(args[0]);
+export const main = (args: string[]): void => upgrade(args[0], args.includes('--installed'));

@@ -1,7 +1,7 @@
 {
   "//": "The base every app's docs/tsconfig.json extends, in one line (extends @joeblew999/remy-ui/docs/tsconfig.json, which names this file): ${configDir} is the app's docs/. Not a project of its own: the tsconfig.json beside it is remy-auth's, checking this Worker against remy-auth's docs/.",
   "include": ["./**/*", "${configDir}/*.ts", "${configDir}/.remy-docs/*.ts", "${configDir}/worker-configuration.d.ts"],
-  "exclude": ["./tests/**/*", "./scripts/**/*", "./template/**/*", "./playwright.config.js"],
+  "exclude": ["./tests/**/*", "./scripts/**/*", "./playwright.config.js"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "types": ["vite-plus/client", "node"],

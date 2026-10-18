@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { ownSrc } from '../own.ts';
 import { visit } from 'unist-util-visit';
 import type { Plugin } from 'unified';
 import type { Root } from 'mdast';
@@ -15,17 +16,22 @@ import type { Root } from 'mdast';
 // Spanish); a word missing in that language reads in the base one, which the translation check reports. A
 // marker naming no entry stops the build, naming the page: a label renamed in the app cannot leave the guide behind.
 
-const packageMessages = new URL('../../messages/', import.meta.url);
+// The package's catalogs, found from its manifest (own.ts), so the same from src/ here and from dist/ in an installed
+// app; the package ships messages/ (its files), and a missing base catalog stops the build rather than leaving every
+// shared word out (issue #44).
+const packageMessages = join(ownSrc, '..', 'messages');
 
 /** The remark plugin, for an app whose root (the folder holding docs/) is `root`. */
 export function remarkUiWords({ root, baseLocale = 'en' }: { root: string; baseLocale?: string }): Plugin<[], Root> {
   const cache = new Map<string, Record<string, unknown>>();
   const catalog = (lang: string): Record<string, unknown> => {
     if (!cache.has(lang)) {
-      const read = (file: URL | string): Record<string, unknown> =>
+      const read = (file: string): Record<string, unknown> =>
         existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
+      const shared = join(packageMessages, `${baseLocale}.json`);
+      if (!existsSync(shared)) throw new Error(`remark-ui-words: the package's catalog is missing (${shared})`);
       cache.set(lang, {
-        ...read(new URL(`${lang}.json`, packageMessages)),
+        ...read(join(packageMessages, `${lang}.json`)),
         ...read(join(root, 'messages', `${lang}.json`)),
       });
     }

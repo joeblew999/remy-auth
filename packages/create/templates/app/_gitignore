@@ -8,7 +8,7 @@ worker-configuration.d.ts
 .agents/skills/
 .claude/skills/
 .claude/settings.local.json
-# A developer's own overrides, e.g. the shared tasks from a local remy-auth checkout.
+# Generated: the app's compiled strings (Paraglide) and inlang's cache.
 src/paraglide/
 project.inlang/cache/
 # Vite Plus's Git hook dispatcher, written by vp config (the prepare script); the hooks themselves are .vite-hooks/*.

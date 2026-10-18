@@ -10,6 +10,7 @@
   "files": [
     "dist",
     "src",
+    "messages",
     "skills",
     "README.md",
     "!src/docs/tsconfig.json"

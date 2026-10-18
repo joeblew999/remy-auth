@@ -6,3 +6,6 @@ exactly as a new repository gets it, plus `files/` (new files only: a contract p
 it owns and an API over it, and a part another package offers: the showcase's time-zones), set up the way
 another repository sees the platform: the packages from tarballs with versions of their own, the template's `.npmrc`. `run.sh`
 does it; see its steps.
+
+`files/docs/content/users/index.md` is the blank app's page plus one line using `:ui[language_label]`, a word only
+`@joeblew999/remy-ui`'s catalog defines: the docs build only when the installed package ships its catalog (issue #44).
