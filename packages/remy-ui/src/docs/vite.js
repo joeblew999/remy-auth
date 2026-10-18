@@ -2,17 +2,10 @@ import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { cloudflare } from '@cloudflare/vite-plugin';
-import tailwindcss from '@tailwindcss/vite';
-import { tanstackStart } from '@tanstack/react-start/plugin/vite';
-import viteReact from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+// The plugins are lazyPlugins (Vite Plus's guide/troubleshooting.md): imported and built only when Vite runs.
+import { defineConfig, lazyPlugins } from 'vite-plus';
 import { docsTableOf } from './docs/table-core.js';
-import { fumadocsMdx } from 'fumadocs-mdx/vite';
-import remarkDirective from 'remark-directive';
 import { remarkUiWords } from './remark-ui-words.js';
-import { remarkAutoTypeTable } from 'fumadocs-typescript';
-import { remarkDirectiveAdmonition, remarkMdxMermaid, remarkSteps } from 'fumadocs-core/mdx-plugins';
 import { remyBuild } from '../build-vite.js';
 
 // An app's whole docs Worker from its docs.config.ts (issue #34, group 2): its docs/vite.config.ts
@@ -72,52 +65,73 @@ export function remyDocs(docsConfig, { root = process.cwd(), app: appRoot = reso
   const app = root.endsWith('/') ? root : `${root}/`;
   const srcDirectory = relative(root, packageDocs).replace(/\/$/, '');
   return defineConfig({
-    plugins: [
-      // What this build is (`virtual:remy-build`): the docs Worker's /healthz answers with it, as an app's does.
-      remyBuild({ root }),
-      // Cloudflare's static-asset headers, the same for every app's docs: Vite names these files by their
-      // content hash, so they never change; browsers may keep them for a year without asking again.
-      {
-        name: 'remy-docs-headers',
-        generateBundle() {
-          if (this.environment?.name !== 'client') return;
-          this.emitFile({
-            type: 'asset',
-            fileName: '_headers',
-            source: '/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n',
-          });
-        },
-      },
-      // Fumadocs MDX compiles content/ for the collections (the app's collections.ts); before Start's plugin.
-      // Beyond its defaults (GFM, heading ids, images, code and npm tabs): the app's own words (:ui[key], from its
-      // Paraglide catalog: remark-ui-words.js), callouts (:::note), Mermaid
-      // (```mermaid), type tables from TypeScript (<auto-type-table>) and steps. GitHub's "default" code
-      // themes keep 4.5:1 comment contrast on both backgrounds, which Lighthouse's accessibility audit requires.
-      fumadocsMdx({
-        macro: { include: [join(root, 'collections.ts')] },
-        globalOptions: {
-          mdxOptions: {
-            remarkPlugins: (plugins) => [
-              remarkDirective,
-              remarkUiWords({ root: appRoot }),
-              remarkDirectiveAdmonition,
-              remarkMdxMermaid,
-              remarkAutoTypeTable,
-              ...plugins,
-              remarkSteps,
-            ],
-            rehypeCodeOptions: { themes: { light: 'github-light-default', dark: 'github-dark-default' } },
-            // Pictures and videos live in public/media and are referenced by URL (Fumadocs' stock option), so the
-            // Markdown that llms.txt, the .md pages and MCP serve keeps their real addresses.
-            remarkImageOptions: { useImport: false, publicDir: 'public' },
+    plugins: lazyPlugins(async () => {
+      const [
+        { cloudflare },
+        { default: tailwindcss },
+        { tanstackStart },
+        { default: viteReact },
+        { fumadocsMdx },
+        { default: remarkDirective },
+        { remarkAutoTypeTable },
+        { remarkDirectiveAdmonition, remarkMdxMermaid, remarkSteps },
+      ] = await Promise.all([
+        import('@cloudflare/vite-plugin'),
+        import('@tailwindcss/vite'),
+        import('@tanstack/react-start/plugin/vite'),
+        import('@vitejs/plugin-react'),
+        import('fumadocs-mdx/vite'),
+        import('remark-directive'),
+        import('fumadocs-typescript'),
+        import('fumadocs-core/mdx-plugins'),
+      ]);
+      return [
+        // What this build is (`virtual:remy-build`): the docs Worker's /healthz answers with it, as an app's does.
+        remyBuild({ root }),
+        // Cloudflare's static-asset headers, the same for every app's docs: Vite names these files by their
+        // content hash, so they never change; browsers may keep them for a year without asking again.
+        {
+          name: 'remy-docs-headers',
+          generateBundle() {
+            if (this.environment?.name !== 'client') return;
+            this.emitFile({
+              type: 'asset',
+              fileName: '_headers',
+              source: '/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n',
+            });
           },
         },
-      }),
-      cloudflare({ viteEnvironment: { name: 'ssr' }, configPath: join(root, 'wrangler.jsonc') }),
-      tailwindcss(),
-      tanstackStart({ srcDirectory, server: { build: { inlineCss: true } } }),
-      viteReact(),
-    ],
+        // Fumadocs MDX compiles content/ for the collections (the app's collections.ts); before Start's plugin.
+        // Beyond its defaults (GFM, heading ids, images, code and npm tabs): the app's own words (:ui[key], from its
+        // Paraglide catalog: remark-ui-words.js), callouts (:::note), Mermaid
+        // (```mermaid), type tables from TypeScript (<auto-type-table>) and steps. GitHub's "default" code
+        // themes keep 4.5:1 comment contrast on both backgrounds, which Lighthouse's accessibility audit requires.
+        fumadocsMdx({
+          macro: { include: [join(root, 'collections.ts')] },
+          globalOptions: {
+            mdxOptions: {
+              remarkPlugins: (plugins) => [
+                remarkDirective,
+                remarkUiWords({ root: appRoot }),
+                remarkDirectiveAdmonition,
+                remarkMdxMermaid,
+                remarkAutoTypeTable,
+                ...plugins,
+                remarkSteps,
+              ],
+              rehypeCodeOptions: { themes: { light: 'github-light-default', dark: 'github-dark-default' } },
+              // Pictures and videos live in public/media and are referenced by URL (Fumadocs' stock option), so the
+              // Markdown that llms.txt, the .md pages and MCP serve keeps their real addresses.
+              remarkImageOptions: { useImport: false, publicDir: 'public' },
+            },
+          },
+        }),
+        cloudflare({ viteEnvironment: { name: 'ssr' }, configPath: join(root, 'wrangler.jsonc') }),
+        tailwindcss(),
+        tanstackStart({ srcDirectory, server: { build: { inlineCss: true } } }),
+        viteReact(),
+      ];
+    }),
     resolve: {
       alias: [
         // The app's own modules the Worker imports (app-modules.d.ts): its contract, and its docs/ files.

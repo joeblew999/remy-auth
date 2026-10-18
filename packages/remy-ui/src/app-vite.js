@@ -6,14 +6,9 @@
 // two rows its checks prove: its router plugin splits each route's component into its own chunk (autoCodeSplitting;
 // code-splitting.checks.js), and its import protection fails the production build when browser code imports
 // a *.server.ts file or @tanstack/react-start/server (build-boundaries.checks.js scans what ships).
-import { cloudflare } from '@cloudflare/vite-plugin';
-import { devtools } from '@tanstack/devtools-vite';
-import tailwindcss from '@tailwindcss/vite';
-import { tanstackStart } from '@tanstack/react-start/plugin/vite';
-import viteReact from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
-import { FontaineTransform } from 'fontaine';
-import { paraglideVitePlugin } from '@inlang/paraglide-js';
+// The plugins are lazyPlugins (Vite Plus's guide/troubleshooting.md): imported and built only when Vite runs (dev,
+// build, test, preview), not each time Vite Plus reads the configuration for lint, fmt, check, staged or a task lookup.
+import { defineConfig, lazyPlugins } from 'vite-plus';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { remyParts } from './parts/vite.js';
@@ -34,39 +29,56 @@ export function remyApp({
   root = process.cwd(),
   build = {},
 } = {}) {
-  // The shared package's parts the app lists in src/parts.json (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/parts.md): their routes and the
-  // package's own (the CSP report endpoint) mount beside src/routes, and `virtual:remy-parts` says which.
-  const parts = remyParts({ root });
-  // The app's own strings, when it has them (project.inlang at its root): compiled into src/paraglide, whose
-  // runtime follows the platform's language (followLocale in the app's config).
-  const catalog = existsSync(resolve(root, appCatalog.project)) ? [paraglideVitePlugin(appCatalog)] : [];
-  // Under Vite Plus's test runner (vp test sets VITEST) the app's plugins stay out: the plain-function checks run in
-  // Node, and Cloudflare's plugin would move them into the Workers runtime.
-  const testing = Boolean(process.env.VITEST);
   return defineConfig({
-    plugins: testing
-      ? []
-      : [
-          // TanStack Devtools: first, as its docs require; strips the devtools from production builds.
-          devtools(),
-          ...plugins,
-          ...catalog,
-          parts.plugin,
-          // What this build is (`virtual:remy-build`): /healthz answers with it and the page carries it.
-          remyBuild({ root, ...build }),
-          cloudflare({ viteEnvironment: { name: 'ssr' }, ...cloudflareOptions }),
-          // Fallback faces sized to the web fonts (size-adjust and ascent/descent overrides), so the swap to
-          // Geist keeps the layout and LCP; fonts.css lists them. Before Tailwind.
-          FontaineTransform.vite({ fallbacks: { 'Geist Variable': ['Arial'] } }),
-          tailwindcss(),
-          // The stylesheet inlined in the HTML, so the first paint needs no CSS fetch.
-          tanstackStart({
-            ...start,
-            server: { build: { inlineCss: true }, ...start.server },
-            router: { virtualRouteConfig: parts.routes, ...start.router },
-          }),
-          viteReact(),
-        ],
+    plugins: lazyPlugins(async () => {
+      // Under Vite Plus's test runner (vp test sets VITEST) the app's plugins stay out: the plain-function checks run
+      // in Node, and Cloudflare's plugin would move them into the Workers runtime.
+      if (process.env.VITEST) return [];
+      const [
+        { cloudflare },
+        { devtools },
+        { default: tailwindcss },
+        { tanstackStart },
+        { default: viteReact },
+        { FontaineTransform },
+        { paraglideVitePlugin },
+      ] = await Promise.all([
+        import('@cloudflare/vite-plugin'),
+        import('@tanstack/devtools-vite'),
+        import('@tailwindcss/vite'),
+        import('@tanstack/react-start/plugin/vite'),
+        import('@vitejs/plugin-react'),
+        import('fontaine'),
+        import('@inlang/paraglide-js'),
+      ]);
+      // The shared package's parts the app lists in src/parts.json (plan: https://github.com/joeblew999/remy-auth/blob/0e42ab7/.plans/done/parts.md): their routes and the
+      // package's own (the CSP report endpoint) mount beside src/routes, and `virtual:remy-parts` says which.
+      const parts = remyParts({ root });
+      // The app's own strings, when it has them (project.inlang at its root): compiled into src/paraglide, whose
+      // runtime follows the platform's language (followLocale in the app's config).
+      const catalog = existsSync(resolve(root, appCatalog.project)) ? [paraglideVitePlugin(appCatalog)] : [];
+      return [
+        // TanStack Devtools: first, as its docs require; strips the devtools from production builds.
+        devtools(),
+        ...plugins,
+        ...catalog,
+        parts.plugin,
+        // What this build is (`virtual:remy-build`): /healthz answers with it and the page carries it.
+        remyBuild({ root, ...build }),
+        cloudflare({ viteEnvironment: { name: 'ssr' }, ...cloudflareOptions }),
+        // Fallback faces sized to the web fonts (size-adjust and ascent/descent overrides), so the swap to
+        // Geist keeps the layout and LCP; fonts.css lists them. Before Tailwind.
+        FontaineTransform.vite({ fallbacks: { 'Geist Variable': ['Arial'] } }),
+        tailwindcss(),
+        // The stylesheet inlined in the HTML, so the first paint needs no CSS fetch.
+        tanstackStart({
+          ...start,
+          server: { build: { inlineCss: true }, ...start.server },
+          router: { virtualRouteConfig: parts.routes, ...start.router },
+        }),
+        viteReact(),
+      ];
+    }),
     server: { host: '127.0.0.1', port, strictPort: true },
   });
 }
