@@ -1,6 +1,6 @@
 {
   "name": "@joeblew999/create",
-  "version": "0.17.0",
+  "version": "0.17.1",
   "description": "New Remy apps: vp create @joeblew999:app (the blank app, TanStack Start on Cloudflare, with its docs)",
   "repository": {
     "type": "git",
