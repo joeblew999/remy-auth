@@ -1,7 +1,7 @@
 ---
 title: "El paquete de UI (@joeblew999/remy-ui)"
 description: "La interfaz que comparten todas las apps de Remy: shadcn de fábrica, fuentes, catálogos de Paraglide, las páginas del sitio y de la app, el pegamento de TanStack Start y sus comprobaciones."
-translatedFrom: "f3f6cb00 46cbc789 60a401ce c77f7598 62bc7837 d7c958f1 415c4606"
+translatedFrom: "f3f6cb00 46cbc789 60a401ce c77f7598 62bc7837 1d4123ab 415c4606"
 ---
 
 La interfaz que comparten todas las apps de Remy: componentes y tema de shadcn de fábrica, fuentes,
@@ -157,7 +157,7 @@ minor o major, y una línea para el registro de cambios), confirmado como `.chan
 máquina, se detiene en el primer fallo: `changeset version` (las versiones nuevas y la sección de `CHANGELOG.md` de cada paquete
 a partir de los changesets pendientes), `scripts/version.ts` (las versiones fijadas de la app en blanco, `template/pnpm-workspace.yaml` y
 el tag de `template/.github/workflows/ci.yml`, llevados a la nueva versión de remy-ui, y después el lockfile), las traducciones
-completas (`remy i18n check --strict`), todas las comprobaciones en todos los idiomas, `vp run ui:verify` y, por último, `vp run release:tag`
+completas (`remy i18n check --strict`), todas las comprobaciones (`vp run ci`), la prueba de la app nueva, `vp run ui:verify` y, por último, `vp run release:tag`
 (el commit «Release vX.Y.Z», el tag anotado, y main y el tag subidos). Sus pasos están en [Comandos](./commands.mdx).
 Un tag ejecuta un solo job en GitHub, la publicación (nunca una sesión en la nube), y ninguna comprobación, ya que la publicación las ejecutó:
 `vp run release:publish` (`changeset publish`, después de generar y construir los paquetes y de crear la skill `remy`),

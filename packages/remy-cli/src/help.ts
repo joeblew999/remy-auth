@@ -34,7 +34,7 @@ const frontDoor = (scripts: Record<string, string>): [string, string][] => {
       ? ([
           [
             'vp run release',
-            `the owner's: the packages versioned from their changesets (pnpm changeset adds one), every check in every language, then the tag GitHub publishes from${steps('release')}`,
+            `the owner's: the packages versioned from their changesets (pnpm changeset adds one), every check and a new app, then the tag GitHub publishes from${steps('release')}`,
           ],
         ] as [string, string][])
       : []),

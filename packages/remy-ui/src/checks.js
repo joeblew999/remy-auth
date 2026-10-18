@@ -40,24 +40,23 @@ function byRendering(list) {
 }
 
 /**
- * The languages whose checks run: one per way of drawing text (byRendering, the default); CHECK_LOCALES=all for every
- * locale (a release runs them all); CHECK_LOCALES=quick for the base language and the first right-to-left one (a
- * deployment's smoke); or a comma-separated subset. Checks iterate this; expectations that must hold for every
+ * The languages whose checks run: one per way of drawing text (byRendering, the default, a release's too: the other
+ * languages draw through the same code, and their catalogs are checked offline, in every language, by remy i18n
+ * check); CHECK_LOCALES=quick for the base language and the first right-to-left one (a deployment's smoke, the new
+ * app); or a comma-separated subset. Checks iterate this; expectations that must hold for every
  * language (sitemap, hreflang, switcher) keep using `locales`.
  */
 const asked = process.env.CHECK_LOCALES;
 export const checkedLocales = !asked
   ? byRendering(locales)
-  : asked === 'all'
-    ? locales
-    : asked === 'quick'
-      ? pair(locales)
-      : locales.filter((locale) =>
-          asked
-            .split(',')
-            .map((value) => value.trim())
-            .includes(locale),
-        );
+  : asked === 'quick'
+    ? pair(locales)
+    : locales.filter((locale) =>
+        asked
+          .split(',')
+          .map((value) => value.trim())
+          .includes(locale),
+      );
 
 /**
  * The languages for checks of behaviour that does not depend on the language (the security policy,

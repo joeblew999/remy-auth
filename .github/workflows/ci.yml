@@ -39,7 +39,7 @@ jobs:
   # the script). Playwright's Chromium is the browsers task (playwright install chromium); a Linux runner has no Han
   # font, which the font checks need, so it is installed here.
   checks:
-    # Not for a release's tag: vp run release ran every check, in every language, before it tagged.
+    # Not for a release's tag: vp run release ran every check before it tagged.
     if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
     strategy:
       fail-fast: false

@@ -1,7 +1,7 @@
 ---
 title: "Ejecutar, previsualizar y probar la app"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "d324c35e c82e5d5e 8dfe66ef d9d6a7c6 b892dd27 48c95f5f 90a87f8d fdbfb49e b0e4dfb0 e04ebe8b"
+translatedFrom: "d324c35e c82e5d5e 8dfe66ef d9d6a7c6 b892dd27 48c95f5f 90a87f8d fdbfb49e b0e4dfb0 e749d4d9"
 ---
 
 :::note
@@ -273,8 +273,8 @@ puede demostrar (propietario, 2026-10-17: "you really need to decide what is tes
 - Una comprobación de un comportamiento que no depende del idioma (la política de seguridad, noindex, los parámetros de búsqueda, el formulario de demo, las páginas de error, las respuestas de la API) se ejecuta en inglés y en el primer idioma de derecha a izquierda (`behaviourLocales`).
 - Lo que sí difiere en cada idioma se comprueba en todos: los catálogos y sus plurales (las comprobaciones unitarias),
   el sitemap, hreflang y el selector de idioma, y las muestras de mayúsculas/minúsculas y de separación silábica.
-- Una release ejecuta todas las comprobaciones en todos los idiomas (`CHECK_LOCALES=all`, su script lo establece). A mano, `CHECK_LOCALES`
-  acepta `all`, `quick` (inglés y árabe) o una lista separada por comas.
+- Una release ejecuta los mismos idiomas: uno por cada forma de dibujar texto. El resto dibuja con el mismo código, así que ejecutarlos no encontró nada más y costaba cuatro minutos; que exista el texto de cada idioma lo comprueba `remy i18n check`, sin conexión.
+  A mano, `CHECK_LOCALES` acepta `quick` (inglés y árabe) o una lista separada por comas.
 
 Lo que cubren las comprobaciones son las propias comprobaciones: `tests/` y el
 `@joeblew999/remy-ui/checks` del paquete (el título de cada comprobación dice qué demuestra); los pasos del flujo que las ejecutan están en

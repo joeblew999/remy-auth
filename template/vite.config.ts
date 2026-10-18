@@ -78,8 +78,7 @@ export default defineConfig({
       // What a browser check needs on this machine: Playwright's Chromium (on Linux the Han languages also need a Han
       // font, fonts-noto-cjk, which GitHub's workflow installs).
       browsers: { command: 'playwright install chromium', cache: false },
-      // The browser checks on the production build, one language per way of drawing text (CHECK_LOCALES=all: every
-      // one), Playwright's own options passed through (`vp run test:browser --shard 1/3`). CI=1 unless set: the same
+      // The browser checks on the production build, one language per way of drawing text, Playwright's own options passed through (`vp run test:browser --shard 1/3`). CI=1 unless set: the same
       // Playwright here as on GitHub, a browser per core.
       'test:browser': {
         command: 'CI=${CI:-1} PREVIEW_PORT=${PREVIEW_PORT:-4173} playwright test --project=ours',

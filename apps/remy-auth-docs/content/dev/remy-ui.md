@@ -149,7 +149,7 @@ minor or major, and one line for the changelog), committed as `.changeset/<name>
 machine, stopping at the first failure: `changeset version` (the new versions and each package's `CHANGELOG.md`
 section from the pending changesets), `scripts/version.ts` (the blank app's pins, `template/pnpm-workspace.yaml` and
 `template/.github/workflows/ci.yml`'s tag, moved to remy-ui's new version, then the lockfile), the translations
-complete (`remy i18n check --strict`), every check in every language, `vp run ui:verify`, then `vp run release:tag`
+complete (`remy i18n check --strict`), every check (`vp run ci`), the new-app test, `vp run ui:verify`, then `vp run release:tag`
 (the commit "Release vX.Y.Z", the annotated tag, main and the tag pushed). Its steps are on [Commands](./commands.mdx).
 A tag runs one job on GitHub, the release (never a cloud session), and no checks, since the release ran them:
 `vp run release:publish` (`changeset publish`, after the packages are generated and built and the `remy` skill made),

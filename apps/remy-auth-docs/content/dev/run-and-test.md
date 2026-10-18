@@ -272,8 +272,9 @@ can show (owner, 2026-10-17: "you really need to decide what is tested and what 
   form, error pages, API answers) runs in English and the first right-to-left language (`behaviourLocales`).
 - What does differ in every language is checked in every language: the catalogs and their plurals (the unit checks),
   the sitemap, hreflang and the language switcher, and the casing and hyphenation samples.
-- A release runs every check in every language (`CHECK_LOCALES=all`, its script sets it). By hand, `CHECK_LOCALES`
-  takes `all`, `quick` (English and Arabic) or a comma-separated list.
+- A release runs the same languages: one per way of drawing text. The rest draw through the same code, so running
+  them found nothing more and took four minutes; whether every language's text exists is `remy i18n check`'s, offline.
+  By hand, `CHECK_LOCALES` takes `quick` (English and Arabic) or a comma-separated list.
 What the checks cover is the checks themselves: `tests/` and the package's
 `@joeblew999/remy-ui/checks` (each check's title says what it proves); the flow's steps that run them are in
 [how we work](./how-we-work.md#the-flow-the-standard-way-in-plain-sight). In short: every page in every

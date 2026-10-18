@@ -48,8 +48,6 @@ function flaky(results: string): void {
   const found = flakyIn(report);
   if (found.length) console.error(`test: ${found.length} flaky, passed only on its retry: ${found.join('; ')}`);
 }
-/** The quick languages for a deployment's checks (checks.js: the base language and the first right-to-left one), unless CHECK_LOCALES says. */
-export const quickLocales = () => ({ CHECK_LOCALES: process.env.CHECK_LOCALES ?? 'quick' });
 const remote = (origin = process.env.TEST_BASE_URL ?? origins().production) => {
   if (!origin) {
     console.error("test: pass an origin (or TEST_BASE_URL), or put VITE_DEPLOY_ORIGIN in the app's .env");

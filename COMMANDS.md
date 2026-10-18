@@ -13,7 +13,7 @@ Day to day: `vp run ready` after every edit; when the work is finished, git and 
 | `vp run fix` | what the checks only verify, written: COMMANDS.md and each docs page's ending |
 | `vp run ci` | what GitHub runs, the same here, each part one of GitHub's jobs (vp run test:browser --shard 1/3) (vp run ready → vp run test:browser → vp run test:audits) |
 | `vp run translate` | before a commit that changed text: the translations it made stale or missing (remy i18n translate) |
-| `vp run release` | the owner's: the packages versioned from their changesets (pnpm changeset adds one), every check in every language, then the tag GitHub publishes from (changeset version → node scripts/version.ts → remy i18n check --strict → CHECK_LOCALES=all vp run ci → vp run new-app → vp run ui:verify → vp run release:tag) |
+| `vp run release` | the owner's: the packages versioned from their changesets (pnpm changeset adds one), every check and a new app, then the tag GitHub publishes from (changeset version → node scripts/version.ts → remy i18n check --strict → vp run ci → vp run new-app → vp run ui:verify → vp run release:tag) |
 | `vp run setup` | an installation: the dependencies, the skills (skills-lock.json), the agents' rules, then every check (vp install → skills experimental_install → skills experimental_sync → remy rules → vp run ready) |
 
 ## Everything the command line does

@@ -1,7 +1,7 @@
 ---
 title: "Proyectos: estructura, apps nuevas y publicación"
 description: "Qué guarda todo proyecto de Remy en el mismo lugar, cómo empezar una app nueva, la publicación de paquetes, las traducciones, Cloudflare y los planes. Todos los comandos están en Comandos."
-translatedFrom: "76024556 ae418fe2 a5d3acab b93fcb78 ebcccdb4 335e995b de907ca6 bf100d42"
+translatedFrom: "76024556 ae418fe2 a5d3acab b93fcb78 5eaa5e2b 335e995b de907ca6 bf100d42"
 ---
 
 La herramienta es `remy` (y `remy-check`), los bins de `@joeblew999/remy-cli` (`packages/remy-cli/src`, un
@@ -171,8 +171,7 @@ release. Una app construida sobre el paquete ejecuta un conjunto de contrato (su
 separadas, sus propias funcionalidades funcionan) más el nivel de Google en sus propias páginas de sitio, no toda la suite del paquete
 de nuevo. Mantén las comprobaciones baratas en lugar de quitarlas (el reloj de Playwright en lugar de esperas
 reales, una página de navegador por comprobación, workers en paralelo). Las comprobaciones recorren `checkedLocales` de
-`@joeblew999/remy-ui/checks`: un idioma por cada forma en que la app dibuja el texto por defecto, todos los idiomas con
-`CHECK_LOCALES=all` (el release), `quick` para el idioma base y el primero de derecha a izquierda, o una lista separada por comas; las propias comprobaciones determinan los idiomas, así que ningún comando los nombra ([cuáles y por qué](./run-and-test.md)). Cada paso indica cuánto tardó.
+`@joeblew999/remy-ui/checks`: un idioma por cada forma en que la app dibuja el texto por defecto (también el del release: los demás idiomas dibujan con el mismo código, y todos los catálogos se comprueban sin conexión), `quick` para el idioma base y el primero de derecha a izquierda, o una lista separada por comas; las propias comprobaciones determinan los idiomas, así que ningún comando los nombra ([cuáles y por qué](./run-and-test.md)). Cada paso indica cuánto tardó.
 
 ### Traducciones [#translations]
 

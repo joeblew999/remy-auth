@@ -168,8 +168,8 @@ release. An app built on the package runs a contract set (its pages render, site
 apart, its own features work) plus Google's level on its own site pages, not the whole package
 suite again. Keep checks cheap rather than dropping them (Playwright's clock rather than real
 waits, one browser page per check, parallel workers). Checks loop over `checkedLocales` from
-`@joeblew999/remy-ui/checks`: one language per way the app draws text by default, every language with
-`CHECK_LOCALES=all` (the release), `quick` for the base language and the first right-to-left one, or a comma-separated
+`@joeblew999/remy-ui/checks`: one language per way the app draws text by default (the release's too: the other
+languages draw through the same code, and every catalog is checked offline), `quick` for the base language and the first right-to-left one, or a comma-separated
 list; the checks work the languages out themselves, so no command names them ([which and why](./run-and-test.md)). Every step says how long it took.
 
 ### Translations

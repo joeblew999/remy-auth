@@ -11,7 +11,7 @@
     "test:audits": "vp run remy-auth#test:audits",
     "ci": "vp run ready && vp run test:browser && vp run test:audits",
     "translate": "node packages/remy-cli/src/remy.ts i18n translate",
-    "release": "changeset version && node scripts/version.ts && node packages/remy-cli/src/remy.ts i18n check --strict && CHECK_LOCALES=all vp run ci && vp run new-app && vp run ui:verify && vp run release:tag",
+    "release": "changeset version && node scripts/version.ts && node packages/remy-cli/src/remy.ts i18n check --strict && vp run ci && vp run new-app && vp run ui:verify && vp run release:tag",
     "setup": "vp install && skills experimental_install && skills experimental_sync && node packages/remy-cli/src/remy.ts rules && vp run ready",
     "docs:cli": "cd packages/remy-ui/src/docs && node ../../../../node_modules/@fumadocs/cli/dist/index.js",
     "ui:components": "shadcn add button card input label badge alert field separator direction skeleton empty sidebar breadcrumb collapsible dropdown-menu avatar sheet tooltip navigation-menu use-mobile table spinner tabs --overwrite --yes -c apps/remy-auth",
