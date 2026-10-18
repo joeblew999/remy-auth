@@ -36,9 +36,19 @@ export const style = {
     rules: { 'vite-plus/prefer-vite-plus-imports': 'error' },
     options: { typeAware: true, typeCheck: true },
     ignorePatterns: ['template/**', 'fixtures/**'],
+    // The unit checks get Oxlint's Vitest rules (focused or disabled tests, expects outside a test); Vitest's
+    // expect(value, message) takes the message second.
+    overrides: [
+      { files: ['**/*.unit.spec.ts'], plugins: ['vitest'], rules: { 'vitest/valid-expect': ['warn', { maxArgs: 2 }] } },
+    ],
   },
   // vp staged (the pre-commit hook, .vite-hooks/pre-commit): the staged files formatted and their lint fixes applied.
   staged: { '*': 'vp check --fix' },
   // vp test: the plain-function checks only; tests/*.spec.ts are the browser checks, Playwright's.
-  test: { include: ['tests/**/*.unit.spec.ts'], passWithNoTests: true },
+  // `vp run coverage` (vp test run --coverage) prints how much of the code they reach; information, not a gate.
+  test: {
+    include: ['tests/**/*.unit.spec.ts'],
+    passWithNoTests: true,
+    coverage: { provider: 'v8', reporter: ['text-summary'] },
+  },
 };

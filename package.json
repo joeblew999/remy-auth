@@ -18,7 +18,8 @@
     "ui:blocks": "shadcn add @shadcn/sidebar-16 -c packages/remy-ui --diff src/blocks/sidebar-16/components/app-sidebar.tsx && shadcn add @shadcn/sidebar-16 -c packages/remy-ui --diff src/blocks/sidebar-16/components/nav-main.tsx && shadcn add @shadcn/sidebar-16 -c packages/remy-ui --diff src/blocks/sidebar-16/components/site-header.tsx",
     "ui:theme": "shadcn apply nova --only theme --yes -c apps/remy-auth",
     "release:push": "V=$(node -p \"require('./packages/remy-ui/package.json').version\") && git add -A && git commit --allow-empty -m \"Release v$V\" && git push origin main",
-    "test:docs": "vp run @joeblew999/remy-auth-docs#test:browser"
+    "test:docs": "vp run @joeblew999/remy-auth-docs#test:browser",
+    "coverage": "vp test run --coverage"
   },
   "devDependencies": {
     "@changesets/cli": "catalog:",
@@ -26,6 +27,7 @@
     "@joeblew999/remy-cli": "workspace:*",
     "@joeblew999/remy-ui": "workspace:*",
     "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "github-slugger": "catalog:",
     "remark-directive": "catalog:",
     "remark-parse": "catalog:",

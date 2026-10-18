@@ -91,8 +91,8 @@ test("the blank app's catalog has the workspace's versions, so a new app install
     );
   const ours = entries('pnpm-workspace.yaml');
   const blank = entries('template/pnpm-workspace.yaml');
-  for (const [name, version] of Object.entries(blank))
-    if (!name.startsWith('@joeblew999/') && !name.startsWith('vite')) expect(version, name).toBe(ours[name]);
+  const shared = Object.entries(blank).filter(([name]) => !name.startsWith('@joeblew999/') && !name.startsWith('vite'));
+  expect(Object.fromEntries(shared)).toEqual(Object.fromEntries(shared.map(([name]) => [name, ours[name]])));
 });
 
 test('every catalog: dependency in the blank app has its catalog entry', () => {
@@ -101,12 +101,15 @@ test('every catalog: dependency in the blank app has its catalog entry', () => {
       (match) => match[1]!,
     ),
   );
-  for (const file of ['template/package.json', 'template/docs/package.json']) {
+  const missing = ['template/package.json', 'template/docs/package.json'].flatMap((file) => {
     const manifest = JSON.parse(readFileSync(file, 'utf8')) as Record<string, Record<string, string> | undefined>;
-    for (const section of ['dependencies', 'devDependencies'])
-      for (const [name, spec] of Object.entries(manifest[section] ?? {}))
-        if (spec === 'catalog:') expect(catalog.has(name), `${file}: ${name}`).toBe(true);
-  }
+    return ['dependencies', 'devDependencies'].flatMap((section) =>
+      Object.entries(manifest[section] ?? {})
+        .filter(([name, spec]) => spec === 'catalog:' && !catalog.has(name))
+        .map(([name]) => `${file}: ${name}`),
+    );
+  });
+  expect(missing).toEqual([]);
 });
 
 test("the new-app test's app is the blank app's, with only its named extras", () => {
@@ -147,6 +150,10 @@ test("the new-app test's app is the blank app's, with only its named extras", ()
       ].map((match) => [match[1]!, match[2]!]),
     );
   const fixtureCatalog = entries('fixtures/consumer/files/pnpm-workspace.yaml');
-  for (const [name, version] of Object.entries(entries('template/pnpm-workspace.yaml')))
-    if (!name.startsWith('@joeblew999/')) expect(fixtureCatalog[name], name).toBe(version);
+  const blankCatalog = Object.entries(entries('template/pnpm-workspace.yaml')).filter(
+    ([name]) => !name.startsWith('@joeblew999/'),
+  );
+  expect(Object.fromEntries(blankCatalog.map(([name]) => [name, fixtureCatalog[name]]))).toEqual(
+    Object.fromEntries(blankCatalog),
+  );
 });

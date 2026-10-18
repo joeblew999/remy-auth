@@ -1,0 +1,5 @@
+{
+  "oxc.fmt.disableNestedConfig": true,
+  "oxc.disableNestedConfig": true,
+  "npm.scriptRunner": "vp"
+}

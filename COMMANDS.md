@@ -63,3 +63,4 @@ The repository's own tools, as package.json defines them, each run as `vp run <s
 | `vp run ui:theme` | `shadcn apply nova --only theme --yes -c apps/remy-auth` |
 | `vp run release:push` | `V=$(node -p "require('./packages/remy-ui/package.json').version") && git add -A && git commit --allow-empty -m "Release v$V" && git push origin main` |
 | `vp run test:docs` | `vp run @joeblew999/remy-auth-docs#test:browser` |
+| `vp run coverage` | `vp test run --coverage` |

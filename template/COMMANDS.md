@@ -55,3 +55,4 @@ The repository's own tools, as package.json defines them, each run as `vp run <s
 | --- | --- |
 | `vp run prepare` | `vp config --no-agent` |
 | `vp run test:docs` | `vp run docs#test:browser` |
+| `vp run coverage` | `vp test run --coverage` |
