@@ -1,7 +1,7 @@
 ---
 title: "Proyectos: estructura, apps nuevas y publicación"
 description: "Qué guarda todo proyecto de Remy en el mismo lugar, cómo empezar una app nueva, la publicación de paquetes, las traducciones, Cloudflare y los planes. Todos los comandos están en Comandos."
-translatedFrom: "76024556 6f14d69f c401652a 191684ff 2ad319b2 335e995b de907ca6 5d426462"
+translatedFrom: "76024556 6f14d69f 77ff6392 191684ff 2ad319b2 335e995b de907ca6 5d426462"
 ---
 
 La herramienta es `remy` (y `remy-check`), los bins de `@joeblew999/remy-cli` (`packages/remy-cli/src`, un
@@ -67,10 +67,11 @@ Todo lo demás es el paquete, que un solo cambio de versión actualiza.
 
 1. Requisitos: el `vp` de la máquina en modo gestionado ([herramientas para desarrollo](./tooling.md#vite-plus-the-machines-vp-in-managed-mode)),
    Node 26, `gh auth login` con un token que tenga `read:packages` y, en Linux, la fuente `fonts-noto-cjk` (las comprobaciones de navegador instalan el Chromium propio de Playwright).
-2. `env "npm_config_@joeblew999:registry=https://npm.pkg.github.com" "npm_config_//npm.pkg.github.com/:_authToken=$(gh auth token)" vp create @joeblew999:app --directory <name>`
-   (la última versión; `@joeblew999:app@X.Y.Z` para una concreta; vp create lee un registro y su token solo de archivos `.npmrc`
-   y de estas variables), luego `cd <name>` y `git init` (las herramientas de traducción leen el historial de git; `vp run setup`
-   lo indica si falta).
+2. Una vez por máquina, GitHub Packages para `vp create`, que lee un registro y su token de `~/.npmrc` (la forma propia de
+   GitHub para su registro npm), no de la configuración de pnpm:
+   `printf '@joeblew999:registry=https://npm.pkg.github.com/\n//npm.pkg.github.com/:_authToken=%s\n' "$(gh auth token)" >> ~/.npmrc`.
+   Luego `vp create @joeblew999:app --directory <name>` (la última versión; `@joeblew999:app@X.Y.Z` para una concreta), después
+   `cd <name>` y `git init` (las herramientas de traducción leen el historial de git; `vp run setup` lo indica si falta).
 3. Nombra la aplicación (vp create nombra `package.json` según la carpeta): sustituye `my-app` y `My app` (`grep -rn -i "my.app" --exclude-dir=node_modules .`):
    `package.json`, `wrangler.jsonc`, `src/service.ts`, los orígenes de `.env`, `docs/wrangler.jsonc`,
    `docs/docs.config.ts` (el nombre y la fuente del producto, que también lee el marco de la app) y `messages/en.json`.

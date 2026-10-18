@@ -122,17 +122,34 @@ export function upgrade(version: string | undefined, installed = false): void {
   console.log(`upgrade: on @joeblew999/remy-ui ${version}. Next: vp run setup (the skills, the rules, every check).`);
 }
 
+/** The registry the app's own .npmrc names for our scope, else GitHub Packages. */
+function scopeRegistry(): string {
+  const npmrc = existsSync('.npmrc') ? readFileSync('.npmrc', 'utf8') : '';
+  return (/^@joeblew999:registry\s*=\s*(\S+)\s*$/m.exec(npmrc)?.[1] ?? 'https://npm.pkg.github.com').replace(
+    /\/+$/,
+    '',
+  );
+}
+
 /**
  * The blank app at a release, in a scratch folder removed when the upgrade ends, however it ends:
- * `vp create @joeblew999:app@<version>`, from @joeblew999/create on GitHub Packages, as a new app is made. vp create
- * reads a registry's address and token from .npmrc files and npm_config_ variables only, not pnpm's own
- * configuration, so both are handed to it here. VP_SKIP_INSTALL: vp create installs the new app's dependencies
- * itself, which the upgrade never needs; Vite Plus's own switch for that, read in vite-plus/dist/prompts-*.js
- * (runViteInstall), not in its docs: if a Vite Plus upgrade drops it, the scratch app is installed again (slow, harmless).
+ * `vp create @joeblew999:app@<version>`, from @joeblew999/create, as a new app is made. vp create reads a registry's
+ * address and token from .npmrc files (its guide: the project's and ~/), not pnpm's own configuration, so the scratch
+ * folder gets one, private to this user: the app's own registry for the scope, and the token for its host. (Not
+ * npm_config_ variables: on GitHub's runner they did not reach vp create, which asked npmjs.org; issue #44.)
+ * VP_SKIP_INSTALL: vp create installs the new app's dependencies itself, which the upgrade never needs; Vite Plus's
+ * own switch for that, read in vite-plus/dist/prompts-*.js (runViteInstall), not in its docs: if a Vite Plus upgrade
+ * drops it, the scratch app is installed again (slow, harmless).
  */
 function fetchBlank(version: string, token: string): string {
   const scratch = mkdtempSync(join(tmpdir(), 'remy-blank-'));
   process.on('exit', () => rmSync(scratch, { recursive: true, force: true }));
+  const registry = scopeRegistry();
+  writeFileSync(
+    join(scratch, '.npmrc'),
+    `@joeblew999:registry=${registry}/\n${registry.replace(/^https?:/, '')}/:_authToken=${token}\n`,
+    { mode: 0o600 },
+  );
   const got = spawnSync(
     'vp',
     [
@@ -146,18 +163,7 @@ function fetchBlank(version: string, token: string): string {
       '--no-editor',
       '--no-hooks',
     ],
-    {
-      cwd: scratch,
-      stdio: 'inherit',
-      env: {
-        ...process.env,
-        VP_SKIP_INSTALL: '1',
-        // The scope's registry as the machine sets it, else GitHub Packages (the upgrade test points it at its own).
-        'npm_config_@joeblew999:registry':
-          process.env['npm_config_@joeblew999:registry'] ?? 'https://npm.pkg.github.com',
-        'npm_config_//npm.pkg.github.com/:_authToken': token,
-      },
-    },
+    { cwd: scratch, stdio: 'inherit', env: { ...process.env, VP_SKIP_INSTALL: '1' } },
   );
   if (got.status !== 0)
     fail(`upgrade: the blank app at ${version} could not be made (vp create @joeblew999:app@${version})`);

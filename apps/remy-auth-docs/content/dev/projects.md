@@ -64,10 +64,11 @@ Everything else is the package, which one version bump upgrades.
 
 1. Prerequisites: the machine's `vp` in managed mode ([developer tooling](./tooling.md#vite-plus-the-machines-vp-in-managed-mode)),
    Node 26, `gh auth login` with a token that has `read:packages`, and on Linux the font `fonts-noto-cjk` (the browser checks install Playwright's own Chromium).
-2. `env "npm_config_@joeblew999:registry=https://npm.pkg.github.com" "npm_config_//npm.pkg.github.com/:_authToken=$(gh auth token)" vp create @joeblew999:app --directory <name>`
-   (the latest release; `@joeblew999:app@X.Y.Z` for one; vp create reads a registry and its token from `.npmrc` files
-   and these variables only), then `cd <name>` and `git init` (the translation tools read git history; `vp run setup`
-   says so if it is missing).
+2. Once per machine, GitHub Packages for `vp create`, which reads a registry and its token from `~/.npmrc` (GitHub's
+   own way for its npm registry), not from pnpm's configuration:
+   `printf '@joeblew999:registry=https://npm.pkg.github.com/\n//npm.pkg.github.com/:_authToken=%s\n' "$(gh auth token)" >> ~/.npmrc`.
+   Then `vp create @joeblew999:app --directory <name>` (the latest release; `@joeblew999:app@X.Y.Z` for one), then
+   `cd <name>` and `git init` (the translation tools read git history; `vp run setup` says so if it is missing).
 3. Name the app (vp create names `package.json` after the folder): replace `my-app` and `My app` (`grep -rn -i "my.app" --exclude-dir=node_modules .`):
    `package.json`, `wrangler.jsonc`, `src/service.ts`, `.env`'s origins, `docs/wrangler.jsonc`,
    `docs/docs.config.ts` (the product's name and source, which the app's frame reads too) and `messages/en.json`.
