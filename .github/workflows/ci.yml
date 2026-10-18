@@ -13,9 +13,8 @@
 #       permissions: { contents: write, packages: write }
 #
 # Every step is a task or script the caller defines (its vite.config.ts and package.json), so the caller decides what
-# runs. vp install reads @joeblew999/remy-ui from GitHub Packages with the run's token, put where pnpm reads it (pnpm
-# expands no variable in a repository's .npmrc), once the package grants the repository read access ("Manage Actions
-# access").
+# runs. vp install reads @joeblew999/remy-ui from GitHub Packages with the run's token (setup-vp's registry-url, the
+# token from NODE_AUTH_TOKEN), once the package grants the repository read access ("Manage Actions access").
 # The release job runs for a push to main: vp run release ran every check and pushed; this job publishes what Changesets
 # versioned (changeset publish, pnpm publish for each package whose version is new), then tags it and makes the GitHub release.
 # Named for what it runs (`vp run ci`); called google.yml until 2026-10-17.
@@ -62,21 +61,21 @@ jobs:
     permissions:
       contents: read
       packages: read
+    # GitHub Packages' token for every pnpm command in the job (setup-vp's .npmrc reads it).
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       # Vite Plus: the global vp, the Node .node-version pins and the npm package.json pins (managed, as on every
-      # machine), then vp install from the lockfile, its packages cached between runs.
+      # machine), then vp install from the lockfile, its packages cached between runs. registry-url and scope: the
+      # .npmrc for GitHub Packages, its token the job's NODE_AUTH_TOKEN.
       - uses: voidzero-dev/setup-vp@68f39c78aaf39be468cabd2afb09c162574c84af # v1.21.2
         with:
           cache: true
-          run-install: false
-      - run: |
-          pnpm config set --location global //npm.pkg.github.com/:_authToken "$GITHUB_TOKEN"
-          vp install --frozen-lockfile
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          registry-url: https://npm.pkg.github.com
+          scope: '@joeblew999'
       - if: startsWith(matrix.task, 'test:')
         run: sudo apt-get install -y --no-install-recommends fonts-noto-cjk
       # Vite Plus's task cache, restored after the install (which recreates node_modules): what an earlier run of
@@ -123,17 +122,16 @@ jobs:
     permissions:
       contents: write
       packages: write
+    # GitHub Packages' token for every pnpm command in the job (setup-vp's .npmrc reads it).
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: voidzero-dev/setup-vp@68f39c78aaf39be468cabd2afb09c162574c84af # v1.21.2
         with:
           cache: true
-          run-install: false
-      - run: |
-          pnpm config set --location global //npm.pkg.github.com/:_authToken "$GITHUB_TOKEN"
-          vp install --frozen-lockfile
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          registry-url: https://npm.pkg.github.com
+          scope: '@joeblew999'
       # changeset publish publishes only what the registry lacks (nothing, after most pushes). The platform's version
       # tag and GitHub release follow once, when that version has none yet.
       - run: vp run release:publish
