@@ -26,6 +26,19 @@ previous=$(curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" "$packages/@joeble
 # Every pnpm command here (the previous app's install, the upgrade's) reads GitHub Packages with this token, once
 # GitHub Packages has taken it (so a bad token never replaces a machine's good one).
 vp pm config set --location global //npm.pkg.github.com/:_authToken "$GITHUB_TOKEN" > /dev/null
+# What GitHub Packages says about @joeblew999/create at that version, before vp create reads it (issue #44's first
+# run on GitHub: vp create found no createConfig there). Printed, never the token.
+curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" "$packages/@joeblew999%2fcreate" > "$out/create.json" || true
+node -e "
+const p = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8')), v = p.versions?.[process.argv[2]] ?? {};
+console.log('upgrade-test: create', process.argv[2], 'keys:', Object.keys(v).join(' '));
+console.log('upgrade-test: createConfig', JSON.stringify(v.createConfig) ?? 'absent', 'tarball', v.dist?.tarball, 'integrity', v.dist?.integrity ? 'yes' : 'no');
+" "$out/create.json" "$previous" || true
+tarball=$(node -p "JSON.parse(require('fs').readFileSync('$out/create.json','utf8')).versions['$previous']?.dist?.tarball ?? ''" 2>/dev/null || true)
+if [ -n "$tarball" ]; then
+  echo "upgrade-test: tarball without a token: $(curl -s -o /dev/null -w '%{http_code}' "$tarball"), with: $(curl -s -L -o "$out/create.tgz" -w '%{http_code} %{url_effective}' -H "Authorization: Bearer $GITHUB_TOKEN" "$tarball" | sed -E 's#\?.*##')"
+  tar -xzOf "$out/create.tgz" package/package.json 2>/dev/null | node -e "let s='';process.stdin.on('data',(d)=>(s+=d)).on('end',()=>{try{console.log('upgrade-test: the tarball\'s createConfig', JSON.stringify(JSON.parse(s).createConfig))}catch(e){console.log('upgrade-test: the tarball has no readable package.json')}})"
+fi
 mkdir -p "$out/make"
 (cd "$out/make" && env "npm_config_@joeblew999:registry=$packages" "npm_config_//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN" \
   VP_SKIP_INSTALL=1 vp create "@joeblew999:app@$previous" --directory app --no-interactive --no-git --no-agent --no-editor --no-hooks)
