@@ -46,8 +46,7 @@ export default defineConfig({
       // nothing, so an earlier build's chunks would stay beside them.
       clean: { command: `node -e "require('node:fs').rmSync('dist', { recursive: true, force: true })"`, cache: false },
       dev: { command: 'vp dev', dependsOn: ['generate'], cache: false },
-      // The production build (CLOUDFLARE_ENV=staging: the Wrangler configuration's env.staging, as Cloudflare's staging
-      // build sets it), replayed while nothing it reads changes. Its stamp names a commit only when one is
+      // The production build, replayed while nothing it reads changes. Its stamp names a commit only when one is
       // given (a deploy's REMY_COMMIT, Workers Builds' WORKERS_CI_COMMIT_SHA), and those are in the cache key.
       build: {
         command: 'vp build',
@@ -55,7 +54,7 @@ export default defineConfig({
         cache: {
           input: [{ auto: true }, ...written, lockfile],
           output: ['dist/**'],
-          env: ['REMY_COMMIT', 'REMY_CHANGES', 'WORKERS_CI_COMMIT_SHA', 'CLOUDFLARE_ENV'],
+          env: ['REMY_COMMIT', 'REMY_CHANGES', 'WORKERS_CI_COMMIT_SHA'],
           untrackedEnv: network,
         },
       },

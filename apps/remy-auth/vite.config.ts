@@ -50,8 +50,7 @@ export default defineConfig({
       // nothing, so an earlier build's chunks would stay beside them.
       clean: { command: `node -e "require('node:fs').rmSync('dist', { recursive: true, force: true })"`, cache: false },
       dev: { command: 'vp dev', dependsOn: ['local', 'generate'], cache: false },
-      // The production build (CLOUDFLARE_ENV=staging: the Wrangler configuration's env.staging, as Cloudflare's staging
-      // build sets it), replayed while nothing it reads changes, across commits too. Its stamp names a commit
+      // The production build, replayed while nothing it reads changes, across commits too. Its stamp names a commit
       // only when one is given (a deploy's REMY_COMMIT, Workers Builds' WORKERS_CI_COMMIT_SHA), and those are in the
       // cache key, so a deployment never takes another commit's build.
       build: {
@@ -60,7 +59,20 @@ export default defineConfig({
         cache: {
           input: [{ auto: true }, ...written, lockfile],
           output: ['dist/**'],
-          env: ['REMY_COMMIT', 'REMY_CHANGES', 'WORKERS_CI_COMMIT_SHA', 'CLOUDFLARE_ENV'],
+          env: ['REMY_COMMIT', 'REMY_CHANGES', 'WORKERS_CI_COMMIT_SHA'],
+          untrackedEnv: network,
+        },
+      },
+      // The same build for staging: the Wrangler configuration's env.staging, its own Worker (Cloudflare's staging build
+      // runs it). The variable is this command's alone: set for the whole run, every package's configuration would
+      // read it, and the docs' has no staging.
+      'build:staging': {
+        command: 'CLOUDFLARE_ENV=staging vp build',
+        dependsOn: ['local', 'generate', 'clean'],
+        cache: {
+          input: [{ auto: true }, ...written, lockfile],
+          output: ['dist/**'],
+          env: ['REMY_COMMIT', 'REMY_CHANGES', 'WORKERS_CI_COMMIT_SHA'],
           untrackedEnv: network,
         },
       },
