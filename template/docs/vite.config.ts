@@ -24,7 +24,7 @@ export default defineConfig({
         cache: {
           input: [{ auto: true }, '!dist/**', '!.wrangler/**'],
           output: ['dist/**'],
-          env: ['REMY_COMMIT', 'REMY_CHANGES', 'WORKERS_CI_COMMIT_SHA'],
+          env: ['WORKERS_CI_COMMIT_SHA'],
           untrackedEnv: network,
         },
       },

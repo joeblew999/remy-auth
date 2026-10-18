@@ -3,7 +3,7 @@ import { network, style } from '@joeblew999/remy-ui/vite-plus';
 import { defineConfig } from 'vite-plus';
 
 // This app: the shared Vite configuration (@joeblew999/remy-ui/app/vite), the shared style, and every task, all of them
-// here. The flow (vp run ci, land, promote, release, setup) is package.json's scripts; the docs' tasks are
+// here. The flow (vp run ci, translate, release, setup) is package.json's scripts; the docs' tasks are
 // docs/vite.config.ts's.
 
 // What a browser run reads that is not what it tests: its own results, Wrangler's local state, tools' caches.
@@ -48,14 +48,14 @@ export default defineConfig({
       // workspace's root without being named it.
       dev: { command: 'vp dev .', dependsOn: ['generate'], cache: false },
       // The production build, replayed while nothing it reads changes. Its stamp names a commit only when one is
-      // given (a deploy's REMY_COMMIT, Workers Builds' WORKERS_CI_COMMIT_SHA), and those are in the cache key.
+      // given (Workers Builds' WORKERS_CI_COMMIT_SHA), and those are in the cache key.
       build: {
         command: 'vp build .',
         dependsOn: ['generate', 'clean'],
         cache: {
           input: [{ auto: true }, ...written, lockfile],
           output: ['dist/**'],
-          env: ['REMY_COMMIT', 'REMY_CHANGES', 'WORKERS_CI_COMMIT_SHA'],
+          env: ['WORKERS_CI_COMMIT_SHA'],
           untrackedEnv: network,
         },
       },

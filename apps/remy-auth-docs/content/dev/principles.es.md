@@ -1,7 +1,7 @@
 ---
 title: "Arquitectura y principios de desarrollo"
 description: "Lo que el código debe ser: propiedad, una única fuente de verdad, gates de pruebas, código generado y decisiones del dueño."
-translatedFrom: "052958b0 82fc4aa9 b2dee8c7"
+translatedFrom: "052958b0 1774671b b2dee8c7"
 ---
 
 Este documento es el dueño de lo que el código debe ser. Cómo trabajan las personas y los agentes día a día vive en
@@ -14,9 +14,8 @@ Este documento es el dueño de lo que el código debe ser. Cómo trabajan las pe
   Comprueba qué existe ya antes de escribir código a medida. Mantén los wrappers delgados; añade
   comportamiento personalizado solo para un requisito concreto no cubierto, y documenta la brecha.
 - Mantén el comportamiento local a su dueño y visible en el punto de entrada.
-- `package.json` es la entrada: sus scripts ejecutan cada comando del proyecto; Node se fija con
-  `.node-version`, y cada herramienta es una dependencia. No importes la librería de tareas retirada
-  `joeblew999/.github` ni controles otros repos mediante scripts compartidos.
+- La entrada es la de Vite Plus: las tareas escritas en el `vite.config.ts` de cada paquete y los scripts del `package.json` raíz que las componen ejecutan cada comando del proyecto (`vp run <name>`); Node se fija con `.node-version`, pnpm con
+  `devEngines`, y cada herramienta es una dependencia en la versión del catálogo (`pnpm-workspace.yaml`). No importes la librería de tareas retirada `joeblew999/.github` ni controles otros repos mediante scripts compartidos.
 - El desarrollo usa almacenamiento local. El arranque no debe aprovisionar identidades de producción,
   importar datos de ejemplo ni cambiar silenciosamente los registros de apps.
 - Mantén una única implementación de Worker y una única configuración fuente de Wrangler para la ejecución
@@ -37,10 +36,11 @@ Este documento es el dueño de lo que el código debe ser. Cómo trabajan las pe
   (incluido `src/routeTree.gen.ts`) regenerándola. No edites a mano ni sobrescribas la salida generada en otro lugar.
 - Las decisiones que los planes dejan abiertas, o las correcciones que entran en conflicto con un plan, pertenecen al
   dueño. Pregunta; no elijas, a menos que el dueño las haya delegado
-  ([cómo trabajamos](./how-we-work.md#when-the-owner-delegates-decisions)). Producción (`vp run promote`), un release
+  ([cómo trabajamos](./how-we-work.md#when-the-owner-delegates-decisions)). Un release
   (`vp run release`), aprovisionar y abrir issues upstream también esperan la solicitud explícita del dueño.
-  Hacer landing (`vp run land`, incluyendo staging) no: es el paso que da todo cambio terminado, por
-  quien lo haya hecho ([el flujo](./how-we-work.md#the-flow-four-steps-in-plain-sight)).
+  Un push no: hacer commit y push a `main` (su hook ejecuta `vp run ci`) es el paso que da todo cambio terminado, por
+  quien lo haya hecho, y Cloudflare despliega `main` desde el push
+  ([el flujo](./how-we-work.md#the-flow-the-standard-way-in-plain-sight)).
 - No mockees Better Auth, D1 ni el runtime de Workers. Las conveniencias de desarrollo (personas creadas mediante seed,
   un selector de inicio de sesión para ellas, un código de inicio de sesión fijo, correo capturado) solo se permiten detrás de una
   única tabla de políticas por entorno ([de remy-auth](./auth.md#environments-one-table)) cuyo valor por defecto, y cuyo valor para cualquier entorno desconocido, es

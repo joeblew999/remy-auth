@@ -32,7 +32,7 @@ is general, not only for missing tools:
 - **Everyone hears it through the repo**: `.plans/now.md` is committed, so what one person saw reaches
   everyone who pulls main (`pnpm remy plans status` prints its open items), and the next change takes the top of it.
 - **"Done" is the end of a sweep, not of a list.** Before saying it: branches and worktrees (`git branch`,
-  `git worktree list`), open pull requests (`gh pr list`), `pnpm remy cloudflare versions`, `pnpm remy plans check`, a
+  `git worktree list`), `pnpm remy cloudflare versions`, `pnpm remy plans check`, a
   search for the words the change retired, the docs the change touched. Show the sweep.
 
 ## Use the project's own tools first
@@ -142,7 +142,7 @@ lacks something, use its options first and record the gap in the owning plan.
 
 ## Translations: in the change
 
-English is the source; translations follow it, in the same change. A pull request holds its English and
+English is the source; translations follow it, in the same change. A commit holds its English and
 its translations together: one commit, one push, one run of the checks.
 
 - A feature agent writes English only: the English docs and the base catalog (`messages/en.json`).
@@ -188,8 +188,8 @@ Owner, 2026-09-26: "how overwhelming and frustrating it is to have so much garba
 one line in `.plans/now.md`, in the order it closes. A plan file is written only for work that is big
 enough to be parked or to run over weeks; research, analyses and reviews go into the plan they serve,
 not a file of their own. A plan closes the day its work ships: a closing line, then `.plans/done/`. Big
-features wait in `.plans/parked/`. Closing a plan needs no extra pull request or test run of its own: batch the
-code into one pull request and one full run at the end.
+features wait in `.plans/parked/`. Closing a plan needs no extra commit or test run of its own: batch the
+code into one commit and one full run at the end.
 The `remy plans` commands ([Commands](./commands.mdx)) do the moves and keep `.plans/` tidy; `vp run ready` runs
 `remy plans check` (its `check:plans`) on every change ([projects](./projects.md#plans)).
 
@@ -213,32 +213,25 @@ in its own `vite.config.ts` (no code makes them), the root `vite.config.ts` hold
 checks (`ready`), and the root `package.json`'s scripts compose them (`ci`, `translate`, `release`, `setup`); `vp run`
 lists every one, and [Commands](./commands.mdx) prints each script's steps. Every `remy` command is a leaf: it does
 the one job it names (a check, the translator, a browser run, a Cloudflare question), reads only its arguments and the files that hold
-what it needs, and decides nothing else. A piece of work runs on a branch of its own (`git switch -c <name>`), or in a worktree
-(Claude Code's `.claude/worktrees/<name>`, or `git worktree add`); two checkouts checking at once give one of them
+what it needs, and decides nothing else. Work is committed and pushed straight to `main`; when several agents work at once, each takes a worktree
+(Claude Code's `.claude/worktrees/<name>`, or `git worktree add`) and pulls before it pushes; two checkouts checking at once give one of them
 its own ports (`PREVIEW_PORT`, `DOCS_PREVIEW_PORT`).
 
 | Step | Command | Who runs it, and when | What runs | Time |
 | --- | --- | --- | --- | --- |
-| Look | `git status`, `git log`, `gh pr list`, `gh run list`, `pnpm wrangler deployments list`, `pnpm remy cloudflare versions` | everyone, first, and whenever they need to know | git and GitHub's own answers; what each deployment runs, read from its `/healthz`, placed against this checkout | seconds |
+| Look | `git status`, `git log`, `gh run list`, `pnpm wrangler deployments list`, `pnpm remy cloudflare versions` | everyone, first, and whenever they need to know | git and GitHub's own answers; what each deployment runs, read from its `/healthz`, placed against this checkout | seconds |
 | After every change | `vp run ready` | whoever is coding; the only step waited for | Vite Plus's tasks: everything generated, the app and the docs built, Wrangler's deployment dry run, the project's own checks, the unit checks, then `vp check` (format, lint, types); what has not changed comes from Vite Plus's cache | ~8 s unchanged, ~50 s from nothing |
-| The change leaves the machine | `vp run translate` (when text changed), `git commit`, `git push`, `gh pr create`, `gh pr merge --auto --squash` | whoever did the work, on their own, as soon as it is finished | the translations the change made stale, in the same commit; the commit (its hook: `vp staged`); the push (its hook: `vp run ci`, from the cache where nothing changed; `VP_GIT_HOOKS=0` skips it); the pull request, squash-merged once it is green; then `git switch main && git pull` | a few minutes: what changed here, in the push's hook |
-| Production | a push to `main` (the merge): Cloudflare deploys it | nobody; every merge goes live | Cloudflare's Git builds (Workers Builds) build and deploy the app and the docs from each push to `main`, and every other branch's Preview from its own push ([on Cloudflare](./run-and-test.md#on-cloudflare)); after a docs change, `pnpm remy docs publish` (a machine signed in to Cloudflare) gives Ask AI's index the new pages | a few minutes after the merge |
+| The change leaves the machine | `vp run translate` (when text changed), `git commit`, `git push` | whoever did the work, on their own, as soon as it is finished | the translations the change made stale, in the same commit; the commit (its hook: `vp staged`); the push to `main` (its hook: `vp run ci`, from the cache where nothing changed; `VP_GIT_HOOKS=0` skips it) | a few minutes: what changed here, in the push's hook |
+| Production | a push to `main`: Cloudflare deploys it | nobody; every push to `main` goes live | Cloudflare's Git builds (Workers Builds) build and deploy the app and the docs from each push to `main`, and every other branch's Preview from its own push ([on Cloudflare](./run-and-test.md#on-cloudflare)); after a docs change, `pnpm remy docs publish` (a machine signed in to Cloudflare) gives Ask AI's index the new pages | a few minutes after the push |
 | A release | `vp run release` | the owner, or an agent the owner asked in that session | `remy release check` (a clean main, translations complete, versions bumped) → `CHECK_LOCALES=all vp run ci` (every language) → `vp run template:check` → `vp run ui:verify` → `vp run publish:rehearse` → `remy test cwv` → `remy packages tag`; GitHub's release job publishes from the tag | ~5 min |
 
-From Claude's cloud, where `gh`'s GraphQL commands are refused, the same steps through GitHub's REST API:
-`gh api repos/joeblew999/remy-auth/pulls -f title=… -f head=<branch> -f base=main -f body=…` opens the pull request,
-and `gh api -X PUT repos/joeblew999/remy-auth/pulls/<n>/merge -f merge_method=squash` merges it once it is green.
+GitHub's CI workflow is off, by the owner's choice: `vp run ci` runs the same here, and the push's hook runs it before
+anything leaves the machine. No pull requests, auto-merge or branch rules: `main` takes the push.
 
-GitHub's CI workflow is disabled for now, by the owner's choice: `vp run ci` runs the same here, and the push's hook
-runs it before anything leaves the machine. Auto-merge and a ruleset on `main` requiring the CI checks (`ready`,
-`browser 1/3`, `browser 2/3`, `browser 3/3`, `audits`, `new-app`) are repository settings, the owner's to set from his
-Mac ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/2026-10-17-02-vite-plus.md)); until auto-merge
-is on, the agent merges its pull request itself (the `merge` call above, or `gh pr merge --squash`) once it is green.
-
-- **Who runs a step is in the table, and it is never a question.** An agent opens and merges its own
-  finished work's pull request without asking: its push ran `vp run ci` first, and nothing red is merged. The owner's word is for a release, the one step whose column says so, and for provisioning
+- **Who runs a step is in the table, and it is never a question.** An agent pushes its own
+  finished work to `main` without asking: its push ran `vp run ci` first, and nothing red is pushed. The owner's word is for a release, the one step whose column says so, and for provisioning
   ([development principles](./principles.md#development-principles)). An agent that reads the table and still asks
-  whether to merge has stopped using the flow (owner, 2026-10-10, after one did: "Is it absolutely clear when each
+  whether to push has stopped using the flow (owner, 2026-10-10, after one did: "Is it absolutely clear when each
   should be run by you?").
 - **Nothing of ours wraps git, GitHub or Cloudflare.** The landing and promotion automation (`vp run land`,
   `vp run promote`, `remy land`, `remy promote`, `remy status`, the Claude status hook, our own Cloudflare deploys)
@@ -276,7 +269,7 @@ is on, the agent merges its pull request itself (the `merge` call above, or `gh 
   cache and why it ran; a slow step is a number in that, not a feeling (owner, 2026-10-10: "how can it be
   6 minutes").
 - **GitHub's answer comes to you**, while its CI workflow is on. A red run comments on the commit (GitHub tells its
-  author), naming the run; `gh run list` and `gh pr checks <n>` show the rest. To reproduce a red
+  author), naming the run; `gh run list` and `gh run view <id>` show the rest. To reproduce a red
   job, a person runs `vp run <task>` (the job's name), the same command GitHub ran, since the workflow holds no
   logic of its own (`remy verify tooling` checks every task a workflow names exists). An agent reads the
   run's own log (`gh run view <id> --log-failed`) and runs the one area
@@ -313,12 +306,12 @@ being turned into a mise task that uses a tool ... It's vital because all our re
   bash logic or untyped JavaScript: what the compiler cannot see, an agent misses (owner, issue #9).
   A one-line tool is a `package.json` script ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/tooling-in-typescript.md)).
 
-## Branches: short-lived, deleted after merge
+## Branches: only for a Preview, deleted after
 
-- Work happens on branches (`git switch -c <name>`), or in git worktrees, one per agent; they merge into `main`
-  through a pull request and are deleted, with their worktree, right after the merge. Only `main`, release tags and
-  branches with a pull request are pushed (each pushed branch gets its Cloudflare Preview); GitHub deletes a branch when its PR
-  merges ("Automatically delete head branches", on for every repo, 2026-09-26).
+- Work is pushed straight to `main`. A branch is for trying something on its Cloudflare Preview before it goes live
+  (`git switch -c <name>`, `git push -u origin <name>`); once it is good it goes into `main` (`git switch main`,
+  `git merge --ff-only <name>` or `git merge <name>`, `git push`) and the branch is deleted, here and on GitHub
+  (`git push origin --delete <name>`).
 - A leftover merged branch (local or on GitHub) is noise, not history: `main` and the tags hold it.
 
 ## Sharing one machine between agents
@@ -362,17 +355,18 @@ The steps, what each runs and who runs it: [the flow's table](#the-flow-the-stan
 
 - **Split by independence.** An orchestrator splits work into parts that touch different files, and
   starts one agent per part, each in a worktree of its own. A part that needs another's result waits for that
-  merge; it does not share a worktree.
-- **Spike first when the risk is unknown**: one agent proves the risky point and merges or stops.
-- **Every part proves itself**: it merges with its own check in `tests/`, a plain function
+  push; it does not share a worktree.
+- **Spike first when the risk is unknown**: one agent proves the risky point and pushes or stops.
+- **Every part proves itself**: it goes in with its own check in `tests/`, a plain function
   (`tests/**/*.unit.spec.ts`) when it can be one, in the browser when only a browser shows it.
-- **Merges serialise themselves.** Two agents at once: each has its own pull request; GitHub
-  refuses the second merge only when the two conflict, and then the second agent merges main into its branch
-  (`git pull origin main`), runs `vp run translate` for what the merge left stale and `vp run ready`, and pushes again.
-- **Hands-on pass before the merge.** Every green merge goes live, so passing checks is not the end: use the piece on
-  its branch's Cloudflare Preview in a real browser, on a phone's width, and fix what feels bad. Then merge.
+- **Pushes serialise themselves.** Two agents at once: GitHub refuses the second push to `main`, and the second agent
+  pulls (`git pull --rebase origin main`), runs `vp run translate` for what that left stale and `vp run ready`, and
+  pushes again.
+- **Hands-on pass before it goes live.** Every push to `main` goes live, so for anything a person sees, passing checks
+  is not the end: use it on a branch's Cloudflare Preview in a real browser, on a phone's width, and fix what feels bad.
+  Then push it to `main`.
 - **An agent never waits in the foreground** on `git push` (its hook runs `vp run ci`), a GitHub run or a Cloudflare
   build; it starts them in the background and acts on the result. Only `vp run ready` is waited for.
 - **Everything asynchronous comes back to everyone** ([the plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/dev-feedback.md)):
-  a red GitHub job writes on the commit, naming itself; `gh run list`, `gh pr list` and `pnpm remy cloudflare versions`
+  a red GitHub job writes on the commit, naming itself; `gh run list` and `pnpm remy cloudflare versions`
   show the rest to whoever asks.

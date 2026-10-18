@@ -221,7 +221,6 @@ export async function publish(options: { release?: string; dryRun?: boolean } = 
         }
       })();
     if (!token) fail('publish: no token (NODE_AUTH_TOKEN, or gh auth login)');
-    // An app's own .npmrc (the blank app's) reads ${GITHUB_TOKEN} and outranks the user config written below.
     const env = { GITHUB_TOKEN: token, NODE_AUTH_TOKEN: token };
     shipsWhatItNames();
     for (const item of workspaces().published) {
@@ -323,7 +322,7 @@ export async function releaseReady(): Promise<void> {
     fail(`release: v${version} is already tagged; bump ${name}'s version.`);
   if ((await translationGaps()).length)
     fail(
-      'release: translations are incomplete or stale (pnpm remy i18n check); vp run translate, through a pull request, first.',
+      'release: translations are incomplete or stale (pnpm remy i18n check); vp run translate, committed and pushed, first.',
     );
   bumped();
 }

@@ -1,7 +1,7 @@
 {
   "name": "@joeblew999/remy-cli",
   "version": "0.15.1",
-  "description": "The Remy command line (remy, remy-check): status, landing, deploys, translations, checks and setup for every Remy app",
+  "description": "The Remy command line (remy, remy-check): checks, translations, releases, Cloudflare questions and setup for every Remy app",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/joeblew999/remy-auth.git",

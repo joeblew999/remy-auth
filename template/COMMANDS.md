@@ -2,7 +2,7 @@ _Generated from the command line and package.json (`vp run fix` writes it; the c
 
 ## What you run
 
-Day to day: `vp run ready` after every edit; when the work is finished, git and GitHub's own commands: `git commit`, `git push` (its hook runs `vp run ci` first), `gh pr create`, `gh pr merge --auto --squash` (GitHub merges once its checks pass). `vp run release` is the owner's; Cloudflare deploys main by itself. `vp dev`, `vp build`, `vp preview` and `vp check` are Vite Plus's own tools, without the app's preparation; `vp run` lists every task and script, and `vp run --last-details` says what the last run did.
+Day to day: `vp run ready` after every edit; when the work is finished, git and GitHub's own commands: `git commit`, `git push` to main (its hook runs `vp run ci` first). `vp run release` is the owner's; Cloudflare deploys main by itself. `vp dev`, `vp build`, `vp preview` and `vp check` are Vite Plus's own tools, without the app's preparation; `vp run` lists every task and script, and `vp run --last-details` says what the last run did.
 
 | Command | What it does |
 | --- | --- |

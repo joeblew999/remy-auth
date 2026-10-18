@@ -39,8 +39,8 @@ This document owns what the code must be. How people and agents work day to day 
   owner. Ask; do not choose, unless the owner has delegated them
   ([how we work](./how-we-work.md#when-the-owner-delegates-decisions)). A release
   (`vp run release`), provisioning and filing upstream issues also wait for the owner's explicit request.
-  A pull request does not: opening it and merging it once it is green (`vp run ci`, which its push ran) is the step
-  every finished change takes, by whoever made it, and Cloudflare deploys the merged `main` from the push
+  A push does not: committing and pushing to `main` (its hook runs `vp run ci`) is the step every finished change
+  takes, by whoever made it, and Cloudflare deploys `main` from the push
   ([the flow](./how-we-work.md#the-flow-the-standard-way-in-plain-sight)).
 - Do not mock Better Auth, D1 or the Workers runtime. Development conveniences (seeded people,
   a sign-in picker for them, a fixed sign-in code, captured mail) are allowed only behind one

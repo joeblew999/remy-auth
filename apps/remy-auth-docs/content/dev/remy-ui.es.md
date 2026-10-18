@@ -1,7 +1,7 @@
 ---
 title: "El paquete de UI (@joeblew999/remy-ui)"
 description: "La interfaz que comparten todas las apps de Remy: shadcn de fábrica, fuentes, catálogos de Paraglide, las páginas del sitio y de la app, el pegamento de TanStack Start y sus comprobaciones."
-translatedFrom: "f3f6cb00 fc413994 aa3e15e4 59e743ca 62bc7837 4b877b76 e77fb7f1"
+translatedFrom: "f3f6cb00 46cbc789 60a401ce abda4f78 62bc7837 1b480316 415c4606"
 ---
 
 La interfaz que comparten todas las apps de Remy: componentes y tema de shadcn de fábrica, fuentes,
@@ -16,7 +16,7 @@ Todo lo que hay en `src/components`, `src/hooks` y `src/styles/globals.css` es l
 de shadcn fijada en una versión concreta (diseño de monorepo: el `components.json` de la app
 encamina `shadcn add` hacia aquí), incluido `cn`, del propio paquete `cn` de shadcn; nada de eso se
 edita a mano. `vp run ui:components` y `vp run ui:theme` los regeneran, y `vp run ui:verify`
-falla ante cualquier desviación (ver [docs/gui.md](./run-and-test.md#shadcn-stock)). Los bloques son
+falla ante cualquier desviación (ver [ejecutar y probar](./run-and-test.md#shadcn-stock)). Los bloques son
 copias propias en `src/blocks`.
 
 ## Uso [#usage]
@@ -30,9 +30,9 @@ y `text.css` en ese orden y declara el `@source` propio del paquete:
 @source "../src";
 ```
 
-`fonts.css` nombra las fuentes de reserva (fallback) de fontaine; añade
-`FontaineTransform.vite({ fallbacks: { 'Geist Variable': ['Arial'] } })` antes de Tailwind en la
-configuración de Vite (el [`vite.config.ts`](https://github.com/joeblew999/remy-auth/blob/main/vite.config.ts) de remy-auth es el ejemplo).
+`fonts.css` nombra las fuentes de reserva (fallback) de fontaine, que genera `remyApp()` (fontaine se ejecuta ahí antes de Tailwind), de modo que el
+[`vite.config.ts`](https://github.com/joeblew999/remy-auth/blob/main/apps/remy-auth/vite.config.ts) de una app no añade
+nada para ellas.
 
 Cada página es de uno de dos tipos, y nunca se mezclan (`isAppPath` de `paths` es la regla; cada
 app lista las suyas):
@@ -44,9 +44,8 @@ app lista las suyas):
   propia exportación para que una página del sitio nunca lo descargue.
 - **Navegación de la app**: la lista propia de la app, en su configuración `defineRemyApp` (`app-config`).
 
-Las páginas propias de remy-auth (las páginas de inicio y de formatos, los formatos, el reloj, la
-demo, la ubicación, los ajustes y la cuenta de la app, sus listas de navegación, la reserva de
-demostración y sus comprobaciones) no son de la plataforma: son `@joeblew999/remy-showcase`
+Las páginas propias de remy-auth (las páginas de inicio y de formatos, las de formatos, reloj, demo, ubicación, ajustes y
+cuenta de la app, sus listas de navegación, la reserva de demostración y sus comprobaciones) no son de la plataforma: son `@joeblew999/remy-showcase`
 (`packages/remy-showcase`, su README), para las apps que las muestran. Las tabletas y los ordenadores
 obtienen la barra lateral (que se contrae a iconos); los teléfonos obtienen la barra inferior
 (`blocks/bottom-nav`, piezas de shadcn de fábrica, ya que shadcn no tiene navegación inferior)
@@ -65,13 +64,13 @@ Lo que tiene toda app basada en el paquete, para que las tareas y comprobaciones
   `themeChecks` compartidas fallan sin él.
 - **Una ruta para cada path de `appPaths` y `sitePaths`**, cada una de pocas líneas sobre la página compartida (el
   Reloj de la demostración (showcase) propaga `clockRouteOptions` desde `@joeblew999/remy-showcase/clock-route`).
-- **`tests/smoke.spec.ts`**, una sola llamada a `smokeChecks(...)`: `vp run test:browser --grep smoke` y la prueba de humo en vivo tras
-  cada despliegue lo ejecutan, y fallan con «No tests found» si no existe.
-- **`.plans/now.md`**, la única lista ordenada del trabajo pendiente (`remy plans check`, en la comprobación).
+- **`tests/smoke.spec.ts`**, una sola llamada a `smokeChecks(...)`: `vp run test:browser --grep smoke` y la prueba de humo contra un despliegue
+  (`pnpm remy test live <origin>`) lo ejecutan, y fallan con «No tests found» si no existe.
+- **`.plans/now.md`**, la única lista ordenada del trabajo pendiente (`remy plans check`, en `vp run ready`).
 - **Instalaciones y actualizaciones mediante los comandos del paquete**, nunca a mano: `vp run setup` (instalar,
-  skills, MCP, las comprobaciones de la instalación) y `vp run upgrade <version>` (la versión exacta del paquete
-  y el workflow de CI en el mismo tag, y después las mismas comprobaciones). Ambos toman el token de GitHub Packages de
-  `gh auth token`.
+  skills, MCP, las comprobaciones de la instalación) y `vp run upgrade <version>` (remy-ui y remy-cli en esa versión, el
+  workflow de CI en el mismo tag, los scripts, hooks y configuración de la app en blanco, y después las mismas comprobaciones). Ambos toman el token de GitHub Packages de
+  `gh auth token` y lo escriben en la configuración de pnpm de la máquina.
 
 ## Exportaciones [#exports]
 
@@ -88,7 +87,9 @@ Todas bajo `@joeblew999/remy-ui/`, como TSX y CSS para consumidores de Vite y Ta
 | `app-config` | `defineRemyApp` y sus tipos (`RemyApp`, `NavItem`): el nombre, el código fuente y la navegación de la app para cada marco; `useRemyApp`, `usePreferredLocale`. `brand` es [el nombre del producto](./run-and-test.md#the-products-name), el único lugar donde se escribe: todo mensaje que lo menciona lo recibe como `{product}`; `pageTitle(title, brand)` es el título de una página tal como lo muestra la pestaña del navegador |
 | `root` | `remyRoot(app, { devtools })`: las opciones de la ruta raíz (el documento en el idioma y dirección de la página, `AppProviders`, el idioma a ofrecer, las páginas de problema); `RemyRouterContext`, `preferredLocale`. El `__root.tsx` de una app es `createRootRouteWithContext<RemyRouterContext>()(remyRoot(remyApp, { devtools: <TanStackDevtools … /> }))`: las devtools permanecen en el archivo de la app, donde el plugin de Vite de TanStack las elimina de los builds de producción |
 | `router` | `remyRouter(routeTree)`: el router que crea cada app (la reescritura de locale, un QueryClient por solicitud con la integración SSR de Query, precarga por intención, el nonce de CSP) |
-| `app/vite` | `remyApp({ plugins, start, cloudflare, port, build })`: el `vite.config.ts` completo de una app (TanStack Devtools, las partes, el sello de build, Cloudflare, Fontaine, Tailwind, Start, React; el catálogo propio de la app cuando tiene `project.inlang`) |
+| `app/vite` | `remyApp({ plugins, start, cloudflare, port, build, root })`: la configuración de Vite de una app, y solo eso (TanStack Devtools, las partes, el sello de build, Cloudflare, Fontaine, Tailwind, Start, React; el catálogo propio de la app cuando tiene `project.inlang`); el `vite.config.ts` de la app la propaga y escribe sus tareas junto a ella |
+| `docs/vite` | `remyDocs(docsConfig, { root, app })`: la configuración de Vite del Worker de docs sobre el `docs/` de una app, igualmente solo la de Vite |
+| `vite-plus` | Ajustes compartidos simples para un `vite.config.ts`: `style` (el formateador, el linter con su comprobación de tipos, el paso del hook de commit; se propaga en la raíz del workspace) y `network` (las variables de proxy y certificado que necesita una tarea en caché que descarga, sin seguimiento en su clave de caché) |
 | `providers` | `AppProviders`: dentro de lo que la raíz de una app renderiza sus páginas (dirección, tema, la configuración `defineRemyApp` de la app, el idioma `preferred`) |
 | `language` | `LanguageSwitcher` (enlaces simples, páginas del sitio), `LanguageMenu` (DropdownMenu de shadcn, páginas de la app), `LanguageHint` |
 | `messages`, `runtime` | Mensajes y runtime compilados de Paraglide |
@@ -104,7 +105,7 @@ Todas bajo `@joeblew999/remy-ui/`, como TSX y CSS para consumidores de Vite y Ta
 | `versions` | `BuildStamp` (una línea discreta: el entorno cuando no es producción, el nombre del producto, el commit, y un control de recarga cuando el despliegue ha avanzado bajo la página) y `Versions` (esta app, su Worker de docs y los `deployments` que la app lista en `defineRemyApp`, cada uno respondiendo por sí mismo, y los paquetes de este build). Piezas de shadcn de fábrica; coloca cualquiera de las dos en cualquier lugar dentro de `AppProviders` |
 | `cloudflare` | `placeFromCloudflare` |
 | `problem` | Las páginas de problema localizadas: `Problem`, `NotFound`, `ErrorPage`, `problemPages` (una línea de propagación por cada ruta de página) |
-| `parts`, `parts/vite`, `parts/checks` | Partes ([plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md)): una app las lista en `src/parts.json`, una por línea: las de la plataforma por nombre, las de otro paquete como `<package>/<name>`. `remyParts()` en `vite.config.ts` (su `plugin` entre los plugins, sus `routes` como `tanstackStart({ router: { virtualRouteConfig } })`) monta las rutas de cada parte listada junto a `src/routes` y genera `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` en el archivo de pruebas ejecuta las comprobaciones de cada parte listada. La parte de la plataforma es `seo-routes` (robots.txt y el sitemap); la demostración (showcase) ofrece `time-zones`, `deferred-place` y `status-card` (`@joeblew999/remy-showcase/<name>`); ver [Escribir una parte](#writing-a-part) |
+| `parts`, `parts/vite`, `parts/checks` | Partes ([plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/parts.md)): una app las lista en `src/parts.json`, una por línea: las de la plataforma por nombre, las de otro paquete como `<package>/<name>`. `remyApp()` (mediante el `parts/vite` del paquete, `remyParts()`: su `plugin` entre los plugins, sus `routes` como `tanstackStart({ router: { virtualRouteConfig } })`) monta las rutas de cada parte listada junto a `src/routes` y genera `virtual:remy-parts` (`parts`, `hasPart`); `partChecks()` en el archivo de pruebas ejecuta las comprobaciones de cada parte listada. La parte de la plataforma es `seo-routes` (robots.txt y el sitemap); la demostración (showcase) ofrece `time-zones`, `deferred-place` y `status-card` (`@joeblew999/remy-showcase/<name>`); ver [Escribir una parte](#writing-a-part) |
 | `rows`, `zod-csp` | `Group`, `Row`, `NameList`: filas de etiqueta/valor; el interruptor jitless de Zod (lo importa AppProviders) |
 | `invalidate` | `invalidateEverything(router, queryClient)`: todos los loaders y consultas marcados como obsoletos y recargados (tras cerrar sesión o un cambio de rol; la actualización de la tarjeta de estado) |
 | `samples` | Los valores fijos que renderizan las páginas |
@@ -124,12 +125,12 @@ Todas bajo `@joeblew999/remy-ui/`, como TSX y CSS para consumidores de Vite y Ta
 | `environment` | `environments({ production: {...}, local: {...} })`: la tabla de una app de lo que permite cada entorno, una fila por capacidad; `permits(env, 'capability')`, `policyFor`, `environmentOf`. El entorno se declara (`ENVIRONMENT`), y todo lo ausente o desconocido es producción |
 | `mail` | `mailerFor({ capture, binding, from })`: correo mediante Cloudflare Email Service (el binding `send_email` del Worker), o guardado en el buzón de salida del Worker donde el entorno lo captura (`readOutbox`, `clearOutbox`); un rechazo dice para quién era el correo y por qué; un mensaje a una dirección a la que no puede llegar ningún correo (`unreachable`: los dominios reservados de prueba y ejemplo) nunca se envía |
 
-Las dependencias del paquete son el único conjunto de dependencias de la plataforma, fijado con
-precisión: el framework (React, TanStack Start, Router y Query), la cadena de herramientas (Vite,
-Wrangler, Tailwind, TypeScript) y las herramientas que ejecutan las tareas y comprobaciones
-compartidas (Playwright, Lighthouse, el servidor MCP de DevTools, npm-check-updates). Una app solo
-nombra el paquete; `remy.singleCopy` en su `package.json` lista las que se rompen si se instalan dos
-veces, lo que mantiene la parte de copias únicas de la comprobación
+Las dependencias del paquete, en las versiones del catálogo, son lo que importa y ejecuta: el framework (React,
+TanStack Start, Router y Query), la cadena de herramientas (Vite, Wrangler, Tailwind, TypeScript) y las herramientas de las
+comprobaciones (Playwright, Lighthouse); las herramientas propias de la línea de comandos (el servidor MCP de DevTools, la CLI de Codex, npm-check-updates)
+son de `@joeblew999/remy-cli`. Una app lista lo que importa ella misma, en las mismas versiones del catálogo;
+`remy.singleCopy` en el `package.json` de este paquete lista las que se rompen si se instalan dos veces, que los
+`overrides` del `pnpm-workspace.yaml` de la app mantienen en una sola copia y que la parte de copias únicas de la comprobación demuestra
 ([proyectos](./projects.md#choosing-the-version-released-development-or-local)).
 
 ## Idioma [#language]
@@ -148,26 +149,27 @@ polaco, turco y alemán) están escritos por un agente y sin revisar.
 ## Publicación [#publishing]
 
 El paquete es `@joeblew999/remy-ui` en GitHub Packages (ahí el scope debe coincidir con el
-propietario de GitHub). `vp run release` ejecuta desde esta máquina las comprobaciones de la publicación,
-deteniéndose en el primer fallo, y después crea el tag; sus pasos, en orden, están en [Comandos](./commands.mdx),
-y el job de publicación de GitHub publica a partir del tag. Core Web Vitals se miden en frío sobre un Worker de
-Cloudflare desechable: las primeras visitas tras un despliegue, que es donde una página lenta sale más cara.
-CI (`.github/workflows/ci.yml`) repite las auditorías de Google sobre el tag.
+propietario de GitHub), publicado con `@joeblew999/remy-cli` bajo la misma versión; la demostración (showcase) y el contrato se
+publican cuando se subió su versión. Ninguno de los dos se publica todavía en esta forma. `vp run release` ejecuta desde esta máquina las
+comprobaciones de la publicación, deteniéndose en el primer fallo, y después crea el tag; sus pasos, en orden, están en
+[Comandos](./commands.mdx), y el job de publicación de GitHub publica a partir del tag (nunca una sesión en la nube). Core Web Vitals
+se miden sobre un despliegue (producción, o el Preview de una rama): las páginas tal como las reciben los visitantes desde Cloudflare. CI
+(`.github/workflows/ci.yml`) repite las auditorías de Google sobre el tag.
 
-Antes de publicar, un solo commit: la versión en `packages/remy-ui/package.json` (y en
-`packages/remy-auth-contract/package.json` cuando el contrato cambió) y la sección del CHANGELOG. Ningún otro
-archivo nombra una versión: los workspaces dependen unos de otros con `"*"` y el rango de peer del
-contrato es abierto. La tarea rechaza un árbol sucio, una rama distinta de main, o un tag ya existente.
+Antes de publicar, un solo commit: la versión (`vp run ui:version X.Y.Z` la escribe en remy-ui, remy-cli y en las
+versiones fijadas de la app en blanco; también en `packages/remy-auth-contract/package.json` cuando el contrato cambió) y la sección del CHANGELOG. Los
+workspaces dependen unos de otros con `workspace:*`, que el publish de pnpm escribe como la versión, y el rango de peer del
+contrato es abierto. `remy release check` rechaza un árbol sucio, una rama distinta de main, traducciones obsoletas o
+un paquete cambiado sin una versión nueva.
 
-Los consumidores añaden esto a su `.npmrc`:
+El `.npmrc` de un consumidor solo nombra el registro:
 
 ```
 @joeblew999:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
-e instalan mediante `vp run setup`, que toma un token con `read:packages` de `gh auth token`
-(o `GITHUB_TOKEN` en el shell). Las versiones publicadas están en el
+pnpm no lee ningún token del `.npmrc` de un repositorio, así que `vp run setup` (y `remy upgrade`) escribe un token con `read:packages`,
+tomado de `GITHUB_TOKEN` en el shell o de `gh auth token`, en la configuración de pnpm de la propia máquina. Las versiones publicadas están en el
 [registro de cambios](https://github.com/joeblew999/remy-auth/blob/main/CHANGELOG.md).
 
 ## Escribir una parte [#writing-a-part]
@@ -193,7 +195,7 @@ listan por nombre (`"seo-routes"`); cualquier paquete puede ofrecer partes tambi
    sus propias rutas, o con las páginas de la app mediante sus opciones `app` (la miga de pan de la parte time-zones toma
    `parent`), nunca con una página que otra app pueda no tener: el fixture consumidor lista una parte de la demostración (showcase) y
    la tipa sin las páginas de la demostración (showcase).
-4. **Demuéstralo:** `vp run check` pasa con la parte listada, sin ella y con la lista
+4. **Demuéstralo:** `vp run ready` pasa con la parte listada, sin ella y con la lista
    vacía (ejecuta un build una vez tras editar `src/parts.json`, lo que regenera el árbol de rutas).
 
 Lo que en cambio sigue siendo un módulo normal del paquete: el código que toda app necesita (observabilidad), un hook

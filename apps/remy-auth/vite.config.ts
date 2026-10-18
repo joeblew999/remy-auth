@@ -51,7 +51,7 @@ export default defineConfig({
       clean: { command: `node -e "require('node:fs').rmSync('dist', { recursive: true, force: true })"`, cache: false },
       dev: { command: 'vp dev', dependsOn: ['local', 'generate'], cache: false },
       // The production build, replayed while nothing it reads changes, across commits too. Its stamp names a commit
-      // only when one is given (a deploy's REMY_COMMIT, Workers Builds' WORKERS_CI_COMMIT_SHA), and those are in the
+      // only when one is given (Workers Builds' WORKERS_CI_COMMIT_SHA), and those are in the
       // cache key, so a deployment never takes another commit's build.
       build: {
         command: 'vp build',
@@ -59,7 +59,7 @@ export default defineConfig({
         cache: {
           input: [{ auto: true }, ...written, lockfile],
           output: ['dist/**'],
-          env: ['REMY_COMMIT', 'REMY_CHANGES', 'WORKERS_CI_COMMIT_SHA'],
+          env: ['WORKERS_CI_COMMIT_SHA'],
           untrackedEnv: network,
         },
       },

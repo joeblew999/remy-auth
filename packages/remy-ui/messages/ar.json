@@ -404,7 +404,6 @@
   "home_guide_text": "لمستخدمي التطبيق: وظيفة كل صفحة، بلغتك.",
   "home_developers_text": "للمطورين الذين يبنون {product} أو تطبيقًا عليه، ومرجع واجهة برمجته (API).",
   "build_update": "يتوفر إصدار جديد: أعد التحميل",
-  "build_changes": "تم البناء بتغييرات غير مُثبَّتة",
   "versions_title": "ما تم نشره",
   "versions_docs": "المستندات",
   "versions_environment": "البيئة",

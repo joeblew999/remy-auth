@@ -33,7 +33,6 @@ export function buildStampChecks({ path }) {
     await expect(reload).toHaveCount(0);
     if (deployment.build.commit)
       await expect(stamp.locator('[data-build="commit"]')).toContainText(deployment.build.commit.slice(0, 7));
-    await expect(stamp.locator('[data-build="changes"]')).toHaveCount(deployment.build.changes ? 1 : 0);
     // Which environment this is matters everywhere but production, where it would be noise.
     if (deployment.environment === 'production')
       await expect(stamp.locator('[data-build="environment"]')).toHaveCount(0);
@@ -45,7 +44,7 @@ export function buildStampChecks({ path }) {
       const body = await response.json();
       await route.fulfill({
         response,
-        json: { ...body, build: { ...body.build, commit: 'f'.repeat(40), changes: '' } },
+        json: { ...body, build: { ...body.build, commit: 'f'.repeat(40) } },
       });
     });
     answered = page.waitForResponse(isHealth);

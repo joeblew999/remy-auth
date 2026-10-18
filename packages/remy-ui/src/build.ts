@@ -12,7 +12,6 @@ export const stamp = z.object({
     version: z.string().describe("The app's package version; empty when it has none"),
   }),
   commit: z.string().describe('The commit it was built from; empty when it was not built in a git checkout'),
-  changes: z.string().describe('Empty for a clean checkout; else a short hash of what was uncommitted'),
   packages: z.record(z.string(), z.string()).describe('The installed version of each package the stamp lists'),
 });
 export type Build = z.infer<typeof stamp>;
@@ -34,9 +33,8 @@ export const deployment = z.object({
 });
 export type Deployment = z.infer<typeof deployment>;
 
-/** Whether two builds are the same code: the same commit with the same uncommitted changes. */
-export const sameBuild = (a: Pick<Build, 'commit' | 'changes'>, b: Pick<Build, 'commit' | 'changes'>) =>
-  a.commit === b.commit && a.changes === b.changes;
+/** Whether two builds are the same code: the same commit. */
+export const sameBuild = (a: Pick<Build, 'commit'>, b: Pick<Build, 'commit'>) => a.commit === b.commit;
 
 /** A commit as people quote it. */
 export const shortCommit = (commit: string) => commit.slice(0, 7);

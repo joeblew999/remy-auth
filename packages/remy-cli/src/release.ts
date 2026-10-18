@@ -15,7 +15,7 @@ export async function check(): Promise<void> {
   const here = where();
   if (!here.onMain || !here.clean) {
     console.error(
-      `release: a release is made from a clean main (this is ${here.branch}${here.clean ? '' : ', with changes'}); merge it through a pull request first`,
+      `release: a release is made from a clean main (this is ${here.branch}${here.clean ? '' : ', with changes'}); push it to main first`,
     );
     process.exit(1);
   }

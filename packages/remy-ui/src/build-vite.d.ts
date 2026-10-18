@@ -10,9 +10,7 @@ export type BuildOptions = {
   scope?: string;
 };
 
-/** The stamp of the app at `root`: its versions, and the commit a deploy gives it (REMY_COMMIT, WORKERS_CI_COMMIT_SHA). */
+/** The stamp of the app at `root`: its versions, and the commit Cloudflare's build gives it (WORKERS_CI_COMMIT_SHA). */
 export declare function buildStamp(options?: BuildOptions): Build;
-/** What a deploy hands its build: the checkout's commit and a hash of what was uncommitted (git, outside the build). */
-export declare function gitStamp(root?: string): { REMY_COMMIT: string; REMY_CHANGES: string };
 /** The Vite plugin behind `virtual:remy-build`; remyApp() and remyDocs() include it. */
 export declare function remyBuild(options?: BuildOptions): Plugin;

@@ -1,18 +1,12 @@
 // Cloudflare. The one way anything is deployed is a push: Cloudflare's Git builds (Workers Builds) deploy main to
 // production and every other branch to its Preview. Here, only what reads Cloudflare: what each deployment runs
 // (`remy cloudflare versions`), an app's page URLs, and the check that a binding names a resource that exists.
-import { quickLocales } from './test.ts';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { randomBytes } from 'node:crypto';
-import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { dispatch, type Subcommands } from './commands.ts';
 import { appDir, bin, origins as projectOrigins } from './config.ts';
-// The commit each deploy's build names (build-vite.js): worked out here, outside the build, which never runs git.
-import { gitStamp } from '@joeblew999/remy-ui/build/vite';
 
 // A declaration, not a constant: tsc narrows after a call only to a function declared with its never type.
 function fail(message: string): never {
@@ -58,7 +52,7 @@ export async function provisioned(environment = process.env.CLOUDFLARE_ENV || un
   ];
   if (missing.length)
     fail(
-      `Not deploying${environment ? ` ${environment}` : ''}: Wrangler would create these by itself.\n${missing.map((line) => `  ${line}`).join('\n')}\nCreate each on the owner's request and put its id in the Wrangler configuration.`,
+      `Missing${environment ? ` in ${environment}` : ''}: Wrangler would create these by itself on Cloudflare's build.\n${missing.map((line) => `  ${line}`).join('\n')}\nCreate each on the owner's request and put its id in the Wrangler configuration.`,
     );
   databasesRight(
     unstable_readConfig({ config: join(appDir(), 'wrangler.jsonc') }) as Databases,
@@ -152,7 +146,7 @@ type Health = {
   environment?: string;
   release?: string;
   deployedAt?: string;
-  build?: { commit?: string; changes?: boolean };
+  build?: { commit?: string };
   error?: string;
 };
 
@@ -201,7 +195,7 @@ export async function versions(
       ]);
       continue;
     }
-    const commit = build.commit ? `${build.commit.slice(0, 7)}${build.changes ? '+changes' : ''}` : '';
+    const commit = build.commit ? build.commit.slice(0, 7) : '';
     rows.push([
       origin,
       answer.service ?? '',
@@ -247,17 +241,6 @@ export async function urls(origin = projectOrigins().production): Promise<void> 
 }
 
 /** The Worker's name in the Wrangler configuration. */
-async function workerConfig(): Promise<{ name: string; config: Record<string, unknown> }> {
-  const { unstable_readConfig } = (await import(
-    pathToFileURL(createRequire(import.meta.url).resolve('wrangler')).href
-  )) as typeof import('wrangler');
-  const config = unstable_readConfig({ config: join(appDir(), 'wrangler.jsonc') }) as Record<string, unknown>;
-  const name = config.name as string | undefined;
-  if (!name) fail('the Wrangler configuration has no Worker name');
-  return { name, config };
-}
-const workerName = async (): Promise<string> => (await workerConfig()).name;
-
 export const what =
   "Cloudflare's builds deploy every push (main to production, a branch to its Preview); here: what each deployment runs, its URLs, the resources a binding needs";
 export const commands: Subcommands = {

@@ -395,7 +395,6 @@
   "home_guide_text": "For people using the app: what each page does, in your language.",
   "home_developers_text": "For developers building {product} or an app on it, and its API reference.",
   "build_update": "New version available: reload",
-  "build_changes": "Built with uncommitted changes",
   "versions_title": "What is deployed",
   "versions_docs": "Docs",
   "versions_environment": "Environment",

@@ -392,7 +392,6 @@
   "home_guide_text": "Für Nutzer der App: was jede Seite macht, in deiner Sprache.",
   "home_developers_text": "Für Entwickler, die {product} oder eine App darauf aufbauen, sowie dessen API-Referenz.",
   "build_update": "Neue Version verfügbar: neu laden",
-  "build_changes": "Mit nicht committeten Änderungen erstellt",
   "versions_title": "Was bereitgestellt ist",
   "versions_docs": "Dokumentation",
   "versions_environment": "Umgebung",

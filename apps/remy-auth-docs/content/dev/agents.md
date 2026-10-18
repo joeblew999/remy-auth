@@ -33,19 +33,17 @@ read those, not the translations beside them (`*.es.md`).
 6. The plan in [`.plans/`](https://github.com/joeblew999/remy-auth/tree/main/.plans) covering your
    task, and its [Executor/Reviewer roles](./principles.md#plans-and-roles).
 
-Start with the standard commands (`git status`, `git log`, `gh pr list`, `gh run list`: what is going on) and
+Start with the standard commands (`git status`, `git log`, `gh run list`: what is going on) and
 [the project's own tools](./how-we-work.md#use-the-projects-own-tools-first), and finish through
 [the flow](./how-we-work.md#the-flow-the-standard-way-in-plain-sight): `vp run ready`
 after every change; when the work is finished and `vp run ready` is green, `vp run translate` if text changed, then
-`git commit`, `git push` (its hook runs `vp run ci`), `gh pr create` and its squash merge once green
-(`gh pr merge --auto --squash` once the owner turns auto-merge on), without asking; then `git switch main && git pull`. A push to `main` is the deploy: Cloudflare builds it.
+`git commit` and `git push` to `main` (its hook runs `vp run ci`), without asking. A push to `main` is the deploy:
+Cloudflare builds it.
 
 ## Working from Claude's cloud
 
 An agent in Claude's cloud (Claude on the web or the phone) has no Cloudflare token: `wrangler` and the
 `pnpm remy cloudflare` commands cannot sign in there, and nothing in the flow needs them (Cloudflare's own builds
-deploy). It has the **Cloudflare connector** instead, used by hand; nothing in the repository depends on it. `gh`'s
-GraphQL commands (`gh pr create`, `gh pr merge`) are refused there: use the REST equivalents in
-[the flow](./how-we-work.md#the-flow-the-standard-way-in-plain-sight).
+deploy). It has the **Cloudflare connector** instead, used by hand; nothing in the repository depends on it.
 How to preview a branch from there, and what lives on Cloudflare rather than in the repository:
 [On Cloudflare](./run-and-test.md#on-cloudflare).

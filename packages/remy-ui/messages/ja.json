@@ -389,7 +389,6 @@
   "home_guide_text": "アプリを使う方へ：各ページの機能を、お使いの言語で説明します。",
   "home_developers_text": "{product}自体やその上にアプリを構築する開発者向けに、APIリファレンスも用意しています。",
   "build_update": "新しいバージョンがあります:再読み込み",
-  "build_changes": "未コミットの変更を含めてビルドされました",
   "versions_title": "デプロイされている内容",
   "versions_docs": "ドキュメント",
   "versions_environment": "環境",

@@ -1,5 +1,7 @@
 # 2026-10-17-01-ci-local-and-fast.md
 
+Closed 2026-10-18: vp run ci runs locally exactly as on GitHub, from the cache where nothing changed, and the push's hook runs it; Previews of every branch from Cloudflare's builds; shipped 2026-10-18
+
 CI that is fast, and that runs the same locally as on GitHub. Everything the owner asked for on
 2026-10-17, in one place, so no agent works from memory.
 

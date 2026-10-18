@@ -6,27 +6,12 @@
 // The build itself never runs git: Vite Plus counts every file a task reads, a git status reads every changed file in
 // the repository and git's index changes with every commit, so a stamp worked out in the build made each change
 // anywhere, and each commit, a new build and all the browser checks again (2026-10-17, traced). The commit comes in
-// the environment instead: REMY_COMMIT and REMY_CHANGES, which a deploy works out (gitStamp, below), or Workers
-// Builds' WORKERS_CI_COMMIT_SHA. A local build names none: Vite Plus's cache is what keeps it current.
-import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
+// the environment instead: Workers Builds' WORKERS_CI_COMMIT_SHA. A local build names none: Vite Plus's cache is what
+// keeps it current.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
 const id = 'virtual:remy-build';
-
-const git = (root, ...args) => {
-  try {
-    return execFileSync('git', args, {
-      cwd: root,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-      maxBuffer: 256 * 1024 * 1024,
-    }).trim();
-  } catch {
-    return ''; // not a git checkout (a tarball, some CI): the stamp says so by naming no commit
-  }
-};
 
 /** The version of `name` as installed for the app at `root`: the nearest node_modules that has it. */
 function installedVersion(name, root) {
@@ -38,32 +23,12 @@ function installedVersion(name, root) {
 }
 
 /**
- * The stamp of the app at `root`: its package's name and version, the commit it was built from,
- * `changes` (empty for a clean checkout, else a short hash of what was uncommitted, so two builds of
- * one commit with different edits differ), and the installed version of each package in `packages`
+ * The stamp of the app at `root`: its package's name and version, the commit it was built from, and the installed version of each package in `packages`
  * and of every dependency the app's package.json names in the platform's scope.
  */
-/**
- * What a deploy hands its build (outside it, before it): the checkout's commit and a short hash of what was
- * uncommitted, as REMY_COMMIT and REMY_CHANGES.
- */
-export function gitStamp(root = process.cwd()) {
-  const commit = git(root, 'rev-parse', 'HEAD');
-  const uncommitted = commit ? git(root, 'status', '--porcelain') : '';
-  const changes = uncommitted
-    ? createHash('sha256')
-        .update(uncommitted)
-        .update(git(root, 'diff', 'HEAD'))
-        .digest('hex')
-        .slice(0, 7)
-    : '';
-  return { REMY_COMMIT: commit, REMY_CHANGES: changes };
-}
-
 export function buildStamp({ root = process.cwd(), packages = [], scope = '@joeblew999/' } = {}) {
   const app = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
-  const commit = process.env.REMY_COMMIT || process.env.WORKERS_CI_COMMIT_SHA || '';
-  const changes = process.env.REMY_CHANGES || '';
+  const commit = process.env.WORKERS_CI_COMMIT_SHA || '';
   const named = [
     ...Object.keys({ ...app.dependencies, ...app.devDependencies }).filter((name) => name.startsWith(scope)),
     ...packages,
@@ -76,7 +41,7 @@ export function buildStamp({ root = process.cwd(), packages = [], scope = '@joeb
         return version ? [[name, version]] : [];
       }),
   );
-  return { app: { name: app.name ?? '', version: app.version ?? '' }, commit, changes, packages: versions };
+  return { app: { name: app.name ?? '', version: app.version ?? '' }, commit, packages: versions };
 }
 
 /**

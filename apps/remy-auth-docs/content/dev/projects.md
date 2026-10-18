@@ -84,7 +84,7 @@ Everything else is the package, which one version bump upgrades.
    docs at `docs/`), with remy-auth's build settings ([on Cloudflare](./run-and-test.md#on-cloudflare); `remy upgrade`
    prints the build command). Creating the databases and secrets a binding names is the owner's
    (`pnpm remy cloudflare provisioned` says what is missing). From then on work goes through
-   [the flow](./how-we-work.md#the-flow-the-standard-way-in-plain-sight): a pull request for every finished change,
+   [the flow](./how-we-work.md#the-flow-the-standard-way-in-plain-sight): every finished change is pushed to `main`,
    and every push to `main` deploys.
 7. CI: `.github/workflows/ci.yml` calls remy-auth's shared workflow at the same tag. Grant the new repository read
    access in the `@joeblew999/remy-ui` and `@joeblew999/remy-cli` packages' settings ("Manage Actions access"), or

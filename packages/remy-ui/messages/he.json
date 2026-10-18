@@ -395,7 +395,6 @@
   "home_guide_text": "למשתמשי האפליקציה: מה עושה כל דף, בשפה שלכם.",
   "home_developers_text": "למפתחים הבונים את {product} או אפליקציה עליו, ולמסמך העזר של ה-API שלו.",
   "build_update": "גרסה חדשה זמינה: טען מחדש",
-  "build_changes": "נבנה עם שינויים שלא נשמרו ב-commit",
   "versions_title": "מה פרוס",
   "versions_docs": "תיעוד",
   "versions_environment": "סביבה",

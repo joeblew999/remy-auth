@@ -21,16 +21,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './componen
 
 const dl = 'grid grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-x-4 gap-y-3 text-sm';
 
-/** A commit: linked to the source when the app names its repository; `+` marks a build with uncommitted changes. */
-function Commit({
-  locale,
-  stamp,
-  repository,
-}: {
-  locale: Locale;
-  stamp: Pick<Build, 'commit' | 'changes'>;
-  repository?: string;
-}) {
+/** A commit: linked to the source when the app names its repository. */
+function Commit({ stamp, repository }: { stamp: Pick<Build, 'commit'>; repository?: string }) {
   if (!stamp.commit) return null;
   const short = <code className="tabular-nums">{shortCommit(stamp.commit)}</code>;
   return (
@@ -41,11 +33,6 @@ function Commit({
         </a>
       ) : (
         short
-      )}
-      {stamp.changes && (
-        <abbr className="no-underline" title={m.build_changes({}, { locale })} data-build="changes">
-          +
-        </abbr>
       )}
     </span>
   );
@@ -80,7 +67,7 @@ export function BuildStamp({ locale, className = '' }: { locale: Locale; classNa
           </>
         )}
       </span>
-      <Commit locale={locale} stamp={build} repository={app.repository} />
+      <Commit stamp={build} repository={app.repository} />
       {stale && (
         <Button size="xs" data-build="reload" onClick={() => window.location.reload()}>
           {m.build_update({}, { locale })}
@@ -147,7 +134,7 @@ function DeploymentCard({
             <>
               <dt className="text-muted-foreground">{m.versions_commit({}, o)}</dt>
               <dd data-version="commit" className="text-start">
-                <Commit locale={locale} stamp={stamp} repository={repository} />
+                <Commit stamp={stamp} repository={repository} />
               </dd>
             </>
           )}

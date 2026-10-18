@@ -1,11 +1,11 @@
 ---
 title: "Escribir la documentación"
 description: "Cómo se organiza y se escribe la documentación de una app de Remy con Fumadocs: carpetas, frontmatter, medios, componentes, traducciones y la CLI."
-translatedFrom: "51e67f5c 88dd9b0d 03b1de50 fadc7848 4aa38436 403283a8 14c6e29e dcbfb538 71f06248 e656bc82"
+translatedFrom: "52c2ba91 88dd9b0d 03b1de50 fadc7848 4aa38436 359648ff db227795 8774df01 92c707f8 1308d589"
 ---
 
 Todas las apps de Remy guardan su documentación de la misma manera, de modo que las tareas compartidas y la CLI de Fumadocs funcionan en cada una.
-Hay dos sitios de documentación, servidos por el Worker de documentación (la app `docs/`, aparte del Worker de la app): la guía
+Hay dos sitios de documentación, servidos por el Worker de documentación (el `docs/` de la app, `apps/remy-auth-docs/` en remy-auth, aparte del Worker de la app): la guía
 para los usuarios de la app en `/docs`, y esta documentación para desarrolladores en `/dev`.
 Cada uno tiene sus propios idiomas, búsqueda, `llms.txt` y carpeta de Ask AI.
 
@@ -93,7 +93,7 @@ el catálogo, la guía la sigue; el traductor deja los marcadores tal cual.
 
 :::note
 Captúralos con la herramienta del propio proyecto, para que muestren la app real:
-`npx remy shots /formats --out docs/public/media` para una imagen, y añade `--video`
+`pnpm remy shots /formats --out docs/public/media` para una imagen, y añade `--video`
 para una grabación corta de la página.
 :::
 
@@ -115,8 +115,8 @@ para una grabación corta de la página.
 ## Componentes [#components]
 
 Una página es `.md` (simple, se lee igual en el sitio, por un agente y en la skill `remy`) a menos que use un componente;
-entonces es `.mdx` (solo el sitio las lee). Nadie lo elige: `vp run check` renombra una página, sus traducciones y
-los enlaces que apuntan a ella cuando su contenido necesita la otra extensión.
+entonces es `.mdx` (solo el sitio las lee). Nadie lo elige: `vp run ready` falla cuando el contenido de una página necesita la otra extensión,
+y `vp run fix` renombra la página, sus traducciones y los enlaces que apuntan a ella.
 
 En páginas `.mdx`: `<Callout>` (o `:::note`, `:::warning` en cualquier página), `<Cards>` y `<Card>`, `<Tabs>`
 y `<Tab>`, `<Steps>` y `<Step>`, `<Accordions>` y `<Accordion>`, `<Files>`, `<Folder>` y
@@ -140,6 +140,7 @@ nunca lo ejecutan.
 
 ## Traducciones [#translations]
 
-Escribe solo en inglés. `vp run land` traduce lo que tu cambio dejó obsoleto, en el mismo commit
-([traducciones: en el cambio](./how-we-work.md#translations-in-the-change)); `npx remy i18n check docs` enumera lo que aún
+Escribe solo en inglés. `vp run translate`, antes del commit, traduce lo que tu cambio dejó obsoleto, de modo que las
+traducciones van en el mismo commit
+([traducciones: en el cambio](./how-we-work.md#translations-in-the-change)); `pnpm remy i18n check docs` enumera lo que aún
 necesita cada idioma.

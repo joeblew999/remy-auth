@@ -36,7 +36,6 @@ export function buildChecks({ service }) {
     expect(typeof build.app.name).toBe('string');
     expect(typeof build.app.version).toBe('string');
     expect(build.commit).toMatch(/^([0-9a-f]{40})?$/);
-    expect(build.changes).toMatch(/^([0-9a-f]{7})?$/);
     expect(Object.keys(build.packages)).toContain('@joeblew999/remy-ui');
     for (const [name, version] of Object.entries(build.packages)) expect(version, name).toMatch(/^\d+\.\d+\.\d+/);
     if (local) {

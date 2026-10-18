@@ -1,7 +1,7 @@
 ---
 title: "Desarrolladores: empieza aquí"
 description: "Para desarrolladores que construyen Remy o una app sobre él: autenticación compartida para las apps de Remy, Better Auth en Cloudflare Workers, el paquete compartido remy-ui y por dónde empezar."
-translatedFrom: "15c7d6a6 e881ac6c 6c6aa90b 88eb7fe7 ec1b7e3b c0d418f2"
+translatedFrom: "15c7d6a6 57a9efbc af6f9a6d 88eb7fe7 f354609f c0d418f2"
 ---
 
 **Para desarrolladores** que construyen Remy, o una app sobre su paquete de UI compartido. ¿Usas la app? Lee la
@@ -43,11 +43,13 @@ Dos sitios en producción, cada uno con páginas de sitio para Google y páginas
 
 ## Primeros pasos [#get-started]
 
-Node según indica `.node-version` (26), y luego, desde este checkout:
+El `vp` de la máquina en modo gestionado, que da a este checkout el Node que indica `.node-version` (26) y el pnpm que indica
+`devEngines` ([herramientas de desarrollo](./tooling.md#vite-plus-the-machines-vp-in-managed-mode)), y luego, desde este
+checkout:
 
 ```sh
-npm install          # once, for the lockfile and the remy bin
-vp run setup        # the pinned skills, MCP, the flow's guard, the installation's checks
+vp install          # once: the dependencies from pnpm-lock.yaml, and the Git hooks
+vp run setup        # the pinned skills, MCP, the installation's checks, then vp run ready
 vp run dev          # http://127.0.0.1:5173/en
 ```
 
@@ -65,14 +67,15 @@ Cómo iniciar, reanudar y recargar Codex o Claude Code, en VS Code o en una term
 ## Comandos cotidianos [#everyday-commands]
 
 Todos los comandos, generados a partir de la propia línea de comandos, están en [Comandos](./commands.mdx). Lo que ejecutas día a
-día, y quién ejecuta producción y una publicación, está en [el flujo](./how-we-work.md#the-flow-four-steps-in-plain-sight).
+día, y quién ejecuta producción y una publicación, está en [el flujo](./how-we-work.md#the-flow-the-standard-way-in-plain-sight).
+Cada tarea está escrita en el `vite.config.ts` de su paquete, y `vp run` las lista junto con los scripts de la raíz.
 
-La vista previa local y el despliegue remoto usan el mismo build y la misma configuración de Wrangler.
-Consulta los [comandos locales/remotos](./run-and-test.md#one-scaffold-for-local-and-cloudflare)
-para el despliegue y para ejecutar las mismas pruebas contra una URL desplegada.
+La vista previa local y el despliegue remoto usan el mismo build y la misma configuración de Wrangler; desplegar es hacer un push, que
+Cloudflare compila. Consulta los [comandos locales/remotos](./run-and-test.md#one-scaffold-for-local-and-cloudflare)
+y [en Cloudflare](./run-and-test.md#on-cloudflare) para el despliegue y para ejecutar las mismas pruebas contra una URL desplegada.
 
 Revisa los cambios de dependencias después de actualizar. Node está fijado en `.node-version` y en los
-`engines` de `package.json`; los commits de origen de las skills están en el paquete (`packages/remy-cli/src/skills.ts`), que todas las
+`engines` de `package.json`, pnpm en `devEngines`, y cada una de las demás versiones una sola vez en el catálogo de `pnpm-workspace.yaml`; los commits de origen de las skills están en el paquete (`packages/remy-cli/src/skills.ts`), que todas las
 apps instalan ([proyectos](./projects.md)).
 
 ## Documentación del proyecto [#project-documentation]

@@ -5,16 +5,10 @@ out because it's now gotten into a huge mess." One list, in order. Close an item
 main and live where that applies; then move its plan to [done/](done/) with a closing line. Big features
 wait in [parked/](parked/). What broke along the way is in the [stability log](stability-log.md).
 
-## First: all the way in with Vite Plus (2026-10-17)
+## Closed 2026-10-18
 
-[2026-10-17-02-vite-plus.md](2026-10-17-02-vite-plus.md): Vite Plus decides what runs, in what order and what is
-skipped; our code only does the jobs Vite Plus has no tool for. The names, the rules, the steps and the status.
-
-## First: CI fast and the same locally (2026-10-17)
-
-[2026-10-17-01-ci-local-and-fast.md](2026-10-17-01-ci-local-and-fast.md): `npm run ci` runs what GitHub runs,
-locally and in a cloud agent's container; pull requests wait only for types, unit and level 1; previews
-straight from a checkout. What the owner asked for, the design, status and what comes next are all there.
+- ~~[Vite Plus all the way](done/2026-10-17-02-vite-plus.md)~~: a standard `vp` monorepo on pnpm; one way to deploy, a push.
+- ~~[CI fast and the same locally](done/2026-10-17-01-ci-local-and-fast.md)~~: `vp run ci` here is what GitHub runs, from the cache.
 
 ## What is left, in order (2026-10-09)
 

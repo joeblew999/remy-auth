@@ -392,7 +392,6 @@
   "home_guide_text": "Uygulamayı kullananlar için: her sayfanın ne işe yaradığı, kendi dilinizde.",
   "home_developers_text": "{product}'ı veya onun üzerine bir uygulama geliştirenler için ve API referansı.",
   "build_update": "Yeni sürüm mevcut: yeniden yükle",
-  "build_changes": "Kaydedilmemiş değişikliklerle oluşturuldu",
   "versions_title": "Ne dağıtıldı",
   "versions_docs": "Belgeler",
   "versions_environment": "Ortam",

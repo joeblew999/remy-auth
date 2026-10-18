@@ -1,7 +1,7 @@
 ---
 title: "Cómo trabajamos"
 description: "Cómo trabajan aquí las personas y los agentes: las herramientas del proyecto primero, encuestas antes de elegir herramientas, shadcn y TanStack, puertas de control, planes y traducciones."
-translatedFrom: "56df3445 507816d3 0d58c3a4 e927cb60 d8386d74 aae80ce5 c958165d 20ea1d8b f3262ad2 b2a387bd ffb82792 23e9a303 c8f062fe 889fa3f9 3d757ec5 3bc5691c f1f09464 851c9a7c 2afe4e6a"
+translatedFrom: "56df3445 507816d3 26f16046 c2d8f54e d8386d74 aae80ce5 6dc5958a 20ea1d8b f3262ad2 d16df021 63d3e039 d41caa8c c8f062fe 81ef89fe 5f043aaa 19f6274f fef9ba98 085849a3 4d1a6674"
 ---
 
 Este documento es el dueño de cómo trabajan las personas y los agentes: los hábitos que ha pedido el
@@ -21,7 +21,7 @@ propietario, tanto para desarrolladores como para agentes de IA. Lo que el códi
   cualquiera de los dos está en el lugar equivocado (propietario, 2026-10-10: «Agents.md y Claude.md en
   la raíz deben ser solo un puntero al área de documentación para agentes»).
 
-## Ves algo: arréglalo o escríbelo, en el mismo landing [#see-something-fix-it-or-write-it-down-in-the-same-landing]
+## Ves algo: arréglalo o escríbelo, en el mismo cambio [#see-something-fix-it-or-write-it-down-in-the-same-change]
 
 Propietario, 2026-10-09, tras encontrar un hueco cada vez que preguntaba: «Está bastante claro que la
 documentación de los agentes está mal si estás viendo problemas y no actúas sobre ellos ni te informas
@@ -29,28 +29,30 @@ a ti mismo ni a los devs». Así que la regla es general, no solo para herramien
 
 - Un agente o desarrollador que note algo mal, lento, que falte o que haya quedado suelto (un paso que
   no espera nada, una comprobación que nadie ejecuta, una rama que nadie posee, un documento que dice
-  algo que ya no es cierto) tiene dos opciones, ambas dentro del landing en el que está: **arreglarlo**
+  algo que ya no es cierto) tiene dos opciones, ambas dentro del cambio en el que está: **arreglarlo**
   cuando es pequeño, o **escribirlo en `.plans/now.md`** («Qué queda, en orden»: qué se vio, dónde, y
   qué lo arreglaría), un archivo de plan cuando es grande. Mencionarlo solo en un chat o en un informe
   no es ninguna de las dos cosas.
-- **Todos se enteran a través del repo**: `vp run status` imprime esa lista en cada sesión (los agentes
-  la abren con esto), así que lo que una persona vio llega a todos, y el siguiente landing toma lo
-  primero de la lista.
-- **«Hecho» es el final de una barrida, no de una lista.** Antes de decirlo: ramas y worktrees, pull
-  requests abiertas, `remy cloudflare versions`, `remy plans check`, una búsqueda de las palabras que el
-  cambio retiró, la documentación que el cambio tocó. Muestra la barrida.
+- **Todos se enteran a través del repo**: `.plans/now.md` está comiteado, así que lo que una persona vio
+  llega a todos los que hacen pull de main (`pnpm remy plans status` imprime sus elementos abiertos), y
+  el siguiente cambio toma lo primero de la lista.
+- **«Hecho» es el final de una barrida, no de una lista.** Antes de decirlo: ramas y worktrees
+  (`git branch`, `git worktree list`), `pnpm remy cloudflare versions`, `pnpm remy plans check`, una
+  búsqueda de las palabras que el cambio retiró, la documentación que el cambio tocó. Muestra la barrida.
 
 ## Usa primero las herramientas propias del proyecto [#use-the-projects-own-tools-first]
 
 - Empieza con `vp run setup`; [herramientas para desarrolladores](./tooling.md) explica qué
   instala.
-- Antes de hacer cualquier paso a mano (instalar, actualizar, publicar, desplegar, traducir), busca su
-  script: `vp run` los lista, en cualquier repositorio en el que estés; una app tiene los mismos.
-  Propietario, 2026-09-26, después de que una app fuera actualizada a mano pasando por encima de
-  `vp run upgrade`: «ya sabes que no reinventamos la rueda».
-- Ejecuta los comandos a través de los scripts de package.json, comprueba la página real con las
-  herramientas de Chrome DevTools (`npx chrome-devtools`), y usa las skills instaladas antes de leer las
-  fuentes originales, buscar en `node_modules` o escribir scripts de un solo uso.
+- Antes de hacer cualquier paso a mano (instalar, actualizar, publicar, traducir), busca su script
+  (desplegar son las propias builds de Cloudflare, nunca un comando nuestro): `vp run` los lista, en
+  cualquier repositorio en el que estés; una app tiene los mismos. Propietario, 2026-09-26, después de
+  que una app fuera actualizada a mano pasando por encima de `vp run upgrade`: «ya sabes que no
+  reinventamos la rueda».
+- Ejecuta los comandos a través de Vite Plus (`vp run <nombre>`: una tarea o un script), comprueba la
+  página real con las herramientas de Chrome DevTools
+  ([herramientas del navegador](./tooling.md#browser-tooling)), y usa las skills instaladas antes de leer
+  las fuentes originales, buscar en `node_modules` o escribir scripts de un solo uso.
 - Mira la página real con las herramientas del navegador antes de escribir una prueba para ella.
 - Una vez que las herramientas pueden responder una pregunta, deja de investigar y úsalas.
 - Indica cuánto tardará un paso antes de empezar cualquier cosa más lenta que unos segundos. El
@@ -111,10 +113,10 @@ perfeccionando, y escribimos solo lo que ellos no ofrecen.
   es así, úsalo.
 
 - Mírala: antes de dar por terminado un trabajo de UI, haz capturas de las páginas que cambiaste con
-  `npx remy shots` (escritorio y móvil, claro y oscuro, inglés y árabe) y mira las capturas. Las
+  `pnpm remy shots` (escritorio y móvil, claro y oscuro, inglés y árabe) y mira las capturas. Las
   comprobaciones demuestran el comportamiento; solo las capturas muestran el layout, el espaciado, el
   desbordamiento y el texto de dirección mixta; nombra las páginas que cambiaste
-  (`npx remy shots /formats --phone`), `--all` solo para una barrida completa
+  (`pnpm remy shots /formats --phone`), `--all` solo para una barrida completa
   (propietario, 2026-09-26: «Es verdaderamente deprimente lo difícil que es ver bien el aspecto del
   sitio web»).
 
@@ -163,16 +165,16 @@ registra el hueco en el plan que lo posee.
 
 ## Traducciones: en el mismo cambio [#translations-in-the-change]
 
-El inglés es la fuente; las traducciones lo siguen, en el mismo cambio. Una pull request lleva junto su
+El inglés es la fuente; las traducciones lo siguen, en el mismo cambio. Un commit lleva junto su
 inglés y sus traducciones: un commit, un push, una ejecución de las comprobaciones.
 
 - Un agente de funcionalidad escribe solo en inglés: la documentación en inglés y el catálogo base
   (`messages/en.json`). Nunca edita a mano una traducción (`<página>.<idioma>.md` junto a su página) ni el
   catálogo de otro locale.
-- `vp run land` traduce lo que el cambio dejó desactualizado o faltante, en la rama, antes de la comprobación y
-  del commit (`remy i18n translate`); nadie la ejecuta por su cuenta. El agente Claude traduce exactamente
-  lo que lista `remy i18n check`: para una página desactualizada, solo las secciones cuyo inglés cambió; para un
-  catálogo, solo las claves que cambiaron.
+- `vp run translate` (`remy i18n translate`) traduce lo que el cambio dejó desactualizado o faltante, en la
+  rama, antes del commit, de modo que las traducciones van en el mismo commit que su inglés. El agente
+  Claude traduce exactamente lo que lista `remy i18n check`: para una página desactualizada, solo las
+  secciones cuyo inglés cambió; para un catálogo, solo las claves que cambiaron.
 - **Cada traducción registra de qué se hizo**: una página traducida, una huella de cada sección en inglés
   (`translatedFrom` en su frontmatter); un catálogo, una huella de cada mensaje en inglés
   (`translated-from/<idioma>.json` a su lado). Desactualizado es donde el registro y el inglés difieren. No se lee
@@ -180,26 +182,26 @@ inglés y sus traducciones: un commit, un push, una ejecución de las comprobaci
   checkout superficial de GitHub, donde `vp run ci` también lo comprueba.
 - Los agentes que trabajan a la vez no necesitan lock ni un único escritor: cada worktree traduce su propio cambio, y dos
   ramas que cambian la misma sección en inglés ya se encuentran en ese inglés; tras mezclar main,
-  `vp run land` vuelve a traducir lo que la mezcla dejó desactualizado. (Hasta el 2026-10-17 la traducción se ejecutaba en `main`
-  después del push, bajo un lock, juzgada por el historial de git: cada landing que tocaba la documentación empujaba main dos veces,
+  `vp run translate` vuelve a traducir lo que la mezcla dejó desactualizado. (Hasta el 2026-10-17 la traducción se ejecutaba en `main`
+  después del push, bajo un lock, juzgada por el historial de git: cada cambio que tocaba la documentación empujaba main dos veces,
   ejecutaba dos veces las comprobaciones de GitHub, y una página se reescribía entera por un cambio de una línea.)
 - El agente no recibe herramientas: se le entrega el inglés (y, para una página desactualizada, las secciones cambiadas y
   su traducción actual) y devuelve texto; la tarea escribe los archivos que pidió, con sus
   registros, y nada más.
 - Lo que devuelve el agente se escribe solo cuando es la página: cada campo del frontmatter que tiene su
   inglés, y el texto que viene después (`packages/remy-cli/src/page.ts`). Un agente fallido deja la página
-  como estaba, dice por qué y hace fallar la traducción; `vp run land` aun así aterriza el inglés, dice que la traducción
-  todavía se debe, y el siguiente landing lo vuelve a intentar. `tests/unit/i18n-docs.unit.spec.ts` sujeta a cada
+  como estaba, dice por qué y hace fallar la traducción (código de salida distinto de cero); el inglés aún puede comitearse, la traducción
+  queda pendiente, y el siguiente `vp run translate` lo vuelve a intentar. `tests/unit/i18n-docs.unit.spec.ts` sujeta a cada
   página traducida del repositorio a la misma regla. El 2026-10-09 el `null` de un agente fallido se comiteó como
   una página y detuvo la construcción de la documentación en main.
 - Una traducción que no es una página se borra, nunca se restaura a mano: una página que falta se traduce
-  desde el inglés en el siguiente landing.
+  desde el inglés con el siguiente `vp run translate`.
 - `remy i18n check` solo lee, sin conexión, así que es seguro en cualquier lugar y en cualquier número de worktrees.
   `remy i18n translate` nunca es un `depends`.
-- Desactualizado o faltante es un aviso mientras se avanza y en `vp run ci` (la parte de comprobación), y un error al
+- Desactualizado o faltante es un aviso mientras se avanza y en `vp run ci` (su parte `ready`), y un error al
   publicar (`remy release check`, el primer paso de la publicación).
 - Un cambio estructural (un renombrado, una barrida) que toca traducciones de documentación va seguido de
-  `npx remy i18n translate docs <archivo>…`, que deja esos archivos totalmente alineados con el
+  `pnpm remy i18n translate docs <archivo>…`, que deja esos archivos totalmente alineados con el
   inglés. Cambia la estructura de un catálogo (el archivo de cada locale) en el mismo commit que `en.json`.
 
 El layout y los comandos están en [proyectos](./projects.md#translations).
@@ -211,11 +213,11 @@ una línea en `.plans/now.md`, en el orden en que se cierra. Un archivo de plan 
 trabajo lo bastante grande como para aparcarlo o para que se prolongue durante semanas; la
 investigación, los análisis y las revisiones van en el plan a que sirven, no en un archivo propio. Un
 plan se cierra el día que su trabajo se publica: una línea de cierre, y luego a `.plans/done/`. Las
-grandes funcionalidades esperan en `.plans/parked/`. Cerrar un plan no necesita un despliegue ni una
-ejecución de pruebas extra propia: agrupa el código en un único despliegue y una única ejecución
+grandes funcionalidades esperan en `.plans/parked/`. Cerrar un plan no necesita un commit ni una
+ejecución de pruebas extra propia: agrupa el código en un único commit y una única ejecución
 completa al final.
 Los comandos `remy plans` ([Comandos](./commands.mdx)) hacen los movimientos y mantienen `.plans/`
-ordenado; la comprobación ejecuta `remy plans check` en cada cambio ([proyectos](./projects.md#plans)).
+ordenado; `vp run ready` ejecuta `remy plans check` (su `check:plans`) en cada cambio ([proyectos](./projects.md#plans)).
 
 ## Cuando el propietario delega decisiones [#when-the-owner-delegates-decisions]
 
@@ -225,62 +227,67 @@ Cuando el propietario delega decisiones, por ejemplo para terminar trabajo sin s
 - Mantén todas las puertas de control en verde; la delegación nunca relaja una comprobación.
 - Deja un informe completo: qué se decidió, qué se hizo, qué se comprobó y qué no.
 
-## El flujo: cuatro pasos, a la vista de todos [#the-flow-four-steps-in-plain-sight]
+## El flujo: la forma estándar, a la vista de todos [#the-flow-the-standard-way-in-plain-sight]
 
-Propietario, 2026-10-09: «El 95% del tiempo ha sido comprobar y el 5% codificar. Esto no puede continuar así», «Es una cuestión de qué ejecutas localmente y qué ejecutas en GitHub de forma asíncrona», y «asegúrate de que el flujo del desarrollador también esté formalizado para que estas putadas estúpidas no puedan volver a pasar». Y 2026-10-17: «en ese archivo de configuración de VP lo ves todo. Todo lo demás que hay debajo debería ser bastante tonto». Así que el flujo son los scripts y las tareas de Vite Plus, escritos una sola vez en `packages/remy-ui/src/tasks.js` (`flowScripts`, `remyApp()`, `remyWorkspace()`) e iguales en cada repositorio: dicen qué se ejecuta, en qué orden y cuándo, y [Comandos](./commands.mdx) imprime los pasos de cada script. Cada comando `remy` de debajo es una hoja: hace el único trabajo que su nombre indica (GitHub, Cloudflare, el traductor, git), lee solo lo que se le da y no decide nada más. Un trozo de trabajo se ejecuta en un worktree propio: el de Claude Code (`.claude/worktrees/<nombre>`), o `git worktree add` a mano; cada worktree obtiene sus propios puertos.
+Propietario, 2026-10-09: «El 95% del tiempo ha sido comprobar y el 5% codificar. Esto no puede continuar así», «Es una cuestión de qué ejecutas localmente y qué ejecutas en GitHub de forma asíncrona», y «asegúrate de que el flujo del desarrollador también esté formalizado para que estas putadas estúpidas no puedan volver a pasar». Y 2026-10-17: «en ese archivo de configuración de VP lo ves todo. Todo lo demás que hay debajo debería ser bastante tonto»; 2026-10-18: «Nada de magia rara» y «La forma estándar». Así que el flujo son las tareas y los scripts de Vite Plus, tal como `vp create vite:monorepo` organiza un repositorio, y luego git, GitHub y las herramientas propias de Cloudflare, sin nada nuestro envolviéndolos. Las tareas de cada paquete están escritas en su propio `vite.config.ts` (ningún código las genera), el `vite.config.ts` de la raíz contiene el estilo compartido y las comprobaciones del repositorio (`ready`), y los scripts del `package.json` de la raíz las componen (`ci`, `translate`, `release`, `setup`); `vp run` los lista todos, y [Comandos](./commands.mdx) imprime los pasos de cada script. Cada comando `remy` es una hoja: hace el único trabajo que su nombre indica (una comprobación, el traductor, una ejecución de navegador, una pregunta a Cloudflare), lee solo sus argumentos y los archivos que contienen lo que necesita, y no decide nada más. El trabajo se comitea y se empuja directamente a `main`; cuando varios agentes trabajan a la vez, cada uno toma un worktree (el `.claude/worktrees/<nombre>` de Claude Code, o `git worktree add`) y hace pull antes de empujar; si dos checkouts comprueban a la vez, uno de ellos recibe sus propios puertos (`PREVIEW_PORT`, `DOCS_PREVIEW_PORT`).
 
 | Paso | Comando | Quién lo ejecuta, y cuándo | Qué ejecuta | Tiempo |
 | --- | --- | --- | --- | --- |
-| Mirar | `vp run status` | todos, primero: cada sesión de agente se abre con esto (`remy hooks` registra el hook), un desarrollador cuando se sienta a trabajar | los últimos commits de main con el veredicto de GitHub, qué ejecuta cada despliegue, cada worktree por delante y por detrás de main, traducciones, pull requests, lo primero de `.plans/now.md` | segundos |
-| Después de cada cambio | `vp run check` | quien esté codificando; el único paso que se espera | las tareas de Vite Plus: todo lo generado, la app y la documentación construidas, el ensayo de despliegue de Wrangler, las comprobaciones propias del proyecto, las comprobaciones unitarias, y luego `vp check` (formato, lint, tipos); lo que no ha cambiado sale de la caché de Vite Plus | ~8 s sin cambios, ~50 s desde cero |
-| El cambio deja la máquina | `vp run land "<qué cambió>"` | quien hizo el trabajo, por su cuenta, en cuanto termina | `remy land start` (el trabajo en una rama con main incorporado; un conflicto se detiene nombrando los archivos) → `vp run translate` (lo que el cambio dejó desactualizado) → `vp run ci` (lo que nada tocó sale de la caché) → `remy land finish` (un commit, la pull request, las comprobaciones de GitHub, el squash merge, este checkout en el nuevo main, y luego staging donde esta máquina tiene sesión iniciada en Cloudflare). Una comprobación en rojo deja la pull request abierta y nombra el job | unos minutos: lo que cambió aquí, luego las comprobaciones de GitHub |
-| Producción | `vp run promote` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `remy promote check` (un main limpio, exactamente el de GitHub, cuyas comprobaciones pasaron) → `remy cloudflare deploy` → `remy cloudflare docs-deploy` → `remy promote done` (lo que está en vivo, escrito en el commit) | ~1 min |
-| Una publicación | `vp run release` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `remy release check` (un main limpio, traducciones completas, versiones subidas) → `CHECK_LOCALES=all vp run ci` (todos los idiomas) → `vp run release-checks` → `vp run publish:rehearse` → `remy test cwv` → `remy packages tag`; el job de publicación de GitHub publica a partir de la etiqueta | ~5 min |
+| Mirar | `git status`, `git log`, `gh run list`, `pnpm wrangler deployments list`, `pnpm remy cloudflare versions` | todos, primero, y siempre que necesiten saberlo | las propias respuestas de git y GitHub; qué ejecuta cada despliegue, leído de su `/healthz`, comparado con este checkout | segundos |
+| Después de cada cambio | `vp run ready` | quien esté codificando; el único paso que se espera | las tareas de Vite Plus: todo lo generado, la app y la documentación construidas, el ensayo de despliegue de Wrangler, las comprobaciones propias del proyecto, las comprobaciones unitarias, y luego `vp check` (formato, lint, tipos); lo que no ha cambiado sale de la caché de Vite Plus | ~8 s sin cambios, ~50 s desde cero |
+| El cambio deja la máquina | `vp run translate` (cuando cambió el texto), `git commit`, `git push` | quien hizo el trabajo, por su cuenta, en cuanto termina | las traducciones que el cambio dejó desactualizadas, en el mismo commit; el commit (su hook: `vp staged`); el push a `main` (su hook: `vp run ci`, desde la caché donde nada cambió; `VP_GIT_HOOKS=0` lo omite) | unos minutos: lo que cambió aquí, en el hook del push |
+| Producción | un push a `main`: Cloudflare lo despliega | nadie; cada push a `main` sale en vivo | las builds de Git de Cloudflare (Workers Builds) construyen y despliegan la app y la documentación a partir de cada push a `main`, y el Preview de cada otra rama a partir de su propio push ([en Cloudflare](./run-and-test.md#on-cloudflare)); tras un cambio de documentación, `pnpm remy docs publish` (una máquina con sesión iniciada en Cloudflare) da al índice de Ask AI las páginas nuevas | unos minutos tras el push |
+| Una publicación | `vp run release` | el propietario, o un agente a quien el propietario se lo pidió en esa sesión | `remy release check` (un main limpio, traducciones completas, versiones subidas) → `CHECK_LOCALES=all vp run ci` (todos los idiomas) → `vp run template:check` → `vp run ui:verify` → `vp run publish:rehearse` → `remy test cwv` → `remy packages tag`; el job de publicación de GitHub publica a partir de la etiqueta | ~5 min |
 
-- **Quién ejecuta un paso está en la tabla, y nunca es una pregunta.** Un agente aterriza su propio
-  trabajo terminado sin preguntar: staging forma parte del landing, GitHub comprueba cada landing, y
-  nada llega a producción por ese camino. La palabra del propietario es para producción y para una
-  publicación, los dos pasos cuya columna así lo dice, y para el aprovisionamiento
+El workflow de CI de GitHub está desactivado por decisión del propietario: `vp run ci` ejecuta lo mismo aquí, y el hook del push lo ejecuta antes de que
+nada salga de la máquina. Sin pull requests, auto-merge ni reglas de rama: `main` recibe el push.
+
+- **Quién ejecuta un paso está en la tabla, y nunca es una pregunta.** Un agente empuja su propio
+  trabajo terminado a `main` sin preguntar: su push ejecutó antes `vp run ci`, y nada en rojo se empuja. La palabra del propietario es para una publicación, el único paso cuya columna así lo dice, y para el aprovisionamiento
   ([principios de desarrollo](./principles.md#development-principles)). Un agente que lee la tabla y
-  aun así pregunta si debe aterrizar ha dejado de usar el flujo (propietario, 2026-10-10, después de que
+  aun así pregunta si debe empujar ha dejado de usar el flujo (propietario, 2026-10-10, después de que
   uno lo hiciera: «¿Está absolutamente claro cuándo te corresponde ejecutar cada paso?»).
-- **Nada rechaza un comando por no estar «en el flujo».** El antiguo guardián (un hook que rechazaba los comandos ajenos al flujo, y `REMY_FLOW`, la variable que le decía quién preguntaba) ya no existe: la caché de Vite Plus hace barato repetir una comprobación, y lo que sigue costando algo (el traductor gasta tokens de Claude; Core Web Vitals crea un Worker desechable) se ejecuta por su nombre desde un script, donde cualquiera lo ve (propietario, 2026-10-17).
-- **Nada se pasa a través del entorno.** Un comando `remy` lee remy.config.ts por sí mismo para obtener el valor que necesita y pasa a un hijo solo lo que ese hijo necesita; ningún comando fija variables para que otros las encuentren, y ningún interruptor oculto cambia lo que hace un comando (`tests/unit/dev-flow.unit.spec.ts` rechaza ambas cosas). El único ajuste que da una persona es `CHECK_LOCALES` (`all`, `quick` o una lista).
+- **Nada nuestro envuelve git, GitHub ni Cloudflare.** La automatización de landing y promoción (`vp run land`,
+  `vp run promote`, `remy land`, `remy promote`, `remy status`, el hook de estado de Claude, nuestros propios despliegues a Cloudflare)
+  ya no existe, como tampoco el antiguo guardián que rechazaba los comandos ajenos al flujo (propietario, 2026-10-18). Lo que sigue costando
+  algo (el traductor gasta tokens de Claude) se ejecuta por su nombre desde un
+  script, donde cualquiera lo ve.
+- **Nada se pasa a través del entorno.** Un comando `remy` lee el valor que necesita del archivo que
+  lo contiene (el `.env` de la app, su `wrangler.jsonc`, `remy.config.ts`) y pasa a un hijo solo lo que ese hijo necesita; ningún comando fija variables para que otros las encuentren, y ningún interruptor oculto cambia lo que hace un comando (`tests/unit/dev-flow.unit.spec.ts` rechaza ambas cosas). El único ajuste que da una persona es `CHECK_LOCALES` (`all`, `quick` o una lista).
 - Un área que parece mal: `vp run test:browser --grep <palabras>` (las comprobaciones de navegador
   cuyo título coincide). Es la única ejecución de navegador que no es propiedad de un paso.
 - Una regla que puede ser una función pertenece a `tests/**/*.unit.spec.ts` (sin build, sin Worker, sin
   navegador), así se ejecuta en cada comprobación gratis. El navegador es para lo que solo un navegador
   muestra.
-- **Un agente nunca espera en un paso de larga duración.** `vp run land`, `vp run promote`, `vp run release`,
-  una traducción, una suite remota: inícialo en segundo plano, sigue trabajando o responde al
+- **Un agente nunca espera en un paso de larga duración.** `git push` (su hook ejecuta `vp run ci`), `vp run release`, una
+  traducción, una suite remota, las comprobaciones de GitHub: inícialo en segundo plano, sigue trabajando o responde al
   propietario, y actúa cuando el harness diga que terminó. Iniciarlo en segundo plano y luego hacer
   polling de él en primer plano es el mismo fallo (propietario, 2026-10-09: «Acabas de hacerlo otra vez
-  con 2 cosas de larga duración»). Solo `vp run check` (segundos) se ejecuta y se espera.
+  con 2 cosas de larga duración»). Solo `vp run ready` (segundos) se ejecuta y se espera.
 - **Qué se vuelve a ejecutar lo decide Vite Plus, nunca nosotros.** Una tarea cuyas entradas no cambiaron se
-  reproduce desde la caché de Vite Plus, así que `vp run check` y `vp run ci` omiten lo que nada tocó, aquí y
+  reproduce desde la caché de Vite Plus, así que `vp run ready` y `vp run ci` omiten lo que nada tocó, aquí y
   (con la caché conservada entre ejecuciones) en GitHub. Ningún código nuestro decide que algo se puede omitir;
   una tarea que se vuelve a ejecutar cuando no debería tiene una entrada que declarar en su configuración de
-  `cache`, que `vp run --last-details` nombra. Cuenta también lo que inicia el comando de una tarea: una build que ejecutaba git leía cada archivo cambiado del repositorio, así que cada cambio la reconstruía (2026-10-17, rastreado); ahora nada nuestro ejecuta git dentro de una tarea.
+  `cache`, que `vp run --last-details` nombra. Cuenta también lo que inicia el comando de una tarea: una build que ejecutaba git leía cada archivo cambiado del repositorio, así que cada cambio la reconstruía (2026-10-17, rastreado); ahora nada nuestro ejecuta git dentro de una tarea. La caché es por tarea, nunca `run.cache: true`, que cachearía también todos los scripts.
 - **Todo lo que dure más de unos segundos se ejecuta en segundo plano, siempre.** `vp run ci` o cualquiera
-  de sus partes, una build, una ejecución de navegador, una instalación. Un comando que corre en primer plano
+  de sus partes, un push, una build, una ejecución de navegador, una instalación. Un comando que corre en primer plano
   se cancela cuando el propietario envía un mensaje (la app de Claude lo detiene), así que el trabajo
   nunca se hace en silencio y se culpa al propietario por hablar. Iniciado en segundo plano, con su salida
   en un archivo que el agente vigila, sobrevive a cada mensaje: el propietario puede hablar con el agente
   en cualquier momento sin romper nada (propietario, 2026-10-17: «esta mierda entre primer plano y
   segundo plano me está jodiendo todo el maldito tiempo»).
 - **Dónde se va el tiempo lo dice Vite Plus.** `vp run --last-details` nombra cada tarea, si salió de la caché y por qué se ejecutó; un paso lento es un número ahí, no una sensación (propietario, 2026-10-10: «cómo puede ser 6 minutos»).
-- **La respuesta de GitHub viene a ti.** Una ejecución en rojo comenta en el commit (GitHub se lo dice a
-  su autor), nombrando la ejecución; `vp run land` empieza diciendo qué hizo la última ejecución en
-  main; `vp run promote` se niega sobre un commit cuya ejecución no esté en verde o no haya terminado. Para
+- **La respuesta de GitHub viene a ti**, mientras su workflow de CI esté activado. Una ejecución en rojo comenta en el commit (GitHub se lo dice a
+  su autor), nombrando la ejecución; `gh run list` y `gh run view <id>` muestran el resto. Para
   reproducir un job en rojo, una persona ejecuta `vp run <task>` (el nombre del job), el mismo comando
   que ejecutó GitHub, ya que el workflow no contiene lógica propia (`remy verify tooling` comprueba
   que exista cada tarea que un workflow nombra). Un agente lee el propio log de la ejecución
   (`gh run view <id> --log-failed`) y ejecuta el área concreta (`vp run test:browser --grep <palabras>`).
   Informa de qué se probó y qué no; nunca llames verificado a un trabajo no probado.
-- **Un landing cuyo staging falla sigue aterrizado, y lo dice.** La pull request se fusiona antes que staging; cuando el despliegue de staging o su smoke en vivo falla, `remy land finish` termina con código distinto de cero tras el merge, nombrando qué falló. Una traducción fallida detiene el landing antes de que se comitee nada: nada traducido a medias llega a main.
+- **Un despliegue que falla es la build de Cloudflare, y lo dice allí.** El merge ya ocurrió; el log de la build (las herramientas de builds del conector de Cloudflare, o el panel) nombra qué falló, y `pnpm remy test live <origin>` ejecuta el smoke contra un despliegue a mano. Una traducción fallida termina con código distinto de cero antes de que se comitee nada: nada traducido a medias llega a main.
 - Nunca encadenes un comando de control con `grep` o `tail` mediante un pipe: el pipe oculta su código
   de salida. Una vez esto publicó una versión cuyas comprobaciones habían fallado, y el 2026-10-10
-  ocultó un `vp run land` fallido.
+  ocultó una comprobación fallida.
 
 ## El trabajo manual se convierte en scripts sobre herramientas reales [#manual-work-becomes-scripts-over-real-tools]
 
@@ -290,15 +297,15 @@ a las cosas que haces manualmente y convertirlas en una tarea de mise que use un
 porque todos nuestros repos van a usar esto».
 
 - Cada comprobación se ejecuta a través de un script o un comando de `remy` que envuelve la herramienta
-  real: los pasos del flujo y las comprobaciones (`npx remy test`, Playwright), el smoke en vivo después
-  de un despliegue, `remy plans check`, `remy i18n check`, `npx remy shots` para mirar. (Las palabras del
+  real: las comprobaciones (`pnpm remy test`, Playwright), el smoke en vivo contra un despliegue
+  (`pnpm remy test live`), `remy plans check`, `remy i18n check`, `pnpm remy shots` para mirar. (Las palabras del
   propietario de arriba dicen mise, que los scripts reemplazaron el 2026-10-11; la regla es la misma.)
   Nada de bucles de `curl`, scripts de un solo uso o greps improvisados para decidir si algo funciona:
   no se pueden repetir, las apps sobre el paquete no los reciben, y nadie los ve después.
 - Usa el criterio en todo lo que se hace a mano, no solo en las comprobaciones: la segunda vez que
   escribes los mismos comandos o recurres a un script descartable, se convierte en un comando del
   paquete (`packages/remy-cli/src`, para que cada app lo reciba) que llama a la herramienta que hace el
-  trabajo: Wrangler, Playwright, gh, npm.
+  trabajo: Wrangler, Playwright, gh, pnpm.
 - ¿No se encuentra ninguna herramienta? No escribas un script y sigas adelante. Añade una línea a
   `.plans/now.md` para hacer una encuesta
   ([elige herramientas por encuesta](#choose-tools-by-survey-not-by-first-find)); si la búsqueda o el
@@ -310,16 +317,16 @@ porque todos nuestros repos van a usar esto».
   puede ver, un agente se lo pierde (propietario, issue #9). Una herramienta de una línea es un script
   de `package.json` ([el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/done/tooling-in-typescript.md)).
 
-## Ramas: de vida corta, borradas tras el merge [#branches-short-lived-deleted-after-merge]
+## Ramas: solo para un Preview, borradas después [#branches-only-for-a-preview-deleted-after]
 
-- El trabajo ocurre en ramas dentro de worktrees de git (uno por agente); se mezclan en `main` y se
-  borran, junto con su worktree, justo después del merge. Solo se empujan `main` y las etiquetas de
-  publicación; una rama va a GitHub solo para una pull request, y GitHub la borra cuando la PR se
-  mezcla («Automatically delete head branches», activado para cada repo, 2026-09-26).
+- El trabajo se empuja directamente a `main`. Una rama sirve para probar algo en su Preview de Cloudflare antes de que salga en vivo
+  (`git switch -c <nombre>`, `git push -u origin <nombre>`); cuando está bien, entra en `main` (`git switch main`,
+  `git merge --ff-only <nombre>` o `git merge <nombre>`, `git push`) y la rama se borra, aquí y en GitHub
+  (`git push origin --delete <nombre>`).
 - Una rama mezclada que queda suelta (local o en GitHub) es ruido, no historia: `main` y las etiquetas
   la contienen.
 
-## Sharing one machine between agents [#sharing-one-machine-between-agents]
+## Compartir una máquina entre agentes [#sharing-one-machine-between-agents]
 
 La máquina se cayó el 2026-09-25 con unos diez agentes construyendo y probando a la vez (carga 188), y
 las comprobaciones sensibles al tiempo fallaron mucho antes de eso. Así que:
@@ -327,59 +334,55 @@ las comprobaciones sensibles al tiempo fallaron mucho antes de eso. Así que:
 - Un agente construye y prueba solo en su propio worktree de git, nunca en el checkout principal: las
   builds escriben en `dist/`, y dos builds en un mismo checkout se borran los archivos entre sí.
   Claude Code crea el worktree.
-- Cada worktree tiene su propio `PREVIEW_PORT` y `DOCS_PREVIEW_PORT`, calculados a partir de su nombre
-  (nunca 4190, que los navegadores bloquean); `PREVIEW_PORT=4232 vp run …` los sobrescribe.
+- Si dos checkouts comprueban a la vez, uno de ellos recibe su propio `PREVIEW_PORT` y `DOCS_PREVIEW_PORT` (por defecto 4173
+  y 4174; nunca 4190, que los navegadores bloquean): `PREVIEW_PORT=4232 DOCS_PREVIEW_PORT=4233 vp run …`.
 - Como máximo tres agentes ejecutan pruebas al mismo tiempo; la investigación, la escritura y los
   spikes de prueba no cuentan. Cuando se necesitan más, pon `PLAYWRIGHT_WORKERS=2` para cada uno.
-- Las auditorías de Google (`vp run test:audits`) y Core Web Vitals (`npx remy test cwv`) toman un lock de toda la
+- Las auditorías de Google (`vp run test:audits`) y Core Web Vitals (`pnpm remy test cwv`) toman un lock de toda la
   máquina, así que una segunda ejecución espera en lugar de distorsionar la primera.
-- Nunca encadenes un despliegue después de una comprobación con `;`: los pasos del flujo se ejecutan
-  uno tras otro y se detienen en el primer fallo.
+- Nunca encadenes un paso después de una comprobación con `;`: los scripts encadenan con `&&`, así que se detienen en el primer fallo.
 
 ## Informar al propietario [#reporting-to-the-owner]
 
-- **Después de cada despliegue, el informe empieza con las URL en vivo de lo que se desplegó**, diga lo
+- **Después de cada merge que despliega, el informe empieza con las URL en vivo de lo que sale en vivo**, diga lo
   que diga después (propietario, 2026-09-26: «te sigo diciendo... dame la url cuando despliegues»): la
-  app <https://remy-auth.gedw99.workers.dev>, su staging <https://remy-auth-staging.gedw99.workers.dev>, y
-  para el Worker de documentación su guía <https://remy-auth-docs.gedw99.workers.dev/docs>,
-  documentación para desarrolladores <https://remy-auth-docs.gedw99.workers.dev/dev> y referencia de la
-  API <https://remy-auth-docs.gedw99.workers.dev/reference>. `remy cloudflare deploy` y `remy cloudflare docs-deploy` las imprimen al
-  final.
+  app <https://remy-auth.gedw99.workers.dev>, y para el Worker de documentación su guía
+  <https://remy-auth-docs.gedw99.workers.dev/docs>, documentación para desarrolladores
+  <https://remy-auth-docs.gedw99.workers.dev/dev> y referencia de la API
+  <https://remy-auth-docs.gedw99.workers.dev/reference>. `pnpm remy cloudflare urls` imprime las de un despliegue.
 - Todo informe sobre algo que el propietario pueda mirar da sus URL: los sitios en vivo, la vista previa
-  (`npx remy cloudflare preview` la imprime) y un enlace directo a cada página o funcionalidad comentada.
+  (el Preview de Cloudflare de una rama empujada, `https://<rama>-remy-auth.gedw99.workers.dev`) y un enlace directo a cada página o funcionalidad comentada.
 - Di qué se comprobó y qué no.
-- Lo que está en vivo se pregunta, no se recuerda: `vp run status` imprime qué está ejecutando
-  cada despliegue y cuán lejos está eso de tu checkout. Dilo a partir de ahí, no de lo que desplegaste
+- Lo que está en vivo se pregunta, no se recuerda: `pnpm remy cloudflare versions` imprime qué está ejecutando
+  cada despliegue y cuán lejos está eso de tu checkout (`wrangler deployments list` da la lista propia de Cloudflare). Dilo a partir de ahí, no de lo que mezclaste
   la última vez.
 
 ## Muchos agentes, un flujo [#many-agents-one-flow]
 
 Propietario, 2026-10-09: «formaliza la forma en que gestionamos el trabajo de desarrollo entre muchos
-agentes para usar el nuevo flujo de desarrollo». Cada trozo de trabajo, quienquiera que lo haga, es un
-worktree a través de los mismos comandos; main es el único integrador, y GitHub comprueba cada
-landing. Nada de esto se hace a mano.
+agentes para usar el nuevo flujo de desarrollo». Cada trozo de trabajo, quienquiera que lo haga, es una
+rama a través de los mismos comandos; main es el único integrador, y cada push ejecuta antes `vp run ci`.
+Nada de esto se hace a mano.
 
-Los pasos, qué ejecuta cada uno y quién lo ejecuta: [la tabla del flujo](#the-flow-four-steps-in-plain-sight).
+Los pasos, qué ejecuta cada uno y quién lo ejecuta: [la tabla del flujo](#the-flow-the-standard-way-in-plain-sight).
 
 - **Divide por independencia.** Un orquestador divide el trabajo en partes que tocan archivos
   diferentes, e inicia un agente por parte, cada uno en un worktree propio. Una parte que necesita el
-  resultado de otra espera a ese landing; no comparte worktree.
+  resultado de otra espera a ese push; no comparte worktree.
 - **Haz un spike primero cuando el riesgo es desconocido**: un agente demuestra el punto arriesgado y
-  aterriza o se detiene.
-- **Cada parte se demuestra a sí misma**: aterriza con su propia comprobación en `tests/`, una función
+  empuja o se detiene.
+- **Cada parte se demuestra a sí misma**: entra con su propia comprobación en `tests/`, una función
   simple (`tests/**/*.unit.spec.ts`) cuando puede serlo, en el navegador cuando solo un navegador lo
   muestra.
-- **Los landings se serializan solos.** Dos agentes aterrizando a la vez: cada uno tiene su propia
-  pull request; GitHub rechaza el segundo merge solo cuando ambos entran en conflicto, y entonces el
-  segundo `vp run land` incorpora main, traduce lo que la mezcla dejó desactualizado, vuelve a comprobar y
-  aterriza.
-- **Revisión práctica antes de producción.** Pasar las comprobaciones no es el final: usa la pieza en
-  staging en un navegador real, con el ancho de un móvil, y arregla lo que se sienta mal. Luego
-  `vp run promote`.
-- **Un agente nunca espera en primer plano** a `vp run land`, `vp run promote` o una ejecución de GitHub; los
-  inicia en segundo plano y actúa sobre el resultado. Solo se espera a `vp run check`.
+- **Los pushes se serializan solos.** Dos agentes a la vez: GitHub rechaza el segundo push a `main`, y el segundo agente
+  hace pull (`git pull --rebase origin main`), ejecuta `vp run translate` para lo que eso dejó desactualizado y `vp run ready`, y
+  vuelve a empujar.
+- **Revisión práctica antes de salir en vivo.** Cada push a `main` sale en vivo, así que para todo lo que una persona ve, pasar las
+  comprobaciones no es el final: úsalo en el Preview de Cloudflare de una rama en un navegador real, con el ancho de un móvil, y arregla lo que se sienta mal.
+  Luego empújalo a `main`.
+- **Un agente nunca espera en primer plano** a `git push` (su hook ejecuta `vp run ci`), una ejecución de GitHub o una build de
+  Cloudflare; los inicia en segundo plano y actúa sobre el resultado. Solo se espera a `vp run ready`.
 - **Todo lo asíncrono vuelve a todos**
   ([el plan](https://github.com/joeblew999/remy-auth/blob/main/.plans/dev-feedback.md)): un job de
-  GitHub en rojo escribe en el commit, nombrándose a sí mismo; `vp run land` dice cuando main está en rojo;
-  `vp run promote` escribe en el commit qué se publicó; `vp run status` muestra todo esto a quien lo pregunte,
-  y cada sesión de agente lo pregunta primero.
+  GitHub en rojo escribe en el commit, nombrándose a sí mismo; `gh run list` y `pnpm remy cloudflare versions`
+  muestran el resto a quien lo pregunte.
