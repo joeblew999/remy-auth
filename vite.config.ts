@@ -41,15 +41,10 @@ export default defineConfig({
         cache: false,
       },
       // The plain-function checks (tests/**/*.unit.spec.ts) on Vite Plus's test runner: no Worker, no browser. They
-      // run the command line as an installed app does (remy-cli's dist/). Vitest's own caches (hidden folders under
-      // node_modules) are neither input nor output.
+      // run the command line as an installed app does (remy-cli's dist/); vp test reports Vitest's own caches itself.
       'check:unit': {
         command: 'vp test',
         dependsOn: ['check:commands', 'remy-auth#generate', '@joeblew999/remy-cli#build'],
-        cache: {
-          input: [{ auto: true }, '!**/node_modules/.*/**'],
-          output: [{ auto: true }, '!**/node_modules/.*/**'],
-        },
       },
       // Every check, after every change: Vite Plus's own (format, lint, types) once everything it reads exists (the
       // app and its docs built: the route tree, every docs page compiling, translations included), Wrangler's

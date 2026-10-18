@@ -31,3 +31,5 @@ playwright-report/
 /packages/remy-cli/dist/
 # Vite Plus's Git hook dispatcher, written by vp config (the prepare script); the hooks themselves are .vite-hooks/*.
 .vite-hooks/_/
+# Vitest 5's reports and attachments.
+.vitest/

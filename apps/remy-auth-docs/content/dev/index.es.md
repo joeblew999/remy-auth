@@ -1,7 +1,7 @@
 ---
 title: "Desarrolladores: empieza aquí"
 description: "Para desarrolladores que construyen Remy o una app sobre él: autenticación compartida para las apps de Remy, Better Auth en Cloudflare Workers, el paquete compartido remy-ui y por dónde empezar."
-translatedFrom: "a8b968c1 57a9efbc 0de6e796 88eb7fe7 f354609f 3befebe0"
+translatedFrom: "a8b968c1 57a9efbc 373d8e60 88eb7fe7 f354609f 3befebe0"
 ---
 
 **Para desarrolladores** que construyen Remy, o una app sobre su paquete de UI compartido. ¿Usas la app? Lee la
@@ -56,7 +56,7 @@ vp run dev          # http://127.0.0.1:5173/en
 Abre [localhost:5173/en](http://127.0.0.1:5173/en); cambia a español o prueba la demo.
 
 Los servidores MCP para Claude y Codex están incluidos en el repositorio (`.mcp.json`, `.codex/config.toml`); la **Codex CLI** se ejecuta con
-`pnpm dlx @openai/codex`, y **Claude Code** se instala aparte.
+`vpx @openai/codex`, y **Claude Code** se instala aparte.
 Las comprobaciones de navegador usan el Chromium propio de Playwright, que instala la tarea `browsers` (en Linux, añade la fuente
 `fonts-noto-cjk`).
 

@@ -16,6 +16,8 @@ const browserInputs = [
 ];
 
 // What the build and the generators write, never read as their input.
+// What the build itself writes (TanStack's route tree, Wrangler's types, Paraglide's output): not its input, or Vite
+// Plus would refuse to cache a task that changes what it reads. The lockfile stands for node_modules, which is skipped.
 const written = [
   '!**/paraglide/**',
   '!**/routeTree.gen.ts',
@@ -33,6 +35,8 @@ const lockfile = { pattern: 'pnpm-lock.yaml', base: 'workspace' } as const;
 export default defineConfig({
   ...style,
   ...remyApp({ root: import.meta.dirname }),
+  // This folder is the app and the workspace's root too: bare vp dev, vp build and vp preview act on it (monorepo.md).
+  defaultPackage: '.',
   run: {
     tasks: {
       // What the type check needs and git does not hold: the app's compiled strings and the Worker's binding types.
@@ -44,17 +48,14 @@ export default defineConfig({
       // The build's folder emptied first: a cache hit restores the build's files over what is there and removes
       // nothing, so an earlier build's chunks would stay beside them.
       clean: { command: `node -e "require('node:fs').rmSync('dist', { recursive: true, force: true })"`, cache: false },
-      // `vp dev .` and `vp build .`: this folder is the app and the workspace's root too, and Vite Plus never acts on a
-      // workspace's root without being named it.
-      dev: { command: 'vp dev .', dependsOn: ['generate'], cache: false },
+      dev: { command: 'vp dev', dependsOn: ['generate'], cache: false },
       // The production build, replayed while nothing it reads changes. Its stamp names a commit only when one is
       // given (Workers Builds' WORKERS_CI_COMMIT_SHA), and those are in the cache key.
       build: {
-        command: 'vp build .',
+        command: 'vp build',
         dependsOn: ['generate', 'clean'],
         cache: {
           input: [{ auto: true }, ...written, lockfile],
-          output: ['dist/**'],
           env: ['WORKERS_CI_COMMIT_SHA'],
           untrackedEnv: network,
         },
@@ -77,7 +78,7 @@ export default defineConfig({
       },
       // What a browser check needs on this machine: Playwright's Chromium (on Linux the Han languages also need a Han
       // font, fonts-noto-cjk, which GitHub's workflow installs).
-      browsers: { command: 'playwright install chromium', cache: false },
+      browsers: { command: 'vp exec playwright install chromium', cache: false },
       // The browser checks on the production build, one language per way of drawing text, Playwright's own options passed through (`vp run test:browser --shard 1/3`). CI=1 unless set: the same
       // Playwright here as on GitHub, a browser per core.
       'test:browser': {
@@ -105,10 +106,6 @@ export default defineConfig({
       'check:unit': {
         command: 'vp test',
         dependsOn: ['check:commands', 'generate'],
-        cache: {
-          input: [{ auto: true }, '!**/node_modules/.*/**'],
-          output: [{ auto: true }, '!**/node_modules/.*/**'],
-        },
       },
       // Every check, after every change: Vite Plus's own (format, lint, types) once everything it reads exists (the
       // app and its docs built), Wrangler's deployment dry run, the project's own checks and the unit checks.

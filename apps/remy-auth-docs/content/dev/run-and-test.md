@@ -24,7 +24,7 @@ Every command for the app, its checks and its deployments, with what each does: 
 In short, the app runs locally on port 5173 with hot reload (`vp run dev`) and as the production build on
 4173 (`vp run preview`), and the checks run on that same local host. Every branch other than `main` gets a
 preview on Cloudflare: [on Cloudflare](#on-cloudflare), below. The agent's own browser on a laptop
-(`pnpm dlx chrome-devtools-mcp`, Chrome DevTools) is not CI: the checks never use it.
+(`vpx chrome-devtools-mcp`, Chrome DevTools) is not CI: the checks never use it.
 
 `vp run ci` runs the whole suite on the production build, here and on GitHub. To run it against a deployed URL (a
 branch's Preview, or production):

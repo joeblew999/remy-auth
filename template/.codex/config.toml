@@ -1,11 +1,4 @@
 [mcp_servers.chrome-devtools]
-command = "pnpm"
-args = [
-  "dlx",
-  "chrome-devtools-mcp@1.10.1",
-  "--isolated",
-  "--headless",
-  "--no-usage-statistics",
-  "--no-performance-crux",
-]
+command = "vpx"
+args = ["chrome-devtools-mcp@1.10.1", "--isolated", "--headless", "--no-usage-statistics", "--no-performance-crux"]
 startup_timeout_sec = 30

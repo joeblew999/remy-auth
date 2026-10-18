@@ -54,7 +54,7 @@ vp run dev          # http://127.0.0.1:5173/en
 Open [localhost:5173/en](http://127.0.0.1:5173/en); switch to Spanish or try the demo.
 
 The MCP servers for Claude and Codex are committed (`.mcp.json`, `.codex/config.toml`); the **Codex CLI** runs as
-`pnpm dlx @openai/codex`, and **Claude Code** is installed separately.
+`vpx @openai/codex`, and **Claude Code** is installed separately.
 The browser checks use Playwright's own Chromium, which the `browsers` task installs (on Linux, add the font
 `fonts-noto-cjk`).
 

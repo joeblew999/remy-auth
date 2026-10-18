@@ -19,6 +19,8 @@ const browserInputs = [
 ];
 
 // What the build and the generators write, never read as their input.
+// What the build itself writes (TanStack's route tree, Wrangler's types, Paraglide's output): not its input, or Vite
+// Plus would refuse to cache a task that changes what it reads. The lockfile stands for node_modules, which is skipped.
 const written = [
   '!**/routeTree.gen.ts',
   '!**/worker-configuration.d.ts',
@@ -57,7 +59,6 @@ export default defineConfig({
         dependsOn: ['local', 'generate', 'clean'],
         cache: {
           input: [{ auto: true }, ...written, lockfile],
-          output: ['dist/**'],
           env: ['WORKERS_CI_COMMIT_SHA'],
           untrackedEnv: network,
         },
@@ -80,7 +81,7 @@ export default defineConfig({
       },
       // What a browser check needs on this machine: Playwright's Chromium (on Linux the Han languages also need a Han
       // font, fonts-noto-cjk, which GitHub's workflow installs).
-      browsers: { command: 'playwright install chromium', cache: false },
+      browsers: { command: 'vp exec playwright install chromium', cache: false },
       // The browser checks on the production build, one language per way of drawing text, Playwright's own options passed through (`vp run remy-auth#test:browser --shard 1/3`). CI=1 unless set:
       // the same Playwright here as on GitHub, a browser per core.
       'test:browser': {

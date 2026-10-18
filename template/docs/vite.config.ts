@@ -23,7 +23,6 @@ export default defineConfig({
         dependsOn: ['generate', 'clean'],
         cache: {
           input: [{ auto: true }, '!dist/**', '!.wrangler/**'],
-          output: ['dist/**'],
           env: ['WORKERS_CI_COMMIT_SHA'],
           untrackedEnv: network,
         },
@@ -31,7 +30,7 @@ export default defineConfig({
       // The docs' browser checks on the production build (remy-ui's docs checks, Playwright run directly, the built
       // Worker on Cloudflare's local runtime at DOCS_PREVIEW_PORT, 4174). Ask AI's search is Cloudflare's only, so
       // answers take their "no answer" path here.
-      browsers: { command: 'playwright install chromium', cache: false },
+      browsers: { command: 'vp exec playwright install chromium', cache: false },
       'test:browser': {
         command: `CI=\${CI:-1} PREVIEW_PORT=\${DOCS_PREVIEW_PORT:-4174} playwright test -c node_modules/@joeblew999/remy-ui/src/docs/playwright.config.js --project=ours`,
         dependsOn: ['build', 'browsers'],

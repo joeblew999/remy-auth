@@ -12,7 +12,7 @@ which `vp install` downloads and runs). Every version is written once, in `pnpm-
 package lists what it imports (`catalog:`, or `workspace:*` for a package of this repository), with `pnpm-lock.yaml`
 beside it; the tools the shared tasks run (Wrangler, Playwright) are `@joeblew999/remy-cli`'s dependencies, so every
 app gets the same ones. Tools no task runs (the Chrome DevTools tools, the Modern Web Guidance CLI, the Codex CLI) are
-nobody's dependency: each runs as `pnpm dlx <name>`. `vp migrate --full` reports nothing to change and `vp env doctor` passes. A new Vite Plus is `vp upgrade <version>`
+nobody's dependency: each runs as `vpx <name>`. `vp migrate --full` reports nothing to change and `vp env doctor` passes. A new Vite Plus is `vp upgrade <version>`
 then `vp migrate`, which re-pins `vite-plus`, the `vite` alias and the `vitest` pin together (never by hand); an app
 gets the release's through `remy upgrade`, which runs that version's migrator (`vp dlx vite-plus@<version> migrate`). `gh` is the machine's, and Claude Code (the translator) is the machine's own, the one the
 subscription is logged into. A script that is one tool is written as that tool (`"logs": "wrangler
@@ -165,7 +165,7 @@ them: deploying is a push. See [the GUI proof](./run-and-test.md) for scope and 
 ### VS Code Codex extension
 
 Open this repository in VS Code and use the Codex sidebar. The extension ships its own executable; in a terminal,
-`pnpm dlx @openai/codex` runs the Codex CLI (it is no dependency of the project).
+`vpx @openai/codex` runs the Codex CLI (it is no dependency of the project).
 The [Codex CLI and IDE extension share MCP configuration](https://developers.openai.com/learn/docs-mcp).
 The committed `.codex/config.toml` is the project's; trust the project in Codex so that it loads. VS Code's
 `.vscode/mcp.json` configures its own MCP client and is not the Codex extension's configuration file.
@@ -186,8 +186,8 @@ VS Code's built-in command rather than a shell wrapper that pretends to restart 
 After `vp run setup`, use Codex or Claude Code:
 
 ```sh
-pnpm dlx @openai/codex                 # New Codex conversation
-pnpm dlx @openai/codex resume --last   # Resume latest Codex conversation
+vpx @openai/codex                 # New Codex conversation
+vpx @openai/codex resume --last   # Resume latest Codex conversation
 claude                                 # New Claude conversation
 claude --continue                      # Resume latest Claude conversation in this project
 ```
@@ -245,7 +245,7 @@ skills also work through the existing CLIs; a skill does not automatically requi
 an MCP server.
 
 The registration is committed, one file per client: `.mcp.json` (Claude) and `.codex/config.toml` (Codex), each
-naming one server, `chrome-devtools`, run as `pnpm dlx chrome-devtools-mcp@1.10.1 --isolated --headless
+naming one server, `chrome-devtools`, run as `vpx chrome-devtools-mcp@1.10.1 --isolated --headless
 --no-usage-statistics --no-performance-crux`: the pinned version, an isolated headless Chrome profile, tool telemetry
 and CrUX uploads off. Nothing writes them; change the version there, by hand, in both. The MCP process is separate
 from the `chrome-devtools start`/`stop` session below; the agent client manages its lifetime.
@@ -264,15 +264,15 @@ Google's [Chrome DevTools agent tools](https://developer.chrome.com/docs/devtool
 provide browser interaction, screenshots, accessibility inspection, network/cookie
 debugging, Lighthouse and performance analysis. Install Google Chrome separately;
 the browser is not installed by project setup. The CLI (`chrome-devtools`, from the `chrome-devtools-mcp` package)
-is experimental and no dependency of the project; it runs through `pnpm dlx`, at the MCP server's version:
+is experimental and no dependency of the project; it runs through `vpx`, at the MCP server's version:
 
 ```sh
-pnpm --package=chrome-devtools-mcp@1.10.1 dlx chrome-devtools start --isolated --usageStatistics=false --performanceCrux=false
-pnpm --package=chrome-devtools-mcp@1.10.1 dlx chrome-devtools new_page http://localhost:5173/en
-pnpm --package=chrome-devtools-mcp@1.10.1 dlx chrome-devtools list_pages
-pnpm --package=chrome-devtools-mcp@1.10.1 dlx chrome-devtools take_snapshot 1              # Use the returned page ID
-pnpm --package=chrome-devtools-mcp@1.10.1 dlx chrome-devtools click 1 "UID_FROM_SNAPSHOT"
-pnpm --package=chrome-devtools-mcp@1.10.1 dlx chrome-devtools stop
+vp dlx -p chrome-devtools-mcp@1.10.1 chrome-devtools start --isolated --usageStatistics=false --performanceCrux=false
+vp dlx -p chrome-devtools-mcp@1.10.1 chrome-devtools new_page http://localhost:5173/en
+vp dlx -p chrome-devtools-mcp@1.10.1 chrome-devtools list_pages
+vp dlx -p chrome-devtools-mcp@1.10.1 chrome-devtools take_snapshot 1              # Use the returned page ID
+vp dlx -p chrome-devtools-mcp@1.10.1 chrome-devtools click 1 "UID_FROM_SNAPSHOT"
+vp dlx -p chrome-devtools-mcp@1.10.1 chrome-devtools stop
 ```
 
 `start` is headless by default; add `--headless=false` for a visible window. Start once
@@ -291,9 +291,9 @@ forms, accessibility, performance, passkeys and browser compatibility. The main
 `chrome-extensions` skill is omitted because this project is a web service and UI.
 
 ```sh
-pnpm dlx modern-web-guidance search "animate a dialog modal backdrop"
-pnpm dlx modern-web-guidance retrieve "GUIDE_ID_FROM_SEARCH"
-pnpm dlx modern-web-guidance list
+vpx modern-web-guidance search "animate a dialog modal backdrop"
+vpx modern-web-guidance retrieve "GUIDE_ID_FROM_SEARCH"
+vpx modern-web-guidance list
 ```
 
 The CLI is no dependency of the project; `skills experimental_install` restores the commit-pinned skill. If a search

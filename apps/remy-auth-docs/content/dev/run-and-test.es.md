@@ -1,7 +1,7 @@
 ---
 title: "Ejecutar, previsualizar y probar la app"
 description: "Un Cloudflare Worker sirve el sitio y la app; cómo ejecutarlo en local, previsualizarlo y probarlo contra destinos locales y remotos."
-translatedFrom: "d324c35e c82e5d5e 8dfe66ef d9d6a7c6 f7afc873 6b089ee9 90a87f8d fdbfb49e 4120a6b8 2355da95"
+translatedFrom: "d324c35e 91377aae 8dfe66ef d9d6a7c6 f7afc873 6b089ee9 90a87f8d fdbfb49e 4120a6b8 2355da95"
 ---
 
 :::note
@@ -25,7 +25,7 @@ Todos los comandos de la aplicación, sus comprobaciones y sus deployments, con 
 En resumen, la aplicación se ejecuta en local en el puerto 5173 con hot reload (`vp run dev`) y como build de producción en
 el 4173 (`vp run preview`), y las comprobaciones se ejecutan en ese mismo host local. Cada rama distinta de `main` obtiene una
 preview en Cloudflare: [en Cloudflare](#on-cloudflare), más abajo. El navegador propio del agente en un portátil
-(`pnpm dlx chrome-devtools-mcp`, Chrome DevTools) no es CI: las comprobaciones nunca lo usan.
+(`vpx chrome-devtools-mcp`, Chrome DevTools) no es CI: las comprobaciones nunca lo usan.
 
 `vp run ci` ejecuta toda la suite sobre la build de producción, aquí y en GitHub. Para ejecutarla contra una URL
 desplegada (la preview de una rama o producción):
