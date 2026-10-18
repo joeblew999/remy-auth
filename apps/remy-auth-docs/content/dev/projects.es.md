@@ -1,7 +1,7 @@
 ---
 title: "Proyectos: estructura, apps nuevas y publicación"
 description: "Qué guarda todo proyecto de Remy en el mismo lugar, cómo empezar una app nueva, la publicación de paquetes, las traducciones, Cloudflare y los planes. Todos los comandos están en Comandos."
-translatedFrom: "76024556 6f14d69f d9cf3bab 191684ff 737dea06 335e995b de907ca6 5d426462"
+translatedFrom: "76024556 6f14d69f c401652a 191684ff 2ad319b2 335e995b de907ca6 5d426462"
 ---
 
 La herramienta es `remy` (y `remy-check`), los bins de `@joeblew999/remy-cli` (`packages/remy-cli/src`, un
@@ -99,14 +99,30 @@ padre, como `videos.$videoId` al lado de `videos`, es `videos_.$videoId.tsx`: Ta
 `src/remy-app.tsx`, cadenas en `messages/en.json` (`m` desde `src/paraglide/messages.js`), una API como
 paquete de contrato y `src/api/` (todo procedimiento que recibe entrada documenta un error, o `apiChecks`
 falla: la regla `api/coverage` del paquete), documentación en `docs/content/`. Pasa a una versión nueva con
-`vp run upgrade <version>`: `@joeblew999/remy-ui` y `@joeblew999/remy-cli` en esa versión (`vp add`), la tag del
-flujo de trabajo de CI, los scripts, los archivos de `.vite-hooks/` y `vite.config.ts` de la app en blanco (uno antiguo se conserva como
-`vite.config.ts.before-upgrade`, para volver a mover a él sus propios plugins y opciones), `pnpm-workspace.yaml`, el
-`collections.ts` y el `wrangler.jsonc` de la documentación donde la app no los tenga, y los orígenes de un
-`remy.config.ts` antiguo movidos a `.env` y el archivo eliminado; imprime el comando de build de Cloudflare, que
+`vp run upgrade <version>`. Se ejecuta en dos fases, de modo que la actualización siempre la hace la versión a la que se pasa: la línea de comandos que la app tiene instalada deja `@joeblew999/remy-ui` y
+`@joeblew999/remy-cli` en esa versión (`vp add`) y luego cede el control al recién instalado `remy upgrade <version>
+--installed`, que hace el resto: la tag del flujo de trabajo de CI, los scripts, los archivos de `.vite-hooks/` y
+`vite.config.ts` de la app en blanco (uno antiguo se conserva como `vite.config.ts.before-upgrade`, para volver a mover a él sus propios plugins y opciones),
+`pnpm-workspace.yaml`, el `collections.ts` y el `wrangler.jsonc` de la documentación donde la app no los tenga,
+y los orígenes de un `remy.config.ts` antiguo movidos a `.env` y el archivo eliminado; imprime el comando de build de Cloudflare, que
 vive en Cloudflare, y termina indicando que ejecutes `vp run setup` (las skills, las reglas, todas las comprobaciones), cosa que no
-hace por sí mismo. Una app en la 0.15.1 instala primero a mano los dos paquetes
-en la versión nueva, porque el upgrade de la 0.15.1 no puede. Dos ejecuciones de navegador locales a la vez comparten
+hace por sí mismo.
+
+**Una app en la 0.17.0 o anterior** tiene una línea de comandos instalada de antes del traspaso (la de la 0.16.0 incluso busca la app
+en blanco donde la 0.17.0 ya no la guarda, y se detiene a medias). Instala primero la nueva línea de comandos y después actualiza:
+
+```bash
+vp add -E @joeblew999/remy-ui@<version> @joeblew999/remy-cli@<version>   # 0.17.1 or later
+vp run upgrade <version>
+```
+
+Una app que una actualización anterior dejó a medias (con los paquetes nuevos instalados, pero los scripts y la configuración antiguos) ejecuta
+de nuevo `vp run upgrade <version>`: su línea de comandos instalada ya es la nueva. Una app en la 0.15.1 hace los mismos dos
+pasos, porque el upgrade de la 0.15.1 no puede.
+
+**Para quien cambie el upgrade:** una app se actualiza con la línea de comandos de la versión a la que pasa, pero solo
+a partir de la 0.17.1. Todo lo que el upgrade lea de una versión (dónde vive la app en blanco, sus archivos, sus nombres) debe
+seguir encontrándose en las versiones anteriores, o la nota de arriba gana una línea para las apps que estén en ellas. Dos ejecuciones de navegador locales a la vez comparten
 `PREVIEW_PORT` y la segunda falla al iniciar su servidor: dale a cada shell el suyo (`PREVIEW_PORT=4232 vp run …`).
 
 ### Un repositorio que publica paquetes [#a-repository-that-publishes-packages]
@@ -165,6 +181,12 @@ skills (`skills experimental_install` y `experimental_sync`, una vez por `skills
 `wrangler.jsonc` (`remy-check wrangler`), el `vp run ready` de la app, las comprobaciones rápidas de
 navegador y las de la documentación (unos 93 s); Vite Plus lo guarda en caché según de qué está hecha una app nueva, así que un cambio en
 la app propia de remy-auth o en la documentación de su producto ya no lo ejecuta.
+Su hermana, la prueba de actualización (`vp run upgrade-test`, `fixtures/consumer/upgrade.sh`, issue #44), crea una app a partir de la
+última versión **publicada** con `vp create`, la instala, la actualiza a los paquetes de este commit tal como
+indica la nota de actualización de arriba (empaquetados con esa versión más 1000 en el parche, servidos por el mismo registro de prueba,
+que deja pasar todas las demás versiones desde GitHub Packages) y ejecuta su `vp run ready`. Lee GitHub
+Packages, así que se ejecuta donde puede haber un token (el job `upgrade` de GitHub, un Mac con `gh`), no en una sesión en la nube.
+Ambas se ejecutan en cada push en GitHub, y el release las espera.
 Un cambio que rompería otro repositorio falla ahí, no en ese repositorio. Las pruebas se comprueban con tipos junto
 con la app (`tsconfig.json` incluye `tests/`). Las auditorías de Google son
 `vp run test:audits` (Lighthouse, local; parte de `vp run ci`, así que de cada push) y Core Web Vitals es

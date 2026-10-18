@@ -95,14 +95,31 @@ Then the app grows in its own files: pages in `src/routes/` (a page beside a par
 `videos`, which then needs an `<Outlet />`), their links in `src/remy-app.tsx`, strings in `messages/en.json`
 (`m` from `src/paraglide/messages.js`), an API as a contract package and `src/api/` (every procedure that
 takes input documents an error, or `apiChecks` fails: the package's `api/coverage` rule), docs in
-`docs/content/`. Move to a new release with `vp run upgrade <version>`: `@joeblew999/remy-ui` and
-`@joeblew999/remy-cli` at that version (`vp add`), the CI workflow's tag, the blank app's scripts, `.vite-hooks/` and
+`docs/content/`. Move to a new release with `vp run upgrade <version>`. It runs in two phases, so the upgrade is
+always done by the release it moves to: the command line the app has installed puts `@joeblew999/remy-ui` and
+`@joeblew999/remy-cli` at that version (`vp add`), then hands over to the newly installed `remy upgrade <version>
+--installed`, which does the rest: the CI workflow's tag, the blank app's scripts, `.vite-hooks/` and
 `vite.config.ts` files (an old one kept as `vite.config.ts.before-upgrade`, to move its own plugins and options
 back), `pnpm-workspace.yaml`, the docs' `collections.ts` and `wrangler.jsonc` where the app has none,
 an old `remy.config.ts`'s origins moved into `.env` and the file removed; it prints Cloudflare's build command, which
 lives on Cloudflare, and ends by saying to run `vp run setup` (the skills, the rules, every check), which it does not
-run itself. An app on 0.15.1 installs the two packages at the new
-version by hand first, since 0.15.1's upgrade cannot. Two local browser runs at once share `PREVIEW_PORT` and the second fails to
+run itself.
+
+**An app on 0.17.0 or older** has an installed command line from before the hand-over (0.16.0's even looks for the
+blank app where 0.17.0 no longer keeps it, and stops halfway). It installs the new command line first, then upgrades:
+
+```bash
+vp add -E @joeblew999/remy-ui@<version> @joeblew999/remy-cli@<version>   # 0.17.1 or later
+vp run upgrade <version>
+```
+
+An app an older upgrade already left halfway (the new packages installed, the old scripts and configuration) runs
+`vp run upgrade <version>` again: its installed command line is the new one now. An app on 0.15.1 does the same two
+steps, since 0.15.1's upgrade cannot.
+
+**For whoever changes the upgrade:** an app upgrades with the command line of the release it moves to, but only from
+0.17.1 on. Anything the upgrade reads from a release (where the blank app lives, its files, their names) must still
+be found by the releases before, or the note above grows a line for apps on them. Two local browser runs at once share `PREVIEW_PORT` and the second fails to
 start its server: give each shell its own (`PREVIEW_PORT=4232 vp run …`).
 
 ### A repository that publishes packages
@@ -161,6 +178,12 @@ skills (`skills experimental_install` and `experimental_sync`, once per `skills-
 `wrangler.jsonc` check (`remy-check wrangler`), the app's `vp run ready`, the quick
 browser checks and the docs' checks (about 93 s); Vite Plus caches it on what a new app is made of, so a change to
 remy-auth's own app or product docs runs it no more.
+Its sibling, the upgrade test (`vp run upgrade-test`, `fixtures/consumer/upgrade.sh`, issue #44), makes an app from the
+latest **published** release with `vp create`, installs it, upgrades it to this commit's packages the way the
+upgrade note above says (packed as that version with 1000 added to its patch, served by the same stand-in registry,
+which passes every other version through from GitHub Packages), and runs its `vp run ready`. It reads GitHub
+Packages, so it runs where a token can (GitHub's `upgrade` job, a Mac with `gh`), not in a cloud session.
+Both run on every push on GitHub, and the release waits for them.
 A change that would break another repository fails there, not in that repository. Tests are type-checked with
 the app (`tsconfig.json` includes `tests/`). Google's audits are
 `vp run test:audits` (Lighthouse, local; part of `vp run ci`, so of every push) and Core Web Vitals is

@@ -108,6 +108,14 @@ export default defineConfig({
           untrackedEnv: [...network, 'GITHUB_TOKEN', 'NODE_AUTH_TOKEN', 'PREVIEW_PORT', 'DOCS_PREVIEW_PORT'],
         },
       },
+      // The upgrade test (issue #44): an app made from the latest published release, upgraded to this commit's packages
+      // as projects.md says, then its own checks. It reads GitHub Packages, so it needs a token that reads packages
+      // (GitHub's upgrade job has one; a cloud session's does not). Never cached: the previous release is the registry's.
+      'upgrade-test': {
+        command: 'bash fixtures/consumer/upgrade.sh',
+        dependsOn: ['@joeblew999/remy-ui#pack', '@joeblew999/remy-cli#pack', 'skills:build'],
+        cache: false,
+      },
       // The release's publish (GitHub's release job, on a push to main): Changesets publishes each package whose
       // version is new on its registry (pnpm publish), after what the packages ship is generated and built.
       'release:publish': {

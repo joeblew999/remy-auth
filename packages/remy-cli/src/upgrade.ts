@@ -152,7 +152,9 @@ function fetchBlank(version: string, token: string): string {
       env: {
         ...process.env,
         VP_SKIP_INSTALL: '1',
-        'npm_config_@joeblew999:registry': 'https://npm.pkg.github.com',
+        // The scope's registry as the machine sets it, else GitHub Packages (the upgrade test points it at its own).
+        'npm_config_@joeblew999:registry':
+          process.env['npm_config_@joeblew999:registry'] ?? 'https://npm.pkg.github.com',
         'npm_config_//npm.pkg.github.com/:_authToken': token,
       },
     },

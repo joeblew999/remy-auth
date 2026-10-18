@@ -40,7 +40,7 @@ step pack
 #    part from the showcase; a unit check holds them to the blank app's), and the packed packages in its vendor/.
 registryPort=$((preview + 300))
 tar -xzf "$out/vendor/create.tgz" -C "$out" package/package.json
-node "$root/fixtures/consumer/registry.mjs" "$registryPort" "$out/package/package.json" "$out/vendor/create.tgz" &
+node "$root/fixtures/consumer/registry.mjs" "$registryPort" - "$out/package/package.json=$out/vendor/create.tgz" &
 registry=$!
 trap 'kill "$registry" 2>/dev/null; rm -rf "$out"' EXIT
 mkdir -p "$out/new" && echo "@joeblew999:registry=http://127.0.0.1:$registryPort/" > "$out/new/.npmrc"
