@@ -191,7 +191,13 @@ export function demoChecks() {
       const other = locales.find((value) => value !== locale);
       // App pages switch language through the header's menu (shadcn's DropdownMenu with a radio group).
       await page.getByRole('button', { name: m.language_label({}, o), exact: true }).click();
-      await page.getByRole('menuitemradio', { name: endonym(other), exact: true }).click();
+      // Choose once the menu has finished opening: a click during its opening animation is dropped (2026-10-18,
+      // the release's run, on a loaded machine).
+      const choice = page.getByRole('menuitemradio', { name: endonym(other), exact: true });
+      await expect(page.getByRole('menu')).toHaveAttribute('data-open', '');
+      await expect(page.getByRole('menu')).not.toHaveAttribute('data-starting-style');
+      await expect(choice).toBeVisible();
+      await choice.click();
       await expect(page).toHaveURL(new RegExp(`${localizedPath('/app/demo', other)}$`));
       await expect(page.locator('html')).toHaveAttribute('lang', other);
       expect(context.pages()).toHaveLength(1);
