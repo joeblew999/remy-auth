@@ -45,6 +45,8 @@ jobs:
   # the script), and the workflow holds nothing else: what a browser task needs (Playwright's Chromium, the Han
   # fonts) is a task too (browsers).
   checks:
+    # Not for a release's tag: vp run release ran every check, in every language, before it tagged.
+    if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
     strategy:
       fail-fast: false
       matrix:
@@ -94,7 +96,7 @@ jobs:
       - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - if: matrix.name == 'new-app'
         uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
@@ -134,7 +136,6 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: checks
     runs-on: ubuntu-latest
     permissions:
       contents: write
