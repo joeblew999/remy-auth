@@ -12,13 +12,15 @@ const scriptsOf = (file: string) =>
   (JSON.parse(readFileSync(file, 'utf8')) as { scripts: Record<string, string> }).scripts;
 
 test('a new app runs on the Node remy-auth runs on', () => {
-  expect(readFileSync('template/.node-version', 'utf8')).toBe(readFileSync('.node-version', 'utf8'));
+  expect(readFileSync('packages/create/templates/app/.node-version', 'utf8')).toBe(
+    readFileSync('.node-version', 'utf8'),
+  );
   const engines = (file: string) => (JSON.parse(readFileSync(file, 'utf8')) as { engines?: unknown }).engines;
-  expect(engines('template/package.json')).toEqual(engines('package.json'));
+  expect(engines('packages/create/templates/app/package.json')).toEqual(engines('package.json'));
 });
 
 test("remy-auth's flow is the blank app's, the command line run from its source", () => {
-  const blank = scriptsOf('template/package.json');
+  const blank = scriptsOf('packages/create/templates/app/package.json');
   const ours = scriptsOf('package.json');
   const fromSource = (text: string) => text.replaceAll('node packages/remy-cli/src/remy.ts ', 'remy ');
   for (const name of ['prepare', 'translate']) expect(fromSource(ours[name]!), name).toBe(blank[name]);
@@ -29,14 +31,14 @@ test("remy-auth's flow is the blank app's, the command line run from its source"
   expect(ours.release).toContain('vp run ci && vp run new-app && ');
   expect(blank.release).toBeUndefined();
   expect(ours.release).toMatch(/^changeset version && /);
-  for (const name of readdirSync('template/.vite-hooks').filter((name) => name !== '_'))
+  for (const name of readdirSync('packages/create/templates/app/.vite-hooks').filter((name) => name !== '_'))
     expect(readFileSync(`.vite-hooks/${name}`, 'utf8'), name).toBe(
-      readFileSync(`template/.vite-hooks/${name}`, 'utf8'),
+      readFileSync(`packages/create/templates/app/.vite-hooks/${name}`, 'utf8'),
     );
 });
 
 test('the flow scripts run Vite Plus between the command line steps, never the other way round', () => {
-  const blank = scriptsOf('template/package.json');
+  const blank = scriptsOf('packages/create/templates/app/package.json');
   // No script of ours touches git: committing, pushing and merging are git's and GitHub's own commands.
   expect(blank.land).toBeUndefined();
   expect(blank.setup).toMatch(/&& vp run ready$/);
@@ -52,8 +54,8 @@ test('no configuration makes tasks in code: each vite.config.ts writes its own o
     'apps/remy-auth-docs/vite.config.ts',
     'packages/remy-ui/vite.config.ts',
     'packages/remy-cli/vite.config.ts',
-    'template/vite.config.ts',
-    'template/docs/vite.config.ts',
+    'packages/create/templates/app/vite.config.ts',
+    'packages/create/templates/app/docs/vite.config.ts',
   ]) {
     const text = readFileSync(file, 'utf8');
     expect(text, file).toMatch(/run: \{\s*tasks: \{/);
@@ -84,24 +86,32 @@ test('the command line hands nothing on through the environment, and reads no sw
 test("the blank app's catalog has the workspace's versions, so a new app installs what remy-auth checked", () => {
   const entries = (file: string) =>
     Object.fromEntries(
-      [...readFileSync(file, 'utf8').matchAll(/^ {2}['"]?([^'":]+)['"]?: ['"]([^'"]+)['"]$/gm)].map((match) => [
-        match[1]!,
-        match[2]!,
-      ]),
+      [
+        // The catalog only: what follows it (overrides, peer rules) is not a version list.
+        ...readFileSync(file, 'utf8')
+          .split('\ncatalog:\n')[1]!
+          .split(/\n\S/)[0]!
+          .matchAll(/^ {2}['"]?([^'":]+)['"]?: ['"]([^'"]+)['"]$/gm),
+      ].map((match) => [match[1]!, match[2]!]),
     );
   const ours = entries('pnpm-workspace.yaml');
-  const blank = entries('template/pnpm-workspace.yaml');
+  const blank = entries('packages/create/templates/app/pnpm-workspace.yaml');
   const shared = Object.entries(blank).filter(([name]) => !name.startsWith('@joeblew999/') && !name.startsWith('vite'));
   expect(Object.fromEntries(shared)).toEqual(Object.fromEntries(shared.map(([name]) => [name, ours[name]])));
 });
 
 test('every catalog: dependency in the blank app has its catalog entry', () => {
   const catalog = new Set(
-    [...readFileSync('template/pnpm-workspace.yaml', 'utf8').matchAll(/^ {2}['"]?([^'":]+)['"]?: /gm)].map(
-      (match) => match[1]!,
-    ),
+    [
+      ...readFileSync('packages/create/templates/app/pnpm-workspace.yaml', 'utf8').matchAll(
+        /^ {2}['"]?([^'":]+)['"]?: /gm,
+      ),
+    ].map((match) => match[1]!),
   );
-  const missing = ['template/package.json', 'template/docs/package.json'].flatMap((file) => {
+  const missing = [
+    'packages/create/templates/app/package.json',
+    'packages/create/templates/app/docs/package.json',
+  ].flatMap((file) => {
     const manifest = JSON.parse(readFileSync(file, 'utf8')) as Record<string, Record<string, string> | undefined>;
     return ['dependencies', 'devDependencies'].flatMap((section) =>
       Object.entries(manifest[section] ?? {})
@@ -114,7 +124,7 @@ test('every catalog: dependency in the blank app has its catalog entry', () => {
 
 test("the new-app test's app is the blank app's, with only its named extras", () => {
   const json = (file: string) => JSON.parse(readFileSync(file, 'utf8')) as Record<string, any>;
-  const blank = json('template/package.json');
+  const blank = json('packages/create/templates/app/package.json');
   const fixture = json('fixtures/consumer/files/package.json');
   expect(fixture.dependencies).toEqual({
     ...blank.dependencies,
@@ -125,20 +135,20 @@ test("the new-app test's app is the blank app's, with only its named extras", ()
   expect({ ...fixture, dependencies: undefined }).toEqual({ ...blank, dependencies: undefined });
   const docs = json('fixtures/consumer/files/docs/package.json');
   expect(docs).toEqual({
-    ...json('template/docs/package.json'),
+    ...json('packages/create/templates/app/docs/package.json'),
     dependencies: {
-      ...json('template/docs/package.json').dependencies,
+      ...json('packages/create/templates/app/docs/package.json').dependencies,
       '@joeblew999/remy-fixture-contract': 'workspace:*',
     },
   });
   expect(readFileSync('fixtures/consumer/files/docs/docs.config.ts', 'utf8')).toBe(
-    readFileSync('template/docs/docs.config.ts', 'utf8').replace(
+    readFileSync('packages/create/templates/app/docs/docs.config.ts', 'utf8').replace(
       "  branch: 'main',\n",
       "  branch: 'main',\n  contract: '@joeblew999/remy-fixture-contract',\n",
     ),
   );
   expect(json('fixtures/consumer/files/src/parts.json')).toEqual([
-    ...(json('template/src/parts.json') as unknown as string[]),
+    ...(json('packages/create/templates/app/src/parts.json') as unknown as string[]),
     '@joeblew999/remy-showcase/time-zones',
   ]);
   const entries = (file: string) =>
@@ -150,7 +160,7 @@ test("the new-app test's app is the blank app's, with only its named extras", ()
       ].map((match) => [match[1]!, match[2]!]),
     );
   const fixtureCatalog = entries('fixtures/consumer/files/pnpm-workspace.yaml');
-  const blankCatalog = Object.entries(entries('template/pnpm-workspace.yaml')).filter(
+  const blankCatalog = Object.entries(entries('packages/create/templates/app/pnpm-workspace.yaml')).filter(
     ([name]) => !name.startsWith('@joeblew999/'),
   );
   expect(Object.fromEntries(blankCatalog.map(([name]) => [name, fixtureCatalog[name]]))).toEqual(

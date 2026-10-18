@@ -2,12 +2,17 @@
   "$schema": "https://unpkg.com/@changesets/config@4.0.1/schema.json",
   "baseBranch": "main",
   "access": "restricted",
-  "fixed": [["@joeblew999/remy-ui", "@joeblew999/remy-cli"]],
+  "fixed": [["@joeblew999/remy-ui", "@joeblew999/remy-cli", "@joeblew999/create"]],
   "linked": [],
   "ignore": [],
   "updateInternalDependencies": "patch",
-  "privatePackages": { "version": false, "tag": false },
+  "privatePackages": {
+    "version": false,
+    "tag": false
+  },
   "commit": false,
   "changelog": "@changesets/cli/changelog",
-  "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": { "onlyUpdatePeerDependentsWhenOutOfRange": true }
+  "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
+    "onlyUpdatePeerDependentsWhenOutOfRange": true
+  }
 }

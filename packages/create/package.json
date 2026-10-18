@@ -1,0 +1,27 @@
+{
+  "name": "@joeblew999/create",
+  "version": "0.16.0",
+  "description": "New Remy apps: vp create @joeblew999:app (the blank app, TanStack Start on Cloudflare, with its docs)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joeblew999/remy-auth.git",
+    "directory": "packages/create"
+  },
+  "files": [
+    "templates",
+    "README.md"
+  ],
+  "type": "module",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "createConfig": {
+    "templates": [
+      {
+        "name": "app",
+        "description": "A Remy app: TanStack Start on Cloudflare, its API, sign-in, docs and checks",
+        "template": "./templates/app"
+      }
+    ]
+  }
+}

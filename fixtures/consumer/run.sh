@@ -12,30 +12,45 @@ preview=${PREVIEW_PORT:-4173}; docs=${DOCS_PREVIEW_PORT:-4174}
 started=$(date +%s); mark=$started; took=""
 step() { local now; now=$(date +%s); took="$took, $1 $((now - mark)) s"; mark=$now; }
 
-# 1. The blank app with the fixture's own files over it: its finished package.json, docs, workspace and parts list (the
-#    blank app's, with a package it owns, its API and a part from the showcase; a unit check holds them to the blank
-#    app's), its contract package, its API and its checks. Nothing is edited here.
-cp -R template "$out/app" && cp -R fixtures/consumer/files/. "$out/app/"
-
-# 2. The platform, its command line and the showcase in the app's vendor/, packed by pnpm in the workspace (which
-#    writes each catalog: and workspace: version in), each with a version no registry has (build metadata, so the
-#    showcase's peer range still holds), so the install can never take a published copy. The version is set for the
-#    pack and put back after, whatever happens.
-mkdir -p "$out/app/vendor"
+# 1. The platform, its command line, the showcase and @joeblew999/create, packed by pnpm in the workspace (which
+#    writes each catalog: and workspace: version in), each with a version no registry has and no earlier run used
+#    (build metadata, so the showcase's peer range still holds; vp create caches a package by its version), so nothing
+#    can come from a published copy. The version is set for the pack and put back after, whatever happens.
+run="dev.$sha.$(date +%s)"
+mkdir -p "$out/vendor"
 set_version() { node -e "const f=process.argv[1],p=require(f);p.version=process.argv[2];require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')" "$1" "$2"; }
-pack() { # <folder>: packed to vendor/<folder>.tgz
+pack() { # <folder>: packed to $out/vendor/<folder>.tgz
   local dir="$root/packages/$1" was file
   was="$(node -p "require('$dir/package.json').version")"
-  set_version "$dir/package.json" "$was+dev.$sha"
+  set_version "$dir/package.json" "$was+$run"
   file=$(cd "$dir" && pnpm pack --pack-destination "$out" --json | node -e "let s='';process.stdin.on('data',(d)=>(s+=d)).on('end',()=>console.log(JSON.parse(s).filename))") || { set_version "$dir/package.json" "$was"; exit 1; }
   set_version "$dir/package.json" "$was"
-  mv "$file" "$out/app/vendor/$1.tgz"
+  mv "$file" "$out/vendor/$1.tgz"
 }
 pack remy-ui
 pack remy-cli
 pack remy-showcase
-version="$(node -p "require('./packages/remy-ui/package.json').version")+dev.$sha"
+pack create
+version="$(node -p "require('./packages/remy-ui/package.json').version")+$run"
 step pack
+
+# 2. The app, made as every new app is: vp create @joeblew999:app, from this commit's @joeblew999/create, which a
+#    stand-in registry (registry.mjs) serves where the scope's .npmrc points; then the fixture's own files over it
+#    (its finished package.json, docs, workspace and parts list: the blank app's, with a package it owns, its API and a
+#    part from the showcase; a unit check holds them to the blank app's), and the packed packages in its vendor/.
+registryPort=$((preview + 300))
+tar -xzf "$out/vendor/create.tgz" -C "$out" package/package.json
+node "$root/fixtures/consumer/registry.mjs" "$registryPort" "$out/package/package.json" "$out/vendor/create.tgz" &
+registry=$!
+trap 'kill "$registry" 2>/dev/null; rm -rf "$out"' EXIT
+mkdir -p "$out/new" && echo "@joeblew999:registry=http://127.0.0.1:$registryPort/" > "$out/new/.npmrc"
+for _ in $(seq 50); do curl -fs "http://127.0.0.1:$registryPort/@joeblew999%2fcreate" > /dev/null && break; sleep 0.1; done
+(cd "$out/new" && vp create "@joeblew999:app@$(node -p "require('$out/package/package.json').version")" --directory app \
+  --no-interactive --no-git --no-agent --no-editor --no-hooks)
+mv "$out/new/app" "$out/app"
+cp -R fixtures/consumer/files/. "$out/app/"
+rm "$out/vendor/create.tgz" && mv "$out/vendor" "$out/app/vendor"
+step create
 
 cd "$out/app"
 git init -q && git add -A && git -c user.name=remy -c user.email=remy@localhost commit -qm fixture && git branch -M main

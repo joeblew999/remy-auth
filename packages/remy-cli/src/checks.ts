@@ -55,7 +55,10 @@ const checks: Record<string, (write: boolean) => void | Promise<unknown>> = {
   },
   // Each docs page's ending: .mdx when it uses a component, .md otherwise (here and the blank app's).
   endings: (write) => {
-    const lines = rightEndings([join(docsDir() ?? 'docs', 'content'), 'template/docs/content'], !write);
+    const lines = rightEndings(
+      [join(docsDir() ?? 'docs', 'content'), 'packages/create/templates/app/docs/content'],
+      !write,
+    );
     for (const line of lines) console.log(`endings: ${line}`);
     if (!write && lines.length) {
       console.error('endings: vp run fix renames them.');

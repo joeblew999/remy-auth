@@ -121,11 +121,11 @@ export async function commandsMarkdown(dir = '.'): Promise<string> {
 }
 
 /**
- * The folders whose COMMANDS.md is written: this app, and in remy-auth the blank app too (template/), so a new
+ * The folders whose COMMANDS.md is written: this app, and in remy-auth the blank app too (packages/create/templates/app), so a new
  * app starts with its own list, as every app keeps one (self-similar: what this repo has, every app has).
  */
 export const commandsDirs = (): string[] =>
-  ['.', 'template'].filter((dir) => dir === '.' || existsSync(join(dir, 'package.json')));
+  ['.', 'packages/create/templates/app'].filter((dir) => dir === '.' || existsSync(join(dir, 'package.json')));
 
 /**
  * Writes each folder's COMMANDS.md when it differs; true when any changed. With `verify` (vp run ci, here and on

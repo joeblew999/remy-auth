@@ -155,8 +155,8 @@ second bundled in.
 Every change to a published package carries a changeset, written with it: `pnpm changeset` (which packages, patch,
 minor or major, and one line for the changelog), committed as `.changeset/<name>.md`. `vp run release`, from this
 machine, stopping at the first failure: `changeset version` (the new versions and each package's `CHANGELOG.md`
-section from the pending changesets), `scripts/version.ts` (the blank app's pins, `template/pnpm-workspace.yaml` and
-`template/.github/workflows/ci.yml`'s tag, moved to remy-ui's new version, then the lockfile), the translations
+section from the pending changesets), `scripts/version.ts` (the blank app's pins, `packages/create/templates/app/pnpm-workspace.yaml` and
+`packages/create/templates/app/.github/workflows/ci.yml`'s tag, moved to remy-ui's new version, then the lockfile), the translations
 complete (`remy i18n check --strict`), every check (`vp run ci`), the new-app test, then `vp run release:push`
 (the commit "Release vX.Y.Z", pushed to main). Its steps are on [Commands](./commands.mdx).
 A push to main runs one job on GitHub, the release (never a cloud session, which can push no tag), and no checks, since the push's hook ran them:

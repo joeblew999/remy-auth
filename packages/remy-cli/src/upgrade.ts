@@ -16,7 +16,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 
 function fail(message: string): never {
   console.error(message);
@@ -92,26 +92,48 @@ export function upgrade(version: string | undefined): void {
       }
     }
   scriptsAndHooks(blank, version);
-  rmSync(blank, { recursive: true, force: true });
+  rmSync(dirname(blank), { recursive: true, force: true });
   console.log(`upgrade: on @joeblew999/remy-ui ${version}. Next: vp run setup (the skills, the rules, every check).`);
 }
 
-/** remy-auth's blank app (template/) at a release's tag, in a scratch folder. */
+/**
+ * The blank app at a release, in a scratch folder: `vp create @joeblew999:app@<version>`, from @joeblew999/create on
+ * GitHub Packages, as a new app is made. vp create reads a registry's address and token from .npmrc files and
+ * npm_config_ variables only, not pnpm's own configuration, so both are handed to it here (the token is gh's).
+ */
 function fetchBlank(version: string): string {
-  const blank = mkdtempSync(join(tmpdir(), 'remy-blank-'));
+  const scratch = mkdtempSync(join(tmpdir(), 'remy-blank-'));
+  const token = execFileSync('gh', ['auth', 'token'], { encoding: 'utf8' }).trim();
   const got = spawnSync(
-    'pnpm',
-    ['dlx', 'giget@3.3.1', `gh:joeblew999/remy-auth/template#v${version}`, blank, '--force'],
+    'vp',
+    [
+      'create',
+      `@joeblew999:app@${version}`,
+      '--directory',
+      'app',
+      '--no-interactive',
+      '--no-git',
+      '--no-agent',
+      '--no-editor',
+      '--no-hooks',
+    ],
     {
+      cwd: scratch,
       stdio: 'inherit',
+      env: {
+        ...process.env,
+        'npm_config_@joeblew999:registry': 'https://npm.pkg.github.com',
+        'npm_config_//npm.pkg.github.com/:_authToken': token,
+      },
     },
   );
-  if (got.status !== 0) fail(`upgrade: the blank app at v${version} could not be fetched`);
-  return blank;
+  if (got.status !== 0)
+    fail(`upgrade: the blank app at ${version} could not be made (vp create @joeblew999:app@${version})`);
+  return join(scratch, 'app');
 }
 
 /**
- * The blank app (remy-auth's template/) at the release's tag, the one source of what every app's flow is: its
+ * The blank app (@joeblew999/create's templates/app) at the release, the one source of what every app's flow is: its
  * package.json scripts in place of the app's flow scripts (the app's own kept), its Git hooks, and its two
  * vite.config.ts files, whose tasks are written out, when the app's still has none of its own (an app from before
  * the tasks were). Nothing is generated: the files are copied as the release has them.

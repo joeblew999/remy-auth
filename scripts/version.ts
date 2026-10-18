@@ -7,11 +7,11 @@ import { readFileSync, writeFileSync } from 'node:fs';
 const { version } = JSON.parse(readFileSync('packages/remy-ui/package.json', 'utf8')) as { version: string };
 const edit = (file: string, change: (text: string) => string) =>
   writeFileSync(file, change(readFileSync(file, 'utf8')));
-edit('template/pnpm-workspace.yaml', (text) =>
+edit('packages/create/templates/app/pnpm-workspace.yaml', (text) =>
   text.replace(/^( {2}['"]@joeblew999\/remy-(?:ui|cli)['"]: )['"][^'"]*['"]$/gm, `$1'${version}'`),
 );
-edit('template/.github/workflows/ci.yml', (text) =>
+edit('packages/create/templates/app/.github/workflows/ci.yml', (text) =>
   text.replace(/workflows\/(?:google|ci)\.yml@v\d+\.\d+\.\d+/g, `workflows/ci.yml@v${version}`),
 );
 execFileSync('vp', ['install', '--lockfile-only'], { stdio: ['ignore', 'ignore', 'inherit'] });
-console.log(`template/ pins ${version}.`);
+console.log(`The blank app (packages/create/templates/app) pins ${version}.`);

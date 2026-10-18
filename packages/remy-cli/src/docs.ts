@@ -18,7 +18,10 @@ function fail(message: string): never {
 }
 const docs = () => {
   return (
-    docsDir() ?? fail('this app has no docs/ (vpx giget gh:joeblew999/remy-auth/template/docs#<tag> docs starts one)')
+    docsDir() ??
+    fail(
+      'this app has no docs/ (a new app from vp create @joeblew999:app has them: its docs/ folder is the one to copy)',
+    )
   );
 };
 /** Wrangler's answer to a command, as text; throws with its stderr when it fails. */

@@ -16,7 +16,12 @@ const shadcnFiles = [
 ];
 
 export default defineConfig({
-  ...style,
+  // A bare `vp create` here opens @joeblew999/create's templates (a new Remy app: vp create @joeblew999:app).
+  create: { defaultTemplate: '@joeblew999' },
+  // The shared style, each part by name (vp create and vp migrate read the keys written here).
+  fmt: style.fmt,
+  lint: style.lint,
+  test: style.test,
   // Before a commit (vp staged): the shared style's formatting and lint fixes, and the shadcn check when a commit
   // stages a file shadcn writes.
   staged: {
@@ -76,7 +81,7 @@ export default defineConfig({
           untrackedEnv: ['DOCS_PREVIEW_PORT'],
         },
       },
-      // A new app from the blank one (template/), on this commit's packages, packed: it installs, builds and passes
+      // A new app from the blank one (packages/create/templates/app), on this commit's packages, packed: it installs, builds and passes
       // its checks. Cached on what a new app is made of, so a change to remy-auth's own app or its product docs runs it
       // no more (~3 minutes). It writes nothing here: its app lives in a scratch folder.
       'new-app': {
@@ -89,7 +94,7 @@ export default defineConfig({
         ],
         cache: {
           input: [
-            'template/**',
+            'packages/create/templates/app/**',
             'fixtures/**',
             'apps/remy-auth-docs/content/dev/**',
             'packages/**',

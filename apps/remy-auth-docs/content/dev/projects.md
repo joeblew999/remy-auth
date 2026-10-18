@@ -29,7 +29,7 @@ which also owns the packages, is a workspace of the same pieces side by side: th
 `apps/remy-auth/`, the docs are `apps/remy-auth-docs/` (not `docs/`), the packages `packages/*` (`remy-ui`, `remy-cli`, the contract and the showcase), each folder named after its
 package, and the root holds `pnpm-workspace.yaml` (the packages and the catalog), `package.json`'s scripts,
 `.changeset/`, the root `vite.config.ts` (the shared style and the repository's checks, `ready`) and the
-repository files (`.github/`, `template/`), as `vp create vite:monorepo` lays a workspace out.
+repository files (`.github/`), as `vp create vite:monorepo` lays a workspace out.
 The commands find the app by its `wrangler.jsonc` and the docs by their `docs.config.ts`, so they run from
 the root either way.
 
@@ -53,20 +53,22 @@ the root either way.
 | `packages/<name>/` with `README.md` (and `CHANGELOG.md`, Changesets') | pnpm, Changesets | packages the repo publishes, if any |
 | `messages/`, `project.inlang/` | the app preset, the app's `generate` task, `remy i18n` | the app's own strings, if any (compiled into `src/paraglide/`) |
 | `AGENTS.md`, `.mcp.json`, `.codex/config.toml`, `.github/workflows/` | agents; Claude and Codex; GitHub | the agents' pointer at the docs; the MCP servers; CI |
-| `packages/remy-cli/src/`, `template/`, `fixtures/consumer/` | the package; `giget`; `vp run new-app` | remy-auth only: the command line itself, the blank app a new repo starts from, and the consumer fixture that tests both as another repo gets them |
+| `packages/remy-cli/src/`, `packages/create/`, `fixtures/consumer/` | the package; `vp create @joeblew999:app`; `vp run new-app` | remy-auth only: the command line itself, `@joeblew999/create` with the blank app a new repo starts from (`templates/app`), and the consumer fixture that tests both as another repo gets them |
 
 ### A new consumer
 
-The one recipe. A new app starts from the blank app, [`template/`](https://github.com/joeblew999/remy-auth/tree/main/template)
-in remy-auth at the release tag: the layout above with only the repo's own files in it (its names, one
+The one recipe. A new app starts from the blank app, [`packages/create/templates/app`](https://github.com/joeblew999/remy-auth/tree/main/packages/create/templates/app)
+in remy-auth, published as `@joeblew999/create` (an organization's templates, as [Vite Plus makes them](https://viteplus.dev/guide/create#organization-templates)): the layout above with only the repo's own files in it (its names, one
 home page in every language, a docs index per site, the layout's config files at a few lines each).
 Everything else is the package, which one version bump upgrades.
 
 1. Prerequisites: the machine's `vp` in managed mode ([developer tooling](./tooling.md#vite-plus-the-machines-vp-in-managed-mode)),
    Node 26, `gh auth login` with a token that has `read:packages`, and on Linux the font `fonts-noto-cjk` (the browser checks install Playwright's own Chromium).
-2. `vpx giget@3.3.1 gh:joeblew999/remy-auth/template#vX.Y.Z <name>`, then `cd <name>` and `git init`
-   (the translation and plans tools read git history; `vp run setup` says so if it is missing).
-3. Name the app: replace `my-app` and `My app` (`grep -rn -i "my.app" --exclude-dir=node_modules .`):
+2. `env "npm_config_@joeblew999:registry=https://npm.pkg.github.com" "npm_config_//npm.pkg.github.com/:_authToken=$(gh auth token)" vp create @joeblew999:app --directory <name>`
+   (the latest release; `@joeblew999:app@X.Y.Z` for one; vp create reads a registry and its token from `.npmrc` files
+   and these variables only), then `cd <name>` and `git init` (the translation tools read git history; `vp run setup`
+   says so if it is missing).
+3. Name the app (vp create names `package.json` after the folder): replace `my-app` and `My app` (`grep -rn -i "my.app" --exclude-dir=node_modules .`):
    `package.json`, `wrangler.jsonc`, `src/service.ts`, `.env`'s origins, `docs/wrangler.jsonc`,
    `docs/docs.config.ts` (the product's name and source, which the app's frame reads too) and `messages/en.json`.
 4. GitHub Packages' token into this machine's pnpm configuration, once (pnpm reads no token from a repository's
@@ -122,8 +124,8 @@ export map. A package's own strings are its own inlang project, compiled by its 
 follows the platform's language with one call, `followLocale(runtime)` (`locale`); the translation tools find
 the repository's inlang project through git. Checks the repository adds to a release are steps of its own `release`
 script, after `vp run ci` (remy-auth: `vp run new-app`). remy-auth's `scripts/version.ts`, run after
-`changeset version`, re-pins the blank app to remy-ui's new version (`template/pnpm-workspace.yaml`'s catalog and
-`template/.github/workflows/ci.yml`'s tag), then the lockfile.
+`changeset version`, re-pins the blank app to remy-ui's new version (`packages/create/templates/app/pnpm-workspace.yaml`'s catalog and
+`packages/create/templates/app/.github/workflows/ci.yml`'s tag), then the lockfile.
 
 ### Choosing the version: released, development or local
 
@@ -150,9 +152,11 @@ The flow is the scripts and Vite Plus's tasks; each step, and who runs it: [how 
 
 `vp run release` runs, after `vp run ci`, remy-auth's new-app test
 (`vp run new-app`, `fixtures/consumer/run.sh`; not in `vp run ci`, so a push does not wait for it): the other repositories this one serves, tested as they get it. It
-copies `template/` to a scratch folder and lays `fixtures/consumer/files` over it (finished files: a package the app
-owns, its API and a showcase part; a unit check holds them to the blank app's), packs remy-ui, remy-cli and the
-showcase into its `vendor/` with `pnpm pack` (each with a version no registry has), then installs and runs the
+packs remy-ui, remy-cli, the showcase and `@joeblew999/create` with `pnpm pack` (each with a version no registry has),
+makes its app with `vp create @joeblew999:app` from that `@joeblew999/create`, served by a stand-in registry
+(`fixtures/consumer/registry.mjs`), lays `fixtures/consumer/files` over it (finished files: a package the app
+owns, its API and a showcase part; a unit check holds them to the blank app's) and the packed packages into its
+`vendor/`, then installs and runs the
 skills (`skills experimental_install` and `experimental_sync`, once per `skills-lock.json`, then reused), the
 `wrangler.jsonc` check (`remy-check wrangler`), the app's `vp run ready`, the quick
 browser checks and the docs' checks (about 93 s); Vite Plus caches it on what a new app is made of, so a change to

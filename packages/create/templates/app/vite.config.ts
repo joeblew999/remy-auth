@@ -33,7 +33,11 @@ const written = [
 const lockfile = { pattern: 'pnpm-lock.yaml', base: 'workspace' } as const;
 
 export default defineConfig({
-  ...style,
+  // The shared style, each part by name (vp create and vp migrate read the keys written here).
+  fmt: style.fmt,
+  lint: style.lint,
+  staged: style.staged,
+  test: style.test,
   ...remyApp({ root: import.meta.dirname }),
   // This folder is the app and the workspace's root too: bare vp dev, vp build and vp preview act on it (monorepo.md).
   defaultPackage: '.',

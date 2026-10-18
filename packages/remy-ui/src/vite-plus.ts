@@ -34,13 +34,13 @@ export const style: {
     ignorePatterns: ['**/*.md', '**/*.mdx', '**/routeTree.gen.ts', '**/worker-configuration.d.ts', '**/paraglide/**'],
   },
   // Vite Plus's type check runs inside its lint (typeAware and typeCheck), so `vp check` is format, lint and types.
-  // template/ and fixtures/ are other apps' source in remy-auth, checked as installed apps by the new-app test.
+  // The blank app (packages/create/templates/app) and fixtures/ are other apps' source in remy-auth, checked as installed apps by the new-app test.
   // Vite Plus's own lint plugin, as `vp create` sets it up: imports from vite-plus, not the tools it wraps.
   lint: {
     jsPlugins: [{ name: 'vite-plus', specifier: 'vite-plus/oxlint-plugin' }],
     rules: { 'vite-plus/prefer-vite-plus-imports': 'error' },
     options: { typeAware: true, typeCheck: true },
-    ignorePatterns: ['template/**', 'fixtures/**'],
+    ignorePatterns: ['packages/create/templates/app/**', 'fixtures/**'],
     // The unit checks get Oxlint's Vitest rules (focused or disabled tests, expects outside a test); Vitest's
     // expect(value, message) takes the message second.
     overrides: [
