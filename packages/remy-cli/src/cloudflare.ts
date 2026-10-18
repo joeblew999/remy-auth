@@ -1,7 +1,6 @@
-// Cloudflare. Deploys are Cloudflare's own: its Git builds (Workers Builds) deploy main, the app and its docs,
-// each with `wrangler deploy`. Here, what Wrangler has no one command for: a throwaway preview Worker with the browser
-// checks against it, what each deployment runs (`remy cloudflare versions`), an app's page URLs, and the check that a
-// binding names a resource that exists. Wrangler does the work.
+// Cloudflare. The one way anything is deployed is a push: Cloudflare's Git builds (Workers Builds) deploy main to
+// production and every other branch to its Preview. Here, only what reads Cloudflare: what each deployment runs
+// (`remy cloudflare versions`), an app's page URLs, and the check that a binding names a resource that exists.
 import { quickLocales } from './test.ts';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
@@ -120,85 +119,6 @@ function databasesRight(production: Databases, deployed: Databases, environment?
   console.log(
     `${infos.length} database${infos.length === 1 ? '' : 's'}: read copies on, all in ${reference ?? 'one region'}.`,
   );
-}
-
-/** The entries Wrangler writes to WRANGLER_OUTPUT_FILE_PATH, as far as this reads them. */
-type WranglerEntry = { type: string; version_id?: string; preview_alias_url?: string };
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-/**
- * Wait until <origin>/healthz reports the Worker version Wrangler recorded in its output file (up to
- * 60 s), then until this build's entry script is served three times in a row (static assets spread
- * across the edge separately). Cloudflare rolls a version out over a few seconds; a check that started
- * earlier would test the previous one.
- */
-export async function waitFor(origin: string, output: string): Promise<void> {
-  const entries: WranglerEntry[] = readFileSync(output, 'utf8')
-    .split('\n')
-    .filter(Boolean)
-    .map((line) => JSON.parse(line));
-  const entry = entries.filter((e) => e.type === 'deploy' || e.type === 'version-upload').at(-1);
-  const version = entry?.version_id;
-  if (!entry || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(version ?? ''))
-    fail(`wait: no Worker version ID in ${output}; did the Wrangler upload succeed?`);
-  if (entry.preview_alias_url && new URL(entry.preview_alias_url).origin !== new URL(origin).origin)
-    fail(`wait: Wrangler published the preview at ${entry.preview_alias_url}, not ${origin}`);
-  const attempts = 30;
-  let last = 'no answer';
-  for (let attempt = 1; attempt <= attempts; attempt++) {
-    try {
-      const response = await fetch(new URL('/healthz', origin), { cache: 'no-store' });
-      const release = response.ok ? ((await response.json()) as { release?: string }).release : undefined;
-      if (release === version) {
-        console.log(`${origin} serves version ${version}.`);
-        break;
-      }
-      last = response.ok ? `release ${release}` : `HTTP ${response.status}`;
-    } catch (error) {
-      last = error instanceof Error ? error.message : String(error);
-    }
-    if (attempt === attempts)
-      fail(`wait: ${origin}/healthz did not report version ${version} within ${attempts * 2} s (last: ${last})`);
-    await sleep(2000);
-  }
-  const assets = join(appDir(), 'dist/client/assets');
-  const asset = existsSync(assets) ? readdirSync(assets).find((name) => /^index-[\w-]+\.js$/.test(name)) : undefined;
-  if (!asset) return;
-  let streak = 0;
-  for (let attempt = 1; attempt <= attempts; attempt++) {
-    const response = await fetch(new URL(`/assets/${asset}`, origin), { cache: 'no-store' }).catch(() => undefined);
-    streak = response?.ok ? streak + 1 : 0;
-    if (streak === 3) {
-      console.log(`${origin} serves this build's assets (${asset}).`);
-      break;
-    }
-    if (attempt === attempts) fail(`wait: ${origin} did not serve this build's /assets/${asset} within ${attempts} s`);
-    await sleep(1000);
-  }
-  // The first page a check opens needs every chunk it references, each cold at the edge after a deploy:
-  // twice (2026-10-10, 2026-10-11) the smoke's hydration wait ran out on that first load and passed
-  // a minute later. So the wait ends only when the home page's every asset answers.
-  const home = await fetch(new URL('/', origin), { cache: 'no-store', redirect: 'follow' })
-    .then((response) => (response.ok ? response.text() : ''))
-    .catch(() => '');
-  const refs = [...new Set([...home.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g)].map((match) => match[1]!))];
-  for (let attempt = 1; attempt <= attempts && refs.length; attempt++) {
-    const answers = await Promise.all(
-      refs.map((path) =>
-        fetch(new URL(path, origin), { cache: 'no-store' })
-          .then((response) => response.ok)
-          .catch(() => false),
-      ),
-    );
-    if (answers.every(Boolean)) {
-      console.log(`${origin} serves the home page's ${refs.length} assets.`);
-      return;
-    }
-    if (attempt === attempts)
-      fail(`wait: ${origin} did not serve all ${refs.length} assets of its home page within ${attempts} s`);
-    await sleep(1000);
-  }
 }
 
 /** The smoke checks against a live origin: the deploy proves itself with the tools, not by hand. */
@@ -338,101 +258,8 @@ async function workerConfig(): Promise<{ name: string; config: Record<string, un
 }
 const workerName = async (): Promise<string> => (await workerConfig()).name;
 
-/**
- * Deploy this commit as a throwaway Worker <worker>-check-<alias> (production untouched), wait until it
- * serves this build, run the browser checks against it in the quick languages, then delete it (or keep it, for
- * the speed measurement). A Worker of its own, because preview URLs are off (every old version and
- * alias was public) and `wrangler delete` removes it completely. Answers the preview's origin.
- */
-export async function preview(alias?: string, keep = false): Promise<string> {
-  const { name: worker, config } = await workerConfig();
-  const host = (projectOrigins().production ?? '').replace(/^https:\/\//, '');
-  if (!host.startsWith(`${worker}.`) || !host.endsWith('.workers.dev'))
-    fail(
-      `preview needs origins.production on workers.dev as https://${worker}.<subdomain>.workers.dev (got ${projectOrigins().production})`,
-    );
-  const part = (alias ?? execFileSync('git', ['rev-parse', '--short=7', 'HEAD'], { encoding: 'utf8' }).trim())
-    .toLowerCase()
-    .replace(/[^a-z0-9-]/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 20);
-  const name = `${worker}-check-${part}`;
-  const origin = `https://${name}.${host.slice(worker.length + 1)}`;
-  console.log(`Target: Cloudflare (remote), throwaway Worker ${name} at ${origin}`);
-  const remove = async () => {
-    await previewDelete(name).catch((error) =>
-      console.error(`preview: could not delete ${name}: ${error instanceof Error ? error.message : String(error)}`),
-    );
-  };
-  try {
-    tool('vp', ['build', '.'], { env: gitStamp(appDir()) });
-    await provisioned();
-    const scratch = mkdtempSync(join(tmpdir(), 'remy-preview-'));
-    try {
-      const output = join(scratch, 'wrangler.ndjson');
-      // A Worker of its own has no secrets: each one the configuration requires gets a random value of its
-      // own, so the preview runs (a session made on it means nothing anywhere else).
-      const required = (config as { secrets?: { required?: string[] } }).secrets?.required ?? [];
-      const secrets = join(scratch, 'secrets.env');
-      writeFileSync(secrets, required.map((name) => `${name}=${randomBytes(32).toString('base64')}`).join('\n') + '\n');
-      tool('wrangler', ['deploy', '--name', name, ...(required.length ? ['--secrets-file', secrets] : [])], {
-        env: { WRANGLER_OUTPUT_FILE_PATH: output },
-      });
-      await waitFor(origin, output);
-    } finally {
-      rmSync(scratch, { recursive: true, force: true });
-    }
-    // A brand-new workers.dev name answers 404 from some places for a while: wait for ten answers in a row.
-    let ok = 0;
-    for (let attempt = 0; attempt < 120 && ok < 10; attempt++) {
-      ok = (await fetch(new URL('/healthz', origin), { cache: 'no-store' })
-        .then((response) => response.status === 200)
-        .catch(() => false))
-        ? ok + 1
-        : 0;
-      if (ok < 10) await sleep(1000);
-    }
-    if (ok < 10) fail(`preview: ${origin} did not answer steadily within 2 minutes`);
-    tool('playwright', ['test', '--project=ours'], {
-      env: { TEST_BASE_URL: origin, TEST_TARGET: 'remote', ...quickLocales() },
-    });
-    console.log(`Preview passed the browser checks: ${origin}`);
-    return origin;
-  } finally {
-    if (!keep) await remove();
-  }
-}
-
-/** Delete a throwaway check Worker by its full name; with none, list them. Never the production Worker. */
-export async function previewDelete(name?: string): Promise<void> {
-  const worker = await workerName();
-  const wrangler = (...args: string[]) =>
-    execFileSync(bin('wrangler'), args, {
-      cwd: appDir(),
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-  if (!name) {
-    console.log(`Check Workers of ${worker} on Cloudflare:`);
-    const token = (JSON.parse(wrangler('auth', 'token', '--json')) as { token: string }).token;
-    const account = (JSON.parse(wrangler('whoami', '--json')) as { accounts: { id: string }[] }).accounts[0]!.id;
-    const answer = (await (
-      await fetch(`https://api.cloudflare.com/client/v4/accounts/${account}/workers/scripts`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-    ).json()) as { result?: { id: string }[] };
-    for (const script of answer.result ?? [])
-      if (script.id.startsWith(`${worker}-check-`)) console.log(`  ${script.id}`);
-    return;
-  }
-  if (!name.startsWith(`${worker}-check-`) || name === `${worker}-check-`)
-    fail(`preview-delete only deletes check Workers named ${worker}-check-<name> (got ${name})`);
-  console.log(`Target: Cloudflare (remote), deleting Worker ${name}`);
-  tool('wrangler', ['delete', '--name', name, '--force']);
-}
-
 export const what =
-  "Cloudflare's builds deploy main (the app, its docs) and each branch's Preview; here: throwaway previews, what each deployment runs, the resources a binding needs";
+  "Cloudflare's builds deploy every push (main to production, a branch to its Preview); here: what each deployment runs, its URLs, the resources a binding needs";
 export const commands: Subcommands = {
   versions: {
     what: '[origins…]: what each deployment runs, asked and never remembered: service, environment, commit and how far it is from this checkout, when it was deployed',
@@ -447,19 +274,6 @@ export const commands: Subcommands = {
     run: async (rest) => {
       await urls(rest[0]);
     },
-  },
-  preview: {
-    what: "[alias] [--keep]: this build as a throwaway Worker <name>-check-<alias> (production untouched), the browser checks against it, then deleted unless --keep (a machine signed in to Cloudflare; from Claude's cloud, push the branch instead)",
-    run: async (rest) => {
-      await preview(
-        rest.find((part) => !part.startsWith('--')),
-        rest.includes('--keep'),
-      );
-    },
-  },
-  'preview-delete': {
-    what: '[name]: list the throwaway check Workers, or delete one; never production',
-    run: (rest) => previewDelete(rest[0]),
   },
   provisioned: {
     what: "refuse when a D1, KV or R2 binding names no existing resource, or a D1 database (the Previews' included) keeps no read copies",

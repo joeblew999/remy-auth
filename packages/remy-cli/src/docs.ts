@@ -67,8 +67,6 @@ function tool(command: string, args: string[], options: { env?: Record<string, s
   });
   if (result.status !== 0) fail(`${command} ${args.join(' ')}: failed`);
 }
-const previewName = () =>
-  `${/"name":\s*"([^"]+)"/.exec(readFileSync(join(docs(), 'wrangler.jsonc'), 'utf8'))?.[1] ?? 'docs'}-preview`;
 
 /**
  * The docs' production build must already be there (the docs package's build task: vp run ready builds it, and a
@@ -158,15 +156,6 @@ export function testRemote(): void {
       '--method',
       'tools/list',
     ]);
-}
-/** A preview Worker of the docs, answers paused. */
-export function preview(): void {
-  built();
-  const name = previewName();
-  tool(bin('wrangler'), ['deploy', '-c', 'dist/server/wrangler.json', '--name', name]);
-  tool(bin('wrangler'), ['secret', 'put', 'ASK_PAUSED', '-c', 'wrangler.jsonc', '--name', name], {
-    input: '1',
-  });
 }
 /** Ask AI's answers: off (an emergency stop, seconds, no build) or on again. */
 export function answers(state: 'on' | 'off'): void {
@@ -368,14 +357,13 @@ export function init(ref: string | undefined): void {
 export const what = "the docs Worker, @joeblew999/remy-ui's, over this app's docs/";
 export const commands: Subcommands = {
   serve: {
-    what: "the built docs here at DOCS_PREVIEW_PORT (4174), as their checks and AI tools see them: llms.txt, each page's .md (preview is Cloudflare's)",
+    what: "the built docs here at DOCS_PREVIEW_PORT (4174), as their checks and AI tools see them: llms.txt, each page's .md (a Preview of a pushed branch is Cloudflare's)",
     run: () => serve(),
   },
   test: {
     what: "[remote]: the docs' browser checks on a local build, or against the deployment with every MCP server's tools",
     run: (rest) => (rest[0] === 'remote' ? testRemote() : test()),
   },
-  preview: { what: 'a preview Worker of the docs, answers paused', run: () => preview() },
   answers: {
     what: "on|off: Ask AI's answers resumed, or stopped in seconds",
     run: (rest) => {

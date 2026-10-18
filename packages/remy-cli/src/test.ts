@@ -1,12 +1,11 @@
 // The browser checks Vite Plus has no tool for (`remy test remote|live|audits|cwv`): against a deployment, the audits
-// under one machine-wide speed lock, Core Web Vitals on a throwaway Worker. The checks on the local build are Vite
+// under one machine-wide speed lock, Core Web Vitals on a deployment. The checks on the local build are Vite
 // Plus's tasks (vp run test:browser), Playwright run directly. Each does what it is asked and nothing more.
 import { spawnSync } from 'node:child_process';
 import { dispatch, type Subcommands } from './commands.ts';
 import { mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { preview, previewDelete } from './cloudflare.ts';
 import { appDir, bin, origins } from './config.ts';
 
 // Playwright from the app's folder, where its playwright.config.ts is (apps/remy-auth in remy-auth; an app's own root).
@@ -54,7 +53,7 @@ function flaky(results: string): void {
 export const quickLocales = () => ({ CHECK_LOCALES: process.env.CHECK_LOCALES ?? 'quick' });
 const remote = (origin = process.env.TEST_BASE_URL ?? origins().production) => {
   if (!origin) {
-    console.error('test: pass TEST_BASE_URL, or put origins.production in remy.config.ts');
+    console.error("test: pass an origin (or TEST_BASE_URL), or put VITE_DEPLOY_ORIGIN in the app's .env");
     process.exit(1);
   }
   return { TEST_TARGET: 'remote', TEST_BASE_URL: origin };
@@ -122,20 +121,14 @@ export function remoteSuite(args: string[]): void {
 export function live(origin?: string): void {
   playwright(['--project=ours', '--grep', 'smoke [a-zA-Z-]+:'], remote(origin));
 }
-/** Google's Core Web Vitals (speed) on a throwaway Cloudflare Worker of this commit, deleted whatever happens. */
-export async function cwv(alias?: string): Promise<void> {
-  const origin = await preview(alias, true);
-  const name = new URL(origin).hostname.split('.')[0]!;
-  try {
-    await withSpeedLock(() =>
-      playwright(['--project=google-cwv', '--no-deps'], { TEST_BASE_URL: origin, TEST_TARGET: 'remote' }),
-    );
-    console.log(`Core Web Vitals passed on ${origin}`);
-  } finally {
-    await previewDelete(name).catch((error) =>
-      console.error(`test cwv: could not delete ${name}: ${error instanceof Error ? error.message : String(error)}`),
-    );
-  }
+/**
+ * Google's Core Web Vitals (speed) on a deployment: production by default, or a branch's Preview
+ * (https://<branch>-remy-auth.<subdomain>.workers.dev), measured one at a time on this machine.
+ */
+export async function cwv(origin?: string): Promise<void> {
+  const target = remote(origin);
+  await withSpeedLock(() => playwright(['--project=google-cwv', '--no-deps'], target));
+  console.log(`Core Web Vitals passed on ${target.TEST_BASE_URL}`);
 }
 
 /**
@@ -146,7 +139,7 @@ export const audits = (args: string[]): Promise<void> =>
   withSpeedLock(() => playwright(['--project=google', ...args], {}));
 
 export const what =
-  'the browser checks Vite Plus has no tool for: against a deployment (the suite, the smoke), Core Web Vitals on a preview, and the local audits under one lock (the local build: vp run test:browser)';
+  'the browser checks Vite Plus has no tool for: against a deployment (the suite, the smoke), Core Web Vitals on a deployment, and the local audits under one lock (the local build: vp run test:browser)';
 export const commands: Subcommands = {
   remote: {
     what: "[origin] [--audits]: our browser checks against a deployment (production by default); --audits adds Google's, which judge production",
@@ -158,7 +151,7 @@ export const commands: Subcommands = {
     run: (rest) => audits(rest),
   },
   cwv: {
-    what: '[alias]: Core Web Vitals on a throwaway preview Worker (the release runs it)',
+    what: "[origin]: Core Web Vitals on a deployment, production unless a Preview's origin is given (the release runs it)",
     run: (rest) => cwv(rest[0]),
   },
 };

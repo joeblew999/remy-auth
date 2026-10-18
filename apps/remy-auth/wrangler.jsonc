@@ -40,9 +40,6 @@
   // Better Auth signs and hashes with it. Local: .dev.vars (vp run local). Deployed: a Worker secret.
   "secrets": { "required": ["BETTER_AUTH_SECRET"] },
   "assets": { "directory": "./dist/client" },
-  // Preview URLs off (2026-09-25): every uploaded version and alias was public, the recent ones with
-  // the AI answers on the production index, and old versions never see the ASK_PAUSED stop. Cloudflare's
-  // newer Previews are served through this same switch, so cf:preview deploys a throwaway Worker instead.
   // On for Worker Previews: Workers Builds makes a throwaway Cloudflare Preview of every branch and pull request
   // (`wrangler preview`), each at https://<branch>-remy-auth.gedw99.workers.dev. This also gives every uploaded
   // version a URL of its own (owner's choice, 2026-10-17).

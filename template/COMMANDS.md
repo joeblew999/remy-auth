@@ -33,11 +33,9 @@ Each as `pnpm remy <command> [<subcommand>]`; a command run without a subcommand
 | `pnpm remy i18n` | translations: check [messages\|docs] [--list] (offline, read-only), translate [messages\|docs] (the machine's Claude; vp run translate runs it, before a commit) |
 | `pnpm remy i18n check` | [messages\|docs] [--list] [--strict]: the offline checks, read-only, no git history: a warning (exit 0) while coding and in vp run ci, exit 1 with --strict; --list prints one line per gap |
 | `pnpm remy i18n translate` | [messages\|docs] [files…]: what the checks list, by the machine's Claude (--model, default sonnet; --jobs at a time, default 8): only the changed sections and keys, with their records; named translation files redone in full; vp run translate runs it, before a commit |
-| `pnpm remy cloudflare` | Cloudflare's builds deploy main (the app, its docs) and each branch's Preview; here: throwaway previews, what each deployment runs, the resources a binding needs |
+| `pnpm remy cloudflare` | Cloudflare's builds deploy every push (main to production, a branch to its Preview); here: what each deployment runs, its URLs, the resources a binding needs |
 | `pnpm remy cloudflare versions` | [origins…]: what each deployment runs, asked and never remembered: service, environment, commit and how far it is from this checkout, when it was deployed |
 | `pnpm remy cloudflare urls` | [origin]: the URLs a deployment answers at |
-| `pnpm remy cloudflare preview` | [alias] [--keep]: this build as a throwaway Worker &lt;name&gt;-check-&lt;alias&gt; (production untouched), the browser checks against it, then deleted unless --keep (a machine signed in to Cloudflare; from Claude's cloud, push the branch instead) |
-| `pnpm remy cloudflare preview-delete` | [name]: list the throwaway check Workers, or delete one; never production |
 | `pnpm remy cloudflare provisioned` | refuse when a D1, KV or R2 binding names no existing resource, or a D1 database (the Previews' included) keeps no read copies |
 | `pnpm remy setup` | an installation's first steps: what it needs, then the dependencies (vp run setup runs the rest) |
 | `pnpm remy setup check` | what setup needs before it can start: git, package.json and its lockfile, wrangler.jsonc |
@@ -64,16 +62,15 @@ Each as `pnpm remy <command> [<subcommand>]`; a command run without a subcommand
 | `pnpm remy packages bumped` | every published package whose files changed since the last release tag has a new version |
 | `pnpm remy packages publish` | [--release vX.Y.Z] [--dry-run]: each registry accepts its token, then each workspace whose version is new on its registry, then the GitHub release from its CHANGELOG notes; the tag's CI job runs the same |
 | `pnpm remy packages tag` | on a clean main: the lead package's version as the tag, pushed with main (GitHub's release job publishes it) |
-| `pnpm remy test` | the browser checks Vite Plus has no tool for: against a deployment (the suite, the smoke), Core Web Vitals on a preview, and the local audits under one lock (the local build: vp run test:browser) |
+| `pnpm remy test` | the browser checks Vite Plus has no tool for: against a deployment (the suite, the smoke), Core Web Vitals on a deployment, and the local audits under one lock (the local build: vp run test:browser) |
 | `pnpm remy test remote` | [origin] [--audits]: our browser checks against a deployment (production by default); --audits adds Google's, which judge production |
 | `pnpm remy test live` | [origin]: the smoke against a deployment (every deploy ends with it) |
 | `pnpm remy test audits` | [playwright options]: Google's audits on the local build, one speed measurement at a time on this machine (vp run test:audits runs it) |
-| `pnpm remy test cwv` | [alias]: Core Web Vitals on a throwaway preview Worker (the release runs it) |
+| `pnpm remy test cwv` | [origin]: Core Web Vitals on a deployment, production unless a Preview's origin is given (the release runs it) |
 | `pnpm remy browsers` | what a browser check needs on this machine: Playwright's Chromium, and on Linux a Han font |
 | `pnpm remy docs` | the docs Worker, @joeblew999/remy-ui's, over this app's docs/ |
-| `pnpm remy docs serve` | the built docs here at DOCS_PREVIEW_PORT (4174), as their checks and AI tools see them: llms.txt, each page's .md (preview is Cloudflare's) |
+| `pnpm remy docs serve` | the built docs here at DOCS_PREVIEW_PORT (4174), as their checks and AI tools see them: llms.txt, each page's .md (a Preview of a pushed branch is Cloudflare's) |
 | `pnpm remy docs test` | [remote]: the docs' browser checks on a local build, or against the deployment with every MCP server's tools |
-| `pnpm remy docs preview` | a preview Worker of the docs, answers paused |
 | `pnpm remy docs answers` | on\|off: Ask AI's answers resumed, or stopped in seconds |
 | `pnpm remy docs publish` | the bucket holds exactly the live docs pages, the index's sync waited for, then the fixed questions (after Cloudflare deployed the docs) |
 | `pnpm remy docs questions` | the fixed questions (docs/content/questions.json) each find their page in the index; search only |

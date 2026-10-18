@@ -10,8 +10,14 @@
   "version_metadata": { "binding": "CF_VERSION_METADATA" },
   "vars": { "ENVIRONMENT": "production" },
   "assets": { "directory": "./dist/client" },
-  // Every uploaded version would be public; cf:preview deploys a throwaway Worker instead.
-  "preview_urls": false,
+  // On for Cloudflare's Previews: every pushed branch is built and served at https://<branch>-<name>.<subdomain>.workers.dev.
+  "preview_urls": true,
+  // What every Preview gets, which it never inherits from production: its environment (the test sign-in is on there)
+  // and the version binding /healthz reads. An app with databases gives the Previews their own here too.
+  "previews": {
+    "vars": { "ENVIRONMENT": "staging" },
+    "version_metadata": { "binding": "CF_VERSION_METADATA" },
+  },
   "observability": {
     "enabled": true,
     "redact_query_string": true,
