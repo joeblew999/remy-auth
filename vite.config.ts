@@ -42,6 +42,7 @@ export default defineConfig({
           'remy-auth#build',
           'remy-auth#check:deploy',
           '@joeblew999/remy-auth-docs#build',
+          '@joeblew999/remy-auth-docs#check:deploy',
           'check:plans',
           'check:single-copies',
           'check:commands',

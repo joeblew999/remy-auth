@@ -25,7 +25,7 @@ import { partChecks } from '@joeblew999/remy-ui/parts/checks';
 import { codeSplittingChecks } from '@joeblew999/remy-ui/code-splitting.checks';
 import { showcaseChecks } from '@joeblew999/remy-showcase/showcase.checks';
 import { buildBoundaryChecks } from '@joeblew999/remy-ui/build-boundaries.checks';
-import project from '../../../remy.config.ts';
+import { loadEnv } from 'vite-plus';
 
 // The shared checks cover what every app built on the package must satisfy: one call for a
 // server-rendered app (@joeblew999/remy-ui/app-checks), with this app's own pages beside the shared ones,
@@ -183,6 +183,6 @@ test('the old docs addresses redirect to the docs Worker, keeping the language',
   ]) {
     const response = await request.get(from!, { maxRedirects: 0 });
     expect(response.status(), from).toBe(301);
-    expect(response.headers().location, from).toBe(`${project.origins.docs}${to}`);
+    expect(response.headers().location, from).toBe(`${loadEnv('production', '.', 'VITE_').VITE_DOCS_ORIGIN}${to}`);
   }
 });

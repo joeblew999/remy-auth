@@ -45,11 +45,13 @@ export default defineConfig({
       // The build's folder emptied first: a cache hit restores the build's files over what is there and removes
       // nothing, so an earlier build's chunks would stay beside them.
       clean: { command: `node -e "require('node:fs').rmSync('dist', { recursive: true, force: true })"`, cache: false },
-      dev: { command: 'vp dev', dependsOn: ['generate'], cache: false },
+      // `vp dev .` and `vp build .`: this folder is the app and the workspace's root too, and Vite Plus never acts on a
+      // workspace's root without being named it.
+      dev: { command: 'vp dev .', dependsOn: ['generate'], cache: false },
       // The production build, replayed while nothing it reads changes. Its stamp names a commit only when one is
       // given (a deploy's REMY_COMMIT, Workers Builds' WORKERS_CI_COMMIT_SHA), and those are in the cache key.
       build: {
-        command: 'vp build',
+        command: 'vp build .',
         dependsOn: ['generate', 'clean'],
         cache: {
           input: [{ auto: true }, ...written, lockfile],
@@ -119,6 +121,7 @@ export default defineConfig({
           'build',
           'check:deploy',
           'docs#build',
+          'docs#check:deploy',
           'check:plans',
           'check:single-copies',
           'check:commands',

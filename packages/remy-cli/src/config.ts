@@ -1,15 +1,15 @@
-// What an app tells its tooling, once: remy.config.ts (defineRemyProject), where it is deployed and its release
-// package. Each command asks for the value it needs (origins(), release()), read from the file
+// What the tooling reads about an app: where it is deployed, from the app's own .env (Vite's file, the one the app's
+// build reads: VITE_DEPLOY_ORIGIN, VITE_DOCS_ORIGIN), and, in a repository that publishes packages, its release package
+// (remy.config.ts). Each command asks for the value it needs (origins(), releaseConfig()), read from the file
 // when asked: nothing is copied into the environment for others to read (configure() did, for every command, so a
 // value reached a child by a route no one could see; owner, 2026-10-17: "everything else underneath it should be
 // pretty dumb").
 import { existsSync, readdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, relative, resolve } from 'node:path';
+import { loadEnv } from 'vite-plus';
 
 export type RemyProject = {
-  /** Where the app is deployed: production, its staging, its docs Worker. */
-  origins?: { production?: string; staging?: string; docs?: string };
   /** For a repository that publishes packages: the one whose version names a release, and the release's title. */
   release?: { package: string; title?: string };
 };
@@ -28,8 +28,11 @@ export function remyProject(cwd = process.cwd()): RemyProject {
   }
 }
 
-/** Where the app is deployed: production, staging, its docs Worker (remy.config.ts's origins). */
-export const origins = (cwd = process.cwd()): NonNullable<RemyProject['origins']> => remyProject(cwd).origins ?? {};
+/** Where the app and its docs are deployed: the app's .env as Vite reads it for a production build. */
+export function origins(cwd = process.cwd()): { production?: string; docs?: string } {
+  const env = loadEnv('production', appDir(cwd), 'VITE_');
+  return { production: env.VITE_DEPLOY_ORIGIN || undefined, docs: env.VITE_DOCS_ORIGIN || undefined };
+}
 
 /** The package whose version names a release, and the release's title. */
 export const releaseConfig = (cwd = process.cwd()): { package?: string; title?: string } =>

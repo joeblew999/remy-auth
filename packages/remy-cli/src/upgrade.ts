@@ -135,6 +135,18 @@ export function scriptsAndHooks(blank: string, version: string): void {
       `upgrade: ${config} is the blank app's, with its tasks written out (yours is ${config}.before-upgrade: move any plugins or options you added)`,
     );
   }
+  // Where the app is deployed is its .env now (Vite's file): the blank app's when the app has none, with remy.config.ts's
+  // origins written in.
+  if (!existsSync('.env') && existsSync(join(blank, '.env'))) {
+    let text = readFileSync(join(blank, '.env'), 'utf8');
+    const old = existsSync('remy.config.ts') ? readFileSync('remy.config.ts', 'utf8') : '';
+    const production = /production:\s*'([^']+)'/.exec(old)?.[1];
+    const docs = /docs:\s*'([^']+)'/.exec(old)?.[1];
+    if (production) text = text.replace(/^VITE_DEPLOY_ORIGIN=.*$/m, `VITE_DEPLOY_ORIGIN=${production}`);
+    if (docs) text = text.replace(/^VITE_DOCS_ORIGIN=.*$/m, `VITE_DOCS_ORIGIN=${docs}`);
+    writeFileSync('.env', text);
+    console.log("upgrade: .env says where the app and its docs are deployed (from remy.config.ts's origins)");
+  }
   // remy.config.ts: its type is the command line's now, and the ports are the tasks' own (PREVIEW_PORT, 4173).
   if (existsSync('remy.config.ts')) {
     const before = readFileSync('remy.config.ts', 'utf8');

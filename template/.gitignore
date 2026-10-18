@@ -17,3 +17,6 @@ src/paraglide/
 project.inlang/cache/
 # Vite Plus's Git hook dispatcher, written by vp config (the prepare script); the hooks themselves are .vite-hooks/*.
 .vite-hooks/_/
+# Vite's own: .env files are committed (public values only), .env.local ones are this machine's.
+.env.local
+.env.*.local

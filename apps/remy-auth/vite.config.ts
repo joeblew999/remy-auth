@@ -63,19 +63,6 @@ export default defineConfig({
           untrackedEnv: network,
         },
       },
-      // The same build for staging: the Wrangler configuration's env.staging, its own Worker (Cloudflare's staging build
-      // runs it). The variable is this command's alone: set for the whole run, every package's configuration would
-      // read it, and the docs' has no staging.
-      'build:staging': {
-        command: 'CLOUDFLARE_ENV=staging vp build',
-        dependsOn: ['local', 'generate', 'clean'],
-        cache: {
-          input: [{ auto: true }, ...written, lockfile],
-          output: ['dist/**'],
-          env: ['REMY_COMMIT', 'REMY_CHANGES', 'WORKERS_CI_COMMIT_SHA'],
-          untrackedEnv: network,
-        },
-      },
       // Wrangler's deployment dry run on the build (no upload): the Worker as Cloudflare would take it.
       'check:deploy': {
         command: 'wrangler deploy --dry-run',

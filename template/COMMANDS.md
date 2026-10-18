@@ -33,7 +33,7 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy i18n` | translations: check [messages\|docs] [--list] (offline, read-only), translate [messages\|docs] (the machine's Claude; vp run translate runs it, before a commit) |
 | `npx remy i18n check` | [messages\|docs] [--list] [--strict]: the offline checks, read-only, no git history: a warning (exit 0) while coding and in vp run ci, exit 1 with --strict; --list prints one line per gap |
 | `npx remy i18n translate` | [messages\|docs] [files…]: what the checks list, by the machine's Claude (--model, default sonnet; --jobs at a time, default 8): only the changed sections and keys, with their records; named translation files redone in full; vp run translate runs it, before a commit |
-| `npx remy cloudflare` | Cloudflare's builds deploy main (the app, its docs, staging); here: throwaway previews, what each deployment runs, the resources a binding needs |
+| `npx remy cloudflare` | Cloudflare's builds deploy main (the app, its docs) and each branch's Preview; here: throwaway previews, what each deployment runs, the resources a binding needs |
 | `npx remy cloudflare versions` | [origins…]: what each deployment runs, asked and never remembered: service, environment, commit and how far it is from this checkout, when it was deployed |
 | `npx remy cloudflare urls` | [origin]: the URLs a deployment answers at |
 | `npx remy cloudflare preview` | [alias] [--keep]: this build as a throwaway Worker &lt;name&gt;-check-&lt;alias&gt; (production untouched), the browser checks against it, then deleted unless --keep (a machine signed in to Cloudflare; from Claude's cloud, push the branch instead) |

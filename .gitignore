@@ -2,9 +2,9 @@ node_modules/
 .wrangler/
 .dev.vars
 .dev.vars.*
-.env
-.env.*
-!.env.example
+# Vite's own: .env files are committed (public values only), .env.local ones are this machine's.
+.env.local
+.env.*.local
 *.log
 .DS_Store
 

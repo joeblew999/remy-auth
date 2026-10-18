@@ -1,0 +1,32 @@
+// The docs Worker: @joeblew999/remy-ui's docs server (packages/remy-ui/src/docs) over this folder's content/ and
+// docs.config.ts. Cloudflare's Vite plugin builds it (vp run build), and Cloudflare's own Git build deploys main.
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "remy-auth-docs",
+  "compatibility_date": "2026-09-24",
+  "main": "../../packages/remy-ui/src/docs/server.ts",
+  "compatibility_flags": ["nodejs_compat"],
+  "version_metadata": { "binding": "CF_VERSION_METADATA" },
+  "vars": { "ENVIRONMENT": "production" },
+  "assets": { "directory": "./dist/client" },
+  "preview_urls": false,
+  // Ask AI: its AI Search instance and its rate limit (docs.config.ts's ask names the bucket and gateway too).
+  "ai_search": [{ "binding": "DOCS_SEARCH", "instance_name": "remy-docs-pages" }],
+  "ratelimits": [{ "name": "ASK_LIMIT", "namespace_id": "4281", "simple": { "limit": 10, "period": 60 } }],
+  // Working on answers (CLOUDFLARE_ENV=ask vp -C apps/remy-auth-docs dev): the same Worker locally, AI Search remote.
+  // Never deployed.
+  "env": {
+    "ask": {
+      "vars": { "ENVIRONMENT": "docs" },
+      "version_metadata": { "binding": "CF_VERSION_METADATA" },
+      "ai_search": [{ "binding": "DOCS_SEARCH", "instance_name": "remy-docs-pages", "remote": true }],
+      "ratelimits": [{ "name": "ASK_LIMIT", "namespace_id": "4281", "simple": { "limit": 10, "period": 60 } }],
+    },
+  },
+  "observability": {
+    "enabled": true,
+    "redact_query_string": true,
+    "logs": { "enabled": true, "invocation_logs": true, "persist": true, "head_sampling_rate": 1 },
+    "traces": { "enabled": true, "persist": true, "head_sampling_rate": 1 },
+  },
+}

@@ -1,0 +1,20 @@
+// The docs Worker: @joeblew999/remy-ui's docs server over this folder's content/ and docs.config.ts. Cloudflare's Vite
+// plugin builds it (vp run build). Ask AI's bindings (ai_search, ratelimits) go here once docs.config.ts's ask names
+// its resources: see remy-auth's apps/remy-auth-docs/wrangler.jsonc.
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "my-app-docs",
+  "compatibility_date": "2026-09-24",
+  "main": "../node_modules/@joeblew999/remy-ui/src/docs/server.ts",
+  "compatibility_flags": ["nodejs_compat"],
+  "version_metadata": { "binding": "CF_VERSION_METADATA" },
+  "vars": { "ENVIRONMENT": "production" },
+  "assets": { "directory": "./dist/client" },
+  "preview_urls": false,
+  "observability": {
+    "enabled": true,
+    "redact_query_string": true,
+    "logs": { "enabled": true, "invocation_logs": true, "persist": true, "head_sampling_rate": 1 },
+    "traces": { "enabled": true, "persist": true, "head_sampling_rate": 1 },
+  },
+}

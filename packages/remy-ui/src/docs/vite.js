@@ -16,55 +16,12 @@ import { remyBuild } from '../build-vite.js';
 // An app's whole docs Worker from its docs.config.ts (.plans/thin-apps.md, group 2): its docs/vite.config.ts
 // is `export default remyDocs(docsConfig, { contract: '<its contract package>' })`. The Worker itself is this
 // package's src/docs (Fumadocs' TanStack Start template, on Cloudflare's Vite plugin instead of Nitro); the
-// app keeps content/ and docs.config.ts. Three things are generated into the app's .remy-docs/ (gitignored):
-//   collections.ts: the Fumadocs collections, compiled by fumadocs-mdx's macro, which never compiles
-//     node_modules, so they cannot stay in the package;
-//   wrangler.json: the Worker's Cloudflare configuration from docs.config.ts, which the Vite plugin and every
-//     wrangler command (-c .remy-docs/wrangler.json) read, so the app writes none;
-// and the route tree beside the package's routes (TanStack Start's srcDirectory is the package's src/docs).
+// app keeps content/, docs.config.ts and its Worker's wrangler.jsonc (name, bindings, the package's server as main).
+// Two things are generated into the app's .remy-docs/ (gitignored): collections.ts, the Fumadocs collections,
+// compiled by fumadocs-mdx's macro, which never compiles node_modules, so they cannot stay in the package; and the
+// route tree beside the package's routes (TanStack Start's srcDirectory is the package's src/docs).
 
 const packageDocs = fileURLToPath(new URL('.', import.meta.url));
-
-/** The Worker's Cloudflare configuration: its name, the assets, observability and, when the app has Ask AI, its bindings. */
-export function docsWorkerConfig(docsConfig, srcDirectory) {
-  const { ask } = docsConfig;
-  const askBindings = (remote) =>
-    ask
-      ? {
-          ai_search: [{ binding: 'DOCS_SEARCH', instance_name: ask.instance, ...(remote ? { remote: true } : {}) }],
-          ratelimits: [{ name: 'ASK_LIMIT', namespace_id: ask.rateLimitNamespace, simple: { limit: 10, period: 60 } }],
-        }
-      : {};
-  return {
-    name: docsConfig.service,
-    compatibility_date: '2026-09-24',
-    main: `${srcDirectory}/server.ts`,
-    compatibility_flags: ['nodejs_compat'],
-    version_metadata: { binding: 'CF_VERSION_METADATA' },
-    vars: { ENVIRONMENT: 'production' },
-    assets: { directory: './dist/client' },
-    preview_urls: false,
-    ...askBindings(false),
-    // Working on answers (CLOUDFLARE_ENV=ask vp -C docs dev): the same Worker locally, AI Search remote. Never deployed.
-    ...(ask
-      ? {
-          env: {
-            ask: {
-              vars: { ENVIRONMENT: 'docs' },
-              version_metadata: { binding: 'CF_VERSION_METADATA' },
-              ...askBindings(true),
-            },
-          },
-        }
-      : {}),
-    observability: {
-      enabled: true,
-      redact_query_string: true,
-      logs: { enabled: true, invocation_logs: true, persist: true, head_sampling_rate: 1 },
-      traces: { enabled: true, persist: true, head_sampling_rate: 1 },
-    },
-  };
-}
 
 /** The docs package's folder from its repository's root (the nearest folder above it with a .git): docs, apps/remy-auth-docs. */
 function repositoryFolder(root) {
@@ -84,8 +41,8 @@ export function remyDocs(docsConfig, { contract, root = process.cwd(), app: appR
   const api = Boolean(contract);
   const app = root.endsWith('/') ? root : `${root}/`;
   const srcDirectory = relative(root, packageDocs).replace(/\/$/, '');
-  // Written while this configuration is evaluated, because Cloudflare's plugin reads wrangler.json then, before any
-  // task could make it; each file only when its text changed, so loading the configuration rewrites nothing.
+  // Written while this configuration is evaluated, before any task could make them; each file only when its text
+  // changed, so loading the configuration rewrites nothing.
   const generated = join(root, '.remy-docs');
   mkdirSync(generated, { recursive: true });
   const write = (name, text) => {
@@ -94,10 +51,6 @@ export function remyDocs(docsConfig, { contract, root = process.cwd(), app: appR
   };
   write('collections.ts', readFileSync(join(packageDocs, 'lib/collections.source.ts'), 'utf8'));
   write('app.json', `${JSON.stringify({ api })}\n`);
-  write(
-    'wrangler.json',
-    `${JSON.stringify({ ...docsWorkerConfig(docsConfig, `../${srcDirectory}`), assets: { directory: '../dist/client' } }, null, 2)}\n`,
-  );
   return defineConfig({
     plugins: [
       // What this build is (`virtual:remy-build`): the docs Worker's /healthz answers with it, as an app's does.
@@ -140,7 +93,7 @@ export function remyDocs(docsConfig, { contract, root = process.cwd(), app: appR
           },
         },
       }),
-      cloudflare({ viteEnvironment: { name: 'ssr' }, configPath: join(generated, 'wrangler.json') }),
+      cloudflare({ viteEnvironment: { name: 'ssr' }, configPath: join(root, 'wrangler.jsonc') }),
       tailwindcss(),
       tanstackStart({ srcDirectory, server: { build: { inlineCss: true } } }),
       viteReact(),

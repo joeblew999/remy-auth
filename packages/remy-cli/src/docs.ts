@@ -67,13 +67,8 @@ function tool(command: string, args: string[], options: { env?: Record<string, s
   });
   if (result.status !== 0) fail(`${command} ${args.join(' ')}: failed`);
 }
-/** The docs Worker's generated configuration (vite.config.ts writes .remy-docs/ when run). */
-const generated = (): string => {
-  execFileSync(process.execPath, ['vite.config.ts'], { cwd: docs(), stdio: 'ignore' });
-  return '.remy-docs/wrangler.json';
-};
 const previewName = () =>
-  `${(JSON.parse(readFileSync(join(docs(), '.remy-docs', 'wrangler.json'), 'utf8')) as { name: string }).name}-preview`;
+  `${/"name":\s*"([^"]+)"/.exec(readFileSync(join(docs(), 'wrangler.jsonc'), 'utf8'))?.[1] ?? 'docs'}-preview`;
 
 /**
  * The docs' production build must already be there (the docs package's build task: vp run ready builds it, and a
@@ -147,7 +142,6 @@ export function test(): void {
 export function testRemote(): void {
   const origin = process.env.DOCS_TEST_URL ?? origins().docs;
   if (!origin) fail('docs test remote: DOCS_TEST_URL, or origins.docs in remy.config.ts');
-  generated();
   tool(bin('playwright'), ['test', '-c', docsChecks()], {
     env: { TEST_TARGET: 'remote', TEST_BASE_URL: origin },
   });
@@ -167,19 +161,16 @@ export function testRemote(): void {
 /** A preview Worker of the docs, answers paused. */
 export function preview(): void {
   built();
-  generated();
   const name = previewName();
   tool(bin('wrangler'), ['deploy', '-c', 'dist/server/wrangler.json', '--name', name]);
-  tool(bin('wrangler'), ['secret', 'put', 'ASK_PAUSED', '-c', '.remy-docs/wrangler.json', '--name', name], {
+  tool(bin('wrangler'), ['secret', 'put', 'ASK_PAUSED', '-c', 'wrangler.jsonc', '--name', name], {
     input: '1',
   });
 }
 /** Ask AI's answers: off (an emergency stop, seconds, no build) or on again. */
 export function answers(state: 'on' | 'off'): void {
-  generated();
-  if (state === 'off')
-    tool(bin('wrangler'), ['secret', 'put', 'ASK_PAUSED', '-c', '.remy-docs/wrangler.json'], { input: '1' });
-  else tool(bin('wrangler'), ['secret', 'delete', 'ASK_PAUSED', '-c', '.remy-docs/wrangler.json']);
+  if (state === 'off') tool(bin('wrangler'), ['secret', 'put', 'ASK_PAUSED', '-c', 'wrangler.jsonc'], { input: '1' });
+  else tool(bin('wrangler'), ['secret', 'delete', 'ASK_PAUSED', '-c', 'wrangler.jsonc']);
 }
 /**
  * Ask AI's pages (.plans/docs-ai-sync.md, route B): make the R2 bucket hold exactly the current docs, one
@@ -404,9 +395,8 @@ export const commands: Subcommands = {
   observe: {
     what: "…: the docs Worker's logs and its AI Gateway (remy observe, with the docs' configuration)",
     run: (rest) => {
-      generated();
       process.chdir(docs());
-      return observe([...rest, '--config', join(docs(), '.remy-docs', 'wrangler.json')]);
+      return observe([...rest, '--config', join(docs(), 'wrangler.jsonc')]);
     },
   },
 };

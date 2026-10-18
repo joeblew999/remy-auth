@@ -1,4 +1,4 @@
-// vp run auth:provision: what a deployment (production, and staging beside it) needs on Cloudflare,
+// vp run auth:provision: what a deployment (production, and the branches' Previews) needs on Cloudflare,
 // printed; nothing is created (that is the owner's). The identity database and the showcase's, each
 // with its id in wrangler.jsonc and its migrations, the secret, and the domain the sign-in code is
 // mailed from. Until then the deploy refuses, because Wrangler would create the database by itself.
@@ -23,9 +23,6 @@ the send_email binding beside it must allow. Its domain has to be enabled for se
 
 A later migration is step 2 or 5 again, before the deploy that needs it.
 
-Staging (Cloudflare's staging build deploys main to it) is the same five steps on its own resources, with --env staging:
-databases remy-auth-staging and remy-auth-demo-staging, their ids in wrangler.jsonc under env.staging,
-then for each binding
-     npx wrangler d1 migrations apply <DB|DEMO_DB> --remote --env staging
-and  openssl rand -base64 32 | npx wrangler secret put BETTER_AUTH_SECRET --env staging
-Its secret is its own: a session made on staging means nothing to production.`);
+Every branch's Preview uses the databases in wrangler.jsonc's previews section (remy-auth-preview,
+remy-auth-demo-preview), migrated the same way with --preview, and its own BETTER_AUTH_SECRET
+(npx wrangler preview base-config secret put BETTER_AUTH_SECRET): a session made there means nothing to production.`);

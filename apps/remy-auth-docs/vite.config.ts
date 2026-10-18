@@ -16,7 +16,7 @@ export default defineConfig({
     tasks: {
       // The Worker's binding types, after the shared catalogs the pages' words come from.
       generate: {
-        command: 'wrangler types -c .remy-docs/wrangler.json',
+        command: 'wrangler types',
         dependsOn: ['@joeblew999/remy-ui#generate'],
         cache: { input: [{ auto: true }, '!worker-configuration.d.ts'] },
       },
@@ -31,6 +31,16 @@ export default defineConfig({
           input: [{ auto: true }, '!.remy-docs/**', '!dist/**', '!.wrangler/**'],
           output: ['dist/**'],
           env: ['REMY_COMMIT', 'REMY_CHANGES', 'WORKERS_CI_COMMIT_SHA'],
+          untrackedEnv: network,
+        },
+      },
+      // Wrangler's deployment dry run on the build (no upload): the Worker as Cloudflare would take it.
+      'check:deploy': {
+        command: 'wrangler deploy --dry-run',
+        dependsOn: ['build'],
+        cache: {
+          input: [{ auto: true }, '!**/node_modules/**', '!**/.wrangler/**'],
+          output: [],
           untrackedEnv: network,
         },
       },

@@ -1,4 +1,4 @@
-// Cloudflare. Deploys are Cloudflare's own: its Git builds (Workers Builds) deploy main, the app, its docs and staging,
+// Cloudflare. Deploys are Cloudflare's own: its Git builds (Workers Builds) deploy main, the app and its docs,
 // each with `wrangler deploy`. Here, what Wrangler has no one command for: a throwaway preview Worker with the browser
 // checks against it, what each deployment runs (`remy cloudflare versions`), an app's page URLs, and the check that a
 // binding names a resource that exists. Wrangler does the work.
@@ -242,9 +242,7 @@ type Health = {
  * from this checkout, when it was deployed. Nothing is written down anywhere, so nothing can drift.
  */
 export async function versions(
-  origins = [projectOrigins().production, projectOrigins().staging, projectOrigins().docs].filter(
-    (o): o is string => !!o,
-  ),
+  origins = [projectOrigins().production, projectOrigins().docs].filter((o): o is string => !!o),
 ): Promise<{ table: string; unanswered: number }> {
   if (!origins.length) fail('versions: pass an origin, or put origins in remy.config.ts');
   const ask = async (origin: string): Promise<Health> => {
@@ -435,7 +433,7 @@ export async function previewDelete(name?: string): Promise<void> {
 }
 
 export const what =
-  "Cloudflare's builds deploy main (the app, its docs, staging); here: throwaway previews, what each deployment runs, the resources a binding needs";
+  "Cloudflare's builds deploy main (the app, its docs) and each branch's Preview; here: throwaway previews, what each deployment runs, the resources a binding needs";
 export const commands: Subcommands = {
   versions: {
     what: '[origins…]: what each deployment runs, asked and never remembered: service, environment, commit and how far it is from this checkout, when it was deployed',
