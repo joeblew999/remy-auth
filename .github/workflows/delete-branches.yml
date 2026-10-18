@@ -1,0 +1,23 @@
+# One-off: delete branches this repository no longer uses (a cloud session may push but not delete refs). Removed
+# again right after it ran.
+name: Delete branches
+on:
+  workflow_dispatch:
+    inputs:
+      branches:
+        description: Space-separated branch names
+        required: true
+permissions: {}
+jobs:
+  delete:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCHES: ${{ inputs.branches }}
+        run: |
+          for b in $BRANCHES; do
+            gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/$b" && echo "deleted $b"
+          done
