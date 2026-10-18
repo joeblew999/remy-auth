@@ -185,6 +185,8 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - run: vp run upgrade-test
         env:
+          # Empty unless set: the release to upgrade from while the latest is known broken (projects.md).
+          UPGRADE_FROM: ${{ vars.UPGRADE_FROM }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - if: success()

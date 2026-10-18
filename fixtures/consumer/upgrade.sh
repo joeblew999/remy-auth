@@ -21,8 +21,12 @@ packages=https://npm.pkg.github.com
 
 # 1. The previous release: the latest remy-ui on GitHub Packages, and its app, made by vp create from its own
 #    @joeblew999/create and installed, as on any machine.
+# UPGRADE_FROM (the repository variable of that name, on GitHub) names it instead, for while the latest is known
+# broken: otherwise a broken release's upgrade would block every release after it, its fix included (projects.md).
+if [ -n "${UPGRADE_FROM:-}" ]; then previous="$UPGRADE_FROM"; else
 previous=$(curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" "$packages/@joeblew999%2fremy-ui" | node -e "let s='';process.stdin.on('data',(d)=>(s+=d)).on('end',()=>console.log(JSON.parse(s)['dist-tags'].latest))" 2>/dev/null) ||
   { echo "upgrade-test: GitHub Packages refused this token for @joeblew999/remy-ui (it needs read:packages)"; exit 1; }
+fi
 # Every pnpm command here (the previous app's install, the upgrade's) reads GitHub Packages with this token, once
 # GitHub Packages has taken it (so a bad token never replaces a machine's good one).
 vp pm config set --location global //npm.pkg.github.com/:_authToken "$GITHUB_TOKEN" > /dev/null

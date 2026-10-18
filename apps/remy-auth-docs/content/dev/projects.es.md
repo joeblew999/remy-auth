@@ -1,7 +1,7 @@
 ---
 title: "Proyectos: estructura, apps nuevas y publicación"
 description: "Qué guarda todo proyecto de Remy en el mismo lugar, cómo empezar una app nueva, la publicación de paquetes, las traducciones, Cloudflare y los planes. Todos los comandos están en Comandos."
-translatedFrom: "76024556 6f14d69f 77ff6392 191684ff 2ad319b2 335e995b de907ca6 5d426462"
+translatedFrom: "76024556 6f14d69f 485fc80a 191684ff 2ad319b2 335e995b de907ca6 5d426462"
 ---
 
 La herramienta es `remy` (y `remy-check`), los bins de `@joeblew999/remy-cli` (`packages/remy-cli/src`, un
@@ -69,7 +69,7 @@ Todo lo demás es el paquete, que un solo cambio de versión actualiza.
    Node 26, `gh auth login` con un token que tenga `read:packages` y, en Linux, la fuente `fonts-noto-cjk` (las comprobaciones de navegador instalan el Chromium propio de Playwright).
 2. Una vez por máquina, GitHub Packages para `vp create`, que lee un registro y su token de `~/.npmrc` (la forma propia de
    GitHub para su registro npm), no de la configuración de pnpm:
-   `printf '@joeblew999:registry=https://npm.pkg.github.com/\n//npm.pkg.github.com/:_authToken=%s\n' "$(gh auth token)" >> ~/.npmrc`.
+   `printf '\n@joeblew999:registry=https://npm.pkg.github.com/\n//npm.pkg.github.com/:_authToken=%s\n' "$(gh auth token)" >> ~/.npmrc && chmod 600 ~/.npmrc`.
    Luego `vp create @joeblew999:app --directory <name>` (la última versión; `@joeblew999:app@X.Y.Z` para una concreta), después
    `cd <name>` y `git init` (las herramientas de traducción leen el historial de git; `vp run setup` lo indica si falta).
 3. Nombra la aplicación (vp create nombra `package.json` según la carpeta): sustituye `my-app` y `My app` (`grep -rn -i "my.app" --exclude-dir=node_modules .`):
@@ -101,7 +101,7 @@ padre, como `videos.$videoId` al lado de `videos`, es `videos_.$videoId.tsx`: Ta
 paquete de contrato y `src/api/` (todo procedimiento que recibe entrada documenta un error, o `apiChecks`
 falla: la regla `api/coverage` del paquete), documentación en `docs/content/`. Pasa a una versión nueva con
 `vp run upgrade <version>`. Se ejecuta en dos fases, de modo que la actualización siempre la hace la versión a la que se pasa: la línea de comandos que la app tiene instalada deja `@joeblew999/remy-ui` y
-`@joeblew999/remy-cli` en esa versión (`vp add`) y luego cede el control al recién instalado `remy upgrade <version>
+`@joeblew999/remy-cli` en esa versión en el catálogo de la app (`pnpm-workspace.yaml`, que la app y su documentación nombran como `catalog:`) y la instala, devolviendo los archivos de la app a su estado anterior si esa instalación falla, y luego cede el control al recién instalado `remy upgrade <version>
 --installed`, que hace el resto: la tag del flujo de trabajo de CI, los scripts, los archivos de `.vite-hooks/` y
 `vite.config.ts` de la app en blanco (uno antiguo se conserva como `vite.config.ts.before-upgrade`, para volver a mover a él sus propios plugins y opciones),
 `pnpm-workspace.yaml`, el `collections.ts` y el `wrangler.jsonc` de la documentación donde la app no los tenga,
@@ -117,13 +117,18 @@ vp add -E @joeblew999/remy-ui@<version> @joeblew999/remy-cli@<version>   # 0.17.
 vp run upgrade <version>
 ```
 
-Una app que una actualización anterior dejó a medias (con los paquetes nuevos instalados, pero los scripts y la configuración antiguos) ejecuta
-de nuevo `vp run upgrade <version>`: su línea de comandos instalada ya es la nueva. Una app en la 0.15.1 hace los mismos dos
-pasos, porque el upgrade de la 0.15.1 no puede.
+Una app que una actualización anterior dejó a medias (con los paquetes nuevos instalados, pero los scripts y la configuración antiguos) hace
+los mismos dos pasos: su línea de comandos instalada podría ser una que no puede terminar. Lo mismo vale para una app en la 0.15.1. El upgrade
+rechaza una versión anterior a la 0.17.1, cuyo propio upgrade no puede terminar.
 
 **Para quien cambie el upgrade:** una app se actualiza con la línea de comandos de la versión a la que pasa, pero solo
 a partir de la 0.17.1. Todo lo que el upgrade lea de una versión (dónde vive la app en blanco, sus archivos, sus nombres) debe
-seguir encontrándose en las versiones anteriores, o la nota de arriba gana una línea para las apps que estén en ellas. Dos ejecuciones de navegador locales a la vez comparten
+seguir encontrándose en las versiones anteriores, o la nota de arriba gana una línea para las apps que estén en ellas. Toda línea de comandos posterior
+sigue aceptando `remy upgrade <version> --installed` (una más antigua cede el control a ella), y la primera fase no puede usar nada más
+nuevo que la versión desde la que se ejecuta. Si el upgrade de una versión publicada resulta estar roto, la prueba de upgrade, que
+parte de la última versión publicada, bloquearía todas las versiones posteriores, incluida la que lo corrige: define la variable
+del repositorio `UPGRADE_FROM` con la última versión buena (`gh variable set UPGRADE_FROM --body X.Y.Z`) hasta que salga la corrección, y luego
+bórrala. Dos ejecuciones de navegador locales a la vez comparten
 `PREVIEW_PORT` y la segunda falla al iniciar su servidor: dale a cada shell el suyo (`PREVIEW_PORT=4232 vp run …`).
 
 ### Un repositorio que publica paquetes [#a-repository-that-publishes-packages]

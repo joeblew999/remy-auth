@@ -17,4 +17,4 @@ vp add -E @joeblew999/remy-ui@0.17.1 @joeblew999/remy-cli@0.17.1
 vp run upgrade 0.17.1
 ```
 
-An app an older upgrade already left halfway runs `vp run upgrade 0.17.1` again.
+An app an older upgrade already left halfway does the same two steps. The upgrade refuses versions older than 0.17.1.

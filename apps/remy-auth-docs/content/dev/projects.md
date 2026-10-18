@@ -66,7 +66,7 @@ Everything else is the package, which one version bump upgrades.
    Node 26, `gh auth login` with a token that has `read:packages`, and on Linux the font `fonts-noto-cjk` (the browser checks install Playwright's own Chromium).
 2. Once per machine, GitHub Packages for `vp create`, which reads a registry and its token from `~/.npmrc` (GitHub's
    own way for its npm registry), not from pnpm's configuration:
-   `printf '@joeblew999:registry=https://npm.pkg.github.com/\n//npm.pkg.github.com/:_authToken=%s\n' "$(gh auth token)" >> ~/.npmrc`.
+   `printf '\n@joeblew999:registry=https://npm.pkg.github.com/\n//npm.pkg.github.com/:_authToken=%s\n' "$(gh auth token)" >> ~/.npmrc && chmod 600 ~/.npmrc`.
    Then `vp create @joeblew999:app --directory <name>` (the latest release; `@joeblew999:app@X.Y.Z` for one), then
    `cd <name>` and `git init` (the translation tools read git history; `vp run setup` says so if it is missing).
 3. Name the app (vp create names `package.json` after the folder): replace `my-app` and `My app` (`grep -rn -i "my.app" --exclude-dir=node_modules .`):
@@ -98,7 +98,8 @@ Then the app grows in its own files: pages in `src/routes/` (a page beside a par
 takes input documents an error, or `apiChecks` fails: the package's `api/coverage` rule), docs in
 `docs/content/`. Move to a new release with `vp run upgrade <version>`. It runs in two phases, so the upgrade is
 always done by the release it moves to: the command line the app has installed puts `@joeblew999/remy-ui` and
-`@joeblew999/remy-cli` at that version (`vp add`), then hands over to the newly installed `remy upgrade <version>
+`@joeblew999/remy-cli` at that version in the app's catalog (`pnpm-workspace.yaml`, which the app and its docs both
+name as `catalog:`) and installs it, putting the app's files back if that install fails, then hands over to the newly installed `remy upgrade <version>
 --installed`, which does the rest: the CI workflow's tag, the blank app's scripts, `.vite-hooks/` and
 `vite.config.ts` files (an old one kept as `vite.config.ts.before-upgrade`, to move its own plugins and options
 back), `pnpm-workspace.yaml`, the docs' `collections.ts` and `wrangler.jsonc` where the app has none,
@@ -114,13 +115,18 @@ vp add -E @joeblew999/remy-ui@<version> @joeblew999/remy-cli@<version>   # 0.17.
 vp run upgrade <version>
 ```
 
-An app an older upgrade already left halfway (the new packages installed, the old scripts and configuration) runs
-`vp run upgrade <version>` again: its installed command line is the new one now. An app on 0.15.1 does the same two
-steps, since 0.15.1's upgrade cannot.
+An app an older upgrade already left halfway (the new packages installed, the old scripts and configuration) does the
+same two steps: its installed command line may still be one that cannot finish. So does an app on 0.15.1. The upgrade
+refuses a version older than 0.17.1, whose own upgrade cannot finish.
 
 **For whoever changes the upgrade:** an app upgrades with the command line of the release it moves to, but only from
 0.17.1 on. Anything the upgrade reads from a release (where the blank app lives, its files, their names) must still
-be found by the releases before, or the note above grows a line for apps on them. Two local browser runs at once share `PREVIEW_PORT` and the second fails to
+be found by the releases before, or the note above grows a line for apps on them. Every later command line keeps
+accepting `remy upgrade <version> --installed` (an older one hands over to it), and the first phase may use nothing
+newer than the release it runs from. If a published release's upgrade turns out broken, the upgrade test, which
+starts from the latest published release, would block every release after it, the fix included: set the repository
+variable `UPGRADE_FROM` to the last good release (`gh variable set UPGRADE_FROM --body X.Y.Z`) until the fix is out, then
+delete it. Two local browser runs at once share `PREVIEW_PORT` and the second fails to
 start its server: give each shell its own (`PREVIEW_PORT=4232 vp run …`).
 
 ### A repository that publishes packages

@@ -28,20 +28,40 @@ function fail(message: string): never {
   process.exit(1);
 }
 
+/** Whether the scope's registry answers for remy-cli with this token (a fine-grained GITHUB_TOKEN often cannot). */
+function accepted(token: string): boolean {
+  const check = spawnSync(
+    process.execPath,
+    [
+      '--input-type=module',
+      '-e',
+      'const r = await fetch(process.argv[1], { headers: { authorization: `Bearer ${process.argv[2]}`, accept: "application/json" } }); process.exit(r.ok ? 0 : 1);',
+      `${scopeRegistry()}/@joeblew999%2fremy-cli`,
+      token,
+    ],
+    { stdio: 'ignore', timeout: 30_000 },
+  );
+  return check.status === 0;
+}
+
 /**
- * GitHub Packages' token: GITHUB_TOKEN (or NODE_AUTH_TOKEN) when set, else gh's when gh is installed and signed in;
- * one sentence, not a stack trace, when there is neither.
+ * GitHub Packages' token: the first of GITHUB_TOKEN, NODE_AUTH_TOKEN and gh's (when gh is installed and signed in)
+ * that the registry accepts, so a token that cannot read packages never replaces a good one; one sentence, not a
+ * stack trace, when there is none.
  */
 function packagesToken(): string {
-  const set = process.env.GITHUB_TOKEN || process.env.NODE_AUTH_TOKEN;
-  if (set) return set;
-  try {
-    return execFileSync('gh', ['auth', 'token'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
-  } catch {
-    return fail(
-      'upgrade: GitHub Packages needs a token: set GITHUB_TOKEN to one with read:packages, or install gh and run gh auth login',
-    );
-  }
+  const gh = () => {
+    try {
+      return execFileSync('gh', ['auth', 'token'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    } catch {
+      return '';
+    }
+  };
+  for (const candidate of [process.env.GITHUB_TOKEN, process.env.NODE_AUTH_TOKEN, gh()])
+    if (candidate && accepted(candidate)) return candidate;
+  return fail(
+    'upgrade: GitHub Packages needs a token that reads packages: set GITHUB_TOKEN to one with read:packages, or install gh and run gh auth login',
+  );
 }
 
 const platform = ['@joeblew999/remy-ui', '@joeblew999/remy-cli'];
@@ -49,18 +69,31 @@ const platform = ['@joeblew999/remy-ui', '@joeblew999/remy-cli'];
 /**
  * The platform at `version` where an app from the blank app keeps it: its catalog (pnpm-workspace.yaml), which the
  * app and its docs both name as `catalog:` (`vp add` would pin the app alone, and leave the docs on the old version:
- * issue #44's upgrade test). A dependency an earlier upgrade's `vp add` pinned is named `catalog:` again. False for an
- * app with no catalog entry for them, which `vp add` moves instead.
+ * issue #44's upgrade test). Each entry's key quoted or not, its value quoted or not, a comment after it kept; both
+ * entries, or the upgrade stops. A dependency an earlier upgrade's `vp add` pinned is named `catalog:` again. Returns
+ * how to put the three files back (for a failed install), or nothing for an app with no catalog entry for them,
+ * which `vp add` moves instead (and refused when its docs name the platform as `catalog:` all the same).
  */
-export function platformAt(version: string): boolean {
-  if (!existsSync('pnpm-workspace.yaml')) return false;
-  const workspace = readFileSync('pnpm-workspace.yaml', 'utf8');
-  const pins = /^( {2}['"]@joeblew999\/remy-(?:ui|cli)['"]: )['"][^'"]*['"]$/gm;
-  if (!pins.test(workspace)) return false;
-  writeFileSync('pnpm-workspace.yaml', workspace.replace(pins, `$1'${version}'`));
+export function platformAt(version: string): (() => void) | undefined {
+  const files = ['pnpm-workspace.yaml', 'package.json', join('docs', 'package.json')].filter((file) =>
+    existsSync(file),
+  );
+  const before = new Map(files.map((file) => [file, readFileSync(file, 'utf8')]));
+  const workspace = before.get('pnpm-workspace.yaml') ?? '';
+  const pins = /^( {2}(['"]?)@joeblew999\/remy-(ui|cli)\2:[ \t]*)(['"]?)[^'"\s#]+\4([ \t]*(?:#.*)?)$/gm;
+  const found = new Set([...workspace.matchAll(pins)].map((match) => match[3]));
+  const docs = before.get(join('docs', 'package.json')) ?? '';
+  if (found.size === 0) {
+    if (/"@joeblew999\/remy-(?:ui|cli)":\s*"catalog:"/.test(docs))
+      fail('upgrade: docs/package.json names the platform as catalog:, but pnpm-workspace.yaml has no entry to move');
+    return undefined;
+  }
+  if (found.size !== 2)
+    fail(`upgrade: pnpm-workspace.yaml's catalog has only remy-${[...found][0]}; it needs remy-ui and remy-cli both`);
+  writeFileSync('pnpm-workspace.yaml', workspace.replace(pins, `$1'${version}'$5`));
   for (const file of ['package.json', join('docs', 'package.json')]) {
-    if (!existsSync(file)) continue;
-    const manifest = JSON.parse(readFileSync(file, 'utf8')) as Record<string, Record<string, string> | undefined>;
+    if (!before.has(file)) continue;
+    const manifest = JSON.parse(before.get(file) as string) as Record<string, Record<string, string> | undefined>;
     let changed = false;
     for (const section of ['dependencies', 'devDependencies'])
       for (const name of platform)
@@ -71,7 +104,9 @@ export function platformAt(version: string): boolean {
     if (changed) writeFileSync(file, `${JSON.stringify(manifest, null, 2)}\n`);
   }
   console.log(`upgrade: the catalog names @joeblew999/remy-ui and @joeblew999/remy-cli at ${version}`);
-  return true;
+  return () => {
+    for (const [file, text] of before) writeFileSync(file, text);
+  };
 }
 
 /** The version of remy-cli this app has installed, or nothing. */
@@ -85,6 +120,11 @@ export function upgrade(version: string | undefined, installed = false): void {
     fail('remy upgrade <version>: a released version without the v, e.g. 0.15.0');
   if (existsSync('packages/remy-cli/src/remy.ts'))
     fail('upgrade: this is remy-auth, which owns the package; an app upgrades.');
+  const [major = 0, minor = 0, patch = 0] = version.split('.').map(Number);
+  if (major * 1e6 + minor * 1e3 + patch < 17_001)
+    fail(
+      `upgrade: ${version} is older than 0.17.1, the first release that upgrades itself; its own upgrade cannot finish (projects.md)`,
+    );
   const token = packagesToken();
   if (!installed) {
     // GitHub Packages' token where pnpm reads it: this machine's pnpm configuration (pnpm expands no variable in a
@@ -92,8 +132,10 @@ export function upgrade(version: string | undefined, installed = false): void {
     spawnSync('vp', ['pm', 'config', 'set', '--location', 'global', '//npm.pkg.github.com/:_authToken', token], {
       stdio: 'ignore',
     });
-    // The platform and its command line, released together under the same number, set where the app keeps them.
-    const install = platformAt(version)
+    // The platform and its command line, released together under the same number, set where the app keeps them;
+    // the app's files put back if the install fails (a version not published yet, the network, the token).
+    const restore = platformAt(version);
+    const install = restore
       ? // --no-frozen-lockfile: an upgrade changes the lockfile, which pnpm refuses by default wherever CI is set
         // (GitHub, agents' sessions: ERR_PNPM_LOCKFILE_CONFIG_MISMATCH in the upgrade test).
         spawnSync('vp', ['install', '--no-frozen-lockfile'], {
@@ -104,7 +146,10 @@ export function upgrade(version: string | undefined, installed = false): void {
           stdio: 'inherit',
           env: { ...process.env, GITHUB_TOKEN: token },
         });
-    if (install.status !== 0) fail('upgrade: installing the release failed');
+    if (install.status !== 0) {
+      restore?.();
+      fail(`upgrade: installing ${version} failed (is it released?); the app's files are as they were`);
+    }
     // The rest by the release's own command line, just installed.
     const rest = spawnSync('vp', ['exec', 'remy', 'upgrade', version, '--installed'], {
       stdio: 'inherit',
@@ -191,6 +236,8 @@ function scopeRegistry(): string {
 function fetchBlank(version: string, token: string): string {
   const scratch = mkdtempSync(join(tmpdir(), 'remy-blank-'));
   process.on('exit', () => rmSync(scratch, { recursive: true, force: true }));
+  // Ctrl-C too: the folder holds a token.
+  process.on('SIGINT', () => process.exit(130));
   const registry = scopeRegistry();
   writeFileSync(
     join(scratch, '.npmrc'),
@@ -210,8 +257,11 @@ function fetchBlank(version: string, token: string): string {
       '--no-editor',
       '--no-hooks',
     ],
-    { cwd: scratch, stdio: 'inherit', env: { ...process.env, VP_SKIP_INSTALL: '1' } },
+    // Its output only when it fails: on success it prints a harmless "failed to load config" (vp create formats the
+    // scratch app, which has nothing installed), which reads like an error in a good upgrade.
+    { cwd: scratch, encoding: 'utf8', env: { ...process.env, VP_SKIP_INSTALL: '1' } },
   );
+  if (got.status !== 0) process.stderr.write(`${got.stdout ?? ''}${got.stderr ?? ''}`);
   if (got.status !== 0)
     fail(`upgrade: the blank app at ${version} could not be made (vp create @joeblew999:app@${version})`);
   return join(scratch, 'app');
