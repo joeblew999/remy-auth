@@ -41,7 +41,7 @@ export function upgrade(version: string | undefined): void {
   // GitHub Packages' token where pnpm reads it: this machine's pnpm configuration (pnpm expands no variable in a
   // repository's .npmrc).
   if (token)
-    spawnSync('pnpm', ['config', 'set', '--location', 'user', '//npm.pkg.github.com/:_authToken', token], {
+    spawnSync('pnpm', ['config', 'set', '--location', 'global', '//npm.pkg.github.com/:_authToken', token], {
       stdio: 'ignore',
     });
   // The platform and its command line, released together under the same number.

@@ -1,7 +1,7 @@
 ---
 title: "Proyectos: estructura, apps nuevas y publicación"
 description: "Qué guarda todo proyecto de Remy en el mismo lugar, cómo empezar una app nueva, la publicación de paquetes, las traducciones, Cloudflare y los planes. Todos los comandos están en Comandos."
-translatedFrom: "76024556 ae418fe2 a5d3acab b3abd1e3 3ccca9ea 335e995b de907ca6 bf100d42"
+translatedFrom: "76024556 ae418fe2 f124ecbd b3abd1e3 3ccca9ea 335e995b de907ca6 bf100d42"
 ---
 
 La herramienta es `remy` (y `remy-check`), los bins de `@joeblew999/remy-cli` (`packages/remy-cli/src`, un
@@ -73,7 +73,7 @@ que un solo cambio de versión actualiza.
    `package.json`, `wrangler.jsonc`, `src/service.ts`, los orígenes de `.env`, `docs/wrangler.jsonc`,
    `docs/docs.config.ts` (el nombre y la fuente del producto, que también lee el marco de la app) y `messages/en.json`.
 4. El token de GitHub Packages en la configuración de pnpm de esta máquina, una sola vez (pnpm no lee ningún token del
-   `.npmrc` de un repositorio, que solo nombra el registro): `pnpm config set --location user //npm.pkg.github.com/:_authToken "$(gh auth token)"`.
+   `.npmrc` de un repositorio, que solo nombra el registro): `pnpm config set --location global //npm.pkg.github.com/:_authToken "$(gh auth token)"`.
    Luego `vp install` una vez para escribir `pnpm-lock.yaml`, y después `vp run setup` (el token otra vez, la instalación, las skills
    fijadas de `skills-lock.json` y la skill `remy` del paquete, el bloque de reglas de `AGENTS.md` y, por último,
    `vp run ready`).

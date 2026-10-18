@@ -1,7 +1,7 @@
 ---
 title: "El paquete de UI (@joeblew999/remy-ui)"
 description: "La interfaz que comparten todas las apps de Remy: shadcn de fábrica, fuentes, catálogos de Paraglide, las páginas del sitio y de la app, el pegamento de TanStack Start y sus comprobaciones."
-translatedFrom: "f3f6cb00 55bce48d 60a401ce c77f7598 62bc7837 f3ccfb1b 415c4606"
+translatedFrom: "f3f6cb00 55bce48d 60a401ce c77f7598 62bc7837 a6127daf 415c4606"
 ---
 
 La interfaz que comparten todas las apps de Remy: componentes y tema de shadcn de fábrica, fuentes,
@@ -172,7 +172,7 @@ El `.npmrc` de un consumidor solo nombra el registro:
 ```
 
 pnpm no lee ningún token del `.npmrc` de un repositorio, así que el `vp run setup` de una app escribe un token con `read:packages`, tomado
-de `gh auth token`, en la configuración de pnpm de la propia máquina (`pnpm config set --location user`); el workflow de GitHub pone
+de `gh auth token`, en la configuración de pnpm de la propia máquina (`pnpm config set --location global`); el workflow de GitHub pone
 su token ahí del mismo modo antes de `vp install --frozen-lockfile`. Las versiones publicadas están en el
 [registro de cambios](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/CHANGELOG.md), que escribe Changesets.
 

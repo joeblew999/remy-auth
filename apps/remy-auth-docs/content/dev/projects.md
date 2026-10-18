@@ -71,7 +71,7 @@ Everything else is the package, which one version bump upgrades.
    `package.json`, `wrangler.jsonc`, `src/service.ts`, `.env`'s origins, `docs/wrangler.jsonc`,
    `docs/docs.config.ts` (the product's name and source, which the app's frame reads too) and `messages/en.json`.
 4. GitHub Packages' token into this machine's pnpm configuration, once (pnpm reads no token from a repository's
-   `.npmrc`, which only names the registry): `pnpm config set --location user //npm.pkg.github.com/:_authToken "$(gh auth token)"`.
+   `.npmrc`, which only names the registry): `pnpm config set --location global //npm.pkg.github.com/:_authToken "$(gh auth token)"`.
    Then `vp install` once to write `pnpm-lock.yaml`, then `vp run setup` (the token again, the install, the pinned
    skills from `skills-lock.json` and the `remy` skill from the package, the `AGENTS.md` rules block, then
    `vp run ready`).

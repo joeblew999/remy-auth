@@ -71,7 +71,7 @@ jobs:
           cache: true
           run-install: false
       - run: |
-          pnpm config set --location user //npm.pkg.github.com/:_authToken "$GITHUB_TOKEN"
+          pnpm config set --location global //npm.pkg.github.com/:_authToken "$GITHUB_TOKEN"
           vp install --frozen-lockfile
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -128,7 +128,7 @@ jobs:
           cache: true
           run-install: false
       - run: |
-          pnpm config set --location user //npm.pkg.github.com/:_authToken "$GITHUB_TOKEN"
+          pnpm config set --location global //npm.pkg.github.com/:_authToken "$GITHUB_TOKEN"
           vp install --frozen-lockfile
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

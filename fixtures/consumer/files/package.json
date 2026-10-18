@@ -6,7 +6,7 @@
     "prepare": "vp config --no-agent",
     "ci": "vp run ready && vp run test:browser && vp run test:audits",
     "translate": "remy i18n translate",
-    "setup": "pnpm config set --location user //npm.pkg.github.com/:_authToken \"$(gh auth token)\" && vp install && skills experimental_install && skills experimental_sync && remy rules && vp run ready",
+    "setup": "pnpm config set --location global //npm.pkg.github.com/:_authToken \"$(gh auth token)\" && vp install && skills experimental_install && skills experimental_sync && remy rules && vp run ready",
     "upgrade": "remy upgrade"
   },
   "dependencies": {

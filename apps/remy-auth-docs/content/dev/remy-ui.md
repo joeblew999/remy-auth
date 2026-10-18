@@ -164,7 +164,7 @@ A consumer's `.npmrc` only names the registry:
 ```
 
 pnpm reads no token from a repository's `.npmrc`, so an app's `vp run setup` writes a `read:packages` token, from
-`gh auth token`, into the machine's own pnpm configuration (`pnpm config set --location user`); GitHub's workflow puts
+`gh auth token`, into the machine's own pnpm configuration (`pnpm config set --location global`); GitHub's workflow puts
 its token there the same way before `vp install --frozen-lockfile`. Released versions are in the
 [changelog](https://github.com/joeblew999/remy-auth/blob/main/packages/remy-ui/CHANGELOG.md), which Changesets writes.
 
