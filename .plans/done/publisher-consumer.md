@@ -71,7 +71,7 @@ preview; remy-auth-app passes its gate and Core Web Vitals after any move; no ch
   there is no `usage_name` there (the analysis's "drop it" would break the cleanup).
 
 - 2026-09-25, recipe and consumer drift (analysis action list items 2 and 4, D2, D3, D6, D15,
-  D16): the new-consumer recipe has **one home**, [docs/content/dev/projects.md](../../apps/docs/content/dev/projects.md#a-new-consumer)
+  D16): the new-consumer recipe has **one home**, [docs/content/dev/projects.md](../../apps/remy-auth-docs/content/dev/projects.md#a-new-consumer)
   (docs/content/dev/tooling.md already links there); it starts from remy-auth-app as a GitHub template repository
   (`gh repo create --template`), no scaffolding script of ours. remy-auth-app (branch
   `consumer-drift-recipe`) now has `min_version`, `PREVIEW_PORT` from the shell with `PUBLIC_ORIGIN`

@@ -4,7 +4,7 @@ Status: done 2026-09-24 for public pages: rendering strategy, the shared package
 `@joeblew999/remy-ui`, internationalisation, SEO checks, and vertical-slice steps 1, 4 and the
 public half of 5, proven in remy-auth (server-rendered) and remy-auth-app (prerendered).
 The open remainder, which needs the auth service or owner decisions, moved to
-[the portal plan](../parked/gui-portal.md). See [the runnable proof](../../apps/docs/content/dev/run-and-test.md).
+[the portal plan](../parked/gui-portal.md). See [the runnable proof](../../apps/remy-auth-docs/content/dev/run-and-test.md).
 
 ## Evidence from existing Remy code
 
@@ -59,7 +59,7 @@ an explicitly localized URL.
 
 ## Shared package and hosted portal
 
-Start with one versioned `packages/ui/` package with explicit component, theme and
+Start with one versioned `packages/remy-ui/` package with explicit component, theme and
 locale/message exports. Use shadcn's supported shared-package layout and CLI,
 not independently copied components in every consuming app. Keep React a peer
 dependency and export styles explicitly; verify Tailwind includes package classes.
@@ -125,7 +125,7 @@ Lighthouse, whose `lang`, `hreflang` and charset audits cannot verify formatting
 
 | Decision | Choice and reasoning |
 | --- | --- |
-| 1. Locale metadata | `packages/ui/project.inlang/settings.json` is the only locale list; Paraglide's runtime exports it. Endonyms come from `Intl.DisplayNames` and direction from the locale's likely script through `Intl.Locale`, both in `@joeblew999/remy-ui/locale`, so no language is listed twice. `app/root.tsx` sets `dir` from it and the switcher shows the endonyms. Release status and provenance stay documented per catalog until a second consumer needs machine-readable metadata. |
+| 1. Locale metadata | `packages/remy-ui/project.inlang/settings.json` is the only locale list; Paraglide's runtime exports it. Endonyms come from `Intl.DisplayNames` and direction from the locale's likely script through `Intl.Locale`, both in `@joeblew999/remy-ui/locale`, so no language is listed twice. `app/root.tsx` sets `dir` from it and the switcher shows the endonyms. Release status and provenance stay documented per catalog until a second consumer needs machine-readable metadata. |
 | 2. Date and time model | Instants are `Date` values serialised as ISO 8601 UTC. Calendar dates are `YYYY-MM-DD` text, formatted with an explicit UTC zone so they never shift. Temporal is not adopted: it is not Baseline widely available and Google's fallback is an unpinned `esm.sh` polyfill. Revisit once a pinned package and Workers support are verified. |
 | 3. Storage in D1 | ISO 8601 UTC text for instants and `YYYY-MM-DD` text for calendar dates: sortable, readable in queries, and the shape the Better Auth adapter writes for SQLite; verify against the pinned adapter when the auth tables are created. |
 | 4. Display time zone and location | Owner decision 2026-09-24: use Cloudflare's request geolocation. The Worker passes `request.cf` through a typed React Router context (`app/context.ts`), and server rendering shows the visitor's country, city, region, time zone and local time from it, labelled as the network's location; it is never logged or stored, and personalised pages already send `Cache-Control: no-store`. Catalog dates still format in UTC with the zone labelled, and the device's own zone renders in the browser after hydration. A stored user or organisation preference can later override both. |

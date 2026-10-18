@@ -16,9 +16,9 @@ getting missed by Claude because it's not type safe."
   `npm run dev:land -- "<what changed>"`, `npm run dev`: about fifteen scripts, the flow's seven and
   the hand tools a person uses (the app, a preview, screenshots, logs, what is deployed). Nothing else
   is a command; what is not a script is a function the steps call.
-- **The tooling is `remy`,** the bin of `@joeblew999/remy-ui` (`packages/ui/src/cli/`): TypeScript,
+- **The tooling is `remy`,** the bin of `@joeblew999/remy-ui` (`packages/remy-cli/src/`): TypeScript,
   type-checked by the app's `tsc` on every check. remy-auth runs the source; an app runs the
-  JavaScript emitted from it (`packages/ui/cli`, by `ui:generate` and `prepack`), because Node strips
+  JavaScript emitted from it (`packages/remy-ui/cli`, by `ui:generate` and `prepack`), because Node strips
   types from nothing under `node_modules` (GitHub's consumer job found it on the first landing). A consumer's `package.json` says
   `"dev:change": "remy change"` and gets the tooling with `npm install`, at the package's version: the
   git-ref include of `tasks/`, `project:upgrade-ui`'s ref dance and mise's include cache go.
@@ -38,7 +38,7 @@ already does, and the scripts list is the documentation of what exists.
 
 ## Slices, one landing each
 
-1. **Done 2026-10-11, the flow.** `tasks/dev/*.ts` moved to `packages/ui/src/cli/` as the bin's
+1. **Done 2026-10-11, the flow.** `tasks/dev/*.ts` moved to `packages/remy-cli/src/` as the bin's
    commands (`remy status|start|change|land|promote|release|done|guard|guard-hook|allowed`), the
    seven `dev:*` scripts in `package.json` and the template's, `remy.config.ts` with the origins and
    ports (`config.ts` hands them to the tasks as the environment they read), the hooks registered as

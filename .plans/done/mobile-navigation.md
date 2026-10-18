@@ -3,7 +3,7 @@
 Status: closed 2026-09-26: released in 0.12.0, live in remy-auth and remy-auth-app. Owner: "find the best shadcn way for our app to have a bottom navigation for
 mobile ... I have no idea if we should retain the drawer for desktop users and use the bottom navigation
 for mobile users ... Our app needs some more pages too to help show the navigation working."
-Executor/Reviewer roles as in [plans and roles](../../apps/docs/content/dev/principles.md#plans-and-roles).
+Executor/Reviewer roles as in [plans and roles](../../apps/remy-auth-docs/content/dev/principles.md#plans-and-roles).
 
 ## Words
 
@@ -53,7 +53,7 @@ pattern. **Choice: B. Runner-up: A** (C needs a shadcn.io account). Switch when 
 - **Tablets and desktops:** the sidebar as now, collapsing to a rail (`collapsible="icon"`).
 - **One list** of destinations, each marked core or not, in the package; the sidebar shows all, the bar
   the core ones and More.
-- Lives in the shared package as an owned block (`packages/ui/src/blocks/bottom-nav`), so remy-auth-app
+- Lives in the shared package as an owned block (`packages/remy-ui/src/blocks/bottom-nav`), so remy-auth-app
   gets it on the next release.
 - Checks (few, ours only): on a phone viewport the bar shows the core tabs and More opens the sheet with
   everything; on desktop no bar. Lighthouse and axe run as now.
@@ -80,7 +80,7 @@ docs, back to the site.
 
 ## Done, 2026-09-26
 
-B built: `packages/ui/src/app-nav.tsx`, `blocks/bottom-nav`, the sidebar collapsing to icons, Clock,
+B built: `packages/remy-ui/src/app-nav.tsx`, `blocks/bottom-nav`, the sidebar collapsing to icons, Clock,
 Settings and Account; `appNavChecks`. Seen at 390 px (English, Arabic), 900 px (rail) and 1280 px.
 Left: remy-auth-app adds the three routes when it takes the next release; the new strings wait for
 translation step 4.

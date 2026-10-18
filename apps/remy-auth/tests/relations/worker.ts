@@ -1,7 +1,7 @@
 import { relationEngine } from '@joeblew999/remy-ui/api/relations';
 import { statements, vocabulary } from './vocabulary';
 
-// The relation engine (packages/ui/src/api/relations.js) on a real D1 in the Workers runtime:
+// The relation engine (packages/remy-ui/src/api/relations.js) on a real D1 in the Workers runtime:
 // tests/relations.spec.ts starts this Worker, which builds the schema, seeds it and answers every
 // question the checks ask in one response.
 

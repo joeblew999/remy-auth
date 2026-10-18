@@ -5,11 +5,11 @@ below; the Executor implements the work items in order and stops at the open dec
 This plan answers one question: is the framework code designed to be shared by other
 projects for both CSR and SSR, and does a demo show that off? Today: designed yes,
 proven half, shown off no. It extends the "Shared package" section of the
-[GUI plan](gui.md); the [development principles](../../apps/docs/content/dev/principles.md) apply.
+[GUI plan](gui.md); the [development principles](../../apps/remy-auth-docs/content/dev/principles.md) apply.
 
 ## Evidence today
 
-- `packages/ui` (`@joeblew999/remy-ui`, private, `0.0.0`, npm workspace) exports `button`,
+- `packages/remy-ui` (`@joeblew999/remy-ui`, private, `0.0.0`, npm workspace) exports `button`,
   `styles.css`, `messages`, `locale` (locale list, `direction`, `localeName`) and
   `locale-info`. React is a peer dependency. Nothing imports React Router.
 - This app consumes only those exports (`grep "from '@joeblew999/remy-ui/"` in `app/` and
@@ -34,7 +34,7 @@ proven half, shown off no. It extends the "Shared package" section of the
 One versioned package that a server-rendered app and a client-only app both consume
 through public exports, a runnable second consumer (`remy-auth-app`) that shows the
 same controls, theme, catalogs and language behaviour in client rendering, and checks
-that fail when either mode breaks. No consumer reaches into `packages/ui/src` or
+that fail when either mode breaks. No consumer reaches into `packages/remy-ui/src` or
 copies app code.
 
 ## Package contract to add
@@ -60,7 +60,7 @@ included by remy-auth-app by git reference pinned to a commit. Since 0.4.0 the p
 shared too, driven by each project's `[env]` inputs (`PREVIEW_PORT`, `PUBLIC_ORIGIN`,
 `DEPLOY_ORIGIN`), and the Playwright configuration is the package's `playwrightConfig()`;
 a project keeps its Node pin, its inputs, and overrides only what it truly owns (remy-auth:
-catalog compilation and the package check). Local task definitions override included ones. The compiler options in `packages/ui/paraglide.mjs` are the one source for
+catalog compilation and the package check). Local task definitions override included ones. The compiler options in `packages/remy-ui/paraglide.mjs` are the one source for
 the Vite plugin and `ui:generate`.
 
 Stays app-local: route modules, the Cloudflare load context and geolocation (runtime
@@ -121,7 +121,7 @@ The consumer, wherever it lives, is the demonstration, not another page in this 
    are verified identically in server and client rendering. Each repository keeps only the
    checks it owns.
 6. **Guard the boundary.** Done, then removed the same day as needless machinery; the rule stays a review rule. A verification step fails if `app/` or the sample imports
-   anything from `packages/ui/src` or copies a helper that the package exports.
+   anything from `packages/remy-ui/src` or copies a helper that the package exports.
 
 ## Acceptance
 

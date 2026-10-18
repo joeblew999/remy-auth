@@ -1,7 +1,7 @@
 import { test, expect } from 'vite-plus/test';
-import { bookmarkCookie, replicated, withReplicas } from '../../packages/ui/src/replicas';
+import { bookmarkCookie, replicated, withReplicas } from '../../packages/remy-ui/src/replicas';
 
-// D1 read replication (packages/ui/src/replicas.ts): a request reads through a D1 session, which may answer
+// D1 read replication (packages/remy-ui/src/replicas.ts): a request reads through a D1 session, which may answer
 // from a nearby copy, and the visitor's next request starts from the bookmark this one left, so what they
 // saved is what they see. A fake D1 here, since the session and its bookmark are the whole contract.
 

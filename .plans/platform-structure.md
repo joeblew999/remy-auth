@@ -2,7 +2,7 @@
 
 Status: agreed 2026-09-29; the owner delegated its decisions ("Stop asking me and use your brain"), recorded
 under "Decisions". Fix 1 and the tests half of fix 3 first. Owner: remy-auth.
-Executor/Reviewer roles as in [plans and roles](../apps/docs/content/dev/principles.md#plans-and-roles).
+Executor/Reviewer roles as in [plans and roles](../apps/remy-auth-docs/content/dev/principles.md#plans-and-roles).
 
 Owner, 2026-09-29, after thin-apps phase C: "you are finding so many structural problems. I expect a plan
 after this to fix the structural problems that make this so fucking hard !!"
@@ -166,7 +166,7 @@ the fixture cannot take the tasks through mise's git cache. What differs there i
      `serverAppChecks` and `prerenderedAppChecks` lost `showcase`. `problem.checks` (the problem pages,
      which the parts use) moved from `showcase/` to the platform's root. remy-auth runs the same 313 checks as
      before, identical by name (the lists diffed).
-  2. **The move: done 2026-09-29, except the parts.** `@joeblew999/remy-showcase` (`packages/showcase`, a
+  2. **The move: done 2026-09-29, except the parts.** `@joeblew999/remy-showcase` (`packages/remy-showcase`, a
      workspace remy-auth publishes with the platform) holds the showcase's pages, navigation, clock route, demo
      reservation, search params, leave guard, page lists and checks, importing the platform only through its
      exports; the platform imports nothing of it (checked). The pieces the parts are built on moved into their

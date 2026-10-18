@@ -7,7 +7,7 @@ should be a skill from the docs? It's a whole research area in itself?"
 ## Today
 
 remy-auth-app's `AGENTS.md` links to remy-auth's docs on GitHub `main`
-(`https://github.com/joeblew999/remy-auth/blob/main/apps/docs/content/dev/how-we-work.md`, development, tooling). Two
+(`https://github.com/joeblew999/remy-auth/blob/main/apps/remy-auth-docs/content/dev/how-we-work.md`, development, tooling). Two
 faults: **unpinned** (the app runs remy-ui 0.11.0 and tasks `ref=v0.11.0`, but its agents read today's
 `main`, so the rules can run ahead of its code) and **web-only** (an agent must fetch the pages; nothing
 checks it did).
@@ -91,7 +91,7 @@ Experiments ran in scratch folders outside the repo. Anything not proven is mark
 | Pin our repo as a skill source | `skills` installer 1.7.0 (`skills add <repo>/tree/<sha>`) | **covers** | A `skills/remy-*/` folder here and a pin in apps; a second pin beside the package version |
 | Skills shipped inside an npm package | `skills experimental_sync` (scans `node_modules/<pkg>/skills/*/SKILL.md`) | **covers**, experimental (proven in scratch) | Ship `skills/` in the package's `files`; add the sync to `skills:install`. Reinstalls on hash change; the lock stores `sourceType: node_modules`. Removal of a dropped skill **assumed** not handled |
 | Same, TanStack's tool | TanStack Intent (`intent install`, `validate`, `stale`, hooks for Claude and Codex) | covers, alpha | Same folder layout (`skills/<name>/SKILL.md`), so it stays open as the runner-up; with a GitHub Packages scope **assumed** |
-| Docs in the npm package | package `files`; the Next.js 16.2 pattern (`node_modules/next/dist/docs` plus an `AGENTS.md` pointer) | **covers** | `files` cannot reach `docs/` at the repo root: generate into `packages/ui` at pack time. Size is small (docs 204 KB against 1.49 MB unpacked; the limit is 256 MB) |
+| Docs in the npm package | package `files`; the Next.js 16.2 pattern (`node_modules/next/dist/docs` plus an `AGENTS.md` pointer) | **covers** | `files` cannot reach `docs/` at the repo root: generate into `packages/remy-ui` at pack time. Size is small (docs 204 KB against 1.49 MB unpacked; the limit is 256 MB) |
 | Claude `@import` from `node_modules` | `CLAUDE.md`/`AGENTS.md` `@path` imports | Claude **covers** (proven with 2.1.278 `-p`), Codex **no** | Loaded in full every session, so import one short file, not the four docs |
 | Claude plugins and marketplaces | `.claude-plugin/marketplace.json`, sources `github`/`npm`/`git-subdir` | partial | Claude only, and a second pin; the skills installer reads the same manifests, so nothing is lost by not using it |
 | shadcn registry | `registry:file` items, `shadcn build`/`add`, the shadcn MCP | partial (proven in scratch) | Copies docs into each app: checked in, drifting, unversioned. Wrong fit for docs |
@@ -325,7 +325,7 @@ only, so it is not the main route.
    - An agent may still not open the skill; the always-loaded block and the checks carry what matters.
    - The Node loader prints a `module.register()` deprecation warning, and `source.config.ts` needs the
      root fix before it runs.
-   - `docs/` sits outside `packages/ui`, so pack time must generate into the package. A skipped
+   - `docs/` sits outside `packages/remy-ui`, so pack time must generate into the package. A skipped
      `docs:skill` would ship stale rules, so `ui:release` runs it and checks the result.
    - Serving `.md` and MCP on the Worker is only partly proven; the build-time and package paths were
      proven in scratch.
@@ -341,7 +341,7 @@ only, so it is not the main route.
    `source.config.ts` root fix, `includeProcessedMarkdown`.
 4. **Site channels:** `llms[.]txt`, `llms-full[.]txt` and `docs/{$}[.]md` server routes with
    `Vary: Accept`; a Playwright check for each; list them in prerender `pages` if prerendered.
-5. **Skill in the package:** `docs:skill` generates `packages/ui/skills/remy/` (`SKILL.md`,
+5. **Skill in the package:** `docs:skill` generates `packages/remy-ui/skills/remy/` (`SKILL.md`,
    `references/`) with relative links, English only; add `skills` to `files`; `ui:release` runs and
    checks it; `SKILL.md` validated against the Agent Skills spec.
 6. **Apps:** `skills:install` adds `experimental_sync`; `agents:rules` writes and checks the `AGENTS.md`

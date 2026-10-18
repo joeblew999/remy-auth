@@ -24,7 +24,7 @@ Below this section is the history of how it got here.
 1. ~~**No mise: package.json is the entry, the tooling one TypeScript command line**~~ closed 2026-10-11
    ([plan](done/tooling-in-typescript.md); owner, 2026-10-11: "strip away mise so that its all typescript",
    "use the package.json as the entry point like all typescript projects do"). Slice 1 landed the same
-   day: `npm run dev:<step>` is the flow, `remy` (the package's bin, `packages/ui/src/cli`) is its
+   day: `npm run dev:<step>` is the flow, `remy` (the package's bin, `packages/remy-cli/src`) is its
    code, `remy.config.ts` the origins and ports. Next: the check (`project:check`) as functions, then
    Cloudflare, translations, the other namespaces, GitHub and the consumers, then `mise.toml` and
    `tasks/` deleted. The flow's own open gaps below ride on it: the detached translation comes with
@@ -76,7 +76,7 @@ Below this section is the history of how it got here.
      stale until someone's `project:setup` rewrites it (seen 2026-10-10: setup dirtied the tree after the
      day's doc changes). Either the lock stops hashing a generated skill, or `dev:land` refreshes it
      when docs changed; decide in item 4's work on the tooling.
-   - **The new-app steps** in [tasks](../apps/docs/content/dev/projects.md) were corrected by reading, not by
+   - **The new-app steps** in [tasks](../apps/remy-auth-docs/content/dev/projects.md) were corrected by reading, not by
      running (translate once by hand with `REMY_FLOW=hand`, the first deploy by hand, then the flow);
      creating `remy-auth-test` (item 3) is their first run.
    - Closed of it: `dev:land` deploys staging before it translates (05896d6, 2026-10-09). The word
@@ -243,7 +243,7 @@ Fixed the same day, for every app through the shared tasks: `project:check` is t
 (plans, types, the plain-function tier `tests/**/*.unit.spec.ts`, translation status; a build or the
 docs only when their inputs changed). The heavy checks (every language, Google's audits, the consumer
 fixture) run on GitHub after every push, in parallel; each still runs locally on purpose, and
-`project:verify` at a release. Then formalised as the flow: `dev:change`, `dev:land`, `dev:promote`, `dev:release`, with a guard in the tooling itself (every heavy task refuses outside a step, on any machine, for any agent) and a Claude hook that answers a step earlier. The rule: [how we work](../apps/docs/content/dev/how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
+`project:verify` at a release. Then formalised as the flow: `dev:change`, `dev:land`, `dev:promote`, `dev:release`, with a guard in the tooling itself (every heavy task refuses outside a step, on any machine, for any agent) and a Claude hook that answers a step earlier. The rule: [how we work](../apps/remy-auth-docs/content/dev/how-we-work.md#the-flow-four-steps-and-a-guard-that-refuses-the-rest).
 
 ## Feedback from everything asynchronous (owner, 2026-10-09)
 
@@ -285,7 +285,7 @@ Found 2026-10-09: the page is not slow, the measurement was. The live home page 
 scripts arrive before the first paint (a quick line to the host) it takes them for render-blocking and
 says 1.1 s on some runs and 3.5 s on others for the same page. Its applied throttling (the page really
 loads slowed down) said 0.83 s on every one of five runs. `performanceChecks` now measures a phone that
-way (`packages/ui/src/checks.js`; desktop unchanged). Not yet run through `project:test:cwv`: GitHub
+way (`packages/remy-ui/src/checks.js`; desktop unchanged). Not yet run through `project:test:cwv`: GitHub
 runs Google's level after this push, and `cf:preview` measures it on a throwaway Worker on purpose.
 
 ## Next: platform structure (owner, 2026-09-29)

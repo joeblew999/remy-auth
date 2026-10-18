@@ -1,4 +1,4 @@
-import { docsConfig } from '../../docs/docs.config';
+import { docsConfig } from '../../remy-auth-docs/docs.config';
 
 /**
  * The product's name, for everything in this app that a person reads: the frame and page titles

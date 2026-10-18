@@ -1,5 +1,5 @@
 import { test, expect } from 'vite-plus/test';
-import { databaseProblems } from '../../packages/ui/src/cli/cloudflare';
+import { databaseProblems } from '../../packages/remy-cli/src/cloudflare';
 
 // The platform's rule for every D1 database (npx remy cloudflare provisioned, before every deploy): read copies on,
 // and in production's region. The infos below are what Cloudflare reported on 2026-10-17, before the fix: the

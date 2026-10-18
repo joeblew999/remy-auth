@@ -1,22 +1,20 @@
-_Generated from the command line and the shared tasks (`vp run fix` writes it; the check fails when it is stale). Change a command's line in `packages/ui/src/cli`, a task's or script's in `packages/ui/src/tasks.js`, never this file._
+_Generated from the command line and package.json (`vp run fix` writes it; the check fails when it is stale). Change a command's line in remy-cli (`packages/remy-cli/src`), a script in package.json, a task in its package's vite.config.ts, never this file._
 
 ## What you run
 
-Day to day, two: `vp run check` after every edit, `vp run land "<what changed>"` when the work is finished. `vp run promote` and `vp run release` are the owner's. `vp dev`, `vp build`, `vp preview` and `vp check` are Vite Plus's own tools, without the app's preparation; `vp run --last-details` says what the last run did.
+Day to day: `vp run ready` after every edit; when the work is finished, git and GitHub's own commands: `git commit`, `git push` (its hook runs `vp run ci` first), `gh pr create`, `gh pr merge --auto --squash` (GitHub merges once its checks pass). `vp run release` is the owner's; Cloudflare deploys main by itself. `vp dev`, `vp build`, `vp preview` and `vp check` are Vite Plus's own tools, without the app's preparation; `vp run` lists every task and script, and `vp run --last-details` says what the last run did.
 
 | Command | What it does |
 | --- | --- |
 | `vp run dev` | the app with hot reload, its local state (.dev.vars, the migrations) and generated files first |
 | `vp run build` | the production build, after the same; no upload |
-| `vp run preview` | the production build on Cloudflare's local host, at this checkout's port (4173 unless a worktree's own) |
-| `vp run check` | after every change: everything generated, both builds, Wrangler's deployment dry run, the project's own checks, the unit checks, then vp check (format, lint, types) |
-| `vp run fix` | what the check only verifies, written: COMMANDS.md and each docs page's ending |
-| `vp run ci` | what GitHub runs, the same here: the check, the browser checks, Google's audits, a new app (each its own task, as GitHub's jobs: vp run test:browser --shard 1/3) |
-| `vp run status` | what is going on: main and GitHub's verdicts, pull requests, deployments, worktrees, translations (remy status) |
-| `vp run land "<what changed>"` | when the work is finished: a branch with main in it, the translations, every check, one commit through a pull request merged when GitHub agrees, then staging (remy land start → vp run translate → vp run ci → remy land finish) |
-| `vp run promote` | the owner's: production and the docs from a pushed main GitHub passed (remy promote check → vp install --frozen-lockfile → remy cloudflare deploy → remy cloudflare docs-deploy → remy promote done) |
-| `vp run release` | the owner's: every check in every language, the release checks, the publish rehearsed, Core Web Vitals, then the tag GitHub publishes from (remy release check → CHECK_LOCALES=all vp run ci → vp run release-checks → vp run publish:rehearse → remy test cwv → remy packages tag) |
-| `vp run setup` | an installation, then the check (remy setup check → remy setup install → remy skills install → remy rules → remy mcp register → remy hooks → remy verify → vp run check) |
+| `vp run preview` | the production build on Cloudflare's local host, at PREVIEW_PORT (4173) |
+| `vp run ready` | after every change: everything generated, the builds, Wrangler's deployment dry run, the project's own checks, the unit checks, then vp check (format, lint, types) |
+| `vp run fix` | what the checks only verify, written: COMMANDS.md and each docs page's ending |
+| `vp run ci` | what GitHub runs, the same here, each part one of GitHub's jobs (vp run test:browser --shard 1/3) (vp run ready → vp run test:browser → vp run test:audits) |
+| `vp run translate` | before a commit that changed text: the translations it made stale or missing (remy i18n translate) |
+| `vp run release` | the owner's: every check in every language, the release checks, the publish rehearsed, Core Web Vitals, then the tag GitHub publishes from (remy release check → CHECK_LOCALES=all vp run ci → vp run publish:rehearse → remy test cwv → remy packages tag) |
+| `vp run setup` | an installation, then every check (remy setup check → remy setup install → remy skills install → remy rules → remy mcp register → remy verify → vp run ready) |
 
 ## Everything the command line does
 
@@ -24,40 +22,28 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 
 | Command | What it does |
 | --- | --- |
-| `npx remy status` | what is going on: main with GitHub's verdicts, the open pull requests, the deployments, the worktrees, the translations, the top of now.md |
-| `npx remy land` | a landing's two ends, around the checks (vp run land "&lt;what changed&gt;" runs both) |
-| `npx remy land start` | the work on a branch of its own, main merged in |
-| `npx remy land finish` | "&lt;what changed&gt;": one commit, its pull request, merged when GitHub agrees, this checkout on the new main, then staging |
-| `npx remy promote` | production's two ends, around the deploys (vp run promote runs both) |
-| `npx remy promote check` | a clean main, exactly what GitHub has, whose checks GitHub passed |
-| `npx remy promote done` | what each deployment runs now, and the same written on the commit |
 | `npx remy release` | what a release needs before its checks (vp run release runs it first) |
 | `npx remy release check` | a clean main, the translations complete, every changed package bumped |
-| `npx remy hooks` | register the status hook with Claude, so each session opens with remy status (--check: is it) |
 | `npx remy plans` | the plans rule on this app's .plans/: few, short, closed |
 | `npx remy plans status` | [--json]: now.md's open items, the open plans with their status line and last commit (STALE after 14 days), the parked ones |
 | `npx remy plans check` | now.md exists, every link under .plans/ resolves, every open plan is linked from now.md; instant (the check runs it) |
 | `npx remy plans close` | &lt;plan&gt; "&lt;what shipped&gt;": into done/ with its closing line, links to it repointed, its now.md item struck; staged, never committed |
 | `npx remy plans park` | &lt;plan&gt; "&lt;why&gt;": the same into parked/ |
 | `npx remy plans open` | &lt;plan&gt; "&lt;why now&gt;": a parked plan back into .plans/; its now.md item is yours to add |
-| `npx remy i18n` | translations: check [messages\|docs] [--list] (offline, read-only), translate [messages\|docs] (the machine's Claude; vp run land runs it in the change) |
+| `npx remy i18n` | translations: check [messages\|docs] [--list] (offline, read-only), translate [messages\|docs] (the machine's Claude; vp run translate runs it, before a commit) |
 | `npx remy i18n check` | [messages\|docs] [--list] [--strict]: the offline checks, read-only, no git history: a warning (exit 0) while coding and in vp run ci, exit 1 with --strict; --list prints one line per gap |
-| `npx remy i18n translate` | [messages\|docs] [files…]: what the checks list, by the machine's Claude (--model, default sonnet; --jobs at a time, default 8): only the changed sections and keys, with their records; named translation files redone in full; vp run land runs it in the change |
-| `npx remy cloudflare` | Cloudflare: production and staging deploys, the docs Worker, throwaway previews, what each deployment runs |
-| `npx remy cloudflare deploy` | production from this checkout (origins.production): upload, wait for the new version, then its live smoke; refuses a D1, KV or R2 binding with no existing resource, since creating resources is the owner's (vp run promote runs it) |
-| `npx remy cloudflare staging` | the same for staging (CLOUDFLARE_ENV=staging, the Wrangler configuration's env.staging): its own Worker at origins.staging, production untouched (remy land finish runs it on a machine signed in to Cloudflare) |
-| `npx remy cloudflare docs-deploy` | the docs Worker, then its pages to Ask AI's index (vp run promote runs it) |
+| `npx remy i18n translate` | [messages\|docs] [files…]: what the checks list, by the machine's Claude (--model, default sonnet; --jobs at a time, default 8): only the changed sections and keys, with their records; named translation files redone in full; vp run translate runs it, before a commit |
+| `npx remy cloudflare` | Cloudflare's builds deploy main (the app, its docs, staging); here: throwaway previews, what each deployment runs, the resources a binding needs |
 | `npx remy cloudflare versions` | [origins…]: what each deployment runs, asked and never remembered: service, environment, commit and how far it is from this checkout, when it was deployed |
 | `npx remy cloudflare urls` | [origin]: the URLs a deployment answers at |
 | `npx remy cloudflare preview` | [alias] [--keep]: this build as a throwaway Worker &lt;name&gt;-check-&lt;alias&gt; (production untouched), the browser checks against it, then deleted unless --keep (a machine signed in to Cloudflare; from Claude's cloud, push the branch instead) |
 | `npx remy cloudflare preview-delete` | [name]: list the throwaway check Workers, or delete one; never production |
-| `npx remy cloudflare wait` | &lt;origin&gt; &lt;wrangler-output-file&gt;: until the origin serves the uploaded version, every home-page asset included |
 | `npx remy cloudflare provisioned` | refuse when a D1, KV or R2 binding names no existing resource, or a D1 database (the Previews' included) keeps no read copies |
 | `npx remy setup` | an installation's first steps: what it needs, then the dependencies (vp run setup runs the rest) |
 | `npx remy setup check` | what setup needs before it can start: git, package.json and its lockfile, wrangler.jsonc |
 | `npx remy setup install` | npm ci with GitHub Packages' token (its install runs vp config: Vite Plus's Git hooks) |
 | `npx remy verify` | the installation's checks |
-| `npx remy verify setup` | the installation's checks: npm ls, MCP, the status hook, doctor, tooling (vp run setup runs them); the default |
+| `npx remy verify setup` | the installation's checks: npm ls, MCP, doctor, tooling (vp run setup runs them); the default |
 | `npx remy verify tooling` | the lockfile, wrangler.jsonc's observability, placement and preview_urls, the workflows, the skill pins |
 | `npx remy verify doctor` | the tooling's versions |
 | `npx remy skills` | the pinned official agent skills for Codex and Claude |
@@ -89,7 +75,7 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy docs test` | [remote]: the docs' browser checks on a local build, or against the deployment with every MCP server's tools |
 | `npx remy docs preview` | a preview Worker of the docs, answers paused |
 | `npx remy docs answers` | on\|off: Ask AI's answers resumed, or stopped in seconds |
-| `npx remy docs publish` | the bucket holds exactly the live docs pages, the index's sync waited for, then the fixed questions (vp run promote runs it) |
+| `npx remy docs publish` | the bucket holds exactly the live docs pages, the index's sync waited for, then the fixed questions (after Cloudflare deployed the docs) |
 | `npx remy docs questions` | the fixed questions (docs/content/questions.json) each find their page in the index; search only |
 | `npx remy docs provision` | what Ask AI needs on Cloudflare, printed, created never |
 | `npx remy docs init` | &lt;ref&gt;: a docs/ for this app from remy-auth's template at that tag |
@@ -101,7 +87,7 @@ Each as `npx remy <command> [<subcommand>]`; a command run without a subcommand 
 | `npx remy observe gateway` | [show \| rate-limit off \| rate-limit &lt;requests&gt;/&lt;seconds&gt; \| logs on\|off]: the AI Gateway's settings |
 | `npx remy shots` | [path] [--phone] [--dark] [--locale en,ar] [--video] [--all] [--out dir] [--origin url]: screenshots (or a WebM) of a page as a visitor sees it; --all every page, desktop and phone, light and dark, en and ar (npx remy shots) |
 | `npx remy api` | spec [origin] [--urls]: the OpenAPI document a Worker generates from its contract |
-| `npx remy upgrade` | &lt;version&gt;: this app onto a release of the platform: the package, the workflow's tag, the skills, the rules, the status hook, the installation's checks (vp run upgrade) |
+| `npx remy upgrade` | &lt;version&gt;: this app onto a release of the platform: the package, the workflow's tag, the scripts, hooks and configuration of the blank app, the skills, the rules, the installation's checks (vp run upgrade) |
 
 ## The other scripts
 

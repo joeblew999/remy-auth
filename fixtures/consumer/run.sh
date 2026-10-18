@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 # The new-app test (README.md): the new-app task (vp run new-app; vp run ci's last part) runs it from remy-auth's
-# root, after the package's catalogs, command line and remy skill are built (the task's dependsOn).
+# root, after remy-ui's catalogs, remy-cli's build and the remy skill (the task's dependsOn).
 set -euo pipefail
 root=$(pwd)
 out=$(mktemp -d); trap 'rm -rf "$out"' EXIT
 sha=$(git rev-parse --short HEAD)
-# This checkout's ports (a worktree's own, tasks.js's localPorts), so two worktrees' new apps never share one.
-read -r preview docs < <(node --input-type=module -e "import { localPorts } from './packages/ui/src/tasks.js'; const p = localPorts(process.cwd()); console.log(process.env.PREVIEW_PORT ?? p.preview, process.env.DOCS_PREVIEW_PORT ?? p.docsPreview)")
+# The new app's ports: 100 above this checkout's (PREVIEW_PORT, DOCS_PREVIEW_PORT: 4173, 4174), so they never meet.
+preview=${PREVIEW_PORT:-4173}; docs=${DOCS_PREVIEW_PORT:-4174}
 # Each step says what it took, in the same words wherever `vp run ci` runs it (a Mac, a cloud agent, GitHub),
 # so where the time goes is read from the run itself, never remembered (owner, 2026-10-17).
 started=$(date +%s); mark=$started; took=""
 step() { local now; now=$(date +%s); took="$took, $1 $((now - mark)) s"; mark=$now; }
 
-# 1. The platform and the showcase as npm serves them, each with a version no registry has (build metadata, so
+# 1. The platform, its command line and the showcase as npm serves them, each with a version no registry has (build metadata, so
 #    the showcase's peer range still holds), so npm can never substitute a published copy (it did once: the
 #    scratch tarball was 0.13.0, the published version).
 pack() { # <folder> <name> -> the tarball's path
@@ -22,8 +22,9 @@ pack() { # <folder> <name> -> the tarball's path
   (cd "$out/$1" && npm pkg set version="$v" && npm pack --silent --pack-destination "$out" > /dev/null)
   echo "$out/$2-$v.tgz"
 }
-ui=$(pack ui joeblew999-remy-ui)
-showcase=$(pack showcase joeblew999-remy-showcase)
+ui=$(pack remy-ui joeblew999-remy-ui)
+cli=$(pack remy-cli joeblew999-remy-cli)
+showcase=$(pack remy-showcase joeblew999-remy-showcase)
 version=$(basename "$ui" .tgz); version=${version#joeblew999-remy-ui-}
 step pack
 
@@ -32,10 +33,10 @@ step pack
 #    contract workspace and the docs' API reference.
 cp -R template "$out/app" && cp -R fixtures/consumer/files/. "$out/app/"
 cd "$out/app"
-npm pkg set "dependencies.@joeblew999/remy-ui=file:$ui" "dependencies.@joeblew999/remy-showcase=file:$showcase" "dependencies.@joeblew999/remy-fixture-contract=*" "workspaces[1]=packages/*"
+npm pkg set "dependencies.@joeblew999/remy-ui=file:$ui" "dependencies.@joeblew999/remy-cli=file:$cli" "dependencies.@joeblew999/remy-showcase=file:$showcase" "dependencies.@joeblew999/remy-fixture-contract=*" "workspaces[1]=packages/*"
 # A part another package offers, listed by its package (its routes, modules and checks come from the tarball).
 node -e "const f='src/parts.json',p=require('./'+f);p.push('@joeblew999/remy-showcase/time-zones');require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')"
-sed -i.bak "s#export default remyDocs(docsConfig, { root: import.meta.dirname });#export default remyDocs(docsConfig, { root: import.meta.dirname, contract: '@joeblew999/remy-fixture-contract' });#" docs/vite.config.ts
+sed -i.bak "s#...remyDocs(docsConfig, { root: import.meta.dirname }),#...remyDocs(docsConfig, { root: import.meta.dirname, contract: '@joeblew999/remy-fixture-contract' }),#" docs/vite.config.ts
 rm -f docs/vite.config.ts.bak
 grep -q "remy-fixture-contract" docs/vite.config.ts
 git init -q && git add -A && git -c user.name=remy -c user.email=remy@localhost commit -qm fixture && git branch -M main
@@ -50,7 +51,7 @@ vp fmt src/parts.json > /dev/null
 # The pinned skills are the same download for every repository, not part of what the fixture is for: install
 # them once per version of the pinned list and reuse them (~2 min of GitHub clones otherwise).
 # The key covers the pinned list and the package's own remy skill, so a changed skill is installed again.
-key=$( (cat "$root/packages/ui/src/cli/skills.ts"; find "$out/ui/skills" -type f -exec cat {} +) | shasum | cut -c1-12)
+key=$( (cat "$root/packages/remy-cli/src/skills.ts"; find "$out/remy-ui/skills" -type f -exec cat {} +) | shasum | cut -c1-12)
 skills="${TMPDIR:-/tmp}/remy-fixture-skills/$key"
 if [ -f "$skills/skills-lock.json" ]; then
   cp -R "$skills/." .
@@ -63,8 +64,8 @@ else
 fi
 npx remy verify tooling
 step 'skills and tooling'
-vp run check
-step vp run check
+vp run ready
+step 'vp run ready'
 # The new app's browser checks in the quick languages, through its own vp run ci (this run is inside ci's new-app part).
 CHECK_LOCALES=quick PREVIEW_PORT=$((preview + 100)) vp run test:browser
 step 'browser checks'

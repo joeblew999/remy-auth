@@ -17,7 +17,7 @@ node_modules/
 # What the builds, the generators and the browser runs write, in each app (apps/*).
 dist/
 worker-configuration.d.ts
-/packages/ui/src/paraglide/
+/packages/remy-ui/src/paraglide/
 test-results/
 playwright-report/
 *.tsbuildinfo
@@ -26,14 +26,14 @@ playwright-report/
 # Installed by npx remy skills install from skills-lock.json; not committed.
 .agents/skills/
 .claude/skills/
-# Written by npx remy hooks (vp run setup): the status hook, with this machine's absolute paths, like .mcp.json.
+# This machine's own Claude settings, like .mcp.json.
 .claude/settings.local.json
 # Temporary git worktrees that agents create; machine-local.
 .claude/worktrees/
 
 .remy-docs/
-/packages/ui/skills/
-# The command line as an app runs it, emitted from packages/ui/src/cli by the cli task (and prepack).
-/packages/ui/cli/
+/packages/remy-ui/skills/
+# The command line as an app runs it, emitted from packages/remy-cli/src by its build task.
+/packages/remy-cli/dist/
 # Vite Plus's Git hook dispatcher, written by vp config (the prepare script); the hooks themselves are .vite-hooks/*.
 .vite-hooks/_/

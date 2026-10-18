@@ -7,7 +7,7 @@ import { product } from '../../apps/remy-auth/src/product';
 // they run without a build (vp test). What the pages show is productNameChecks'.
 
 test("no message in the platform's catalog names a product: a message that says the name takes it as {product}", () => {
-  const catalog: Record<string, unknown> = JSON.parse(readFileSync('packages/ui/messages/en.json', 'utf8'));
+  const catalog: Record<string, unknown> = JSON.parse(readFileSync('packages/remy-ui/messages/en.json', 'utf8'));
   const naming = Object.entries(catalog)
     .filter(([, message]) => /\bRemy\b/.test(JSON.stringify(message)))
     .map(([key]) => key);

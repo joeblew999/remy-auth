@@ -1,5 +1,5 @@
 import { test, expect } from 'vite-plus/test';
-import { links, nowItems } from '../../packages/ui/src/cli/plans';
+import { links, nowItems } from '../../packages/remy-cli/src/plans';
 
 // The plans rule's reading of Markdown, as plain functions (the whole rule runs on every check as
 // `plans`, the first part of `remy change`, which checks this repository's own .plans/).

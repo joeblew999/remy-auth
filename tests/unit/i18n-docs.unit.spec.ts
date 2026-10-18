@@ -1,6 +1,6 @@
 import { test, expect } from 'vite-plus/test';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { broken, pageFrom } from '../../packages/ui/src/cli/page';
+import { broken, pageFrom } from '../../packages/remy-cli/src/page';
 
 // The docs translator writes pages and nothing else (tasks/i18n/docs/page.ts). On 2026-10-09 the agent
 // returned nothing, the pipe lost its failure and the word "null" was committed as a Spanish page: the
@@ -32,7 +32,7 @@ test('what the agent returns is written only when it is the page: nothing, null 
 });
 
 test('every translated docs page in the repository is a page of its English', () => {
-  const root = 'apps/docs/content';
+  const root = 'apps/remy-auth-docs/content';
   const files = existsSync(root)
     ? readdirSync(root, { recursive: true, encoding: 'utf8' }).map((file) => `${root}/${file}`)
     : [];
