@@ -46,8 +46,11 @@ The installer, run without a terminal (as an agent runs it), leaves `vp` in **sy
 the pin is silently ignored and every check runs on the machine's Node, so check `vp env current` before
 trusting any result.
 
-- **Claude's cloud** machines start empty. The committed `.claude/settings.json` runs the four steps at the
-  start of every session there and reports the Node it got, so nobody runs them by hand.
+- **Claude's cloud** machines start empty, with no mise and no `vp`. The committed `.claude/settings.json` installs
+  mise there at the start of every session (mise's own installer, `curl https://mise.run | sh`), then
+  `mise trust` and `mise install` (below), hands the session mise's environment (`mise env`, through Claude's
+  session environment file) and reports the Node it got, so nobody runs anything by hand and no global `vp` is
+  installed. About 20 seconds from an empty machine.
 - **Your own machine without mise:** you run the four steps once. After that, `node` goes through `vp` in every
   project, not only this one: a project with its own `.node-version` gets that Node; one without gets `vp`'s
   default (the latest LTS) rather than the Node installed before. `vp env default <version>` sets that default.
@@ -58,7 +61,8 @@ trusting any result.
 
 ### With mise
 
-A machine with [mise](https://mise.jdx.dev) needs no global `vp`: the committed `mise.toml` is enough. mise reads
+A machine with [mise](https://mise.jdx.dev) needs no global `vp`: the committed `mise.toml` is enough (the blank
+app has the same one, so every app gets it). mise reads
 the versions where they already are (Node from `.node-version`, pnpm from `devEngines`), its `postinstall` hook runs
 `pnpm install`, and it puts `node_modules/.bin` on PATH, so `vp` is the repository's own, at the catalog's version:
 

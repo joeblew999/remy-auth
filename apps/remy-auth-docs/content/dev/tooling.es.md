@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "Las herramientas detrás de los comandos: dónde se explica cada área, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación. Todos los comandos están en Comandos."
-translatedFrom: "cccfd094 8fdb2480 5f63a56f 3814ebc9 2bb0febe 40ea278b 53e17a88 ec3067e7 aebeb2ab 2c449b08 fa312d97 bf6a65d1 8df2e9bb 07566142 a70340a7 da03f137 97411dca 5ee1f825"
+translatedFrom: "cccfd094 8fdb2480 e8a30719 ace943ba 2bb0febe 40ea278b 53e17a88 ec3067e7 aebeb2ab 2c449b08 fa312d97 bf6a65d1 8df2e9bb 07566142 a70340a7 da03f137 97411dca 5ee1f825"
 ---
 
 ## Las herramientas [#the-tooling]
@@ -43,8 +43,11 @@ El instalador, ejecutado sin terminal (como lo ejecuta un agente), deja `vp` en 
 el pin se ignora en silencio y cada comprobación se ejecuta con el Node de la máquina, así que revisa `vp env current` antes de
 fiarte de cualquier resultado.
 
-- **Las máquinas de la nube de Claude** empiezan vacías. El `.claude/settings.json` versionado ejecuta los cuatro pasos al
-  inicio de cada sesión allí e informa del Node que obtuvo, así que nadie los ejecuta a mano.
+- **Las máquinas de la nube de Claude** empiezan vacías, sin mise y sin `vp`. El `.claude/settings.json` versionado instala
+  mise allí al inicio de cada sesión (el instalador propio de mise, `curl https://mise.run | sh`), luego
+  `mise trust` y `mise install` (abajo), entrega a la sesión el entorno de mise (`mise env`, a través del
+  archivo de entorno de sesión de Claude) e informa del Node que obtuvo, así que nadie ejecuta nada a mano y no se instala
+  ningún `vp` global. Unos 20 segundos desde una máquina vacía.
 - **Tu propia máquina sin mise:** ejecutas los cuatro pasos una vez. Después, `node` pasa por `vp` en todos los
   proyectos, no solo en este: un proyecto con su propio `.node-version` obtiene ese Node; uno sin él obtiene el predeterminado
   de `vp` (la última LTS) en lugar del Node instalado antes. `vp env default <version>` fija ese predeterminado.
@@ -55,7 +58,8 @@ fiarte de cualquier resultado.
 
 ### Con mise [#with-mise]
 
-Una máquina con [mise](https://mise.jdx.dev) no necesita un `vp` global: basta con el `mise.toml` versionado. mise lee
+Una máquina con [mise](https://mise.jdx.dev) no necesita un `vp` global: basta con el `mise.toml` versionado (la app
+en blanco tiene el mismo, así que toda app lo recibe). mise lee
 las versiones donde ya están (Node en `.node-version`, pnpm en `devEngines`), su hook `postinstall` ejecuta
 `pnpm install` y pone `node_modules/.bin` en el PATH, de modo que `vp` es el del propio repositorio, en la versión del catálogo:
 
