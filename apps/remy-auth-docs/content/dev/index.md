@@ -43,7 +43,7 @@ Two live sites, each with site pages for Google and app pages under `/app`;
 
 The machine's `vp` in managed mode, which gives this checkout the Node `.node-version` names (26) and the pnpm
 `devEngines` names ([developer tooling](./tooling.md#vite-plus-the-machines-vp-in-managed-mode)), or mise, where
-`mise install` does the same and the install below ([with mise](./tooling.md#with-mise)); then from this
+`mise trust && mise install` does the same and the install below ([with mise](./tooling.md#with-mise)); then from this
 checkout:
 
 ```sh

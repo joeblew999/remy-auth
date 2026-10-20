@@ -63,6 +63,7 @@ the versions where they already are (Node from `.node-version`, pnpm from `devEn
 `pnpm install`, and it puts `node_modules/.bin` on PATH, so `vp` is the repository's own, at the catalog's version:
 
 ```sh
+mise trust            # once per checkout: mise ignores a repository's mise.toml until it is trusted
 mise install          # Node, pnpm and the dependencies; then vp run <name> as everywhere else
 ```
 

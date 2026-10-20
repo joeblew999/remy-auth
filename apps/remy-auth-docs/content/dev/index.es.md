@@ -1,7 +1,7 @@
 ---
 title: "Desarrolladores: empieza aquí"
 description: "Para desarrolladores que construyen Remy o una app sobre él: autenticación compartida para las apps de Remy, Better Auth en Cloudflare Workers, el paquete compartido remy-ui y por dónde empezar."
-translatedFrom: "a8b968c1 877cac98 6dec904d 88eb7fe7 f354609f 3befebe0"
+translatedFrom: "a8b968c1 877cac98 55a743bb 88eb7fe7 f354609f 3befebe0"
 ---
 
 **Para desarrolladores** que construyen Remy, o una app sobre su paquete de UI compartido. ¿Usas la app? Lee la
@@ -45,7 +45,7 @@ Dos sitios en producción, cada uno con páginas de sitio para Google y páginas
 
 El `vp` de la máquina en modo gestionado, que da a este checkout el Node que indica `.node-version` (26) y el pnpm que indica
 `devEngines` ([herramientas de desarrollo](./tooling.md#vite-plus-the-machines-vp-in-managed-mode)), o mise, con el que
-`mise install` hace lo mismo y la instalación de abajo ([con mise](./tooling.md#with-mise)); y luego, desde este
+`mise trust && mise install` hace lo mismo y la instalación de abajo ([con mise](./tooling.md#with-mise)); y luego, desde este
 checkout:
 
 ```sh

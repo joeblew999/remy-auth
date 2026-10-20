@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "Las herramientas detrás de los comandos: dónde se explica cada área, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación. Todos los comandos están en Comandos."
-translatedFrom: "cccfd094 8fdb2480 5f63a56f c5ccea39 2bb0febe 40ea278b 53e17a88 ec3067e7 aebeb2ab 2c449b08 fa312d97 bf6a65d1 8df2e9bb 07566142 a70340a7 da03f137 97411dca 5ee1f825"
+translatedFrom: "cccfd094 8fdb2480 5f63a56f 3814ebc9 2bb0febe 40ea278b 53e17a88 ec3067e7 aebeb2ab 2c449b08 fa312d97 bf6a65d1 8df2e9bb 07566142 a70340a7 da03f137 97411dca 5ee1f825"
 ---
 
 ## Las herramientas [#the-tooling]
@@ -60,7 +60,8 @@ las versiones donde ya están (Node en `.node-version`, pnpm en `devEngines`), s
 `pnpm install` y pone `node_modules/.bin` en el PATH, de modo que `vp` es el del propio repositorio, en la versión del catálogo:
 
 ```sh
-mise install          # Node, pnpm y las dependencias; luego vp run <name> como en todas partes
+mise trust            # once per checkout: mise ignores a repository's mise.toml until it is trusted
+mise install          # Node, pnpm and the dependencies; then vp run <name> as everywhere else
 ```
 
 El `vp` del repositorio ejecuta todos los comandos del proyecto (`vp run`, `vp install`, `vp dlx`); solo faltan los propios de la CLI global,
@@ -79,9 +80,9 @@ opciones en `src/auth/options.ts` (ambos en `apps/remy-auth/`). Sus scripts son 
 `scripts/local.ts` de la app); desde la raíz cada una es `remy-auth#<name>`:
 
 ```sh
-vp run remy-auth#auth:generate <name>        # LOCAL: lo que las opciones necesitan además de migrations/, como la siguiente migración numerada
-vp run remy-auth#local                       # LOCAL: .dev.vars si falta, migrations/ y migrations-demo/ en las bases D1 locales de Wrangler, el fixture del guard
-curl 'http://127.0.0.1:5173/dev/mail?recipient=you@example.com'   # LOCAL: los códigos de inicio de sesión capturados para una dirección, desde el Worker en ejecución
+vp run remy-auth#auth:generate <name>        # LOCAL: what the options need beyond migrations/, as the next numbered migration
+vp run remy-auth#local                       # LOCAL: .dev.vars when missing, migrations/ and migrations-demo/ on Wrangler's local D1 databases, the guard's fixture
+curl 'http://127.0.0.1:5173/dev/mail?recipient=you@example.com'   # LOCAL: the sign-in codes captured for an address, from the running Worker
 ```
 
 La tarea `local` (que `vp run dev`, `vp run build` y todo lo posterior ejecutan primero) escribe `.dev.vars`, aplica las migraciones e instala el fixture de oRPC v1 del guard (`tests/guard/v1`),
