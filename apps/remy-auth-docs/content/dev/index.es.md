@@ -1,7 +1,7 @@
 ---
 title: "Desarrolladores: empieza aquí"
 description: "Para desarrolladores que construyen Remy o una app sobre él: autenticación compartida para las apps de Remy, Better Auth en Cloudflare Workers, el paquete compartido remy-ui y por dónde empezar."
-translatedFrom: "a8b968c1 877cac98 373d8e60 88eb7fe7 f354609f 3befebe0"
+translatedFrom: "a8b968c1 877cac98 6dec904d 88eb7fe7 f354609f 3befebe0"
 ---
 
 **Para desarrolladores** que construyen Remy, o una app sobre su paquete de UI compartido. ¿Usas la app? Lee la
@@ -44,7 +44,8 @@ Dos sitios en producción, cada uno con páginas de sitio para Google y páginas
 ## Primeros pasos [#get-started]
 
 El `vp` de la máquina en modo gestionado, que da a este checkout el Node que indica `.node-version` (26) y el pnpm que indica
-`devEngines` ([herramientas de desarrollo](./tooling.md#vite-plus-the-machines-vp-in-managed-mode)), y luego, desde este
+`devEngines` ([herramientas de desarrollo](./tooling.md#vite-plus-the-machines-vp-in-managed-mode)), o mise, con el que
+`mise install` hace lo mismo y la instalación de abajo ([con mise](./tooling.md#with-mise)); y luego, desde este
 checkout:
 
 ```sh
@@ -56,7 +57,7 @@ vp run dev          # http://127.0.0.1:5173/en
 Abre [localhost:5173/en](http://127.0.0.1:5173/en); cambia a español o prueba la demo.
 
 Los servidores MCP para Claude y Codex están incluidos en el repositorio (`.mcp.json`, `.codex/config.toml`); la **Codex CLI** se ejecuta con
-`vpx @openai/codex`, y **Claude Code** se instala aparte.
+`vp dlx @openai/codex`, y **Claude Code** se instala aparte.
 Las comprobaciones de navegador usan el Chromium propio de Playwright, que instala la tarea `browsers` (en Linux, añade la fuente
 `fonts-noto-cjk`).
 

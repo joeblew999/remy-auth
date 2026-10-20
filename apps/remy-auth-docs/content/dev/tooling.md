@@ -12,7 +12,7 @@ which `vp install` downloads and runs). Every version is written once, in `pnpm-
 package lists what it imports (`catalog:`, or `workspace:*` for a package of this repository), with `pnpm-lock.yaml`
 beside it; the tools the shared tasks run (Wrangler, Playwright) are `@joeblew999/remy-cli`'s dependencies, so every
 app gets the same ones. Tools no task runs (the Chrome DevTools tools, the Modern Web Guidance CLI, the Codex CLI) are
-nobody's dependency: each runs as `vpx <name>`. `vp migrate --full` reports nothing to change and `vp env doctor` passes. A new Vite Plus is `vp upgrade <version>`
+nobody's dependency: each runs as `vp dlx <name>`. `vp migrate --full` reports nothing to change and `vp env doctor` passes. A new Vite Plus is `vp upgrade <version>`
 then `vp migrate`, which re-pins `vite-plus`, the `vite` alias and the `vitest` pin together (never by hand); an app
 gets the release's through `remy upgrade`, which runs that version's migrator (`vp dlx --package=vite-plus@<version> vp migrate --no-interactive`, as Vite Plus's guide runs one). `gh` is the machine's, and Claude Code (the translator) is the machine's own, the one the
 subscription is logged into. A script that is one tool is written as that tool (`"logs": "wrangler
@@ -48,13 +48,29 @@ trusting any result.
 
 - **Claude's cloud** machines start empty. The committed `.claude/settings.json` runs the four steps at the
   start of every session there and reports the Node it got, so nobody runs them by hand.
-- **Your own machine (a Mac):** you run the four steps once. After that, `node` goes through `vp` in every
+- **Your own machine without mise:** you run the four steps once. After that, `node` goes through `vp` in every
   project, not only this one: a project with its own `.node-version` gets that Node; one without gets `vp`'s
   default (the latest LTS) rather than the Node installed before. `vp env default <version>` sets that default.
   The session step in `.claude/settings.json` does nothing there.
 - **A checkout made before 17 October 2026** has a `.claude/settings.json` written by the old `remy guard` (it was
   not committed then). Delete it before pulling, or the pull refuses; then `vp install`. The guard and the Claude
   hooks of ours are gone; a `.claude/settings.local.json` they left is the machine's to delete.
+
+### With mise
+
+A machine with [mise](https://mise.jdx.dev) needs no global `vp`: the committed `mise.toml` is enough. mise reads
+the versions where they already are (Node from `.node-version`, pnpm from `devEngines`), its `postinstall` hook runs
+`pnpm install`, and it puts `node_modules/.bin` on PATH, so `vp` is the repository's own, at the catalog's version:
+
+```sh
+mise install          # Node, pnpm and the dependencies; then vp run <name> as everywhere else
+```
+
+The repository's `vp` runs every project command (`vp run`, `vp install`, `vp dlx`); only the global CLI's own,
+`vp env` and `vp upgrade`, are missing, and nothing in the flow needs them. mise's own `vp` tool is not used: it is a
+second copy of the toolchain, whose `vp pack` builds with its own tools and cannot find the repository's TypeScript
+([vite-plus#2795](https://github.com/voidzero-dev/vite-plus/issues/2795),
+[#943](https://github.com/voidzero-dev/vite-plus/issues/943)).
 
 Vite Plus's own instructions for agents load in every Claude session from the installed package
 (`CLAUDE.md` imports `node_modules/vite-plus/AGENTS.md`), and its docs for the installed version are in
@@ -165,7 +181,7 @@ them: deploying is a push. See [the GUI proof](./run-and-test.md) for scope and 
 ### VS Code Codex extension
 
 Open this repository in VS Code and use the Codex sidebar. The extension ships its own executable; in a terminal,
-`vpx @openai/codex` runs the Codex CLI (it is no dependency of the project).
+`vp dlx @openai/codex` runs the Codex CLI (it is no dependency of the project).
 The [Codex CLI and IDE extension share MCP configuration](https://developers.openai.com/learn/docs-mcp).
 The committed `.codex/config.toml` is the project's; trust the project in Codex so that it loads. VS Code's
 `.vscode/mcp.json` configures its own MCP client and is not the Codex extension's configuration file.
@@ -186,8 +202,8 @@ VS Code's built-in command rather than a shell wrapper that pretends to restart 
 After `vp run setup`, use Codex or Claude Code:
 
 ```sh
-vpx @openai/codex                 # New Codex conversation
-vpx @openai/codex resume --last   # Resume latest Codex conversation
+vp dlx @openai/codex              # New Codex conversation
+vp dlx @openai/codex resume --last   # Resume latest Codex conversation
 claude                                 # New Claude conversation
 claude --continue                      # Resume latest Claude conversation in this project
 ```
@@ -245,9 +261,10 @@ skills also work through the existing CLIs; a skill does not automatically requi
 an MCP server.
 
 The registration is committed, one file per client: `.mcp.json` (Claude) and `.codex/config.toml` (Codex), each
-naming one server, `chrome-devtools`, run as `vpx chrome-devtools-mcp@1.10.1 --isolated --headless
+naming one server, `chrome-devtools`, run as `pnpm dlx chrome-devtools-mcp@1.10.1 --isolated --headless
 --no-usage-statistics --no-performance-crux`: the pinned version, an isolated headless Chrome profile, tool telemetry
-and CrUX uploads off. Nothing writes them; change the version there, by hand, in both. The MCP process is separate
+and CrUX uploads off. pnpm rather than `vp`, because the client starts the server outside the repository's PATH, and
+pnpm is there with mise or with the global `vp`. Nothing writes them; change the version there, by hand, in both. The MCP process is separate
 from the `chrome-devtools start`/`stop` session below; the agent client manages its lifetime.
 
 Reload the agent after a change. Codex only loads project configuration in a
@@ -264,7 +281,7 @@ Google's [Chrome DevTools agent tools](https://developer.chrome.com/docs/devtool
 provide browser interaction, screenshots, accessibility inspection, network/cookie
 debugging, Lighthouse and performance analysis. Install Google Chrome separately;
 the browser is not installed by project setup. The CLI (`chrome-devtools`, from the `chrome-devtools-mcp` package)
-is experimental and no dependency of the project; it runs through `vpx`, at the MCP server's version:
+is experimental and no dependency of the project; it runs through `vp dlx`, at the MCP server's version:
 
 ```sh
 vp dlx -p chrome-devtools-mcp@1.10.1 chrome-devtools start --isolated --usageStatistics=false --performanceCrux=false
@@ -291,9 +308,9 @@ forms, accessibility, performance, passkeys and browser compatibility. The main
 `chrome-extensions` skill is omitted because this project is a web service and UI.
 
 ```sh
-vpx modern-web-guidance search "animate a dialog modal backdrop"
-vpx modern-web-guidance retrieve "GUIDE_ID_FROM_SEARCH"
-vpx modern-web-guidance list
+vp dlx modern-web-guidance search "animate a dialog modal backdrop"
+vp dlx modern-web-guidance retrieve "GUIDE_ID_FROM_SEARCH"
+vp dlx modern-web-guidance list
 ```
 
 The CLI is no dependency of the project; `skills experimental_install` restores the commit-pinned skill. If a search

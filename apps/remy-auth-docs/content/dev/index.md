@@ -42,7 +42,8 @@ Two live sites, each with site pages for Google and app pages under `/app`;
 ## Get started
 
 The machine's `vp` in managed mode, which gives this checkout the Node `.node-version` names (26) and the pnpm
-`devEngines` names ([developer tooling](./tooling.md#vite-plus-the-machines-vp-in-managed-mode)), then from this
+`devEngines` names ([developer tooling](./tooling.md#vite-plus-the-machines-vp-in-managed-mode)), or mise, where
+`mise install` does the same and the install below ([with mise](./tooling.md#with-mise)); then from this
 checkout:
 
 ```sh
@@ -54,7 +55,7 @@ vp run dev          # http://127.0.0.1:5173/en
 Open [localhost:5173/en](http://127.0.0.1:5173/en); switch to Spanish or try the demo.
 
 The MCP servers for Claude and Codex are committed (`.mcp.json`, `.codex/config.toml`); the **Codex CLI** runs as
-`vpx @openai/codex`, and **Claude Code** is installed separately.
+`vp dlx @openai/codex`, and **Claude Code** is installed separately.
 The browser checks use Playwright's own Chromium, which the `browsers` task installs (on Linux, add the font
 `fonts-noto-cjk`).
 

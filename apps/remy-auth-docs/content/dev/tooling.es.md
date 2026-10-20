@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "Las herramientas detrás de los comandos: dónde se explica cada área, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación. Todos los comandos están en Comandos."
-translatedFrom: "cccfd094 0d9bf3ee 208b7760 2bb0febe 40ea278b 53e17a88 ec3067e7 4c1d61ff 8d020f83 fa312d97 bf6a65d1 0c002941 e11c40cd 37adadcc da03f137 97411dca 5ee1f825"
+translatedFrom: "cccfd094 8fdb2480 5f63a56f c5ccea39 2bb0febe 40ea278b 53e17a88 ec3067e7 aebeb2ab 2c449b08 fa312d97 bf6a65d1 8df2e9bb 07566142 a70340a7 da03f137 97411dca 5ee1f825"
 ---
 
 ## Las herramientas [#the-tooling]
@@ -11,7 +11,7 @@ del proyecto es una tarea escrita en el `vite.config.ts` de su paquete o un scri
 `vp run <name>`. Node está fijado por `.node-version` y por el `engines` de `package.json`, pnpm por `devEngines` (12.14.0,
 que `vp install` descarga y ejecuta). Cada versión se escribe una sola vez, en el catálogo de `pnpm-workspace.yaml`, y cada
 paquete enumera lo que importa (`catalog:`, o `workspace:*` para un paquete de este repositorio), con `pnpm-lock.yaml`
-junto a él; las herramientas que ejecutan las tareas compartidas (Wrangler, Playwright) son dependencias de `@joeblew999/remy-cli`, de modo que todas las apps obtienen las mismas. Las herramientas que ninguna tarea ejecuta (las herramientas de Chrome DevTools, la CLI de Modern Web Guidance, la CLI de Codex) no son dependencia de nadie: cada una se ejecuta como `vpx <name>`. `vp migrate --full` no informa de nada que cambiar y `vp env doctor` pasa. Un nuevo Vite Plus se instala con `vp upgrade <version>` y luego `vp migrate`, que vuelve a fijar juntos `vite-plus`, el alias `vite` y la versión fijada de `vitest` (nunca a mano); una app obtiene la de la versión publicada mediante `remy upgrade`, que ejecuta el migrador de esa versión (`vp dlx --package=vite-plus@<version> vp migrate --no-interactive`, como lo ejecuta la guía de Vite Plus). `gh` es el de la máquina, y Claude Code (el traductor) es el propio de la máquina, aquel en el que
+junto a él; las herramientas que ejecutan las tareas compartidas (Wrangler, Playwright) son dependencias de `@joeblew999/remy-cli`, de modo que todas las apps obtienen las mismas. Las herramientas que ninguna tarea ejecuta (las herramientas de Chrome DevTools, la CLI de Modern Web Guidance, la CLI de Codex) no son dependencia de nadie: cada una se ejecuta como `vp dlx <name>`. `vp migrate --full` no informa de nada que cambiar y `vp env doctor` pasa. Un nuevo Vite Plus se instala con `vp upgrade <version>` y luego `vp migrate`, que vuelve a fijar juntos `vite-plus`, el alias `vite` y la versión fijada de `vitest` (nunca a mano); una app obtiene la de la versión publicada mediante `remy upgrade`, que ejecuta el migrador de esa versión (`vp dlx --package=vite-plus@<version> vp migrate --no-interactive`, como lo ejecuta la guía de Vite Plus). `gh` es el de la máquina, y Claude Code (el traductor) es el propio de la máquina, aquel en el que
 está iniciada la sesión de la suscripción. Un script que es una sola herramienta se escribe como esa herramienta (`"logs": "wrangler
 tail --format json"`); todo lo que tenga lógica es TypeScript, un comando `remy` del paquete
 (`packages/remy-cli/src`, con comprobación de tipos en cada check) o, para lo que es propio de una sola app, un `scripts/*.ts` de
@@ -45,13 +45,29 @@ fiarte de cualquier resultado.
 
 - **Las máquinas de la nube de Claude** empiezan vacías. El `.claude/settings.json` versionado ejecuta los cuatro pasos al
   inicio de cada sesión allí e informa del Node que obtuvo, así que nadie los ejecuta a mano.
-- **Tu propia máquina (un Mac):** ejecutas los cuatro pasos una vez. Después, `node` pasa por `vp` en todos los
+- **Tu propia máquina sin mise:** ejecutas los cuatro pasos una vez. Después, `node` pasa por `vp` en todos los
   proyectos, no solo en este: un proyecto con su propio `.node-version` obtiene ese Node; uno sin él obtiene el predeterminado
   de `vp` (la última LTS) en lugar del Node instalado antes. `vp env default <version>` fija ese predeterminado.
   El paso de sesión de `.claude/settings.json` no hace nada allí.
 - **Un checkout hecho antes del 17 de octubre de 2026** tiene un `.claude/settings.json` escrito por el antiguo `remy guard` (entonces no
   se versionaba). Bórralo antes de hacer pull, o el pull se rechaza; luego `vp install`. El guard y los hooks de Claude
   nuestros han desaparecido; un `.claude/settings.local.json` que dejaron es de la máquina y le corresponde borrarlo.
+
+### Con mise [#with-mise]
+
+Una máquina con [mise](https://mise.jdx.dev) no necesita un `vp` global: basta con el `mise.toml` versionado. mise lee
+las versiones donde ya están (Node en `.node-version`, pnpm en `devEngines`), su hook `postinstall` ejecuta
+`pnpm install` y pone `node_modules/.bin` en el PATH, de modo que `vp` es el del propio repositorio, en la versión del catálogo:
+
+```sh
+mise install          # Node, pnpm y las dependencias; luego vp run <name> como en todas partes
+```
+
+El `vp` del repositorio ejecuta todos los comandos del proyecto (`vp run`, `vp install`, `vp dlx`); solo faltan los propios de la CLI global,
+`vp env` y `vp upgrade`, y nada del flujo los necesita. La herramienta `vp` propia de mise no se usa: es una
+segunda copia de la cadena de herramientas, cuyo `vp pack` compila con sus propias herramientas y no encuentra el TypeScript del repositorio
+([vite-plus#2795](https://github.com/voidzero-dev/vite-plus/issues/2795),
+[#943](https://github.com/voidzero-dev/vite-plus/issues/943)).
 
 Las instrucciones propias de Vite Plus para agentes se cargan en cada sesión de Claude desde el paquete instalado
 (`CLAUDE.md` importa `node_modules/vite-plus/AGENTS.md`), y sus docs de la versión instalada están en
@@ -163,7 +179,7 @@ desplegar es hacer push. Consulta [la prueba de la GUI](./run-and-test.md) para 
 ### Extensión de Codex para VS Code [#vs-code-codex-extension]
 
 Abre este repositorio en VS Code y usa la barra lateral de Codex. La extensión incluye
-su propio ejecutable; en una terminal, `vpx @openai/codex` ejecuta la CLI de Codex (no es una dependencia del proyecto).
+su propio ejecutable; en una terminal, `vp dlx @openai/codex` ejecuta la CLI de Codex (no es una dependencia del proyecto).
 [La CLI de Codex y la extensión de IDE comparten la configuración de MCP](https://developers.openai.com/learn/docs-mcp).
 El `.codex/config.toml` versionado es el del proyecto; confía en el proyecto en Codex
 para que se cargue. El `.vscode/mcp.json` de VS Code configura
@@ -185,8 +201,8 @@ el comando integrado de VS Code en lugar de un wrapper de shell que simule reini
 Después de `vp run setup`, usa Codex o Claude Code:
 
 ```sh
-vpx @openai/codex                 # New Codex conversation
-vpx @openai/codex resume --last   # Resume latest Codex conversation
+vp dlx @openai/codex              # New Codex conversation
+vp dlx @openai/codex resume --last   # Resume latest Codex conversation
 claude                                 # New Claude conversation
 claude --continue                      # Resume latest Claude conversation in this project
 ```
@@ -244,9 +260,10 @@ también funcionan a través de las CLI existentes; un skill no requiere automá
 un servidor MCP.
 
 El registro está versionado, un archivo por cliente: `.mcp.json` (Claude) y `.codex/config.toml` (Codex), cada uno
-nombrando un único servidor, `chrome-devtools`, que se ejecuta como `vpx chrome-devtools-mcp@1.10.1 --isolated --headless
+nombrando un único servidor, `chrome-devtools`, que se ejecuta como `pnpm dlx chrome-devtools-mcp@1.10.1 --isolated --headless
 --no-usage-statistics --no-performance-crux`: la versión fijada, un perfil de Chrome headless aislado, y la telemetría de herramientas
-y las subidas a CrUX desactivadas. Nada los escribe; cambia la versión ahí, a mano, en ambos. El proceso MCP es independiente
+y las subidas a CrUX desactivadas. pnpm y no `vp`, porque el cliente inicia el servidor fuera del PATH del repositorio, y
+pnpm está ahí con mise o con el `vp` global. Nada los escribe; cambia la versión ahí, a mano, en ambos. El proceso MCP es independiente
 de la sesión `chrome-devtools start`/`stop` de más abajo; el cliente del agente gestiona su ciclo de vida.
 
 Recarga el agente después de un cambio. Codex solo carga la configuración del proyecto en un
@@ -263,7 +280,7 @@ Las [herramientas de agente de Chrome DevTools](https://developer.chrome.com/doc
 ofrecen interacción con el navegador, capturas de pantalla, inspección de accesibilidad, depuración de
 red/cookies, Lighthouse y análisis de rendimiento. Instala Google Chrome por separado; la configuración
 del proyecto no instala el navegador. La CLI (`chrome-devtools`, del paquete `chrome-devtools-mcp`)
-es experimental y no es una dependencia del proyecto; se ejecuta con `vpx`, en la versión del servidor MCP:
+es experimental y no es una dependencia del proyecto; se ejecuta con `vp dlx`, en la versión del servidor MCP:
 
 ```sh
 vp dlx -p chrome-devtools-mcp@1.10.1 chrome-devtools start --isolated --usageStatistics=false --performanceCrux=false
@@ -290,9 +307,9 @@ principal `modern-web-guidance` está instalado para ambos agentes. El skill sep
 `chrome-extensions` se omite porque este proyecto es un servicio web y una UI.
 
 ```sh
-vpx modern-web-guidance search "animate a dialog modal backdrop"
-vpx modern-web-guidance retrieve "GUIDE_ID_FROM_SEARCH"
-vpx modern-web-guidance list
+vp dlx modern-web-guidance search "animate a dialog modal backdrop"
+vp dlx modern-web-guidance retrieve "GUIDE_ID_FROM_SEARCH"
+vp dlx modern-web-guidance list
 ```
 
 La CLI no es una dependencia del proyecto; `skills experimental_install` restaura el skill fijado por commit. Si una búsqueda
