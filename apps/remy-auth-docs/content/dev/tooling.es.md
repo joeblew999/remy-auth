@@ -1,7 +1,7 @@
 ---
 title: "Referencia de herramientas de desarrollo"
 description: "Las herramientas detrás de los comandos: dónde se explica cada área, herramientas fijadas, secretos, skills de agentes y los servicios de Cloudflare detrás de la documentación. Todos los comandos están en Comandos."
-translatedFrom: "cccfd094 8fdb2480 e8a30719 ace943ba 2bb0febe 40ea278b 53e17a88 ec3067e7 aebeb2ab 2c449b08 fa312d97 bf6a65d1 8df2e9bb 07566142 a70340a7 da03f137 97411dca 5ee1f825"
+translatedFrom: "cccfd094 8fdb2480 eba97c71 91b1c019 2bb0febe 40ea278b 53e17a88 ec3067e7 aebeb2ab 2c449b08 fa312d97 bf6a65d1 8df2e9bb 07566142 a70340a7 da03f137 97411dca 5ee1f825"
 ---
 
 ## Las herramientas [#the-tooling]
@@ -43,15 +43,11 @@ El instalador, ejecutado sin terminal (como lo ejecuta un agente), deja `vp` en 
 el pin se ignora en silencio y cada comprobación se ejecuta con el Node de la máquina, así que revisa `vp env current` antes de
 fiarte de cualquier resultado.
 
-- **Las máquinas de la nube de Claude** empiezan vacías, sin mise y sin `vp`. El `.claude/settings.json` versionado instala
-  mise allí al inicio de cada sesión (el instalador propio de mise, `curl https://mise.run | sh`), luego
-  `mise trust` y `mise install` (abajo), entrega a la sesión el entorno de mise (`mise env`, a través del
-  archivo de entorno de sesión de Claude) e informa del Node que obtuvo, así que nadie ejecuta nada a mano y no se instala
-  ningún `vp` global. Unos 20 segundos desde una máquina vacía.
-- **Tu propia máquina sin mise:** ejecutas los cuatro pasos una vez. Después, `node` pasa por `vp` en todos los
+- **Toda sesión de Claude, en cualquier máquina** (un Mac, Linux, Windows, la nube de Claude) se prepara sola con mise:
+  [con mise](#with-mise), abajo. Nadie ejecuta los cuatro pasos por un agente.
+- **Una máquina sin mise, a mano:** ejecutas los cuatro pasos una vez. Después, `node` pasa por `vp` en todos los
   proyectos, no solo en este: un proyecto con su propio `.node-version` obtiene ese Node; uno sin él obtiene el predeterminado
   de `vp` (la última LTS) en lugar del Node instalado antes. `vp env default <version>` fija ese predeterminado.
-  El paso de sesión de `.claude/settings.json` no hace nada allí.
 - **Un checkout hecho antes del 17 de octubre de 2026** tiene un `.claude/settings.json` escrito por el antiguo `remy guard` (entonces no
   se versionaba). Bórralo antes de hacer pull, o el pull se rechaza; luego `vp install`. El guard y los hooks de Claude
   nuestros han desaparecido; un `.claude/settings.local.json` que dejaron es de la máquina y le corresponde borrarlo.
@@ -67,6 +63,13 @@ las versiones donde ya están (Node en `.node-version`, pnpm en `devEngines`), s
 mise trust            # once per checkout: mise ignores a repository's mise.toml until it is trusted
 mise install          # Node, pnpm and the dependencies; then vp run <name> as everywhere else
 ```
+
+Toda sesión de Claude hace esto sola, en cualquier máquina: el `.claude/settings.json` versionado instala mise cuando
+la máquina no lo tiene (el script de instalación de mise en macOS y Linux; en Windows `winget install jdx.mise`, como hace claude-rig),
+ejecuta esos dos comandos, entrega a la sesión el entorno de mise (`mise env`, a través del archivo de entorno de sesión
+de Claude) e informa del Node, pnpm y `vp` que obtuvo: unos 20 segundos desde una máquina vacía.
+Toda app tiene el mismo hook y el mismo `mise.toml` desde la app en blanco, y `remy upgrade` los trae. Cuando un paso falla, el hook imprime el error de mise: en Linux, el propio Node necesita `libatomic1`, que a una imagen mínima como
+`debian:stable-slim` le falta (`apt-get install libatomic1`).
 
 El `vp` del repositorio ejecuta todos los comandos del proyecto (`vp run`, `vp install`, `vp dlx`); solo faltan los propios de la CLI global,
 `vp env` y `vp upgrade`, y nada del flujo los necesita. La herramienta `vp` propia de mise no se usa: es una
