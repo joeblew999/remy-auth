@@ -46,15 +46,11 @@ The installer, run without a terminal (as an agent runs it), leaves `vp` in **sy
 the pin is silently ignored and every check runs on the machine's Node, so check `vp env current` before
 trusting any result.
 
-- **Claude's cloud** machines start empty, with no mise and no `vp`. The committed `.claude/settings.json` installs
-  mise there at the start of every session (mise's own installer, `curl https://mise.run | sh`), then
-  `mise trust` and `mise install` (below), hands the session mise's environment (`mise env`, through Claude's
-  session environment file) and reports the Node it got, so nobody runs anything by hand and no global `vp` is
-  installed. About 20 seconds from an empty machine.
-- **Your own machine without mise:** you run the four steps once. After that, `node` goes through `vp` in every
+- **Every Claude session, on any machine** (a Mac, Linux, Windows, Claude's cloud) sets itself up with mise instead:
+  [with mise](#with-mise), below. Nobody runs the four steps for an agent.
+- **A machine without mise, by hand:** you run the four steps once. After that, `node` goes through `vp` in every
   project, not only this one: a project with its own `.node-version` gets that Node; one without gets `vp`'s
   default (the latest LTS) rather than the Node installed before. `vp env default <version>` sets that default.
-  The session step in `.claude/settings.json` does nothing there.
 - **A checkout made before 17 October 2026** has a `.claude/settings.json` written by the old `remy guard` (it was
   not committed then). Delete it before pulling, or the pull refuses; then `vp install`. The guard and the Claude
   hooks of ours are gone; a `.claude/settings.local.json` they left is the machine's to delete.
@@ -70,6 +66,13 @@ the versions where they already are (Node from `.node-version`, pnpm from `devEn
 mise trust            # once per checkout: mise ignores a repository's mise.toml until it is trusted
 mise install          # Node, pnpm and the dependencies; then vp run <name> as everywhere else
 ```
+
+Every Claude session does this by itself, on any machine: the committed `.claude/settings.json` installs mise when
+the machine has none (mise's install script on macOS and Linux; on Windows `winget install jdx.mise`, as claude-rig
+does), runs those two commands, hands the session mise's environment (`mise env`, through Claude's session
+environment file) and reports the Node, pnpm and `vp` it got: about 20 seconds from an empty machine.
+Every app has the same hook and `mise.toml` from the blank app, and `remy upgrade` brings them. When a step fails, the hook prints mise's error: on Linux, Node itself needs `libatomic1`, which a minimal image such as
+`debian:stable-slim` lacks (`apt-get install libatomic1`).
 
 The repository's `vp` runs every project command (`vp run`, `vp install`, `vp dlx`); only the global CLI's own,
 `vp env` and `vp upgrade`, are missing, and nothing in the flow needs them. mise's own `vp` tool is not used: it is a

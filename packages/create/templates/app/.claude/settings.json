@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ \"$CLAUDE_CODE_REMOTE\" = true ] || exit 0; M=\"$HOME/.local/bin/mise\"; [ -x \"$M\" ] || curl -fsSL https://mise.run | sh >/dev/null 2>&1 || exit 1; cd \"$CLAUDE_PROJECT_DIR\" && \"$M\" trust -q . && \"$M\" install -q && { [ -z \"$CLAUDE_ENV_FILE\" ] || echo \"eval \\\"\\$('$M' env -s bash -C '$CLAUDE_PROJECT_DIR')\\\"\" >> \"$CLAUDE_ENV_FILE\"; } && \"$M\" exec -- node --version",
+            "command": "export PATH=\"$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH\"; if ! command -v mise >/dev/null; then case \"$(uname -s)\" in MINGW*|MSYS*|CYGWIN*) winget install --id jdx.mise --exact --source winget --silent --accept-source-agreements --accept-package-agreements >/dev/null 2>&1; export PATH=\"$(cygpath -u \"$LOCALAPPDATA\")/Microsoft/WinGet/Links:$PATH\" ;; *) curl -fsSL https://mise.run | MISE_VERSION=v2026.10.15 sh >/dev/null 2>&1 ;; esac; command -v mise >/dev/null || { echo \"mise could not be installed: https://mise.jdx.dev/installing-mise.html\"; exit 1; }; fi; M=\"$(command -v mise)\"; cd \"$CLAUDE_PROJECT_DIR\" || exit 1; \"$M\" trust -q . || exit 1; out=$(\"$M\" install 2>&1) || { echo \"$out\" | tail -20; exit 1; }; [ -z \"$CLAUDE_ENV_FILE\" ] || echo \"eval \\\"\\$('$M' env -s bash -C '$CLAUDE_PROJECT_DIR')\\\"\" >> \"$CLAUDE_ENV_FILE\"; \"$M\" exec -- sh -c 'echo \"node $(node --version), pnpm $(pnpm --version), $(vp --version | head -1)\"'",
             "timeout": 900
           }
         ]

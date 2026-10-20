@@ -21,7 +21,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 
 function fail(message: string): never {
   console.error(message);
@@ -267,11 +267,14 @@ function fetchBlank(version: string, token: string): string {
   return join(scratch, 'app');
 }
 
+/** The blank app's files that set up a machine and its agents, the same in every app. */
+export const agentSetup = [join('.claude', 'settings.json'), 'mise.toml', '.mcp.json', join('.codex', 'config.toml')];
+
 /**
  * The blank app (@joeblew999/create's templates/app) at the release, the one source of what every app's flow is: its
  * package.json scripts in place of the app's flow scripts (the app's own kept), its Git hooks, and its two
  * vite.config.ts files, whose tasks are written out, when the app's still has none of its own (an app from before
- * the tasks were). Nothing is generated: the files are copied as the release has them.
+ * the tasks were), and its agent setup (agentSetup). Nothing is generated: the files are copied as the release has them.
  */
 export function scriptsAndHooks(blank: string, version: string): void {
   const read = (file: string) => JSON.parse(readFileSync(file, 'utf8')) as { scripts?: Record<string, string> };
@@ -329,6 +332,18 @@ export function scriptsAndHooks(blank: string, version: string): void {
       '.gitignore',
       `${ignore.replace(/\n?$/, '\n')}# Vite Plus's Git hook dispatcher, written by vp config (the prepare script).\n.vite-hooks/_/\n`,
     );
+  // The agent setup, the blank app's: the session hook that sets up any machine with mise, mise's configuration, and
+  // the MCP servers for Claude and Codex. An app's own differing copy is kept beside it, to move what it added.
+  for (const file of agentSetup) {
+    if (!existsSync(join(blank, file))) continue;
+    const theirs = readFileSync(join(blank, file), 'utf8');
+    if (existsSync(file) && readFileSync(file, 'utf8') === theirs) continue;
+    const kept = existsSync(file);
+    if (kept) cpSync(file, `${file}.before-upgrade`);
+    mkdirSync(dirname(file), { recursive: true });
+    writeFileSync(file, theirs);
+    console.log(`upgrade: ${file} is the blank app's${kept ? ` (yours is ${file}.before-upgrade)` : ''}`);
+  }
   // Vite Plus's own rules for agents, from the installed package, beside the app's.
   const vitePlusRules = '@node_modules/vite-plus/AGENTS.md';
   if (existsSync('CLAUDE.md') && !readFileSync('CLAUDE.md', 'utf8').includes(vitePlusRules))

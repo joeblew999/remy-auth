@@ -1,8 +1,8 @@
 import { test, expect } from 'vite-plus/test';
 import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { platformAt } from '../../packages/remy-cli/src/upgrade.ts';
+import { join, resolve } from 'node:path';
+import { agentSetup, platformAt, scriptsAndHooks } from '../../packages/remy-cli/src/upgrade.ts';
 
 // remy upgrade sets the platform where an app from the blank app keeps it: its catalog, which the app and its docs
 // both name as catalog: (issue #44: vp add pinned the app alone, and left its docs on the old remy-ui).
@@ -82,3 +82,17 @@ test('an app with no catalog entry for the platform is left to vp add', () =>
     },
     () => expect(platformAt('9.8.7')).toBeUndefined(),
   ));
+
+// The agent setup reaches apps through the upgrade: the session hook that sets up any machine with mise, mise.toml and
+// the MCP servers. An app's own differing copy is kept as <file>.before-upgrade.
+test("the upgrade gives an app the blank app's agent setup, keeping the app's own copy beside it", () => {
+  const blank = resolve('packages/create/templates/app');
+  inApp(
+    (app) => writeFileSync(join(app, '.mcp.json'), '{"mcpServers":{}}\n'),
+    () => {
+      scriptsAndHooks(blank, '9.8.7');
+      for (const file of agentSetup) expect(readFileSync(file, 'utf8')).toBe(readFileSync(join(blank, file), 'utf8'));
+      expect(readFileSync('.mcp.json.before-upgrade', 'utf8')).toBe('{"mcpServers":{}}\n');
+    },
+  );
+});
