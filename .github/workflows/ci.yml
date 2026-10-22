@@ -79,7 +79,7 @@ jobs:
       # Vite Plus's task cache, restored after the install (which recreates node_modules): what an earlier run of
       # this job already checked on the same inputs is replayed, not run again. Keyed per run, restored from the
       # newest of this job's, then any job's.
-      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: node_modules/.vite/task-cache
           key: vite-task-${{ runner.os }}-${{ runner.arch }}-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -131,7 +131,7 @@ jobs:
           registry-url: https://npm.pkg.github.com
           scope: '@joeblew999'
       - run: sudo apt-get install -y --no-install-recommends fonts-noto-cjk
-      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: node_modules/.vite/task-cache
           key: vite-task-${{ runner.os }}-${{ runner.arch }}-new-app-${{ github.run_id }}-${{ github.run_attempt }}
@@ -172,7 +172,7 @@ jobs:
           registry-url: https://npm.pkg.github.com
           scope: '@joeblew999'
       - run: sudo apt-get install -y --no-install-recommends fonts-noto-cjk
-      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: node_modules/.vite/task-cache
           key: vite-task-${{ runner.os }}-${{ runner.arch }}-upgrade-${{ github.run_id }}-${{ github.run_attempt }}
